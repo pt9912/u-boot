@@ -1,0 +1,56 @@
+== Aufraeumen, 2026-10-23T10:42:12.148Z
+-- vorher (rohdaten-08-vorher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=5 images=72 volumes=706 netze=3
+-- Objekte mit dem Praefix u-boot-messung-forge (Name beginnt mit u-boot-messung-forge oder vsc-u-boot-messung-forge)
+-- vor dem Aufraeumen
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=5 images=87 volumes=715 netze=3
+-- Objekte mit dem Praefix u-boot-messung-forge (Name beginnt mit u-boot-messung-forge oder vsc-u-boot-messung-forge)
+image u-boot-messung-forge-img-glabtgz:latest
+image u-boot-messung-forge-img-ghtgz:latest
+image u-boot-messung-forge-img-glabdeb:latest
+image u-boot-messung-forge-img-ghdeb:latest
+image u-boot-messung-forge-img-basd:latest
+image u-boot-messung-forge-img-ghnk:latest
+image u-boot-messung-forge-img-glabzk:latest
+image u-boot-messung-forge-img-glabpk:latest
+image u-boot-messung-forge-img-glabsk:latest
+image u-boot-messung-forge-img-ghxk:latest
+image u-boot-messung-forge-img-ghk:latest
+image u-boot-messung-forge-img-basn:latest
+image u-boot-messung-forge-img-bas:latest
+image u-boot-messung-forge-devcontainer-cli:latest
+image u-boot-messung-forge-ub:latest
+-- Entfernen
+entferne image u-boot-messung-forge-img-glabtgz:latest
+entferne image u-boot-messung-forge-img-ghtgz:latest
+entferne image u-boot-messung-forge-img-glabdeb:latest
+entferne image u-boot-messung-forge-img-ghdeb:latest
+entferne image u-boot-messung-forge-img-basd:latest
+entferne image u-boot-messung-forge-img-ghnk:latest
+entferne image u-boot-messung-forge-img-glabzk:latest
+entferne image u-boot-messung-forge-img-glabpk:latest
+entferne image u-boot-messung-forge-img-glabsk:latest
+entferne image u-boot-messung-forge-img-ghxk:latest
+entferne image u-boot-messung-forge-img-ghk:latest
+entferne image u-boot-messung-forge-img-basn:latest
+entferne image u-boot-messung-forge-img-bas:latest
+entferne image u-boot-messung-forge-devcontainer-cli:latest
+entferne image u-boot-messung-forge-ub:latest
+-- nachher (rohdaten-08-nachher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=6 images=72 volumes=715 netze=3
+-- Objekte mit dem Praefix u-boot-messung-forge (Name beginnt mit u-boot-messung-forge oder vsc-u-boot-messung-forge)
+AUSSAGE objekte-mit-praefix-nachher=0
+
+-- Anzahl je Art vorher gegen nachher (Aenderungen fremder Arbeiten auf dem Host waehrend der Messung stehen hier ebenfalls)
+vorher:  container=5 images=72 volumes=706 netze=3
+nachher: container=6 images=72 volumes=715 netze=3
+
+-- Build-Cache und Platz (der Build-Cache bleibt; er wurde nicht geleert)
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          211       4         64.79GB   38.78GB (59%)
+Containers      6         2         158.6MB   158.6MB (99%)
+Local Volumes   715       4         36.63GB   2.947GB (8%)
+Build Cache     2724      6         162.8GB   107.2GB

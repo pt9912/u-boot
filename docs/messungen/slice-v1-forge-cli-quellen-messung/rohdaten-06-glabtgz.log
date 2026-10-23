@@ -1,0 +1,108 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.50kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/7] FROM mcr.microsoft.com/devcontainers/base:debian@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99
+#4 resolve mcr.microsoft.com/devcontainers/base:debian@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99 0.0s done
+#4 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 36B done
+#5 DONE 0.0s
+
+#6 [2/7] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+#6 0.316 Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+#6 0.378 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#6 0.407 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#6 0.436 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+#6 2.517 Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [720 B]
+#6 2.535 Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [269 kB]
+#6 3.129 Fetched 10.2 MB in 3s (3551 kB/s)
+#6 3.129 Reading package lists...
+#6 3.534 Reading package lists...
+#6 3.941 Building dependency tree...
+#6 4.026 Reading state information...
+#6 4.137 The following additional packages will be installed:
+#6 4.137   libdbus-1-3 libnftables1
+#6 4.138 Suggested packages:
+#6 4.138   firewalld
+#6 4.138 Recommended packages:
+#6 4.138   dns-root-data dbus
+#6 4.160 The following NEW packages will be installed:
+#6 4.161   dnsmasq-base libdbus-1-3 libnftables1 nftables
+#6 4.233 0 upgraded, 4 newly installed, 0 to remove and 9 not upgraded.
+#6 4.233 Need to get 1093 kB of archives.
+#6 4.233 After this operation, 2868 kB of additional disk space will be used.
+#6 4.233 Get:1 http://deb.debian.org/debian trixie/main amd64 libnftables1 amd64 1.1.3-1 [332 kB]
+#6 4.338 Get:2 http://deb.debian.org/debian trixie/main amd64 nftables amd64 1.1.3-1 [75.9 kB]
+#6 4.365 Get:3 http://deb.debian.org/debian trixie/main amd64 libdbus-1-3 amd64 1.16.2-2 [178 kB]
+#6 4.401 Get:4 http://deb.debian.org/debian trixie/main amd64 dnsmasq-base amd64 2.91-1+deb13u2 [507 kB]
+#6 4.621 debconf: unable to initialize frontend: Dialog
+#6 4.621 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#6 4.621 debconf: falling back to frontend: Readline
+#6 4.627 debconf: unable to initialize frontend: Readline
+#6 4.627 debconf: (This frontend requires a controlling tty.)
+#6 4.627 debconf: falling back to frontend: Teletype
+#6 4.630 debconf: unable to initialize frontend: Teletype
+#6 4.630 debconf: (This frontend requires a controlling tty.)
+#6 4.630 debconf: falling back to frontend: Noninteractive
+#6 5.065 Fetched 1093 kB in 0s (3248 kB/s)
+#6 5.147 Selecting previously unselected package libnftables1:amd64.
+#6 5.147 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 25740 files and directories currently installed.)
+#6 5.154 Preparing to unpack .../libnftables1_1.1.3-1_amd64.deb ...
+#6 5.193 Unpacking libnftables1:amd64 (1.1.3-1) ...
+#6 5.353 Selecting previously unselected package nftables.
+#6 5.354 Preparing to unpack .../nftables_1.1.3-1_amd64.deb ...
+#6 5.375 Unpacking nftables (1.1.3-1) ...
+#6 5.523 Selecting previously unselected package libdbus-1-3:amd64.
+#6 5.525 Preparing to unpack .../libdbus-1-3_1.16.2-2_amd64.deb ...
+#6 5.545 Unpacking libdbus-1-3:amd64 (1.16.2-2) ...
+#6 5.701 Selecting previously unselected package dnsmasq-base.
+#6 5.702 Preparing to unpack .../dnsmasq-base_2.91-1+deb13u2_amd64.deb ...
+#6 5.726 Unpacking dnsmasq-base (2.91-1+deb13u2) ...
+#6 5.869 Setting up libnftables1:amd64 (1.1.3-1) ...
+#6 5.931 Setting up nftables (1.1.3-1) ...
+#6 6.064 Setting up libdbus-1-3:amd64 (1.16.2-2) ...
+#6 6.125 Setting up dnsmasq-base (2.91-1+deb13u2) ...
+#6 6.320 Processing triggers for libc-bin (2.41-12+deb13u4) ...
+#6 6.386 Processing triggers for man-db (2.13.1-1) ...
+#6 DONE 7.4s
+
+#7 [3/7] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+#7 DONE 0.1s
+
+#8 [4/7] RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+#8 DONE 0.3s
+
+#9 [5/7] RUN mkdir -p "/workspaces/u-boot-messung-forge-bas" && chown vscode:vscode "/workspaces/u-boot-messung-forge-bas"
+#9 DONE 0.3s
+
+#10 [6/7] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+#10 DONE 0.3s
+
+#11 [7/7] RUN arch="$(dpkg --print-architecture)"  && case "$arch" in amd64) sha256="63df684842b0697e418649dd64374d37ac1da0fbcdcb422d6a5557222f8bb40f" ;; arm64) sha256="0716395a0efeb991fc844b33fe55310645afcbd9b9746e50c725e9d1cd1b8d16" ;; *) echo "glab has no archive for $arch" >&2; exit 1 ;; esac  && work="$(mktemp -d)"  && cd "$work"  && curl -fsSLO "https://gitlab.com/gitlab-org/cli/-/releases/v1.124.0/downloads/glab_1.124.0_linux_${arch}.tar.gz"  && echo "${sha256}  glab_1.124.0_linux_${arch}.tar.gz" | sha256sum -c -  && tar -xzf "glab_1.124.0_linux_${arch}.tar.gz" -C /usr/local --no-same-owner bin/glab  && cd /  && rm -rf "$work"
+#11 4.673 glab_1.124.0_linux_amd64.tar.gz: OK
+#11 DONE 5.0s
+
+#12 exporting to image
+#12 exporting layers
+#12 exporting layers 2.3s done
+#12 exporting manifest sha256:f00b4bee432de645b077b278395e69ba8e99ca4fc9598155a006bc2e3f03873b 0.0s done
+#12 exporting config sha256:f4906360837bb82dc31fbab106a7ec2aaf130adc72dc5814c2eaf52b784d89f0 0.0s done
+#12 exporting attestation manifest sha256:773ca51e013f002385f36ee0dfcbe56ccf1faf0f6aad5e8f194370bbe05d2ac1
+#12 exporting attestation manifest sha256:773ca51e013f002385f36ee0dfcbe56ccf1faf0f6aad5e8f194370bbe05d2ac1 0.1s done
+#12 exporting manifest list sha256:18c6759b1e7e5e36204d951ac02fc371c2c47eb37e9701c97e72f99326b4fe3d 0.0s done
+#12 naming to docker.io/library/u-boot-messung-forge-img-glabtgz:latest
+#12 naming to docker.io/library/u-boot-messung-forge-img-glabtgz:latest done
+#12 unpacking to docker.io/library/u-boot-messung-forge-img-glabtgz:latest
+#12 unpacking to docker.io/library/u-boot-messung-forge-img-glabtgz:latest 0.5s done
+#12 DONE 3.1s

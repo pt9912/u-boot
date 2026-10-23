@@ -1,0 +1,251 @@
+[2026-10-23T09:46:46.968Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-147-generic x64.
+[2026-10-23T09:46:47.283Z] Resolving Feature dependencies for 'ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1'...
+[2026-10-23T09:46:48.073Z] Soft-dependency 'ghcr.io/devcontainers/features/common-utils' is not required.  Removing from installation order...
+[2026-10-23T09:46:48.411Z] Files to omit: ''
+[2026-10-23T09:46:48.418Z] Start: Run: docker build -t dev_container_feature_content_temp -f /tmp/devcontainercli-root/container-features/0.89.0-1792748807282/Dockerfile.buildContent /tmp/devcontainercli-root/container-features/0.89.0-1792748807282
+[2026-10-23T09:46:48.430Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:46:48.431Z] Sending build context to Docker daemon   25.6kB
+[2026-10-23T09:46:48.433Z] Step 1/2 : FROM scratch
+[2026-10-23T09:46:48.433Z]  ---> 
+Step 2/2 : COPY . /tmp/build-features/
+[2026-10-23T09:46:48.467Z]  ---> Using cache
+ ---> 0fa79ed2feec
+[2026-10-23T09:46:48.467Z] Successfully built 0fa79ed2feec
+[2026-10-23T09:46:48.508Z] Successfully tagged dev_container_feature_content_temp:latest
+[2026-10-23T09:46:48.510Z] Start: Run: docker build -f /tmp/devcontainercli-root/container-features/0.89.0-1792748807282/Dockerfile-with-features -t u-boot-messung-forge-img-glabzk --target dev_containers_target_stage --no-cache --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label --build-arg _DEV_CONTAINERS_IMAGE_USER=vscode --build-arg _DEV_CONTAINERS_FEATURE_CONTENT_SOURCE=dev_container_feature_content_temp /w/u-boot-messung-forge-glabzk/.devcontainer
+[2026-10-23T09:46:48.526Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:46:48.528Z] Sending build context to Docker daemon  16.43kB
+[2026-10-23T09:46:48.530Z] Step 1/25 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+Step 2/25 : FROM mcr.microsoft.com/devcontainers/base:debian AS dev_container_auto_added_stage_label
+[2026-10-23T09:46:48.544Z]  ---> 6ee2b4097c75
+Step 3/25 : USER root
+[2026-10-23T09:46:48.668Z]  ---> Running in 4f860edafe0e
+[2026-10-23T09:46:50.480Z]  ---> Removed intermediate container 4f860edafe0e
+ ---> dc697a30f67b
+Step 4/25 : RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+[2026-10-23T09:46:50.584Z]  ---> Running in a7a4a3e7b83c
+[2026-10-23T09:46:50.870Z] Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+[2026-10-23T09:46:50.941Z] Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+[2026-10-23T09:46:50.966Z] Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+[2026-10-23T09:46:50.994Z] Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+[2026-10-23T09:46:53.001Z] Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [720 B]
+[2026-10-23T09:46:53.015Z] Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [269 kB]
+[2026-10-23T09:46:53.616Z] Fetched 10.2 MB in 3s (3618 kB/s)
+Reading package lists...
+[2026-10-23T09:46:54.010Z] 
+[2026-10-23T09:46:54.026Z] Reading package lists...
+[2026-10-23T09:46:54.402Z] 
+[2026-10-23T09:46:54.411Z] Building dependency tree...
+[2026-10-23T09:46:54.493Z] 
+Reading state information...
+[2026-10-23T09:46:54.608Z] The following additional packages will be installed:
+[2026-10-23T09:46:54.609Z]   libdbus-1-3 libnftables1
+[2026-10-23T09:46:54.609Z] Suggested packages:
+  firewalld
+Recommended packages:
+  dns-root-data dbus
+[2026-10-23T09:46:54.635Z] The following NEW packages will be installed:
+[2026-10-23T09:46:54.636Z]   dnsmasq-base libdbus-1-3 libnftables1 nftables
+[2026-10-23T09:46:54.732Z] 0 upgraded, 4 newly installed, 0 to remove and 9 not upgraded.
+Need to get 1093 kB of archives.
+After this operation, 2868 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian trixie/main amd64 libnftables1 amd64 1.1.3-1 [332 kB]
+[2026-10-23T09:46:54.827Z] Get:2 http://deb.debian.org/debian trixie/main amd64 nftables amd64 1.1.3-1 [75.9 kB]
+[2026-10-23T09:46:54.846Z] Get:3 http://deb.debian.org/debian trixie/main amd64 libdbus-1-3 amd64 1.16.2-2 [178 kB]
+[2026-10-23T09:46:54.883Z] Get:4 http://deb.debian.org/debian trixie/main amd64 dnsmasq-base amd64 2.91-1+deb13u2 [507 kB]
+[2026-10-23T09:46:55.091Z] debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+[2026-10-23T09:46:55.097Z] debconf: unable to initialize frontend: Readline
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Teletype
+[2026-10-23T09:46:55.101Z] debconf: unable to initialize frontend: Teletype
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Noninteractive
+[2026-10-23T09:46:55.528Z] Fetched 1093 kB in 0s (3310 kB/s)
+[2026-10-23T09:46:55.596Z] Selecting previously unselected package libnftables1:amd64.
+(Reading database ... 
+[2026-10-23T09:46:55.597Z] (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%
+[2026-10-23T09:46:55.598Z] (Reading database ... 70%
+[2026-10-23T09:46:55.598Z] (Reading database ... 75%
+[2026-10-23T09:46:55.599Z] (Reading database ... 80%
+[2026-10-23T09:46:55.600Z] (Reading database ... 85%
+[2026-10-23T09:46:55.600Z] (Reading database ... 90%
+[2026-10-23T09:46:55.602Z] (Reading database ... 95%
+[2026-10-23T09:46:55.603Z] (Reading database ... 100%(Reading database ... 25740 files and directories currently installed.)
+[2026-10-23T09:46:55.603Z] Preparing to unpack .../libnftables1_1.1.3-1_amd64.deb ...
+[2026-10-23T09:46:55.641Z] Unpacking libnftables1:amd64 (1.1.3-1) ...
+[2026-10-23T09:46:55.805Z] Selecting previously unselected package nftables.
+[2026-10-23T09:46:55.807Z] Preparing to unpack .../nftables_1.1.3-1_amd64.deb ...
+[2026-10-23T09:46:55.826Z] Unpacking nftables (1.1.3-1) ...
+[2026-10-23T09:46:55.962Z] Selecting previously unselected package libdbus-1-3:amd64.
+[2026-10-23T09:46:55.964Z] Preparing to unpack .../libdbus-1-3_1.16.2-2_amd64.deb ...
+[2026-10-23T09:46:55.982Z] Unpacking libdbus-1-3:amd64 (1.16.2-2) ...
+[2026-10-23T09:46:56.121Z] Selecting previously unselected package dnsmasq-base.
+[2026-10-23T09:46:56.124Z] Preparing to unpack .../dnsmasq-base_2.91-1+deb13u2_amd64.deb ...
+[2026-10-23T09:46:56.150Z] Unpacking dnsmasq-base (2.91-1+deb13u2) ...
+[2026-10-23T09:46:56.278Z] Setting up libnftables1:amd64 (1.1.3-1) ...
+[2026-10-23T09:46:56.332Z] Setting up nftables (1.1.3-1) ...
+[2026-10-23T09:46:56.460Z] Setting up libdbus-1-3:amd64 (1.16.2-2) ...
+[2026-10-23T09:46:56.513Z] Setting up dnsmasq-base (2.91-1+deb13u2) ...
+[2026-10-23T09:46:56.690Z] Processing triggers for libc-bin (2.41-12+deb13u4) ...
+[2026-10-23T09:46:56.755Z] Processing triggers for man-db (2.13.1-1) ...
+[2026-10-23T09:47:00.038Z]  ---> Removed intermediate container a7a4a3e7b83c
+ ---> d402c209635a
+Step 5/25 : COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+[2026-10-23T09:47:01.832Z]  ---> bd14cfbaf2ff
+Step 6/25 : RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+[2026-10-23T09:47:01.936Z]  ---> Running in fba49cbdcb99
+[2026-10-23T09:47:04.162Z]  ---> Removed intermediate container fba49cbdcb99
+ ---> b32d2ba5f8bd
+Step 7/25 : RUN mkdir -p "/workspaces/u-boot-messung-forge-glabz" && chown vscode:vscode "/workspaces/u-boot-messung-forge-glabz"
+[2026-10-23T09:47:04.269Z]  ---> Running in 92e7b6adff84
+[2026-10-23T09:47:06.638Z]  ---> Removed intermediate container 92e7b6adff84
+ ---> 56358b60c882
+Step 8/25 : RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+[2026-10-23T09:47:06.750Z]  ---> Running in 358391af7b64
+[2026-10-23T09:47:08.978Z]  ---> Removed intermediate container 358391af7b64
+ ---> 8c8d7e382800
+Step 9/25 : USER vscode
+[2026-10-23T09:47:09.084Z]  ---> Running in 85a584a4e2ba
+[2026-10-23T09:47:11.046Z]  ---> Removed intermediate container 85a584a4e2ba
+ ---> 9c4e835be322
+Step 10/25 : FROM dev_container_feature_content_temp as dev_containers_feature_content_source
+[2026-10-23T09:47:11.057Z]  ---> 0fa79ed2feec
+Step 11/25 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+[2026-10-23T09:47:11.161Z]  ---> Running in a7bab3a09e39
+[2026-10-23T09:47:11.601Z]  ---> Removed intermediate container a7bab3a09e39
+ ---> 4f43e664cf32
+Step 12/25 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_feature_content_normalize
+[2026-10-23T09:47:11.614Z]  ---> 9c4e835be322
+Step 13/25 : USER root
+[2026-10-23T09:47:11.717Z]  ---> Running in b938f0f49e61
+[2026-10-23T09:47:13.551Z]  ---> Removed intermediate container b938f0f49e61
+ ---> ac21d2e6ce8b
+Step 14/25 : COPY --from=dev_containers_feature_content_source /tmp/build-features/devcontainer-features.builtin.env /tmp/build-features/
+[2026-10-23T09:47:15.419Z]  ---> 85ece2255fdc
+Step 15/25 : RUN chmod -R 0755 /tmp/build-features/
+[2026-10-23T09:47:15.528Z]  ---> Running in 040d45e7aa0a
+[2026-10-23T09:47:17.906Z]  ---> Removed intermediate container 040d45e7aa0a
+ ---> 1ad8efd332cc
+Step 16/25 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_target_stage
+ ---> 9c4e835be322
+[2026-10-23T09:47:17.906Z] Step 17/25 : USER root
+[2026-10-23T09:47:18.018Z]  ---> Running in 7e8e6f32926f
+[2026-10-23T09:47:19.840Z]  ---> Removed intermediate container 7e8e6f32926f
+ ---> 348d0e05e660
+Step 18/25 : RUN mkdir -p /tmp/dev-container-features
+[2026-10-23T09:47:19.946Z]  ---> Running in 1946865f6929
+[2026-10-23T09:47:22.265Z]  ---> Removed intermediate container 1946865f6929
+ ---> bb8a9dd3195e
+Step 19/25 : COPY --from=dev_containers_feature_content_normalize /tmp/build-features/ /tmp/dev-container-features
+[2026-10-23T09:47:24.244Z]  ---> c4702bfbe838
+Step 20/25 : RUN echo "_CONTAINER_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'vscode' || grep -E '^vscode|^[^:]*:[^:]*:vscode:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env && echo "_REMOTE_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'vscode' || grep -E '^vscode|^[^:]*:[^:]*:vscode:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env
+[2026-10-23T09:47:24.353Z]  ---> Running in f93b32e31575
+[2026-10-23T09:47:26.535Z]  ---> Removed intermediate container f93b32e31575
+ ---> ced26bc382bd
+Step 21/25 : COPY --chown=root:root --from=dev_containers_feature_content_source /tmp/build-features/gitlab-cli_0 /tmp/dev-container-features/gitlab-cli_0
+[2026-10-23T09:47:28.631Z]  ---> b7f8d2ad8782
+Step 22/25 : RUN chmod -R 0755 /tmp/dev-container-features/gitlab-cli_0 && cd /tmp/dev-container-features/gitlab-cli_0 && chmod +x ./devcontainer-features-install.sh && ./devcontainer-features-install.sh
+[2026-10-23T09:47:28.745Z]  ---> Running in 023d793afa82
+[2026-10-23T09:47:29.014Z] ===========================================================================
+Feature       : GitLab CLI
+Description   : Installs the GitLab CLI (glab) for interacting with GitLab repositories and CI/CD pipelines.
+Id            : ghcr.io/srzstephen/devcontainer-features/gitlab-cli
+Version       : 1.0.1
+Documentation : https://github.com/SrzStephen/devcontainer-features/blob/main/src/gitlab-cli/README.md
+Options       :
+    VERSION="latest"
+===========================================================================
+[2026-10-23T09:47:29.096Z] Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+[2026-10-23T09:47:29.156Z] Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+[2026-10-23T09:47:29.184Z] Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+[2026-10-23T09:47:29.205Z] Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+[2026-10-23T09:47:31.227Z] Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [720 B]
+[2026-10-23T09:47:31.242Z] Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [269 kB]
+[2026-10-23T09:47:31.833Z] Fetched 10.2 MB in 3s (3641 kB/s)
+Reading package lists...
+[2026-10-23T09:47:32.229Z] 
+[2026-10-23T09:47:32.246Z] Reading package lists...
+[2026-10-23T09:47:32.655Z] 
+[2026-10-23T09:47:32.664Z] Building dependency tree...
+[2026-10-23T09:47:32.756Z] 
+Reading state information...
+[2026-10-23T09:47:32.885Z] The following additional packages will be installed:
+[2026-10-23T09:47:32.885Z]   libcurl3t64-gnutls libcurl4-openssl-dev libcurl4t64
+[2026-10-23T09:47:32.902Z] The following packages will be upgraded:
+[2026-10-23T09:47:32.903Z]   ca-certificates curl libcurl3t64-gnutls libcurl4-openssl-dev libcurl4t64
+[2026-10-23T09:47:32.981Z] 5 upgraded, 0 newly installed, 0 to remove and 4 not upgraded.
+Need to get 1718 kB of archives.
+After this operation, 3072 B disk space will be freed.
+Get:1 http://deb.debian.org/debian-security trixie-security/main amd64 ca-certificates all 20250419+deb13u1 [161 kB]
+[2026-10-23T09:47:33.054Z] Get:2 http://deb.debian.org/debian-security trixie-security/main amd64 libcurl4-openssl-dev amd64 8.14.1-2+deb13u7 [511 kB]
+[2026-10-23T09:47:33.176Z] Get:3 http://deb.debian.org/debian-security trixie-security/main amd64 curl amd64 8.14.1-2+deb13u7 [270 kB]
+[2026-10-23T09:47:33.231Z] Get:4 http://deb.debian.org/debian-security trixie-security/main amd64 libcurl4t64 amd64 8.14.1-2+deb13u7 [392 kB]
+[2026-10-23T09:47:33.310Z] Get:5 http://deb.debian.org/debian-security trixie-security/main amd64 libcurl3t64-gnutls amd64 8.14.1-2+deb13u7 [385 kB]
+[2026-10-23T09:47:33.899Z] Preconfiguring packages ...
+[2026-10-23T09:47:34.403Z] Fetched 1718 kB in 0s (3600 kB/s)
+[2026-10-23T09:47:34.482Z] (Reading database ... 
+[2026-10-23T09:47:34.484Z] (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%
+[2026-10-23T09:47:34.484Z] (Reading database ... 70%
+[2026-10-23T09:47:34.485Z] (Reading database ... 75%
+[2026-10-23T09:47:34.485Z] (Reading database ... 80%
+[2026-10-23T09:47:34.486Z] (Reading database ... 85%
+[2026-10-23T09:47:34.486Z] (Reading database ... 90%
+[2026-10-23T09:47:34.488Z] (Reading database ... 95%
+[2026-10-23T09:47:34.489Z] (Reading database ... 100%(Reading database ... 25828 files and directories currently installed.)
+[2026-10-23T09:47:34.489Z] Preparing to unpack .../ca-certificates_20250419+deb13u1_all.deb ...
+[2026-10-23T09:47:34.540Z] Unpacking ca-certificates (20250419+deb13u1) over (20250419) ...
+[2026-10-23T09:47:36.172Z] Preparing to unpack .../libcurl4-openssl-dev_8.14.1-2+deb13u7_amd64.deb ...
+[2026-10-23T09:47:36.226Z] Unpacking libcurl4-openssl-dev:amd64 (8.14.1-2+deb13u7) over (8.14.1-2+deb13u5) ...
+[2026-10-23T09:47:36.521Z] Preparing to unpack .../curl_8.14.1-2+deb13u7_amd64.deb ...
+[2026-10-23T09:47:36.574Z] Unpacking curl (8.14.1-2+deb13u7) over (8.14.1-2+deb13u5) ...
+[2026-10-23T09:47:36.816Z] Preparing to unpack .../libcurl4t64_8.14.1-2+deb13u7_amd64.deb ...
+[2026-10-23T09:47:36.886Z] Unpacking libcurl4t64:amd64 (8.14.1-2+deb13u7) over (8.14.1-2+deb13u5) ...
+[2026-10-23T09:47:37.078Z] Preparing to unpack .../libcurl3t64-gnutls_8.14.1-2+deb13u7_amd64.deb ...
+[2026-10-23T09:47:37.131Z] Unpacking libcurl3t64-gnutls:amd64 (8.14.1-2+deb13u7) over (8.14.1-2+deb13u5) ...
+[2026-10-23T09:47:37.323Z] Setting up libcurl4t64:amd64 (8.14.1-2+deb13u7) ...
+[2026-10-23T09:47:37.381Z] Setting up libcurl3t64-gnutls:amd64 (8.14.1-2+deb13u7) ...
+[2026-10-23T09:47:37.433Z] Setting up ca-certificates (20250419+deb13u1) ...
+[2026-10-23T09:47:39.050Z] Updating certificates in /etc/ssl/certs...
+[2026-10-23T09:47:40.033Z] rehash: warning: skipping ca-certificates.crt, it does not contain exactly one certificate or CRL
+[2026-10-23T09:47:40.036Z] 0 added, 2 removed; done.
+[2026-10-23T09:47:40.122Z] Setting up libcurl4-openssl-dev:amd64 (8.14.1-2+deb13u7) ...
+[2026-10-23T09:47:40.173Z] Setting up curl (8.14.1-2+deb13u7) ...
+[2026-10-23T09:47:40.223Z] Processing triggers for man-db (2.13.1-1) ...
+[2026-10-23T09:47:41.016Z] Processing triggers for libc-bin (2.41-12+deb13u4) ...
+[2026-10-23T09:47:41.073Z] Processing triggers for ca-certificates (20250419+deb13u1) ...
+[2026-10-23T09:47:41.094Z] Updating certificates in /etc/ssl/certs...
+[2026-10-23T09:47:41.681Z] 0 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+[2026-10-23T09:47:41.682Z] done.
+[2026-10-23T09:47:42.208Z] Downloading glab 1.124.0...
+[2026-10-23T09:47:46.091Z] Verified checksum for glab_1.124.0_linux_amd64.tar.gz.
+[2026-10-23T09:47:46.374Z] glab 1.124.0 installed.
+Done!
+[2026-10-23T09:47:49.452Z]  ---> Removed intermediate container 023d793afa82
+ ---> 19f307f07505
+Step 23/25 : ARG _DEV_CONTAINERS_IMAGE_USER=root
+[2026-10-23T09:47:49.588Z]  ---> Running in f49e9c0a17db
+[2026-10-23T09:47:51.654Z]  ---> Removed intermediate container f49e9c0a17db
+ ---> 84e59dbdbb7f
+Step 24/25 : USER $_DEV_CONTAINERS_IMAGE_USER
+[2026-10-23T09:47:51.760Z]  ---> Running in b88cb4ace9e1
+[2026-10-23T09:47:53.676Z]  ---> Removed intermediate container b88cb4ace9e1
+ ---> 40455e59bd32
+Step 25/25 : LABEL devcontainer.metadata="[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"id\":\"ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1\"}, {\"postStartCommand\":\"sudo sh /usr/local/bin/u-boot-egress-init\",\"mounts\":[\"source=u-boot-messung-forge-glabz-workspace-\${devcontainerId},target=/workspaces/u-boot-messung-forge-glabz,type=volume\"],\"remoteUser\":\"vscode\",\"remoteEnv\":{\"GIT_TOKEN\":\"\${localEnv:GIT_TOKEN}\"}} ]"
+[2026-10-23T09:47:53.787Z]  ---> Running in f6f15666ffd5
+[2026-10-23T09:47:55.750Z]  ---> Removed intermediate container f6f15666ffd5
+ ---> 5900554e7973
+[Warning] One or more build-args [_DEV_CONTAINERS_FEATURE_CONTENT_SOURCE] were not consumed
+[2026-10-23T09:47:55.833Z] Successfully built 5900554e7973
+[2026-10-23T09:47:55.851Z] Successfully tagged u-boot-messung-forge-img-glabzk:latest
+{"outcome":"success","imageName":["u-boot-messung-forge-img-glabzk"],"ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}

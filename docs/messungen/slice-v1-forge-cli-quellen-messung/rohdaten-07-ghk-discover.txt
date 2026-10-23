@@ -1,0 +1,193 @@
+== Laufzeit ghk (gh), Modus discover, 2026-10-23T10:26:42.047Z
+runArgs laut devcontainer.json: "runArgs":["--cap-add=NET_ADMIN"],
+modus=discover werkzeug=gh home=/home/vscode user=vscode
+-- Git-Konfiguration im Image (system, vom Dockerfile der Vorlage) und im Home (global)
+credential.helper !f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f
+fatal: unable to read config file '/home/vscode/.gitconfig': No such file or directory
+---- 10:26:43.779 version
+$ gh --version
+gh version 2.103.0 (2026-10-21)
+https://github.com/cli/cli/releases/tag/v2.103.0
+exit=0
+AUSSAGE discover-gh-version-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+~/.local/state/gh/device-id 36
+---- 10:26:44.047 help-environment
+$ gh help environment
+`GH_TOKEN`, `GITHUB_TOKEN` (in order of precedence): an authentication token that will be used when
+a command targets either `github.com` or a subdomain of `ghe.com`. Setting this avoids being prompted to
+authenticate and takes precedence over previously stored credentials.
+`GH_ENTERPRISE_TOKEN`, `GITHUB_ENTERPRISE_TOKEN` (in order of precedence): an authentication
+token that will be used when a command targets a GitHub Enterprise Server host.
+`GH_HOST`: specify the GitHub hostname for commands where a hostname has not been provided, or
+cannot be inferred from the context of a local Git repository. If this host was previously
+authenticated with, the stored credentials will be used. Otherwise, setting `GH_TOKEN` or
+`GH_ENTERPRISE_TOKEN` is required, depending on the targeted host.
+`GH_REPO`: specify the GitHub repository in the `[HOST/]OWNER/REPO` format for commands
+that otherwise operate on a local repository.
+`GH_EDITOR`, `GIT_EDITOR`, `VISUAL`, `EDITOR` (in order of precedence): the editor tool to use
+for authoring text.
+`GH_BROWSER`, `BROWSER` (in order of precedence): the web browser to use for opening links.
+exit=0
+AUSSAGE discover-gh-help-environment-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:44.304 auth-status-ohne-variable
+$ gh auth status
+You are not logged into any GitHub hosts. To log in, run: gh auth login
+exit=1
+AUSSAGE discover-gh-auth-status-ohne-variable-exit=1
+-- DNS-Anfragen (A/AAAA)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:44.555 api-ohne-variable
+$ gh api rate_limit
+To get started with GitHub CLI, please run:  gh auth login
+Alternatively, populate the GH_TOKEN environment variable with a GitHub API authentication token.
+exit=4
+AUSSAGE discover-gh-api-ohne-variable-exit=4
+-- DNS-Anfragen (A/AAAA)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:44.810 auth-status-gh_token
+$ gh auth status
+github.com
+  X Failed to log in to github.com using token (GH_TOKEN)
+  - Active account: true
+  - The token in GH_TOKEN is invalid.
+exit=1
+AUSSAGE discover-gh-auth-status-gh_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 api.github.com
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:45.274 api-gh_token
+$ gh api rate_limit
+{
+  "message": "Bad credentials",
+  "documentation_url": "https://docs.github.com/rest",
+  "status": "401"
+}gh: Bad credentials (HTTP 401)
+exit=1
+AUSSAGE discover-gh-api-gh_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 api.github.com
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:45.769 api-github_token
+$ gh api rate_limit
+{
+  "message": "Bad credentials",
+  "documentation_url": "https://docs.github.com/rest",
+  "status": "401"
+}gh: Bad credentials (HTTP 401)
+exit=1
+AUSSAGE discover-gh-api-github_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 api.github.com
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:46.223 repo-view-gh_token
+$ gh repo view cli/cli
+HTTP 401: Bad credentials (https://api.github.com/graphql)
+Try authenticating with:  gh auth login -h github.com
+exit=1
+AUSSAGE discover-gh-repo-view-gh_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 api.github.com
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:46.719 release-download-gh_token
+$ gh release download v2.103.0 -R cli/cli -p gh_*_checksums.txt -D /tmp/dl
+HTTP 401: Bad credentials (https://api.github.com/repos/cli/cli/releases/tags/v2.103.0)
+Try authenticating with:  gh auth login -h github.com
+exit=1
+AUSSAGE discover-gh-release-download-gh_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 api.github.com
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:47.201 git-ls-remote-ohne-git_token
+$ git ls-remote https://github.com/cli/cli.git HEAD
+e87ed4c751918d89c87b041913973770a770dc5c	HEAD
+exit=0
+AUSSAGE discover-gh-git-ls-remote-ohne-git_token-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 github.com
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:47.928 git-ls-remote-git_token
+$ git ls-remote https://github.com/cli/cli.git HEAD
+e87ed4c751918d89c87b041913973770a770dc5c	HEAD
+exit=0
+AUSSAGE discover-gh-git-ls-remote-git_token-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 github.com
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:48.683 config-list
+$ gh config list
+api_host=
+git_protocol=https
+editor=
+prompt=enabled
+prefer_editor_prompt=disabled
+expiring_credentials=disabled
+pager=
+http_unix_socket=
+browser=
+clipboard=enabled
+exit=0
+AUSSAGE discover-gh-config-list-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:48.935 env-hilfe-telemetrie-update
+$ sh -c gh help environment | grep -i -E "telemetry|update|NO_"
+`NO_COLOR`: set to any value to avoid printing ANSI escape sequences for color output.
+`GH_NO_UPDATE_NOTIFIER`: set to any value to disable GitHub CLI update notifications.
+`GH_NO_EXTENSION_UPDATE_NOTIFIER`: set to any value to disable GitHub CLI extension update notifications.
+`GH_TELEMETRY`: set to `log` to print telemetry data to standard error instead of sending it.
+Set to `false` or `0` to disable telemetry. Takes precedence over `DO_NOT_TRACK`.
+`DO_NOT_TRACK`: set to `true` or `1` to disable telemetry. Ignored when
+`GH_TELEMETRY` is set, which takes precedence.
+exit=0
+AUSSAGE discover-gh-env-hilfe-telemetrie-update-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:49.184 repo-clone-gh_token
+$ gh repo clone cli/cli /tmp/clone-gh -- --depth 1
+HTTP 401: Bad credentials (https://api.github.com/graphql)
+Try authenticating with:  gh auth login -h github.com
+exit=1
+AUSSAGE discover-gh-repo-clone-gh_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 api.github.com
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:49.646 auth-git-credential-hilfe
+$ gh auth setup-git --help
+This command configures `git` to use GitHub CLI as a credential helper.
+For more information on git credential helpers please reference:
+<https://git-scm.com/docs/gitcredentials>.
+By default, GitHub CLI will be set as the credential helper for all authenticated hosts.
+If there is no authenticated hosts the command fails with an error.
+Alternatively, use the `--hostname` flag to specify a single host to be configured.
+If the host is not authenticated with, the command fails with an error.
+USAGE
+  gh auth setup-git [flags]
+FLAGS
+exit=0
+AUSSAGE discover-gh-auth-git-credential-hilfe-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:26:49.894 auth-setup-git
+$ gh auth setup-git --hostname github.com
+exit=0
+AUSSAGE discover-gh-auth-setup-git-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+~/.gitconfig 181
+-- git config --global --get-regexp credential (Eintraege, die ein Werkzeug geschrieben haette)
+credential.https://github.com.helper 
+credential.https://github.com.helper !/usr/bin/gh auth git-credential
+credential.https://gist.github.com.helper 
+credential.https://gist.github.com.helper !/usr/bin/gh auth git-credential
+-- Dateien unter HOME ausserhalb der Image-Grundausstattung (Pfad, Bytes, Zeilen mit dem Platzhalter)
+~/.gitconfig 181 platzhalter-treffer=0
+~/.local/state/gh/device-id 36 platzhalter-treffer=0
+
+---- 10:26:49.982 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
+     12 api.github.com
+      4 github.com
+container-exit=0  gesamtdauer=8.3s

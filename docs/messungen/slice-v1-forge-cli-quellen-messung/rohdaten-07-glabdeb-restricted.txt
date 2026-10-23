@@ -1,0 +1,260 @@
+== Laufzeit glabdeb (glab), Modus restricted, 2026-10-23T10:37:12.426Z
+runArgs laut devcontainer.json: "runArgs":["--cap-add=NET_ADMIN"],
+egress-init exit=0
+-- Status-Datei des Skripts
+u-boot-status 1
+result=ok
+at=2026-10-23T10:37:12Z
+conf: server=/api.github.com/1.1.1.1
+conf: server=/api.github.com/8.8.8.8
+conf: server=/codeload.github.com/1.1.1.1
+conf: server=/codeload.github.com/8.8.8.8
+conf: server=/deb.debian.org/1.1.1.1
+conf: server=/deb.debian.org/8.8.8.8
+conf: server=/github.com/1.1.1.1
+conf: server=/github.com/8.8.8.8
+conf: server=/objects.githubusercontent.com/1.1.1.1
+conf: server=/objects.githubusercontent.com/8.8.8.8
+conf: server=/raw.githubusercontent.com/1.1.1.1
+conf: server=/raw.githubusercontent.com/8.8.8.8
+conf: server=/security.debian.org/1.1.1.1
+conf: server=/security.debian.org/8.8.8.8
+modus=restricted werkzeug=glab home=/home/vscode user=vscode
+Hosts der Allowlist im Startscript: api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+-- Git-Konfiguration im Image (system, vom Dockerfile der Vorlage) und im Home (global)
+credential.helper !f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f
+fatal: unable to read config file '/home/vscode/.gitconfig': No such file or directory
+---- 10:37:15.214 version
+$ glab --version
+Current glab version: 1.53.0
+exit=0
+AUSSAGE restricted-glab-version-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+~/.config/glab-cli/aliases.yml 32
+~/.config/glab-cli/config.yml 1584
+---- 10:37:15.509 auth-status-ohne-variable
+$ glab auth status
+gitlab.com
+  x gitlab.com: API call failed: Get "https://gitlab.com/api/v4/user": dial tcp: lookup gitlab.com on 127.0.0.1:53: server misbehaving
+  ✓ Git operations for gitlab.com configured to use ssh protocol.
+  ✓ API calls for gitlab.com are made over https protocol.
+  ✓ REST API Endpoint: https://gitlab.com/api/v4/
+  ✓ GraphQL Endpoint: https://gitlab.com/api/graphql/
+  ! No token provided in configuration file.
+x could not authenticate to one or more of the configured GitLab instances.
+exit=1
+AUSSAGE restricted-glab-auth-status-ohne-variable-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:15.768 api-ohne-variable
+$ glab api projects/gitlab-org%2Fcli --silent
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-api-ohne-variable-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:16.038 repo-view-ohne-variable
+$ glab repo view gitlab-org/cli
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-repo-view-ohne-variable-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:16.304 release-list-ohne-variable
+$ glab release list -R gitlab-org/cli
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-release-list-ohne-variable-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:16.571 release-download-ohne-variable
+$ glab release download v1.124.0 -R gitlab-org/cli --asset-name checksums.txt -D /tmp/dl
+• fetching release repo=gitlab-org/cli tag=v1.124.0.
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-release-download-ohne-variable-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:16.832 auth-status-gitlab_token
+$ glab auth status
+gitlab.com
+  x gitlab.com: API call failed: Get "https://gitlab.com/api/v4/user": dial tcp: lookup gitlab.com on 127.0.0.1:53: server misbehaving
+  ✓ Git operations for gitlab.com configured to use ssh protocol.
+  ✓ API calls for gitlab.com are made over https protocol.
+  ✓ REST API Endpoint: https://gitlab.com/api/v4/
+  ✓ GraphQL Endpoint: https://gitlab.com/api/graphql/
+  ! No token provided in configuration file.
+! One of GITLAB_TOKEN, GITLAB_ACCESS_TOKEN, OAUTH_TOKEN environment variables is set. It will be used for all authentication.
+x could not authenticate to one or more of the configured GitLab instances.
+exit=1
+AUSSAGE restricted-glab-auth-status-gitlab_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:17.097 api-gitlab_token
+$ glab api projects/gitlab-org%2Fcli --silent
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-api-gitlab_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:17.362 api-gitlab_access_token
+$ glab api projects/gitlab-org%2Fcli --silent
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-api-gitlab_access_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:17.631 api-oauth_token
+$ glab api projects/gitlab-org%2Fcli --silent
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-api-oauth_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:17.896 repo-view-gitlab_token
+$ glab repo view gitlab-org/cli
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-repo-view-gitlab_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:18.175 git-ls-remote-ohne-git_token
+$ git ls-remote https://gitlab.com/gitlab-org/cli.git HEAD
+fatal: unable to access 'https://gitlab.com/gitlab-org/cli.git/': Could not resolve host: gitlab.com
+exit=128
+AUSSAGE restricted-glab-git-ls-remote-ohne-git_token-exit=128
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:18.409 git-ls-remote-git_token
+$ git ls-remote https://gitlab.com/gitlab-org/cli.git HEAD
+fatal: unable to access 'https://gitlab.com/gitlab-org/cli.git/': Could not resolve host: gitlab.com
+exit=128
+AUSSAGE restricted-glab-git-ls-remote-git_token-exit=128
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:18.649 config-git-protocol
+$ glab config get git_protocol
+ssh
+exit=0
+AUSSAGE restricted-glab-config-git-protocol-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:18.927 config-telemetrie-update-duo
+$ sh -c for k in telemetry check_update duo_cli_auto_download duo_cli_auto_run show_whats_new; do printf "%s=" $k; glab config get $k; done
+telemetry=check_update=false
+duo_cli_auto_download=duo_cli_auto_run=show_whats_new=
+exit=0
+AUSSAGE restricted-glab-config-telemetrie-update-duo-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:19.392 auth-login-hilfe-git-credential-helper
+$ sh -c glab auth login --help | grep -i -E "credential|stdin"
+You can pass in a token on standard input by using `--stdin`.
+Configuration and credentials are stored in the global configuration file (Default: `~/.config/glab-cli/config.yml`)
+      --stdin                 Read token from standard input.
+  $ glab auth login --stdin < myaccesstoken.txt
+  $ glab auth login --hostname gitlab.example.org --api-host gitlab.example.org:3443 --api-protocol https --git-protocol ssh  --stdin < myaccesstoken.txt
+exit=0
+AUSSAGE restricted-glab-auth-login-hilfe-git-credential-helper-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:19.659 repo-clone-ssh-standard
+$ glab repo clone gitlab-org/cli /tmp/clone-ssh -- --depth 1
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-repo-clone-ssh-standard-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:19.927 config-git-protocol-https
+$ glab config set git_protocol https --global
+exit=0
+AUSSAGE restricted-glab-config-git-protocol-https-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+~/.config/glab-cli/config.yml 1586
+---- 10:37:20.211 repo-clone-https
+$ glab repo clone gitlab-org/cli /tmp/clone-https -- --depth 1
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-repo-clone-https-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:37:20.472 repo-clone-https-git_token
+$ glab repo clone gitlab-org/cli /tmp/clone-https2 -- --depth 1
+x error connecting to gitlab.com
+• Check your internet connection and status.gitlab.com. If on a self-managed instance, run 'sudo gitlab-ctl status' on your server.
+exit=1
+AUSSAGE restricted-glab-repo-clone-https-git_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[49]: config error
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+-- git config --global --get-regexp credential (Eintraege, die ein Werkzeug geschrieben haette)
+-- Dateien unter HOME ausserhalb der Image-Grundausstattung (Pfad, Bytes, Zeilen mit dem Platzhalter)
+~/.config/glab-cli/aliases.yml 32 platzhalter-treffer=0
+~/.config/glab-cli/config.yml 1586 platzhalter-treffer=0
+-- Schluessel (nicht Werte) in ~/.config/glab-cli/config.yml
+git_protocol editor browser glamour_style check_update last_update_check_timestamp display_hyperlinks host no_prompt hosts 
+
+---- 10:37:20.554 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
+     60 gitlab.com
+container-exit=0  gesamtdauer=8.5s

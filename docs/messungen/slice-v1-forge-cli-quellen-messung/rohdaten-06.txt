@@ -1,0 +1,66 @@
+== Dockerfile-Bloecke, 2026-10-23T09:48:42.956Z
+
+---- 2026-10-23T09:48:42.963Z docker build basd (kalt)
+build basd exit=0 dauer=10.7s
+AUSSAGE bau-basd-exit=0
+image=sha256:0270ba84fd48fb097b1843051173ae501f3dec46ee0b991b15086c1794430879 size=1419125578 arch=amd64
+gh: nicht im Image
+glab: nicht im Image
+
+---- 2026-10-23T09:48:55.193Z docker build ghdeb (kalt)
+build ghdeb exit=0 dauer=19.3s
+AUSSAGE bau-ghdeb-exit=0
+image=sha256:e47f133bbef0e4eed640c9d962f7c275efe705fe75dfd4e3c653d49fdccd838b size=1467934720 arch=amd64
+gh: /usr/bin/gh
+gh version 2.46.0 (2025-01-13 Debian 2.46.0-3)
+root:root 755 35248672
+glab: nicht im Image
+
+---- 2026-10-23T09:49:16.143Z docker build glabdeb (kalt)
+build glabdeb exit=0 dauer=19.0s
+AUSSAGE bau-glabdeb-exit=0
+image=sha256:cc90ae5c8f3604935749ce0d266e8554958cae347cd5b67bc00114c06560b20d size=1459924146 arch=amd64
+gh: nicht im Image
+glab: /usr/bin/glab
+Current glab version: 1.53.0
+root:root 755 27859560
+
+---- 2026-10-23T09:49:36.703Z docker build ghtgz (kalt)
+build ghtgz exit=0 dauer=16.0s
+AUSSAGE bau-ghtgz-exit=0
+image=sha256:fe917a95ec96484fda3a865d28a6c886c5b0d1c3af3c7521bba809189c8bf446 size=1475226151 arch=amd64
+gh: /usr/local/bin/gh
+gh version 2.103.0 (2026-10-21)
+root:root 755 41070752
+glab: nicht im Image
+-- Zeilen des Builds zur Pruefsumme
+#11 3.858 gh_2.103.0_linux_amd64.tar.gz: OK
+
+---- 2026-10-23T09:49:54.311Z docker build glabtgz (kalt)
+build glabtgz exit=0 dauer=17.2s
+AUSSAGE bau-glabtgz-exit=0
+image=sha256:18c6759b1e7e5e36204d951ac02fc371c2c47eb37e9701c97e72f99326b4fe3d size=1486564755 arch=amd64
+gh: nicht im Image
+glab: /usr/local/bin/glab
+glab 1.124.0 (d43ccacec)
+root:root 755 49426592
+-- Zeilen des Builds zur Pruefsumme
+#11 4.673 glab_1.124.0_linux_amd64.tar.gz: OK
+
+== Imagegroesse gegen basd (Bytes, Differenz)
+ghdeb size=1467934720 differenz=48809142
+AUSSAGE groesse-differenz-ghdeb=48809142
+glabdeb size=1459924146 differenz=40798568
+AUSSAGE groesse-differenz-glabdeb=40798568
+ghtgz size=1475226151 differenz=56100573
+AUSSAGE groesse-differenz-ghtgz=56100573
+glabtgz size=1486564755 differenz=67439177
+AUSSAGE groesse-differenz-glabtgz=67439177
+
+== Negativprobe: falsche Pruefsumme bricht den Bau ab (ghtgz, SHA-256 mit geaenderter erster Stelle)
+build negativ exit=1
+#11 3.883 sha256sum: WARNING: 1 computed checksum did NOT match
+#11 3.883 gh_2.103.0_linux_amd64.tar.gz: FAILED
+3.883 sha256sum: WARNING: 1 computed checksum did NOT match
+AUSSAGE negativprobe-pin-exit=1
+Image entstanden: nein

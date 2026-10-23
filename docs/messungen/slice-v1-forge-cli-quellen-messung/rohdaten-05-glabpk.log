@@ -1,0 +1,248 @@
+[2026-10-23T09:45:44.937Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-147-generic x64.
+[2026-10-23T09:45:45.175Z] Resolving Feature dependencies for 'ghcr.io/postfinance/devcontainer-features/gitlab-cli:1'...
+[2026-10-23T09:45:48.870Z] Files to omit: ''
+[2026-10-23T09:45:48.891Z] Start: Run: docker build -t dev_container_feature_content_temp -f /tmp/devcontainercli-root/container-features/0.89.0-1792748745172/Dockerfile.buildContent /tmp/devcontainercli-root/container-features/0.89.0-1792748745172
+[2026-10-23T09:45:48.908Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:45:48.937Z] Sending build context to Docker daemon  24.02MB
+[2026-10-23T09:45:48.937Z] Step 1/2 : FROM scratch
+ ---> 
+Step 2/2 : COPY . /tmp/build-features/
+[2026-10-23T09:45:48.968Z]  ---> Using cache
+ ---> 3bd61c082548
+[2026-10-23T09:45:48.972Z] Successfully built 3bd61c082548
+[2026-10-23T09:45:49.012Z] Successfully tagged dev_container_feature_content_temp:latest
+[2026-10-23T09:45:49.014Z] Start: Run: docker build -f /tmp/devcontainercli-root/container-features/0.89.0-1792748745172/Dockerfile-with-features -t u-boot-messung-forge-img-glabpk --target dev_containers_target_stage --no-cache --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label --build-arg _DEV_CONTAINERS_IMAGE_USER=vscode --build-arg _DEV_CONTAINERS_FEATURE_CONTENT_SOURCE=dev_container_feature_content_temp /w/u-boot-messung-forge-glabpk/.devcontainer
+[2026-10-23T09:45:49.026Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:45:49.027Z] Sending build context to Docker daemon  16.43kB
+[2026-10-23T09:45:49.029Z] Step 1/25 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+[2026-10-23T09:45:49.029Z] Step 2/25 : FROM mcr.microsoft.com/devcontainers/base:debian AS dev_container_auto_added_stage_label
+[2026-10-23T09:45:49.044Z]  ---> 6ee2b4097c75
+Step 3/25 : USER root
+[2026-10-23T09:45:49.181Z]  ---> Running in 96558ff5520d
+[2026-10-23T09:45:51.131Z]  ---> Removed intermediate container 96558ff5520d
+ ---> d39a0a40d06d
+Step 4/25 : RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+[2026-10-23T09:45:51.131Z] 
+[2026-10-23T09:45:51.244Z]  ---> Running in e099c47bee1a
+[2026-10-23T09:45:51.494Z] Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+[2026-10-23T09:45:51.552Z] Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+[2026-10-23T09:45:51.579Z] Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+[2026-10-23T09:45:51.608Z] Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+[2026-10-23T09:45:53.702Z] Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [720 B]
+[2026-10-23T09:45:53.716Z] Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [269 kB]
+[2026-10-23T09:45:54.314Z] Fetched 10.2 MB in 3s (3534 kB/s)
+Reading package lists...
+[2026-10-23T09:45:54.697Z] 
+[2026-10-23T09:45:54.713Z] Reading package lists...
+[2026-10-23T09:45:55.100Z] 
+[2026-10-23T09:45:55.109Z] Building dependency tree...
+[2026-10-23T09:45:55.195Z] 
+Reading state information...
+[2026-10-23T09:45:55.308Z] The following additional packages will be installed:
+[2026-10-23T09:45:55.308Z]   libdbus-1-3 libnftables1
+[2026-10-23T09:45:55.309Z] Suggested packages:
+  firewalld
+Recommended packages:
+  dns-root-data dbus
+[2026-10-23T09:45:55.336Z] The following NEW packages will be installed:
+[2026-10-23T09:45:55.337Z]   dnsmasq-base libdbus-1-3 libnftables1 nftables
+[2026-10-23T09:45:55.419Z] 0 upgraded, 4 newly installed, 0 to remove and 9 not upgraded.
+Need to get 1093 kB of archives.
+After this operation, 2868 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian trixie/main amd64 libnftables1 amd64 1.1.3-1 [332 kB]
+[2026-10-23T09:45:55.541Z] Get:2 http://deb.debian.org/debian trixie/main amd64 nftables amd64 1.1.3-1 [75.9 kB]
+[2026-10-23T09:45:55.559Z] Get:3 http://deb.debian.org/debian trixie/main amd64 libdbus-1-3 amd64 1.16.2-2 [178 kB]
+[2026-10-23T09:45:55.594Z] Get:4 http://deb.debian.org/debian trixie/main amd64 dnsmasq-base amd64 2.91-1+deb13u2 [507 kB]
+[2026-10-23T09:45:55.830Z] debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+[2026-10-23T09:45:55.837Z] debconf: unable to initialize frontend: Readline
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Teletype
+[2026-10-23T09:45:55.841Z] debconf: unable to initialize frontend: Teletype
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Noninteractive
+[2026-10-23T09:45:56.283Z] Fetched 1093 kB in 0s (3050 kB/s)
+[2026-10-23T09:45:56.353Z] Selecting previously unselected package libnftables1:amd64.
+(Reading database ... 
+[2026-10-23T09:45:56.356Z] (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%
+[2026-10-23T09:45:56.358Z] (Reading database ... 70%
+[2026-10-23T09:45:56.358Z] (Reading database ... 75%
+[2026-10-23T09:45:56.360Z] (Reading database ... 80%
+[2026-10-23T09:45:56.361Z] (Reading database ... 85%
+[2026-10-23T09:45:56.362Z] (Reading database ... 90%
+[2026-10-23T09:45:56.366Z] (Reading database ... 95%
+[2026-10-23T09:45:56.367Z] (Reading database ... 100%(Reading database ... 25740 files and directories currently installed.)
+[2026-10-23T09:45:56.368Z] Preparing to unpack .../libnftables1_1.1.3-1_amd64.deb ...
+[2026-10-23T09:45:56.405Z] Unpacking libnftables1:amd64 (1.1.3-1) ...
+[2026-10-23T09:45:56.575Z] Selecting previously unselected package nftables.
+[2026-10-23T09:45:56.578Z] Preparing to unpack .../nftables_1.1.3-1_amd64.deb ...
+[2026-10-23T09:45:56.597Z] Unpacking nftables (1.1.3-1) ...
+[2026-10-23T09:45:56.740Z] Selecting previously unselected package libdbus-1-3:amd64.
+[2026-10-23T09:45:56.742Z] Preparing to unpack .../libdbus-1-3_1.16.2-2_amd64.deb ...
+[2026-10-23T09:45:56.760Z] Unpacking libdbus-1-3:amd64 (1.16.2-2) ...
+[2026-10-23T09:45:56.891Z] Selecting previously unselected package dnsmasq-base.
+[2026-10-23T09:45:56.892Z] Preparing to unpack .../dnsmasq-base_2.91-1+deb13u2_amd64.deb ...
+[2026-10-23T09:45:56.915Z] Unpacking dnsmasq-base (2.91-1+deb13u2) ...
+[2026-10-23T09:45:57.045Z] Setting up libnftables1:amd64 (1.1.3-1) ...
+[2026-10-23T09:45:57.098Z] Setting up nftables (1.1.3-1) ...
+[2026-10-23T09:45:57.223Z] Setting up libdbus-1-3:amd64 (1.16.2-2) ...
+[2026-10-23T09:45:57.277Z] Setting up dnsmasq-base (2.91-1+deb13u2) ...
+[2026-10-23T09:45:57.453Z] Processing triggers for libc-bin (2.41-12+deb13u4) ...
+[2026-10-23T09:45:57.515Z] Processing triggers for man-db (2.13.1-1) ...
+[2026-10-23T09:46:00.547Z]  ---> Removed intermediate container e099c47bee1a
+ ---> e37453779312
+Step 5/25 : COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+[2026-10-23T09:46:02.425Z]  ---> 0a651ae7f8b8
+Step 6/25 : RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+[2026-10-23T09:46:02.533Z]  ---> Running in 5a33584fd647
+[2026-10-23T09:46:04.752Z]  ---> Removed intermediate container 5a33584fd647
+ ---> 004f6abc4bc6
+Step 7/25 : RUN mkdir -p "/workspaces/u-boot-messung-forge-glabp" && chown vscode:vscode "/workspaces/u-boot-messung-forge-glabp"
+[2026-10-23T09:46:04.861Z]  ---> Running in a574606996f7
+[2026-10-23T09:46:07.049Z]  ---> Removed intermediate container a574606996f7
+ ---> bd55a631f5be
+Step 8/25 : RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+[2026-10-23T09:46:07.158Z]  ---> Running in 7fafd3c2882a
+[2026-10-23T09:46:09.390Z]  ---> Removed intermediate container 7fafd3c2882a
+ ---> 584cb16869ab
+Step 9/25 : USER vscode
+[2026-10-23T09:46:09.501Z]  ---> Running in cb84a8040751
+[2026-10-23T09:46:11.331Z]  ---> Removed intermediate container cb84a8040751
+ ---> 3973d1861d4b
+[2026-10-23T09:46:11.331Z] Step 10/25 : FROM dev_container_feature_content_temp as dev_containers_feature_content_source
+[2026-10-23T09:46:11.343Z]  ---> 3bd61c082548
+Step 11/25 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+[2026-10-23T09:46:11.447Z]  ---> Running in 1af45c710d6f
+[2026-10-23T09:46:11.901Z]  ---> Removed intermediate container 1af45c710d6f
+ ---> 2c15bda42338
+Step 12/25 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_feature_content_normalize
+[2026-10-23T09:46:11.913Z]  ---> 3973d1861d4b
+Step 13/25 : USER root
+[2026-10-23T09:46:12.023Z]  ---> Running in 81562ac3a4e0
+[2026-10-23T09:46:14.063Z]  ---> Removed intermediate container 81562ac3a4e0
+ ---> fd8455484e45
+Step 14/25 : COPY --from=dev_containers_feature_content_source /tmp/build-features/devcontainer-features.builtin.env /tmp/build-features/
+[2026-10-23T09:46:15.985Z]  ---> c4f5adef21bf
+Step 15/25 : RUN chmod -R 0755 /tmp/build-features/
+[2026-10-23T09:46:16.097Z]  ---> Running in 9544ad8d1582
+[2026-10-23T09:46:18.353Z]  ---> Removed intermediate container 9544ad8d1582
+ ---> 78817fe4967e
+Step 16/25 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_target_stage
+[2026-10-23T09:46:18.353Z]  ---> 3973d1861d4b
+Step 17/25 : USER root
+[2026-10-23T09:46:18.465Z]  ---> Running in cf915f30f672
+[2026-10-23T09:46:20.430Z]  ---> Removed intermediate container cf915f30f672
+ ---> e96432468ce5
+Step 18/25 : RUN mkdir -p /tmp/dev-container-features
+[2026-10-23T09:46:20.538Z]  ---> Running in bc4a14885b37
+[2026-10-23T09:46:22.741Z]  ---> Removed intermediate container bc4a14885b37
+ ---> 1390bdac2982
+Step 19/25 : COPY --from=dev_containers_feature_content_normalize /tmp/build-features/ /tmp/dev-container-features
+[2026-10-23T09:46:24.728Z]  ---> dc235f92b551
+Step 20/25 : RUN echo "_CONTAINER_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'vscode' || grep -E '^vscode|^[^:]*:[^:]*:vscode:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env && echo "_REMOTE_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'vscode' || grep -E '^vscode|^[^:]*:[^:]*:vscode:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env
+[2026-10-23T09:46:24.838Z]  ---> Running in 128b299410a6
+[2026-10-23T09:46:27.052Z]  ---> Removed intermediate container 128b299410a6
+ ---> 2e180f036937
+Step 21/25 : COPY --chown=root:root --from=dev_containers_feature_content_source /tmp/build-features/gitlab-cli_0 /tmp/dev-container-features/gitlab-cli_0
+[2026-10-23T09:46:29.167Z]  ---> af6843fec47c
+Step 22/25 : RUN chmod -R 0755 /tmp/dev-container-features/gitlab-cli_0 && cd /tmp/dev-container-features/gitlab-cli_0 && chmod +x ./devcontainer-features-install.sh && ./devcontainer-features-install.sh
+[2026-10-23T09:46:29.278Z]  ---> Running in e0d5b4b0c14d
+[2026-10-23T09:46:29.558Z] ===========================================================================
+Feature       : GitLab CLI
+Description   : Installs the GitLab CLI.
+Id            : ghcr.io/postfinance/devcontainer-features/gitlab-cli
+Version       : 1.0.1
+Documentation : 
+Options       :
+    VERSION="latest"
+    DOWNLOADURL=""
+===========================================================================
+[2026-10-23T09:46:29.564Z] Processing feature 'GitLab CLI'
+Processing component 'GitLab CLI'
+[2026-10-23T09:46:30.053Z] Installing version 1.124.0
+[2026-10-23T09:46:30.886Z] GitLab CLI   0% |                                        | ( 0 B/18 MB) [0s:0s]
+[2026-10-23T09:46:30.954Z]                                                                                GitLab CLI   1% |                            | (255 kB/18 MB, 3.8 MB/s) [0s:4s]
+[2026-10-23T09:46:31.022Z]                                                                                GitLab CLI   3% |                            | (583 kB/18 MB, 4.3 MB/s) [0s:4s]
+[2026-10-23T09:46:31.089Z]                                                                                GitLab CLI   4% |█                           | (894 kB/18 MB, 4.4 MB/s) [0s:3s]
+[2026-10-23T09:46:31.155Z]                                                                                GitLab CLI   6% |█                              | (1.2/18 MB, 4.5 MB/s) [0s:3s]
+[2026-10-23T09:46:31.233Z]                                                                                GitLab CLI   7% |██                             | (1.3/18 MB, 3.8 MB/s) [0s:4s]
+[2026-10-23T09:46:31.322Z]                                                                                GitLab CLI   8% |██                             | (1.5/18 MB, 3.4 MB/s) [0s:4s]
+[2026-10-23T09:46:31.389Z]                                                                                GitLab CLI  10% |███                            | (1.8/18 MB, 3.6 MB/s) [0s:4s]
+[2026-10-23T09:46:31.456Z]                                                                                GitLab CLI  12% |███                            | (2.2/18 MB, 3.6 MB/s) [0s:4s]
+[2026-10-23T09:46:31.525Z]                                                                                GitLab CLI  13% |████                           | (2.5/18 MB, 3.6 MB/s) [0s:4s]
+[2026-10-23T09:46:31.593Z]                                                                                GitLab CLI  15% |████                           | (2.8/18 MB, 3.6 MB/s) [0s:4s]
+[2026-10-23T09:46:31.660Z]                                                                                GitLab CLI  17% |█████                          | (3.1/18 MB, 3.6 MB/s) [0s:4s]
+[2026-10-23T09:46:31.726Z]                                                                                GitLab CLI  19% |█████                          | (3.4/18 MB, 3.6 MB/s) [0s:3s]
+[2026-10-23T09:46:31.792Z]                                                                                GitLab CLI  20% |██████                         | (3.8/18 MB, 3.6 MB/s) [0s:3s]
+[2026-10-23T09:46:31.859Z]                                                                                GitLab CLI  22% |██████                         | (4.1/18 MB, 3.6 MB/s) [0s:3s]
+[2026-10-23T09:46:31.926Z]                                                                                GitLab CLI  24% |███████                        | (4.4/18 MB, 4.2 MB/s) [1s:3s]
+[2026-10-23T09:46:31.993Z]                                                                                GitLab CLI  26% |████████                       | (4.7/18 MB, 4.2 MB/s) [1s:3s]
+[2026-10-23T09:46:32.060Z]                                                                                GitLab CLI  28% |████████                       | (5.0/18 MB, 4.2 MB/s) [1s:3s]
+[2026-10-23T09:46:32.127Z]                                                                                GitLab CLI  29% |████████                       | (5.3/18 MB, 4.2 MB/s) [1s:2s]
+[2026-10-23T09:46:32.195Z]                                                                                GitLab CLI  31% |█████████                      | (5.7/18 MB, 4.2 MB/s) [1s:2s]
+[2026-10-23T09:46:32.262Z]                                                                                GitLab CLI  33% |██████████                     | (6.0/18 MB, 4.2 MB/s) [1s:2s]
+[2026-10-23T09:46:32.329Z]                                                                                GitLab CLI  35% |██████████                     | (6.3/18 MB, 4.2 MB/s) [1s:2s]
+[2026-10-23T09:46:32.397Z]                                                                                GitLab CLI  37% |███████████                    | (6.6/18 MB, 4.4 MB/s) [1s:2s]
+[2026-10-23T09:46:32.466Z]                                                                                GitLab CLI  38% |███████████                    | (6.9/18 MB, 4.4 MB/s) [1s:2s]
+[2026-10-23T09:46:32.532Z]                                                                                GitLab CLI  40% |████████████                   | (7.3/18 MB, 4.4 MB/s) [1s:2s]
+[2026-10-23T09:46:32.599Z]                                                                                GitLab CLI  42% |█████████████                  | (7.6/18 MB, 4.4 MB/s) [1s:2s]
+[2026-10-23T09:46:32.668Z]                                                                                GitLab CLI  44% |█████████████                  | (7.9/18 MB, 4.4 MB/s) [1s:2s]
+[2026-10-23T09:46:32.734Z]                                                                                GitLab CLI  45% |█████████████                  | (8.2/18 MB, 4.4 MB/s) [1s:2s]
+[2026-10-23T09:46:32.801Z]                                                                                GitLab CLI  47% |██████████████                 | (8.5/18 MB, 4.4 MB/s) [1s:2s]
+[2026-10-23T09:46:32.867Z]                                                                                GitLab CLI  49% |███████████████                | (8.8/18 MB, 4.4 MB/s) [1s:2s]
+[2026-10-23T09:46:32.933Z]                                                                                GitLab CLI  51% |███████████████                | (9.2/18 MB, 4.5 MB/s) [2s:1s]
+[2026-10-23T09:46:33.001Z]                                                                                GitLab CLI  53% |████████████████               | (9.5/18 MB, 4.5 MB/s) [2s:1s]
+[2026-10-23T09:46:33.069Z]                                                                                GitLab CLI  54% |████████████████               | (9.8/18 MB, 4.5 MB/s) [2s:1s]
+[2026-10-23T09:46:33.136Z]                                                                                GitLab CLI  56% |█████████████████               | (10/18 MB, 4.5 MB/s) [2s:1s]
+[2026-10-23T09:46:33.205Z]                                                                                GitLab CLI  58% |██████████████████              | (10/18 MB, 4.5 MB/s) [2s:1s]
+[2026-10-23T09:46:33.271Z]                                                                                GitLab CLI  60% |███████████████████             | (11/18 MB, 4.5 MB/s) [2s:1s]
+[2026-10-23T09:46:33.337Z]                                                                                GitLab CLI  62% |███████████████████             | (11/18 MB, 4.5 MB/s) [2s:1s]
+[2026-10-23T09:46:33.404Z]                                                                                GitLab CLI  64% |████████████████████            | (12/18 MB, 4.6 MB/s) [2s:1s]
+[2026-10-23T09:46:33.470Z]                                                                                GitLab CLI  65% |████████████████████            | (12/18 MB, 4.6 MB/s) [2s:1s]
+[2026-10-23T09:46:33.539Z]                                                                                GitLab CLI  67% |█████████████████████           | (12/18 MB, 4.6 MB/s) [2s:1s]
+[2026-10-23T09:46:33.606Z]                                                                                GitLab CLI  69% |██████████████████████          | (12/18 MB, 4.6 MB/s) [2s:1s]
+[2026-10-23T09:46:33.671Z]                                                                                GitLab CLI  71% |██████████████████████          | (13/18 MB, 4.6 MB/s) [2s:1s]
+[2026-10-23T09:46:33.737Z]                                                                                GitLab CLI  73% |███████████████████████         | (13/18 MB, 4.6 MB/s) [2s:1s]
+[2026-10-23T09:46:33.803Z]                                                                                GitLab CLI  74% |███████████████████████         | (13/18 MB, 4.6 MB/s) [2s:0s]
+[2026-10-23T09:46:33.869Z]                                                                                GitLab CLI  76% |████████████████████████        | (14/18 MB, 4.6 MB/s) [2s:0s]
+[2026-10-23T09:46:33.935Z]                                                                                GitLab CLI  78% |████████████████████████        | (14/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.001Z]                                                                                GitLab CLI  80% |█████████████████████████       | (14/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.067Z]                                                                                GitLab CLI  82% |██████████████████████████      | (15/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.132Z]                                                                                GitLab CLI  83% |██████████████████████████      | (15/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.198Z]                                                                                GitLab CLI  85% |███████████████████████████     | (15/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.265Z]                                                                                GitLab CLI  87% |███████████████████████████     | (16/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.331Z]                                                                                GitLab CLI  88% |████████████████████████████    | (16/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.397Z]                                                                                GitLab CLI  90% |████████████████████████████    | (16/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.464Z]                                                                                GitLab CLI  92% |█████████████████████████████   | (17/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.530Z]                                                                                GitLab CLI  94% |██████████████████████████████  | (17/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.597Z]                                                                                GitLab CLI  96% |██████████████████████████████  | (17/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.662Z]                                                                                GitLab CLI  98% |███████████████████████████████ | (18/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.727Z]                                                                                GitLab CLI  99% |███████████████████████████████ | (18/18 MB, 4.6 MB/s) [3s:0s]
+[2026-10-23T09:46:34.740Z]                                                                                GitLab CLI 100% |████████████████████████████████| (18/18 MB, 4.6 MB/s)
+[2026-10-23T09:46:37.948Z]  ---> Removed intermediate container e0d5b4b0c14d
+ ---> 4489d0c99a91
+Step 23/25 : ARG _DEV_CONTAINERS_IMAGE_USER=root
+[2026-10-23T09:46:38.084Z]  ---> Running in 2e4934fc4956
+[2026-10-23T09:46:39.924Z]  ---> Removed intermediate container 2e4934fc4956
+ ---> f4dc8259474d
+Step 24/25 : USER $_DEV_CONTAINERS_IMAGE_USER
+[2026-10-23T09:46:40.031Z]  ---> Running in d9c5b6b73592
+[2026-10-23T09:46:42.042Z]  ---> Removed intermediate container d9c5b6b73592
+ ---> 92d68a01286c
+Step 25/25 : LABEL devcontainer.metadata="[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"id\":\"ghcr.io/postfinance/devcontainer-features/gitlab-cli:1\"}, {\"postStartCommand\":\"sudo sh /usr/local/bin/u-boot-egress-init\",\"mounts\":[\"source=u-boot-messung-forge-glabp-workspace-\${devcontainerId},target=/workspaces/u-boot-messung-forge-glabp,type=volume\"],\"remoteUser\":\"vscode\",\"remoteEnv\":{\"GIT_TOKEN\":\"\${localEnv:GIT_TOKEN}\"}} ]"
+[2026-10-23T09:46:42.155Z]  ---> Running in 70c3044a652c
+[2026-10-23T09:46:44.038Z]  ---> Removed intermediate container 70c3044a652c
+ ---> c7fe83bccc66
+[Warning] One or more build-args [_DEV_CONTAINERS_FEATURE_CONTENT_SOURCE] were not consumed
+[2026-10-23T09:46:44.120Z] Successfully built c7fe83bccc66
+[2026-10-23T09:46:44.139Z] Successfully tagged u-boot-messung-forge-img-glabpk:latest
+{"outcome":"success","imageName":["u-boot-messung-forge-img-glabpk"],"ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}

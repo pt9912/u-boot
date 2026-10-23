@@ -1,0 +1,3 @@
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=5 images=72 volumes=706 netze=3
+-- Objekte mit dem Praefix u-boot-messung-forge (Name beginnt mit u-boot-messung-forge oder vsc-u-boot-messung-forge)

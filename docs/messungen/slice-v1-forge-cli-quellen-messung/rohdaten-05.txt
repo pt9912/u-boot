@@ -1,0 +1,247 @@
+Hand-Variante ghk, Schluessel: "ghcr.io/devcontainers/features/github-cli:1":{}
+Hand-Variante ghxk, Schluessel: "ghcr.io/devcontainers-extra/features/gh-cli:1":{}
+Hand-Variante glabsk, Schluessel: "ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli:1":{}
+Hand-Variante glabpk, Schluessel: "ghcr.io/postfinance/devcontainer-features/gitlab-cli:1":{}
+Hand-Variante glabzk, Schluessel: "ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1":{}
+Hand-Variante ghnk, Schluessel: "ghcr.io/devcontainers/features/github-cli:1":{}
+== Bau, 2026-10-23T09:41:29.154Z
+devcontainer-cli 0.89.0
+AUSSAGE cli-version=0.89.0
+
+---- 2026-10-23T09:41:34.363Z devcontainer build bas (kalt)
+build bas exit=0 dauer=25.2s
+AUSSAGE bau-bas-exit=0
+image=sha256:c0b2d5e65c7bdce9bfff2b143d956605acbcde9004f37f90fbcd4c9d89687ba5 size=1419218247 arch=amd64
+-- Werkzeuge im Image (als Benutzer des Images)
+vscode
+gh: nicht im Image
+glab: nicht im Image
+pakete=298
+
+---- 2026-10-23T09:42:01.606Z devcontainer build basn (kalt)
+build basn exit=0 dauer=4.8s
+AUSSAGE bau-basn-exit=0
+image=sha256:a8b43dce37fecd71997df082daedc0fd84d40a6b2c2a8dc74e4ca2be0c75636e size=1412193634 arch=amd64
+-- Werkzeuge im Image (als Benutzer des Images)
+vscode
+gh: nicht im Image
+glab: nicht im Image
+pakete=294
+
+---- 2026-10-23T09:42:08.438Z devcontainer build gh (kalt)
+build gh exit=1 dauer=0.9s
+AUSSAGE bau-gh-exit=1
+-- letzte Zeilen
+Error: ERR: Feature 'https://ghcr.io/devcontainers/features/github-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature author.
+    at aj (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:4753)
+    at async gI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7321)
+    at async BQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7547)
+    at async fQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:394:1834)
+    at async uI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:397:2321)
+    at async IW (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:2477)
+    at async Sp (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1910)
+    at async f9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:671:2524)
+    at async h9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:670:5791)
+    at async /usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+{"outcome":"error","message":"ERR: Feature 'https://ghcr.io/devcontainers/features/github-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to th
+
+---- 2026-10-23T09:42:10.022Z devcontainer build ghx (kalt)
+build ghx exit=1 dauer=0.8s
+AUSSAGE bau-ghx-exit=1
+-- letzte Zeilen
+Error: ERR: Feature 'https://ghcr.io/devcontainers-extra/features/gh-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature author.
+    at aj (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:4753)
+    at async gI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7321)
+    at async BQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7547)
+    at async fQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:394:1834)
+    at async uI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:397:2321)
+    at async IW (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:2477)
+    at async Sp (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1910)
+    at async f9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:671:2524)
+    at async h9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:670:5791)
+    at async /usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+{"outcome":"error","message":"ERR: Feature 'https://ghcr.io/devcontainers-extra/features/gh-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to 
+
+---- 2026-10-23T09:42:11.566Z devcontainer build glabs (kalt)
+build glabs exit=1 dauer=0.9s
+AUSSAGE bau-glabs-exit=1
+-- letzte Zeilen
+Error: ERR: Feature 'https://ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature a
+    at aj (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:4753)
+    at async gI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7321)
+    at async BQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7547)
+    at async fQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:394:1834)
+    at async uI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:397:2321)
+    at async IW (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:2477)
+    at async Sp (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1910)
+    at async f9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:671:2524)
+    at async h9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:670:5791)
+    at async /usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+{"outcome":"error","message":"ERR: Feature 'https://ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, repor
+
+---- 2026-10-23T09:42:13.161Z devcontainer build glabp (kalt)
+build glabp exit=1 dauer=0.9s
+AUSSAGE bau-glabp-exit=1
+-- letzte Zeilen
+Error: ERR: Feature 'https://ghcr.io/postfinance/devcontainer-features/gitlab-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature au
+    at aj (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:4753)
+    at async gI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7321)
+    at async BQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7547)
+    at async fQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:394:1834)
+    at async uI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:397:2321)
+    at async IW (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:2477)
+    at async Sp (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1910)
+    at async f9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:671:2524)
+    at async h9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:670:5791)
+    at async /usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+{"outcome":"error","message":"ERR: Feature 'https://ghcr.io/postfinance/devcontainer-features/gitlab-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report
+
+---- 2026-10-23T09:42:14.729Z devcontainer build glabz (kalt)
+build glabz exit=1 dauer=0.8s
+AUSSAGE bau-glabz-exit=1
+-- letzte Zeilen
+Error: ERR: Feature 'https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature aut
+    at aj (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:4753)
+    at async gI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7321)
+    at async BQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7547)
+    at async fQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:394:1834)
+    at async uI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:397:2321)
+    at async IW (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:2477)
+    at async Sp (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1910)
+    at async f9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:671:2524)
+    at async h9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:670:5791)
+    at async /usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+{"outcome":"error","message":"ERR: Feature 'https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report 
+
+---- 2026-10-23T09:42:16.265Z devcontainer build ghn (kalt)
+build ghn exit=1 dauer=0.8s
+AUSSAGE bau-ghn-exit=1
+-- letzte Zeilen
+Error: ERR: Feature 'https://ghcr.io/devcontainers/features/github-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature author.
+    at aj (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:4753)
+    at async gI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7321)
+    at async BQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7547)
+    at async fQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:394:1834)
+    at async uI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:397:2321)
+    at async IW (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:2477)
+    at async Sp (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1910)
+    at async f9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:671:2524)
+    at async h9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:670:5791)
+    at async /usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+{"outcome":"error","message":"ERR: Feature 'https://ghcr.io/devcontainers/features/github-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to th
+
+---- 2026-10-23T09:42:17.828Z devcontainer build ghk (kalt)
+build ghk exit=0 dauer=59.2s
+AUSSAGE bau-ghk-exit=0
+image=sha256:c1ad6e8425b0d9b3a16b9ca0441e6b0534f490c0c43e6b83cdee3b7f908f5f29 size=1479255931 arch=amd64
+-- Werkzeuge im Image (als Benutzer des Images)
+vscode
+gh: /usr/bin/gh
+gh version 2.103.0 (2026-10-21)
+https://github.com/cli/cli/releases/tag/v2.103.0
+root:root 755 41070752
+glab: nicht im Image
+pakete=299
+
+---- 2026-10-23T09:43:19.045Z devcontainer build ghxk (kalt)
+build ghxk exit=0 dauer=71.0s
+AUSSAGE bau-ghxk-exit=0
+image=sha256:fc1636d7d972d25966685ded1c58cc4437fd4e25e13bf7dc6cddd38679178ca5 size=1476974056 arch=amd64
+-- Werkzeuge im Image (als Benutzer des Images)
+vscode
+gh: /usr/local/bin/gh
+gh version 2.103.0 (2026-10-21)
+https://github.com/cli/cli/releases/tag/v2.103.0
+root:root 777 47
+glab: nicht im Image
+pakete=298
+
+---- 2026-10-23T09:44:32.094Z devcontainer build glabsk (kalt)
+build glabsk exit=0 dauer=70.3s
+AUSSAGE bau-glabsk-exit=0
+image=sha256:ec90f1fa6b0e990950743a5f2b7fe4538530e72f002488f6687c97db078d08e7 size=1501865746 arch=amd64
+-- Werkzeuge im Image (als Benutzer des Images)
+vscode
+gh: nicht im Image
+glab: /usr/bin/glab
+glab 1.124.0 (d43ccacec)
+root:root 755 49426592
+pakete=299
+
+---- 2026-10-23T09:45:44.543Z devcontainer build glabpk (kalt)
+build glabpk exit=0 dauer=59.9s
+AUSSAGE bau-glabpk-exit=0
+image=sha256:c7fe83bccc6614a32363b9c614859cb33d280eb552bbd6a86ecdb6cb764894d9 size=1504119000 arch=amd64
+-- Werkzeuge im Image (als Benutzer des Images)
+vscode
+gh: nicht im Image
+glab: /usr/local/bin/glab
+glab 1.124.0 (d43ccacec)
+root:root 755 49426592
+pakete=298
+
+---- 2026-10-23T09:46:46.563Z devcontainer build glabzk (kalt)
+build glabzk exit=0 dauer=69.6s
+AUSSAGE bau-glabzk-exit=0
+image=sha256:5900554e7973b8ce7e024cf9006c6009ed2f5b19904bb0f0582c267ea5e59d6f size=1500216385 arch=amd64
+-- Werkzeuge im Image (als Benutzer des Images)
+vscode
+gh: nicht im Image
+glab: /usr/local/bin/glab
+glab 1.124.0 (d43ccacec)
+root:root 755 49426592
+pakete=298
+
+---- 2026-10-23T09:47:58.355Z devcontainer build ghnk (kalt)
+build ghnk exit=0 dauer=36.2s
+AUSSAGE bau-ghnk-exit=0
+image=sha256:7e5269f63d8198f46c8d93c8795e0392c5ae0e4cd5ef85e534dc3a7512c03820 size=1472224607 arch=amd64
+-- Werkzeuge im Image (als Benutzer des Images)
+vscode
+gh: /usr/bin/gh
+gh version 2.103.0 (2026-10-21)
+https://github.com/cli/cli/releases/tag/v2.103.0
+root:root 755 41070752
+glab: nicht im Image
+pakete=295
+
+== Paketunterschied gegen bas (mit Sandbox-Profil) bzw. basn (ohne); nur die Varianten, die gebaut haben
+-- ghk gegen bas
+> gh 2.103.0
+AUSSAGE paketdiff-ghk=1
+-- ghxk gegen bas
+AUSSAGE paketdiff-ghxk=0
+-- glabsk gegen bas
+< ca-certificates 20250419
+> ca-certificates 20250419+deb13u1
+< curl 8.14.1-2+deb13u5
+> curl 8.14.1-2+deb13u7
+> glab 1.124.0
+< libcurl3t64-gnutls 8.14.1-2+deb13u5
+< libcurl4-openssl-dev 8.14.1-2+deb13u5
+< libcurl4t64 8.14.1-2+deb13u5
+> libcurl3t64-gnutls 8.14.1-2+deb13u7
+> libcurl4-openssl-dev 8.14.1-2+deb13u7
+> libcurl4t64 8.14.1-2+deb13u7
+AUSSAGE paketdiff-glabsk=11
+-- glabpk gegen bas
+AUSSAGE paketdiff-glabpk=0
+-- glabzk gegen bas
+< ca-certificates 20250419
+> ca-certificates 20250419+deb13u1
+< curl 8.14.1-2+deb13u5
+> curl 8.14.1-2+deb13u7
+< libcurl3t64-gnutls 8.14.1-2+deb13u5
+< libcurl4-openssl-dev 8.14.1-2+deb13u5
+< libcurl4t64 8.14.1-2+deb13u5
+> libcurl3t64-gnutls 8.14.1-2+deb13u7
+> libcurl4-openssl-dev 8.14.1-2+deb13u7
+> libcurl4t64 8.14.1-2+deb13u7
+AUSSAGE paketdiff-glabzk=10
+-- ghnk gegen basn
+> gh 2.103.0
+AUSSAGE paketdiff-ghnk=1
+-- Plattenplatz
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          221       3         65.62GB   39.58GB (60%)
+Containers      5         1         158.6MB   158.6MB (99%)

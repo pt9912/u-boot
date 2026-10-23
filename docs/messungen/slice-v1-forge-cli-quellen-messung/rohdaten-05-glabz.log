@@ -1,0 +1,15 @@
+[2026-10-23T09:42:15.117Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-147-generic x64.
+[2026-10-23T09:42:15.297Z] Resolving Feature dependencies for 'https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1'...
+[2026-10-23T09:42:15.297Z] Expected tarball name to follow 'devcontainer-feature-<feature-id>.tgz' format.  Received 'gitlab-cli:1'
+Error: ERR: Feature 'https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature author.
+    at aj (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:4753)
+    at async gI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7321)
+    at async BQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:287:7547)
+    at async fQ (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:394:1834)
+    at async uI (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:397:2321)
+    at async IW (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:2477)
+    at async Sp (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1910)
+    at async f9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:671:2524)
+    at async h9 (/usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:670:5791)
+    at async /usr/local/lib/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+{"outcome":"error","message":"ERR: Feature 'https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature author.","description":"An error occurred building the container."}

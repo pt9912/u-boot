@@ -1,0 +1,127 @@
+[2026-10-23T09:47:58.763Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-147-generic x64.
+[2026-10-23T09:47:58.946Z] Resolving Feature dependencies for 'ghcr.io/devcontainers/features/github-cli:1'...
+[2026-10-23T09:48:00.162Z] Soft-dependency 'ghcr.io/devcontainers/features/git' is not required.  Removing from installation order...
+[2026-10-23T09:48:00.162Z] Soft-dependency 'ghcr.io/devcontainers/features/common-utils' is not required.  Removing from installation order...
+[2026-10-23T09:48:00.471Z] Files to omit: ''
+[2026-10-23T09:48:00.480Z] Start: Run: docker build -t dev_container_feature_content_temp -f /tmp/devcontainercli-root/container-features/0.89.0-1792748878944/Dockerfile.buildContent /tmp/devcontainercli-root/container-features/0.89.0-1792748878944
+[2026-10-23T09:48:00.494Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:48:00.495Z] Sending build context to Docker daemon  56.32kB
+[2026-10-23T09:48:00.497Z] Step 1/2 : FROM scratch
+ ---> 
+Step 2/2 : COPY . /tmp/build-features/
+[2026-10-23T09:48:00.528Z]  ---> Using cache
+ ---> 0cbd73e97f40
+[2026-10-23T09:48:00.528Z] Successfully built 0cbd73e97f40
+[2026-10-23T09:48:00.566Z] Successfully tagged dev_container_feature_content_temp:latest
+[2026-10-23T09:48:00.568Z] Start: Run: docker build -f /tmp/devcontainercli-root/container-features/0.89.0-1792748878944/Dockerfile-with-features -t u-boot-messung-forge-img-ghnk --target dev_containers_target_stage --no-cache --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label --build-arg _DEV_CONTAINERS_IMAGE_USER=vscode --build-arg _DEV_CONTAINERS_FEATURE_CONTENT_SOURCE=dev_container_feature_content_temp /w/u-boot-messung-forge-ghnk/.devcontainer
+[2026-10-23T09:48:00.581Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:48:00.582Z] Sending build context to Docker daemon  7.421kB
+[2026-10-23T09:48:00.584Z] Step 1/19 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+Step 2/19 : FROM mcr.microsoft.com/devcontainers/base:debian AS dev_container_auto_added_stage_label
+[2026-10-23T09:48:00.597Z]  ---> 6ee2b4097c75
+Step 3/19 : USER vscode
+[2026-10-23T09:48:00.716Z]  ---> Running in 1d793c381f71
+[2026-10-23T09:48:02.654Z]  ---> Removed intermediate container 1d793c381f71
+ ---> be29f7b20e4d
+Step 4/19 : FROM dev_container_feature_content_temp as dev_containers_feature_content_source
+[2026-10-23T09:48:02.666Z]  ---> 0cbd73e97f40
+Step 5/19 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+[2026-10-23T09:48:02.775Z]  ---> Running in 7fd00aa6a5e0
+[2026-10-23T09:48:03.218Z]  ---> Removed intermediate container 7fd00aa6a5e0
+ ---> 9eb0a3eb6464
+Step 6/19 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_feature_content_normalize
+[2026-10-23T09:48:03.233Z]  ---> be29f7b20e4d
+Step 7/19 : USER root
+[2026-10-23T09:48:03.338Z]  ---> Running in e3188217d467
+[2026-10-23T09:48:05.149Z]  ---> Removed intermediate container e3188217d467
+ ---> d0068b163d35
+Step 8/19 : COPY --from=dev_containers_feature_content_source /tmp/build-features/devcontainer-features.builtin.env /tmp/build-features/
+[2026-10-23T09:48:06.935Z]  ---> 30ea28307915
+Step 9/19 : RUN chmod -R 0755 /tmp/build-features/
+[2026-10-23T09:48:07.042Z]  ---> Running in bc5b0f53a11c
+[2026-10-23T09:48:09.352Z]  ---> Removed intermediate container bc5b0f53a11c
+ ---> d7c9e5c2ca5e
+Step 10/19 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_target_stage
+ ---> be29f7b20e4d
+Step 11/19 : USER root
+[2026-10-23T09:48:09.465Z]  ---> Running in e7cf8c1ed6a1
+[2026-10-23T09:48:11.331Z]  ---> Removed intermediate container e7cf8c1ed6a1
+ ---> ca4ae75a121d
+Step 12/19 : RUN mkdir -p /tmp/dev-container-features
+[2026-10-23T09:48:11.440Z]  ---> Running in 8f59e82a302b
+[2026-10-23T09:48:13.644Z]  ---> Removed intermediate container 8f59e82a302b
+ ---> 8d78f8e6d59e
+Step 13/19 : COPY --from=dev_containers_feature_content_normalize /tmp/build-features/ /tmp/dev-container-features
+[2026-10-23T09:48:15.509Z]  ---> 6708e541d180
+Step 14/19 : RUN echo "_CONTAINER_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'vscode' || grep -E '^vscode|^[^:]*:[^:]*:vscode:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env && echo "_REMOTE_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'vscode' || grep -E '^vscode|^[^:]*:[^:]*:vscode:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env
+[2026-10-23T09:48:15.612Z]  ---> Running in dc821c675756
+[2026-10-23T09:48:17.842Z]  ---> Removed intermediate container dc821c675756
+ ---> 8d29f827bcfd
+Step 15/19 : COPY --chown=root:root --from=dev_containers_feature_content_source /tmp/build-features/github-cli_0 /tmp/dev-container-features/github-cli_0
+[2026-10-23T09:48:19.765Z]  ---> a202d4b04f6b
+Step 16/19 : RUN chmod -R 0755 /tmp/dev-container-features/github-cli_0 && cd /tmp/dev-container-features/github-cli_0 && chmod +x ./devcontainer-features-install.sh && ./devcontainer-features-install.sh
+[2026-10-23T09:48:19.874Z]  ---> Running in 6a731edf5b6d
+[2026-10-23T09:48:20.141Z] ===========================================================================
+Feature       : GitHub CLI
+Description   : Installs the GitHub CLI. Auto-detects latest version and installs needed dependencies.
+Id            : ghcr.io/devcontainers/features/github-cli
+Version       : 1.1.3
+Documentation : https://github.com/devcontainers/features/tree/main/src/github-cli
+Options       :
+    VERSION="latest"
+    INSTALLDIRECTLYFROMGITHUBRELEASE="true"
+    EXTENSIONS=""
+===========================================================================
+[2026-10-23T09:48:20.153Z] Downloading github CLI...
+[2026-10-23T09:48:20.587Z] CLI_VERSION=2.103.0
+[2026-10-23T09:48:20.588Z] /tmp/ghcli /tmp/dev-container-features/github-cli_0
+[2026-10-23T09:48:21.267Z] 
+     0K .
+[2026-10-23T09:48:21.490Z] .
+[2026-10-23T09:48:21.712Z] .
+[2026-10-23T09:48:21.926Z] .
+[2026-10-23T09:48:22.143Z] .
+[2026-10-23T09:48:22.372Z] .
+[2026-10-23T09:48:22.582Z] .
+[2026-10-23T09:48:22.816Z] .
+[2026-10-23T09:48:23.028Z]  .
+[2026-10-23T09:48:23.241Z] .
+[2026-10-23T09:48:23.462Z] .
+[2026-10-23T09:48:23.684Z] .
+[2026-10-23T09:48:23.907Z] .
+[2026-10-23T09:48:24.120Z] .
+[2026-10-23T09:48:24.202Z]                     100% 4.53M=3.2s
+
+[2026-10-23T09:48:24.244Z] Selecting previously unselected package gh.
+[2026-10-23T09:48:24.255Z] (Reading database ... 25740 files and directories currently installed.)
+[2026-10-23T09:48:24.256Z] Preparing to unpack .../gh_2.103.0_linux_amd64.deb ...
+[2026-10-23T09:48:24.274Z] Unpacking gh (2.103.0) ...
+[2026-10-23T09:48:24.546Z] Setting up gh (2.103.0) ...
+[2026-10-23T09:48:24.600Z] Processing triggers for man-db (2.13.1-1) ...
+[2026-10-23T09:48:25.647Z] /tmp/dev-container-features/github-cli_0
+[2026-10-23T09:48:28.360Z]  ---> Removed intermediate container 6a731edf5b6d
+ ---> 2084f846ef28
+Step 17/19 : ARG _DEV_CONTAINERS_IMAGE_USER=root
+[2026-10-23T09:48:28.494Z]  ---> Running in b9209931409b
+[2026-10-23T09:48:30.272Z]  ---> Removed intermediate container b9209931409b
+ ---> fd2f5ca49aad
+Step 18/19 : USER $_DEV_CONTAINERS_IMAGE_USER
+[2026-10-23T09:48:30.380Z]  ---> Running in 81f21fc954a8
+[2026-10-23T09:48:32.236Z]  ---> Removed intermediate container 81f21fc954a8
+ ---> 833a2006daf4
+Step 19/19 : LABEL devcontainer.metadata="[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"id\":\"ghcr.io/devcontainers/features/github-cli:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes the GitHub CLI (`gh`), which is pre-installed and available on the `PATH`. IMPORTANT: `gh api -f` does not support object values, use multiple `-f` flags with hierarchical keys and string values instead. When using GitHub actions `actions/upload-artifact` or `actions/download-artifact` use v4 or later.\"}]}}}}, {\"remoteUser\":\"vscode\"} ]"
+[2026-10-23T09:48:32.347Z]  ---> Running in 72e693121d9c
+[2026-10-23T09:48:34.171Z]  ---> Removed intermediate container 72e693121d9c
+ ---> 7e5269f63d81
+[2026-10-23T09:48:34.171Z] [Warning] One or more build-args [_DEV_CONTAINERS_FEATURE_CONTENT_SOURCE] were not consumed
+[2026-10-23T09:48:34.239Z] Successfully built 7e5269f63d81
+[2026-10-23T09:48:34.258Z] Successfully tagged u-boot-messung-forge-img-ghnk:latest
+{"outcome":"success","imageName":["u-boot-messung-forge-img-ghnk"],"ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}

@@ -1,0 +1,178 @@
+== Lieferkette, 2026-10-23T10:41:39.990Z
+################ gh (github.com/cli/cli)
+-- neuestes Release (Tag, Veroeffentlichung, immutable, Prerelease, Zahl der Assets)
+{"tag_name":"v2.103.0","published_at":"2026-10-21T15:33:31Z","immutable":true,"prerelease":false,"assets":22}
+-- Assets fuer Linux (Name, Groesse, GitHub-Digest)
+gh_2.103.0_checksums.txt 1971 sha256:075bb954e2b113d0d2ac788d318b516280cb87103e601e788c34f3557acb15df
+gh_2.103.0_linux_amd64.deb 15103762 sha256:4a48fa23b9ce9581f3304b822f3e014812f26519b134f89b37db8bc7d74746e1
+gh_2.103.0_linux_amd64.tar.gz 15030338 sha256:fdd768eb70f6409f80fcfa9f3a1c0adf0fc98d827ab3ce0bed2ac22762c5d786
+gh_2.103.0_linux_arm64.deb 13721044 sha256:5e218097cf3e02c4855a07fd4f5719b1523fa799f24eeb70d6b795a9a74fffe2
+gh_2.103.0_linux_arm64.tar.gz 13658228 sha256:7f322df34e624d14f5ec0c4acb121fd6dfa14392fdbbd1066aa8e0a05ac3721e
+-- Assets, deren Name nach Signatur, Provenance oder SBOM aussieht (Anzahl)
+0
+-- Archiv gh_2.103.0_linux_amd64.tar.gz: sha256 der Datei, Eintrag in checksums.txt, GitHub-Digest des Assets
+datei:    fdd768eb70f6409f80fcfa9f3a1c0adf0fc98d827ab3ce0bed2ac22762c5d786
+checksums: fdd768eb70f6409f80fcfa9f3a1c0adf0fc98d827ab3ce0bed2ac22762c5d786
+api:      sha256:fdd768eb70f6409f80fcfa9f3a1c0adf0fc98d827ab3ce0bed2ac22762c5d786
+AUSSAGE gh-tag=v2.103.0
+AUSSAGE gh-amd64-sha256=fdd768eb70f6409f80fcfa9f3a1c0adf0fc98d827ab3ce0bed2ac22762c5d786
+AUSSAGE gh-checksums-gleich-datei=ja
+-- GitHub-Attestierung (API, anonym) fuer das Archiv
+http=200
+{"attestations":2,"inline_bundle":[false,false],"initiator":["github","user"]}
+-- Attestierungen: Bundle liegt hinter einer signierten Adresse der Antwort (Adresse nicht ausgegeben); Format der Bundle-Datei:
+bundle 0: 4797 Bytes, JSON lesbar: nein
+bundle 1: 13906 Bytes, JSON lesbar: nein
+(Inhalt nicht dekodiert: die Prueflogik von gh attestation verify ist nicht gemessen)
+-- Release-Workflow des Projekts: Zeilen zu Signatur, Attestierung, Pruefsumme
+http-datei-groesse=20216
+9:  attestations: write
+11:  id-token: write
+372:      - name: Set up GPG
+375:          GPG_PUBKEY_2026: ${{ secrets.GPG_PUBKEY_2026 }}
+376:          GPG_KEY_2026: ${{ secrets.GPG_KEY_2026 }}
+377:          GPG_PASSPHRASE_2026: ${{ secrets.GPG_PASSPHRASE_2026 }}
+378:          GPG_KEYGRIP_2026: ${{ secrets.GPG_KEYGRIP_2026 }}
+380:          base64 -d <<<"$GPG_PUBKEY_2026" | gpg --import --no-tty --batch --yes
+381:          base64 -d <<<"$GPG_KEY_2026" | gpg --import --no-tty --batch --yes
+382:          echo "allow-preset-passphrase" > ~/.gnupg/gpg-agent.conf
+383:          gpg-connect-agent RELOADAGENT /bye
+384:          base64 -d <<<"$GPG_PASSPHRASE_2026" | /usr/lib/gnupg2/gpg-preset-passphrase --preset "$GPG_KEYGRIP_2026"
+390:      - name: Attest release artifacts
+392:        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+404:          gpg --yes --detach-sign --armor --default-key 7F38BBB59D064DBCB3D84D725612B36462313325 repodata/repomd.xml
+432:          shasum -a 256 gh_* > checksums.txt
+433:          mv checksums.txt gh_${TAG_NAME#v}_checksums.txt
+-- apt-Repository des Projekts: Schluessel, Fingerabdruck, Signatur von InRelease
+gpg: keybox '/w/lieferkette/gnupg/pubring.kbx' created
+gpg: /w/lieferkette/gnupg/trustdb.gpg: trustdb created
+gpg: WARNING: No valid encryption subkey left over.
+pub e 
+fpr  2C6106201985B60E6C7AC87323F3D4EA75716059
+uid e GitHub CLI <opensource+cli@github.com>
+fpr  5700BAB26C8DE75F3EE323FEE5FAF19590714157
+pub - 
+fpr  7F38BBB59D064DBCB3D84D725612B36462313325
+uid - GitHub CLI <opensource+cli@github.com>
+fpr  B84252FAAA164D9EBEA2E2C1F4CAB2C46C97E579
+(Fingerabdruck, den das offizielle Feature fest eintraegt: 7F38BBB59D064DBCB3D84D725612B36462313325)
+[GNUPG:] GOODSIG 5612B36462313325 GitHub CLI <opensource+cli@github.com>
+[GNUPG:] VALIDSIG 7F38BBB59D064DBCB3D84D725612B36462313325 2026-10-21 1792596757 0 4 0 1 10 01 7F38BBB59D064DBCB3D84D725612B36462313325
+-- Version in diesem apt-Repository (Paket gh, amd64)
+Version: 2.103.0
+gpg: WARNING: No valid encryption subkey left over.
+AUSSAGE gh-apt-fingerprint-gleich-feature=1
+
+################ glab (gitlab.com/gitlab-org/cli)
+-- neuestes Release (Tag, Zeitpunkt, Zahl der Asset-Links, Quellen)
+{"tag_name":"v1.124.0","released_at":"2026-10-20T12:17:01.108Z","links":36,"sources":4}
+-- Asset-Links fuer Linux amd64/arm64 und Pruefsummen (Name, Typ)
+glab_1.124.0_linux_amd64.deb other
+glab_1.124.0_linux_amd64.tar.gz other
+checksums.txt other
+glab_1.124.0_linux_arm64.deb other
+glab_1.124.0_linux_arm64.tar.gz other
+-- Assets, deren Name nach Signatur, Provenance oder SBOM aussieht (Anzahl)
+0
+-- Archiv glab_1.124.0_linux_amd64.tar.gz: sha256 der Datei gegen checksums.txt
+datei:    63df684842b0697e418649dd64374d37ac1da0fbcdcb422d6a5557222f8bb40f
+checksums: 63df684842b0697e418649dd64374d37ac1da0fbcdcb422d6a5557222f8bb40f
+AUSSAGE glab-tag=v1.124.0
+AUSSAGE glab-amd64-sha256=63df684842b0697e418649dd64374d37ac1da0fbcdcb422d6a5557222f8bb40f
+AUSSAGE glab-checksums-gleich-datei=ja
+-- checksums.txt aus dem Paketregister (Adresse, die das Feature von SrzStephen nutzt) gegen die Datei des Release
+gleich
+-- Release-Konfiguration des Projekts: Zeilen zu Signatur, Attestierung, Pruefsumme
+.goreleaser.yml groesse=6274
+27:        - cmd: './scripts/sign-binary.sh macos "{{ .Path }}"'
+41:        - cmd: './scripts/sign-binary.sh windows "{{ .Path }}"'
+139:checksum:
+140:  name_template: "checksums.txt"
+.gitlab-ci.yml groesse=27938
+33:.sign_windows_base:
+34:  image: ${CI_REGISTRY}/gitlab-com/gl-infra/common-ci-tasks-images/code-signer:1.3.0
+42:    GCLOUD_PROJECT: gitlab-ci-runners-signing
+43:    SERVICE_ACCOUNT: gitlab-cli-signer@gitlab-ci-runners-signing.iam.gserviceaccount.com
+46:.use_signed_if_available: &use_signed_if_available
+48:    if [ -d "signed/" ]; then
+49:      echo "Using signed binaries"
+51:      mv signed bin
+54:      echo "Using unsigned binaries"
+107:  # injects the SBOM-based analyzer that replaces it. Including both ran two
+461:  extends: .sign_windows_base
+476:  needs: [sign_windows_installer]
+477:  dependencies: [sign_windows_installer]
+480:    - *use_signed_if_available
+518:      goreleaser/goreleaser:v2.18.3 release --skip=sign --snapshot
+527:  # artifacts:false because only the signed installer is consumed.
+531:    - job: sign_windows_installer
+552:    # Assign the release token inline, not via `variables:` above: the
+633:    - *use_signed_if_available
+645:    - job: sign_windows_glab
+-- Include-Dateien der CI-Konfiguration (Namen) mit Signatur-Bezug
+103:include:
+110:  - project: "gitlab-com/gl-security/security-operations/infrastructure-security-public/oidc-modules"
+115:  - local: .gitlab/ci/review-docs.gitlab-ci.yml
+189:    - lychee --offline --include-fragments docs/**/*.md *.md
+392:  # uncomment the below lines and adjust the `GO_VERSION` to included versions to test.
+416:  # uncomment the below lines and adjust the `GO_VERSION` to included versions to test.
+
+################ Rhythmus der Releases (die acht neuesten, fuer die Pflege der Pins)
+-- gh
+v2.103.0 2026-10-21T15:33:31Z prerelease=false immutable=true
+v2.102.1 2026-10-20T19:35:51Z prerelease=false immutable=true
+v2.102.0 2026-09-30T02:40:02Z prerelease=false immutable=true
+v2.101.0 2026-09-15T14:24:34Z prerelease=false immutable=true
+v2.100.0 2026-09-03T15:43:20Z prerelease=false immutable=true
+v2.99.0 2026-09-01T20:25:04Z prerelease=false immutable=true
+v2.98.0 2026-08-20T22:15:58Z prerelease=false immutable=true
+v2.97.0 2026-07-31T02:04:00Z prerelease=false immutable=true
+-- glab
+v1.124.0 2026-10-20T12:17:01.108Z
+v1.123.0 2026-10-13T12:25:25.860Z
+v1.122.0 2026-10-09T06:40:31.189Z
+v1.121.0 2026-10-06T12:17:32.971Z
+v1.120.0 2026-09-29T12:19:38.124Z
+v1.119.0 2026-09-22T12:17:10.933Z
+v1.118.0 2026-09-15T12:29:10.343Z
+v1.117.0 2026-09-08T12:22:28.543Z
+
+################ Debian-Pakete im Basis-Image (Debian 13)
+Debian GNU/Linux 13 (trixie), arch=amd64
+apt-get update exit=0
+-- Paketquellen des Basis-Images
+URIs: http://deb.debian.org/debian
+Suites: trixie trixie-updates
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.pgp
+URIs: http://deb.debian.org/debian-security
+Suites: trixie-security
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.pgp
+-- Kandidaten gh und glab
+gh:
+  Candidate: 2.46.0-3
+     2.46.0-3 500
+glab:
+  Candidate: 1.53.0-1+b3
+     1.53.0-1+b3 500
+-- Abhaengigkeiten der Pakete
+gh
+  Depends: libc6
+  Conflicts: gitsome
+glab
+  Depends: libc6
+-- Debian-Paket gh: Herkunft der Quelle (apt-cache show)
+Package: gh
+Version: 2.46.0-3
+Installed-Size: 34662
+Maintainer: Debian Go Packaging Team <team+pkg-go@tracker.debian.org>
+Homepage: https://cli.github.com/
+Size: 7615896
+-- Debian-Paket glab: Herkunft der Quelle (apt-cache show)
+Package: glab
+Version: 1.53.0-1+b3
+Installed-Size: 27416
+Maintainer: Debian Go Packaging Team <team+pkg-go@tracker.debian.org>
+Homepage: https://gitlab.com/gitlab-org/cli
+Size: 7238996

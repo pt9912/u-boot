@@ -1,0 +1,275 @@
+== Laufzeit glabsk (glab), Modus restricted-allow, 2026-10-23T10:29:41.539Z
+runArgs laut devcontainer.json: "runArgs":["--cap-add=NET_ADMIN"],
+egress-init exit=0
+-- Status-Datei des Skripts
+u-boot-status 1
+result=ok
+at=2026-10-23T10:29:42Z
+conf: server=/api.github.com/1.1.1.1
+conf: server=/api.github.com/8.8.8.8
+conf: server=/codeload.github.com/1.1.1.1
+conf: server=/codeload.github.com/8.8.8.8
+conf: server=/deb.debian.org/1.1.1.1
+conf: server=/deb.debian.org/8.8.8.8
+conf: server=/github.com/1.1.1.1
+conf: server=/github.com/8.8.8.8
+conf: server=/gitlab.com/1.1.1.1
+conf: server=/gitlab.com/8.8.8.8
+conf: server=/objects.githubusercontent.com/1.1.1.1
+conf: server=/objects.githubusercontent.com/8.8.8.8
+conf: server=/raw.githubusercontent.com/1.1.1.1
+conf: server=/raw.githubusercontent.com/8.8.8.8
+conf: server=/security.debian.org/1.1.1.1
+conf: server=/security.debian.org/8.8.8.8
+modus=restricted-allow werkzeug=glab home=/home/vscode user=vscode
+Hosts der Allowlist im Startscript: api.github.com codeload.github.com deb.debian.org github.com gitlab.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+-- Git-Konfiguration im Image (system, vom Dockerfile der Vorlage) und im Home (global)
+credential.helper !f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f
+fatal: unable to read config file '/home/vscode/.gitconfig': No such file or directory
+---- 10:29:44.314 version
+$ glab --version
+glab 1.124.0 (d43ccacec)
+exit=0
+AUSSAGE restricted-allow-glab-version-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+~/.config/glab-cli/aliases.yml 32
+~/.config/glab-cli/config.lock 0
+~/.config/glab-cli/config.yml 7534
+---- 10:29:44.595 auth-status-ohne-variable
+$ glab auth status
+gitlab.com
+  x gitlab.com: API call failed: GET https://gitlab.com/api/v4/user: 401 {message: 401 Unauthorized}
+  ✓ Git operations for gitlab.com configured to use ssh protocol.
+  ✓ API calls for gitlab.com are made over https protocol.
+  ✓ REST API Endpoint: https://gitlab.com/api/v4/
+  ✓ GraphQL Endpoint: https://gitlab.com/api/graphql/
+  ! No token found (checked config file, keyring, and environment variables).
+   ERROR  
+  X could not authenticate to one or more of the configured GitLab instances.                                         
+exit=1
+AUSSAGE restricted-allow-glab-auth-status-ohne-variable-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:45.519 api-ohne-variable
+$ glab api projects/gitlab-org%2Fcli --silent
+What's new in glab v1.124.0
+  Run: glab whatsnew
+exit=0
+AUSSAGE restricted-allow-glab-api-ohne-variable-exit=0
+-- DNS-Anfragen (A/AAAA)
+      4 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+~/.config/glab-cli/config.yml 7557
+---- 10:29:46.790 repo-view-ohne-variable
+$ glab repo view gitlab-org/cli
+name:	GitLab.org / cli
+description:	A GitLab CLI tool bringing GitLab to your command line
+---
+# GLab
+![GLab](docs/source/img/glab-logo.png)
+GLab is an open source GitLab CLI tool. It brings GitLab to your terminal, next to where you are already working with `git` and your code, without switching between windows and browser tabs. While it'
+- View, manage, and retry CI/CD pipelines directly from your CLI.
+- Create changelogs.
+- Create and manage releases.
+- Ask GitLab Duo Chat (Classic) questions about Git.
+exit=0
+AUSSAGE restricted-allow-glab-repo-view-ohne-variable-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:47.827 release-list-ohne-variable
+$ glab release list -R gitlab-org/cli
+Showing 30 releases on gitlab-org/cli. 
+Name	Tag	Created
+v1.124.0	v1.124.0	about 2 days ago
+v1.123.0	v1.123.0	about 9 days ago
+v1.122.0	v1.122.0	about 14 days ago
+v1.121.0	v1.121.0	about 16 days ago
+v1.120.0	v1.120.0	about 23 days ago
+v1.119.0	v1.119.0	about 1 month ago
+v1.118.0	v1.118.0	about 1 month ago
+v1.117.0	v1.117.0	about 1 month ago
+exit=0
+AUSSAGE restricted-allow-glab-release-list-ohne-variable-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:49.256 release-download-ohne-variable
+$ glab release download v1.124.0 -R gitlab-org/cli --asset-name checksums.txt -D /tmp/dl
+• fetching release repo=gitlab-org/cli tag=v1.124.0.
+• downloading release assets repo=gitlab-org/cli tag=v1.124.0
+• downloading file name=checksums.txt url=https://gitlab.com/api/v4/projects/gitlab-org%2Fcli/packages/generic/glab/1%2E124%2E0/checksums%2Etxt.
+✓ release "v1.124.0" downloaded
+exit=0
+AUSSAGE restricted-allow-glab-release-download-ohne-variable-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:50.472 auth-status-gitlab_token
+$ glab auth status
+gitlab.com
+  x gitlab.com: API call failed: GET https://gitlab.com/api/v4/user: 401 {message: 401 Unauthorized}
+    ! Token is from environment variable GITLAB_TOKEN. A wrapper may be injecting a different or expired token.
+    ! To investigate, run type glab: an alias such as 'op plugin run -- glab' means a wrapper (for example, a 1Password shell plugin) is injecting the token; a plain path rules that out.
+    ! To see the token value in use, run: env | grep -E 'GITLAB_TOKEN|GITLAB_ACCESS_TOKEN|OAUTH_TOKEN'
+  ✓ Git operations for gitlab.com configured to use ssh protocol.
+  ✓ API calls for gitlab.com are made over https protocol.
+  ✓ REST API Endpoint: https://gitlab.com/api/v4/
+  ✓ GraphQL Endpoint: https://gitlab.com/api/graphql/
+  ✓ Token found in environment variable GITLAB_TOKEN: **************************
+exit=1
+AUSSAGE restricted-allow-glab-auth-status-gitlab_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:51.204 api-gitlab_token
+$ glab api projects/gitlab-org%2Fcli --silent
+glab: 401 Unauthorized (HTTP 401)
+exit=1
+AUSSAGE restricted-allow-glab-api-gitlab_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:52.028 api-gitlab_access_token
+$ glab api projects/gitlab-org%2Fcli --silent
+glab: 401 Unauthorized (HTTP 401)
+exit=1
+AUSSAGE restricted-allow-glab-api-gitlab_access_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:52.812 api-oauth_token
+$ glab api projects/gitlab-org%2Fcli --silent
+glab: 401 Unauthorized (HTTP 401)
+exit=1
+AUSSAGE restricted-allow-glab-api-oauth_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:53.651 repo-view-gitlab_token
+$ glab repo view gitlab-org/cli
+   ERROR  
+  Get https://gitlab.com/api/v4/projects/gitlab-org%2Fcli: 401 {message: 401 Unauthorized}.                           
+exit=1
+AUSSAGE restricted-allow-glab-repo-view-gitlab_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:54.491 git-ls-remote-ohne-git_token
+$ git ls-remote https://gitlab.com/gitlab-org/cli.git HEAD
+75f95e6b572c784aa80d21259a50fe9823574ae7	HEAD
+exit=0
+AUSSAGE restricted-allow-glab-git-ls-remote-ohne-git_token-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:55.421 git-ls-remote-git_token
+$ git ls-remote https://gitlab.com/gitlab-org/cli.git HEAD
+75f95e6b572c784aa80d21259a50fe9823574ae7	HEAD
+exit=0
+AUSSAGE restricted-allow-glab-git-ls-remote-git_token-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:56.613 config-git-protocol
+$ glab config get git_protocol
+ssh
+exit=0
+AUSSAGE restricted-allow-glab-config-git-protocol-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:57.135 config-telemetrie-update-duo
+$ sh -c for k in telemetry check_update duo_cli_auto_download duo_cli_auto_run show_whats_new; do printf "%s=" $k; glab config get $k; done
+telemetry=true
+check_update=true
+duo_cli_auto_download=duo_cli_auto_run=show_whats_new=true
+exit=0
+AUSSAGE restricted-allow-glab-config-telemetrie-update-duo-exit=0
+-- DNS-Anfragen (A/AAAA)
+     10 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:59.141 auth-login-hilfe-git-credential-helper
+$ sh -c glab auth login --help | grep -i -E "credential|stdin"
+  By default, glab stores your credentials in your operating system's                                                   
+  keyring (macOS Keychain, Windows Credential Manager, or the Secret                                                    
+  stored credentials.                                                                                                   
+  If you previously signed in and your credentials are stored as                                                        
+  In CI (when `GITLAB_CI` or `CI` is set), glab stores credentials in the                                               
+  configuration file rather than the keyring. Credentials in CI are                                                     
+  they take precedence over the stored credentials. When CI auto-login is                                               
+  To pass a token on standard input, use `--stdin`.                                                                     
+  To configure glab as the Git credential helper for the host without a prompt, for example in a CI/CD job, use `--     
+  setup-git-credential-helper`.                                                                                         
+exit=0
+AUSSAGE restricted-allow-glab-auth-login-hilfe-git-credential-helper-exit=0
+-- DNS-Anfragen (A/AAAA)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:29:59.406 repo-clone-ssh-standard
+$ glab repo clone gitlab-org/cli /tmp/clone-ssh -- --depth 1
+   ERROR  
+  Get https://gitlab.com/api/v4/user: 401 {message: 401 Unauthorized}.                                                
+exit=1
+AUSSAGE restricted-allow-glab-repo-clone-ssh-standard-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:30:00.179 config-git-protocol-https
+$ glab config set git_protocol https --global
+exit=0
+AUSSAGE restricted-allow-glab-config-git-protocol-https-exit=0
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+~/.config/glab-cli/config.yml 7559
+---- 10:30:00.753 repo-clone-https
+$ glab repo clone gitlab-org/cli /tmp/clone-https -- --depth 1
+   ERROR  
+  Get https://gitlab.com/api/v4/user: 401 {message: 401 Unauthorized}.                                                
+exit=1
+AUSSAGE restricted-allow-glab-repo-clone-https-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+---- 10:30:01.539 repo-clone-https-git_token
+$ glab repo clone gitlab-org/cli /tmp/clone-https2 -- --depth 1
+   ERROR  
+  Get https://gitlab.com/api/v4/user: 401 {message: 401 Unauthorized}.                                                
+exit=1
+AUSSAGE restricted-allow-glab-repo-clone-https-git_token-exit=1
+-- DNS-Anfragen (A/AAAA)
+      2 gitlab.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+-- geaenderte Dateien unter HOME (Pfad, Bytes)
+-- git config --global --get-regexp credential (Eintraege, die ein Werkzeug geschrieben haette)
+-- Dateien unter HOME ausserhalb der Image-Grundausstattung (Pfad, Bytes, Zeilen mit dem Platzhalter)
+~/.config/glab-cli/aliases.yml 32 platzhalter-treffer=0
+~/.config/glab-cli/config.lock 0 platzhalter-treffer=0
+~/.config/glab-cli/config.yml 7559 platzhalter-treffer=0
+-- Schluessel (nicht Werte) in ~/.config/glab-cli/config.yml
+git_protocol branch_prefix remote_alias editor browser glab_pager debug glamour_style check_update last_update_check_timestamp show_whats_new last_seen_version last_whatsnew_version notify_skill_updates display_hyperlinks host no_prompt telemetry duo_cli_auto_run duo_cli_auto_download duo_cli_binary_path duo_cli_binary_version duo_cli_binary_checksum duo_cli_last_update_check orbit_cli_auto_run orbit_cli_auto_download orbit_cli_binary_path orbit_cli_binary_version orbit_cli_binary_checksum orbit_cli_last_update_check hosts 
+
+---- 10:30:02.237 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
+     46 gitlab.com
+container-exit=0  gesamtdauer=21.0s

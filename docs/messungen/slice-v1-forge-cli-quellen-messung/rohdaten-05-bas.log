@@ -1,0 +1,112 @@
+[2026-10-23T09:41:34.752Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-147-generic x64.
+[2026-10-23T09:41:34.931Z] Start: Run: docker build -f /tmp/devcontainercli-root/container-features/0.89.0-1792748494930/Dockerfile-with-features -t u-boot-messung-forge-img-bas --target dev_containers_target_stage --no-cache --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label /w/u-boot-messung-forge-bas/.devcontainer
+[2026-10-23T09:41:34.941Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:41:34.942Z] Sending build context to Docker daemon  13.87kB
+[2026-10-23T09:41:34.943Z] Step 1/11 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+Step 2/11 : FROM mcr.microsoft.com/devcontainers/base:debian AS dev_container_auto_added_stage_label
+[2026-10-23T09:41:34.958Z]  ---> 6ee2b4097c75
+Step 3/11 : USER root
+[2026-10-23T09:41:35.074Z]  ---> Running in 480662d6df80
+[2026-10-23T09:41:36.904Z]  ---> Removed intermediate container 480662d6df80
+ ---> e41ebcf4f864
+Step 4/11 : RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+[2026-10-23T09:41:37.011Z]  ---> Running in ac5afbe3baec
+[2026-10-23T09:41:37.290Z] Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+[2026-10-23T09:41:37.359Z] Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+[2026-10-23T09:41:37.388Z] Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+[2026-10-23T09:41:37.420Z] Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+[2026-10-23T09:41:39.484Z] Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [720 B]
+[2026-10-23T09:41:39.500Z] Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [269 kB]
+[2026-10-23T09:41:40.096Z] Fetched 10.2 MB in 3s (3555 kB/s)
+Reading package lists...
+[2026-10-23T09:41:40.487Z] 
+[2026-10-23T09:41:40.502Z] Reading package lists...
+[2026-10-23T09:41:40.886Z] 
+[2026-10-23T09:41:40.896Z] Building dependency tree...
+[2026-10-23T09:41:40.980Z] 
+Reading state information...
+[2026-10-23T09:41:41.108Z] The following additional packages will be installed:
+[2026-10-23T09:41:41.108Z]   libdbus-1-3 libnftables1
+[2026-10-23T09:41:41.109Z] Suggested packages:
+  firewalld
+Recommended packages:
+  dns-root-data dbus
+[2026-10-23T09:41:41.133Z] The following NEW packages will be installed:
+[2026-10-23T09:41:41.133Z]   dnsmasq-base libdbus-1-3 libnftables1 nftables
+[2026-10-23T09:41:41.204Z] 0 upgraded, 4 newly installed, 0 to remove and 9 not upgraded.
+Need to get 1093 kB of archives.
+After this operation, 2868 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian trixie/main amd64 libnftables1 amd64 1.1.3-1 [332 kB]
+[2026-10-23T09:41:41.309Z] Get:2 http://deb.debian.org/debian trixie/main amd64 nftables amd64 1.1.3-1 [75.9 kB]
+[2026-10-23T09:41:41.326Z] Get:3 http://deb.debian.org/debian trixie/main amd64 libdbus-1-3 amd64 1.16.2-2 [178 kB]
+[2026-10-23T09:41:41.363Z] Get:4 http://deb.debian.org/debian trixie/main amd64 dnsmasq-base amd64 2.91-1+deb13u2 [507 kB]
+[2026-10-23T09:41:41.590Z] debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+[2026-10-23T09:41:41.595Z] debconf: unable to initialize frontend: Readline
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Teletype
+[2026-10-23T09:41:41.599Z] debconf: unable to initialize frontend: Teletype
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Noninteractive
+[2026-10-23T09:41:42.032Z] Fetched 1093 kB in 0s (3264 kB/s)
+[2026-10-23T09:41:42.099Z] Selecting previously unselected package libnftables1:amd64.
+(Reading database ... 
+[2026-10-23T09:41:42.100Z] (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%
+[2026-10-23T09:41:42.101Z] (Reading database ... 70%
+[2026-10-23T09:41:42.101Z] (Reading database ... 75%
+[2026-10-23T09:41:42.102Z] (Reading database ... 80%
+[2026-10-23T09:41:42.102Z] (Reading database ... 85%
+[2026-10-23T09:41:42.103Z] (Reading database ... 90%
+[2026-10-23T09:41:42.105Z] (Reading database ... 95%
+[2026-10-23T09:41:42.105Z] (Reading database ... 100%(Reading database ... 25740 files and directories currently installed.)
+[2026-10-23T09:41:42.105Z] Preparing to unpack .../libnftables1_1.1.3-1_amd64.deb ...
+[2026-10-23T09:41:42.141Z] Unpacking libnftables1:amd64 (1.1.3-1) ...
+[2026-10-23T09:41:42.297Z] Selecting previously unselected package nftables.
+[2026-10-23T09:41:42.299Z] Preparing to unpack .../nftables_1.1.3-1_amd64.deb ...
+[2026-10-23T09:41:42.317Z] Unpacking nftables (1.1.3-1) ...
+[2026-10-23T09:41:42.443Z] Selecting previously unselected package libdbus-1-3:amd64.
+[2026-10-23T09:41:42.445Z] Preparing to unpack .../libdbus-1-3_1.16.2-2_amd64.deb ...
+[2026-10-23T09:41:42.463Z] Unpacking libdbus-1-3:amd64 (1.16.2-2) ...
+[2026-10-23T09:41:42.601Z] Selecting previously unselected package dnsmasq-base.
+[2026-10-23T09:41:42.603Z] Preparing to unpack .../dnsmasq-base_2.91-1+deb13u2_amd64.deb ...
+[2026-10-23T09:41:42.626Z] Unpacking dnsmasq-base (2.91-1+deb13u2) ...
+[2026-10-23T09:41:42.760Z] Setting up libnftables1:amd64 (1.1.3-1) ...
+[2026-10-23T09:41:42.817Z] Setting up nftables (1.1.3-1) ...
+[2026-10-23T09:41:42.944Z] Setting up libdbus-1-3:amd64 (1.16.2-2) ...
+[2026-10-23T09:41:42.998Z] Setting up dnsmasq-base (2.91-1+deb13u2) ...
+[2026-10-23T09:41:43.176Z] Processing triggers for libc-bin (2.41-12+deb13u4) ...
+[2026-10-23T09:41:43.241Z] Processing triggers for man-db (2.13.1-1) ...
+[2026-10-23T09:41:46.296Z]  ---> Removed intermediate container ac5afbe3baec
+ ---> 30f3ce594a0b
+Step 5/11 : COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+[2026-10-23T09:41:48.111Z]  ---> 28c66b855802
+Step 6/11 : RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+[2026-10-23T09:41:48.217Z]  ---> Running in 44cb49f94606
+[2026-10-23T09:41:50.612Z]  ---> Removed intermediate container 44cb49f94606
+ ---> 87d7bd6bec1f
+Step 7/11 : RUN mkdir -p "/workspaces/u-boot-messung-forge-bas" && chown vscode:vscode "/workspaces/u-boot-messung-forge-bas"
+[2026-10-23T09:41:50.718Z]  ---> Running in d58b61fd82f0
+[2026-10-23T09:41:52.964Z]  ---> Removed intermediate container d58b61fd82f0
+ ---> 2b97507555ea
+Step 8/11 : RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+[2026-10-23T09:41:53.071Z]  ---> Running in a3949f6d66c0
+[2026-10-23T09:41:55.253Z]  ---> Removed intermediate container a3949f6d66c0
+ ---> c6d42bd0dcc9
+Step 9/11 : USER vscode
+[2026-10-23T09:41:55.362Z]  ---> Running in 78a927f20c61
+[2026-10-23T09:41:57.263Z]  ---> Removed intermediate container 78a927f20c61
+ ---> 0dc453877bde
+[2026-10-23T09:41:57.263Z] Step 10/11 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_target_stage
+[2026-10-23T09:41:57.275Z]  ---> 0dc453877bde
+[2026-10-23T09:41:57.276Z] Step 11/11 : LABEL devcontainer.metadata="[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"postStartCommand\":\"sudo sh /usr/local/bin/u-boot-egress-init\",\"mounts\":[\"source=u-boot-messung-forge-bas-workspace-\${devcontainerId},target=/workspaces/u-boot-messung-forge-bas,type=volume\"],\"remoteUser\":\"vscode\",\"remoteEnv\":{\"GIT_TOKEN\":\"\${localEnv:GIT_TOKEN}\"}} ]"
+[2026-10-23T09:41:57.384Z]  ---> Running in 8c5e4d089c8e
+[2026-10-23T09:41:59.191Z]  ---> Removed intermediate container 8c5e4d089c8e
+ ---> c0b2d5e65c7b
+[2026-10-23T09:41:59.219Z] Successfully built c0b2d5e65c7b
+[2026-10-23T09:41:59.237Z] Successfully tagged u-boot-messung-forge-img-bas:latest
+{"outcome":"success","imageName":["u-boot-messung-forge-img-bas"],"ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}

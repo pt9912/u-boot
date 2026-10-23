@@ -1,0 +1,261 @@
+== Quellen als OCI-Feature, 2026-10-23T09:39:45.798Z
+-- Feature-Index https://containers.dev/static/devcontainer-index.json: Eintraege zu gh und glab
+http=200 bytes=1979258
+-- Eintraege, deren id gitlab-cli, glab, github-cli, gh-cli oder gh enthaelt (Sammlung, id, Version)
+Reference Implementation Features	ghcr.io/devcontainers/features/github-cli	1.1.3
+Features by joshuanianji	ghcr.io/joshuanianji/devcontainer-features/github-cli-persistence	1.0.4
+Alpine DevContainer Features	ghcr.io/cirolosapio/devcontainers-features/alpine-gh-cli	0.0.2
+Dev Container Features by skriptfabrik	ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli	1.1.1
+Dev Container Features by devcontainers-extra	ghcr.io/devcontainers-extra/features/gh-cli	1.0.13
+Dev Container features by sliekens	ghcr.io/sliekens/devcontainer-features/github-cli	1.1.3
+PostFinance Features	ghcr.io/postfinance/devcontainer-features/github-cli	1.1.0
+PostFinance Features	ghcr.io/postfinance/devcontainer-features/gitlab-cli	1.0.1
+Devcontainer Features by SrzStephen	ghcr.io/srzstephen/devcontainer-features/gitlab-cli	1.0.1
+-- Eintraege mit glab oder GitLab CLI in id, Name oder Beschreibung (alle Sammlungen)
+ghcr.io/postfinance/devcontainer-features/gitlab-cli
+ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli
+ghcr.io/srzstephen/devcontainer-features/gitlab-cli
+AUSSAGE index-abgefragt=2026-10-23
+
+== ghcr.io/devcontainers/features/github-cli
+-- Tags
+["1","1.0","1.0.0","1.0.1","1.0.10","1.0.11","1.0.12","1.0.13","1.0.14","1.0.15","1.0.2","1.0.3","1.0.4","1.0.5","1.0.6","1.0.7","1.0.8","1.0.9","1.1","1.1.0","1.1.1","1.1.2","1.1.3","latest"]
+-- Manifest :latest (Digest laut Antwort-Header, Layer, Annotationen)
+docker-content-digest: sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2
+{"layers":[{"mediaType":"application/vnd.devcontainers.layer.v1+tar","digest":"sha256:6e743161a1a0851280f181794c8d8ece76ba27723bafb274df56be416157dfc1","size":25088}],"annotationKeys":["com.github.package.type","dev.containers.metadata"]}
+-- Gegenprobe: Digest des Manifests = sha256 der Antwort
+sha256:bd7ab48a832228f633239277552c30b353867fef2e5b037e064b4e64f0b843f2
+-- Referrers (Signaturen, Attestierungen) zum Digest
+referrers http=404
+{"errors":[{"code":"MANIFEST_UNKNOWN","message":"manifest unknown"}]}
+
+-- Tags der Form sha256-*, *.sig, *.att (Cosign-Schema)
+(keine)
+-- Metadaten (Annotation dev.containers.metadata): Sicherheitsfelder und Abhaengigkeiten
+{"id":"github-cli","version":"1.1.3","name":"GitHub CLI","mounts":null,"privileged":null,"init":null,"capAdd":null,"securityOpt":null,"entrypoint":null,"dependsOn":null,"installsAfter":["ghcr.io/devcontainers/features/common-utils","ghcr.io/devcontainers/features/git"],"containerEnv":null,"remoteEnv":null,"onCreateCommand":null,"postCreateCommand":null,"postStartCommand":null,"postAttachCommand":null,"customizations":{"vscode":{"settings":{"github.copilot.chat.codeGeneration.instructions":[{"text":"This dev container includes the GitHub CLI (`gh`), which is pre-installed and available on the `PATH`. IMPORTANT: `gh api -f` does not support object values, use multiple `-f` flags with hierarchical keys and string values instead. When using GitHub actions `actions/upload-artifact` or `actions/download-artifact` use v4 or later."}]}}},"options":["extensions","installDirectlyFromGitHubRelease","version"]}
+-- Layer laden, Pruefsumme gegen den Digest, Inhalt
+layer-sha256 gleich Digest: ja (25088 Bytes)
+9488d0552deb35b9 651 ./NOTES.md
+2f61da63e3cbfd5d 1456 ./README.md
+f4cbc74114d75806 1626 ./devcontainer-feature.json
+27ec4577ec6a6db0 11426 ./install.sh
+e523df6e84495a93 3785 ./scripts/install-extensions.sh
+-- install.sh: Zeilen zu Herkunft, Pruefung und Fremdskripten (grep -n)
+zeilen=284
+4:# Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
+7:# Docs: https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/github.md
+10:CLI_VERSION=${VERSION:-"latest"}
+14:GITHUB_CLI_ARCHIVE_GPG_KEY=7F38BBB59D064DBCB3D84D725612B36462313325
+26:# Get the list of GPG key servers that are reachable
+27:get_gpg_key_servers() {
+28:    declare -A keyservers_curl_map=(
+29:        ["hkp://keyserver.ubuntu.com"]="http://keyserver.ubuntu.com:11371"
+30:        ["hkp://keyserver.ubuntu.com:80"]="http://keyserver.ubuntu.com"
+31:        ["hkps://keys.openpgp.org"]="https://keys.openpgp.org"
+32:        ["hkp://keyserver.pgp.com"]="http://keyserver.pgp.com:11371"
+35:    local curl_args=""
+39:        curl_args="--proxy ${KEYSERVER_PROXY}"
+42:    for keyserver in "${!keyservers_curl_map[@]}"; do
+43:        local keyserver_curl_url="${keyservers_curl_map[${keyserver}]}"
+44:        if curl -s ${curl_args} --max-time 5 ${keyserver_curl_url} > /dev/null; then
+59:receive_gpg_keys() {
+61:    local keyring_path=$2
+62:    mkdir -p "$(dirname "${keyring_path}")"
+64:    # Install curl
+65:    if ! type curl > /dev/null 2>&1; then
+66:        check_packages curl
+69:    # Use a temporary location for gpg keys to avoid polluting image
+73:    echo -e "disable-ipv6\n$(get_gpg_key_servers)" > ${GNUPGHOME}/dirmngr.conf
+74:    # GPG key download sometimes fails for some reason and retrying fixes it.
+76:    local gpg_ok="false"
+78:    until [ "${gpg_ok}" = "true" ] || [ "${retry_count}" -eq "5" ]; 
+80:        echo "(*) Downloading GPG key..."
+81:        ( echo "${keys}" | xargs -n 1 gpg -q --recv-keys) 2>&1 \
+82:            && gpg --export ${keys} | gpg --dearmor --yes -o "${keyring_path}" \
+83:            && gpg_ok="true"
+84:        if [ "${gpg_ok}" != "true" ]; then
+91:    if [ "${gpg_ok}" = "false" ]; then
+92:        echo "(!) Failed to get gpg key."
+100:        echo "Running apt-get update..."
+101:        apt-get update -y
+107:    if ! dpkg -s "$@" > /dev/null 2>&1; then
+109:        apt-get -y install --no-install-recommends "$@"
+132:        if [ "${requested_version}" = "latest" ] || [ "${requested_version}" = "current" ] || [ "${requested_version}" = "lts" ]; then
+169:            # Look for latest version from previous major release
+171:        # Handle situations like Go's odd version pattern where "0" releases omit the last part
+175:            # Look for latest version from previous minor release
+189:# Fetches .deb file to be installed with dpkg
+191:    check_packages wget
+192:    arch=$(dpkg --print-architecture)
+194:    find_version_from_git_tags CLI_VERSION https://github.com/cli/cli
+199:    wget -q --show-progress --progress=dot:giga https://github.com/cli/cli/releases/download/v${CLI_VERSION}/${cli_filename}
+205:        find_prev_version_from_git_tags CLI_VERSION https://github.com/cli/cli
+206:        wget -q --show-progress --progress=dot:giga https://github.com/cli/cli/releases/download/v${CLI_VERSION}/${cli_filename}
+209:    dpkg -i /tmp/ghcli/${cli_filename}
+216:# Install curl, apt-transport-https, curl, gpg, or dirmngr, git if missing
+217:check_packages curl ca-certificates apt-transport-https dirmngr gnupg2
+223:if [ "${CLI_VERSION}" != "latest" ] && [ "${CLI_VERSION}" != "lts" ] && [ "${CLI_VERSION}" != "stable" ]; then
+224:    find_version_from_git_tags CLI_VERSION "https://github.com/cli/cli"
+238:    receive_gpg_keys GITHUB_CLI_ARCHIVE_GPG_KEY /usr/share/keyrings/githubcli-archive-keyring.gpg
+239:    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list
+240:    apt-get update
+241:    apt-get -y install "gh${version_suffix}"
+-- weitere Dateien des Features (ausser install.sh und devcontainer-feature.json)
+  ./NOTES.md
+  ./README.md
+  ./scripts/install-extensions.sh
+
+== ghcr.io/devcontainers-extra/features/gh-cli
+-- Tags
+["1","1.0","1.0.12","1.0.13","latest"]
+-- Manifest :latest (Digest laut Antwort-Header, Layer, Annotationen)
+docker-content-digest: sha256:bd667bbc8a0d4614b4c3613ec2cce260ea6cdf893f8a10b8b670e47240e0e993
+{"layers":[{"mediaType":"application/vnd.devcontainers.layer.v1+tar","digest":"sha256:133c54ce7da49aefdf14521c12d9538a564beee4236d346af8f8d578a032d8fa","size":12288}],"annotationKeys":["com.github.package.type","dev.containers.metadata"]}
+-- Gegenprobe: Digest des Manifests = sha256 der Antwort
+sha256:bd667bbc8a0d4614b4c3613ec2cce260ea6cdf893f8a10b8b670e47240e0e993
+-- Referrers (Signaturen, Attestierungen) zum Digest
+referrers http=404
+{"errors":[{"code":"MANIFEST_UNKNOWN","message":"manifest unknown"}]}
+
+-- Tags der Form sha256-*, *.sig, *.att (Cosign-Schema)
+(keine)
+-- Metadaten (Annotation dev.containers.metadata): Sicherheitsfelder und Abhaengigkeiten
+{"id":"gh-cli","version":"1.0.13","name":"GitHub CLI (via GitHub Releases)","mounts":null,"privileged":null,"init":null,"capAdd":null,"securityOpt":null,"entrypoint":null,"dependsOn":null,"installsAfter":["ghcr.io/devcontainers-extra/features/gh-release"],"containerEnv":null,"remoteEnv":null,"onCreateCommand":null,"postCreateCommand":null,"postStartCommand":null,"postAttachCommand":null,"customizations":null,"options":["version"]}
+-- Layer laden, Pruefsumme gegen den Digest, Inhalt
+layer-sha256 gleich Digest: ja (12288 Bytes)
+3cc553cc215a3966 543 ./README.md
+c3924264e958ff7a 637 ./devcontainer-feature.json
+717d20e05e80de19 649 ./install.sh
+5e06ad5c5a3b5eb9 5414 ./library_scripts.sh
+-- install.sh: Zeilen zu Herkunft, Pruefung und Fremdskripten (grep -n)
+zeilen=23
+7:# source code: https://github.com/devcontainers-extra/nanolayer
+-- weitere Dateien des Features (ausser install.sh und devcontainer-feature.json)
+  ./README.md
+  ./library_scripts.sh
+
+== ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli
+-- Tags
+["1","1.0","1.0.0","1.1","1.1.0","1.1.1","latest"]
+-- Manifest :latest (Digest laut Antwort-Header, Layer, Annotationen)
+docker-content-digest: sha256:f87aea79d9299116e06df9f5bf607de00dfcbb26a1783e92ce69e4a07ceb450a
+{"layers":[{"mediaType":"application/vnd.devcontainers.layer.v1+tar","digest":"sha256:82495f4c51b170c1a2064de50402277ee034acfefd0008d116d6caee580c23dd","size":6656}],"annotationKeys":["com.github.package.type","dev.containers.metadata"]}
+-- Gegenprobe: Digest des Manifests = sha256 der Antwort
+sha256:f87aea79d9299116e06df9f5bf607de00dfcbb26a1783e92ce69e4a07ceb450a
+-- Referrers (Signaturen, Attestierungen) zum Digest
+referrers http=404
+{"errors":[{"code":"MANIFEST_UNKNOWN","message":"manifest unknown"}]}
+
+-- Tags der Form sha256-*, *.sig, *.att (Cosign-Schema)
+(keine)
+-- Metadaten (Annotation dev.containers.metadata): Sicherheitsfelder und Abhaengigkeiten
+{"id":"gitlab-cli","version":"1.1.1","name":"GitLab CLI","mounts":null,"privileged":null,"init":null,"capAdd":null,"securityOpt":null,"entrypoint":null,"dependsOn":null,"installsAfter":["ghcr.io/devcontainers/features/common-utils"],"containerEnv":null,"remoteEnv":null,"onCreateCommand":null,"postCreateCommand":null,"postStartCommand":null,"postAttachCommand":null,"customizations":null,"options":["version"]}
+-- Layer laden, Pruefsumme gegen den Digest, Inhalt
+layer-sha256 gleich Digest: ja (6656 Bytes)
+52122f0a0846586d 558 ./README.md
+dfbe98caca16ca5d 569 ./devcontainer-feature.json
+eff430213b422bd3 1410 ./install.sh
+-- install.sh: Zeilen zu Herkunft, Pruefung und Fremdskripten (grep -n)
+zeilen=52
+5:CLI_VERSION="${VERSION:-"latest"}"
+22:apt-get -y update
+23:apt-get -y install --no-install-recommends curl ca-certificates jq git
+26:apt-get -y clean
+29:# Fetch latest version if needed
+30:if [ "${CLI_VERSION}" = "latest" ]; then
+31:    CLI_VERSION=$(curl -s curl -s https://gitlab.com/api/v4/projects/34675721/releases | jq -r '.[0].tag_name' | awk '{print substr($1, 2)}')
+43:DOWNLOAD_URL="https://gitlab.com/gitlab-org/cli/-/releases/v${CLI_VERSION}/downloads/${DEB_PACKAGE}"
+47:curl -sSLO "${DOWNLOAD_URL}"
+48:dpkg -i "${DEB_PACKAGE}"
+-- weitere Dateien des Features (ausser install.sh und devcontainer-feature.json)
+  ./README.md
+
+== ghcr.io/postfinance/devcontainer-features/gitlab-cli
+-- Tags
+["0","0.1","0.1.0","1","1.0","1.0.0","1.0.1","latest"]
+-- Manifest :latest (Digest laut Antwort-Header, Layer, Annotationen)
+docker-content-digest: sha256:e2b0903cbdf48cad2b3953c985df24c5d8cd403dee366bdfd62b88eac8f12273
+{"layers":[{"mediaType":"application/vnd.devcontainers.layer.v1+tar","digest":"sha256:800c5a3a66eebcbecd62be8f01d59d540d3fad035923bd4134acc12301087abc","size":12005888}],"annotationKeys":["com.github.package.type","dev.containers.metadata"]}
+-- Gegenprobe: Digest des Manifests = sha256 der Antwort
+sha256:e2b0903cbdf48cad2b3953c985df24c5d8cd403dee366bdfd62b88eac8f12273
+-- Referrers (Signaturen, Attestierungen) zum Digest
+referrers http=404
+{"errors":[{"code":"MANIFEST_UNKNOWN","message":"manifest unknown"}]}
+
+-- Tags der Form sha256-*, *.sig, *.att (Cosign-Schema)
+(keine)
+-- Metadaten (Annotation dev.containers.metadata): Sicherheitsfelder und Abhaengigkeiten
+{"id":"gitlab-cli","version":"1.0.1","name":"GitLab CLI","mounts":null,"privileged":null,"init":null,"capAdd":null,"securityOpt":null,"entrypoint":null,"dependsOn":null,"installsAfter":null,"containerEnv":null,"remoteEnv":null,"onCreateCommand":null,"postCreateCommand":null,"postStartCommand":null,"postAttachCommand":null,"customizations":null,"options":["downloadUrl","version"]}
+-- Layer laden, Pruefsumme gegen den Digest, Inhalt
+layer-sha256 gleich Digest: ja (12005888 Bytes)
+afab0c69ce8dcba5 674 ./README.md
+082ccea5fb75ab0a 565 ./devcontainer-feature.json
+f70d0daccae8da15 207 ./functions.sh
+4d65ab9d016b3137 125 ./install.sh
+4d0f03c9124a65a6 6230200 ./installer_amd64
+b6ba887a34d6e945 5767352 ./installer_arm64
+-- install.sh: Zeilen zu Herkunft, Pruefung und Fremdskripten (grep -n)
+zeilen=5
+4:    -version="${VERSION:-"latest"}" \
+-- weitere Dateien des Features (ausser install.sh und devcontainer-feature.json)
+  ./README.md
+  ./functions.sh
+  ./installer_amd64
+  ./installer_arm64
+
+== ghcr.io/srzstephen/devcontainer-features/gitlab-cli
+-- Tags
+["0","0.1","0.1.0","0.1.1","1","1.0","1.0.1","latest"]
+-- Manifest :latest (Digest laut Antwort-Header, Layer, Annotationen)
+docker-content-digest: sha256:b72b717350f109aeacc48315a7128d160006d3b2a0defa460b981ac3353ae4eb
+{"layers":[{"mediaType":"application/vnd.devcontainers.layer.v1+tar","digest":"sha256:70aa7b70b5058580960e4b66259346e5b2d71ceb41ef0be67da693e0b148327d","size":9728}],"annotationKeys":["com.github.package.type","dev.containers.metadata","org.opencontainers.image.description","org.opencontainers.image.documentation","org.opencontainers.image.revision","org.opencontainers.image.source","org.opencontainers.image.title","org.opencontainers.image.version"]}
+-- Gegenprobe: Digest des Manifests = sha256 der Antwort
+sha256:b72b717350f109aeacc48315a7128d160006d3b2a0defa460b981ac3353ae4eb
+-- Referrers (Signaturen, Attestierungen) zum Digest
+referrers http=404
+{"errors":[{"code":"MANIFEST_UNKNOWN","message":"manifest unknown"}]}
+
+-- Tags der Form sha256-*, *.sig, *.att (Cosign-Schema)
+(keine)
+-- Metadaten (Annotation dev.containers.metadata): Sicherheitsfelder und Abhaengigkeiten
+{"id":"gitlab-cli","version":"1.0.1","name":"GitLab CLI","mounts":null,"privileged":null,"init":null,"capAdd":null,"securityOpt":null,"entrypoint":null,"dependsOn":null,"installsAfter":["ghcr.io/devcontainers/features/common-utils"],"containerEnv":null,"remoteEnv":null,"onCreateCommand":null,"postCreateCommand":null,"postStartCommand":null,"postAttachCommand":null,"customizations":null,"options":["version"]}
+-- Layer laden, Pruefsumme gegen den Digest, Inhalt
+layer-sha256 gleich Digest: ja (9728 Bytes)
+7c4192eedd051d9e 254 ./NOTES.md
+dd776672b17dd983 841 ./README.md
+7a5ef326833f55f4 653 ./devcontainer-feature.json
+35c25b27baf74a98 3460 ./install.sh
+-- install.sh: Zeilen zu Herkunft, Pruefung und Fremdskripten (grep -n)
+zeilen=108
+10:GLAB_VERSION="${VERSION:-"latest"}"
+17:# Resolve "latest" to the current release version; pass through exact versions.
+20:    if [ "${version}" = "latest" ]; then
+21:        result="$(curl -fsSL "https://gitlab.com/api/v4/projects/gitlab-org%2Fcli/releases?per_page=1" \
+37:        if curl -fsSL "${url}" -o "${dest}"; then
+48:# Verify a file's sha256 against the entry for ${asset} in a checksums file
+49:# (format: "<sha256>  <filename>", one asset per line).
+50:verify_checksum() {
+51:    local file="$1" checksums="$2" asset="$3" expected actual
+52:    expected="$(awk -v f="${asset}" '$2 == f {print $1}' "${checksums}")"
+54:        echo "ERROR: no checksum found for ${asset}" >&2
+57:    actual="$(sha256sum "${file}" | cut -d' ' -f1)"
+59:        echo "ERROR: checksum mismatch for ${asset}" >&2
+64:    echo "Verified checksum for ${asset}."
+72:    apk add --no-cache curl ca-certificates
+75:        apt-get update -y
+77:    apt-get install -y --no-install-recommends curl ca-certificates
+95:pkg_base="https://gitlab.com/api/v4/projects/gitlab-org%2Fcli/packages/generic/glab/${GLAB_VERSION}"
+98:download "${pkg_base}/checksums.txt" "${tmp}/checksums.txt"
+99:verify_checksum "${archive}" "${tmp}/checksums.txt" "${asset}"
+103:if command -v apt-get &>/dev/null; then
+-- weitere Dateien des Features (ausser install.sh und devcontainer-feature.json)
+  ./NOTES.md
+  ./README.md
+
+-- Sondierung weiterer Namen (tags/list; 404 = unter diesem Namen kein Paket, KEINE Aussage ueber andere Namen)
+devcontainers/features/gitlab-cli http=404
+devcontainers/features/glab http=404
+devcontainers-extra/features/gitlab-cli http=404
+devcontainers-extra/features/glab http=404
+devcontainers-contrib/features/gh-cli http=404
+devcontainers-contrib/features/gitlab-cli http=404

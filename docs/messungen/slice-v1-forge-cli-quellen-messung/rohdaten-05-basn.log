@@ -1,0 +1,24 @@
+[2026-10-23T09:42:02.004Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-147-generic x64.
+[2026-10-23T09:42:02.177Z] Start: Run: docker build -f /tmp/devcontainercli-root/container-features/0.89.0-1792748522176/Dockerfile-with-features -t u-boot-messung-forge-img-basn --target dev_containers_target_stage --no-cache --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label /w/u-boot-messung-forge-basn/.devcontainer
+[2026-10-23T09:42:02.190Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:42:02.191Z] Sending build context to Docker daemon  4.143kB
+[2026-10-23T09:42:02.193Z] Step 1/5 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+[2026-10-23T09:42:02.193Z] Step 2/5 : FROM mcr.microsoft.com/devcontainers/base:debian AS dev_container_auto_added_stage_label
+[2026-10-23T09:42:02.217Z]  ---> 6ee2b4097c75
+Step 3/5 : USER vscode
+[2026-10-23T09:42:02.335Z]  ---> Running in bf3950ff8931
+[2026-10-23T09:42:04.138Z]  ---> Removed intermediate container bf3950ff8931
+ ---> 26cef888b31c
+[2026-10-23T09:42:04.138Z] Step 4/5 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_target_stage
+[2026-10-23T09:42:04.149Z]  ---> 26cef888b31c
+Step 5/5 : LABEL devcontainer.metadata="[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"remoteUser\":\"vscode\"} ]"
+[2026-10-23T09:42:04.257Z]  ---> Running in 448e97341bd5
+[2026-10-23T09:42:06.076Z]  ---> Removed intermediate container 448e97341bd5
+ ---> a8b43dce37fe
+[2026-10-23T09:42:06.089Z] Successfully built a8b43dce37fe
+[2026-10-23T09:42:06.107Z] Successfully tagged u-boot-messung-forge-img-basn:latest
+{"outcome":"success","imageName":["u-boot-messung-forge-img-basn"],"ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}

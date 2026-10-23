@@ -1,0 +1,221 @@
+[2026-10-23T09:43:19.442Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-147-generic x64.
+[2026-10-23T09:43:19.622Z] Resolving Feature dependencies for 'ghcr.io/devcontainers-extra/features/gh-cli:1'...
+[2026-10-23T09:43:20.424Z] Soft-dependency 'ghcr.io/devcontainers-extra/features/gh-release' is not required.  Removing from installation order...
+[2026-10-23T09:43:20.798Z] Files to omit: ''
+[2026-10-23T09:43:20.806Z] Start: Run: docker build -t dev_container_feature_content_temp -f /tmp/devcontainercli-root/container-features/0.89.0-1792748599621/Dockerfile.buildContent /tmp/devcontainercli-root/container-features/0.89.0-1792748599621
+[2026-10-23T09:43:20.818Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:43:20.819Z] Sending build context to Docker daemon  30.21kB
+[2026-10-23T09:43:20.821Z] Step 1/2 : FROM scratch
+[2026-10-23T09:43:20.821Z]  ---> 
+Step 2/2 : COPY . /tmp/build-features/
+[2026-10-23T09:43:20.854Z]  ---> Using cache
+ ---> 640597bf83ab
+[2026-10-23T09:43:20.854Z] Successfully built 640597bf83ab
+[2026-10-23T09:43:20.896Z] Successfully tagged dev_container_feature_content_temp:latest
+[2026-10-23T09:43:20.899Z] Start: Run: docker build -f /tmp/devcontainercli-root/container-features/0.89.0-1792748599621/Dockerfile-with-features -t u-boot-messung-forge-img-ghxk --target dev_containers_target_stage --no-cache --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label --build-arg _DEV_CONTAINERS_IMAGE_USER=vscode --build-arg _DEV_CONTAINERS_FEATURE_CONTENT_SOURCE=dev_container_feature_content_temp /w/u-boot-messung-forge-ghxk/.devcontainer
+[2026-10-23T09:43:20.917Z] DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+
+[2026-10-23T09:43:20.918Z] Sending build context to Docker daemon  16.43kB
+[2026-10-23T09:43:20.921Z] Step 1/25 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+[2026-10-23T09:43:20.921Z] Step 2/25 : FROM mcr.microsoft.com/devcontainers/base:debian AS dev_container_auto_added_stage_label
+[2026-10-23T09:43:20.944Z]  ---> 6ee2b4097c75
+Step 3/25 : USER root
+[2026-10-23T09:43:21.074Z]  ---> Running in bbf5538089f2
+[2026-10-23T09:43:23.001Z]  ---> Removed intermediate container bbf5538089f2
+ ---> f848b7541fb9
+Step 4/25 : RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+[2026-10-23T09:43:23.105Z]  ---> Running in 2be64325293a
+[2026-10-23T09:43:23.354Z] Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+[2026-10-23T09:43:23.412Z] Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+[2026-10-23T09:43:23.439Z] Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+[2026-10-23T09:43:23.465Z] Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+[2026-10-23T09:43:25.494Z] Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [720 B]
+[2026-10-23T09:43:25.508Z] Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [269 kB]
+[2026-10-23T09:43:26.112Z] Fetched 10.2 MB in 3s (3617 kB/s)
+Reading package lists...
+[2026-10-23T09:43:26.530Z] 
+[2026-10-23T09:43:26.546Z] Reading package lists...
+[2026-10-23T09:43:26.954Z] 
+[2026-10-23T09:43:26.963Z] Building dependency tree...
+[2026-10-23T09:43:27.055Z] 
+Reading state information...
+[2026-10-23T09:43:27.055Z] 
+[2026-10-23T09:43:27.172Z] The following additional packages will be installed:
+[2026-10-23T09:43:27.172Z]   libdbus-1-3 libnftables1
+[2026-10-23T09:43:27.173Z] Suggested packages:
+  firewalld
+Recommended packages:
+  dns-root-data dbus
+[2026-10-23T09:43:27.199Z] The following NEW packages will be installed:
+[2026-10-23T09:43:27.200Z]   dnsmasq-base libdbus-1-3 libnftables1 nftables
+[2026-10-23T09:43:27.271Z] 0 upgraded, 4 newly installed, 0 to remove and 9 not upgraded.
+Need to get 1093 kB of archives.
+After this operation, 2868 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian trixie/main amd64 libnftables1 amd64 1.1.3-1 [332 kB]
+[2026-10-23T09:43:27.373Z] Get:2 http://deb.debian.org/debian trixie/main amd64 nftables amd64 1.1.3-1 [75.9 kB]
+[2026-10-23T09:43:27.393Z] Get:3 http://deb.debian.org/debian trixie/main amd64 libdbus-1-3 amd64 1.16.2-2 [178 kB]
+[2026-10-23T09:43:27.430Z] Get:4 http://deb.debian.org/debian trixie/main amd64 dnsmasq-base amd64 2.91-1+deb13u2 [507 kB]
+[2026-10-23T09:43:27.648Z] debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+[2026-10-23T09:43:27.654Z] debconf: unable to initialize frontend: Readline
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Teletype
+[2026-10-23T09:43:27.658Z] debconf: unable to initialize frontend: Teletype
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Noninteractive
+[2026-10-23T09:43:28.101Z] Fetched 1093 kB in 0s (3363 kB/s)
+[2026-10-23T09:43:28.175Z] Selecting previously unselected package libnftables1:amd64.
+(Reading database ... 
+[2026-10-23T09:43:28.176Z] (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%
+[2026-10-23T09:43:28.177Z] (Reading database ... 70%
+[2026-10-23T09:43:28.177Z] (Reading database ... 75%
+[2026-10-23T09:43:28.178Z] (Reading database ... 80%
+[2026-10-23T09:43:28.178Z] (Reading database ... 85%
+[2026-10-23T09:43:28.179Z] (Reading database ... 90%
+[2026-10-23T09:43:28.180Z] (Reading database ... 95%
+[2026-10-23T09:43:28.181Z] (Reading database ... 100%(Reading database ... 25740 files and directories currently installed.)
+[2026-10-23T09:43:28.181Z] Preparing to unpack .../libnftables1_1.1.3-1_amd64.deb ...
+[2026-10-23T09:43:28.218Z] Unpacking libnftables1:amd64 (1.1.3-1) ...
+[2026-10-23T09:43:28.377Z] Selecting previously unselected package nftables.
+[2026-10-23T09:43:28.378Z] Preparing to unpack .../nftables_1.1.3-1_amd64.deb ...
+[2026-10-23T09:43:28.396Z] Unpacking nftables (1.1.3-1) ...
+[2026-10-23T09:43:28.517Z] Selecting previously unselected package libdbus-1-3:amd64.
+[2026-10-23T09:43:28.519Z] Preparing to unpack .../libdbus-1-3_1.16.2-2_amd64.deb ...
+[2026-10-23T09:43:28.536Z] Unpacking libdbus-1-3:amd64 (1.16.2-2) ...
+[2026-10-23T09:43:28.672Z] Selecting previously unselected package dnsmasq-base.
+[2026-10-23T09:43:28.674Z] Preparing to unpack .../dnsmasq-base_2.91-1+deb13u2_amd64.deb ...
+[2026-10-23T09:43:28.697Z] Unpacking dnsmasq-base (2.91-1+deb13u2) ...
+[2026-10-23T09:43:28.826Z] Setting up libnftables1:amd64 (1.1.3-1) ...
+[2026-10-23T09:43:28.879Z] Setting up nftables (1.1.3-1) ...
+[2026-10-23T09:43:29.002Z] Setting up libdbus-1-3:amd64 (1.16.2-2) ...
+[2026-10-23T09:43:29.054Z] Setting up dnsmasq-base (2.91-1+deb13u2) ...
+[2026-10-23T09:43:29.231Z] Processing triggers for libc-bin (2.41-12+deb13u4) ...
+[2026-10-23T09:43:29.297Z] Processing triggers for man-db (2.13.1-1) ...
+[2026-10-23T09:43:32.263Z]  ---> Removed intermediate container 2be64325293a
+ ---> a72943c81a33
+Step 5/25 : COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+[2026-10-23T09:43:34.124Z]  ---> 64cb2dce3f85
+Step 6/25 : RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+[2026-10-23T09:43:34.235Z]  ---> Running in f95eb2202164
+[2026-10-23T09:43:36.617Z]  ---> Removed intermediate container f95eb2202164
+ ---> 1691ce222bed
+Step 7/25 : RUN mkdir -p "/workspaces/u-boot-messung-forge-ghx" && chown vscode:vscode "/workspaces/u-boot-messung-forge-ghx"
+[2026-10-23T09:43:36.723Z]  ---> Running in fceeddfc677b
+[2026-10-23T09:43:39.152Z]  ---> Removed intermediate container fceeddfc677b
+ ---> ad1dd8a5248e
+Step 8/25 : RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+[2026-10-23T09:43:39.256Z]  ---> Running in 601769fe135b
+[2026-10-23T09:43:41.515Z]  ---> Removed intermediate container 601769fe135b
+ ---> d509a5a05561
+Step 9/25 : USER vscode
+[2026-10-23T09:43:41.627Z]  ---> Running in b84c45632162
+[2026-10-23T09:43:43.524Z]  ---> Removed intermediate container b84c45632162
+ ---> 5adf3cf7d7f3
+Step 10/25 : FROM dev_container_feature_content_temp as dev_containers_feature_content_source
+[2026-10-23T09:43:43.536Z]  ---> 640597bf83ab
+Step 11/25 : ARG _DEV_CONTAINERS_BASE_IMAGE=scratch
+[2026-10-23T09:43:43.647Z]  ---> Running in 1499bd86e1f7
+[2026-10-23T09:43:44.143Z]  ---> Removed intermediate container 1499bd86e1f7
+ ---> b964d7ad6a9e
+[2026-10-23T09:43:44.143Z] Step 12/25 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_feature_content_normalize
+[2026-10-23T09:43:44.156Z]  ---> 5adf3cf7d7f3
+Step 13/25 : USER root
+[2026-10-23T09:43:44.267Z]  ---> Running in 5df6e3ca5f79
+[2026-10-23T09:43:46.202Z]  ---> Removed intermediate container 5df6e3ca5f79
+ ---> e900dfea78ee
+Step 14/25 : COPY --from=dev_containers_feature_content_source /tmp/build-features/devcontainer-features.builtin.env /tmp/build-features/
+[2026-10-23T09:43:48.090Z]  ---> 04c9adbf2d2c
+Step 15/25 : RUN chmod -R 0755 /tmp/build-features/
+[2026-10-23T09:43:48.194Z]  ---> Running in 97ccc031ad45
+[2026-10-23T09:43:50.630Z]  ---> Removed intermediate container 97ccc031ad45
+ ---> 7c9157cbf4c6
+Step 16/25 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_target_stage
+ ---> 5adf3cf7d7f3
+Step 17/25 : USER root
+[2026-10-23T09:43:50.734Z]  ---> Running in 044ac2a4bd20
+[2026-10-23T09:43:52.602Z]  ---> Removed intermediate container 044ac2a4bd20
+ ---> c077e2ce6379
+Step 18/25 : RUN mkdir -p /tmp/dev-container-features
+[2026-10-23T09:43:52.602Z] 
+[2026-10-23T09:43:52.716Z]  ---> Running in 4963e30ba68a
+[2026-10-23T09:43:54.928Z]  ---> Removed intermediate container 4963e30ba68a
+ ---> 4d18cf431756
+Step 19/25 : COPY --from=dev_containers_feature_content_normalize /tmp/build-features/ /tmp/dev-container-features
+[2026-10-23T09:43:56.962Z]  ---> 233cb10801a8
+[2026-10-23T09:43:56.962Z] Step 20/25 : RUN echo "_CONTAINER_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'vscode' || grep -E '^vscode|^[^:]*:[^:]*:vscode:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env && echo "_REMOTE_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'vscode' || grep -E '^vscode|^[^:]*:[^:]*:vscode:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env
+[2026-10-23T09:43:57.066Z]  ---> Running in f498fa23ce1d
+[2026-10-23T09:43:59.328Z]  ---> Removed intermediate container f498fa23ce1d
+ ---> 0fdca8fe4236
+Step 21/25 : COPY --chown=root:root --from=dev_containers_feature_content_source /tmp/build-features/gh-cli_0 /tmp/dev-container-features/gh-cli_0
+[2026-10-23T09:43:59.329Z] 
+[2026-10-23T09:44:01.363Z]  ---> f4dc78901ee7
+[2026-10-23T09:44:01.363Z] Step 22/25 : RUN chmod -R 0755 /tmp/dev-container-features/gh-cli_0 && cd /tmp/dev-container-features/gh-cli_0 && chmod +x ./devcontainer-features-install.sh && ./devcontainer-features-install.sh
+[2026-10-23T09:44:01.477Z]  ---> Running in ff955f101de8
+[2026-10-23T09:44:01.729Z] ===========================================================================
+Feature       : GitHub CLI (via GitHub Releases)
+Description   : GitHub CLI is a command-line interface to GitHub for use in your terminal or your scripts.
+Id            : ghcr.io/devcontainers-extra/features/gh-cli
+Version       : 1.0.13
+Documentation : http://github.com/devcontainers-extra/features/tree/main/src/gh-cli
+Options       :
+    VERSION="latest"
+===========================================================================
+[2026-10-23T09:44:06.635Z] nanolayer
+[2026-10-23T09:44:10.663Z] cd /tmp/tmp66ehku0l && chmod +x -R . && _REMOTE_USER="vscode" _REMOTE_USER_HOME="/home/vscode" REPO="cli/cli" BINARYNAMES="gh" VERSION="latest" ASSETREGEX="" RELEASETAGREGEX="" BINLOCATION="/usr/local/bin" LIBNAME="" LIBLOCATION="/usr/local/lib" ADDITIONALFLAGS="" NANOLAYER_VERBOSE="" NANOLAYER_FORCE_CLI_INSTALLATION="" NANOLAYER_PROPAGATE_CLI_LOCATION="1" NANOLAYER_CLI_LOCATION="/tmp/nanolayer-2yHCRdK5UW/nanolayer" bash  -i  +H ./install.sh
+Found a pre-existing nanolayer which were given in env variable: /tmp/nanolayer-2yHCRdK5UW/nanolayer
+[2026-10-23T09:44:10.793Z] skipping usage of pre-existing nanolayer. (required version v0.5.6 does not match existing version 0.5.4)
+[2026-10-23T09:44:14.850Z] nanolayer
+[2026-10-23T09:44:16.107Z] 'gh_2.103.0_checksums.txt' filtered by '(\.sig$|\.text$|\.txt$|[Cc]hecksums|sha256|sha512|\.sha1$|\.md5$)' (negative)
+'gh_2.103.0_linux_386.deb' filtered by '(i386|\-386|_386)' (negative)
+'gh_2.103.0_linux_386.rpm' filtered by '(i386|\-386|_386)' (negative)
+'gh_2.103.0_linux_386.tar.gz' filtered by '(i386|\-386|_386)' (negative)
+'gh_2.103.0_linux_amd64.deb' filtered by '(\.deb|\.rpm|\.pkg|\.apk|\.[Aa]ppImage|\.snap)' (negative)
+'gh_2.103.0_linux_amd64.rpm' filtered by '(\.deb|\.rpm|\.pkg|\.apk|\.[Aa]ppImage|\.snap)' (negative)
+[2026-10-23T09:44:16.108Z] 'gh_2.103.0_linux_arm64.deb' filtered by '([Aa]rm64|ARM64)' (negative)
+'gh_2.103.0_linux_arm64.rpm' filtered by '([Aa]rm64|ARM64)' (negative)
+'gh_2.103.0_linux_arm64.tar.gz' filtered by '([Aa]rm64|ARM64)' (negative)
+'gh_2.103.0_linux_armv6.deb' filtered by '([Aa][Rr][Mm]v6)' (negative)
+'gh_2.103.0_linux_armv6.rpm' filtered by '([Aa][Rr][Mm]v6)' (negative)
+'gh_2.103.0_linux_armv6.tar.gz' filtered by '([Aa][Rr][Mm]v6)' (negative)
+'gh_2.103.0_macOS_amd64.zip' filtered by '([Mm]ac[Oo][Ss]|[Mm]ac\-[Oo][Ss]|\-osx\-|_osx_|[Dd]arwin|\.dmg)' (negative)
+'gh_2.103.0_macOS_arm64.zip' filtered by '([Aa]rm64|ARM64)' (negative)
+'gh_2.103.0_macOS_universal.pkg' filtered by '(\.deb|\.rpm|\.pkg|\.apk|\.[Aa]ppImage|\.snap)' (negative)
+'gh_2.103.0_windows_386.msi' filtered by '(i386|\-386|_386)' (negative)
+'gh_2.103.0_windows_386.zip' filtered by '(i386|\-386|_386)' (negative)
+'gh_2.103.0_windows_amd64.msi' filtered by '(windows|Windows|WINDOWS|win32|\-win\-|\.msi$|.msixbundle$|\.exe$)' (negative)
+'gh_2.103.0_windows_amd64.zip' filtered by '(windows|Windows|WINDOWS|win32|\-win\-|\.msi$|.msixbundle$|\.exe$)' (negative)
+'gh_2.103.0_windows_arm64.msi' filtered by '([Aa]rm64|ARM64)' (negative)
+'gh_2.103.0_windows_arm64.zip' filtered by '([Aa]rm64|ARM64)' (negative)
+resolved asset: gh_2.103.0_linux_amd64.tar.gz
+[2026-10-23T09:44:19.648Z] asset recognized as an archive file
+[2026-10-23T09:44:19.923Z] binary members found in archive are: ['gh_2.103.0_linux_amd64/bin/gh']
+[2026-10-23T09:44:20.197Z] archive recognized as library (contains additional files outside of requested binaries)
+extracting gh_2.103.0_linux_amd64.tar.gz into /usr/local/lib/gh
+[2026-10-23T09:44:20.524Z] linking /usr/local/lib/gh/gh_2.103.0_linux_amd64/bin/gh to /usr/local/bin/gh
+[2026-10-23T09:44:20.608Z] Done!
+[2026-10-23T09:44:23.490Z]  ---> Removed intermediate container ff955f101de8
+ ---> b073d044d967
+Step 23/25 : ARG _DEV_CONTAINERS_IMAGE_USER=root
+[2026-10-23T09:44:23.624Z]  ---> Running in 9c3dc0bf8464
+[2026-10-23T09:44:25.638Z]  ---> Removed intermediate container 9c3dc0bf8464
+ ---> 16add33b1a9a
+Step 24/25 : USER $_DEV_CONTAINERS_IMAGE_USER
+[2026-10-23T09:44:25.743Z]  ---> Running in 5417cd1140fd
+[2026-10-23T09:44:27.631Z]  ---> Removed intermediate container 5417cd1140fd
+ ---> cebfd9011e62
+Step 25/25 : LABEL devcontainer.metadata="[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"id\":\"ghcr.io/devcontainers-extra/features/gh-cli:1\"}, {\"postStartCommand\":\"sudo sh /usr/local/bin/u-boot-egress-init\",\"mounts\":[\"source=u-boot-messung-forge-ghx-workspace-\${devcontainerId},target=/workspaces/u-boot-messung-forge-ghx,type=volume\"],\"remoteUser\":\"vscode\",\"remoteEnv\":{\"GIT_TOKEN\":\"\${localEnv:GIT_TOKEN}\"}} ]"
+[2026-10-23T09:44:27.736Z]  ---> Running in 559f13d28d75
+[2026-10-23T09:44:29.559Z]  ---> Removed intermediate container 559f13d28d75
+ ---> fc1636d7d972
+[Warning] One or more build-args [_DEV_CONTAINERS_FEATURE_CONTENT_SOURCE] were not consumed
+[2026-10-23T09:44:29.642Z] Successfully built fc1636d7d972
+[2026-10-23T09:44:29.659Z] Successfully tagged u-boot-messung-forge-img-ghxk:latest
+{"outcome":"success","imageName":["u-boot-messung-forge-img-ghxk"],"ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}

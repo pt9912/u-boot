@@ -1,0 +1,312 @@
+== make build IMAGE=u-boot-messung-forge-ub (Repo-Stand: Arbeitsverzeichnis u-boot, HEAD 2e986785)
+make build exit=0 dauer=6.9s
+#18 unpacking to docker.io/library/u-boot-messung-forge-ub:latest 0.0s done
+#18 DONE 0.4s
+make: Verzeichnis „/Development/u-boot“ wird verlassen
+image=sha256:7566aa7f8cc476e573c8e7a2b5511864e6c56d20484020dabf8b465a9c8992a4 size=16812945 arch=amd64
+u-boot version 0.14.0-dev
+AUSSAGE u-boot-version=u-boot version 0.14.0-dev
+-- Arbeitsverzeichnis sauber? (git status --short, Anzahl Zeilen; Skripte der Messung selbst stehen darin)
+0
+-- sha256 der drei Vorlagen, aus denen die Projekte entstehen
+9c476fb6b44a9b9990c2ba3e8dfc634406d23e09d8c30300fcc608986c110049  /t/Dockerfile.tmpl
+bfbe3fbf14b850c9bce25ee21cfe8277c691fe33ed157f4c21b51cab87b5fb29  /t/devcontainer.json.tmpl
+53c7558132ea65e16c94c76c99a84a1fb75f6bc3c99e7cb5565f8dbc563bc974  /t/egress-init.sh.tmpl
+
+== Projekt bas (sandbox=ja, feature=keines)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+generate-exit=0
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+-- features und remoteEnv in der erzeugten devcontainer.json
+13:  "remoteEnv": {
+14:    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-  enabled: true
+6-  profile: sandbox
+7-  sandbox:
+8-    egress:
+9-      enabled: true
+10-    onUnavailable: warn
+
+== Projekt basn (sandbox=nein, feature=keines)
+devcontainer already up to date; no changes.
+generate-exit=0
+-- features und remoteEnv in der erzeugten devcontainer.json
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-    enabled: true
+
+== Projekt gh (sandbox=ja, feature=gh)
+config: devcontainer.featureSources.allow (unset) → https://ghcr.io/devcontainers/features/github-cli.
+config: devcontainer.features.gh.source (unset) → https://ghcr.io/devcontainers/features/github-cli.
+config: devcontainer.features.gh.enabled (unset) → true.
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-FA-DEV-006): devcontainer feature gh comes from the external source https://ghcr.io/devcontainers/features/github-cli; u-boot does not read its metadata, so the sandbox profile makes none of its promises for this feature (it can mount the container-engine socket or host paths, add capabilities and pull in further features)
+generate-exit=0
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+-- features und remoteEnv in der erzeugten devcontainer.json
+13:  "remoteEnv": {
+14:    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+16:  "features": {
+17:    "https://ghcr.io/devcontainers/features/github-cli:1": {}
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-  enabled: true
+6-  featureSources:
+7-    allow:
+8-      - https://ghcr.io/devcontainers/features/github-cli
+9-  profile: sandbox
+10-  sandbox:
+11-    onUnavailable: warn
+12-    egress:
+13-      enabled: true
+14-  features:
+15-    gh:
+16-      source: https://ghcr.io/devcontainers/features/github-cli
+
+== Projekt ghx (sandbox=ja, feature=ghx)
+config: devcontainer.featureSources.allow (unset) → https://ghcr.io/devcontainers-extra/features/gh-cli.
+config: devcontainer.features.gh.source (unset) → https://ghcr.io/devcontainers-extra/features/gh-cli.
+config: devcontainer.features.gh.enabled (unset) → true.
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-FA-DEV-006): devcontainer feature gh comes from the external source https://ghcr.io/devcontainers-extra/features/gh-cli; u-boot does not read its metadata, so the sandbox profile makes none of its promises for this feature (it can mount the container-engine socket or host paths, add capabilities and pull in further features)
+generate-exit=0
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+-- features und remoteEnv in der erzeugten devcontainer.json
+13:  "remoteEnv": {
+14:    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+16:  "features": {
+17:    "https://ghcr.io/devcontainers-extra/features/gh-cli:1": {}
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-  enabled: true
+6-  featureSources:
+7-    allow:
+8-      - https://ghcr.io/devcontainers-extra/features/gh-cli
+9-  profile: sandbox
+10-  sandbox:
+11-    onUnavailable: warn
+12-    egress:
+13-      enabled: true
+14-  features:
+15-    gh:
+16-      source: https://ghcr.io/devcontainers-extra/features/gh-cli
+
+== Projekt glabs (sandbox=ja, feature=glabs)
+config: devcontainer.featureSources.allow (unset) → https://ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli.
+config: devcontainer.features.glab.source (unset) → https://ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli.
+config: devcontainer.features.glab.enabled (unset) → true.
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-FA-DEV-006): devcontainer feature glab comes from the external source https://ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli; u-boot does not read its metadata, so the sandbox profile makes none of its promises for this feature (it can mount the container-engine socket or host paths, add capabilities and pull in further features)
+generate-exit=0
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+-- features und remoteEnv in der erzeugten devcontainer.json
+13:  "remoteEnv": {
+14:    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+16:  "features": {
+17:    "https://ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli:1": {}
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-  enabled: true
+6-  featureSources:
+7-    allow:
+8-      - https://ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli
+9-  profile: sandbox
+10-  sandbox:
+11-    onUnavailable: warn
+12-    egress:
+13-      enabled: true
+14-  features:
+15-    glab:
+16-      source: https://ghcr.io/skriptfabrik/devcontainer-features/gitlab-cli
+
+== Projekt glabp (sandbox=ja, feature=glabp)
+config: devcontainer.featureSources.allow (unset) → https://ghcr.io/postfinance/devcontainer-features/gitlab-cli.
+config: devcontainer.features.glab.source (unset) → https://ghcr.io/postfinance/devcontainer-features/gitlab-cli.
+config: devcontainer.features.glab.enabled (unset) → true.
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-FA-DEV-006): devcontainer feature glab comes from the external source https://ghcr.io/postfinance/devcontainer-features/gitlab-cli; u-boot does not read its metadata, so the sandbox profile makes none of its promises for this feature (it can mount the container-engine socket or host paths, add capabilities and pull in further features)
+generate-exit=0
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+-- features und remoteEnv in der erzeugten devcontainer.json
+13:  "remoteEnv": {
+14:    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+16:  "features": {
+17:    "https://ghcr.io/postfinance/devcontainer-features/gitlab-cli:1": {}
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-  enabled: true
+6-  featureSources:
+7-    allow:
+8-      - https://ghcr.io/postfinance/devcontainer-features/gitlab-cli
+9-  profile: sandbox
+10-  sandbox:
+11-    onUnavailable: warn
+12-    egress:
+13-      enabled: true
+14-  features:
+15-    glab:
+16-      source: https://ghcr.io/postfinance/devcontainer-features/gitlab-cli
+
+== Projekt glabz (sandbox=ja, feature=glabz)
+config: devcontainer.featureSources.allow (unset) → https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli.
+config: devcontainer.features.glab.source (unset) → https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli.
+config: devcontainer.features.glab.enabled (unset) → true.
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-FA-DEV-006): devcontainer feature glab comes from the external source https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli; u-boot does not read its metadata, so the sandbox profile makes none of its promises for this feature (it can mount the container-engine socket or host paths, add capabilities and pull in further features)
+generate-exit=0
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+-- features und remoteEnv in der erzeugten devcontainer.json
+13:  "remoteEnv": {
+14:    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+16:  "features": {
+17:    "https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli:1": {}
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-  enabled: true
+6-  featureSources:
+7-    allow:
+8-      - https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli
+9-  profile: sandbox
+10-  sandbox:
+11-    onUnavailable: warn
+12-    egress:
+13-      enabled: true
+14-  features:
+15-    glab:
+16-      source: https://ghcr.io/srzstephen/devcontainer-features/gitlab-cli
+
+== Projekt ghn (sandbox=nein, feature=gh)
+config: devcontainer.featureSources.allow (unset) → https://ghcr.io/devcontainers/features/github-cli.
+config: devcontainer.features.gh.source (unset) → https://ghcr.io/devcontainers/features/github-cli.
+config: devcontainer.features.gh.enabled (unset) → true.
+Updated devcontainer managed block (.devcontainer/devcontainer.json).
+generate-exit=0
+-- features und remoteEnv in der erzeugten devcontainer.json
+8:  "features": {
+9:    "https://ghcr.io/devcontainers/features/github-cli:1": {}
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-  enabled: true
+6-  featureSources:
+7-    allow:
+8-      - https://ghcr.io/devcontainers/features/github-cli
+9-  features:
+10-    gh:
+11-      source: https://ghcr.io/devcontainers/features/github-cli
+12-      enabled: true
+
+== Projekt ega (sandbox=ja, feature=keines)
+config: devcontainer.sandbox.egress.allow (unset) → gitlab.com.
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+generate-exit=0
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+gitlab.com                     user
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+-- features und remoteEnv in der erzeugten devcontainer.json
+13:  "remoteEnv": {
+14:    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-    enabled: true
+6-    profile: sandbox
+7-    sandbox:
+8-        onUnavailable: warn
+9-        egress:
+10-            enabled: true
+11-            allow:
+12-                - gitlab.com
+
+== Projekt kat (sandbox=ja, feature=keines)
+config: devcontainer.features.git.enabled (unset) → true.
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+generate-exit=0
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+-- features und remoteEnv in der erzeugten devcontainer.json
+13:  "remoteEnv": {
+14:    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+16:  "features": {
+17:    "ghcr.io/devcontainers/features/git:1": {}
+-- u-boot.yaml (Abschnitt devcontainer)
+4:devcontainer:
+5-  enabled: true
+6-  profile: sandbox
+7-  sandbox:
+8-    egress:
+9-      enabled: true
+10-    onUnavailable: warn
+11-  features:
+12-    git:
+13-      enabled: true
