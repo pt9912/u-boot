@@ -545,3 +545,72 @@ func TestConfigSet_FeatureSource_FeatureMissing(t *testing.T) {
 		t.Errorf("err = %v, want ErrConfigValueInvalid (allowlist enforcement)", err)
 	}
 }
+
+// seedForgeVersionWithoutSource is a u-boot.yaml whose `gh` or `glab` entry
+// carries a `version:` without `source:`, the shape every command of the
+// config family and `doctor` and `generate devcontainer` reject.
+func seedForgeVersionWithoutSource(t *testing.T, fs *fakeFS, key string) []byte {
+	t.Helper()
+	body := []byte("schemaVersion: 1\nproject:\n  name: t-uboot-config\n" +
+		"devcontainer:\n  enabled: true\n  features:\n    " + key + ":\n      enabled: true\n      version: \"9.9.9\"\n")
+	seedConfigUbootYAMLWithDevcontainer(t, fs, string(body))
+	return body
+}
+
+// A `version:` without `source:` on `gh` or `glab` makes every further
+// `config set` end with ErrConfigSchemaInvalid (exit code 10) and leaves the
+// file byte-identical; the way out is to remove the `version:` entry by hand.
+func TestConfigSet_ForgeVersionWithoutSource_RejectsEverySet(t *testing.T) {
+	t.Parallel()
+	for _, key := range []string{"gh", "glab"} {
+		for _, set := range []struct{ path, value string }{
+			{"project.name", "other-name"},
+			{"devcontainer.features." + key + ".enabled", "false"},
+		} {
+			t.Run(key+"/"+set.path, func(t *testing.T) {
+				t.Parallel()
+				svc, fs := newConfigService(t)
+				before := seedForgeVersionWithoutSource(t, fs, key)
+				_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+					BaseDir: configTestBaseDir,
+					Path:    mustConfigPath(t, set.path),
+					Value:   set.value,
+				})
+				if !errors.Is(err, driving.ErrConfigSchemaInvalid) {
+					t.Fatalf("Set error = %v, want a wrap of ErrConfigSchemaInvalid (exit code 10)", err)
+				}
+				after, _ := fs.ReadFile(filepath.Join(configTestBaseDir, "u-boot.yaml"))
+				if string(after) != string(before) {
+					t.Errorf("u-boot.yaml changed by a rejected Set:\n%s", after)
+				}
+			})
+		}
+	}
+}
+
+// Characterisation of the state before the `version` check of `config set`
+// follows `generate`: `config set …gh.version <value>` on a valid file
+// without `source:` ends without error and writes the entry, after which the
+// file is the shape of the test above. The assertion turns to a rejection
+// with the follow-up that checks the value on Set.
+func TestConfigSet_ForgeVersionWithoutSource_SetItselfSucceeds(t *testing.T) {
+	t.Parallel()
+	svc, fs := newConfigService(t)
+	seedConfigUbootYAMLWithDevcontainer(t, fs, "schemaVersion: 1\nproject:\n  name: t-uboot-config\n"+
+		"devcontainer:\n  enabled: true\n  features:\n    gh:\n      enabled: true\n")
+	resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "devcontainer.features.gh.version"),
+		Value:   "2.0.0",
+	})
+	if err != nil {
+		t.Fatalf("Set: %v", err)
+	}
+	if resp.NewValue != "2.0.0" {
+		t.Errorf("NewValue = %q, want 2.0.0", resp.NewValue)
+	}
+	after, _ := fs.ReadFile(filepath.Join(configTestBaseDir, "u-boot.yaml"))
+	if !strings.Contains(string(after), "2.0.0") {
+		t.Errorf("u-boot.yaml does not carry the written version:\n%s", after)
+	}
+}

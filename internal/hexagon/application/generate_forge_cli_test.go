@@ -618,3 +618,23 @@ func TestGenerateDevcontainer_ForgeCLI_ActivateAndDeactivateLater(t *testing.T) 
 		})
 	}
 }
+
+// The way out of the rejection of X2: the same configuration without the
+// `version:` entry generates without error and writes the Dockerfile block.
+func TestGenerateDevcontainer_ForgeCLI_RemovingVersionEntryLetsGenerateRun(t *testing.T) {
+	t.Parallel()
+	for _, key := range []string{"gh", "glab"} {
+		for pname, head := range map[string]string{"default profile": defaultProfile, "sandbox profile": sandboxProfile} {
+			t.Run(key+"/"+pname, func(t *testing.T) {
+				t.Parallel()
+				svc, fs := newGenerateService(t)
+				seedUBootYAMLWithFeatures(t, fs, head+"  features:\n    "+key+":\n      enabled: true\n")
+				if _, err := generateSandbox(svc, false); err != nil {
+					t.Fatalf("generate without the version entry: %v", err)
+				}
+				raw, _ := fs.ReadFile(dockerfilePath())
+				assertForgeBlock(t, string(raw), forgeSpecs()[key])
+			})
+		}
+	}
+}

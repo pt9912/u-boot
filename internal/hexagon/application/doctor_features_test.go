@@ -364,3 +364,28 @@ func TestDoctor_FeaturesAllowlist_SandboxProfileAndAllowlistViolationTogether(t 
 		}
 	}
 }
+
+// A `version:` without `source:` on `gh` or `glab` is an Error of the check
+// `uboot.yaml.valid`, with the key in the message.
+func TestDoctor_UbootYaml_ErrorOnForgeVersionWithoutSource(t *testing.T) {
+	t.Parallel()
+	for _, key := range []string{"gh", "glab"} {
+		t.Run(key, func(t *testing.T) {
+			t.Parallel()
+			svc, fs, _, _, _ := newDoctorService(t)
+			seedDoctorUbootYAMLFeatures(t, fs, "schemaVersion: 1\nproject:\n  name: demo\n"+
+				"devcontainer:\n  features:\n    "+key+":\n      enabled: true\n      version: \"9.9.9\"\n")
+			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+			if err != nil {
+				t.Fatalf("Check: %v", err)
+			}
+			d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+			if d.Severity != domain.SeverityError {
+				t.Errorf("Severity = %v, want Error", d.Severity)
+			}
+			if !strings.Contains(d.Message, "features."+key+".version") {
+				t.Errorf("Message does not name the key: %q", d.Message)
+			}
+		})
+	}
+}
