@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-22.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-23.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-devcontainer-shell-und-zweites-up`](../welle-devcontainer-shell-und-zweites-up.md) (Shell im Devcontainer ohne Editor, `u-boot devcontainer shell`, und erneutes `up` nach dem Zustand des Containers; sechs Slices, der Release-Cut zuletzt; Release `v0.14.0`).
 
-**v0.14.0 (`u-boot devcontainer shell` und erneutes `up` nach dem Zustand des Containers; trägt die Welle `welle-devcontainer-shell-und-zweites-up`; Lastenheft 0.21.0)** — Slice: [`slice-v1-release-cut-v0.14.0`](slice-v1-release-cut-v0.14.0.md) (Push und Tag stehen aus).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
@@ -101,6 +101,7 @@ flowchart LR
 | welle-devcontainer-start-ohne-editor (Devcontainer ohne Editor und ohne Node/CLI auf dem Host starten: `u-boot devcontainer up [--recreate]` und `down`, Dev-Container-CLI im lokal gebauten Hilfs-Image, Docker-Socket nur für den Befehl und ausgewiesen; Zusage Linux-Host `amd64` mit lokaler Engine, Colima nicht zugesagt; Lastenheft 0.18.0, [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), [`ADR-0029`](../../adr/0029-devcontainer-start-exit-11-und-socket-haltung.md); Release `v0.13.0` (das nächste Minor nach `v0.12.0`, Nummer vom Projektinhaber bestätigt am 2026-10-21); Aufträge an den Release-Cut in der Welle-Datei §7) | 2026-10-21 | [`slice-v2-spec-devcontainer-start`](../done/slice-v2-spec-devcontainer-start.md) (Detailquelle); [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); [`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md); [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md); [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md); Validator-Bericht [`2026-10-21-validation-welle-devcontainer-start-ohne-editor`](../../../reviews/2026-10-21-validation-welle-devcontainer-start-ohne-editor.md); Welle-Datei [`welle-devcontainer-start-ohne-editor`](../done/welle-devcontainer-start-ohne-editor.md) §7 |
 | v0.13.0 (`u-boot devcontainer up [--recreate]` und `down` ohne Editor, zugesagt für einen Linux-Host `amd64` mit lokaler Engine; DNS zu den Upstream-Resolvern nur für den lokalen Resolver, Wiederholungslauf des Egress-Startscripts in einer Transaktion, Warnung beim Ersetzen von `egress-init.sh`; trägt [`welle-devcontainer-start-ohne-editor`](../done/welle-devcontainer-start-ohne-editor.md) und die Slices seit `v0.12.0`) | 2026-10-21 | [`slice-v1-release-cut-v0.13.0`](../done/slice-v1-release-cut-v0.13.0.md) — Tag `v0.13.0` auf `df4e5cc3` |
 | v0.13.1 (Patch-Release vor `v0.14.0`, ohne Welle-Datei: im Sandbox-Profil ist `docker-cli` ein fachlicher Fehler (Exit-Code `10`, `doctor` meldet `11`), die Lockerungen von `go` und Features aus externen Quellen sind in der Befehlsausgabe ausgewiesen, die Socket-Aussagen von `devcontainer up`, Hilfe und Handbuch sind für beide Profile berichtigt; Eintrag *Security* und Security Advisory `GHSA-9269-r4v3-8vcg`; Go-Toolchain 1.27.3; Lastenheft 0.21.0, [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md); trägt den Bugfix [`slice-v1-sandbox-features-socket-und-lockerungen`](../done/slice-v1-sandbox-features-socket-und-lockerungen.md)) | 2026-10-22 | [`slice-v1-release-cut-v0.13.1`](../done/slice-v1-release-cut-v0.13.1.md) — Tag `v0.13.1` auf `52e368e4` |
+| v0.14.0 (`u-boot devcontainer shell`, interaktive Shell im Devcontainer ohne Editor, und `u-boot devcontainer up` urteilt nach dem Zustand des Containers: Exit-Code `11` auch beim erneuten `up`, Erfolgszeile `already running`, Feld `alreadyRunning`; zugesagt für einen Linux-Host `amd64` mit lokaler Docker-Engine, Colima nicht zugesagt; Lastenheft 0.21.0; trägt die Welle `welle-devcontainer-shell-und-zweites-up` und die Slices seit `v0.13.1`) | 2026-10-23 | [`slice-v1-release-cut-v0.14.0`](../done/slice-v1-release-cut-v0.14.0.md) — Tag `v0.14.0` auf `68f3c94f` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen
