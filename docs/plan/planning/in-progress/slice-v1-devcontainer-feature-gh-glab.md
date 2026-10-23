@@ -48,7 +48,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 - **`arm64`** — die Prüfsummen stehen im Block, ein Bau auf `arm64` ist nicht gemessen und nicht zugesagt (Zusage-Menge Linux `amd64` mit lokaler Docker-Engine, Welle §6); der Docker-Test läuft auf dem Host, den der Lauf hat.
 - **Aufrufe mit gültigem Token, Hosts nach der Anmeldung, Telemetrie- und Update-Hosts, `glab duo`/`glab orbit`, selbst gehostete Instanzen** — vom Projektinhaber aus der Zusage genommen ([`ADR-0035`](../../adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) Punkte f und h); ein Test dafür wäre eine Zusage.
 - **Ein Credential-Helper für `gh`/`glab`, `gh auth setup-git`, Voreinstellungen in `containerEnv`** — Entscheidungen 5 und 7 der ADR; der vorhandene Helper für `GIT_TOKEN` (`Dockerfile.tmpl`, `git config --system credential.helper`) bleibt unberührt.
-- **N1 bis N3 von [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md)** ([`slice-v1-katalog-features-quellen-und-freigabe`](slice-v1-katalog-features-quellen-und-freigabe.md)) — der Weg ohne `source:` braucht weder den Render-Schlüssel einer externen Quelle noch die Freigabeprüfung in `generate` (Welle §5, Frage 2).
+- **N1 bis N3 von [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md)** ([`slice-v1-katalog-features-quellen-und-freigabe`](../open/slice-v1-katalog-features-quellen-und-freigabe.md)) — der Weg ohne `source:` braucht weder den Render-Schlüssel einer externen Quelle noch die Freigabeprüfung in `generate` (Welle §5, Frage 2).
 
 ## 2. Definition of Done
 
