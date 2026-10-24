@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-23.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-24.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Ohne Welle in Arbeit: [`slice-v1-config-set-validiert-feature-version`](slice-v1-config-set-validiert-feature-version.md) (`config set` prüft die `version` eines Dockerfile-Block-Features wie `generate`).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
