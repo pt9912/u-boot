@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** `lastenheft.md` §4.3 ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)), §4.1 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16 (Historie), Versionsfeld. `SPEC-*` und `ARC-*` berührt der CR nicht (das tut `slice-v2-spec-ollama-cloud` nach dem Code). Der Verweis zeigt aufwärts: Das Lastenheft nennt diesen Slice nie.
 
-**Verantwortlich:** — (gesetzt beim Start); Freigaben: Projektinhaber.
+**Verantwortlich:** Implementer (Start 2026-10-24); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-24.
 
@@ -249,7 +249,31 @@ aus §6 seinen Ausgang; die Liefer-Punkte der DoD bleiben leer
 
 Reihenfolge dieser Sektion: Version und Start · Freigabe je Stelle (Rückfrage beim Projektinhaber) · Vorab-Suche mit Fundstellen · Beleg-Tabelle (Bedingung → Zusage-Zeile oder Test) · Verifikation mit Exit-Codes · Closure.
 
-*(Wird beim Start und bei der Closure gefüllt.)*
+### Version und Start
+
+Start am 2026-10-24 (`date +%F`, Ortszeit). Versionsfeld gelesen: `0.22.0` (Zeile 9), letzte Historie-Zeile `0.22.0`. Vergeben: **`0.23.0`**. `in-progress/` trug vorher nur `carveouts.md`, `README.md`, `roadmap.md`. Angaben von [`slice-cr-lastenheft-messstaende`](../open/slice-cr-lastenheft-messstaende.md) (Version, Zeilen 412, 472, 474, 1588, 1593, 1594, 1596) und seiner Zeile in `open/README.md` sind nachgezogen.
+
+### Freigabe je Stelle
+
+Projektinhaber, 2026-10-24, je Stelle eigene Rückfrage, Antwort „Freigeben wie vorgelegt“ (Vorlage ungekürzt mit *Alt* und *Neu*):
+
+| Stelle | Entscheidung | Wortlaut |
+|---|---|---|
+| 1, 2, 3, 4, 5, 6 | Ja | wie in §1, Zeichen für Zeichen; Links als Anker innerhalb der Datei |
+| 7 | Ja | Version beim Start vergeben (`0.23.0`), Historie-Zeile mit Datum 2026-10-24, sonst Wortlaut §1 |
+| 8 | Ja (keine Änderung) | wie in §1 |
+
+Fragen: F1 `ollama.com` genannt, `host.docker.internal` nicht; F2 zwei Zusage-Mengen bis zum Messstände-CR; F3 Halbsatz „Gemessen ist das auf …“ bleibt; F4 „Cloud-Modelle“ ohne Namen; F5 Zusatzwarnung nicht gesondert unter `--quiet`; F6 Sätze ohne eigene Z-Zeile bleiben, Beleg ist der Test des Code-Slice (alle Standard). **Abweichung gegen den Entwurf in §1:** keine.
+
+### Vorab-Suche (Implementer, 2026-10-24)
+
+`grep -n -i -F` über `spec/lastenheft.md` auf `Anschluss an einen Ollama`, `ollama-host`: Treffer nur die neuen Stellen (Zeilen 410, 418, 1604) und die Chronik-Zeile `0.15.0` (Zeile 1596, Klasse D, bleibt). Dieselben Suchwörter über `harness/`, `docs/user/`, `docs/maintainer/`, `README.md`, `README.de.md`, `CHANGELOG.md`, `spec/spezifikation.md`, `spec/architecture.md`: Treffer außerhalb des Slice, bewusst bis zu den Folge-Slices stehen geblieben: `spec/spezifikation.md` Zeile 739 ([`SPEC-047`](../../../../spec/spezifikation.md#spec-047--feature-ollama-im-sandbox-devcontainer-installation-volume-meldungen-und-grenzen), „Nicht zugesagt. GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts, …“, widerspricht dem Lastenheft bis `slice-v2-spec-ollama-cloud`), `docs/user/benutzerhandbuch.md` Zeile 2043 (gleiche Aufzählung) und Zeile 2023 („Cloud-Modelle sind nicht enthalten“), `README.de.md` Zeile 14 („Cloud-Modelle von Ollama sind nicht enthalten“). Weitere Spiegelstellen im Lastenheft (Befehlsübersicht, Feature-Aufzählungen, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)): keine Aussage über den Anschluss oder Cloud-Modelle gefunden (Suche `Cloud`, `Ollama`, `Anschluss` im Lastenheft: nur die genannten Stellen und Zeile 1394 „Cloud-Provisioning“).
+
+### Ist-Stand der Änderung
+
+Geänderte Stellen in `spec/lastenheft.md` (Zeilen am Stand `0.23.0`): Stelle 1 Zeile 410; Stelle 2 Zeile 412 (Aufzählung); Stelle 3 Zeile 414 (neuer Absatz); Stelle 4 Zeile 418 (neuer Absatz); Stelle 5 Zeile 460 ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)); Stelle 6 Zeile 191 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) Ausnahme 1); Stelle 7 Zeile 9 und Zeile 1604.
+
+*(Beleg-Tabelle, Verifikation und Closure werden von Reviewer, Verifier und bei der Closure gefüllt.)*
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

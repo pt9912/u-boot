@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; vier Slices mit Datei (beide Messungen, die Folge-ADR [`ADR-0036`](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), Ausgang A, und der Lastenheft-CR [`slice-cr-lastenheft-ollama-cloud-modelle`](../in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md) vor dem Code-Slice), drei weitere benannt ohne Datei (Code, Spezifikation, Release-Cut zuletzt); Release `v0.16.0`).
 
-Nichts in Arbeit.
+In Arbeit: [`slice-cr-lastenheft-ollama-cloud-modelle`](slice-cr-lastenheft-ollama-cloud-modelle.md) (`welle-ollama-cloud-modelle`).
 
 ## Nächste Wellen
 
