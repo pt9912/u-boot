@@ -165,6 +165,6 @@ Ein Sicherheitsbefund zum Relay oder zur Erreichbarkeit des Host-Servers aus dem
 |---|---|---|
 | 2026-10-24 | Entwurf mit den Entscheidungen des Projektinhabers vom selben Tag (a bis d) und Empfehlungen für den Rest; `Proposed` | Auftrag des Projektinhabers |
 | 2026-10-24 | Der Projektinhaber entscheidet die Rückfragen O1 (K2), O2 (Warnung), O3 (bestätigt) und gibt die Punkte j bis m frei; Status bleibt `Proposed` | Rückfragen im Gespräch |
-| 2026-10-24 | Review-Befunde und Nachlauf-Befunde eingearbeitet (Referenzmodell, Pfad je Zusage-Zeile, Rendering-Pfad von `ollama-host`, Sichtbarkeit unter `--quiet` samt `LH-FA-CLI-005`, Herkunft, Reichweite der Messlage); Status bleibt `Proposed` | Review-Reports vom selben Tag |
+| 2026-10-24 | Review-Befunde und Nachlauf-Befunde eingearbeitet (Referenzmodell, Pfad je Zusage-Zeile, Rendering-Pfad von `ollama-host`, Sichtbarkeit unter `--quiet` samt [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Herkunft, Reichweite der Messlage); Status bleibt `Proposed` | Review-Reports vom selben Tag |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit `Supersedes ADR-0036` (Baseline-Regelwerk `modul-04-adrs.md` §Hard Rule für Accepted-ADRs).
