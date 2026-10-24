@@ -1,0 +1,28 @@
+== Vorlauf (Sicherung vor dem ersten Lauf), 2026-10-24T10:49:54.572Z
+-- Namen der Umgebungsvariablen dieses Skripts (nach der Bereinigung im selben Prozess; Werte werden nicht ausgegeben)
+HOME OLDPWD PATH PWD SHLVL USER WORK _ 
+umgebung-pruefung exit=0 (0 = kein verbotener Name)
+-- Gegenprobe der Pruefung: derselbe Aufruf mit gesetzten Namen (Platzhalterwert) muss anschlagen
+VERBOTENER NAME in der Umgebung: GITLAB_TOKEN
+VERBOTENER NAME in der Umgebung: OLLAMA_HOST
+VERBOTENER NAME in der Umgebung: OLLAMA_API_KEY
+VERBOTENER NAME in der Umgebung: GIT_TOKEN
+VERBOTENER NAME in der Umgebung: ANTHROPIC_API_KEY
+VERBOTENER NAME in der Umgebung: GH_TOKEN
+VERBOTENER NAME in der Umgebung: ANTHROPIC_AUTH_TOKEN
+gegenprobe exit=1
+-- die Variablen des Hosts, die einen Zugang tragen koennten, sind im Messlauf nicht gesetzt:
+ANTHROPIC_API_KEY: ungesetzt
+ANTHROPIC_AUTH_TOKEN: ungesetzt
+GH_TOKEN: ungesetzt
+GITLAB_TOKEN: ungesetzt
+GIT_TOKEN: ungesetzt
+OLLAMA_API_KEY: ungesetzt
+OLLAMA_HOST: ungesetzt
+-- redact-probe.sh
+redact-probe: 32 Formen und ein Schluesselblock geschwaerzt, 15 neutrale Zeilen unveraendert
+redact-probe exit=0
+-- Stand der Sicherung
+AUSSAGE sicherung-stand=37f7860a6cabed0a1ff12d47177857c1cec273aa1ba5ff2e5a88fd095a0a1fbd
+AUSSAGE umgebung-pruefung=ok
+AUSSAGE redact-probe=ok

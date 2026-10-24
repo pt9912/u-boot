@@ -17,7 +17,7 @@ Anlass: Entscheidung des Projektinhabers vom 2026-10-24 (Rückfrage zu Frage 2 d
 
 **Berührte Spec-Stellen:** [`SPEC-047`](../../../../spec/spezifikation.md#spec-047--feature-ollama-im-sandbox-devcontainer-installation-volume-meldungen-und-grenzen) (Feature `ollama`) — der Slice **liest** sie und ändert keine; die Nachführung folgt im Spezifikations-Slice der Welle. Das Lastenheft ändert nur der CR. Der Verweis zeigt **aufwärts**: Lastenheft und Spezifikation nennen diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Rolle Implementer)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-24.
 
