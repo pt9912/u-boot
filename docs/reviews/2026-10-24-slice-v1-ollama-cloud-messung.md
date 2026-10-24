@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (`.harness/skills/reviewer.md`), frischer Kontext
 * Gegenstand: `git diff e60956c3..HEAD` (HEAD `23639d60`), Slice
-  [`slice-v1-ollama-cloud-messung`](../plan/planning/in-progress/slice-v1-ollama-cloud-messung.md)
+  [`slice-v1-ollama-cloud-messung`](../plan/planning/done/slice-v1-ollama-cloud-messung.md)
   der Welle `welle-ollama-cloud-modelle`: Skripte `tools/messung/ollama-cloud/`, Messprotokoll mit 22 Rohdaten-Dateien unter dem Protokollordner der Messung
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), `AGENTS.md` §3.7, §3.9, §3.10
 * Nicht Gegenstand: DoD-Prüfung (Verifier)

@@ -2,7 +2,7 @@
 
 * Rolle: Verifier (`harness/verification.md`), frischer Kontext
 * Gegenstand: `git diff e60956c3..HEAD` (HEAD `952cb06c`), Slice
-  [`slice-v1-ollama-cloud-messung`](../plan/planning/in-progress/slice-v1-ollama-cloud-messung.md)
+  [`slice-v1-ollama-cloud-messung`](../plan/planning/done/slice-v1-ollama-cloud-messung.md)
   (Welle [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md))
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)
 * Review: [`2026-10-24-slice-v1-ollama-cloud-messung.md`](2026-10-24-slice-v1-ollama-cloud-messung.md) (HIGH-1, MEDIUM-1, LOW und INFO in `952cb06c` behoben)
@@ -108,7 +108,7 @@ Aufräumen zusätzlich selbst geprüft: `docker ps -a`, `docker images`, `docker
 
 * `kategorie`: LOW (Plan-Konsistenz)
 * `quelle`: `AGENTS.md` §3.10 (Zustandsmarker beim Ablauf berichtigen), Slice §2 DoD 3 gegen §5
-* `pfad`: [der Slice](../plan/planning/in-progress/slice-v1-ollama-cloud-messung.md), §5 *Closure-Trigger* („Suche über `docs/messungen/` und `tools/messung/` leer“) und DoD 3 (Kennzeichen „vom Verifier gelten zu lassen oder zu verwerfen“)
+* `pfad`: [der Slice](../plan/planning/done/slice-v1-ollama-cloud-messung.md), §5 *Closure-Trigger* („Suche über `docs/messungen/` und `tools/messung/` leer“) und DoD 3 (Kennzeichen „vom Verifier gelten zu lassen oder zu verwerfen“)
 * `befund`: §5 trägt weiter die Fassung, die DoD 3 ersetzt, und ist mit dem Kriterium „DoD vollständig“ nicht erfüllbar (Suche über den Gesamtbestand: Exit 1). Das Kennzeichen in DoD 3 bleibt nach meiner Entscheidung stehen.
 * `risiko`: Der Slice wird mit zwei widersprüchlichen Closure-Kriterien geschlossen; ein späterer Leser wertet §5 als nicht erfüllt.
 * `empfehlung`: Planner gleicht §5 an DoD 3 an und ersetzt das Kennzeichen durch den Verweis auf diese Entscheidung (Abschnitt *Entscheidung zur Planänderung DoD 3* dieses Reports). Nicht von mir editiert.

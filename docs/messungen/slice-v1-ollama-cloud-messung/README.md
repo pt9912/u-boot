@@ -1,7 +1,7 @@
 # Messprotokoll: Cloud-Modelle von Ollama mit Claude Code im Sandbox-Devcontainer — Hosts, Fehlertext, Verhalten bis zur Anmeldung, ohne Konto
 
 Rohdaten und Ablauf der Messung des Slice
-[`slice-v1-ollama-cloud-messung`](../../plan/planning/in-progress/slice-v1-ollama-cloud-messung.md).
+[`slice-v1-ollama-cloud-messung`](../../plan/planning/done/slice-v1-ollama-cloud-messung.md).
 Skripte und Hilfsdateien liegen unter `tools/messung/ollama-cloud/` (Ablage: [`docs/messungen/README.md`](../README.md)).
 Dieses Protokoll liefert **Messwerte und eine Liste des Ungemessenen**; es entscheidet nichts und enthält keinen Wortlaut für das Lastenheft
 (Entscheidung: Folge-ADR der Welle; Anforderungen: [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
