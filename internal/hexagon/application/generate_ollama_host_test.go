@@ -266,6 +266,14 @@ func TestGenerateDevcontainer_OllamaHost_InactiveIsByteIdentical(t *testing.T) {
 				if !reflect.DeepEqual(files, wantFiles) {
 					t.Errorf("generated files differ from the run without the entry:\n%v\n---\n%v", files, wantFiles)
 				}
+				// The comparison above runs against the same build; this
+				// literal pins the shape of the existing outputs: a
+				// configuration without any container option has no `runArgs`
+				// key (not even an empty one).
+				if !strings.Contains(hname, "egress") && !strings.Contains(hname, "podman") &&
+					strings.Contains(files[".devcontainer/devcontainer.json"], "runArgs") {
+					t.Errorf("devcontainer.json carries a runArgs key although no option is configured:\n%s", files[".devcontainer/devcontainer.json"])
+				}
 				if n := len(hostNotices(got.resp.Warnings)); n != 0 {
 					t.Errorf("notices = %d, want 0 for an inactive entry", n)
 				}
