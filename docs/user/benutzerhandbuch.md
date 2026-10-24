@@ -1060,7 +1060,7 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `ollama` | Ollama (lokale Sprachmodelle, nur CPU); wirkt nur im Sandbox-Profil. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv (SHA-256 geprüft, vom Upstream nicht signiert; `u-boot generate devcontainer` weist das aus), dazu ein benanntes Volume für die Modelle; keine Optionen, `version` nur zusammen mit `source` (siehe [Ollama](#ollama-optional)) |
 | `gh` | GitHub-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `cli/cli` (SHA-256 geprüft, nur das Programm `gh` entpackt; keine Signatur gefunden (nach Suchmuster, nicht abschließend), die GitHub-Attestierung des Projekts prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` (siehe [Forge-CLIs](#forge-clis-optional)) |
 | `glab` | GitLab-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `gitlab-org/cli` (SHA-256 geprüft, nur das Programm `glab` entpackt; keine Signatur gefunden (nach Suchmuster, nicht abschließend); `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` (siehe [Forge-CLIs](#forge-clis-optional)) |
-| `ollama-host` | Anschluss an einen Dienst des Hosts. Kein OCI-Feature und kein Dockerfile-Block: `u-boot generate devcontainer` schreibt genau eine Zeile in `runArgs` der `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, im Standard- und im Sandbox-Profil, und weist den Anschluss beim Erzeugen aus (im Sandbox-Profil als Sicherheitslockerung, auch unter `--quiet`). `u-boot` startet keinen Relay, setzt keine Variable und trägt keinen Host in die Egress-Liste ein; keine Optionen, `version` nur zusammen mit `source` |
+| `ollama-host` | Anschluss an einen Dienst des Hosts. Kein OCI-Feature und kein Dockerfile-Block: `u-boot generate devcontainer` schreibt genau eine Zeile in `runArgs` der `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, im Standard- und im Sandbox-Profil, und weist den Anschluss beim Erzeugen aus (im Sandbox-Profil als Sicherheitslockerung, auch unter `--quiet`). `u-boot` startet keinen Relay, setzt keine Variable und trägt keinen Host in die Egress-Liste ein; keine Optionen, `version` nur zusammen mit `source` (siehe [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)) |
 
 #### Externe Feature-Quellen freigeben
 
@@ -1179,6 +1179,11 @@ ein. Für die Features gilt:
   `u-boot generate devcontainer` beide als Sicherheitslockerung aus, je eine
   Warnung, auch unter `--quiet`; `u-boot` schreibt sie nicht in
   `devcontainer.json`. Ohne Sandbox-Profil weist `u-boot` sie nicht aus.
+- **`ollama-host`:** Der Anschluss an einen Dienst des Hosts ist im Sandbox-Profil eine
+  Sicherheitslockerung. `u-boot generate devcontainer` weist ihn mit einer Warnung aus, auch
+  unter `--quiet`; `u-boot` schreibt dafür genau eine Zeile in `runArgs` der `devcontainer.json`
+  (siehe
+  [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)).
 - **Features aus einer externen Quelle** (siehe oben, *Externe Feature-Quellen
   freigeben*): Im Sandbox-Profil weist `u-boot generate devcontainer` jedes
   aktivierte Feature mit einer Warnung aus, auch unter `--quiet`. `u-boot` liest
@@ -1610,6 +1615,7 @@ Standardmäßig erlaubt sind:
 | Feature `ollama` | `registry.ollama.ai`, `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com` (Modell-Pull; Stabilität des zweiten Namens nicht gemessen: siehe [Ollama](#ollama-optional)) |
 | Feature `gh` | `api.github.com`, `github.com` (beide stehen schon in der Zeile „immer“; Hosts nach einer Anmeldung nicht: siehe [Forge-CLIs](#forge-clis-optional)) |
 | Feature `glab` | `gitlab.com` (Hosts nach einer Anmeldung nicht: siehe [Forge-CLIs](#forge-clis-optional)) |
+| Feature `ollama-host` | keine zusätzlichen Hosts (siehe [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)) |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
 
@@ -1908,7 +1914,10 @@ keinen Berechtigungsmodus.
   bevor Sie den Container starten (Quelle: Dokumentation von Anthropic, Stand
   2026-10-17: der Schlüssel hat Vorrang vor dem Login mit einem Abonnement). Ist die
   Variable auf dem Host nicht gesetzt, bleibt sie im Container leer; die CLI
-  behandelt das wie einen fehlenden Schlüssel (gemessen: „Not logged in“).
+  behandelt das wie einen fehlenden Schlüssel (gemessen: „Not logged in“). Für
+  Cloud-Modelle von Ollama gilt die Zusage nur bei nicht gesetztem `ANTHROPIC_API_KEY` im
+  Aufruf; ob eine leere Variable dabei wie eine nicht gesetzte wirkt, ist nicht gemessen
+  (siehe [Ollama](#ollama-optional)).
   `u-boot` reicht nur diese eine Variable durch; andere Wege (etwa ein Token mit
   `CLAUDE_CODE_OAUTH_TOKEN` oder ein Login mit `/login` im Container) gehören nicht zur
   Zusage und sind nicht gemessen. Wohin ein Login im Container seine Zugangsdaten
@@ -2018,16 +2027,112 @@ ollama run smollm2:135m "Reply with the single word OK."
   ersten Lauf (8,7 und 10,5 Sekunden, an einem Netzstandort) über genau diese zwei Hosts, die dort
   mitgeschnitten wurden; im zweiten Lauf gelang der Pull ebenfalls, die Hosts sind dort nicht
   mitgeschnitten;
-  `ollama.com`, `example.com` und `huggingface.co` ließen sich nicht auflösen. `ollama.com` ist nicht aufgenommen: gesperrt
-  meldet der Server beim Start zwei Warnzeilen, Start, Pull und Lauf funktionierten
-  (gemessen).
-- **Cloud-Modelle sind nicht enthalten:** Ein Cloud-Modell von Ollama (Modellname mit der
-  Endung `-cloud`, etwa `gpt-oss:120b-cloud`) lässt sich ziehen: `ollama pull` meldet `success`,
-  und das Modell steht in `ollama list`. Es läuft aber nicht: `ollama run` scheitert, weil sich
-  `ollama.com` nicht auflösen lässt; der Host steht nicht in der Allowlist, und `u-boot` nimmt ihn
-  für `ollama` nicht auf. `ollama signin` meldete ohne Konto `account unavailable`; eine Anmeldung mit Konto
-  und ob ein Cloud-Modell mit Konto läuft, sind nicht gemessen. Gemessen in einem Lauf auf Linux (`amd64`,
-  native Docker Engine 29.9.1, Ollama `0.40.6`) hinter der Egress-Beschränkung.
+  `ollama.com`, `example.com` und `huggingface.co` ließen sich nicht auflösen. Für lokale Modelle ist
+  `ollama.com` nicht aufgenommen: gesperrt meldet der Server beim Start zwei Warnzeilen, Start, Pull
+  und Lauf funktionierten (gemessen). Für Cloud-Modelle siehe den folgenden Punkt.
+- **Cloud-Modelle von Ollama:** Ein Cloud-Modell (Modellname mit der Endung `-cloud`, etwa
+  `gpt-oss:120b-cloud`) läuft nicht auf Ihrem Rechner, sondern bei Ollama, und braucht ein Konto
+  dort. `u-boot` richtet dafür nichts ein: Sie starten den Server und melden sich selbst im
+  Container an. `u-boot` setzt keine Umgebungsvariable dafür und nimmt `ollama.com` nicht in die
+  Egress-Liste auf. Der Ablauf im Container des Sandbox-Profils mit den Features `ollama`, `node`
+  und `claude-code`:
+
+  ```bash
+  ollama serve > /tmp/ollama.log 2>&1 &
+  ollama signin
+  ollama run gpt-oss:120b-cloud "Reply with the single word OK."
+  ```
+
+  `ollama signin` zeigt eine Adresse und einen Code in Ihrem Terminal; die Freigabe geben Sie in
+  einem Browser außerhalb des Containers. Ein `ollama pull` vorher ist nicht nötig. Statt
+  `ollama run` können Sie `ollama launch claude --model <Modell> --yes` oder `claude -p`
+  aufrufen; für `claude -p` setzen Sie im Aufruf die Basis-URL auf den Server im Container und
+  einen Platzhalter als Token:
+
+  ```bash
+  ANTHROPIC_BASE_URL=http://127.0.0.1:11434 ANTHROPIC_AUTH_TOKEN=<Platzhalter> \
+    claude --model gpt-oss:120b-cloud -p "Reply with the single word OK."
+  ```
+
+  Gemessen: Nach der Anmeldung endeten alle drei Aufrufe mit Exit-Code 0 und einer Ausgabe, mit
+  zwei Modellen (`glm-5.3-flash:cloud` und `gpt-oss:120b-cloud`), in einem Lauf. Die Zusage gilt
+  nur für diesen Aufbau: ein Container aus dem Image, das `u-boot` mit den Features `ollama`,
+  `node` und `claude-code` im Sandbox-Profil erzeugt, **den Sie selbst starten** (mit der
+  zusätzlichen Capability `NET_ADMIN`, ohne das Egress-Skript, ohne Workspace-Volume, mit einem
+  Volume für die Modelle), Aufrufe ohne Terminal, auf einem Linux-Host (`amd64`) mit lokaler
+  Docker-Engine. **Nicht zugesagt:** der Ablauf mit Anmeldung in dem Container, den
+  `u-boot devcontainer up` aus der erzeugten Konfiguration startet (insbesondere im Sandbox-Profil
+  ohne Egress-Restriktion und damit ohne `NET_ADMIN`), und ein Aufruf mit Anmeldung hinter der
+  Egress-Restriktion.
+
+  - **`ANTHROPIC_API_KEY`:** Die Zusage für `claude -p` gilt nur, wenn die Variable bei dem
+    Aufruf nicht gesetzt ist; die Messung lief in einer Umgebung ohne sie. Das erzeugte
+    Sandbox-Profil mit `claude-code` trägt die Referenz auf die Variable des Hosts (siehe
+    [Claude Code](#claude-code-optional)). **Nicht gemessen:** der Aufruf bei gesetztem
+    `ANTHROPIC_API_KEY` und bei einer leeren Variable im Container.
+  - **Anmeldung und Geräteschlüssel:** Die Anmeldung führen Sie aus; `u-boot` reicht keine
+    Umgebungsvariable des Hosts für Ollama durch und nimmt `OLLAMA_API_KEY` nicht auf. Der Server
+    legt beim ersten Start das Schlüsselpaar `id_ed25519` und `id_ed25519.pub` im Volume der
+    Modelle (`/home/vscode/.ollama`) an, **vor** jeder Anmeldung und nicht im Workspace-Volume;
+    die Anmeldung änderte gegenüber diesem Zustand keine Datei (Pfad, Größe, Rechte; den Inhalt
+    hat die Messung nie gelesen). Geben Sie das Volume nicht weiter. Den Rückbau auf der
+    Schlüsselseite Ihres Kontos bei Ollama machen Sie selbst. Gemessen ist das im beschriebenen
+    Aufbau und in einem Container, den die Dev-Container-CLI aus der erzeugten Konfiguration des
+    Sandbox-Profils startet; für den Container, den `u-boot devcontainer up` ohne
+    Egress-Restriktion startet, ist es nicht gemessen. **Nicht gemessen:** die Wirkung von
+    `ollama signout` im Konto (der Befehl meldete `You have signed out of ollama.com`, Exit-Code
+    0), die Rolle des Schlüssels bei den Cloud-Anfragen und der Zustand nach der Neuanlage des
+    Containers.
+  - **Hinter der Egress-Restriktion:** Die Liste führt `ollama.com` nicht; die Zeile `ollama`
+    bleibt bei zwei Hosts. Gemessen ohne Konto in zwei Läufen je Fall, in einem Container, den die
+    Dev-Container-CLI aus der erzeugten Konfiguration startet, mit einem protokollierenden
+    Resolver: Ohne den Eintrag scheitert `ollama run` eines Cloud-Modells mit Exit-Code 1 und
+    einem Fehler zur Namensauflösung (`dial tcp: lookup ollama.com on 127.0.0.1:53: server
+    misbehaving`). Mit dem Eintrag `ollama.com` in `devcontainer.sandbox.egress.allow` (der Eintrag
+    schließt Subdomains ein) wechselt die Meldung zur Aufforderung `You need to be signed in to
+    Ollama to run Cloud models.`:
+
+    ```bash
+    u-boot config set devcontainer.sandbox.egress.allow ollama.com
+    u-boot generate devcontainer
+    u-boot devcontainer up --recreate   # legt einen vorhandenen Container neu an
+    ```
+
+    Mit Konto lief ein Aufruf mit diesem Eintrag, von Hand gesetzt, in einem Lauf; ob der Eintrag
+    mit Konto **nötig** ist, folgt daraus nicht. **Nicht zugesagt:** `ollama launch claude` und
+    `claude -p` hinter der Restriktion ohne Anmeldung; die Hosts, die der Server im Container zum
+    Cloud-Dienst braucht.
+  - **`OLLAMA_NO_CLOUD`:** `u-boot` setzt die Variable nicht. Mit `OLLAMA_NO_CLOUD=1` an Server
+    **und** Client scheiterte `ollama run` mit `Error: ollama cloud is disabled: remote model
+    details are unavailable` und `ollama launch claude` mit `Error: headless --yes launch for
+    claude requires --model <model>` (davor `Warning: ignoring --model glm-5.3-flash:cloud because
+    cloud is disabled`), jeweils mit Exit-Code 1 und ohne Namensanfrage im Container, trotz Anmeldung.
+    **Nicht gemessen:** die Variable allein am Server oder allein am Client.
+  - **Modellnamen mit `[1m]`:** `u-boot` wählt und verwaltet keine Modelle. Gemessen:
+    `claude --model glm-5.3-flash:cloud[1m] -p` lieferte eine Antwort ohne Hinweis zum
+    Kontextfenster; ohne das Suffix kam der Hinweis `Claude Code doesn't recognize the model
+    "glm-5.3-flash:cloud", so it assumes a context window of 200k tokens`. `ollama run` und
+    `ollama launch` lehnten den Namen mit `[1m]` ab (`Error: invalid model name`, Exit-Code 1,
+    ohne Namensanfrage); das ist mit einem Dienst des Hosts gemessen, im Container mit eigenem
+    Server nicht. **Nicht gemessen:** ob Claude Code das Suffix vor dem Senden entfernt.
+  - **Neuanlage mit demselben Volume:** zugesagt ist nichts. Im Handaufbau der Messung kam nach
+    der Neuanlage des Containers mit demselben Volume die Antwort ohne neue Anmeldung (ein Lauf);
+    welcher Teil des Volume-Inhalts sie trägt, ist nicht gemessen.
+  - **Standardprofil:** `u-boot` installiert dort kein Ollama (siehe *Nur im Sandbox-Profil*). Für
+    ein Cloud-Modell bietet `u-boot` im Standardprofil den
+    [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)
+    an.
+  - **Grenzen der Messung (Cloud-Modelle):** Linux `amd64` (Ubuntu 24.04.5) mit lokaler
+    Docker-Engine 29.9.2, Ollama-Client `0.40.6` (Pin des erzeugten Dockerfiles), Claude Code
+    `2.1.310` und Node `v24.22.1` (nicht gepinnt, Stand beim Bau), die Modelle
+    `glm-5.3-flash:cloud` und `gpt-oss:120b-cloud`, ohne Terminal, mit einem Konto des Projekts,
+    am 2026-10-24, 40 Prompts. Ein bis drei Läufe je Aussage,
+    ein Lauf zählt einen Container mit neuem Volume; die Läufe mit Konto liefen als Handvarianten
+    (Aufruf der Dev-Container-CLI statt `u-boot devcontainer up`, `docker exec`, Platzhalter im
+    Aufruf). **Nicht gemessen:** der interaktive Ablauf von Claude Code und von `ollama launch
+    claude`, Kontingent und Kosten, `arm64`, Docker Desktop, Colima, Podman, rootless Docker, ein
+    gültiger `OLLAMA_API_KEY`, das Sandbox-Profil, wie `u-boot` es ohne Egress-Restriktion
+    erzeugt, andere Modelle und Versionen, abgelaufene oder entfernte Anmeldung.
 - **Grenzen der Messung:** Zwei Messumgebungen (auf dem `amd64`-Host zwei Läufe), Ollama `0.40.6`:
   Docker 29.5.2 auf Colima 0.10.3 (`arm64`) und, am 2026-10-19, Linux x86_64 (`amd64`) mit
   einer nativen Docker Engine 29.9.1 ohne VM (Kernel 6.8, `kernel.apparmor_restrict_unprivileged_userns=0`,
@@ -2039,10 +2144,83 @@ ollama run smollm2:135m "Reply with the single word OK."
   und führte einen kleinen verschachtelten Container aus, während der Server und ein Pull liefen. Das
   sind **zwei Messläufe auf einem Host, kein Lauf in der CI**: Ein CI-Lauf von `amd64` ist nicht
   gemessen. Nicht gemessen: Docker Desktop, Linux hinter einer VM, größere
-  Modelle und Mindest-Speicher, `OLLAMA_NO_CLOUD`, ein Start des Servers über die
+  Modelle und Mindest-Speicher, ein Start des Servers über die
   `devcontainer.json` (gemessen ist der Start von Hand und der Egress-Start durch die
-  Dev-Container-CLI). GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts
-  und die Verwaltung von Modellen durch `u-boot` gibt es nicht.
+  Dev-Container-CLI). GPU-Beschleunigung und die Verwaltung von Modellen durch `u-boot`
+  gibt es nicht. Die Messung der Cloud-Modelle steht im Punkt *Cloud-Modelle von Ollama* oben,
+  die des Anschlusses an einen Dienst des Hosts im folgenden Abschnitt.
+
+#### Anschluss an einen Ollama-Dienst des Hosts (optional)
+
+```bash
+u-boot config set devcontainer.features.ollama-host.enabled true
+u-boot generate devcontainer
+```
+
+Das Feature `ollama-host` macht den Host aus dem Container unter dem Namen
+`host.docker.internal` adressierbar, damit ein Programm im Container einen Ollama-Dienst
+erreichen kann, der auf Ihrem Rechner läuft, etwa mit Ihrem angemeldeten Konto für
+Cloud-Modelle. Es wirkt im Standard- und im Sandbox-Profil und ist unabhängig vom Feature
+`ollama`. Es ist kein OCI-Feature und kein Dockerfile-Block und erscheint nicht unter
+`features` in `devcontainer.json`.
+
+- **Was `u-boot` erzeugt:** genau eine Zeile in `runArgs` der `devcontainer.json`,
+  `--add-host=host.docker.internal:host-gateway`; im Sandbox-Profil steht sie als letzter
+  Eintrag, hinter den Optionen von `nestedRuntime` und der Egress-Restriktion. Sonst
+  erzeugt `u-boot` nichts zu diesem Anschluss: keinen Relay, keine Umgebungsvariable
+  (Basis-URL und Token für Claude Code setzen Sie selbst im Aufruf) und keinen Eintrag in
+  der Egress-Liste. `version` nehmen Sie nur zusammen mit
+  `source` (sonst Exit-Code `10`); eine `source` macht den Schlüssel zu einem externen
+  Feature ohne die Zeile.
+- **Ausweisung:** `u-boot generate devcontainer` meldet den Anschluss bei jedem Lauf mit
+  einer Warnung. Im Sandbox-Profil ist sie eine Sicherheitslockerung und bleibt unter
+  `--quiet` sichtbar; im Standardprofil ist sie eine gewöhnliche Warnung und entfällt unter
+  `--quiet`. Im Sandbox-Profil mit Egress-Restriktion nennt sie zusätzlich, dass der
+  Anschluss dahinter nicht funktioniert; das ist eine Warnung und kein Fehler (Exit-Code 0).
+- **Relay und Bindung liegen bei Ihnen:** `u-boot` startet keinen Relay. Lauscht der Dienst
+  nur auf der Loopback-Adresse des Hosts (gemessen: Linux, lokale Docker-Engine, Dienst auf
+  `127.0.0.1:11434`), ist er ohne einen Relay oder eine geänderte Bindung durch Sie aus dem
+  Container nicht erreichbar: Ohne die Zeile löst `host.docker.internal` im Container nicht
+  auf; mit der Zeile und ohne Relay scheitert der Aufruf (drei Läufe, mit einer von Hand
+  gesetzten Zeile). Für einen Dienst mit anderer Bindung gibt es keine Zusage, auch nicht für
+  eine Bindung, die Sie ändern. Ein Verfahren für den Relay steht hier nicht.
+- **Wirkung eines Relay:** Macht ein Relay den Dienst über die Adresse des Gateways
+  (`host-gateway`) erreichbar, ist der angemeldete Dienst für **jeden Container im Netz
+  `bridge`** erreichbar, solange er läuft (aus der Bindung abgeleitet, mit einem fremden
+  Container **nicht geprüft**). Im Sandbox-Profil stellt das dem Agenten im Container das
+  Kontingent Ihres Kontos zur Verfügung (Folgerung, nicht gemessen). Entscheiden Sie das
+  vor dem Einsatz eines Relay.
+- **Mit Relay:** `claude -p` im Container antwortet über den Dienst des Hosts, wenn Sie im
+  Aufruf die Basis-URL auf den Dienst des Hosts und einen Platzhalter als Token setzen und
+  `ANTHROPIC_API_KEY` nicht gesetzt ist:
+
+  ```bash
+  ANTHROPIC_BASE_URL=http://host.docker.internal:11434 ANTHROPIC_AUTH_TOKEN=<Platzhalter> \
+    claude --model <Modell> -p "Reply with the single word OK."
+  ```
+
+  Gemessen: zwei Läufe im Standardprofil und zwei von zwei Läufen in einem Container aus dem
+  Image des Sandbox-Profils, den Sie selbst starten (mit der zusätzlichen Capability
+  `NET_ADMIN`, ohne das Egress-Skript), jeweils mit den Features `claude-code` und `node` und
+  mit beiden Modellen. **Die Zeile hatten Sie von Hand gesetzt**, nicht `u-boot` erzeugt; die
+  Wirkung der erzeugten gegenüber der von Hand gesetzten Zeile ist nicht zugesagt. Der
+  Integrationstest von `u-boot` prüft nur, dass der Name im Container auflöst, nicht dass der
+  Dienst antwortet.
+- **Hinter der Egress-Restriktion trägt der Anschluss nicht:** `host.docker.internal` löst
+  über `/etc/hosts` auf, aber ein Aufruf von `claude -p` läuft in die Zeitgrenze (gemessen:
+  Exit-Code 124 nach 120 Sekunden); ein Eintrag `host.docker.internal` in `devcontainer.sandbox.egress.allow`
+  ändert das nicht. `u-boot` trägt keine Adresse ein und warnt beim Erzeugen, ohne
+  abzubrechen. **Nicht gemessen:** ein Weg, der die Adresse erlaubt, und `ollama run` und
+  `ollama launch` mit dem Dienst des Hosts hinter der Restriktion.
+- **Grenzen der Messung:** Linux `amd64` (Ubuntu 24.04.5) mit lokaler Docker-Engine 29.9.2,
+  Ollama-Client `0.40.6`, Dienst des Hosts `0.40.10` auf `127.0.0.1:11434`, Claude Code
+  `2.1.310`, die Modelle `glm-5.3-flash:cloud` und `gpt-oss:120b-cloud`, ohne Terminal, mit
+  einem Konto des Projekts, am 2026-10-24. Ein bis drei Läufe je Aussage, als Handvarianten
+  (die Zeile von Hand gesetzt, der Relay ein Hilfs-Container, Platzhalter im Aufruf).
+  **Nicht gemessen:** Docker Desktop, Colima, Podman, rootless Docker, `arm64`, Windows, ein
+  Dienst mit anderer Bindung, die Erreichbarkeit durch einen fremden Container, das
+  Sandbox-Profil, wie `u-boot` es ohne Egress-Restriktion erzeugt, der interaktive Ablauf von
+  Claude Code, Kontingent und Kosten, ein Aufruf bei gesetztem `ANTHROPIC_API_KEY`.
 
 #### Forge-CLIs (optional)
 
@@ -2203,7 +2381,7 @@ erzeugten Datei:
   kommt `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` hinzu, mit `gh` und `glab`
   `"GH_TOKEN": "${localEnv:GH_TOKEN}"` und `"GITLAB_TOKEN": "${localEnv:GITLAB_TOKEN}"`
   (siehe [Forge-CLIs](#forge-clis-optional)); ohne diese Features bleibt die Datei
-  unverändert.
+  unverändert. Die Features `ollama` und `ollama-host` ergänzen keine Variable.
 - Ein Credential-Helper im Image liefert `$GIT_TOKEN` an `git` (nur für
   `https`-Remotes; bei `ssh` gibt es keinen Schlüssel im Container).
 - Starten Sie den Container mit `u-boot devcontainer up`, reicht der Befehl nur den Namen
