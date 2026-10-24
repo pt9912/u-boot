@@ -1,7 +1,7 @@
 # Review — slice-v1-generate-prueft-freigabeliste
 
 * Rolle: Reviewer (`.harness/skills/reviewer.md`), frischer Kontext
-* Gegenstand: `git diff 750139e5..0cdec3b2`, Slice [`slice-v1-generate-prueft-freigabeliste`](../plan/planning/in-progress/slice-v1-generate-prueft-freigabeliste.md)
+* Gegenstand: `git diff 750139e5..0cdec3b2`, Slice [`slice-v1-generate-prueft-freigabeliste`](../plan/planning/done/slice-v1-generate-prueft-freigabeliste.md)
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 * Sensor-Lauf: `make gates` selbst gefahren, Exit-Code 0. Gezielte Tests (`Freigabe|ThreeCallers|SandboxHostSocket|SandboxFeatureWarn|Homebrew|ClaudeCodeNode` in `internal/hexagon/application`, `UnlistedFeature|SandboxFeatureWarnings` in `cmd/uboot`) im Image `u-boot:test-docker-tools`: grün. Nicht gelaufen: `make test-docker` (Anweisung: Speicher; kein Docker-Pfad berührt), `make verify-depguard` (keine Importregel berührt, kein neuer Import im Diff).
 

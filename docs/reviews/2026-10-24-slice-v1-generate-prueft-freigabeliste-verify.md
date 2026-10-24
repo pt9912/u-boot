@@ -2,7 +2,7 @@
 
 * Rolle: Verifier (`harness/verification.md`), frischer Kontext
 * Gegenstand: `git diff 750139e5..HEAD` (HEAD `5b5016b9`), Slice
-  [`slice-v1-generate-prueft-freigabeliste`](../plan/planning/in-progress/slice-v1-generate-prueft-freigabeliste.md),
+  [`slice-v1-generate-prueft-freigabeliste`](../plan/planning/done/slice-v1-generate-prueft-freigabeliste.md),
   Review [`2026-10-24-slice-v1-generate-prueft-freigabeliste`](2026-10-24-slice-v1-generate-prueft-freigabeliste.md) (LOW-1 bis LOW-3 in `77083695` und `5b5016b9` behoben)
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 * Frage: Bauen wir es richtig (Plan und DoD)? Reparaturen: keine. Der Baum war vor und nach jeder Probe sauber (`git status --short` leer; Mutationen per Diff angewandt und mit `git apply -R` zurückgenommen, nie `git checkout`).
