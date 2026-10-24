@@ -1,0 +1,4 @@
+devcontainer already up to date; no changes.
+Warning (LH-NFA-SEC-004): devcontainer feature claude-code comes from the third-party publisher anthropics (ghcr.io/anthropics/devcontainer-features/claude-code:1); its install script runs when the image is built
+Warning (LH-FA-DEV-003): devcontainer feature ollama has no effect without devcontainer.profile=sandbox; no Ollama installation was generated
+zweiter Lauf (idempotent) exit=0

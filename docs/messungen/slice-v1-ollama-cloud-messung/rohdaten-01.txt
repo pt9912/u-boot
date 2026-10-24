@@ -1,0 +1,34 @@
+== Messstand, 2026-10-24T08:38:04.111Z
+host: Linux x86_64
+docker client=29.9.2 server=29.9.2 os/arch=linux/amd64
+storage-driver=overlayfs cgroup=2
+-- Namen der Umgebungsvariablen dieses Messlaufs (nach env -i; Werte werden nicht ausgegeben)
+HOME OUT PATH PWD ROOT SHLVL UB_BEREINIGT USER WORK _ 
+umgebung-pruefung exit=0 (0 = kein verbotener Name)
+AUSSAGE umgebung-ohne-verbotene-namen=ja
+-- Gegenprobe der Pruefung: derselbe Aufruf mit gesetzten Namen (Platzhalterwert) muss anschlagen
+VERBOTENER NAME in der Umgebung: GIT_TOKEN
+VERBOTENER NAME in der Umgebung: GITLAB_TOKEN
+VERBOTENER NAME in der Umgebung: GH_TOKEN
+VERBOTENER NAME in der Umgebung: OLLAMA_API_KEY
+VERBOTENER NAME in der Umgebung: ANTHROPIC_API_KEY
+gegenprobe exit=1
+-- die Variablen des Hosts, die die Dev-Container-CLI ueber ${localEnv:…} erreichen koennte, sind im Messlauf nicht gesetzt:
+ANTHROPIC_API_KEY: ungesetzt
+GH_TOKEN: ungesetzt
+GITLAB_TOKEN: ungesetzt
+GIT_TOKEN: ungesetzt
+OLLAMA_API_KEY: ungesetzt
+OLLAMA_HOST: ungesetzt
+-- Bestand der Docker-Objekte vorher
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=0 images=83 volumes=871 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud (Name beginnt mit u-boot-messung-ocloud oder vsc-u-boot-messung-ocloud)
+-- Platz
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          92        1         35.82GB   21.3GB (59%)
+Containers      1         1         4.096kB   0B (0%)
+Local Volumes   871       0         37.62GB   37.62GB (100%)
+Build Cache     1226      19        103.1GB   35.1GB
+               total        used        free      shared  buff/cache   available
+Mem:           31817       15467         462        1407       17898       16349

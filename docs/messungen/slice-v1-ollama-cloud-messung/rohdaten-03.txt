@@ -1,0 +1,6 @@
+== Hilfs-Image u-boot-messung-ocloud-devcontainer-cli, 2026-10-24T08:18:05.481Z
+build exit=0
+0.89.0
+-- Namen der Umgebungsvariablen im CLI-Container (Werte nicht ausgegeben)
+HOME HOSTNAME NODE_VERSION PATH PWD YARN_VERSION 
+AUSSAGE cli-version=0.89.0

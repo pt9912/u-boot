@@ -1,0 +1,133 @@
+== make build IMAGE=u-boot-messung-ocloud-ub (Repo-Stand: Arbeitsverzeichnis u-boot)
+make build exit=0 dauer=7.5s
+#19 unpacking to docker.io/library/u-boot-messung-ocloud-ub:latest 0.1s done
+#19 DONE 0.3s
+make: Leaving directory '/Development/u-boot'
+image=sha256:13eff1e9e6b179dea3ff238fc3fc8505b6088a7ba7e4f648e1feef8e3125f3a1 size=16823558 arch=amd64
+AUSSAGE u-boot-version=u-boot version 0.15.1-dev
+
+== Projekt std (sandbox=false, egress=false, allow=-)
+config: devcontainer.features.ollama.enabled (unset) → true.
+config: devcontainer.features.node.enabled (unset) → true.
+config: devcontainer.features.claude-code.enabled (unset) → true.
+-- generate devcontainer --yes (Ausgabe des Werkzeugs, Exit-Code folgt)
+Updated devcontainer managed block (.devcontainer/devcontainer.json).
+Warning (LH-NFA-SEC-004): devcontainer feature claude-code comes from the third-party publisher anthropics (ghcr.io/anthropics/devcontainer-features/claude-code:1); its install script runs when the image is built
+Warning (LH-FA-DEV-003): devcontainer feature ollama has no effect without devcontainer.profile=sandbox; no Ollama installation was generated
+generate exit=0
+-- erzeugte Dateien (Pfad, Groesse)
+./.devcontainer/Dockerfile 271
+./.devcontainer/devcontainer.json 344
+./.env.example 380
+./.gitignore 633
+./CHANGELOG.md 412
+./README.md 768
+./compose.yaml 397
+./u-boot.yaml 201
+AUSSAGE projekt-std-ollama-block=0
+
+== Projekt res (sandbox=true, egress=true, allow=-)
+config: devcontainer.features.ollama.enabled (unset) → true.
+config: devcontainer.features.node.enabled (unset) → true.
+config: devcontainer.features.claude-code.enabled (unset) → true.
+-- generate devcontainer --yes (Ausgabe des Werkzeugs, Exit-Code folgt)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-NFA-SEC-004): devcontainer feature claude-code comes from the third-party publisher anthropics (ghcr.io/anthropics/devcontainer-features/claude-code:1); its install script runs when the image is built
+Warning (LH-NFA-SEC-004): devcontainer feature ollama installs the release archive from github.com/ollama/ollama (version pinned as OLLAMA_VERSION in .devcontainer/Dockerfile) when the image is built; it is checked by its SHA-256 only, the upstream publishes no signature, so the check does not protect against a release that was harmful from the start
+generate exit=0
+-- erzeugte Dateien (Pfad, Groesse)
+./.devcontainer/Dockerfile 2945
+./.devcontainer/devcontainer.json 904
+./.devcontainer/egress-init.sh 5865
+./.env.example 380
+./.gitignore 633
+./CHANGELOG.md 412
+./README.md 768
+./compose.yaml 397
+./u-boot.yaml 287
+AUSSAGE projekt-res-ollama-block=1
+
+== Projekt alw (sandbox=true, egress=true, allow=ollama.com)
+config: devcontainer.features.ollama.enabled (unset) → true.
+config: devcontainer.features.node.enabled (unset) → true.
+config: devcontainer.features.claude-code.enabled (unset) → true.
+-- generate devcontainer --yes (Ausgabe des Werkzeugs, Exit-Code folgt)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-NFA-SEC-004): devcontainer feature claude-code comes from the third-party publisher anthropics (ghcr.io/anthropics/devcontainer-features/claude-code:1); its install script runs when the image is built
+Warning (LH-NFA-SEC-004): devcontainer feature ollama installs the release archive from github.com/ollama/ollama (version pinned as OLLAMA_VERSION in .devcontainer/Dockerfile) when the image is built; it is checked by its SHA-256 only, the upstream publishes no signature, so the check does not protect against a release that was harmful from the start
+generate exit=0
+-- erzeugte Dateien (Pfad, Groesse)
+./.devcontainer/Dockerfile 2945
+./.devcontainer/devcontainer.json 904
+./.devcontainer/egress-init.sh 5876
+./.env.example 380
+./.gitignore 633
+./CHANGELOG.md 412
+./README.md 768
+./compose.yaml 397
+./u-boot.yaml 389
+AUSSAGE projekt-alw-ollama-block=1
+
+-- Ollama-Pin im erzeugten Dockerfile (Variante res)
+16:ARG OLLAMA_VERSION=0.40.6
+26: && curl -fsSLO "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-${arch}.tar.zst" \
+AUSSAGE ollama-pin=OLLAMA_VERSION=0.40.6
+-- Egress-Liste je Variante (u-boot egress list)
+# res
+Egress restriction: active.
+
+HOST                                                       ORIGIN
+api.anthropic.com                                          feature:claude-code
+api.github.com                                             base
+codeload.github.com                                        base
+dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com  feature:ollama
+deb.debian.org                                             base
+github.com                                                 base
+objects.githubusercontent.com                              base
+raw.githubusercontent.com                                  base
+registry.npmjs.org                                         feature:claude-code, feature:node
+registry.ollama.ai                                         feature:ollama
+security.debian.org                                        base
+
+Notes:
+- A name in the list also allows its subdomains, one and two levels below it; an entry for a subdomain (www.example.org) does not open its parent name (example.org) for a connection by name.
+- No clone host: there is no git remote 'origin' in .git/config and no devcontainer.sandbox.repository.
+- The list is computed from u-boot.yaml and the git configuration, as `u-boot generate devcontainer` writes it into the start script.
+  It is not read from a container: a container keeps the list of the image it was built from, so a changed list takes effect after a rebuild of the container (measured with the Dev Container CLI 0.89.0:
+  stopping and starting it again kept the old list, `devcontainer up --remove-existing-container` applied the new one;
+  measured on Colima, arm64; editor actions not measured).
+# alw
+Egress restriction: active.
+
+HOST                                                       ORIGIN
+api.anthropic.com                                          feature:claude-code
+api.github.com                                             base
+codeload.github.com                                        base
+dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com  feature:ollama
+deb.debian.org                                             base
+github.com                                                 base
+objects.githubusercontent.com                              base
+ollama.com                                                 user
+raw.githubusercontent.com                                  base
+registry.npmjs.org                                         feature:claude-code, feature:node
+registry.ollama.ai                                         feature:ollama
+security.debian.org                                        base
+
+Notes:
+- A name in the list also allows its subdomains, one and two levels below it; an entry for a subdomain (www.example.org) does not open its parent name (example.org) for a connection by name.
+- No clone host: there is no git remote 'origin' in .git/config and no devcontainer.sandbox.repository.
+- The list is computed from u-boot.yaml and the git configuration, as `u-boot generate devcontainer` writes it into the start script.
+  It is not read from a container: a container keeps the list of the image it was built from, so a changed list takes effect after a rebuild of the container (measured with the Dev Container CLI 0.89.0:
+  stopping and starting it again kept the old list, `devcontainer up --remove-existing-container` applied the new one;
+  measured on Colima, arm64; editor actions not measured).
+-- C7: Standardprofil, Meldungen und Dateien (Ausgabe von generate in rohdaten-02-c7.txt)
+devcontainer already up to date; no changes.
+Warning (LH-NFA-SEC-004): devcontainer feature claude-code comes from the third-party publisher anthropics (ghcr.io/anthropics/devcontainer-features/claude-code:1); its install script runs when the image is built
+Warning (LH-FA-DEV-003): devcontainer feature ollama has no effect without devcontainer.profile=sandbox; no Ollama installation was generated
+zweiter Lauf (idempotent) exit=0
+AUSSAGE c7-std-ollama-im-dockerfile=0
+AUSSAGE c7-std-claude-code-feature-in-json=1

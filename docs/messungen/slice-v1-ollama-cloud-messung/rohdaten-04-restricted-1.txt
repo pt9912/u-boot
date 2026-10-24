@@ -1,0 +1,307 @@
+== Modus restricted, Modell gpt-oss:120b-cloud, 2026-10-24T08:27:51.371Z
+-- Status-Datei des Startscripts (postStartCommand)
+u-boot-status 1
+result=ok
+at=2026-10-24T08:27:12Z
+conf: server=/api.anthropic.com/1.1.1.1
+conf: server=/api.anthropic.com/8.8.8.8
+conf: nftset=/api.anthropic.com/4#ip#u_boot_egress#allowed
+conf: server=/api.github.com/1.1.1.1
+conf: server=/api.github.com/8.8.8.8
+conf: nftset=/api.github.com/4#ip#u_boot_egress#allowed
+conf: server=/codeload.github.com/1.1.1.1
+conf: server=/codeload.github.com/8.8.8.8
+conf: nftset=/codeload.github.com/4#ip#u_boot_egress#allowed
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/1.1.1.1
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/8.8.8.8
+conf: nftset=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/4#ip#u_boot_egress#allowed
+conf: server=/deb.debian.org/1.1.1.1
+conf: server=/deb.debian.org/8.8.8.8
+conf: nftset=/deb.debian.org/4#ip#u_boot_egress#allowed
+conf: server=/github.com/1.1.1.1
+conf: server=/github.com/8.8.8.8
+conf: nftset=/github.com/4#ip#u_boot_egress#allowed
+conf: server=/objects.githubusercontent.com/1.1.1.1
+conf: server=/objects.githubusercontent.com/8.8.8.8
+conf: nftset=/objects.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/raw.githubusercontent.com/1.1.1.1
+conf: server=/raw.githubusercontent.com/8.8.8.8
+conf: nftset=/raw.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/registry.npmjs.org/1.1.1.1
+conf: server=/registry.npmjs.org/8.8.8.8
+conf: nftset=/registry.npmjs.org/4#ip#u_boot_egress#allowed
+conf: server=/registry.ollama.ai/1.1.1.1
+conf: server=/registry.ollama.ai/8.8.8.8
+conf: nftset=/registry.ollama.ai/4#ip#u_boot_egress#allowed
+conf: server=/security.debian.org/1.1.1.1
+conf: server=/security.debian.org/8.8.8.8
+conf: nftset=/security.debian.org/4#ip#u_boot_egress#allowed
+modus=restricted modell=gpt-oss:120b-cloud benutzer=vscode HOME=/home/vscode
+-- Namen der Umgebungsvariablen im Container (Werte nicht ausgegeben)
+HOME HOSTNAME LANG NVM_DIR NVM_SYMLINK_CURRENT PATH PWD SHLVL _ 
+AUSSAGE umgebung-container-verbotene-namen=0
+-- Einhaengepunkt von ~/.ollama (Volume?)
+/home/vscode/.ollama ext4
+/
+---- 08:27:53.513 C0 Version und Unterbefehle
+Warning: could not connect to a running Ollama instance
+Warning: client version is 0.40.6
+AUSSAGE ollama-version is 0.40.6
+claude im PATH: /usr/local/share/nvm/current/bin/claude
+claude --version: 2.1.310 (Claude Code)
+-- ollama --help (Unterbefehle)
+Large language model runner
+Usage:
+  ollama [flags]
+  ollama [command]
+Available Commands:
+  serve        Start Ollama
+  create       Create a model
+  show         Show information for a model
+  run          Run a model
+  stop         Stop a running model
+  pull         Pull a model from a registry
+  push         Push a model to a registry
+  signin       Sign in to ollama.com
+  signout      Sign out from ollama.com
+  list         List models
+  ps           List running models
+  cp           Copy a model
+  rm           Remove a model
+  launch       Launch the Ollama menu or an integration
+  help         Help about any command
+Flags:
+  -h, --help         help for ollama
+      --nowordwrap   Don't wrap words to the next line automatically
+      --verbose      Show timings for response
+  -v, --version      Show version information
+Use "ollama [command] --help" for more information about a command.
+AUSSAGE c0-launch-in-help=1
+-- ollama launch --help (ohne Server aufrufbar?)
+Launch the Ollama interactive menu, or directly launch a specific integration.
+Without arguments, this is equivalent to running 'ollama' directly.
+Flags and extra arguments require an integration name.
+Supported integrations:
+  claude          Claude Code
+  chatgpt         ChatGPT (aliases: codex-app, codex-desktop, codex-gui)
+  hermes          Hermes Agent
+  openclaw        OpenClaw (aliases: clawdbot, moltbot)
+  opencode        OpenCode
+  codex           Codex
+  hermes-desktop  Hermes Desktop
+  copilot         Copilot CLI (aliases: copilot-cli)
+  omp             OMP
+  droid           Droid
+  dsh             DeepSeek Harness (alias: deepseek-harness)
+  kimi            Kimi Code CLI
+  muse            Muse Code (aliases: muse-code)
+  pi              Pi
+  pool            Pool
+  cline           Cline
+  qwen            Qwen Code
+  vscode          VS Code (aliases: code)
+Examples:
+  ollama launch
+  ollama launch claude-desktop --restore
+  ollama launch claude
+  ollama launch claude --model <model>
+  ollama launch chatgpt
+  ollama launch chatgpt --restore
+  ollama launch hermes
+  ollama launch hermes-desktop
+  ollama launch dsh
+  ollama launch droid --config (does not auto-launch)
+  ollama launch codex --restore
+  ollama launch codex -- --sandbox workspace-write
+Usage:
+  ollama launch [INTEGRATION] [-- [EXTRA_ARGS...]] [flags]
+Flags:
+      --config         Configure without launching
+  -h, --help           help for launch
+      --model string   Model to use
+      --restore        Restore an integration to its default profile
+  -y, --yes            Automatically answer yes to confirmation prompts
+AUSSAGE c0-launch-claude-in-help=4
+-- Namen der Variablen OLLAMA_* im Binary (nur Namen, gelesen mit grep -a aus dem installierten Binary)
+(Go-Zeichenketten liegen im Binary aneinandergereiht; Namen koennen mit Nachbarn verklebt erscheinen. Ausgewiesen: Namen mit KEY, TOKEN, API, AUTH, CLOUD, SIGN, LAUNCH)
+OLLAMA_API_KEY OLLAMA_AUTHHTTPS_PROXYHTTPS OLLAMA_CLOUD_BASE_URL OLLAMA_LAUNCH_DSH_API_KEY OLLAMA_NO_CLOUD 
+AUSSAGE c4-ollama-var-mit-key-api-token-im-binary=OLLAMA_API_KEY OLLAMA_AUTHHTTPS_PROXYHTTPS OLLAMA_LAUNCH_DSH_API_KEY 
+AUSSAGE c5-no-cloud-im-binary=1
+-- Namen im Resolver-Log fuer C0
+-- Dateien neu/geaendert seit der letzten Marke (C0): Pfad, Groesse, Einhaengepunkt
+---- 08:27:53.717 serve starten (ohne OLLAMA_NO_CLOUD)
+serve bereit: {"version":"0.40.6"}
+-- Namen beim Start des Servers
+      4 ollama.com
+-- ollama help serve (Umgebungsvariablen laut Hilfe)
+Start Ollama
+Usage:
+  ollama serve [flags]
+Aliases:
+  serve, start
+Flags:
+  -h, --help   help for serve
+Environment Variables:
+      OLLAMA_DEBUG                  Show additional debug information (e.g. OLLAMA_DEBUG=1)
+      OLLAMA_HOST                   IP Address for the ollama server (default 127.0.0.1:11434)
+      OLLAMA_CONTEXT_LENGTH         Context length to use unless otherwise specified (default: 4k/32k/256k based on VRAM)
+      OLLAMA_KEEP_ALIVE             The duration that models stay loaded in memory (default "5m")
+      OLLAMA_MAX_LOADED_MODELS      Maximum number of loaded models per GPU
+      OLLAMA_MAX_TRANSFER_STREAMS   Maximum parallel transfer streams for safetensors model pulls/pushes (default 4)
+      OLLAMA_MAX_QUEUE              Maximum number of queued requests
+      OLLAMA_MODELS                 The path to the models directory
+      OLLAMA_NUM_PARALLEL           Maximum number of parallel requests
+      OLLAMA_NO_CLOUD               Disable Ollama cloud features (remote inference and web search)
+      OLLAMA_NOPRUNE                Do not prune model blobs on startup
+      OLLAMA_ORIGINS                A comma separated list of allowed origins
+      OLLAMA_SCHED_SPREAD           Always schedule model across all GPUs
+      OLLAMA_FLASH_ATTENTION        Enabled flash attention
+      OLLAMA_KV_CACHE_TYPE          Quantization type for the K/V cache (default: f16)
+      OLLAMA_LLM_LIBRARY            Set LLM library to bypass autodetection
+      OLLAMA_GPU_OVERHEAD           Reserve a portion of VRAM per GPU (bytes)
+      OLLAMA_IGPU_ENABLE            Enable integrated GPUs
+      LLAMA_ARG_FIT                 Enable llama.cpp automatic fit of unset memory options (default "on")
+      LLAMA_ARG_FIT_TARGET          Target free VRAM margin per device for llama.cpp fit (MiB)
+      OLLAMA_LOAD_TIMEOUT           How long to allow model loads to stall before giving up (default "5m")
+-- Dateien neu/geaendert seit der letzten Marke (serve): Pfad, Groesse, Einhaengepunkt
+/home/vscode/.ollama/id_ed25519 387 /home/vscode/.ollama
+/home/vscode/.ollama/id_ed25519.pub 81 /home/vscode/.ollama
+---- 08:27:54.315 C1-pull: ollama pull gpt-oss:120b-cloud
+pulling manifest ⠋ pulling manifest ⠙ pulling manifest ⠹ pulling manifest ⠸ pulling manifest ⠼ pulling manifest ⠴ pulling manifest ⠦ pulling manifest ⠧ pulling manifest ⠇ pulling manifest 
+pulling dad8bd034e57: 100% ▕██████████████████▏  307 B                         
+verifying sha256 digest 
+writing manifest 
+success 
+C1-pull exit=0 dauer=0.9s (124 = timeout nach 90s)
+AUSSAGE C1-pull-exit=0
+-- Namen im Resolver-Log waehrend C1-pull (Anzahl Anfragen A/AAAA)
+      4 registry.ollama.ai
+-- abgelehnte/unbekannte Namen waehrend C1-pull
+-- Dateien neu/geaendert seit der letzten Marke (C1-pull): Pfad, Groesse, Einhaengepunkt
+/home/vscode/.ollama/models/blobs/sha256-ac7f7a1e778577c4418f6a25e46e0b45dced6746c75422d4b343aa1495a022ed 264 /home/vscode/.ollama
+/home/vscode/.ollama/models/blobs/sha256-dad8bd034e571c7856a11969a6a9d59a0b8a10a13a39b9f5899b308165d6ddb7 307 /home/vscode/.ollama
+/home/vscode/.ollama/models/manifests/registry.ollama.ai/library/gpt-oss/120b-cloud 426 /home/vscode/.ollama
+---- 08:27:55.319 C1-run: ollama run gpt-oss:120b-cloud Reply with the single word OK.
+Error: Post "https://ollama.com:443/api/show?ts=1792830475": dial tcp: lookup ollama.com on 127.0.0.1:53: server misbehaving
+C1-run exit=1 dauer=0.0s (124 = timeout nach 90s)
+AUSSAGE C1-run-exit=1
+-- Namen im Resolver-Log waehrend C1-run (Anzahl Anfragen A/AAAA)
+      4 ollama.com
+-- abgelehnte/unbekannte Namen waehrend C1-run
+      4 dnsmasq[287]: config error
+-- Dateien neu/geaendert seit der letzten Marke (C1-run): Pfad, Groesse, Einhaengepunkt
+-- ollama list / ps nach den Aufrufen
+NAME                  ID              SIZE    MODIFIED               
+gpt-oss:120b-cloud    ac7f7a1e7785    -       Less than a second ago    
+NAME    ID    SIZE    PROCESSOR    CONTEXT    RUNNER    UNTIL 
+---- 08:27:55.464 C3-launch-claude: ollama launch claude --model gpt-oss:120b-cloud
+Error: Input must be provided either through stdin or as a prompt argument when using --print
+Error: exit status 1
+C3-launch-claude exit=1 dauer=0.7s (124 = timeout nach 40s)
+AUSSAGE C3-launch-claude-exit=1
+-- Namen im Resolver-Log waehrend C3-launch-claude (Anzahl Anfragen A/AAAA)
+      2 api.anthropic.com
+     12 ollama.com
+-- abgelehnte/unbekannte Namen waehrend C3-launch-claude
+     12 dnsmasq[287]: config error
+-- Dateien neu/geaendert seit der letzten Marke (C3-launch-claude): Pfad, Groesse, Einhaengepunkt
+/home/vscode/.claude.json 852 /
+/home/vscode/.claude/backups/.claude.json.backup.1792830475656 84 /
+/home/vscode/.ollama/config.json 104 /home/vscode/.ollama
+---- 08:27:56.216 C3 mit Pseudo-Terminal (script), Aufruf bis zum Hindernis
+-- Prozesse von ollama launch nach dem Aufruf: 0
+ausgabe des Aufrufs im Pseudo-Terminal: 8 Bytes, 1 Zeilen nach Entfernen der Steuerzeichen
+Killed
+C3-launch-claude-tty exit=137 dauer=30.0s
+AUSSAGE C3-launch-claude-tty-exit=137
+-- Namen im Resolver-Log (C3 tty)
+      8 ollama.com
+-- Dateien neu/geaendert seit der letzten Marke (C3-tty): Pfad, Groesse, Einhaengepunkt
+---- 08:28:26.302 C3-launch-claude-stub: env PATH=/tmp/stub:/usr/local/share/nvm/current/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin ollama launch claude --model gpt-oss:120b-cloud
+STUB claude gestartet, Argumente: --model gpt-oss:120b-cloud
+STUB Namen: ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL ANTHROPIC_DEFAULT_HAIKU_MODEL ANTHROPIC_DEFAULT_OPUS_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL CLAUDE_CODE_ATTRIBUTION_HEADER CLAUDE_CODE_AUTO_COMPACT_WINDOW CLAUDE_CODE_AUTO_MODE_SERVER CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY CLAUDE_CODE_MAX_CONTEXT_TOKENS CLAUDE_CODE_SUBAGENT_MODEL CLAUDE_CODE_TOTAL_TOKENS_REMINDER ENABLE_CLAUDEAI_MCP_SERVERS 
+STUB ANTHROPIC_BASE_URL=http://127.0.0.1:11434
+C3-launch-claude-stub exit=0 dauer=0.0s (124 = timeout nach 40s)
+AUSSAGE C3-launch-claude-stub-exit=0
+-- Namen im Resolver-Log waehrend C3-launch-claude-stub (Anzahl Anfragen A/AAAA)
+     12 ollama.com
+-- abgelehnte/unbekannte Namen waehrend C3-launch-claude-stub
+     12 dnsmasq[287]: config error
+-- Dateien neu/geaendert seit der letzten Marke (C3-launch-claude-stub): Pfad, Groesse, Einhaengepunkt
+/tmp/stub/claude 795 /
+---- 08:28:26.387 C4-signin: ollama signin
+Error: account unavailable
+C4-signin exit=1 dauer=0.0s (124 = timeout nach 40s)
+AUSSAGE C4-signin-exit=1
+-- Namen im Resolver-Log waehrend C4-signin (Anzahl Anfragen A/AAAA)
+      4 ollama.com
+-- abgelehnte/unbekannte Namen waehrend C4-signin
+      4 dnsmasq[287]: config error
+-- Dateien neu/geaendert seit der letzten Marke (C4-signin): Pfad, Groesse, Einhaengepunkt
+---- 08:28:26.472 C4-signout: ollama signout
+Error: there was an error signing out
+C4-signout exit=1 dauer=0.0s (124 = timeout nach 20s)
+AUSSAGE C4-signout-exit=1
+-- Namen im Resolver-Log waehrend C4-signout (Anzahl Anfragen A/AAAA)
+      4 ollama.com
+-- abgelehnte/unbekannte Namen waehrend C4-signout
+      4 dnsmasq[287]: config error
+-- Dateien neu/geaendert seit der letzten Marke (C4-signout): Pfad, Groesse, Einhaengepunkt
+---- 08:28:26.565 serve neu mit OLLAMA_NO_CLOUD=1 (C5)
+serve bereit: {"version":"0.40.6"}
+-- Namen beim Start des Servers (NO_CLOUD)
+---- 08:28:29.101 C5-pull: ollama pull gpt-oss:120b-cloud
+pulling manifest ⠋ pulling manifest ⠙ pulling manifest ⠹ pulling manifest ⠼ pulling manifest ⠼ pulling manifest 
+pulling dad8bd034e57: 100% ▕██████████████████▏  307 B                         
+verifying sha256 digest 
+writing manifest 
+removing unused layers 
+success 
+C5-pull exit=0 dauer=0.5s (124 = timeout nach 90s)
+AUSSAGE C5-pull-exit=0
+-- Namen im Resolver-Log waehrend C5-pull (Anzahl Anfragen A/AAAA)
+      2 registry.ollama.ai
+-- abgelehnte/unbekannte Namen waehrend C5-pull
+-- Dateien neu/geaendert seit der letzten Marke (C5-pull): Pfad, Groesse, Einhaengepunkt
+/home/vscode/.ollama/models/manifests/registry.ollama.ai/library/gpt-oss/120b-cloud 426 /home/vscode/.ollama
+---- 08:28:29.703 C5-run: ollama run gpt-oss:120b-cloud Reply with the single word OK.
+Error: ollama cloud is disabled: remote model details are unavailable
+C5-run exit=1 dauer=0.0s (124 = timeout nach 90s)
+AUSSAGE C5-run-exit=1
+-- Namen im Resolver-Log waehrend C5-run (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend C5-run
+-- Dateien neu/geaendert seit der letzten Marke (C5-run): Pfad, Groesse, Einhaengepunkt
+---- 08:28:29.783 C5-launch-claude: ollama launch claude --model gpt-oss:120b-cloud
+Warning: ignoring --model gpt-oss:120b-cloud because cloud is disabled
+Error: model selection requires an interactive terminal; use --model to run in headless mode
+C5-launch-claude exit=1 dauer=0.0s (124 = timeout nach 40s)
+AUSSAGE C5-launch-claude-exit=1
+-- Namen im Resolver-Log waehrend C5-launch-claude (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend C5-launch-claude
+-- Dateien neu/geaendert seit der letzten Marke (C5-launch-claude): Pfad, Groesse, Einhaengepunkt
+---- 08:28:29.858 C5-signin: ollama signin
+Error: account unavailable
+C5-signin exit=1 dauer=0.0s (124 = timeout nach 40s)
+AUSSAGE C5-signin-exit=1
+-- Namen im Resolver-Log waehrend C5-signin (Anzahl Anfragen A/AAAA)
+      4 ollama.com
+-- abgelehnte/unbekannte Namen waehrend C5-signin
+      4 dnsmasq[287]: config error
+-- Dateien neu/geaendert seit der letzten Marke (C5-signin): Pfad, Groesse, Einhaengepunkt
+---- 08:28:29.933 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
+      2 api.anthropic.com
+     52 ollama.com
+      6 registry.ollama.ai
+-- Server-Log: Zeilen mit cloud (ohne Zugangsdaten, hoechstens 12)
+time=2026-10-24T08:28:28.581Z level=INFO source=routes.go:2439 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: H
+time=2026-10-24T08:28:28.582Z level=INFO source=routes.go:2441 msg="Ollama cloud disabled: true"
+-- ~/.ollama (Pfad, Groesse; kein Inhalt)
+/home/vscode/.ollama 4096
+/home/vscode/.ollama/config.json 104
+/home/vscode/.ollama/id_ed25519 387
+/home/vscode/.ollama/id_ed25519.pub 81
+/home/vscode/.ollama/models 4096
+/home/vscode/.ollama/models/blobs 4096
+/home/vscode/.ollama/models/manifests 4096
+/home/vscode/.ollama/models/manifests-v2 4096
+docker exec exit=0

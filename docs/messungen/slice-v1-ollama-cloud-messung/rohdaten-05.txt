@@ -1,0 +1,38 @@
+== Aufraeumen, 2026-10-24T08:34:20.083Z
+-- vorher (rohdaten-01-vorher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=1 images=83 volumes=871 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud (Name beginnt mit u-boot-messung-ocloud oder vsc-u-boot-messung-ocloud)
+-- vor dem Aufraeumen
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=2 images=89 volumes=875 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud (Name beginnt mit u-boot-messung-ocloud oder vsc-u-boot-messung-ocloud)
+image vsc-u-boot-messung-ocloud-alw-4b72d1c3369e63a12cfe3868a0b3ba61f4fd158ebc2465f3553e671f4d5c25fe-uid:latest
+image vsc-u-boot-messung-ocloud-alw-4b72d1c3369e63a12cfe3868a0b3ba61f4fd158ebc2465f3553e671f4d5c25fe:latest
+image vsc-u-boot-messung-ocloud-res-519fbaa7b1499f21d1457844e472e57c65c2411091046b2d0030f8438aa9e55a-uid:latest
+image vsc-u-boot-messung-ocloud-res-519fbaa7b1499f21d1457844e472e57c65c2411091046b2d0030f8438aa9e55a:latest
+image u-boot-messung-ocloud-devcontainer-cli:latest
+image u-boot-messung-ocloud-ub:latest
+volume u-boot-messung-ocloud-alw-ollama-0ko9r67mapg5be2tgb0ivj22fd3ul8ord3vcj049691sams0sa5r
+volume u-boot-messung-ocloud-alw-workspace-0ko9r67mapg5be2tgb0ivj22fd3ul8ord3vcj049691sams0sa5r
+volume u-boot-messung-ocloud-res-ollama-05bhho68hddlumq750ltnbb0smmt9hjkmi6i5eh02ognh3s4cotj
+volume u-boot-messung-ocloud-res-workspace-05bhho68hddlumq750ltnbb0smmt9hjkmi6i5eh02ognh3s4cotj
+-- Entfernen
+entferne volume u-boot-messung-ocloud-alw-ollama-0ko9r67mapg5be2tgb0ivj22fd3ul8ord3vcj049691sams0sa5r
+entferne volume u-boot-messung-ocloud-alw-workspace-0ko9r67mapg5be2tgb0ivj22fd3ul8ord3vcj049691sams0sa5r
+entferne volume u-boot-messung-ocloud-res-ollama-05bhho68hddlumq750ltnbb0smmt9hjkmi6i5eh02ognh3s4cotj
+entferne volume u-boot-messung-ocloud-res-workspace-05bhho68hddlumq750ltnbb0smmt9hjkmi6i5eh02ognh3s4cotj
+entferne image vsc-u-boot-messung-ocloud-alw-4b72d1c3369e63a12cfe3868a0b3ba61f4fd158ebc2465f3553e671f4d5c25fe-uid:latest
+entferne image vsc-u-boot-messung-ocloud-alw-4b72d1c3369e63a12cfe3868a0b3ba61f4fd158ebc2465f3553e671f4d5c25fe:latest
+entferne image vsc-u-boot-messung-ocloud-res-519fbaa7b1499f21d1457844e472e57c65c2411091046b2d0030f8438aa9e55a-uid:latest
+entferne image vsc-u-boot-messung-ocloud-res-519fbaa7b1499f21d1457844e472e57c65c2411091046b2d0030f8438aa9e55a:latest
+entferne image u-boot-messung-ocloud-devcontainer-cli:latest
+entferne image u-boot-messung-ocloud-ub:latest
+-- nachher (rohdaten-05-nachher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=3 images=83 volumes=871 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud (Name beginnt mit u-boot-messung-ocloud oder vsc-u-boot-messung-ocloud)
+AUSSAGE objekte-mit-praefix-nachher=0
+vorher:  container=1 images=83 volumes=871 netze=3
+nachher: container=3 images=83 volumes=871 netze=3
+(Aenderungen fremder Arbeiten auf dem Host waehrend der Messung stehen in diesem Vergleich ebenfalls)

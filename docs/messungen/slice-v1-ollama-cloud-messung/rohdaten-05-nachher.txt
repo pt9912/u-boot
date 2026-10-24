@@ -1,0 +1,3 @@
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=3 images=83 volumes=871 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud (Name beginnt mit u-boot-messung-ocloud oder vsc-u-boot-messung-ocloud)
