@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (`.harness/skills/reviewer.md`), frischer Kontext
 * Gegenstand: `git diff a67acfc0..HEAD` (HEAD `bb6a401f`), Slice
-  [`slice-v1-config-set-validiert-feature-version`](../plan/planning/in-progress/slice-v1-config-set-validiert-feature-version.md)
+  [`slice-v1-config-set-validiert-feature-version`](../plan/planning/done/slice-v1-config-set-validiert-feature-version.md)
 * Sensors: `make gates` selbst gefahren, Exit-Code 0 (sichtbar im Log, `GATES EXIT=0`).
   `make test-docker` nicht gelaufen: kein Docker-Pfad berührt. `make verify-depguard` nicht gelaufen:
   keine Importregel berührt (nur `internal/hexagon/application` ohne neue Importe).

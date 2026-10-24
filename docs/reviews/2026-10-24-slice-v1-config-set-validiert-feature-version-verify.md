@@ -2,7 +2,7 @@
 
 * Rolle: Verifier (`harness/verification.md`), frischer Kontext
 * Gegenstand: `git diff a67acfc0..HEAD` (HEAD `7f355889`), Slice
-  [`slice-v1-config-set-validiert-feature-version`](../plan/planning/in-progress/slice-v1-config-set-validiert-feature-version.md),
+  [`slice-v1-config-set-validiert-feature-version`](../plan/planning/done/slice-v1-config-set-validiert-feature-version.md),
   Review [`2026-10-24-slice-v1-config-set-validiert-feature-version`](2026-10-24-slice-v1-config-set-validiert-feature-version.md)
 * Frage: Bauen wir es richtig (Plan und DoD)? Reparaturen: keine, der Baum war vor und nach jeder Probe sauber (`git status --short` leer).
 
