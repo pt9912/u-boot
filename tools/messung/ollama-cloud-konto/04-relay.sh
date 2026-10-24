@@ -3,6 +3,7 @@
 # <Gateway-Adresse>:11434 an 127.0.0.1:11434 des Hosts weiter. Die Gateway-Adresse ist die, die host-gateway in einem Container ergibt
 # (getent im Container); gebunden wird nur diese Adresse, nie 0.0.0.0. Der Relay laeuft nur waehrend eines Falls.
 #   start   prueft, dass kein fremder Container im Netz bridge haengt, startet den Relay (Image per Digest), prueft die Erreichbarkeit
+#   probe   K1 ohne Relay (Aufloesung, Erreichbarkeit, Bindung des Dienstes), kein Prompt
 #   stop    entfernt den Relay und weist per docker ps nach, dass er weg ist
 # Solange der Relay laeuft, kann jeder Container im Netz bridge den angemeldeten Server des Hosts nutzen; deshalb die Pruefung beim Start.
 # Voraussetzung: 00-vorlauf.sh. Aufruf: WORK=<messordner> tools/messung/ollama-cloud-konto/04-relay.sh start|stop
@@ -38,6 +39,19 @@ start)
   docker run --rm --network host "$BASE" sh -c "ss -ltn | grep ':$PORT '"
   aussage "relay-gateway-adresse=$adr relay-gebunden-nur-an-diese-adresse=$(docker run --rm --network host "$BASE" sh -c "ss -ltn | grep -c '0.0.0.0:$PORT'" | grep -q '^0$' && echo ja || echo nein)"
   ;;
+probe)
+  # K1 ohne Relay: Namensaufloesung ohne und mit --add-host, Erreichbarkeit der Gateway-Adresse, Bindung des Dienstes auf dem Host (nur Zeilen mit Port 11434)
+  rohdaten "rohdaten-04-probe-$(date -u +%H%M%S).txt"
+  echo "== K1 ohne Relay, $(now)"
+  echo "-- ohne --add-host: getent hosts host.docker.internal"
+  docker run --rm "$BASE" getent hosts host.docker.internal; echo "exit=$?"
+  echo "-- mit --add-host=host.docker.internal:host-gateway: getent, dann api/version ohne Relay"
+  docker run --rm --add-host=host.docker.internal:host-gateway "$BASE" sh -c "getent hosts host.docker.internal; curl -sS -m 5 http://host.docker.internal:$PORT/api/version; echo ' exit='\$?"
+  echo "-- Bindung des Dienstes auf dem Host (ss im Container mit Host-Netz, Zeilen mit Port $PORT)"
+  docker run --rm --network host "$BASE" sh -c "ss -ltn | grep ':$PORT '"
+  echo "-- api/version ueber 127.0.0.1 im Host-Netz (kein Prompt)"
+  docker run --rm --network host "$BASE" curl -sS -m 5 "http://127.0.0.1:$PORT/api/version"; echo " exit=$?"
+  ;;
 stop)
   rohdaten "rohdaten-04-relay-stop-$(date -u +%H%M%S).txt"
   echo "== Relay stop, $(now)"
@@ -46,5 +60,5 @@ stop)
   echo "lauscht noch etwas auf $PORT ausser 127.0.0.1: $(docker run --rm --network host "$BASE" sh -c "ss -ltn | grep ':$PORT ' | grep -v '127.0.0.1:$PORT' | wc -l")"
   aussage "relay-entfernt=$(docker ps -a --format '{{.Names}}' | grep -c -x "$RELAY" | grep -q '^0$' && echo ja || echo nein)"
   ;;
-*) echo "Aufruf: 04-relay.sh start|stop"; exit 2 ;;
+*) echo "Aufruf: 04-relay.sh start|stop|probe"; exit 2 ;;
 esac

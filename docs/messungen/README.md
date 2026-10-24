@@ -28,3 +28,4 @@ Die Regel steht in [`harness/conventions.md`](../../harness/conventions.md#ablag
 | [`slice-v1-cli-devcontainer-up-down`](slice-v1-cli-devcontainer-up-down/README.md) | `tools/messung/devcontainer-start-befehl/` |
 | [`slice-v1-forge-cli-quellen-messung`](slice-v1-forge-cli-quellen-messung/README.md) | `tools/messung/forge-cli/` |
 | [`slice-v1-ollama-cloud-messung`](slice-v1-ollama-cloud-messung/README.md) | `tools/messung/ollama-cloud/` |
+| [`slice-v1-ollama-cloud-messung-mit-konto`](slice-v1-ollama-cloud-messung-mit-konto/README.md) | `tools/messung/ollama-cloud-konto/` |

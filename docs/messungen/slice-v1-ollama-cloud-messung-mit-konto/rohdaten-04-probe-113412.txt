@@ -1,0 +1,11 @@
+== K1 ohne Relay, 2026-10-24T11:34:12.638Z
+-- ohne --add-host: getent hosts host.docker.internal
+exit=2
+-- mit --add-host=host.docker.internal:host-gateway: getent, dann api/version ohne Relay
+172.17.0.1      host.docker.internal
+curl: (7) Failed to connect to host.docker.internal port 11434 after 0 ms: Could not connect to server
+ exit=7
+-- Bindung des Dienstes auf dem Host (ss im Container mit Host-Netz, Zeilen mit Port 11434)
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*   
+-- api/version ueber 127.0.0.1 im Host-Netz (kein Prompt)
+{"version":"0.40.10"} exit=0

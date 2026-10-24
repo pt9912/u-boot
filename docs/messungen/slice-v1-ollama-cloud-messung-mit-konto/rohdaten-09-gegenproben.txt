@@ -1,0 +1,38 @@
+== Gegenprobe Prompt-Obergrenze (PROMPT_MAX=22, Zaehler steht auf 22)
+/
+relay: gestartet
+Abbruch: Obergrenze von 22 Prompts erreicht (22)
+zaehler danach: 22
+== Gegenprobe Relay mit fremdem Container im Netz bridge
+container im Netz bridge, die nicht zur Messung gehoeren: 1 (Namen nicht ausgewiesen)
+Abbruch: fremde Container im Messnetz
+exit=3
+relay-container danach: 0
+== Gegenprobe Stufe 2 ohne --gelesen
+Abbruch: Stufe 2 nur mit --gelesen (die Dateien sind von Hand gelesen)
+== Gegenprobe Stufe 2 mit Token-Form in der Datei
+/Development/u-boot/docs/messungen/slice-v1-ollama-cloud-messung-mit-konto/rohdaten-gp.txt:1:GH_TOKEN=[entfernt]
+ausnahmen: 0 Treffer in den Pfaden der Ausnahmeliste (nur mit --alle), 0 Zeilen nur mit einem benannten Platzhalter
+Abbruch: die Suche hat angeschlagen; die Dateien wurden wieder entfernt
+0
+
+== Gegenprobe der Schwaerzung: je eine Regel von redact() entfernt, die Probe muss rot werden (Exit 1)
+-- ohne die Regel 'Schluesselblock': Exit der Probe 1; erste Meldung: DURCHGELASSEN (Schluesselblock): Kopfzeile des Blocks [Wortlaut hier nicht wiedergegeben, damit die Suche nicht anschlaegt]
+-- ohne die Regel 'lange Base64': Exit der Probe 1; erste Meldung: DURCHGELASSEN: PROBEWERTb3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAAB
+-- ohne die Regel '\^ANTWORT': Exit der Probe 1; erste Meldung: DURCHGELASSEN: ANTWORT PROBEWERT
+-- ohne die Regel 'Antwort entfernt': Exit der Probe 1; erste Meldung: DURCHGELASSEN: {"response":"[Antwort entfernt]","done":true}
+-- ohne die Regel 'signed in as': Exit der Probe 1; erste Meldung: DURCHGELASSEN: You are now signed in as [entfernt]
+-- ohne die Regel 'E-Mail': Exit der Probe 1; erste Meldung: DURCHGELASSEN: contact [E-Mail entfernt] for access
+-- ohne die Regel 'Anmelde-URL': Exit der Probe 1; erste Meldung: DURCHGELASSEN: You need to sign in to Ollama. Visit https://ollama.com/connect?[Query entfernt: Anmelde-URL] to
+-- mit allen Regeln (unveraendert): redact-probe: 32 Formen und ein Schluesselblock geschwaerzt, 15 neutrale Zeilen unveraendert
+== Gegenprobe der Vorlauf-Pruefung
+-- Artefakt fehlt:
+Abbruch: Artefakt der Gegenprobe fehlt (/tmp/claude-1000/-Development-u-boot/21e5bb75-1fc6-4cb1-b0cc-08a9f2765369/scratc
+-- lib.sh geaendert seit dem Artefakt:
+Abbruch: Artefakt gehoert zu einem anderen Stand von lib.sh / redact-probe.sh; 00-vorlauf.sh erneut
+== Gegenprobe der Suche (09-suche.sh)
+-- a: GH_TOKEN=[entfernt]  -> exit 1
+-- b: ANTHROPIC_AUTH_TOKEN=[entfernt] ANTHROPIC_API_KEY=[entfernt]  -> exit 1
+-- c: export ANTHROPIC_AUTH_TOKEN=[entfernt]  -> exit 0
+== Gegenprobe des Modellschluessels (vor der Korrektur verbrauchte der leere Name zwei Prompts; jetzt Abbruch ohne Zaehler)
+siehe rohdaten-05-std-1-111030.txt (Abbruch: unbekannter Modellschluessel 'x'), Zaehler vorher/nachher 9/9

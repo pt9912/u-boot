@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; zwei Slices mit Datei, bis zu fünf weitere vorläufig, der Release-Cut zuletzt; Release `v0.16.0`).
 
-Nichts in Arbeit.
+**Welle [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Release `v0.16.0`)** — Slice: [`slice-v1-ollama-cloud-messung-mit-konto`](slice-v1-ollama-cloud-messung-mit-konto.md) (Messung mit Konto).
 
 ## Nächste Wellen
 

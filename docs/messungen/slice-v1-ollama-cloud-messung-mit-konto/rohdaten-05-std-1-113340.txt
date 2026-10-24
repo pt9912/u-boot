@@ -1,0 +1,43 @@
+== Weg (a), Teil std, Lauf 1, Faelle: versionen, 2026-10-24T11:33:40.742Z
+AUSSAGE prompts-gestellt=22 obergrenze=40
+devcontainer up std exit=0 dauer=4.7s
+image des Containers: vsc-u-boot-messung-ocloud-konto-std-a4a0212cc935c0940c3e7d7f24ea2a557def86bb78df7dce585b8d4c9ee0b2f6-uid
+-- Einhaengepunkte des Containers (Art, Ziel)
+bind /workspaces/u-boot-messung-ocloud-konto-std
+
+-- Egress-Status im Container: 
+-- Standardprofil: kein Resolver-Protokoll (das Image traegt kein dnsmasq); das Log bleibt leer
+modus=none benutzer=vscode HOME=/home/vscode zusatzzeilen=0
+-- Namen der Umgebungsvariablen im Container (Werte nicht ausgegeben)
+HOME HOSTNAME LANG NVM_DIR NVM_SYMLINK_CURRENT PATH PWD SHLVL _ 
+AUSSAGE umgebung-container-verbotene-namen=0
+-- /etc/hosts-Zeile fuer host.docker.internal: 172.17.0.1 host.docker.internal
+-- Einhaengepunkt von ~/.ollama und von HOME
+/
+---- 11:33:46.833 V-claude
+befehl: claude --version (env-namen: keine; prompt=0; stdin=0)
+2.1.310 (Claude Code)
+V-claude exit=0 dauer=0.0s (124 = timeout nach 30s, 137 = beendet nach -k 5)
+AUSSAGE V-claude-exit=0
+-- Namen im Resolver-Log waehrend V-claude (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend V-claude
+-- Dateien neu/geaendert seit der letzten Marke (V-claude): Pfad, Groesse, Rechte, Einhaengepunkt
+---- 11:33:47.004 V-node
+befehl: node --version (env-namen: keine; prompt=0; stdin=0)
+v24.22.1
+V-node exit=0 dauer=0.0s (124 = timeout nach 20s, 137 = beendet nach -k 5)
+AUSSAGE V-node-exit=0
+-- Namen im Resolver-Log waehrend V-node (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend V-node
+-- Dateien neu/geaendert seit der letzten Marke (V-node): Pfad, Groesse, Rechte, Einhaengepunkt
+---- 11:33:47.122 V-ollama-client
+befehl: ollama --version (env-namen: keine; prompt=0; stdin=0)
+env: ‘ollama’: No such file or directory
+V-ollama-client exit=127 dauer=0.0s (124 = timeout nach 20s, 137 = beendet nach -k 5)
+AUSSAGE V-ollama-client-exit=127
+-- Namen im Resolver-Log waehrend V-ollama-client (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend V-ollama-client
+-- Dateien neu/geaendert seit der letzten Marke (V-ollama-client): Pfad, Groesse, Rechte, Einhaengepunkt
+-- Aufraeumen des Containers und der Volumes dieses Teils
+AUSSAGE prompts-gestellt=22 obergrenze=40
+== Ende, 2026-10-24T11:33:47.641Z

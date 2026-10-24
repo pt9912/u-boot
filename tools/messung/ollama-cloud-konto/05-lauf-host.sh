@@ -111,6 +111,11 @@ for f in "${faelle[@]}"; do
     ex fall "K1b-ollama-version" 25 0 0 "OLLAMA_HOST=$HOSTURL" ollama --version
     ;;
   nft) ex nft ;;
+  versionen)
+    ex fall "V-claude" 30 0 0 - claude --version
+    ex fall "V-node" 20 0 0 - node --version
+    ex fall "V-ollama-client" 20 0 0 - ollama --version
+    ;;
   nftadd) ex nftadd "$gateway"; ex nft ;;
   curl)
     [ "$relay_an" = 1 ] || relay start
