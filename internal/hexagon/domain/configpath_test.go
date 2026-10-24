@@ -2,6 +2,7 @@ package domain_test
 
 import (
 	"errors"
+	"slices"
 	"strings"
 	"testing"
 
@@ -182,6 +183,55 @@ func TestConfigPath_String_RoundTrip(t *testing.T) {
 		if p != p2 {
 			t.Errorf("round-trip inequality: %+v vs %+v", p, p2)
 		}
+	}
+}
+
+// TestFixedConfigPaths_SetIsPinned pins the sorted set of wildcard-free
+// whitelisted paths. A new fixed path changes this list and must be
+// added here deliberately.
+func TestFixedConfigPaths_SetIsPinned(t *testing.T) {
+	t.Parallel()
+	want := []string{
+		"devcontainer.enabled",
+		"devcontainer.featureSources.allow",
+		"devcontainer.profile",
+		"devcontainer.sandbox.egress.allow",
+		"devcontainer.sandbox.egress.enabled",
+		"devcontainer.sandbox.nestedRuntime",
+		"devcontainer.sandbox.onUnavailable",
+		"devcontainer.sandbox.repository",
+		"devcontainer.user.uid",
+		"project.name",
+	}
+	if got := domain.FixedConfigPaths(); !slices.Equal(got, want) {
+		t.Errorf("FixedConfigPaths() = %v, want %v", got, want)
+	}
+}
+
+// TestNewConfigPath_OllamaHost_UsesFeaturePlaceholderKinds pins that
+// the ollama-host feature is addressed by the three feature
+// placeholder kinds and that any other leaf is rejected.
+func TestNewConfigPath_OllamaHost_UsesFeaturePlaceholderKinds(t *testing.T) {
+	t.Parallel()
+	for raw, wantKind := range map[string]domain.ConfigPathKind{
+		"devcontainer.features.ollama-host.enabled": domain.ConfigDevcontainerFeatureEnabled,
+		"devcontainer.features.ollama-host.source":  domain.ConfigDevcontainerFeatureSource,
+		"devcontainer.features.ollama-host.version": domain.ConfigDevcontainerFeatureVersion,
+	} {
+		got, err := domain.NewConfigPath(raw)
+		if err != nil {
+			t.Errorf("NewConfigPath(%q): unexpected error %v", raw, err)
+			continue
+		}
+		if got.Kind != wantKind {
+			t.Errorf("NewConfigPath(%q).Kind = %v, want %v", raw, got.Kind, wantKind)
+		}
+		if got.Feature.String() != "ollama-host" {
+			t.Errorf("NewConfigPath(%q).Feature = %q, want %q", raw, got.Feature.String(), "ollama-host")
+		}
+	}
+	if _, err := domain.NewConfigPath("devcontainer.features.ollama-host.relay"); !errors.Is(err, domain.ErrInvalidConfigPath) {
+		t.Errorf("unknown leaf: err = %v, want ErrInvalidConfigPath", err)
 	}
 }
 
