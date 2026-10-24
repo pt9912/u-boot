@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; drei Slices mit Datei (beide Messungen und die Folge-ADR [`ADR-0036`](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), Ausgang A), vier weitere benannt ohne Datei (Lastenheft-CR vor dem Code-Slice, Code, Spezifikation, Release-Cut zuletzt); Release `v0.16.0`).
+Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; vier Slices mit Datei (beide Messungen, die Folge-ADR [`ADR-0036`](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), Ausgang A, und der Lastenheft-CR [`slice-cr-lastenheft-ollama-cloud-modelle`](../open/slice-cr-lastenheft-ollama-cloud-modelle.md) vor dem Code-Slice), drei weitere benannt ohne Datei (Code, Spezifikation, Release-Cut zuletzt); Release `v0.16.0`).
 
 Nichts in Arbeit.
 
@@ -119,6 +119,7 @@ flowchart LR
 | 2026-06-08 | JSON-CLI als 9-teiliger Cluster vor v0.4.0 gezogen | [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) Re-Eval-Trigger 2; V1-pünktlich statt HTTP-Adapter |
 | laufend | Debian/RPM + Homebrew auf konkrete Anfrage vertagt | Packaging-Overhead ohne belastbare Nachfrage ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) |
 | 2026-10-24 | `welle-ollama-cloud-modelle`: Closure-Kriterien §3 Punkt 2, 3 und 4 angeglichen (Pfad der Auslieferung nur soweit die Zusage-Zeilen ihn ausweisen; kein Zugang als Umgebungsvariable des Hosts, Anmeldung im Container; Validator ohne Konto und ohne Anfrage an den Cloud-Dienst); der Code-Slice entfällt nicht; der Lastenheft-CR läuft vor dem Code-Slice | Messbefund (Weg im Container ohne Variable, Läufe mit Konto über Handvarianten) und [ADR-0036](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) (Entscheidungen 4 bis 6, 10, 11; Freigabe des Projektinhabers 2026-10-24) |
+| 2026-10-24 | Reihenfolge der zwei Lastenheft-CR: [`slice-cr-lastenheft-ollama-cloud-modelle`](../open/slice-cr-lastenheft-ollama-cloud-modelle.md) (`welle-ollama-cloud-modelle`) läuft vor [`slice-cr-lastenheft-messstaende`](../open/slice-cr-lastenheft-messstaende.md); die Version wird beim Start des Cloud-CR vergeben (erwartet 0.23.0), der Messstände-CR nimmt die folgende und liest seine Fundstellen neu; der Messstand im Absatz `ollama` bleibt im Cloud-CR stehen (vorbehaltlich der Freigabe) | Der Cloud-CR gehört zu einer laufenden Welle (Release `v0.16.0`), der Messstände-CR hat keine Welle und hält keinen Release auf; beide ändern [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features); [ADR-0036](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) Freigabe-Punkt g (Version erst beim Start) |
 
 ## Verwandte Dokumente
 
