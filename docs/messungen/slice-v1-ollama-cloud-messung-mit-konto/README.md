@@ -37,7 +37,7 @@ Modelle `glm-5.3-flash:cloud[1m]` (Modell 1) und `gpt-oss:120b-cloud` (Modell 2)
 
 | Schritt | Skript | Rohdaten | Messfrage |
 |---|---|---|---|
-| 0 | `00-vorlauf.sh` (ruft `redact-probe.sh`) | `rohdaten-00-vorlauf.txt` | Gegenprobe der Schwärzung, Umgebungsprüfung samt Gegenprobe, Hash des Stands; der Stand **vor dem ersten Prompt** (Hash `c9a5467b…`) liegt nur in der Historie von Commit `6bfc17e8` (2026-10-24 11:06:29 UTC; erster Prompt 11:07:26 UTC), `git show 6bfc17e8:docs/messungen/slice-v1-ollama-cloud-messung-mit-konto/rohdaten-00-vorlauf.txt`. **Die Datei im Baum ist der zweite Vorlauf** (11:27:20 UTC, nach 22 Prompts), geschrieben, weil die Hash-Prüfung nach der Änderung von `lib.sh` (Aufräumen) einen neuen Stand verlangte |
+| 0 | `00-vorlauf.sh` (ruft `redact-probe.sh`) | `rohdaten-00-vorlauf.txt` | Gegenprobe der Schwärzung, Umgebungsprüfung samt Gegenprobe, Hash des Stands; der Stand **vor dem ersten Prompt** (Hash `c9a5467b…`) liegt nur in der Historie von Commit `6bfc17e8` (2026-10-24 11:06:29 UTC; erster Prompt 11:07:26 UTC), `git show 6bfc17e8:<dieses Verzeichnis>/rohdaten-00-vorlauf.txt`. **Die Datei im Baum ist der zweite Vorlauf** (11:27:20 UTC, nach 22 Prompts), geschrieben, weil die Hash-Prüfung nach der Änderung von `lib.sh` (Aufräumen) einen neuen Stand verlangte |
 | 1 | `01-messstand.sh` | `rohdaten-01.txt`, `rohdaten-01-vorher.txt` | Messstand, Namen der Umgebung, Docker-Objekte vorher (vor allen Bauten) |
 | 2 | `02-projekte.sh` | `rohdaten-02.txt`, `rohdaten-02-erzeugt-<variante>.txt` | `u-boot generate devcontainer` für `std`, `res`, `alw`; Handvariante `--add-host`; Egress-Listen |
 | 3 | `03-lauf-vorbereitung.sh` (`Dockerfile.cli`) | `rohdaten-03.txt` | Hilfs-Image der Dev-Container-CLI |
