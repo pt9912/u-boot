@@ -11,6 +11,17 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-25
+
+Sixteenth release. **Cloud models of Ollama with Claude Code in the devcontainer, described with the limits of what was measured, and the catalogue feature `ollama-host`.**
+The user manual describes the flow in the container of the sandbox profile: start the server, sign in with `ollama signin`, then `ollama run`, `ollama launch claude` or `claude -p` (entry below). `u-boot config set devcontainer.features.ollama-host.enabled true`, then `u-boot generate devcontainer`: one line in `runArgs` gives the container the name `host.docker.internal`; a configuration without `ollama-host` renders byte-identical.
+**Promised only on a Linux host (`amd64`) with a local Docker engine** (measured with Docker 29.9.2); **not promised:** macOS with Colima (whoever installs `u-boot` with Homebrew finds the features, but they are not promised there), Docker Desktop, rootless Docker, Podman as host engine, a remote engine, Linux `arm64`, Windows.
+**The way through `u-boot devcontainer up` is not measured and not promised.** The sign-in and the cloud calls ran in a container that you start yourself (the image that `u-boot` generates for the sandbox profile, with the capability `NET_ADMIN`, without the egress script, without a workspace volume, with a volume for the models), with the account of the project owner, two models, one to three runs, hand variants. In the container that `u-boot devcontainer up` starts from the generated configuration only what needs no account was measured, one run each on Linux `amd64`: the key pair appears in the volume of the models, and behind the egress restriction the name `ollama.com` resolves after an entry in `devcontainer.sandbox.egress.allow`, `u-boot generate devcontainer` and `u-boot devcontainer up --recreate`. At this path the change of the message of `ollama run` from the lookup error to the request to sign in was not measured, and neither was a sign-in or a cloud call. A call with a sign-in behind the egress restriction is not promised, also not in a container that was created anew with the same volume.
+**The host connection delivers the name, not the service:** a service that listens only on the loopback address of the host is reachable only through a relay that you set up yourself; `u-boot` starts none, that a service is reachable is not tested, and behind the egress restriction the connection does not work (`u-boot generate devcontainer` warns and adds no address to the list).
+**Measured at the binary** (one run, Linux `amd64`): `u-boot config set devcontainer.features.ollama-host.version <value>` without `source` ends with exit code `10` and leaves `u-boot.yaml` unchanged, and with `--dry-run` it ends with exit code `10` as well; `devcontainer.features.ollama.version <value>` ends with exit code `10`. The entry of `[0.15.1]` names `ollama` only at the level of the service. The path with a `source` was not run.
+**Limit of the Lastenheft:** it carries two sets of promised conditions for `ollama`: the installation (measured on Colima, `arm64`, and in two runs on one Linux `amd64` host) and, separately, the cloud models and the host connection (Linux `amd64`, local engine); unifying them is a later change of the Lastenheft.
+Lastenheft 0.23.2.
+
 ### Added
 
 - Catalogue feature `ollama-host` ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)): `u-boot config set devcontainer.features.ollama-host.enabled true`, then `u-boot generate devcontainer` writes one line into `runArgs` of `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, in the default and in the sandbox profile, and nothing else for the connection: no relay, no environment variable, no host in the egress list. It is no OCI feature and renders no key under `features`; `version` without `source` ends with exit code `10` like for `ollama`, `gh` and `glab`. `generate devcontainer` discloses the connection with one notice per run; in the sandbox profile it is a security relaxation and stays visible under `--quiet`, and while the egress restriction is active it adds that the connection does not work behind it (a warning, no error). Pinned by tests, including one run of the container started by `u-boot devcontainer up` that resolves `host.docker.internal`; that a service of the host is reachable is not tested.
@@ -1532,7 +1543,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.15.1...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/pt9912/u-boot/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/pt9912/u-boot/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/pt9912/u-boot/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/pt9912/u-boot/compare/v0.13.1...v0.14.0

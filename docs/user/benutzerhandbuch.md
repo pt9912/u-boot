@@ -1,8 +1,8 @@
 # Benutzerhandbuch: u-boot
 
 Handbuch-Version: 2.0
-Software-Version: v0.15.1
-Stand: 2026-10-24
+Software-Version: v0.16.0
+Stand: 2026-10-25
 
 ---
 
@@ -79,7 +79,7 @@ u-boot --version
 ```
 
 **Ergebnis:** Die installierte Version erscheint, zum Beispiel
-`u-boot version 0.15.1`.
+`u-boot version 0.16.0`.
 
 ### Binary (Linux, macOS, Windows)
 
@@ -105,7 +105,7 @@ Invoke-WebRequest `
 ```
 
 Für eine bestimmte Version ersetzen Sie `latest/download` durch
-`download/v0.15.1`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
+`download/v0.16.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
 jeweiligen Release.
 
 ### Homebrew (macOS)
@@ -132,7 +132,7 @@ Ein APT- oder DNF-Repository gibt es nicht; Sie laden das Paket und
 installieren es lokal:
 
 ```bash
-VERSION=0.15.1
+VERSION=0.16.0
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -1914,8 +1914,11 @@ keinen Berechtigungsmodus.
   `GIT_TOKEN`, nie einen Wert. Setzen Sie `ANTHROPIC_API_KEY` in der Host-Umgebung,
   bevor Sie den Container starten (Quelle: Dokumentation von Anthropic, Stand
   2026-10-17: der Schlüssel hat Vorrang vor dem Login mit einem Abonnement). Ist die
-  Variable auf dem Host nicht gesetzt, bleibt sie im Container leer; die CLI
-  behandelt das wie einen fehlenden Schlüssel (gemessen: „Not logged in“). Für
+  Variable auf dem Host nicht gesetzt, ist sie im Container nicht gesetzt (gemessen mit
+  `u-boot devcontainer shell`, ein Lauf auf Linux `amd64`: weder in der Shell noch in der
+  Konfiguration des Containers). Ohne Schlüssel meldet die CLI „Not logged in“ (gemessen
+  mit der Dev-Container-CLI auf Colima, `arm64`, ohne Variable und mit leerer Variable;
+  mit `u-boot devcontainer shell` nicht gefahren). Für
   Cloud-Modelle von Ollama gilt die Zusage nur bei nicht gesetztem `ANTHROPIC_API_KEY` im
   Aufruf; ob eine leere Variable dabei wie eine nicht gesetzte wirkt, ist nicht gemessen
   (siehe [Ollama](#ollama-optional)).
@@ -2069,7 +2072,13 @@ ollama run smollm2:135m "Reply with the single word OK."
   - **`ANTHROPIC_API_KEY`:** Die Zusage für `claude -p` gilt nur, wenn die Variable bei dem
     Aufruf nicht gesetzt ist; die Messung lief in einer Umgebung ohne sie. Das erzeugte
     Sandbox-Profil mit `claude-code` trägt die Referenz auf die Variable des Hosts (siehe
-    [Claude Code](#claude-code-optional)). **Nicht gemessen:** der Aufruf bei gesetztem
+    [Claude Code](#claude-code-optional)). Haben Sie auf dem Host einen Schlüssel in dieser
+    Variablen, reicht die Referenz ihn in den Container durch, und die Zusage gilt dann nicht
+    (abgeleitet aus der Referenz, nicht mit einem Schlüssel gemessen; gemessen mit
+    `u-boot devcontainer shell`, je ein Lauf auf Linux `amd64`: eine ungesetzte Host-Variable
+    kommt ungesetzt an, eine leer gesetzte als leere, gesetzte Variable der Länge 0). Ob
+    `unset ANTHROPIC_API_KEY` oder `env -u ANTHROPIC_API_KEY` im Aufruf die Bedingung
+    herstellt, ist nicht gemessen. **Nicht gemessen:** der Aufruf bei gesetztem
     `ANTHROPIC_API_KEY` und bei einer leeren Variable im Container.
   - **Anmeldung und Geräteschlüssel:** Die Anmeldung führen Sie aus; `u-boot` reicht keine
     Umgebungsvariable des Hosts für Ollama durch und nimmt `OLLAMA_API_KEY` nicht auf. Der Server
@@ -2084,6 +2093,16 @@ ollama run smollm2:135m "Reply with the single word OK."
     `ollama signout` im Konto (der Befehl meldete `You have signed out of ollama.com`, Exit-Code
     0), die Rolle des Schlüssels bei den Cloud-Anfragen und der Zustand nach der Neuanlage des
     Containers.
+
+    **Rückbau:** Auf der Seite Ihres Kontos bei Ollama, die Ihre Schlüssel führt, entfernen Sie den
+    Eintrag selbst; der öffentliche Teil liegt als `id_ed25519.pub` im Volume, ob und wie diese
+    Seite ihn anzeigt, ist nicht gemessen. Lokal entfernen Sie den Schlüssel mit dem Volume:
+    `u-boot devcontainer down` entfernt weder den Container noch das Volume, und
+    `docker volume rm` lehnt ein Volume ab, das ein Container noch benutzt, auch ein gestoppter
+    (gemessen mit einem Container von `u-boot devcontainer up` nach `down`: `volume is in use`,
+    die Meldung nennt den Container). Entfernen Sie den Container mit `docker rm`, dann das Volume
+    mit `docker volume rm <projekt>-ollama-<Kennung>`; `docker volume ls` zeigt den vollständigen
+    Namen. Mit dem Volume gehen die geladenen Modelle verloren.
   - **Hinter der Egress-Restriktion:** Die Liste führt `ollama.com` nicht; die Zeile `ollama`
     bleibt bei zwei Hosts. Gemessen ohne Konto in zwei Läufen je Fall, in einem Container, den die
     Dev-Container-CLI aus der erzeugten Konfiguration startet, mit einem protokollierenden
@@ -3177,6 +3196,6 @@ Sie vorher Passwörter, Tokens und interne Adressen aus der Ausgabe.
 
 **Lizenz:** MIT, siehe `LICENSE` im Projektarchiv.
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.15.1. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.16.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, zeigt
 `u-boot <befehl> --help` den Stand Ihrer Version.
