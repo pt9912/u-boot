@@ -42,9 +42,9 @@ Die Fundstellen mit Klasse (Klassen wie in [`slice-v2-spec-zielbild`](../done/sl
 | Zeile 1593, Historie 0.12.0 | „… gemessen auf Docker 29.5.2 unter Colima 0.10.3 (arm64, VM Ubuntu 24.04 mit `kernel.apparmor_restrict_unprivileged_userns=0`) …“ | **D** | wie 0.7.0 |
 | Zeile 1594, Historie 0.13.0 | „… (gemessen: Docker 29.5.2 auf Colima 0.10.3, `docker run` Exit-Code `127`, `docker start` Exit-Code `1`) …“ | **D** | wie 0.7.0 |
 | Zeile 1596, Historie 0.15.0 | „Katalog-Feature `ollama` … für die gemessenen Hosts und Versionen; nicht zugesagt: GPU, Anschluss an einen Ollama des Hosts, Modellverwaltung.“ | **D** | wie 0.7.0 |
-| Zeile 1096, [`LH-NFA-PERF-001`](../../../../spec/lastenheft.md#lh-nfa-perf-001--schnelle-cli-antwort) | „(gemessen ohne Docker-Kommunikation, Kaltstart)“ | **C** | Messbedingung der Anforderung (Leistungsziel), keine Messumgebung eines Hosts; bleibt |
-| Zeile 428, [`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte) (Benutzerrechte), Absatz zur UID | „(z. B. `501` unter macOS mit Colima)“ | — | Beispiel, kein Messstand; bleibt |
-| Zeilen 1504 und 1579, [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung), Historie 0.3.5 | `.deb`/`.rpm` für amd64 und arm64 als Release-Assets | **B** | Zusage-Menge der Paketierung, keine Messung; bleibt |
+| Zeile 1101, [`LH-NFA-PERF-001`](../../../../spec/lastenheft.md#lh-nfa-perf-001--schnelle-cli-antwort) | „(gemessen ohne Docker-Kommunikation, Kaltstart)“ | **C** | Messbedingung der Anforderung (Leistungsziel), keine Messumgebung eines Hosts; bleibt |
+| Zeile 433, [`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte) (Benutzerrechte), Absatz zur UID | „(z. B. `501` unter macOS mit Colima)“ | — | Beispiel, kein Messstand; bleibt |
+| Zeilen 1509 und 1584, [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung), Historie 0.3.5 | `.deb`/`.rpm` für amd64 und arm64 als Release-Assets | **B** | Zusage-Menge der Paketierung, keine Messung; bleibt |
 
 ### Offene Fragen an den Projektinhaber (vor dem Wortlaut)
 
@@ -70,7 +70,7 @@ Die Fundstellen mit Klasse (Klassen wie in [`slice-v2-spec-zielbild`](../done/sl
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/lastenheft.md` (Absätze der Zeilen 411, 467 und 469; Versionsfeld im Kopf; §16 Historie) | update | Streichen der Klasse **A**, Zusage-Menge im Wortlaut, neue Historie-Zeile; erst nach Freigabe |
+| `spec/lastenheft.md` (Absätze der Zeilen 412, 472 und 474; Versionsfeld im Kopf; §16 Historie) | update | Streichen der Klasse **A**, Zusage-Menge im Wortlaut, neue Historie-Zeile; erst nach Freigabe |
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update, falls die Zusage-Menge im Wortlaut vom heutigen Handbuch-Text abweicht | Abgleich nach unten; Handbuch kennungsfrei (`AGENTS.md` §5 Regel 6) |
 | diese Slice-Datei, `open/README.md`, Register, Roadmap bei Start und Closure; `docs/reviews/` | update; neu | Lifecycle, Review und Verifikation |
 | `spec/spezifikation.md`, `spec/architecture.md`, `docs/plan/adr/`, `internal/**`, `Makefile`, `.github/workflows/` | unverändert | Auftrag; das Lastenheft ist Rang 1, die Spezifikation trägt nach [`slice-v2-spec-zielbild`](../done/slice-v2-spec-zielbild.md) keinen Messstand |
@@ -94,7 +94,7 @@ DoD vollständig, Review-Report und Verification-Report liegen vor, Closure-Noti
 - **Eine Vertragsänderung nach dem Review wird nicht mehr gelesen** ([`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)). — **Ausgang:** weiter offen; Nachlauf-Review über den Diff nach der letzten Fix-Runde.
 - **Das Streichen widerspricht der Historie** (Zeilen früherer Versionen nennen die Messumgebung weiter). — **Ausgang:** weiter offen bis zur Frage 2.
 
-- **Reihenfolge zum CR der Welle `welle-ollama-cloud-modelle`** ([`slice-cr-lastenheft-ollama-cloud-modelle`](../in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md); Planänderung, Entscheidung des Standards, 2026-10-24). Dieser Slice läuft **nach** jenem CR: Der CR gehört zu einer laufenden Welle, dieser hält keinen Release auf. Folgen: Die Version dieses Slice ist die auf jenen CR folgende (jener hat beim Start `0.23.0` vergeben; dieser nimmt die nächste freie Minor-Version nach dem Stand beim eigenen Start, erwartet `0.24.0`); die Zeilenangaben und Zitate in §1 und §3 (Zeilen 411, 467, 469, 1583 bis 1591) werden beim Start am Stand nach jenem CR neu gelesen; der Halbsatz „Gemessen ist das auf Docker 29.5.2, Colima 0.10.3, arm64, Ollama 0.40.6“ im Absatz `ollama` bleibt in jenem CR stehen und gehört zu diesem Slice (Klasse **A**); die Zusage-Menge der Installation (Frage 1) entscheidet dieser Slice, jener CR trägt für Cloud-Modelle und den Anschluss an den Host eine eigene Menge (Linux-Host `amd64`, lokale Docker-Engine). — **Ausgang:** weiter offen bis zum Start.
+- **Reihenfolge zum CR der Welle `welle-ollama-cloud-modelle`** ([`slice-cr-lastenheft-ollama-cloud-modelle`](../in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md); Planänderung, Entscheidung des Standards, 2026-10-24). Dieser Slice läuft **nach** jenem CR: Der CR gehört zu einer laufenden Welle, dieser hält keinen Release auf. Folgen: Die Version dieses Slice ist die auf jenen CR folgende (jener hat beim Start `0.23.0` vergeben; dieser nimmt die nächste freie Minor-Version nach dem Stand beim eigenen Start, erwartet `0.24.0`); die Zeilenangaben und Zitate in §1 und §3 (Zeilen 412, 472, 474, 1588 bis 1596) werden beim Start am Stand nach jenem CR neu gelesen; der Halbsatz „Gemessen ist das auf Docker 29.5.2, Colima 0.10.3, arm64, Ollama 0.40.6“ im Absatz `ollama` bleibt in jenem CR stehen und gehört zu diesem Slice (Klasse **A**); die Zusage-Menge der Installation (Frage 1) entscheidet dieser Slice, jener CR trägt für Cloud-Modelle und den Anschluss an den Host eine eigene Menge (Linux-Host `amd64`, lokale Docker-Engine). — **Ausgang:** weiter offen bis zum Start.
 
 ## 7. Closure-Notiz
 
