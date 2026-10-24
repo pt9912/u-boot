@@ -41,7 +41,7 @@ neu_container() { # <name>: aus dem Image von res, mit dem Modell-Volume
 
 case "$stufe" in
 vorbereiten)
-  rohdaten "rohdaten-06-vorbereiten-$LAUF.txt"
+  rohdaten "rohdaten-06-vorbereiten-$LAUF-$(date -u +%H%M%S).txt"
   echo "== Weg (b) vorbereiten, $(now)"
   c=$B; neu_container "$B"
   ex setup discover
@@ -65,7 +65,7 @@ messen)
     ;;
   *) echo "Aufruf: messen discover|restricted ..."; exit 2 ;;
   esac
-  rohdaten "rohdaten-06-$modus-$LAUF.txt"
+  rohdaten "rohdaten-06-$modus-$LAUF-$(date -u +%H%M%S).txt"
   echo "== Weg (b), Modus $modus, Lauf $LAUF, Faelle: $*, $(now)"
   prompt_stand
   if [ "$modus" = restricted ]; then
@@ -80,6 +80,8 @@ messen)
   ex nft
   for f in "$@"; do
     k=${f#*:}; m=$(modell "$k"); lbl="B-$modus-${f%%:*}-m$k"
+    # ein unbekannter Modellschluessel bricht ab, bevor ein Prompt gezaehlt wird
+    case "$f" in run:*|claude:*|launch:*) [ -n "$m" ] || { echo "Abbruch: unbekannter Modellschluessel '$k'"; exit 2; } ;; esac
     case "$f" in
     daten)
       echo "-- K4: Resolver-Namen seit der Marke vor der Anmeldung (Anmeldeablauf, Serverstart)"
@@ -112,7 +114,7 @@ messen)
   echo "== Ende, $(now)"
   ;;
 ende)
-  rohdaten "rohdaten-06-ende-$LAUF.txt"
+  rohdaten "rohdaten-06-ende-$LAUF-$(date -u +%H%M%S).txt"
   echo "== Weg (b) Rueckabwicklung, $(now)"
   c=$(docker ps --format '{{.Names}}' | grep -x -E "$B2|$B" | head -1)
   if [ -n "$c" ]; then

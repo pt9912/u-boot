@@ -1,0 +1,23 @@
+== Messstand, 2026-10-24T10:50:09.799Z
+host: Linux x86_64
+docker client=29.9.2 server=29.9.2 os/arch=linux/amd64
+storage-driver=overlayfs cgroup=2 os=Ubuntu 24.04.5 LTS
+-- Namen der Umgebungsvariablen dieses Messlaufs (Werte werden nicht ausgegeben)
+HOME OLDPWD PATH PWD SHLVL USER WORK _ 
+umgebung-pruefung exit=0 (0 = kein verbotener Name)
+AUSSAGE umgebung-ohne-verbotene-namen=ja
+-- Bestand der Docker-Objekte vorher
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=0 images=85 volumes=899 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud-konto (Name beginnt mit u-boot-messung-ocloud-konto oder vsc-u-boot-messung-ocloud-konto)
+-- Container im Netz bridge (Anzahl; Namen fremder Container werden nicht ausgegeben)
+bridge: gateway=172.17.0.1 container=1
+-- Platz
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          101       1         37.15GB   22.32GB (60%)
+Containers      1         1         4.096kB   0B (0%)
+Local Volumes   899       0         39.58GB   39.58GB (100%)
+Build Cache     1490      6         129.1GB   39.47GB
+               total        used        free      shared  buff/cache   available
+Mem:           31817       13009         615        1351       20216       18807
+AUSSAGE prompts-gestellt=0 obergrenze=40

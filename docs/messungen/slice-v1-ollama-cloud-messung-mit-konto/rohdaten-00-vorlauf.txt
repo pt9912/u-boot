@@ -1,4 +1,4 @@
-== Vorlauf (Sicherung vor dem ersten Lauf), 2026-10-24T11:05:59.386Z
+== Vorlauf (Sicherung vor dem ersten Lauf), 2026-10-24T11:27:20.908Z
 -- Namen der Umgebungsvariablen dieses Skripts (nach der Bereinigung im selben Prozess; Werte werden nicht ausgegeben)
 HOME OLDPWD PATH PWD SHLVL USER WORK _ 
 umgebung-pruefung exit=0 (0 = kein verbotener Name)
@@ -23,6 +23,6 @@ OLLAMA_HOST: ungesetzt
 redact-probe: 32 Formen und ein Schluesselblock geschwaerzt, 15 neutrale Zeilen unveraendert
 redact-probe exit=0
 -- Stand der Sicherung
-AUSSAGE sicherung-stand=c9a5467b77302691b058e8ec5824e9f40ece31da4e92bb0ad917cd6e04b39a1b
+AUSSAGE sicherung-stand=257ec95a3c4d728d5cd21183bfb4e40256fcb127edfc7b87cfefc642af300224
 AUSSAGE umgebung-pruefung=ok
 AUSSAGE redact-probe=ok

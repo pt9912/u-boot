@@ -102,6 +102,7 @@ fall)
     echo "ausgabe: $zl Zeilen nach Entfernen der Steuerzeichen, $by Bytes (Inhalt wird nicht ausgewiesen)"
     echo "-- Zeilen, die nach einer Meldung aussehen (Muster $MELDUNG; hoechstens 10, je 200 Zeichen)"
     strip < /tmp/o-$$.txt | grep -i -E "$MELDUNG" | cut -c1-200 | head -10
+    echo "uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): $(strip < /tmp/o-$$.txt | grep -v -i -E "$MELDUNG" | wc -l), laengste $(strip < /tmp/o-$$.txt | grep -v -i -E "$MELDUNG" | awk '{ if (length($0) > m) m = length($0) } END { print m + 0 }') Zeichen"
   else
     strip < /tmp/o-$$.txt | cut -c1-300
   fi
@@ -134,6 +135,10 @@ ablage)
 dns)
   echo "-- Namen im Resolver-Log ab Zeile ${1:-0} (Anzahl Anfragen A/AAAA)"; dns_seit "${1:-0}"
   echo "-- Zeilen im Log: $(wc -l < $log)"
+  ;;
+nftadd)
+  # HANDVARIANTE (K3c): die Adresse von Hand in die nftables-Menge der Egress-Restriktion eintragen; zeigt, ob der Weg offen ist, wenn die Menge die Adresse traegt
+  sudo nft add element ip u_boot_egress allowed "{ $1 }"; echo "nft add element exit=$?"
   ;;
 nft)
   if sudo nft list set ip u_boot_egress allowed > /tmp/o-nft.txt 2>&1; then

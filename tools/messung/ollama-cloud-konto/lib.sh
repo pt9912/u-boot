@@ -139,13 +139,14 @@ prompt_zaehlen() { # <fall>
 prompt_stand() { echo "AUSSAGE prompts-gestellt=$( [ -f "$ZAEHLER" ] && wc -l < "$ZAEHLER" || echo 0 ) obergrenze=$PROMPT_MAX"; }
 
 # Bestand der Docker-Objekte auf stdout: je Art nur die Anzahl und die Objekte, deren Name das Praefix der Messung traegt (auch die
-# Images der Dev-Container-CLI, vsc-<Praefix>-…). Namen anderer Objekte des Hosts werden nirgends ausgegeben.
+# Images der Dev-Container-CLI, vsc-<Praefix>-…). Namen anderer Objekte des Hosts werden nirgends ausgegeben. Die Filter-Container der
+# Schwaerzung (<Praefix>-redact-…) gehoeren dem laufenden Skript und werden weder ausgewiesen noch entfernt.
 bestand() {
   local pat="^(vsc-)?$PFX" n
   echo "Namen fremder Objekte nicht ausgewiesen, nur Anzahl"
   echo "container=$(docker ps -a -q | wc -l) images=$(docker images -q | wc -l) volumes=$(docker volume ls -q | wc -l) netze=$(docker network ls -q | wc -l)"
   echo "-- Objekte mit dem Praefix $PFX (Name beginnt mit $PFX oder vsc-$PFX)"
-  docker ps -a --format '{{.Names}}' | while read -r n; do [[ $n =~ $pat ]] && echo "container $n"; done
+  docker ps -a --format '{{.Names}}' | while read -r n; do [[ $n =~ $pat && $n != *-redact-* ]] && echo "container $n"; done
   docker images --format '{{.Repository}}:{{.Tag}}' | while read -r n; do [[ $n =~ $pat ]] && echo "image $n"; done
   docker volume ls -q | while read -r n; do [[ $n =~ $pat ]] && echo "volume $n"; done
   docker network ls --format '{{.Name}}' | while read -r n; do [[ $n =~ $pat ]] && echo "netz $n"; done
@@ -155,7 +156,7 @@ bestand() {
 # Mit KEEP_IMAGES=1 bleiben die Images (der Folgeschritt braucht das Image des Projekts).
 praefix_entfernen() {
   local pat="^(vsc-)?$PFX" n
-  docker ps -a --format '{{.Names}}' | while read -r n; do [[ $n =~ $pat ]] && { echo "entferne container $n"; docker rm -f -v "$n" > /dev/null; }; done
+  docker ps -a --format '{{.Names}}' | while read -r n; do [[ $n =~ $pat && $n != *-redact-* ]] && { echo "entferne container $n"; docker rm -f -v "$n" > /dev/null; }; done
   docker volume ls -q | while read -r n; do [[ $n =~ $pat ]] && { echo "entferne volume $n"; docker volume rm "$n" > /dev/null; }; done
   docker network ls --format '{{.Name}}' | while read -r n; do [[ $n =~ $pat ]] && { echo "entferne netz $n"; docker network rm "$n" > /dev/null; }; done
   [ "${KEEP_IMAGES:-0}" = 1 ] || docker images --format '{{.Repository}}:{{.Tag}}' | while read -r n; do [[ $n =~ $pat ]] && { echo "entferne image $n"; docker rmi "$n" > /dev/null; }; done

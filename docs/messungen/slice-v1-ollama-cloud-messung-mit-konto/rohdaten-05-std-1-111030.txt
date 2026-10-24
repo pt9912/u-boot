@@ -1,0 +1,17 @@
+== Weg (a), Teil std, Lauf 1, Faelle: run:x, 2026-10-24T11:10:30.119Z
+AUSSAGE prompts-gestellt=9 obergrenze=40
+devcontainer up std exit=0 dauer=4.5s
+image des Containers: vsc-u-boot-messung-ocloud-konto-std-a4a0212cc935c0940c3e7d7f24ea2a557def86bb78df7dce585b8d4c9ee0b2f6-uid
+-- Einhaengepunkte des Containers (Art, Ziel)
+bind /workspaces/u-boot-messung-ocloud-konto-std
+
+-- Egress-Status im Container: 
+-- Standardprofil: kein Resolver-Protokoll (das Image traegt kein dnsmasq); das Log bleibt leer
+modus=none benutzer=vscode HOME=/home/vscode zusatzzeilen=0
+-- Namen der Umgebungsvariablen im Container (Werte nicht ausgegeben)
+HOME HOSTNAME LANG NVM_DIR NVM_SYMLINK_CURRENT PATH PWD SHLVL _ 
+AUSSAGE umgebung-container-verbotene-namen=0
+-- /etc/hosts-Zeile fuer host.docker.internal: 172.17.0.1 host.docker.internal
+-- Einhaengepunkt von ~/.ollama und von HOME
+/
+Abbruch: unbekannter Modellschluessel 'x'

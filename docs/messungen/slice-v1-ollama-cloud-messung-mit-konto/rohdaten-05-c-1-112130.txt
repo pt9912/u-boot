@@ -1,0 +1,105 @@
+== Weg (a), Teil c, Lauf 1, Faelle: nftadd curl claude:1 claude:2, 2026-10-24T11:21:30.941Z
+AUSSAGE prompts-gestellt=14 obergrenze=40
+devcontainer up alw exit=0 dauer=5.1s
+image des Containers: vsc-u-boot-messung-ocloud-konto-alw-2272c2461a9a4f5d337e9076d9944902476f3621e5edbcac0546249c54414833-uid
+-- Einhaengepunkte des Containers (Art, Ziel)
+volume /workspaces/u-boot-messung-ocloud-konto-alw
+volume /home/vscode/.ollama
+
+-- Egress-Status im Container: u-boot-status 1 result=ok at=2026-10-24T11:21:35Z 
+-- Status-Datei des Startscripts
+u-boot-status 1
+result=ok
+at=2026-10-24T11:21:35Z
+conf: server=/api.anthropic.com/1.1.1.1
+conf: server=/api.anthropic.com/8.8.8.8
+conf: nftset=/api.anthropic.com/4#ip#u_boot_egress#allowed
+conf: server=/api.github.com/1.1.1.1
+conf: server=/api.github.com/8.8.8.8
+conf: nftset=/api.github.com/4#ip#u_boot_egress#allowed
+conf: server=/codeload.github.com/1.1.1.1
+conf: server=/codeload.github.com/8.8.8.8
+conf: nftset=/codeload.github.com/4#ip#u_boot_egress#allowed
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/1.1.1.1
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/8.8.8.8
+conf: nftset=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/4#ip#u_boot_egress#allowed
+conf: server=/deb.debian.org/1.1.1.1
+conf: server=/deb.debian.org/8.8.8.8
+conf: nftset=/deb.debian.org/4#ip#u_boot_egress#allowed
+conf: server=/github.com/1.1.1.1
+conf: server=/github.com/8.8.8.8
+conf: nftset=/github.com/4#ip#u_boot_egress#allowed
+conf: server=/host.docker.internal/1.1.1.1
+conf: server=/host.docker.internal/8.8.8.8
+conf: nftset=/host.docker.internal/4#ip#u_boot_egress#allowed
+conf: server=/objects.githubusercontent.com/1.1.1.1
+conf: server=/objects.githubusercontent.com/8.8.8.8
+conf: nftset=/objects.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/raw.githubusercontent.com/1.1.1.1
+conf: server=/raw.githubusercontent.com/8.8.8.8
+conf: nftset=/raw.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/registry.npmjs.org/1.1.1.1
+conf: server=/registry.npmjs.org/8.8.8.8
+conf: nftset=/registry.npmjs.org/4#ip#u_boot_egress#allowed
+conf: server=/registry.ollama.ai/1.1.1.1
+conf: server=/registry.ollama.ai/8.8.8.8
+conf: nftset=/registry.ollama.ai/4#ip#u_boot_egress#allowed
+conf: server=/security.debian.org/1.1.1.1
+conf: server=/security.debian.org/8.8.8.8
+conf: nftset=/security.debian.org/4#ip#u_boot_egress#allowed
+modus=restricted benutzer=vscode HOME=/home/vscode zusatzzeilen=1
+zusatz: address=/host.docker.internal/172.17.0.1
+-- Namen der Umgebungsvariablen im Container (Werte nicht ausgegeben)
+HOME HOSTNAME LANG NVM_DIR NVM_SYMLINK_CURRENT PATH PWD SHLVL _ 
+AUSSAGE umgebung-container-verbotene-namen=0
+-- /etc/hosts-Zeile fuer host.docker.internal: 172.17.0.1 host.docker.internal
+-- Einhaengepunkt von ~/.ollama und von HOME
+/home/vscode/.ollama ext4
+/
+nft add element exit=0
+nft set allowed: Elemente=1 172.17.0.1-enthalten=1
+relay: gestartet
+---- 11:21:45.666 K-curl-api
+befehl: curl -sS -m 5 http://host.docker.internal:11434/api/version (env-namen: keine; prompt=0; stdin=0)
+{"version":"0.40.10"}
+K-curl-api exit=0 dauer=0.0s (124 = timeout nach 15s, 137 = beendet nach -k 5)
+AUSSAGE K-curl-api-exit=0
+-- Namen im Resolver-Log waehrend K-curl-api (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend K-curl-api
+-- Dateien neu/geaendert seit der letzten Marke (K-curl-api): Pfad, Groesse, Rechte, Einhaengepunkt
+PROMPT 15/40 weg-a c lauf1 claude:1
+---- 11:21:45.808 K-claude-m1
+befehl: claude --model glm-5.3-flash:cloud[1m] -p @PROMPT@ (env-namen: ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ; prompt=1; stdin=0)
+ausgabe: 2 Zeilen nach Entfernen der Steuerzeichen, 93 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+[claude-code:[entfernt]] {"model":"glm-5.3-flash:cloud[1m]","query_source":"sdk"}
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 1, laengste 2 Zeichen
+K-claude-m1 exit=0 dauer=8.1s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE K-claude-m1-exit=0
+-- Namen im Resolver-Log waehrend K-claude-m1 (Anzahl Anfragen A/AAAA)
+      1 api.anthropic.com
+-- abgelehnte/unbekannte Namen waehrend K-claude-m1
+-- Dateien neu/geaendert seit der letzten Marke (K-claude-m1): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.claude.json 852 600 /
+/home/vscode/.claude/.last-cleanup 24 644 /
+/home/vscode/.claude/backups/.claude.json.backup.1792840905957 84 600 /
+/home/vscode/.claude/projects/-home-vscode/da00b4a5-ab33-4fde-ade1-028f29c653b5.jsonl 132698 600 /
+PROMPT 16/40 weg-a c lauf1 claude:2
+---- 11:21:54.022 K-claude-m2
+befehl: claude --model gpt-oss:120b-cloud -p @PROMPT@ (env-namen: ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ; prompt=1; stdin=0)
+ausgabe: 3 Zeilen nach Entfernen der Steuerzeichen, 340 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Claude Code doesn't recognize the model "gpt-oss:120b-cloud", so it assumes a context window of 200k tokens. Update Claude Code, or see https://code.claude.com/docs/en/model-config#correct-the-window-
+[claude-code:[entfernt]] {"model":"gpt-oss:120b-cloud","query_source":"sdk"}
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 1, laengste 2 Zeichen
+K-claude-m2 exit=0 dauer=1.2s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE K-claude-m2-exit=0
+-- Namen im Resolver-Log waehrend K-claude-m2 (Anzahl Anfragen A/AAAA)
+      1 api.anthropic.com
+-- abgelehnte/unbekannte Namen waehrend K-claude-m2
+-- Dateien neu/geaendert seit der letzten Marke (K-claude-m2): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.claude/projects/-home-vscode/78c3ff8e-64cf-483a-890e-1f3173cf79a9.jsonl 132734 600 /
+relay: entfernt (docker ps -a: 0 Relay-Container)
+-- Aufraeumen des Containers und der Volumes dieses Teils
+AUSSAGE prompts-gestellt=16 obergrenze=40
+== Ende, 2026-10-24T11:22:00.295Z

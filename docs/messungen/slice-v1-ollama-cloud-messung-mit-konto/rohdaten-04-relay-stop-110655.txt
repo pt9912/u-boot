@@ -1,0 +1,4 @@
+== Relay stop, 2026-10-24T11:06:55.847Z
+docker ps -a nach dem Entfernen: Relay-Container vorhanden: 0
+lauscht noch etwas auf 11434 ausser 127.0.0.1: 0
+AUSSAGE relay-entfernt=ja

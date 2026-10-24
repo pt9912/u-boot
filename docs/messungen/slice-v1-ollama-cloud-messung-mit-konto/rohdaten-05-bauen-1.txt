@@ -1,0 +1,5 @@
+== bauen (devcontainer up der drei Projekte, kein Prompt), 2026-10-24T11:06:14.562Z
+devcontainer up std exit=0 dauer=4.7s
+container std: 50def2a2aa16
+AUSSAGE bauen-std-container=ja
+image res: vsc-u-boot-messung-ocloud-konto-res-192cfb3f360863c5c75967abf7338029f98d69e803d0976d744c66f814ac5f70-uid:latest

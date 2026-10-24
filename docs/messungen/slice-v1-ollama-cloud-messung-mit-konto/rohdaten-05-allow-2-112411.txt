@@ -1,0 +1,96 @@
+== Weg (a), Teil allow, Lauf 2, Faelle: k1 nft, 2026-10-24T11:24:11.303Z
+AUSSAGE prompts-gestellt=22 obergrenze=40
+devcontainer up alw exit=0 dauer=4.7s
+image des Containers: vsc-u-boot-messung-ocloud-konto-alw-2272c2461a9a4f5d337e9076d9944902476f3621e5edbcac0546249c54414833-uid
+-- Einhaengepunkte des Containers (Art, Ziel)
+volume /workspaces/u-boot-messung-ocloud-konto-alw
+volume /home/vscode/.ollama
+
+-- Egress-Status im Container: u-boot-status 1 result=ok at=2026-10-24T11:24:15Z 
+-- Status-Datei des Startscripts
+u-boot-status 1
+result=ok
+at=2026-10-24T11:24:15Z
+conf: server=/api.anthropic.com/1.1.1.1
+conf: server=/api.anthropic.com/8.8.8.8
+conf: nftset=/api.anthropic.com/4#ip#u_boot_egress#allowed
+conf: server=/api.github.com/1.1.1.1
+conf: server=/api.github.com/8.8.8.8
+conf: nftset=/api.github.com/4#ip#u_boot_egress#allowed
+conf: server=/codeload.github.com/1.1.1.1
+conf: server=/codeload.github.com/8.8.8.8
+conf: nftset=/codeload.github.com/4#ip#u_boot_egress#allowed
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/1.1.1.1
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/8.8.8.8
+conf: nftset=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/4#ip#u_boot_egress#allowed
+conf: server=/deb.debian.org/1.1.1.1
+conf: server=/deb.debian.org/8.8.8.8
+conf: nftset=/deb.debian.org/4#ip#u_boot_egress#allowed
+conf: server=/github.com/1.1.1.1
+conf: server=/github.com/8.8.8.8
+conf: nftset=/github.com/4#ip#u_boot_egress#allowed
+conf: server=/host.docker.internal/1.1.1.1
+conf: server=/host.docker.internal/8.8.8.8
+conf: nftset=/host.docker.internal/4#ip#u_boot_egress#allowed
+conf: server=/objects.githubusercontent.com/1.1.1.1
+conf: server=/objects.githubusercontent.com/8.8.8.8
+conf: nftset=/objects.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/raw.githubusercontent.com/1.1.1.1
+conf: server=/raw.githubusercontent.com/8.8.8.8
+conf: nftset=/raw.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/registry.npmjs.org/1.1.1.1
+conf: server=/registry.npmjs.org/8.8.8.8
+conf: nftset=/registry.npmjs.org/4#ip#u_boot_egress#allowed
+conf: server=/registry.ollama.ai/1.1.1.1
+conf: server=/registry.ollama.ai/8.8.8.8
+conf: nftset=/registry.ollama.ai/4#ip#u_boot_egress#allowed
+conf: server=/security.debian.org/1.1.1.1
+conf: server=/security.debian.org/8.8.8.8
+conf: nftset=/security.debian.org/4#ip#u_boot_egress#allowed
+modus=restricted benutzer=vscode HOME=/home/vscode zusatzzeilen=0
+-- Namen der Umgebungsvariablen im Container (Werte nicht ausgegeben)
+HOME HOSTNAME LANG NVM_DIR NVM_SYMLINK_CURRENT PATH PWD SHLVL _ 
+AUSSAGE umgebung-container-verbotene-namen=0
+-- /etc/hosts-Zeile fuer host.docker.internal: 172.17.0.1 host.docker.internal
+-- Einhaengepunkt von ~/.ollama und von HOME
+/home/vscode/.ollama ext4
+/
+---- 11:24:18.436 K1-getent
+befehl: getent hosts host.docker.internal (env-namen: keine; prompt=0; stdin=0)
+172.17.0.1      host.docker.internal
+K1-getent exit=0 dauer=0.0s (124 = timeout nach 10s, 137 = beendet nach -k 5)
+AUSSAGE K1-getent-exit=0
+-- Namen im Resolver-Log waehrend K1-getent (Anzahl Anfragen A/AAAA)
+      1 host.docker.internal
+-- abgelehnte/unbekannte Namen waehrend K1-getent
+      1 dnsmasq[254]: reply host.docker.internal
+-- Dateien neu/geaendert seit der letzten Marke (K1-getent): Pfad, Groesse, Rechte, Einhaengepunkt
+---- 11:24:18.592 K1-api-ohne-relay
+befehl: curl -sS -m 5 http://host.docker.internal:11434/api/version (env-namen: keine; prompt=0; stdin=0)
+curl: (28) Connection timed out after 5002 milliseconds
+K1-api-ohne-relay exit=28 dauer=5.0s (124 = timeout nach 15s, 137 = beendet nach -k 5)
+AUSSAGE K1-api-ohne-relay-exit=28
+-- Namen im Resolver-Log waehrend K1-api-ohne-relay (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend K1-api-ohne-relay
+-- Dateien neu/geaendert seit der letzten Marke (K1-api-ohne-relay): Pfad, Groesse, Rechte, Einhaengepunkt
+relay: gestartet
+---- 11:24:30.995 K1b-api-mit-relay
+befehl: curl -sS -m 5 http://host.docker.internal:11434/api/version (env-namen: keine; prompt=0; stdin=0)
+curl: (28) Connection timed out after 5002 milliseconds
+K1b-api-mit-relay exit=28 dauer=5.0s (124 = timeout nach 15s, 137 = beendet nach -k 5)
+AUSSAGE K1b-api-mit-relay-exit=28
+-- Namen im Resolver-Log waehrend K1b-api-mit-relay (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend K1b-api-mit-relay
+-- Dateien neu/geaendert seit der letzten Marke (K1b-api-mit-relay): Pfad, Groesse, Rechte, Einhaengepunkt
+---- 11:24:36.121 K1b-ollama-version
+befehl: ollama --version (env-namen: OLLAMA_HOST ; prompt=0; stdin=0)
+K1b-ollama-version exit=124 dauer=25.0s (124 = timeout nach 25s, 137 = beendet nach -k 5)
+AUSSAGE K1b-ollama-version-exit=124
+-- Namen im Resolver-Log waehrend K1b-ollama-version (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend K1b-ollama-version
+-- Dateien neu/geaendert seit der letzten Marke (K1b-ollama-version): Pfad, Groesse, Rechte, Einhaengepunkt
+nft set allowed: Elemente=0 172.17.0.1-enthalten=0
+relay: entfernt (docker ps -a: 0 Relay-Container)
+-- Aufraeumen des Containers und der Volumes dieses Teils
+AUSSAGE prompts-gestellt=22 obergrenze=40
+== Ende, 2026-10-24T11:25:06.316Z

@@ -1,0 +1,10 @@
+== Relay start, 2026-10-24T11:06:48.428Z
+container im Netz bridge, die nicht zur Messung gehoeren: 0 (Namen nicht ausgewiesen)
+host-gateway im Container ergibt: 172.17.0.1
+image: alpine/socat@sha256:603174b77eebaba25ba8f8ebb15e1234d6600409554e95d6fb203fd106150287
+-- Erreichbarkeit aus einem Container mit add-host (api/version, kein Prompt)
+{"version":"0.40.10"} rc=0
+-- Relay lauscht auf (ss im Host-Netz-Container, nur Zeilen mit Port 11434)
+LISTEN 0      5         172.17.0.1:11434      0.0.0.0:*   
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*   
+AUSSAGE relay-gateway-adresse=172.17.0.1 relay-gebunden-nur-an-diese-adresse=ja

@@ -1,0 +1,40 @@
+== Aufraeumen (weg-a), 2026-10-24T11:27:35.846Z
+-- vorher (rohdaten-01-vorher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=0 images=85 volumes=899 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud-konto (Name beginnt mit u-boot-messung-ocloud-konto oder vsc-u-boot-messung-ocloud-konto)
+-- vor dem Aufraeumen
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=0 images=95 volumes=914 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud-konto (Name beginnt mit u-boot-messung-ocloud-konto oder vsc-u-boot-messung-ocloud-konto)
+image vsc-u-boot-messung-ocloud-konto-std-a4a0212cc935c0940c3e7d7f24ea2a557def86bb78df7dce585b8d4c9ee0b2f6-uid:latest
+image vsc-u-boot-messung-ocloud-konto-std-b3a3a6804cc5067f570597ecf71c19cd037689c4163dde4bb27b81dcb05dec28-uid:latest
+image vsc-u-boot-messung-ocloud-konto-std-a4a0212cc935c0940c3e7d7f24ea2a557def86bb78df7dce585b8d4c9ee0b2f6:latest
+image vsc-u-boot-messung-ocloud-konto-std-b3a3a6804cc5067f570597ecf71c19cd037689c4163dde4bb27b81dcb05dec28:latest
+image vsc-u-boot-messung-ocloud-konto-alw-2272c2461a9a4f5d337e9076d9944902476f3621e5edbcac0546249c54414833-uid:latest
+image vsc-u-boot-messung-ocloud-konto-alw-2272c2461a9a4f5d337e9076d9944902476f3621e5edbcac0546249c54414833:latest
+image vsc-u-boot-messung-ocloud-konto-res-192cfb3f360863c5c75967abf7338029f98d69e803d0976d744c66f814ac5f70-uid:latest
+image vsc-u-boot-messung-ocloud-konto-res-192cfb3f360863c5c75967abf7338029f98d69e803d0976d744c66f814ac5f70:latest
+image u-boot-messung-ocloud-konto-devcontainer-cli:latest
+image u-boot-messung-ocloud-konto-ub:latest
+-- Entfernen
+-- nachher (rohdaten-08-weg-a-nachher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=1 images=95 volumes=914 netze=3
+-- Objekte mit dem Praefix u-boot-messung-ocloud-konto (Name beginnt mit u-boot-messung-ocloud-konto oder vsc-u-boot-messung-ocloud-konto)
+image vsc-u-boot-messung-ocloud-konto-std-a4a0212cc935c0940c3e7d7f24ea2a557def86bb78df7dce585b8d4c9ee0b2f6-uid:latest
+image vsc-u-boot-messung-ocloud-konto-std-b3a3a6804cc5067f570597ecf71c19cd037689c4163dde4bb27b81dcb05dec28-uid:latest
+image vsc-u-boot-messung-ocloud-konto-std-a4a0212cc935c0940c3e7d7f24ea2a557def86bb78df7dce585b8d4c9ee0b2f6:latest
+image vsc-u-boot-messung-ocloud-konto-std-b3a3a6804cc5067f570597ecf71c19cd037689c4163dde4bb27b81dcb05dec28:latest
+image vsc-u-boot-messung-ocloud-konto-alw-2272c2461a9a4f5d337e9076d9944902476f3621e5edbcac0546249c54414833-uid:latest
+image vsc-u-boot-messung-ocloud-konto-alw-2272c2461a9a4f5d337e9076d9944902476f3621e5edbcac0546249c54414833:latest
+image vsc-u-boot-messung-ocloud-konto-res-192cfb3f360863c5c75967abf7338029f98d69e803d0976d744c66f814ac5f70-uid:latest
+image vsc-u-boot-messung-ocloud-konto-res-192cfb3f360863c5c75967abf7338029f98d69e803d0976d744c66f814ac5f70:latest
+image u-boot-messung-ocloud-konto-devcontainer-cli:latest
+image u-boot-messung-ocloud-konto-ub:latest
+AUSSAGE objekte-mit-praefix-nachher-weg-a=10
+AUSSAGE relay-container-nachher=0
+vorher:  container=0 images=85 volumes=899 netze=3
+nachher: container=1 images=95 volumes=914 netze=3
+(Aenderungen fremder Arbeiten auf dem Host waehrend der Messung stehen in diesem Vergleich ebenfalls)
+AUSSAGE prompts-gestellt=22 obergrenze=40

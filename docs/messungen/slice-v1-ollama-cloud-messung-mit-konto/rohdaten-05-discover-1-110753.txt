@@ -1,0 +1,61 @@
+NACHTRAG (nicht vom Skript geschrieben): Konsolenausgabe des Aufrufs `05-lauf-host.sh discover claude:1 run:1 launch:1` (LAUF=1), woertlich uebernommen. Die Rohdatei dieses Aufrufs wurde vom naechsten Aufruf desselben Teils und Laufs ueberschrieben (gleicher Dateiname; behoben: die Uhrzeit steht jetzt im Namen).
+== Weg (a), Teil discover, Lauf 1, Faelle: claude:1 run:1 launch:1, 2026-10-24T11:07:53.166Z
+AUSSAGE prompts-gestellt=1 obergrenze=40
+devcontainer up res exit=0 dauer=4.7s
+image des Containers: vsc-u-boot-messung-ocloud-konto-res-192cfb3f360863c5c75967abf7338029f98d69e803d0976d744c66f814ac5f70-uid
+-- Einhaengepunkte des Containers (Art, Ziel)
+
+-- Egress-Status im Container:
+modus=discover benutzer=vscode HOME=/home/vscode zusatzzeilen=0
+-- Namen der Umgebungsvariablen im Container (Werte nicht ausgegeben)
+HOME HOSTNAME LANG NVM_DIR NVM_SYMLINK_CURRENT PATH PWD SHLVL _
+AUSSAGE umgebung-container-verbotene-namen=0
+-- /etc/hosts-Zeile fuer host.docker.internal: 172.17.0.1 host.docker.internal
+-- Einhaengepunkt von ~/.ollama und von HOME
+/          overlay
+/
+relay: gestartet
+PROMPT 2/40 weg-a discover lauf1 claude:1
+---- 11:08:07.382 K-claude-m1
+befehl: claude --model glm-5.3-flash:cloud[1m] -p @PROMPT@ (env-namen: ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ; prompt=1; stdin=0)
+ausgabe: 2 Zeilen nach Entfernen der Steuerzeichen, 93 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+[claude-code:[entfernt]] {"model":"glm-5.3-flash:cloud[1m]","query_source":"sdk"}
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 1, laengste 2 Zeichen
+K-claude-m1 exit=0 dauer=1.8s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE K-claude-m1-exit=0
+-- Namen im Resolver-Log waehrend K-claude-m1 (Anzahl Anfragen A/AAAA)
+      1 api.anthropic.com
+-- abgelehnte/unbekannte Namen waehrend K-claude-m1
+-- Dateien neu/geaendert seit der letzten Marke (K-claude-m1): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.claude.json 852 600 /
+/home/vscode/.claude/backups/.claude.json.backup.1792840087530 84 600 /
+/home/vscode/.claude/projects/-home-vscode/be0e4606-07af-4587-9eff-21015754405e.jsonl 131515 600 /
+PROMPT 3/40 weg-a discover lauf1 run:1
+---- 11:08:09.375 K-run-m1
+befehl: ollama run glm-5.3-flash:cloud[1m] @PROMPT@ (env-namen: OLLAMA_HOST ; prompt=1; stdin=0)
+ausgabe: 1 Zeilen nach Entfernen der Steuerzeichen, 26 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Error: invalid model name
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 0, laengste 0 Zeichen
+K-run-m1 exit=1 dauer=0.0s (124 = timeout nach 90s, 137 = beendet nach -k 5)
+AUSSAGE K-run-m1-exit=1
+-- Namen im Resolver-Log waehrend K-run-m1 (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend K-run-m1
+-- Dateien neu/geaendert seit der letzten Marke (K-run-m1): Pfad, Groesse, Rechte, Einhaengepunkt
+PROMPT 4/40 weg-a discover lauf1 launch:1
+---- 11:08:09.526 K-launch-m1
+befehl: ollama launch claude --model glm-5.3-flash:cloud[1m] --yes (env-namen: OLLAMA_HOST ; prompt=1; stdin=1)
+ausgabe: 1 Zeilen nach Entfernen der Steuerzeichen, 26 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Error: invalid model name
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 0, laengste 0 Zeichen
+K-launch-m1 exit=1 dauer=0.0s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE K-launch-m1-exit=1
+-- Namen im Resolver-Log waehrend K-launch-m1 (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend K-launch-m1
+-- Dateien neu/geaendert seit der letzten Marke (K-launch-m1): Pfad, Groesse, Rechte, Einhaengepunkt
+relay: entfernt (docker ps -a: 0 Relay-Container)
+-- Aufraeumen des Containers und der Volumes dieses Teils
+AUSSAGE prompts-gestellt=4 obergrenze=40
+== Ende, 2026-10-24T11:08:14.574Z
