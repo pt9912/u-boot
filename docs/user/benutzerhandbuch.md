@@ -1115,6 +1115,16 @@ atomar (siehe Abschnitt 5).
 - Ohne Freigabe endet `config set …source` mit Exit-Code 10:
   `external source "…" is not in devcontainer.featureSources.allow`. Die
   Fehlermeldung nennt den passenden `config set`-Befehl.
+- Auch `generate devcontainer` erzeugt die Quelle eines aktivierten Features
+  nur, wenn sie in der Freigabeliste steht oder im selben Aufruf mit
+  `--allow-external-feature-sources` freigegeben wird. Sonst endet der Aufruf
+  mit Exit-Code 10, schreibt nichts (auch mit `--dry-run` nicht) und nennt
+  zwei Auswege: die Quelle freigeben (mit
+  `config set devcontainer.featureSources.allow <Quelle>` oder mit dem Flag)
+  oder das Feature abschalten (mit
+  `config set devcontainer.features.<Name>.enabled false`). Das gilt im
+  Standard- und im Sandbox-Profil. Features mit `enabled: false` oder ohne `enabled` werden weder
+  erzeugt noch geprüft; `doctor` meldet sie weiter.
 - `--allow-external-feature-sources` gibt es nur bei `init --devcontainer`,
   `generate devcontainer` und `config set …featureSources.allow`; bei anderen
   Befehlen wird es abgelehnt.
