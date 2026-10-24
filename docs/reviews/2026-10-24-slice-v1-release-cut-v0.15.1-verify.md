@@ -2,7 +2,7 @@
 
 * Rolle: Verifier (`harness/verification.md`), frischer Kontext
 * Gegenstand: `git diff 6335bf18..HEAD` (HEAD `f16b89c2`), Slice
-  [`slice-v1-release-cut-v0.15.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.15.1.md)
+  [`slice-v1-release-cut-v0.15.1`](../plan/planning/done/slice-v1-release-cut-v0.15.1.md)
   (Patch `v0.15.1`, Einstufung *Fixed*); Muster [`slice-v1-release-cut-v0.15.0`](../plan/planning/done/slice-v1-release-cut-v0.15.0.md)
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CONF-005`](../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)
 * Review: [`2026-10-24-slice-v1-release-cut-v0.15.1.md`](2026-10-24-slice-v1-release-cut-v0.15.1.md) (LOW-1 und INFO-1 in `f16b89c2` behoben)

@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-release-cut-v0.15.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.15.1.md) — Nachlauf-Review der Fix-Runde LOW-V1 — 2026-10-24
+# Review-Report: [`slice-v1-release-cut-v0.15.1`](../plan/planning/done/slice-v1-release-cut-v0.15.1.md) — Nachlauf-Review der Fix-Runde LOW-V1 — 2026-10-24
 
 **Review-Art:** Doku, Nachlauf (klein) — der neue Wortlaut der getrennten Messaussage gegen die beiden Verify-Reports, Plan-Änderungen und die Hard Rules (`AGENTS.md` §3.7, §3.10, §5 Regel 6). Keine DoD-Closure (Verifier). Keine Einschätzung des Implementers ist ungeprüft übernommen.
 

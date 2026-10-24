@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (`.harness/skills/reviewer.md`), frischer Kontext
 * Gegenstand: `git diff 6335bf18..HEAD` (HEAD `40195a96`), Slice
-  [`slice-v1-release-cut-v0.15.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.15.1.md)
+  [`slice-v1-release-cut-v0.15.1`](../plan/planning/done/slice-v1-release-cut-v0.15.1.md)
   (Patch `v0.15.1`, Einstufung *Fixed*, kein Advisory); Muster: Cuts `v0.15.0` und `v0.13.1`
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CONF-005`](../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)
 * Belege der Inhalte: Review- und Verify-Reports beider Fix-Slices vom 2026-10-24
