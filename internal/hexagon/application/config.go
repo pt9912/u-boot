@@ -549,6 +549,11 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 // suffice — the user must have populated the allowlist first via
 // `config set devcontainer.featureSources.allow <url>` or
 // `--allow-external-feature-sources <url>`.
+//
+// For .version it enforces the rule of [validateDevcontainerFeatures]
+// through [featureVersionNeedsSource]: a Dockerfile-block feature
+// (`ollama`, `gh`, `glab`) takes a version only with a source, else
+// [driving.ErrConfigValueInvalid] (exit code 10, file untouched).
 func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 	entry, ok := lookupFeatureEntry(cfg, path.Feature)
 	if !ok {
@@ -577,6 +582,11 @@ func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 		if entry.Version == "" {
 			return fmt.Errorf("%w: post-patch %s is empty",
 				driving.ErrConfigPostPatchSanityFailed, path)
+		}
+		if featureVersionNeedsSource(path.Feature.String(), entry) {
+			return fmt.Errorf(
+				"%w: %s: the %s installation is pinned in the Dockerfile; a version override needs a source: set devcontainer.features.%s.source first (in the same `config set` call, list the source pair before the version pair), or leave the version unset",
+				driving.ErrConfigValueInvalid, path, path.Feature, path.Feature)
 		}
 		return nil
 	}

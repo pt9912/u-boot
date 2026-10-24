@@ -590,29 +590,69 @@ func TestConfigSet_ForgeVersionWithoutSource_RejectsEverySet(t *testing.T) {
 	}
 }
 
-// Characterisation of the state before the `version` check of `config set`
-// follows `generate`: `config set …gh.version <value>` on a valid file
-// without `source:` ends without error and writes the entry, after which the
-// file is the shape of the test above. The assertion turns to a rejection
-// with the follow-up that checks the value on Set.
-func TestConfigSet_ForgeVersionWithoutSource_SetItselfSucceeds(t *testing.T) {
+// `config set …<feature>.version <value>` follows `generate devcontainer`: a
+// Dockerfile-block feature (`ollama`, `gh`, `glab`) takes a `version` only with
+// a `source`. Without it the Set ends with ErrConfigValueInvalid (exit code
+// 10, not the file-broken ErrConfigSchemaInvalid), the file stays
+// byte-identical and nothing is written, in every preview mode.
+func TestConfigSet_DockerfileBlockVersionWithoutSource_Rejected(t *testing.T) {
+	t.Parallel()
+	for _, key := range []string{"ollama", "gh", "glab"} {
+		for _, mode := range []struct {
+			name string
+			mode driving.PreviewMode
+		}{{"apply", driving.PreviewNone}, {"dry-run", driving.PreviewDryRun}} {
+			t.Run(key+"/"+mode.name, func(t *testing.T) {
+				t.Parallel()
+				svc, fs := newConfigService(t)
+				seedConfigUbootYAMLWithDevcontainer(t, fs, "schemaVersion: 1\nproject:\n  name: t-uboot-config\n"+
+					"devcontainer:\n  enabled: true\n  features:\n    "+key+":\n      enabled: true\n")
+				before, writes := readYAML(t, fs), len(fs.writes)
+				_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+					BaseDir:     configTestBaseDir,
+					Path:        mustConfigPath(t, "devcontainer.features."+key+".version"),
+					Value:       "2.0.0",
+					PreviewMode: mode.mode,
+				})
+				if !errors.Is(err, driving.ErrConfigValueInvalid) {
+					t.Fatalf("Set error = %v, want a wrap of ErrConfigValueInvalid", err)
+				}
+				if errors.Is(err, driving.ErrConfigSchemaInvalid) {
+					t.Errorf("Set error = %v, must not claim a broken file", err)
+				}
+				if !strings.Contains(err.Error(), "devcontainer.features."+key+".source") {
+					t.Errorf("Set error = %v, want the source path as the way out", err)
+				}
+				if readYAML(t, fs) != before || len(fs.writes) != writes {
+					t.Errorf("u-boot.yaml changed by a rejected Set:\n%s", readYAML(t, fs))
+				}
+			})
+		}
+	}
+}
+
+// With an allowlisted `source` in the entry the version is set; a feature
+// without a Dockerfile block (`java`) keeps its `version` without a source.
+func TestConfigSet_VersionWithSourceOrWithoutDockerfileBlock_Succeeds(t *testing.T) {
 	t.Parallel()
 	svc, fs := newConfigService(t)
 	seedConfigUbootYAMLWithDevcontainer(t, fs, "schemaVersion: 1\nproject:\n  name: t-uboot-config\n"+
-		"devcontainer:\n  enabled: true\n  features:\n    gh:\n      enabled: true\n")
-	resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
-		BaseDir: configTestBaseDir,
-		Path:    mustConfigPath(t, "devcontainer.features.gh.version"),
-		Value:   "2.0.0",
-	})
-	if err != nil {
-		t.Fatalf("Set: %v", err)
+		"devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://example.test/features/gh\n"+
+		"  features:\n    gh:\n      enabled: true\n      source: https://example.test/features/gh\n")
+	for _, set := range []struct{ path, value string }{
+		{"devcontainer.features.gh.version", "2.0.0"},
+		{"devcontainer.features.java.version", "21"},
+	} {
+		resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+			BaseDir: configTestBaseDir, Path: mustConfigPath(t, set.path), Value: set.value})
+		if err != nil {
+			t.Fatalf("Set %s: %v", set.path, err)
+		}
+		if resp.NewValue != set.value {
+			t.Errorf("Set %s: NewValue = %q, want %q", set.path, resp.NewValue, set.value)
+		}
 	}
-	if resp.NewValue != "2.0.0" {
-		t.Errorf("NewValue = %q, want 2.0.0", resp.NewValue)
-	}
-	after, _ := fs.ReadFile(filepath.Join(configTestBaseDir, "u-boot.yaml"))
-	if !strings.Contains(string(after), "2.0.0") {
-		t.Errorf("u-boot.yaml does not carry the written version:\n%s", after)
+	if y := readYAML(t, fs); !strings.Contains(y, "2.0.0") || !strings.Contains(y, "21") {
+		t.Errorf("u-boot.yaml does not carry both versions:\n%s", y)
 	}
 }

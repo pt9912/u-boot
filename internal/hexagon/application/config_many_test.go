@@ -161,6 +161,61 @@ func TestConfigSetMany_OrderedDependency(t *testing.T) {
 	}
 }
 
+// `version` of a Dockerfile-block feature needs a `source` in the same
+// document: a version pair alone, or ahead of its source pair, is rejected
+// with ErrConfigValueInvalid and nothing is written; the source pair first
+// makes it work (the source is allowlisted by an earlier pair).
+func TestConfigSetMany_DockerfileBlockVersionNeedsSourceFirst(t *testing.T) {
+	t.Parallel()
+	const url = "https://example.test/features/"
+	for _, key := range []string{"ollama", "gh", "glab"} {
+		t.Run(key, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newConfigService(t)
+			seedMany(t, fs, manyFixture)
+			before, writes := readYAML(t, fs), len(fs.writes)
+			allow := driving.ConfigSetItem{Path: mustConfigPath(t, "devcontainer.featureSources.allow"), Value: url + key}
+			source := driving.ConfigSetItem{Path: mustConfigPath(t, "devcontainer.features."+key+".source"), Value: url + key}
+			version := driving.ConfigSetItem{Path: mustConfigPath(t, "devcontainer.features."+key+".version"), Value: "2.0.0"}
+			for name, items := range map[string][]driving.ConfigSetItem{
+				"version alone":         {version},
+				"version before source": {allow, version, source},
+			} {
+				_, err := svc.SetMany(context.Background(), driving.ConfigSetManyRequest{BaseDir: configTestBaseDir, Items: items})
+				if !errors.Is(err, driving.ErrConfigValueInvalid) {
+					t.Fatalf("%s: err = %v, want ErrConfigValueInvalid", name, err)
+				}
+				if readYAML(t, fs) != before || len(fs.writes) != writes {
+					t.Errorf("%s: u-boot.yaml changed by a rejected SetMany", name)
+				}
+			}
+			if _, err := svc.SetMany(context.Background(), driving.ConfigSetManyRequest{BaseDir: configTestBaseDir,
+				Items: []driving.ConfigSetItem{allow, source, version}}); err != nil {
+				t.Fatalf("allow, source, version: %v", err)
+			}
+			if y := readYAML(t, fs); !strings.Contains(y, "2.0.0") || !strings.Contains(y, url+key) {
+				t.Errorf("u-boot.yaml lacks source and version:\n%s", y)
+			}
+		})
+	}
+}
+
+// A file that already carries `version` without `source` on a Dockerfile-block
+// feature is rejected by the read check of SetMany as well, byte-identical.
+func TestConfigSetMany_RejectsFileWithForgeVersionWithoutSource(t *testing.T) {
+	t.Parallel()
+	svc, fs := newConfigService(t)
+	before := seedForgeVersionWithoutSource(t, fs, "gh")
+	_, err := svc.SetMany(context.Background(), driving.ConfigSetManyRequest{BaseDir: configTestBaseDir,
+		Items: []driving.ConfigSetItem{{Path: mustConfigPath(t, "project.name"), Value: "other-name"}}})
+	if !errors.Is(err, driving.ErrConfigSchemaInvalid) {
+		t.Fatalf("err = %v, want ErrConfigSchemaInvalid", err)
+	}
+	if readYAML(t, fs) != string(before) {
+		t.Errorf("u-boot.yaml changed by a rejected SetMany")
+	}
+}
+
 // All values already set → no write at all.
 func TestConfigSetMany_NoOp(t *testing.T) {
 	t.Parallel()

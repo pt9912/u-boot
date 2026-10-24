@@ -638,12 +638,20 @@ func validateDevcontainerFeatures(dc *ubootYAMLDevcontainer) error {
 				return fmt.Errorf("features.%s.source: %w", k, err)
 			}
 		}
-		if entry.Source == "" && entry.Version != "" && featureCatalogue()[k].dockerfileBlock {
+		if featureVersionNeedsSource(k, entry) {
 			return fmt.Errorf("%w: features.%s.version: the %s installation is pinned in the Dockerfile; "+
 				"a version override needs a source: override", ErrInvalidFeatureSource, k, k)
 		}
 	}
 	return nil
+}
+
+// featureVersionNeedsSource is the single statement of the rule "a
+// Dockerfile-block feature has no `version:` without a `source:`".
+// [validateDevcontainerFeatures] (read path) and [revalidateFeatureEntry]
+// (write path of config set) both ask it.
+func featureVersionNeedsSource(name string, entry ubootYAMLDevcontainerFeature) bool {
+	return entry.Source == "" && entry.Version != "" && featureCatalogue()[name].dockerfileBlock
 }
 
 // ErrDevcontainerJSONUnparsable signals that the devcontainer.json
