@@ -29,7 +29,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; Lastenheft `0.23.2` liefern die Slices der Welle; dieser Slice ändert `spec/` nicht).
 
-**Verantwortlich:** — (wird beim Start gesetzt, Rolle Implementer); Freigaben: Projektinhaber.
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-24); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-24.
 
@@ -237,6 +237,8 @@ Der Ausgang jedes Risikos wird bei der Closure festgeschrieben.
 ## 7. Closure-Notiz
 
 *(Wird bei der Closure gefüllt: Läufe M0 bis M7 · Befunde des Validators mit Ausgang je Befund · Steering-Loop-Lerneintrag · Register · Folge-Slices · Risiken aus §6 · Verifikation · Abgleich der Plan-Tabelle · drei Paarungen.)*
+
+**Entscheidungen beim Start** (2026-10-24, Implementer nach dem Auftrag des Hauptagenten; der Projektinhaber hat mit „mach weiter ohne nachzufragen“ die Standards des Plans gelten lassen, ein Wortlaut einer Freigabe zu einzelnen Fragen liegt nicht vor): Frage 1: Lead in der Form aus §3 (Wortlaut geht dem Projektinhaber vor M1 vor); Frage 2: **kein** Messlauf mit Konto vor dem Cut, nur Text im Lead; Frage 3: Messstände-CR (Carveout 2) **nach** dem Cut, der Lead nennt die zwei Zusage-Mengen als Grenze; Frage 4 (V-1): Eingrenzen auf den gemessenen Pfad, nur Gemessenes; Frage 5: Einstufung *Added*/*Changed*, kein Advisory, Z4 bleibt „nicht zugesagt“; Frage 6: L-1, L-3 und I-1 nur als Kandidaten in der Closure-Notiz, keine neuen Dateien; Frage 7: Beleg M-1 in der Cut-Closure (der Planner schreibt das Register später); Frage 8 (M3): kein Vorab-Tag. Reichweite: Push (M1) und Tag (M5) führt nur der Hauptagent, je Vorgang nach ausdrücklicher Freigabe des Projektinhabers; der Implementer pusht und taggt nie, auch nicht lokal.
 
 **Fragen an den Projektinhaber (gesammelt vom Planner, 2026-10-24; Standard in Klammern, gilt bis zur Antwort):**
 

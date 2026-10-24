@@ -132,7 +132,7 @@ nicht vom Schreibort.
 
 ### Stand nach dem Spezifikations-Slice (Planner, 2026-10-24)
 
-Sechs Slices mit Datei liegen in `done/`; der Validator-Bericht liegt vor (unten, Punkt 4 und 7); offen ist der Release-Cut (`v0.16.0`, [`slice-v1-release-cut-v0.16.0`](in-progress/slice-v1-release-cut-v0.16.0.md) in `open/`). Der Spezifikations-Slice [`slice-v2-spec-ollama-cloud`](done/slice-v2-spec-ollama-cloud.md) ist geschlossen (Verify-Report konform, Carveout 1 aufgelöst); Carveout 2 (zwei Zusage-Mengen im Feature `ollama`, Anker [`slice-cr-lastenheft-messstaende`](open/slice-cr-lastenheft-messstaende.md)) steht weiter im Inventar.
+Sechs Slices mit Datei liegen in `done/`; der Validator-Bericht liegt vor (unten, Punkt 4 und 7); offen ist der Release-Cut (`v0.16.0`, [`slice-v1-release-cut-v0.16.0`](in-progress/slice-v1-release-cut-v0.16.0.md) in `in-progress/`). Der Spezifikations-Slice [`slice-v2-spec-ollama-cloud`](done/slice-v2-spec-ollama-cloud.md) ist geschlossen (Verify-Report konform, Carveout 1 aufgelöst); Carveout 2 (zwei Zusage-Mengen im Feature `ollama`, Anker [`slice-cr-lastenheft-messstaende`](open/slice-cr-lastenheft-messstaende.md)) steht weiter im Inventar.
 
 **Stand der Closure-Kriterien (§3), gelesen gegen die Reports des Slice:**
 
@@ -145,7 +145,7 @@ Sechs Slices mit Datei liegen in `done/`; der Validator-Bericht liegt vor (unten
 | 5 Smokes, kein Test an `ollama.com` | Docker-Tests D1, D2 gehen nicht an `ollama.com` (der Test sucht den Namen in den erzeugten Dateien); `ci` und `integration-docker` auf dem Push-Tip des Cuts stehen aus | Cut-Slice |
 | 6 Gates | zuletzt grün im Verify-Report und bei der Closure des Slice | beim Cut erneut |
 | 7 Validator-Bericht | erfüllt (Bericht vom 2026-10-24 liegt vor, vor dem Cut) | `docs/reviews/2026-10-24-welle-ollama-cloud-modelle-validierung.md` |
-| 8 Release | **offen** | [`slice-v1-release-cut-v0.16.0`](in-progress/slice-v1-release-cut-v0.16.0.md) (Datei in `open/`) |
+| 8 Release | **offen** | [`slice-v1-release-cut-v0.16.0`](in-progress/slice-v1-release-cut-v0.16.0.md) (Datei in `in-progress/`) |
 | 9 Closure-Notiz der Welle | steht aus | bei der Welle-Closure |
 
 **Aufträge an den Validator** (Rolle Validator, bevor der Cut beginnt; ohne Konto und ohne Anfrage an den Cloud-Dienst, Punkt 4 und [`ADR-0036`](../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) Entscheidung 11; am ausgelieferten Binary, Linux `amd64`, lokale Docker-Engine):
