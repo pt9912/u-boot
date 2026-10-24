@@ -17,13 +17,14 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
+Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; ein Slice mit Datei, bis zu sechs weitere vorläufig, der Release-Cut zuletzt; Release-Nummer offen, Vorschlag `v0.16.0`).
+
 Nichts in Arbeit.
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| `welle-ollama-cloud-modelle` (Cloud-Modelle von Ollama mit Claude Code im Sandbox-Devcontainer, `ollama launch claude`) | Release der Welle `welle-sandbox-egress-ollama` geschnitten (eingetreten: `v0.12.0`, 2026-10-19); Beauftragung durch den Projektinhaber (2026-10-19, eingetreten: Lücke im Lastenheft 0.15.0, Cloud-Modelle sind weder zugesagt noch ausgeschlossen) | `slice-v1-ollama-cloud-messung` (Hosts, Anmeldung, Zusammenspiel mit `claude-code`; noch kein Plan), danach ADR, Lastenheft-CR, Code, Spezifikation | M |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 
