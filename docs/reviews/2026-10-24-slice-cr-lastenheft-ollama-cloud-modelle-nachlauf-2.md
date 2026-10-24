@@ -49,7 +49,7 @@ Verifizierbar: Review-only
 ```
 
 ```text
-INFO docs/plan/planning/in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md · "Zugesagt ist der Ablauf nur in dem Aufbau, in dem er geprüft ist" (Wortlaut, wie in N-6) - Prüfzustand im Zielbild; Freigabe-Beleg und Lastenheft-Commit im selben Commit (wie N-7); Z13 bis zum Code-Slice ohne Beleg
+INFO docs/plan/planning/done/slice-cr-lastenheft-ollama-cloud-modelle.md · "Zugesagt ist der Ablauf nur in dem Aufbau, in dem er geprüft ist" (Wortlaut, wie in N-6) - Prüfzustand im Zielbild; Freigabe-Beleg und Lastenheft-Commit im selben Commit (wie N-7); Z13 bis zum Code-Slice ohne Beleg
 Klasse: bekannte INFO, unverändert
 Quelle: Vorreport N-6, N-7; Vorreport F-11 des ersten Reviews
 Befund: Alle drei Hinweise bestehen unverändert fort; die Fassung 3 berührt sie nicht.

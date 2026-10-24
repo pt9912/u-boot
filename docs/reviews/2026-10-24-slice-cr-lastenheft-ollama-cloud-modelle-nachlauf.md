@@ -67,7 +67,7 @@ Verifizierbar: Review-only
 ```
 
 ```text
-INFO docs/plan/planning/in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md · "kein Commit von `spec/lastenheft.md` vor diesem Eintrag" - Freigabe-Eintrag und Lastenheft-Commit im selben Commit
+INFO docs/plan/planning/done/slice-cr-lastenheft-ollama-cloud-modelle.md · "kein Commit von `spec/lastenheft.md` vor diesem Eintrag" - Freigabe-Eintrag und Lastenheft-Commit im selben Commit
 Klasse: Freigabe-Beleg und Änderung im selben Commit
 Quelle: Slice §2 Liefer-Punkt 1; Verifier-Aufgabe
 Befund: §7 *Freigabe der Fassung 2* und der Lastenheft-Diff liegen im Commit `9c8c16eb`; die Reihenfolge "Eintrag vor Commit" ist aus `git log` nicht ablesbar. Bei Fassung 1 verlief es gleich; der Vorreport hat es nicht beanstandet.

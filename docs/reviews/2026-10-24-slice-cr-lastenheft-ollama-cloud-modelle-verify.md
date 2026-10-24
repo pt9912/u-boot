@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Modul 8) · **Frage:** Wurde der Slice richtig gebaut, gemessen an Plan, DoD, ADR und ausgeführten Sensors? (nicht: Review, nicht: Validierung) · **Modell:** claude-sonnet-5-5 · frischer Kontext.
 
-**Gegenstand:** Slice [`slice-cr-lastenheft-ollama-cloud-modelle`](../plan/planning/in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md) (liegt in `in-progress/`, DoD-Häkchen offen außer Punkt 1), Stand HEAD `7e32651b` (11 Commits `origin/main..HEAD`), Lastenheft `0.23.2` ([`spec/lastenheft.md`](../../spec/lastenheft.md), Commits `3b135e0e`, `9c8c16eb`, `29cb728b`). Geprüft gegen Slice §1 (freigegebener Wortlaut: Fassung 1 Stellen 1, 2, 5, 6, 8; Fassung 2 Stelle 4; Fassung 3 Stelle 3; Stelle 7 Historie), §2 (DoD), §3 (Plan-Tabelle), §6, §7 (Freigaben je Stelle), die Reports [`…-ollama-cloud-modelle.md`](2026-10-24-slice-cr-lastenheft-ollama-cloud-modelle.md) (F-1 bis F-12), [`…-nachlauf.md`](2026-10-24-slice-cr-lastenheft-ollama-cloud-modelle-nachlauf.md) (N-1 bis N-7) und [`…-nachlauf-2.md`](2026-10-24-slice-cr-lastenheft-ollama-cloud-modelle-nachlauf-2.md) (L-1, I-1 bis I-4), [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) (Accepted; Z1 bis Z13; *Folgepflicht*) und die Messprotokolle (nur Gemessenes: [`slice-v1-ollama-cloud-messung`](../messungen/slice-v1-ollama-cloud-messung/README.md), [`…-mit-konto`](../messungen/slice-v1-ollama-cloud-messung-mit-konto/README.md)).
+**Gegenstand:** Slice [`slice-cr-lastenheft-ollama-cloud-modelle`](../plan/planning/done/slice-cr-lastenheft-ollama-cloud-modelle.md) (liegt in `in-progress/`, DoD-Häkchen offen außer Punkt 1), Stand HEAD `7e32651b` (11 Commits `origin/main..HEAD`), Lastenheft `0.23.2` ([`spec/lastenheft.md`](../../spec/lastenheft.md), Commits `3b135e0e`, `9c8c16eb`, `29cb728b`). Geprüft gegen Slice §1 (freigegebener Wortlaut: Fassung 1 Stellen 1, 2, 5, 6, 8; Fassung 2 Stelle 4; Fassung 3 Stelle 3; Stelle 7 Historie), §2 (DoD), §3 (Plan-Tabelle), §6, §7 (Freigaben je Stelle), die Reports [`…-ollama-cloud-modelle.md`](2026-10-24-slice-cr-lastenheft-ollama-cloud-modelle.md) (F-1 bis F-12), [`…-nachlauf.md`](2026-10-24-slice-cr-lastenheft-ollama-cloud-modelle-nachlauf.md) (N-1 bis N-7) und [`…-nachlauf-2.md`](2026-10-24-slice-cr-lastenheft-ollama-cloud-modelle-nachlauf-2.md) (L-1, I-1 bis I-4), [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) (Accepted; Z1 bis Z13; *Folgepflicht*) und die Messprotokolle (nur Gemessenes: [`slice-v1-ollama-cloud-messung`](../messungen/slice-v1-ollama-cloud-messung/README.md), [`…-mit-konto`](../messungen/slice-v1-ollama-cloud-messung-mit-konto/README.md)).
 
 **Nicht Gegenstand (Auftrag):** Closure-Notiz und Welle-Nachzug (Planner kommt danach); das gesprochene Gespräch mit dem Projektinhaber.
 
@@ -11,7 +11,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-cr-lastenheft-ollama-cloud-modelle`](../plan/planning/in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md)
+- Slice: [`slice-cr-lastenheft-ollama-cloud-modelle`](../plan/planning/done/slice-cr-lastenheft-ollama-cloud-modelle.md)
 - IDs: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (geändert); [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (unverändert); [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md) (unverändert)
 - Artefakte (Diff `origin/main..HEAD`, 10 Dateien): `spec/lastenheft.md` (+12/−4, fünf Hunks: Zeile 9, 191, 407 bis 418, 460, 1604 bis 1606), Slice-Plan (neu in `in-progress/`), `roadmap.md`, `carveouts.md` (+2), `open/README.md`, `open/slice-cr-lastenheft-messstaende.md`, `welle-ollama-cloud-modelle.md`, drei Review-Reports. Kein Go-Code, kein Docker-Pfad, keine Importregel. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 
@@ -199,7 +199,7 @@ Die ADR-*Folgepflicht* nennt außerdem `CHANGELOG.md` und die Golden-Zeile in `h
 | `docs/plan/planning/open/slice-cr-lastenheft-messstaende.md` | ja | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 | `docs/plan/planning/welle-ollama-cloud-modelle.md` | ja |
 | `docs/plan/planning/in-progress/carveouts.md` | ja |
-| `docs/plan/planning/in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md` („diese Datei“) | ja | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+| `docs/plan/planning/done/slice-cr-lastenheft-ollama-cloud-modelle.md` („diese Datei“) | ja | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 | `docs/reviews/` (drei Reports) | ja (Zeile „neu“; der Verification-Report kommt mit diesem Commit hinzu) |
 | `docs/plan/planning/observations/` | Plan-Zeile „update (Closure)“; **kein** Diff, weil die Closure noch aussteht |
 
