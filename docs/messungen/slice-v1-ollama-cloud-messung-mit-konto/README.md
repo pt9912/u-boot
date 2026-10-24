@@ -229,7 +229,9 @@ Der Projektinhaber berichtet, ohne Namen und Kontodaten:
 - **(c) Anfragen:** Auf der Kontoseite der letzten Anfragen standen am selben Tag **28 Einträge** beider Modelle; davor nur ein Eintrag von vor drei Tagen. Der Projektinhaber gibt an, sie stammten nicht von ihm. Die Zahl entspricht den 28 Prompts mit Antwort dieses Protokolls;
   **Herkunft** und Zuordnung zu Weg (a) oder Weg (b) sind aus der Anzeige nicht ablesbar. Beobachtung ohne Schluss; sie begründet keine Aussage über Kontobindung, Authentifizierung oder Abrechnung.
 
-**Hinweis für die Folge-ADR:** Die Anmeldung trägt nach der (einmal wiederholten) Beobachtung des Projektinhabers einen Schlüssel im Konto ein; der **Rückbau im Konto durch den Nutzer bleibt zu bestätigen**. Die ADR sagt nicht zu, dass `signout` ihn entfernt (ungemessen). Welche Rolle der Schlüssel für die Cloud-Anfragen hat,
+- **(d) Später am selben Tag, Eintrag mit Container-ID-Namen:** Der Projektinhaber meldete einen Geräteschlüssel im Konto, dessen Name die Form einer Container-ID hat (Wert hier nicht genannt); zuvor stand dort nur der Schlüssel seines Host-Rechners. **Herkunft ungeklärt:** der Eintrag kann aus Weg (b) dieser Messung stammen (Anmeldung 2026-10-24, `signout` 11:46:43 UTC) oder aus der eigenen Wiederholung der Anmeldung des Projektinhabers (Punkt (a)); die Uhrzeit des Eintrags wurde nicht genannt. Ein Abgleich mit der Messung ist aus den Rohdaten nicht möglich: sie tragen weder Hostnamen noch Container-ID (die Umgebungsprüfung führt `HOSTNAME` nur als Namen), und die Skripte unter `tools/messung/ollama-cloud-konto/` setzen keinen Hostnamen (gelesen: keine Fundstelle). Der Widerspruch zu (b) ist nicht aufgelöst: (b) gibt den Stand unmittelbar nach der Messung an, (d) einen späteren Zeitpunkt. Der Projektinhaber hat den Eintrag gelöscht (2026-10-24); danach steht im Konto nur der Schlüssel seines Host-Rechners (Angabe). **Bestätigt ist damit der Kontozustand nach dem Löschen** (kein Eintrag mit Container-ID-Namen), nicht, dass die Messung keinen Eintrag erzeugt hat. Ob `ollama signout` einen Eintrag serverseitig entfernt, bleibt ungemessen; die Beobachtung (d) gilt als Hinweis, nicht als Messwert.
+
+**Hinweis für die Folge-ADR:** Die Anmeldung trägt nach der (einmal wiederholten) Beobachtung des Projektinhabers einen Schlüssel im Konto ein; der Rückbau im Konto geschah durch den Nutzer (Punkt (d): Eintrag vom Projektinhaber gelöscht, Herkunft des Eintrags ungeklärt). Die ADR sagt nicht zu, dass `signout` ihn entfernt (ungemessen). Welche Rolle der Schlüssel für die Cloud-Anfragen hat,
 ist nicht gemessen. Gemessen sind der Ort der Schlüsseldateien im Modell-Volume und dass die Antworten nach Neuanlage des Containers mit demselben Volume ohne neue Anmeldung kamen.
 
 ## Nutzerpfad je Profil — Weg (a) (Eingabe für ADR und Validator)
@@ -248,7 +250,7 @@ ist nicht gemessen. Gemessen sind der Ort der Schlüsseldateien im Modell-Volume
 | Sandbox, Weg (b), `discover` | `ollama run <modell> "<Prompt>"`, `claude -p` mit `ANTHROPIC_BASE_URL=http://127.0.0.1:11434`, `ollama launch claude --model <m> --yes` | Antwort in 1 bis 2,5 s; `[1m]` im Namen nur für `claude` gültig | `rohdaten-06-discover-1-114452.txt`, `…-114507.txt` |
 | Sandbox, Weg (b), `restricted` | Liste des Generators plus `ollama.com`, Container neu mit demselben Volume | Anmeldung bleibt, Antwort ohne neue Anmeldung | `rohdaten-06-restricted-1-114624.txt` |
 | Sandbox, Weg (b) | `OLLAMA_NO_CLOUD=1` | „ollama cloud is disabled“, Exit 1 | `rohdaten-06-discover-1-114559.txt` |
-| Sandbox, Weg (b) | Rückabwicklung: `ollama signout`, Volume entfernen; Kontozustand prüfen | `You have signed out of ollama.com`; die Wirkung von `signout` im Konto ist nicht gemessen; ob `signout` einen Kontoeintrag entfernt, ist ungemessen; der Projektinhaber bestätigte den Kontozustand nach der Messung (kein Eintrag von heute) | `rohdaten-06-ende-1-114643.txt` |
+| Sandbox, Weg (b) | Rückabwicklung: `ollama signout`, Volume entfernen; Kontozustand prüfen | `You have signed out of ollama.com`; die Wirkung von `signout` im Konto ist nicht gemessen; ob `signout` einen Kontoeintrag entfernt, ist ungemessen; der Projektinhaber bestätigte den Kontozustand nach der Messung (kein Eintrag von heute), meldete später einen Eintrag mit Container-ID-Namen unklarer Herkunft und löschte ihn (*Beobachtung des Projektinhabers*, Punkt (d)) | `rohdaten-06-ende-1-114643.txt` |
 
 ## Zugangsdaten und Rohdaten
 
@@ -294,7 +296,7 @@ die zehn Mehr-Images sind die der Messung. Beim ersten Aufruf von `08-aufraeumen
 unberührt; Artefakt der Gegenprobe zum neuen Stand); der Aufruf wurde wiederholt.
 
 `08-aufraeumen.sh alles` nach Weg (b) (`rohdaten-08-alles.txt`, `rohdaten-08-alles-nachher.txt`): `objekte-mit-praefix-nachher-alles=0`, `relay-container-nachher=0`; Images wieder 85 wie vorher. Containerzahl und Volumes (899 gegen 914) enthalten fremde Arbeit.
-Der Kontozustand nach der Messung (kein Eintrag aus der Messung) ist vom Projektinhaber bestätigt (2026-10-24); ob `signout` einen Eintrag entfernt hat, ist nicht gemessen (siehe *Beobachtung des Projektinhabers*).
+Der Kontozustand ist vom Projektinhaber bestätigt (2026-10-24): unmittelbar nach der Messung ohne Eintrag von heute; ein später gemeldeter Eintrag mit Container-ID-Namen, dessen Herkunft (Messung oder eigene Wiederholung der Anmeldung) ungeklärt ist, wurde von ihm gelöscht, danach steht nur sein Host-Schlüssel im Konto (Punkt (d)); ob `signout` einen Eintrag entfernt hat, ist nicht gemessen (siehe *Beobachtung des Projektinhabers*).
 
 ## Rohdaten-Eigenheiten (nur ausgewiesen)
 
