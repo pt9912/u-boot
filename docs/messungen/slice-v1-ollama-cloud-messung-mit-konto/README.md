@@ -15,7 +15,9 @@ Das Protokoll des Vorgängers ohne Konto: [`slice-v1-ollama-cloud-messung`](../s
 gemessen, headless (`claude -p`, kein interaktiver Ablauf)*. „Der Aufruf lieferte eine Antwort“ heißt nicht „Cloud-Modelle laufen“ und begründet keine Zusage.
 
 **Antwort-Inhalte sind nicht aufgenommen.** Die Skripte weisen bei Aufrufen mit Prompt nur Exit-Code, Dauer, Zeilen- und Byte-Zahl der Ausgabe und die Zeilen aus, die nach einer Meldung aussehen
-(Muster `MELDUNG` in `inner.sh`); „Antwort vorhanden“ in den Tabellen heißt: Exit 0 und eine Zeile ohne Meldungsmuster von höchstens zwei Zeichen (`claude -p`, Prompt: ein Satz mit der Bitte um ein Wort). Der Inhalt selbst
+(Muster `MELDUNG` in `inner.sh`); „Antwort“ in den Tabellen hat **zwei Kriterien**, je nach Aufruf. `claude -p`: Exit 0 und eine Zeile ohne Meldungsmuster von höchstens zwei Zeichen (Prompt: ein Satz mit der Bitte um ein Wort).
+`ollama run` und `ollama launch claude`: nur Exit 0 und mindestens eine Ausgabezeile ohne Meldungsmuster; **ob das die erbetene Ein-Wort-Antwort ist, belegen die Rohdaten nicht** (die Ausgabe von `ollama run` hat 4 bis 16 Zeilen
+bis 75 Zeichen, die von `launch` zwei Zeilen bis 170 Zeichen; Denkausgabe, Banner oder Hinweise sind nicht ausgeschlossen). „Antwort“ heißt dort „Aufruf endete mit Exit 0 und ohne Fehlermeldung, mit Ausgabe“. Der Inhalt selbst
 steht in keiner Rohdatei und in keinem Chat.
 
 ## Messstand
@@ -35,7 +37,7 @@ Modelle `glm-5.3-flash:cloud[1m]` (Modell 1) und `gpt-oss:120b-cloud` (Modell 2)
 
 | Schritt | Skript | Rohdaten | Messfrage |
 |---|---|---|---|
-| 0 | `00-vorlauf.sh` (ruft `redact-probe.sh`) | `rohdaten-00-vorlauf.txt` | Gegenprobe der Schwärzung, Umgebungsprüfung samt Gegenprobe, Hash des Stands; **vor dem ersten Lauf** (Commit `6bfc17e8`, 2026-10-24 11:06:29 UTC; erster Prompt 11:07:26 UTC) |
+| 0 | `00-vorlauf.sh` (ruft `redact-probe.sh`) | `rohdaten-00-vorlauf.txt` | Gegenprobe der Schwärzung, Umgebungsprüfung samt Gegenprobe, Hash des Stands; der Stand **vor dem ersten Prompt** (Hash `c9a5467b…`) liegt nur in der Historie von Commit `6bfc17e8` (2026-10-24 11:06:29 UTC; erster Prompt 11:07:26 UTC), `git show 6bfc17e8:docs/messungen/slice-v1-ollama-cloud-messung-mit-konto/rohdaten-00-vorlauf.txt`. **Die Datei im Baum ist der zweite Vorlauf** (11:27:20 UTC, nach 22 Prompts), geschrieben, weil die Hash-Prüfung nach der Änderung von `lib.sh` (Aufräumen) einen neuen Stand verlangte |
 | 1 | `01-messstand.sh` | `rohdaten-01.txt`, `rohdaten-01-vorher.txt` | Messstand, Namen der Umgebung, Docker-Objekte vorher (vor allen Bauten) |
 | 2 | `02-projekte.sh` | `rohdaten-02.txt`, `rohdaten-02-erzeugt-<variante>.txt` | `u-boot generate devcontainer` für `std`, `res`, `alw`; Handvariante `--add-host`; Egress-Listen |
 | 3 | `03-lauf-vorbereitung.sh` (`Dockerfile.cli`) | `rohdaten-03.txt` | Hilfs-Image der Dev-Container-CLI |
@@ -97,7 +99,7 @@ in `rohdaten-09-gegenproben.txt`). **Stand am Ende: 40 von 40 (Weg a: 22, Weg b:
 | 36 | Weg (b) `OLLAMA_API_KEY=platzhalter`: `ollama run` (ohne `[1m]`) | Antwort |
 | 37 bis 40 | Weg (b) `restricted` mit Eintrag `ollama.com`: `ollama run` Modell 1, `claude -p` Modell 1, `ollama launch claude` Modell 1, `ollama run` Modell 2 | Antwort |
 
-Aufteilung der 40: mit Antwort 28 (Weg a: Nr. 1, 2, 6, 8 bis 12, 15 bis 22 = 16; Weg b: Nr. 23 bis 29, 36 bis 40 = 12), ohne Wirkung auf den Server 10 (Nr. 3, 4, 5, 7, 30 bis 35), durch die Egress-Restriktion blockiert 2 (Nr. 13, 14).
+Aufteilung der 40 (Kriterien siehe oben; davon `claude -p` mit Kurzantwort 14 (Nr. 1, 2, 6, 12, 15 bis 20, 24, 25, 28, 38), `ollama run`/`launch` mit Exit 0 und Ausgabe ohne Fehlermeldung 14): Exit 0 mit Ausgabe 28 (Weg a: Nr. 1, 2, 6, 8 bis 12, 15 bis 22 = 16; Weg b: Nr. 23 bis 29, 36 bis 40 = 12), ohne Wirkung auf den Server 10 (Nr. 3, 4, 5, 7, 30 bis 35), durch die Egress-Restriktion blockiert 2 (Nr. 13, 14).
 Nach Wegen: Weg (a) 22 (Plan: 20; die zwei Überschreitungen sind die verschwendeten Prompts 5 und 7), Weg (b) 18 (Plan: 14 + 2 + 2 + 2 Reserve = 20 abzüglich der 2, die Weg (a) aus der Reserve nahm). Vier Prompts (Nr. 30 bis 33) verbrauchte ich mit einem Namen, den Weg (a) schon als ungültig gezeigt hatte; deshalb entfielen in `restricted` `claude:2` und `launch:2` und im Fall `apikey` der `launch`.
 
 ## Aussagen Weg (a): Host-Server, Claude Code im Container
@@ -178,13 +180,13 @@ standen nur auf seinem Terminal, in keiner Datei und nicht im Gespräch. Server 
 | Namen im Resolver-Log (`discover`): `ollama run` → `ollama.com` und `registry.ollama.ai`; `claude -p` und `launch` → nur `api.anthropic.com`; `run` ein zweites Mal → nur `registry.ollama.ai` | dieselben | 1 |
 | `restricted` mit Liste des Generators **plus** Eintrag `ollama.com` (Handvariante: dieselben zwei Zeilen wie im Egress-Skript): `ollama run` (Modell 1 1,1 s, Modell 2 0,4 s), `claude -p` (1,0 s) und `ollama launch claude` (1,7 s) alle Exit 0 mit Antwort; im Resolver-Log nur `api.anthropic.com` (bei `claude` und `launch`). **K8:** in diesem Lauf verhält sich `launch` in `restricted` wie in `discover` (startet `claude`, Antwort); ohne `ollama.com` in der Liste ist `restricted` **nicht gemessen** (Kontingent) | `rohdaten-06-restricted-1-114624.txt` | 1 |
 | Dateien: `~/.ollama/config.json` (104/105 Byte) und `~/.ollama/backup/config.json.<zeit>` (von `launch`), `cache/model-recommendations.json` (2041 Byte), Manifest und Blobs unter `models/`: alle auf dem **Modell-Volume**; `~/.claude.json`, `~/.claude/projects/…jsonl`: Wurzel-Dateisystem | `rohdaten-06-discover-1-*`, `rohdaten-06-ende-1-114643.txt` | 1 |
-| Die Egress-Restriktion verlangte für Weg (b) im gemessenen Lauf **eine** Zeile mehr als die erzeugte Liste: `ollama.com` (`registry.ollama.ai` und der Blob-Host stehen bereits in der Liste). Ob der Lauf ohne den Eintrag scheitert, ist nicht gemessen; der Vorgänger (ohne Konto) zeigte für `restricted` den Lookup-Fehler `ollama.com` | `rohdaten-06-restricted-1-114624.txt` | 1 |
+| Gemessen ist nur: **mit** dem Eintrag `ollama.com` (Handvariante) liefen die Aufrufe mit Exit 0. Im Resolver-Log dieser Aufrufe steht für `ollama run` und `ollama launch` **keine** Anfrage nach `ollama.com` oder `registry.ollama.ai` (nur `api.anthropic.com` bei `claude`/`launch`); dass die Aufrufe ohne neue Namensanfrage antworteten, ist **nicht erklärt** (naheliegend, nicht geprüft: der Server hielt Auflösung oder Verbindung aus dem Start der Sitzung). Ein Lauf **ohne** den Eintrag ist nicht gemessen; ob `ollama.com` für Weg (b) nötig ist, folgt aus dieser Messung **nicht** (der Vorgänger ohne Konto zeigte für `restricted` den Lookup-Fehler `ollama.com` bei `ollama run`, ohne Anmeldung) | `rohdaten-06-restricted-1-114624.txt` | 1 |
 
 ### K6: Modellname `…[1m]`
 
 | Aussage | Rohdaten |
 |---|---|
-| `claude --model glm-5.3-flash:cloud[1m] -p` liefert eine Antwort und gibt **keinen** Hinweis zum Kontextfenster aus; `claude --model glm-5.3-flash:cloud -p` (ohne Suffix) liefert eine Antwort **mit** dem Hinweis `Claude Code doesn't recognize the model "glm-5.3-flash:cloud", so it assumes a context window of 200k tokens`. Claude Code behandelt `[1m]` also als eigene Angabe (Kontextfenster) und nicht als Teil des Ollama-Namens; ob es das Suffix vor dem Senden entfernt, ist am Server nicht gelesen. `ollama run` und `ollama launch` lehnen den Namen mit `[1m]` ab (Weg a, Weg b) | `rohdaten-06-discover-1-114507.txt` |
+| `claude --model glm-5.3-flash:cloud[1m] -p` liefert eine Antwort und gibt **keinen** Hinweis zum Kontextfenster aus; `claude --model glm-5.3-flash:cloud -p` (ohne Suffix) liefert eine Antwort **mit** dem Hinweis `Claude Code doesn't recognize the model "glm-5.3-flash:cloud", so it assumes a context window of 200k tokens`. Gemessen ist nur dieser Unterschied der Ausgabe von Claude Code; was der Server als Modellname erhält und ob Claude Code das Suffix vor dem Senden entfernt, ist am Server nicht gelesen. `ollama run` und `ollama launch` lehnen den Namen mit `[1m]` ab (Weg a, Weg b) | `rohdaten-06-discover-1-114507.txt` |
 
 ### K7: Variablen
 
@@ -254,6 +256,17 @@ standen nur auf seinem Terminal, in keiner Datei und nicht im Gespräch. Server 
 den Platzhalter allein durch (Exit 0); (4) `10-uebernehmen.sh` verweigert ohne `--gelesen` und entfernt Dateien, bei denen die Suche anschlägt; (5) die Prompt-Obergrenze bricht mit Exit 99 ab; (6) der Relay startet nicht,
 solange ein fremder Container im Netz `bridge` hängt (Exit 3); (7) der unbekannte Modellschlüssel bricht vor dem Zählen ab (`rohdaten-05-std-1-111030.txt`); (8) `07-anmeldung.sh` bricht ohne Terminal ab (Exit 2, Konsole, keine Datei).
 Das Wort „Schlüsselblock“ in der ersten Zeile von (1) steht dort ohne die Kopfzeile des Blocks, damit die Suche nicht anschlägt (von Hand ersetzt, nicht vom Skript geschrieben).
+
+**Zeitbezug (ehrlich ausgewiesen):** `rohdaten-09-gegenproben.txt` trägt keine Zeitstempel; alle acht Läufe darin entstanden **nach Weg (a)**, also nach dem ersten Prompt (11:07:26 UTC), und sind für die Dokumentation neu gefahren. Vor dem ersten Prompt rot gesehen
+und im Gespräch gelesen, aber nicht als Datei erhalten, wurden nur (1) die Regeln von `redact()` (Probe mit je einer entfernten Regel), (2) die Vorlauf-Prüfung (Artefakt fehlt; Stand geändert) und (3) die Suche. Die Gegenproben (4) bis (8) entstanden erst danach:
+(5) die Prompt-Obergrenze wurde nur mit `PROMPT_MAX=22` bei Zählerstand 22 rot gesehen; **der Abbruch bei 40 wurde nie rot gesehen** (der 40. Prompt lief durch, die Grenze wurde erreicht, nicht überschritten); (7) der Wächter für den Modellschlüssel kam nach den
+verschwendeten Prompts 5 und 7. Das Artefakt der Gegenprobe vor dem ersten Prompt gilt also für (1) bis (3), nicht für die übrigen.
+
+**Änderung an einer Rohdatei:** `rohdaten-09-gegenproben.txt` wurde nach dem Schreiben von Hand und durch `redact()` verändert: Platzhalter-Werte erscheinen als `[entfernt]`, die Kopfzeile des Schlüsselblocks ist ersetzt (siehe oben), und Pfade des Messordners
+und des Repos stehen als `<messordner>` und `<repo>` statt im Klartext (nachträglich von Hand ersetzt, damit keine umgebungsgebundenen Pfade des Agenten in der Rohdatei stehen). In `rohdaten-02.txt` steht der Repo-Pfad in der `make`-Zeile `Leaving directory` unverändert.
+
+**Grenze der Suche (`09-suche.sh`):** Zeilen, die `[entfernt]`, `[Query entfernt` oder `PROBEWERT` tragen, werden übersprungen; eine Zeile mit einem echten Wert **und** einer solchen Marke würde die Suche nicht melden. Die Handlesung ersetzt das nicht. Die Rohdaten tragen die
+öffentliche Form `https://ollama.com/connect?[Query entfernt: Anmelde-URL]` (aus der Gegenprobe der Schwärzung), keine Query, keinen Code, keinen Schlüssel.
 
 ## Aufräumen
 

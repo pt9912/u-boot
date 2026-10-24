@@ -98,7 +98,7 @@ trap '[ "$relay_an" = 1 ] && "$here/04-relay.sh" stop > /dev/null 2>&1; teil_auf
 ex setup "$mode" "$extra"
 CLAUDE_ENV="ANTHROPIC_BASE_URL=$HOSTURL ANTHROPIC_AUTH_TOKEN=ollama"
 modell() { case "$1" in 1) echo "$M1" ;; 2) echo "$M2" ;; o) echo "${M1%\[1m\]}" ;; esac; }   # o = Modell 1 ohne den Zusatz [1m]
-# ein unbekannter Modellschluessel bricht ab, bevor ein Prompt gezaehlt wird (ein leerer Name wuerde einen Prompt verbrauchen)
+# ein unbekannter Modellschluessel bricht ab, bevor ein Prompt gezaehlt wird
 modell_pruefen() { [ -n "$(modell "$1")" ] || { echo "Abbruch: unbekannter Modellschluessel '$1'"; exit 2; }; }
 for f in "${faelle[@]}"; do
   case "$f" in

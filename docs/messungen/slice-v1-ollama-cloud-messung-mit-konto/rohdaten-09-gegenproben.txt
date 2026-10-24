@@ -11,7 +11,7 @@ relay-container danach: 0
 == Gegenprobe Stufe 2 ohne --gelesen
 Abbruch: Stufe 2 nur mit --gelesen (die Dateien sind von Hand gelesen)
 == Gegenprobe Stufe 2 mit Token-Form in der Datei
-/Development/u-boot/docs/messungen/slice-v1-ollama-cloud-messung-mit-konto/rohdaten-gp.txt:1:GH_TOKEN=[entfernt]
+<repo>/docs/messungen/slice-v1-ollama-cloud-messung-mit-konto/rohdaten-gp.txt:1:GH_TOKEN=[entfernt]
 ausnahmen: 0 Treffer in den Pfaden der Ausnahmeliste (nur mit --alle), 0 Zeilen nur mit einem benannten Platzhalter
 Abbruch: die Suche hat angeschlagen; die Dateien wurden wieder entfernt
 0
@@ -27,7 +27,7 @@ Abbruch: die Suche hat angeschlagen; die Dateien wurden wieder entfernt
 -- mit allen Regeln (unveraendert): redact-probe: 32 Formen und ein Schluesselblock geschwaerzt, 15 neutrale Zeilen unveraendert
 == Gegenprobe der Vorlauf-Pruefung
 -- Artefakt fehlt:
-Abbruch: Artefakt der Gegenprobe fehlt (/tmp/claude-1000/-Development-u-boot/21e5bb75-1fc6-4cb1-b0cc-08a9f2765369/scratc
+Abbruch: Artefakt der Gegenprobe fehlt (<messordner>
 -- lib.sh geaendert seit dem Artefakt:
 Abbruch: Artefakt gehoert zu einem anderen Stand von lib.sh / redact-probe.sh; 00-vorlauf.sh erneut
 == Gegenprobe der Suche (09-suche.sh)
