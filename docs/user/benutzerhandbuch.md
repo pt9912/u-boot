@@ -2415,7 +2415,7 @@ mit `--json` einen strukturierten Hinweis in `data.hint` (`command`, `action`,
 | `devcontainer.profile` | Devcontainer-Profil | `sandbox` | ja |
 | `devcontainer.user.uid` | Benutzer-ID im Container | 1 bis 65535 (Standard 1000) | ja |
 | `devcontainer.features.<name>.enabled` | Feature aktiv | `true` / `false` | ja |
-| `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`) | ja |
+| `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `ollama-host`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`) | ja |
 | `devcontainer.features.<name>.source` | externe Feature-Quelle | URL aus der Freigabeliste | ja |
 | `devcontainer.featureSources.allow` | Freigabeliste externer Quellen | URLs, kommagetrennt | ja |
 | `devcontainer.sandbox.nestedRuntime` | Container-Laufzeit im Sandbox | `none` / `podman` / `docker` | ja |
