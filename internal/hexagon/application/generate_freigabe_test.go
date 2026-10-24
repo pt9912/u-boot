@@ -163,9 +163,9 @@ func TestGenerateDevcontainer_FreigabeMessageParts(t *testing.T) {
 		t.Fatal("expected error")
 	}
 	parts := []struct{ name, want string }{
-		{"feature", "devcontainer.features.evil"},
-		{"source", `"` + freigabeSource + `"`},
-		{"allowlist", "devcontainer.featureSources.allow"},
+		{"feature", "devcontainer.features.evil: external source"},
+		{"source", `external source "` + freigabeSource + `" is not in`},
+		{"allowlist", "is not in devcontainer.featureSources.allow;"},
 		{"abhilfe 1 (config set)", "`u-boot config set devcontainer.featureSources.allow " + freigabeSource + "`"},
 		{"abhilfe 1 (flag)", "`--allow-external-feature-sources " + freigabeSource + "`"},
 		{"abhilfe 2 (disable)", "`u-boot config set devcontainer.features.evil.enabled false`"},
