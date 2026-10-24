@@ -105,7 +105,7 @@ Stand: vor dem Push. „erfüllt“ nur, was ich selbst gesehen habe.
 ## Außenwirkungs- und Historien-Prüfung
 
 * **Keine Tag-/Push-Aktion:** `git tag -l 'v0.15*'` = nur `v0.15.0`, `git rev-parse 'v0.15.0^{commit}'` = `a895ffd2`; `origin/main` = `d98f5755`, `HEAD` = `f16b89c2`.
-* **Zwischenstände nicht Spitze:** die roten Zwischenstände der `slice-mv`-Commits (`f246e155`, `b1d94f5b`, `f053b1ec`, `617cd0d8`) liegen unter der Spitze; sie gehören in **einen** Push (M1: „alle Commits des Cuts in einem Push“). Der Tip `f16b89c2` (oder ein Nachfolger der LOW-V1-Korrektur) ist der Stand, den M2 liest.
+* **Zwischenstände nicht Spitze:** die roten Zwischenstände der reinen Move- und Verweis-Nachzug-Commits (`f246e155`, `b1d94f5b`, `f053b1ec`, `617cd0d8`) liegen unter der Spitze; sie gehören in **einen** Push (M1: „alle Commits des Cuts in einem Push“). Der Tip `f16b89c2` (oder ein Nachfolger der LOW-V1-Korrektur) ist der Stand, den M2 liest.
 * **Commits:** jede Message nennt Slice und `LH-*`; keine `SPEC-`/`ARC-`-Kennung; `doc-commits` 0 Befunde.
 * **Harte Regeln:** kein `//nolint`, kein Gate gelockert, keine Spec-, ADR- oder Workflow-Änderung im Diff.
 
