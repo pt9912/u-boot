@@ -1,8 +1,8 @@
 # Review — slice-v1-generate-prueft-freigabeliste
 
 * Rolle: Reviewer (`.harness/skills/reviewer.md`), frischer Kontext
-* Gegenstand: `git diff 750139e5..0cdec3b2`, Slice `docs/plan/planning/in-progress/slice-v1-generate-prueft-freigabeliste.md`
-* Bezug: LH-FA-DEV-003, LH-NFA-SEC-004, LH-FA-CLI-006
+* Gegenstand: `git diff 750139e5..0cdec3b2`, Slice [`slice-v1-generate-prueft-freigabeliste`](../plan/planning/in-progress/slice-v1-generate-prueft-freigabeliste.md)
+* Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 * Sensor-Lauf: `make gates` selbst gefahren, Exit-Code 0. Gezielte Tests (`Freigabe|ThreeCallers|SandboxHostSocket|SandboxFeatureWarn|Homebrew|ClaudeCodeNode` in `internal/hexagon/application`, `UnlistedFeature|SandboxFeatureWarnings` in `cmd/uboot`) im Image `u-boot:test-docker-tools`: grün. Nicht gelaufen: `make test-docker` (Anweisung: Speicher; kein Docker-Pfad berührt), `make verify-depguard` (keine Importregel berührt, kein neuer Import im Diff).
 
 ## Findings
@@ -20,7 +20,7 @@ Kein HIGH, kein MEDIUM.
 
 ### LOW-2
 * kategorie: LOW
-* quelle: AGENTS.md §3.10; Spec SPEC-050 „Freigabe der Quelle (beide Profile)“
+* quelle: AGENTS.md §3.10; Spec [`SPEC-050`](../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen) „Freigabe der Quelle (beide Profile)“
 * pfad: `internal/hexagon/application/generate_freigabe_test.go` · `TestGenerateDevcontainer_FreigabeBeforeSandboxRejection`
 * klasse: bedingung-ohne-eigenen-pin
 * befund: „Beide Profile“ ist nur indirekt gepinnt. Mutation `len(unlisted) > 0 && !sandbox` (Prüfung im Sandbox-Profil ausgesetzt) wird allein von T6 erkannt, und T6 trägt zugleich `docker-cli`. Ein Test „Sandbox-Profil, nur unfreigegebene Quelle, kein `docker-cli`“ fehlt; der Binary-Test läuft nur im Standardprofil. Die umgestellten Sandbox-Fixtures belegen nur den Positivfall (Quelle gelistet).
@@ -37,7 +37,7 @@ Kein HIGH, kein MEDIUM.
 * verifizierbar: `make test`.
 
 ### INFO-1 (Sicherheitseinschätzung, Advisory)
-Kein Advisory-Kandidat im Sinne einer Vertrauensgrenzen-Verletzung. Begründung aus dem Code: `devcontainer.featureSources.allow` und `devcontainer.features.<n>.source` stehen in derselben Datei `u-boot.yaml` (`cfg.Devcontainer.FeatureSources.Allow` neben `Features[...]`), und `generate` liest sie ohne weitere Signatur (`readProjectConfig`). Wer `u-boot.yaml` kontrollieren kann (Schreibrecht im Projekt, PR/Fremd-Repository vor dem Klonen), kann Quelle und Freigabe zugleich eintragen – oder `devcontainer.json` direkt ändern. Die Prüfung schützt also vor Versehen und vor dem Umweg über u-boot-Befehle (`config set` verweigert schon, `doctor` meldet), nicht vor einem Angreifer mit Schreibrecht auf `u-boot.yaml`. Es ist ein Vertragsfehler (LH-FA-DEV-003 / LH-NFA-SEC-004: Freigabe als expliziter Schritt wurde von `generate` still umgangen, Exit 0) und als Verhaltensänderung im CHANGELOG richtig unter Fixed verbucht. Einzuschätzen bleibt die Wirkung für Nutzer, die einem fremden `u-boot.yaml` mit vorbereiteter Liste vertrauen: unverändert. Die Einstufung als Advisory liegt beim Projektinhaber; aus dem Code folgt eher „Hardening/Bugfix“ (niedrige Schwere), nicht „Vulnerability“.
+Kein Advisory-Kandidat im Sinne einer Vertrauensgrenzen-Verletzung. Begründung aus dem Code: `devcontainer.featureSources.allow` und `devcontainer.features.<n>.source` stehen in derselben Datei `u-boot.yaml` (`cfg.Devcontainer.FeatureSources.Allow` neben `Features[...]`), und `generate` liest sie ohne weitere Signatur (`readProjectConfig`). Wer `u-boot.yaml` kontrollieren kann (Schreibrecht im Projekt, PR/Fremd-Repository vor dem Klonen), kann Quelle und Freigabe zugleich eintragen – oder `devcontainer.json` direkt ändern. Die Prüfung schützt also vor Versehen und vor dem Umweg über u-boot-Befehle (`config set` verweigert schon, `doctor` meldet), nicht vor einem Angreifer mit Schreibrecht auf `u-boot.yaml`. Es ist ein Vertragsfehler ([`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) / [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte): Freigabe als expliziter Schritt wurde von `generate` still umgangen, Exit 0) und als Verhaltensänderung im CHANGELOG richtig unter Fixed verbucht. Einzuschätzen bleibt die Wirkung für Nutzer, die einem fremden `u-boot.yaml` mit vorbereiteter Liste vertrauen: unverändert. Die Einstufung als Advisory liegt beim Projektinhaber; aus dem Code folgt eher „Hardening/Bugfix“ (niedrige Schwere), nicht „Vulnerability“.
 
 ### INFO-2
 Sicherheits-Randfälle am Vergleich (`featureSourceInAllow`, `allowed == src`), selbst gelesen und durch Mutation geprüft:
@@ -62,13 +62,13 @@ M7b wurde als Abwandlung gefahren (Reihenfolge-Verschiebung per Skript nicht zuv
 
 ## Negativbefund (geprüft, ohne Befund)
 
-* Dual-Classifier: `isConfigValidationError` (`cli.go`, `ErrConfigValueInvalid` -> Exit 10) und `mapGenerateErrorToDiagnostic` (`cli/generate.go`, -> `LH-FA-DEV-003`) selbst gelesen; Exit-Code-Pin und Envelope-Pin im Binary-Test (`TestRun_Generate_UnlistedFeatureSourceIsRejected`: Exit 10, genau ein Diagnostic `error` / `LH-FA-DEV-003`). Kein neuer Sentinel.
+* Dual-Classifier: `isConfigValidationError` (`cli.go`, `ErrConfigValueInvalid` -> Exit 10) und `mapGenerateErrorToDiagnostic` (`cli/generate.go`, -> [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)) selbst gelesen; Exit-Code-Pin und Envelope-Pin im Binary-Test (`TestRun_Generate_UnlistedFeatureSourceIsRejected`: Exit 10, genau ein Diagnostic `error` / [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)). Kein neuer Sentinel.
 * Architekturgrenze: Änderungen nur in `internal/hexagon/application`; keine neuen Imports, kein I/O in der Prüfung, kein `//nolint`.
 * Eine Vergleichsstelle: `featureSourceInAllow` mit drei Aufrufern (`config.go`, `doctor.go`, `devcontainer_features.go`); `unlistedFeatureSources` baut nur die gemergte Liste, keine zweite Vergleichslogik.
 * Reihenfolge in `generateDevcontainer`: nach `collectDevcontainerFeatures`, vor Sandbox-Abweisung und Plan/Schreiben; Freigabe-Code gewinnt bei Doppelverstoß (T6).
 * Sprachvertrag: Fehlermeldung Englisch.
 * Kommentare §3.7/§3.9: neue Kommentare im Indikativ, ohne Chronik; die ersetzten Kommentare („T3's renderer does not enforce…“, „T4 enforces…“) sind auf den Ist-Ort umgestellt. Verweise auf alte Namen geprüft (kein Rest in der Berührungszone).
-* Spec: SPEC-050 „Freigabe der Quelle“ und Bullet `LH-FA-DEV-003.a` zeigen aufwärts/innerhalb der Spec, keine Slice-/ADR-Verweise; Historie-Zeile ergänzt, ältere Einträge unverändert. Jede Bedingung (Liste, Flag desselben Aufrufs, `enabled`, Katalogschlüssel, Reihenfolge vor `docker-cli`, kein Schreiben auch `--dry-run`, Meldungsteile) hat einen Test (T1–T8, Binary-Test); Ausnahmen siehe LOW-1/2.
+* Spec: [`SPEC-050`](../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen) „Freigabe der Quelle“ und Bullet [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Abschnitt `.a`) zeigen aufwärts/innerhalb der Spec, keine Slice-/ADR-Verweise; Historie-Zeile ergänzt, ältere Einträge unverändert. Jede Bedingung (Liste, Flag desselben Aufrufs, `enabled`, Katalogschlüssel, Reihenfolge vor `docker-cli`, kein Schreiben auch `--dry-run`, Meldungsteile) hat einen Test (T1–T8, Binary-Test); Ausnahmen siehe LOW-1/2.
 * Handbuch: kennungsfrei (§5 Regel 6); CHANGELOG `[Unreleased]` / Fixed mit Kennungen (zulässig), Abhilfe genannt. `harness/replay.md`: neue Zeile, bestehende Zeilen unverändert.
 * Plan-Tabelle gegen `git diff --stat` (13 Dateien): alle Dateien im Slice-Ist-Stand aufgeführt, kein Eintrag ohne Diff; `README*`, `architecture.md`, `doctor.go`, `cli*.go` unverändert (Diff-Stat bestätigt).
 * Lastenheft und ADR im Diff unverändert; Tag `v0.15.0` (`3377aa80`) unverändert; nichts gepusht, kein Tag.
