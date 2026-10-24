@@ -39,7 +39,7 @@ umgebung_pruefen() {
   return $treffer
 }
 
-# Alle Docker-Objekte der Messung tragen dieses Praefix (Aufraeumen in 07-aufraeumen.sh arbeitet nur darauf).
+# Alle Docker-Objekte der Messung tragen dieses Praefix (Aufraeumen in 05-aufraeumen.sh arbeitet nur darauf).
 PFX=u-boot-messung-ocloud
 UB=$PFX-ub                       # Runtime-Image von u-boot (make build IMAGE=$UB)
 BASE=mcr.microsoft.com/devcontainers/base:debian
@@ -110,7 +110,8 @@ praefix_entfernen() {
   return 0
 }
 
-# Variante -> Projektverzeichnis, Projektname. Varianten: std (Standardprofil, C7), dis (Sandbox ohne Egress: Modus discover),
-# res (Sandbox mit Egress: Modus restricted), alw (wie res plus Eintrag ollama.com in egress.allow, C2b).
+# Variante -> Projektverzeichnis, Projektname. Varianten: std (Standardprofil, C7),
+# res (Sandbox mit Egress: Modus restricted; der Modus discover startet einen zweiten Container aus dem Image von res),
+# alw (wie res plus Eintrag ollama.com in egress.allow, C2b).
 vdir() { echo "$WORK/$PFX-$1"; }
 vname() { echo "$PFX-$1"; }

@@ -23,7 +23,8 @@ Zugangsdaten** (siehe *Zugangsdaten und Rohdaten*).
 
 `WORK=<messordner ausserhalb des Repos> tools/messung/ollama-cloud/00-alles.sh` führt 01 bis 03, dann `04-lauf.sh` zweimal (`LAUF=1`, `LAUF=2`) und zuletzt `05-aufraeumen.sh` aus;
 `redact-probe.sh` läuft vor dem ersten Lauf, `06-suche.sh` nach dem Lauf. Jedes Skript startet sich mit bereinigter Umgebung neu (`env -i`) und schreibt seine Rohdaten
-(geschwärzt) in dieses Verzeichnis (Vorgabe `OUT`). Voraussetzungen auf dem Host: Docker und GNU `make`; `sed`, `awk`, `curl` laufen nur in Containern.
+(geschwärzt) in dieses Verzeichnis (Vorgabe `OUT`). Voraussetzungen auf dem Host: Docker und GNU `make`; die **Skripte** rufen `sed`, `awk`, `curl` nur in Containern auf. Außerhalb der Skripte liefen während der Arbeit zwei Host-`sed`-Aufrufe (Verfahrensabweichung des Messenden); die Skripte, Rohdaten und deren Schwärzung gehen nicht durch sie.
+Zu `rohdaten-01.txt` und `rohdaten-01-vorher.txt`: beide Dateien tragen den Zeitstempel 08:38 UTC, also einen Stand **nach** den Läufen (04: 08:18 bis 08:34) und nach dem Aufräumen (05: 08:34); Der Name „vorher“ stammt aus dem Skript (Schritt 1 der Reihenfolge); die Datei weist 0 Container und 0 Objekte mit dem Präfix aus, also den Zustand nach dem Aufräumen, nicht den Bestand vor der Messung. Schritt 1 wurde demnach nach den Läufen (erneut) ausgeführt; die Dateien sind Stand nach den Läufen. Die Umgebungsprüfung vor den Läufen belegen `rohdaten-04-*` (`umgebung-container-verbotene-namen=0`) und `umgebung_pruefen()` in `04-lauf.sh`.
 
 | Schritt | Skript | Rohdaten | Messfrage |
 |---|---|---|---|
@@ -61,7 +62,7 @@ auf `/home/vscode/.ollama`; Einhängepunkte in `rohdaten-04-<n>.txt`). Ollama `0
 
 **Lauf 0:** ein erster Lauf von `04-lauf.sh` wurde abgebrochen, weil `timeout` ohne `-k` den Aufruf im Pseudo-Terminal (`ollama launch claude` unter `script`) nach 40 s nicht beendete (Prozess
 nach über zehn Minuten noch vorhanden; Ursache nicht untersucht). Seine Rohdaten sind nicht erhalten (beim Neuaufsetzen der Rohdaten-Ablage versehentlich überschrieben); die Messwerte stammen aus Lauf 1 und 2.
-Vorgänge gegen `ollama.com`/`registry.ollama.ai` im Lauf 0: Pull, Run und Launch (ohne und mit Pseudo-Terminal) je einmal in `discover` (kein Lasttest).
+Einzelheiten zu Lauf 0 (welche Aufrufe, wie oft gegen `ollama.com`/`registry.ollama.ai`) sind **nicht belegt**: keine Rohdaten erhalten, die Angabe der Vorgänge stünde auf Erinnerung und entfällt. Die Zahl der Cloud-Vorgänge belegen nur Lauf 1 und 2.
 
 ## Aussagen
 
@@ -111,7 +112,7 @@ Hosts = Namen im Resolver-Log (Anfragen A/AAAA), ohne Antwort-Inhalte.
 
 | Aussage | Rohdaten | Läufe |
 |---|---|---|
-| `ollama signin` im Modus `discover` und `allow`: Exit 0; Text `You need to be signed in to Ollama to run Cloud models.` / `If your browser did not open, navigate to:` und eine Anmelde-URL der Form `https://ollama.com/connect?…` (Query geschwärzt); `ollama signout` danach: `You are not signed in to ollama.com`, Exit 0; in diesem Aufruf keine neue Namensanfrage; **die Anmeldung wurde nicht ausgeführt** | `…-discover-<n>.txt`, `…-allow-<n>.txt`, Abschnitte `C4-signin`, `C4-signout` | 4 |
+| `ollama signin` im Modus `discover` und `allow`: Exit 0; Text `You need to be signed in to Ollama to run Cloud models.` / `If your browser did not open, navigate to:` und eine Anmelde-URL der Form `https://ollama.com/connect` mit Query (Query geschwärzt); `ollama signout` danach: `You are not signed in to ollama.com`, Exit 0; in diesem Aufruf keine neue Namensanfrage; **die Anmeldung wurde nicht ausgeführt** | `…-discover-<n>.txt`, `…-allow-<n>.txt`, Abschnitte `C4-signin`, `C4-signout` | 4 |
 | `ollama signin` im Modus `restricted`: `Error: account unavailable`, Exit 1 (4 abgelehnte Anfragen nach `ollama.com`); `ollama signout`: `Error: there was an error signing out`, Exit 1 | `…-restricted-<n>.txt` | 2/2 |
 | Das Binary enthält die Zeichenketten `OLLAMA_API_KEY`, `OLLAMA_CLOUD_BASE_URL`, `OLLAMA_NO_CLOUD` und `OLLAMA_LAUNCH_DSH_API_KEY` (gelesen mit `grep -a` aus `/usr/local/bin/ollama`; Go-Zeichenketten liegen aneinandergereiht, daher auch verklebte Treffer). **`ollama --help`, `ollama launch --help` und `ollama help serve` nennen keine Variable für den Zugang**; `ollama help serve` nennt `OLLAMA_NO_CLOUD` (*Disable Ollama cloud features (remote inference and web search)*). Ob `OLLAMA_API_KEY` ein Zugang ist und wie er wirkt, ist **nicht gemessen** | `…-<modus>-<n>.txt`, `AUSSAGE c4-ollama-var-…`, Abschnitt `ollama help serve` | 6 |
 | Der Generator setzt für `ollama` keine Zugangsvariable (`remoteEnv` nennt nur `GIT_TOKEN`, `ANTHROPIC_API_KEY`) | `rohdaten-02-erzeugt-res.txt` | 1 |
@@ -173,14 +174,15 @@ braucht vorher eine Gegenprobe für die Form des Zugangs (die Anmelde-URL und ih
 - **Schwärzung:** `redact()` (formgebunden: Header, Zuweisungen an Namen mit Zugangswort, JSON-Felder, URLs mit Zugang, Token-Präfixe, Anmelde-URLs mit Query, Code/Schlüssel nach `code`, `key`, `nonce`) mit der Gegenprobe
   `redact-probe.sh` **vor dem ersten Lauf**: 24 Formen geschwärzt, 5 neutrale Zeilen unverändert (Exit 0); rot gesehen: ohne die Regel für Anmelde-URLs lässt die Probe drei Zeilen durch (Exit 1). Die Zusage gilt den Formen der
   Probe, nicht jedem Token.
-- **Suche vor dem Commit:** `06-suche.sh` über dieses Verzeichnis und `tools/messung/ollama-cloud/` (Tokenpräfixe, Schlüsselblöcke, Header, URL-Zugang, Zuweisungen, Anmelde-URLs): 0 Treffer; Gegenprobe der Suche: eine Datei mit
-  `GH_TOKEN=ghp_…` schlägt an (Exit 1). Treffer über **ganz** `docs/messungen/` und `tools/messung/` (die Vorgabe des Skripts): ältere Protokolle enthalten die öffentlichen Geräteschlüssel, die `ollama serve` in Wegwerf-Containern ausgibt (`Your new public key is:` in
+- **Suche vor dem Commit:** `06-suche.sh` über dieses Verzeichnis und `tools/messung/ollama-cloud/` (Tokenpräfixe, Schlüsselblöcke, Header, URL-Zugang, Zuweisungen, Anmelde-URLs): 0 Treffer, Exit 0 (Aufruf `06-suche.sh <dieses Verzeichnis> tools/messung/ollama-cloud`, gefahren nach dem letzten Schreiben dieser Datei; ein früherer Lauf der Fix-Runde endete mit Exit 1 wegen zweier Beispielzeilen in dieser Datei, die umformuliert wurden, kein Zugangsdatum); Gegenprobe der Suche: eine Datei mit
+  einer Zuweisung an `GH_TOKEN` (Wert mit dem Präfix `ghp_`) schlägt an (Exit 1). Treffer über **ganz** `docs/messungen/` und `tools/messung/` (die Vorgabe des Skripts): ältere Protokolle enthalten die öffentlichen Geräteschlüssel, die `ollama serve` in Wegwerf-Containern ausgibt (`Your new public key is:` in
   [`slice-v1-devcontainer-ollama-messung`](../slice-v1-devcontainer-ollama-messung/README.md); öffentlich, der private Teil wurde nie ausgegeben), GPG-Fingerabdrücke
   ([`slice-v1-devcontainer-ollama-amd64-messung`](../slice-v1-devcontainer-ollama-amd64-messung/README.md), [`slice-v1-forge-cli-quellen-messung`](../slice-v1-forge-cli-quellen-messung/README.md)), Testnamen mit `Ollama_` und Platzhalter-Zuweisungen (`DUMMY` in `forge-cli`, `platzhalter-…` in
   `devcontainer-start-befehl`); alle von Hand als **kein Zugangsdatum** gelesen, nicht verändert.
 - **Von Hand gelesen:** alle `rohdaten-04-*`-Abschnitte außerhalb der Hilfetexte, `rohdaten-01`, `rohdaten-03`, `rohdaten-05`; die erzeugten Dateien (`rohdaten-02-erzeugt-*`) tragen nur `${localEnv:…}`-Verweise, keinen Wert. Die Anmelde-URLs stehen als
   `https://ollama.com/connect?[Query entfernt: Anmelde-URL]`.
 - Das Binary-Fundstück `OLLAMA_API_KEY` ist ein Name, kein Wert.
+- **Rohdaten-Eigenheiten (nur ausgewiesen, nicht geändert):** In den Sammeldateien `rohdaten-04-<n>.txt` ist die Schwärzung doppelt angewandt und nicht idempotent (zerstückelte Marke `[Query entfernt: Anmelde-URL] entfernt: Anmelde-URL]`, kein Wert sichtbar); `rohdaten-04-allow-<n>.txt` trägt die Überschrift `Modus restricted`, weil `inner.sh` für `allow` den Modus `restricted` übergibt; `rohdaten-02-c7.txt` läuft nicht durch `redact()` (Ausgabe von `generate`, kein Zugang, von Hand gelesen).
 
 ## Aufräumen
 
@@ -190,6 +192,6 @@ Arbeit auf dem Host, `rohdaten-05.txt`). Der Messordner `WORK` (erzeugte Projekt
 
 ## Lesehilfen
 
-`AUSSAGE <schlüssel>=<wert>` sind die stabilen Zeilen, die ein zweiter Lauf wiederholen muss: Vergleich `grep '^AUSSAGE' rohdaten-04-<modus>-1.txt` gegen `…-2.txt` — in den sechs Dateipaaren unterscheidet sich **nur** der
+`AUSSAGE <schlüssel>=<wert>` sind die stabilen Zeilen, die ein zweiter Lauf wiederholen muss: Vergleich `grep '^AUSSAGE' rohdaten-04-<modus>-1.txt` gegen `…-2.txt` — in den drei Dateipaaren (`discover`, `restricted`, `allow`, je Lauf 1 und 2) unterscheidet sich **nur** der
 Exit-Code des Pseudo-Terminal-Aufrufs (`C3-launch-claude-tty-exit`: 124 oder 137). Zahlen der Resolver-Anfragen schwanken in Details (`registry.ollama.ai` 4 gegen 6 je nach Lauf); die Anzahl gesperrter Anfragen an `ollama.com` ist ein
 Wiederholungszähler des Clients, kein Maß für Verbindungen. Zeiten der Aufrufe: `dauer=` (Sekunden); `devcontainer up` des ersten Laufs dauerte 539 s (kalter Bau der Features), der zweite Lauf 5,5 s.
