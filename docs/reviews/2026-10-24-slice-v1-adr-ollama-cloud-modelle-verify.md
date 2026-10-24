@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Modul 8) · **Frage:** Wurde der Slice richtig gebaut, gemessen an Plan, DoD, ADR und ausgeführten Sensors? (nicht: Review, nicht: Validierung) · **Modell:** claude-sonnet-5-5 · frischer Kontext.
 
-**Gegenstand:** Slice [`slice-v1-adr-ollama-cloud-modelle`](../plan/planning/open/slice-v1-adr-ollama-cloud-modelle.md) (liegt in `open/`, DoD-Häkchen offen: setzt der Planner bei der Closure), Stand HEAD `d9dd171e` (9 Commits `origin/main..HEAD`). Geprüft gegen [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) (Accepted), den ADR-Index, die Reports [`…-modelle.md`](2026-10-24-slice-v1-adr-ollama-cloud-modelle.md) (F-1 bis F-16) und [`…-nachlauf.md`](2026-10-24-slice-v1-adr-ollama-cloud-modelle-nachlauf.md) (N-1 bis N-6), [`harness/verification.md`](../../harness/verification.md).
+**Gegenstand:** Slice [`slice-v1-adr-ollama-cloud-modelle`](../plan/planning/done/slice-v1-adr-ollama-cloud-modelle.md) (liegt in `open/`, DoD-Häkchen offen: setzt der Planner bei der Closure), Stand HEAD `d9dd171e` (9 Commits `origin/main..HEAD`). Geprüft gegen [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) (Accepted), den ADR-Index, die Reports [`…-modelle.md`](2026-10-24-slice-v1-adr-ollama-cloud-modelle.md) (F-1 bis F-16) und [`…-nachlauf.md`](2026-10-24-slice-v1-adr-ollama-cloud-modelle-nachlauf.md) (N-1 bis N-6), [`harness/verification.md`](../../harness/verification.md).
 
 **Nicht Gegenstand (Auftrag):** Nachzug der Welle-Datei/Roadmap (Planner-Closure), Gesprächsverlauf mit dem Projektinhaber.
 
@@ -11,7 +11,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-adr-ollama-cloud-modelle`](../plan/planning/open/slice-v1-adr-ollama-cloud-modelle.md)
+- Slice: [`slice-v1-adr-ollama-cloud-modelle`](../plan/planning/done/slice-v1-adr-ollama-cloud-modelle.md)
 - IDs: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md) (unverändert), [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md)
 - Artefakte (Diff `origin/main..HEAD`, 8 Dateien): die ADR-Datei (neu, 170 Zeilen), der ADR-Index (+1), der Slice-Plan (neu), das Verzeichnis-README von `open/` (+1), die Roadmap (Offen-Zeile), die Welle-Datei (Zeile §4, Satz, Frage 2), zwei Review-Reports. Kein Go-Code, kein Docker-Pfad, keine Importregel.
 

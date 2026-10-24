@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-adr-ollama-cloud-modelle`](../../../../open/slice-v1-adr-ollama-cloud-modelle.md)
+**Vorgang:** [`slice-v1-adr-ollama-cloud-modelle`](../../../../done/slice-v1-adr-ollama-cloud-modelle.md)
 **Fund:** [`ADR-0036`](../../../../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) legte fest, keine Handvariante begründe eine Zusage, und führte Zeilen mit Pfad *Handvariante* als zugesagt (Review F-2); Entscheidung 8 und die Fitness Function sagten, die Meldungen entfielen unter `--quiet`, während Entscheidung O3 die Ausweisung als Lockerung bestätigte, die im Code unter `--quiet` sichtbar bleibt (F-5); die Zusage-Menge Z1 bis Z12 deckte das Produktversprechen Z13 nicht (Nachlauf N-5). Alle vor `Accepted` aufgelöst.
 
 **Beleg-Qualität:** belegt durch Lesen von Design-Review ([F-2, F-5](../../../../../../reviews/2026-10-24-slice-v1-adr-ollama-cloud-modelle.md)), Nachlauf-Review ([N-5](../../../../../../reviews/2026-10-24-slice-v1-adr-ollama-cloud-modelle-nachlauf.md)) und Verification-Report ([Textabgleich](../../../../../../reviews/2026-10-24-slice-v1-adr-ollama-cloud-modelle-verify.md)). Ein Vorgang, zählt einmal.

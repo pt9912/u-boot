@@ -2,14 +2,14 @@
 
 **Review-Art:** Design — die neue [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) (Status `Proposed`) gegen Slice-Plan, Messprotokolle, Hard Rules und Referenzmodell (Maintainability; nicht gegen die DoD).
 
-**Gegenstand:** Commits `e9f94698` und `5034770b` ([`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) und Index-Zeile in `docs/plan/adr/README.md`) für den Slice [`slice-v1-adr-ollama-cloud-modelle`](../plan/planning/open/slice-v1-adr-ollama-cloud-modelle.md).
+**Gegenstand:** Commits `e9f94698` und `5034770b` ([`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) und Index-Zeile in `docs/plan/adr/README.md`) für den Slice [`slice-v1-adr-ollama-cloud-modelle`](../plan/planning/done/slice-v1-adr-ollama-cloud-modelle.md).
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `5034770b` ·
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-24
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-adr-ollama-cloud-modelle`](../plan/planning/open/slice-v1-adr-ollama-cloud-modelle.md) (§1 Gefundener Stand, E1 bis E5, §2 DoD, §6 Risiken und Fragen), Welle [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md) (§3 Closure-Kriterien)
+- Slice [`slice-v1-adr-ollama-cloud-modelle`](../plan/planning/done/slice-v1-adr-ollama-cloud-modelle.md) (§1 Gefundener Stand, E1 bis E5, §2 DoD, §6 Risiken und Fragen), Welle [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md) (§3 Closure-Kriterien)
 - Messprotokolle der Slices [`slice-v1-ollama-cloud-messung`](../plan/planning/done/slice-v1-ollama-cloud-messung.md) und [`slice-v1-ollama-cloud-messung-mit-konto`](../plan/planning/done/slice-v1-ollama-cloud-messung-mit-konto.md) unter `docs/messungen/`; Rohdaten nur dort gelesen, wo eine Zeile der ADR sie nennt (Stichproben unten); Skripte `06-lauf-container.sh` und `inner.sh` unter `tools/messung/ollama-cloud-konto/`
 - [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md) (ganz), [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (Form, Herkunfts-Definition), [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md) (Zweck von `relaxations`), [`ADR-0013`](../plan/adr/0013-dokumentationsreferenzmodell.md) (Referenzmatrix), [`MR-008`](../../harness/conventions/MR-008-adr-form.md)
 - [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); [`SPEC-043`](../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), [`SPEC-044`](../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten), [`SPEC-047`](../../spec/spezifikation.md#spec-047--feature-ollama-im-sandbox-devcontainer-installation-volume-meldungen-und-grenzen)
