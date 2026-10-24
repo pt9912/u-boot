@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-ollama-cloud-messung`](../../../../done/slice-v1-ollama-cloud-messung.md)
+**Fund:** Selbstauskunft des Implementers: zwei Host-`sed`-Aufrufe außerhalb der Skripte während der Arbeit (Verfahrensabweichung); das Protokoll weist sie aus (Abschnitt *Reihenfolge und Aufruf*), die Skripte, Rohdaten und deren Schwärzung gehen nicht durch sie (Review INFO-2; Verification, Abschnitt *Weitere Prüfungen*: kein `sed`, `awk`, `perl`, `python`, `jq`, `curl`, `sha256sum` im Skriptkopf). Selbstauskunft des Planners: ein leerer Redirect `cat > /tmp/dummy` ohne Inhalt in der Closure (Datei sofort entfernt), sonst nur `git`, `make`, `ls`, `grep` und lesende Aufrufe; geschrieben wurde mit den Werkzeugen `Write` und `Edit`. Kein Nachweis stützt sich auf diese Auskünfte.
+
+**Beleg-Qualität:** Selbstauskunft, an keiner Datei nachprüfbar außer dem Protokollsatz.

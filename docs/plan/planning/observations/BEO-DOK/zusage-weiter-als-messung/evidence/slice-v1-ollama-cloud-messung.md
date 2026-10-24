@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-ollama-cloud-messung`](../../../../done/slice-v1-ollama-cloud-messung.md)
+**Fund:** Im Messprotokoll standen Aussagen weiter als der Beleg: „0 Treffer“ der Suche, die beim Wiederholen mit Exit 1 endete (zwei Beispielzeilen im Protokoll selbst, Review LOW-2), eine Zählung „sechs Dateipaare“ bei drei Paaren (LOW-3) und Einzelheiten des verlorenen Laufs 0 („je einmal“) ohne erhaltene Rohdaten (LOW-4). Alle drei in der Fix-Runde berichtigt; die Liste „nicht gemessen“ und die Kopfbedingung „ohne Konto gemessen, Erfolgspfad nicht gemessen“ hielten; der Verifier verglich 16 Aussagen mit den Rohdaten ohne Abweichung ([Review-Report](../../../../../../reviews/2026-10-24-slice-v1-ollama-cloud-messung.md), [Verification-Report](../../../../../../reviews/2026-10-24-slice-v1-ollama-cloud-messung-verify.md)).
+
+**Beleg-Qualität:** belegt durch Lesen von Protokoll, Rohdaten und beiden Reports.

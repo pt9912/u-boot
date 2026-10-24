@@ -1,0 +1,1 @@
+**Stand:** offen — ein Beleg (`slice-v1-ollama-cloud-messung`); unter der Schwelle von drei, keine Verkörperung entschieden. Der Plan von [`slice-v1-ollama-cloud-messung-mit-konto`](../../../open/slice-v1-ollama-cloud-messung-mit-konto.md) verlangt das Artefakt des Vorlaufs (DoD 1) und lässt den ersten Lauf ohne es abbrechen.

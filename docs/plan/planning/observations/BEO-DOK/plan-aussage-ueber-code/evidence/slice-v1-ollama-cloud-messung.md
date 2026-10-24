@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-ollama-cloud-messung`](../../../../done/slice-v1-ollama-cloud-messung.md)
+**Fund:** Zwei Plan-Zustandsaussagen wurden nach der Umsetzung nicht nachgezogen: §3 nannte als Ansatz `env -u` der genannten Variablen, umgesetzt ist `env -i` mit Positivliste (Review INFO-4, Verification V-2: eine Verschärfung, nicht als Planänderung gekennzeichnet); §5 trug weiter die Fassung der Suche über den Gesamtbestand, die DoD 3 ersetzt hatte, und war mit „DoD vollständig“ nicht erfüllbar (Verification V-1, `AGENTS.md` §3.10, Zustandsmarker beim Ablauf berichtigen). Rückfall nach der Verkörperung; der Abgleich der Plan-Tabelle gegen `git diff --stat` fand keine fehlende Datei ([Verification-Report](../../../../../../reviews/2026-10-24-slice-v1-ollama-cloud-messung-verify.md), Abschnitt *Weitere Prüfungen*).
+
+**Beleg-Qualität:** belegt durch Lesen von Plan, Review- und Verification-Report; §5 und DoD 3 sind beim Schließen berichtigt.
