@@ -2090,7 +2090,8 @@ ollama run smollm2:135m "Reply with the single word OK."
     einem Fehler zur Namensauflösung (`dial tcp: lookup ollama.com on 127.0.0.1:53: server
     misbehaving`). Mit dem Eintrag `ollama.com` in `devcontainer.sandbox.egress.allow` (der Eintrag
     schließt Subdomains ein) wechselt die Meldung zur Aufforderung `You need to be signed in to
-    Ollama to run Cloud models.`:
+    Ollama to run Cloud models.`. So setzen und wenden Sie den Eintrag an (gemessen wurde der
+    Neuaufbau mit der Dev-Container-CLI, nicht mit `u-boot devcontainer up --recreate`):
 
     ```bash
     u-boot config set devcontainer.sandbox.egress.allow ollama.com
