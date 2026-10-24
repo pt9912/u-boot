@@ -11,6 +11,14 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-10-24
+
+Patch release. **Two checks of the feature entries in `u-boot.yaml` now run where they were promised.** `u-boot generate devcontainer` rejects the source of an enabled feature that is not on the allowlist, and `u-boot config set devcontainer.features.<feature>.version <value>` rejects a `version` without `source` for `ollama`, `gh` and `glab`.
+**Behaviour change for scripts:** `u-boot generate devcontainer` ends with exit code `10` instead of `0` and writes nothing when the source of an enabled feature is not allowed; the entry below names the two ways out (allow the source, or switch the feature off). `u-boot config set` ends with exit code `10` instead of `0` for a `version` without `source` at `ollama`, `gh` and `glab`.
+The lead of `[0.15.0]` named the check in `config set` as a follow-up; this release delivers it. A file that already carries such a `version` entry stays rejected; the way out is to remove the entry by hand.
+**Measured:** both fixes at the built binary on one Linux host (`docker run` with a project mount), and by mutation tests of the verifiers. **Not measured:** whitespace at the edge of a source in `u-boot.yaml`, `u-boot doctor` with a missing `enabled`, the `--json` output of the rejection in `config set`, macOS, Podman and other hosts.
+No new command and no new option. Lastenheft 0.22.0.
+
 ### Fixed
 
 - `u-boot generate devcontainer` now checks the allowlist of external feature sources ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)): an enabled feature whose `source` is not listed byte-for-byte in `devcontainer.featureSources.allow`, or given with `--allow-external-feature-sources` in the same call, ends with exit code `10` and code [`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), and writes nothing, also with `--dry-run`, in the default and in the sandbox profile. Before, the call exited `0` and wrote the unlisted source into `devcontainer.json`, while `u-boot doctor` reported the entry as an error and `u-boot config set …source` refused it. Projects that carry such an entry now need one of the two ways out the message names: allow the source (`u-boot config set devcontainer.featureSources.allow <source>` or the flag), or switch the feature off (`u-boot config set devcontainer.features.<name>.enabled false`).
@@ -1515,7 +1523,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/pt9912/u-boot/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/pt9912/u-boot/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/pt9912/u-boot/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/pt9912/u-boot/compare/v0.13.0...v0.13.1
