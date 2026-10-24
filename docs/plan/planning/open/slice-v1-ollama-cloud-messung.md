@@ -17,7 +17,7 @@ Anlass: Beauftragung durch den Projektinhaber am 2026-10-19 (Roadmap, *Nächste 
 
 **Berührte Spec-Stellen:** [`SPEC-047`](../../../../spec/spezifikation.md#spec-047--feature-ollama-im-sandbox-devcontainer-installation-volume-meldungen-und-grenzen) (Feature `ollama`), [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) (Zugangsdaten des Agenten) — der Slice **liest** sie und ändert keine; die Nachführung folgt im Spezifikations-Slice der Welle. Das Lastenheft ändert nur der CR. Der Verweis zeigt **aufwärts**: Lastenheft und Spezifikation nennen diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Rolle Implementer)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-24.
 
