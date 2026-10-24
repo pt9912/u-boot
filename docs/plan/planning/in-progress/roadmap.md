@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; vier Slices mit Datei (beide Messungen, die Folge-ADR [`ADR-0036`](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), Ausgang A, und der Lastenheft-CR [`slice-cr-lastenheft-ollama-cloud-modelle`](../in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md) vor dem Code-Slice), drei weitere benannt ohne Datei (Code, Spezifikation, Release-Cut zuletzt); Release `v0.16.0`).
+Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; vier Slices mit Datei (beide Messungen, die Folge-ADR [`ADR-0036`](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), Ausgang A, und der Lastenheft-CR [`slice-cr-lastenheft-ollama-cloud-modelle`](../in-progress/slice-cr-lastenheft-ollama-cloud-modelle.md), Lastenheft `0.23.2`), drei weitere benannt ohne Datei (Code `slice-v1-devcontainer-ollama-cloud`, Spezifikation `slice-v2-spec-ollama-cloud`, Release-Cut zuletzt, davor der Validator-Bericht); Release `v0.16.0`).
 
 In Arbeit: [`slice-cr-lastenheft-ollama-cloud-modelle`](slice-cr-lastenheft-ollama-cloud-modelle.md) (`welle-ollama-cloud-modelle`).
 
