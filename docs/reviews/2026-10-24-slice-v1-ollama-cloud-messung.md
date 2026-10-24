@@ -3,7 +3,7 @@
 * Rolle: Reviewer (`.harness/skills/reviewer.md`), frischer Kontext
 * Gegenstand: `git diff e60956c3..HEAD` (HEAD `23639d60`), Slice
   [`slice-v1-ollama-cloud-messung`](../plan/planning/in-progress/slice-v1-ollama-cloud-messung.md)
-  der Welle `welle-ollama-cloud-modelle`: Skripte `tools/messung/ollama-cloud/`, Messprotokoll mit 22 Rohdaten-Dateien unter `docs/messungen/slice-v1-ollama-cloud-messung/`
+  der Welle `welle-ollama-cloud-modelle`: Skripte `tools/messung/ollama-cloud/`, Messprotokoll mit 22 Rohdaten-Dateien unter dem Protokollordner der Messung
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), `AGENTS.md` §3.7, §3.9, §3.10
 * Nicht Gegenstand: DoD-Prüfung (Verifier)
 
@@ -40,9 +40,9 @@ Zugangsdaten: kein Fund. Messaussagen: bis auf eine falsche Zählung (LOW-3) geg
 
 * `kategorie`: MEDIUM
 * `quelle`: `AGENTS.md` §3.6 (Gates/Akzeptanz nicht still ändern), `harness/roles.md` (Rollenvertrag: Plan ändert der Planner/Architect)
-* `pfad`: `docs/plan/planning/in-progress/slice-v1-ollama-cloud-messung.md` · „**Keine Zugangsdaten:**“ (DoD-Punkt 3)
+* `pfad`: der Slice-Plan · „**Keine Zugangsdaten:**“ (DoD-Punkt 3)
 * `klasse`: DoD-Wortlaut vom Implementer angepasst
-* `befund`: Die Zeile verlangte „die Suche … über `docs/messungen/` und `tools/messung/` ist leer“ und wurde im selben Diff, der sie abhakt, auf „leer über das Verzeichnis dieser Messung und `tools/messung/ollama-cloud/`“ plus „älteres von Hand als keine Zugangsdaten gelesen“ umformuliert. Die Ausweitung trägt: ich habe die älteren Treffer selbst gelesen (öffentliche `ssh-ed25519`-Zeilen und „Your new public key is:“ in `slice-v1-devcontainer-ollama-messung`, GPG-Schlüssel-IDs, `DUMMY`/`platzhalter-…`, Testnamen `…_Ollama_…`): kein privater Teil, kein Zugangsdatum.
+* `befund`: Die Zeile verlangte „die Suche … über `docs/messungen/` und `tools/messung/` ist leer“ und wurde im selben Diff, der sie abhakt, auf „leer über das Verzeichnis dieser Messung und `tools/messung/ollama-cloud/`“ plus „älteres von Hand als keine Zugangsdaten gelesen“ umformuliert. Die Ausweitung trägt: ich habe die älteren Treffer selbst gelesen (öffentliche `ssh-ed25519`-Zeilen und „Your new public key is:“ in dem Vorgänger-Messprotokoll zur Ollama-Messung, GPG-Schlüssel-IDs, `DUMMY`/`platzhalter-…`, Testnamen `…_Ollama_…`): kein privater Teil, kein Zugangsdatum.
 * `risiko`: Die ursprüngliche Zeile war über den Bestand nicht erfüllbar (Planungsfehler); die Korrektur ist sachlich richtig, aber der Rollenwechsel „Plan ändern“ ist nicht als Artefakt belegt, und der Verifier prüft sonst gegen den vom Implementer selbst weichgestellten Maßstab.
 * `verifizierbar`: Review-only (Verifier bewertet, ob er die geänderte DoD-Zeile gelten lässt)
 
@@ -60,7 +60,7 @@ Zugangsdaten: kein Fund. Messaussagen: bis auf eine falsche Zählung (LOW-3) geg
 
 * `kategorie`: LOW
 * `quelle`: `AGENTS.md` §3.10 (Aussage nennt nur, was gelesen oder gemessen wurde)
-* `pfad`: `docs/messungen/slice-v1-ollama-cloud-messung/README.md` · „über dieses Verzeichnis und `tools/messung/ollama-cloud/` (…): 0 Treffer“
+* `pfad`: `Protokollordner/README.md` · „über dieses Verzeichnis und `tools/messung/ollama-cloud/` (…): 0 Treffer“
 * `klasse`: Messaussage nicht reproduzierbar
 * `befund`: `06-suche.sh` auf genau diese beiden Orte endet mit Exit 1: zwei Treffer in `README.md` (Zeile mit der `ollama signin`-Aussage und der Satz mit `GH_TOKEN=ghp_…`), Muster „Zuweisung“ und „Anmelde-URL“. Die Suche lief vor dem Schreiben dieser Zeilen oder zählt sie nicht; der Text sagt es nicht.
 * `risiko`: Ein Wiederholungslauf (Verifier, Folge-Slice mit Konto) beginnt mit rotem Ergebnis und muss selbst klären, ob es ein Zugangsdatum ist.
@@ -70,7 +70,7 @@ Zugangsdaten: kein Fund. Messaussagen: bis auf eine falsche Zählung (LOW-3) geg
 
 * `kategorie`: LOW
 * `quelle`: `AGENTS.md` §3.10
-* `pfad`: `docs/messungen/slice-v1-ollama-cloud-messung/README.md` · „in den sechs Dateipaaren unterscheidet sich **nur** der Exit-Code“
+* `pfad`: `Protokollordner/README.md` · „in den sechs Dateipaaren unterscheidet sich **nur** der Exit-Code“
 * `klasse`: Zählung falsch
 * `befund`: Es gibt drei Paare (`discover`, `restricted`, `allow`, je Lauf 1 und 2), sechs Dateien; der Vergleich der `AUSSAGE`-Zeilen bestätigt die Sachaussage (nur `C3-launch-claude-tty-exit` 124/137).
 * `risiko`: Gering; eine falsche Zahl in der Lesehilfe senkt das Vertrauen in die übrigen Zahlen.
@@ -80,7 +80,7 @@ Zugangsdaten: kein Fund. Messaussagen: bis auf eine falsche Zählung (LOW-3) geg
 
 * `kategorie`: LOW
 * `quelle`: `AGENTS.md` §3.10 (Aussage nur nach Lesen/Messen), `harness/verification.md` (Evidence)
-* `pfad`: `docs/messungen/slice-v1-ollama-cloud-messung/README.md` · „Vorgänge gegen `ollama.com`/`registry.ollama.ai` im Lauf 0: Pull, Run und Launch (ohne und mit Pseudo-Terminal) je einmal in `discover`“
+* `pfad`: `Protokollordner/README.md` · „Vorgänge gegen `ollama.com`/`registry.ollama.ai` im Lauf 0: Pull, Run und Launch (ohne und mit Pseudo-Terminal) je einmal in `discover`“
 * `klasse`: Aussage ohne erhaltene Rohdaten
 * `befund`: Lauf 0 ist ehrlich ausgewiesen (abgebrochen, Rohdaten beim Neuaufsetzen überschrieben, Ursache des Hängens nicht untersucht), nennt aber Einzelheiten des verlorenen Laufs (welche Aufrufe, je einmal), die kein Beleg trägt.
 * `risiko`: Die Zahl der Vorgänge gegen die Cloud ist für ein späteres Kontingent relevant und steht auf Erinnerung.
@@ -90,7 +90,7 @@ Zugangsdaten: kein Fund. Messaussagen: bis auf eine falsche Zählung (LOW-3) geg
 
 * `kategorie`: INFO
 * `quelle`: Maintainability
-* `pfad`: `docs/messungen/slice-v1-ollama-cloud-messung/rohdaten-01.txt` · „== Messstand, 2026-10-24T08:38:04.111Z“
+* `pfad`: `Protokollordner/rohdaten-01.txt` · „== Messstand, 2026-10-24T08:38:04.111Z“
 * `klasse`: Messstand nach dem Lauf aufgenommen
 * `befund`: `rohdaten-01.txt` und `rohdaten-01-vorher.txt` tragen 08:38, nach den Läufen (04: 08:18 bis 08:34) und nach dem Aufräumen (05: 08:34); die Tabelle „Reihenfolge“ führt 01 als ersten Schritt. Die Umgebungsprüfung der Läufe selbst steht in `rohdaten-04-*` (`umgebung-container-verbotene-namen=0`) und in `04-lauf.sh` (`umgebung_pruefen`); der Zeitpunkt der Datei „vorher“ ist im Protokoll nicht genannt.
 * `risiko`: Der Leser nimmt „vorher“ als Stand vor der Messung.
@@ -100,7 +100,7 @@ Zugangsdaten: kein Fund. Messaussagen: bis auf eine falsche Zählung (LOW-3) geg
 
 * `kategorie`: INFO
 * `quelle`: Maintainability
-* `pfad`: `docs/messungen/slice-v1-ollama-cloud-messung/README.md` · „`sed`, `awk`, `curl` laufen nur in Containern“
+* `pfad`: `Protokollordner/README.md` · „`sed`, `awk`, `curl` laufen nur in Containern“
 * `klasse`: Verfahrensabweichung nicht im Protokoll
 * `befund`: Der Auftrag nennt zweimal Host-`sed` während der Arbeit (Verfahrensabweichung); weder README noch Slice erwähnen sie. Die Skripte selbst nutzen Host-`sed` nicht (`redact` und `tool()` laufen in Containern); ich kann die zwei Aufrufe nicht aus dem Diff erkennen, also keinen Einfluss auf Rohdaten feststellen.
 * `risiko`: Die Aussage des READMEs gilt für die Skripte, nicht für den gesamten Arbeitsvorgang; ob das für die Messung zählt, entscheidet der Verifier.
@@ -110,7 +110,7 @@ Zugangsdaten: kein Fund. Messaussagen: bis auf eine falsche Zählung (LOW-3) geg
 
 * `kategorie`: INFO
 * `quelle`: Maintainability
-* `pfad`: `docs/messungen/slice-v1-ollama-cloud-messung/rohdaten-04-1.txt` · „[Query entfernt: Anmelde-URL] entfernt: Anmelde-URL]“; `docs/messungen/slice-v1-ollama-cloud-messung/rohdaten-04-allow-1.txt` · „== Modus restricted“
+* `pfad`: `Protokollordner/rohdaten-04-1.txt` · „[Query entfernt: Anmelde-URL] entfernt: Anmelde-URL]“; `Protokollordner/rohdaten-04-allow-1.txt` · „== Modus restricted“
 * `klasse`: Rohdaten-Artefakte
 * `befund`: In den Sammeldateien `rohdaten-04-<n>.txt` ist die Schwärzung doppelt angewandt und nicht idempotent (zerstückelte Marke, nur Kosmetik, kein Wert sichtbar); `rohdaten-04-allow-<n>.txt` trägt die Überschrift „Modus restricted“, weil `inner.sh` für `allow` den Modus `restricted` übergibt (im README erklärt). `rohdaten-02-c7.txt` wird nicht durch `redact()` geschrieben (Ausgabe von `generate`, kein Zugang, Hand gelesen).
 * `risiko`: Kosmetik; ein Leser, der die Dateien maschinell vergleicht, stolpert.
@@ -120,7 +120,7 @@ Zugangsdaten: kein Fund. Messaussagen: bis auf eine falsche Zählung (LOW-3) geg
 
 * `kategorie`: INFO
 * `quelle`: Maintainability
-* `pfad`: `docs/plan/planning/in-progress/slice-v1-ollama-cloud-messung.md` · „bereinigter Umgebung (`env -u` der genannten Variablen“
+* `pfad`: der Slice-Plan · „bereinigter Umgebung (`env -u` der genannten Variablen“
 * `klasse`: Plan-Text und Umsetzung weichen ab
 * `befund`: Der Plan nennt `env -u`, umgesetzt ist `env -i` (strenger: nur sechs Variablen); die Umsetzung erfüllt die Absicht, der Plan-Satz ist veraltet.
 * `risiko`: gering
