@@ -1,0 +1,7 @@
+# Ein Vergleichstest gegen denselben Build färbt eine Mutation am Vergleichsgegenstand nicht
+
+**Sub-Area:** `internal/hexagon/application` (Kürzel APP, Greenfield laut [`harness/conventions.md`](../../../../../../harness/conventions.md#mr-006)) — die Golden- und Byte-Identitäts-Tests des Generators liegen dort (`generate_ollama_host_test.go`, Muster `generate_forge_cli_test.go`); der Gegenstand ist die Wirkung einer Änderung an `templates/devcontainer/devcontainer.json.tmpl`.
+
+Ein Test, der „Eintrag inaktiv“ gegen „Eintrag fehlt“ im selben Build vergleicht (`…InactiveIsByteIdentical`), bleibt grün, wenn eine Mutation am Template beide Läufe gleich verändert: Beide Seiten rendern mit demselben fehlerhaften Template (hier `"runArgs": [],` bei leerer Liste). Rot wurde in der ersten Mutation (M07) nur der Bestand der Golden Cases (`TestGenerateDevcontainer_SandboxEgress_NotGenerated`, `…_SandboxPodman_NotGenerated`), nicht der neue Test. Geschlossen hat es ein Literalpin im Test („eine Konfiguration ohne Container-Option trägt keinen `runArgs`-Schlüssel“, ein Feld je Fall).
+
+**Trigger:** der nächste Slice, der einen Test „unverändert gegenüber dem Lauf ohne X“ schreibt. **Grenze:** Leser ist die Slice-Planung (§8, Sichtungs-Schritt) jedes Slice, der Generator-Ausgaben mit einem Byte-Identitäts-Anspruch ändert; dort lautet die Frage, welches Literal die Abwesenheit pinnt und welche Mutation den Vergleichstest allein rot färbt. Kein Carveout: Der Fall ist im Test behoben; es gibt keinen offenen Mangel, nur die Klasse.

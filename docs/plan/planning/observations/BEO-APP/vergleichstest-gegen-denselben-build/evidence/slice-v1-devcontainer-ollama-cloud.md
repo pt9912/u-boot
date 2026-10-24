@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-devcontainer-ollama-cloud`](../../../../done/slice-v1-devcontainer-ollama-cloud.md)
+**Fund:** Slice §7 *Abweichungen* (H3): Der Vergleich „inaktiver Eintrag gegen Lauf ohne Eintrag“ läuft gegen denselben Build und färbt eine Template-Mutation nicht; die Rotfärbung der ersten M07-Fassung kam allein von den bestehenden Golden Cases. Der Implementer ergänzte den Literalpin „kein `runArgs`-Schlüssel“ (zweiter Commit `5b983434`), danach färbt M07 auch `…InactiveIsByteIdentical`; der Reviewer fand den Pin ans Fallnamen gekoppelt (F-4), behoben in `377bc72b` (ein Feld je Fall). Der Verifier reproduzierte M07 als V01 (vier Tests rot, darunter der Literalpin).
+
+**Beleg-Qualität:** nachgefahren (Implementer M07; Reviewer; Verifier V01, Rücknahme sauber, `git diff` leer). Erster Vorgang.
