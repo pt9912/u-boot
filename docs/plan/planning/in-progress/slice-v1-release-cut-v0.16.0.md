@@ -233,7 +233,7 @@ Ergebnis: `docker volume rm` lehnt das Volume ab, solange der gestoppte Containe
 | Sensor | Ergebnis |
 |---|---|
 | `make gates` (erster Lauf, `HEAD` `e8c42ef1` plus Arbeitsbaum des Cuts, Datumszeichen noch `2026-10-24`) | Exit 0: `lint` 0 issues; `coverage-gate` 92,10 % gegen 90 %; `docs-check` 880 Dateien, 0 Befunde; `baseline-verify` v6.18.1 OK, 54 Dateien; `ablage-pruefung` 26 Fälle, 0 Fehlschläge |
-| `make gates` (nach dem letzten Commit) | siehe Bericht des Implementers an den Hauptagenten; ein Lauf nach dem Commit mit diesem Abschnitt |
+| `make gates` (zweiter Lauf, `HEAD` `f35f2e8c`, Datumszeichen `2026-10-25`) | Exit 0: `lint` 0 issues; `coverage-gate` 92,10 %; `docs-check` 880 Dateien, 0 Befunde; `baseline-verify` v6.18.1 OK, 54 Dateien; `ablage-pruefung` 26 Fälle, 0 Fehlschläge. Ein weiterer Lauf nach dem Commit dieser Zeile steht im Bericht an den Hauptagenten |
 | `make ci` | Exit 0: `govulncheck` „No vulnerabilities found.“; `image-scan`: `u-boot:latest (debian 12.15)` 0, `usr/local/bin/u-boot` 0 |
 | `make fullbuild` | Exit 0; `docker run --rm u-boot:latest --version` = `u-boot version 0.16.0-dev` |
 | `make build VERSION=0.16.0` | Exit 0; `--version` = `u-boot version 0.16.0`, OCI-Label `0.16.0` (lokal, nicht gepusht) |
