@@ -1123,8 +1123,8 @@ atomar (siehe Abschnitt 5).
   `config set devcontainer.featureSources.allow <Quelle>` oder mit dem Flag)
   oder das Feature abschalten (mit
   `config set devcontainer.features.<Name>.enabled false`). Das gilt im
-  Standard- und im Sandbox-Profil. Features mit `enabled: false` oder ohne `enabled` werden weder
-  erzeugt noch geprüft; `doctor` meldet sie weiter.
+  Standard- und im Sandbox-Profil. Features mit `enabled: false` oder ohne
+  `enabled` werden weder erzeugt noch geprüft.
 - `--allow-external-feature-sources` gibt es nur bei `init --devcontainer`,
   `generate devcontainer` und `config set …featureSources.allow`; bei anderen
   Befehlen wird es abgelehnt.
