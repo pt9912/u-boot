@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-ollama-cloud-messung-mit-konto`](../../../../done/slice-v1-ollama-cloud-messung-mit-konto.md)
+**Fund:** Von 40 Prompts verbrauchten sechs keinen Messwert: Nr. 5 und 7 mit leerem Modellnamen (der Schlüssel `o` war im Skript unbekannt), Nr. 30 bis 33 mit dem Namen `…[1m]`, den der Client in Weg (a) schon als ungültig gezeigt hatte. Der Wächter für unbekannte Modellschlüssel kam danach. Folge: in Weg (b) entfielen `restricted` mit dem zweiten Modell für `claude -p` und `launch` sowie `launch` unter `OLLAMA_API_KEY`; die Lücke bei den zweiten Läufen ist teilweise darauf zurückzuführen (Verification F-11).
+
+**Beleg-Qualität:** belegt durch Lesen des Protokolls (Abschnitt *Prompt-Zähler*) und des Verification-Reports ([F-11](../../../../../../reviews/2026-10-24-slice-v1-ollama-cloud-messung-mit-konto-verify.md)); erster Vorgang dieser Beobachtung.

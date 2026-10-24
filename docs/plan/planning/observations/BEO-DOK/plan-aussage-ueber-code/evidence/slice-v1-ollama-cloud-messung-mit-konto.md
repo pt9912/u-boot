@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-ollama-cloud-messung-mit-konto`](../../../../done/slice-v1-ollama-cloud-messung-mit-konto.md)
+**Fund:** Nach dem Start trugen Zustandsmarker ihren Ablauf weiter: §6 führte die Fragen an den Projektinhaber als „offen“ mit „Antwort: steht aus“, §7 „noch nicht gestartet“, `open/README.md` „fünf Fragen offen“ (Review F-6). Die Plan-Tabelle (§3) war nicht gegen `git diff --stat` abgeglichen: nicht gelistet waren eine Verweiskorrektur in einem `done/`-Slice, drei Skripte des Messverzeichnisses, die `state.md` zweier Beobachtungen; die Variante `hgw` hieß im Ist `alw` (F-7). Aussagen über Code und Dateien (Egress-Mechanismus, Katalog, Handbuch) hielten. Rückfall nach der Verkörperung; in der Fix-Runde berichtigt.
+
+**Beleg-Qualität:** belegt durch Lesen des Review-Reports ([F-6, F-7](../../../../../../reviews/2026-10-24-slice-v1-ollama-cloud-messung-mit-konto.md)).

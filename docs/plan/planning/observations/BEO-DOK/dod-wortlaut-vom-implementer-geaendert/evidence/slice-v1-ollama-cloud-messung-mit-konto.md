@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-ollama-cloud-messung-mit-konto`](../../../../done/slice-v1-ollama-cloud-messung-mit-konto.md)
+**Fund:** Die DoD-Zeilen 2 und 3 nannten „zwei Läufe“ und standen auf `[x]`, während das Protokoll für Weg (b) und die Prompt-Fälle von `restricted`, `allow` und K3c einen Lauf belegt (Verification V-2). Anders als im ersten Vorgang änderte der Implementer den Wortlaut nicht, er hakte gegen den unveränderten ab; das Protokoll wies die Abweichung aus, die Kennzeichnung im Plan fehlte bis zur Closure. Die Planner-Rolle trug die Planänderung bei der Closure ein (Verifier-Entscheidung F-11 gilt). Der Plan hatte den Fall vorab benannt (§4, Rückführung (c)).
+
+**Beleg-Qualität:** belegt durch Lesen des Verification-Reports ([V-2, F-11](../../../../../../reviews/2026-10-24-slice-v1-ollama-cloud-messung-mit-konto-verify.md)); zweiter Vorgang dieser Beobachtung, Klasse erweitert (Haken über einem unerfüllten Wortlaut statt umformuliertem Wortlaut).
