@@ -3,7 +3,7 @@
 **Rolle:** Verifier (Modul 8). Frage: Bauen wir es richtig — gegen Plan, DoD, Lastenheft, ADR und Sensor-Belege.
 
 **Gegenstand:** `git diff c3e8044e..HEAD` (Commits `c0b5a757`, `19508c19`, `4293a4cc`, `f8a6dd33`, Review-Report `3207da2e`, Fix-Runde `e942484d`), Slice
-[`slice-v2-spec-ollama-cloud`](../plan/planning/in-progress/slice-v2-spec-ollama-cloud.md)
+[`slice-v2-spec-ollama-cloud`](../plan/planning/done/slice-v2-spec-ollama-cloud.md)
 (Welle [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md)).
 
 **Maßstab:** [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Absätze `ollama`, Cloud-Modelle, `ollama-host`, Fassung 0.23.2),

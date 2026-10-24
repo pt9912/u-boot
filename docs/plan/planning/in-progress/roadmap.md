@@ -17,9 +17,9 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; sechs Slices mit Datei (beide Messungen, die Folge-ADR [`ADR-0036`](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), Ausgang A, der Lastenheft-CR [`slice-cr-lastenheft-ollama-cloud-modelle`](../done/slice-cr-lastenheft-ollama-cloud-modelle.md), Lastenheft `0.23.2`, und der Code-Slice [`slice-v1-devcontainer-ollama-cloud`](../done/slice-v1-devcontainer-ollama-cloud.md), diese fünf in `done/`, dazu der Spezifikations-Slice [`slice-v2-spec-ollama-cloud`](../in-progress/slice-v2-spec-ollama-cloud.md) in `in-progress/`), einer benannt ohne Datei (Release-Cut zuletzt, davor der Validator-Bericht); Release `v0.16.0`).
+Offen: [`welle-ollama-cloud-modelle`](../welle-ollama-cloud-modelle.md) (Cloud-Modelle von Ollama mit Claude Code im Devcontainer, `ollama launch claude`; sechs Slices mit Datei (beide Messungen, die Folge-ADR [`ADR-0036`](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), Ausgang A, der Lastenheft-CR [`slice-cr-lastenheft-ollama-cloud-modelle`](../done/slice-cr-lastenheft-ollama-cloud-modelle.md), Lastenheft `0.23.2`, und der Code-Slice [`slice-v1-devcontainer-ollama-cloud`](../done/slice-v1-devcontainer-ollama-cloud.md), diese fünf in `done/`, dazu der Spezifikations-Slice [`slice-v2-spec-ollama-cloud`](../done/slice-v2-spec-ollama-cloud.md) in `in-progress/`), einer benannt ohne Datei (Release-Cut zuletzt, davor der Validator-Bericht); Release `v0.16.0`).
 
-In Arbeit: [`slice-v2-spec-ollama-cloud`](../in-progress/slice-v2-spec-ollama-cloud.md) (`welle-ollama-cloud-modelle`).
+In Arbeit: [`slice-v2-spec-ollama-cloud`](../done/slice-v2-spec-ollama-cloud.md) (`welle-ollama-cloud-modelle`).
 
 ## Nächste Wellen
 
