@@ -224,15 +224,21 @@ func podmanOptions() []string {
 // restriction.
 func TestGenerateDevcontainer_OllamaHost_InactiveIsByteIdentical(t *testing.T) {
 	t.Parallel()
-	heads := map[string]string{
-		"default":                 defaultProfile,
-		"sandbox":                 sandboxProfile,
-		"sandbox with egress":     sandboxProfile + egressOn,
-		"default with UID":        defaultProfile + "  user:\n    uid: 501\n",
-		"sandbox, nested podman":  sandboxProfile + "  sandbox:\n    nestedRuntime: podman\n",
-		"sandbox, ollama and gh":  sandboxProfile + "  features:\n    ollama:\n      enabled: true\n    gh:\n      enabled: true\n",
-		"default, gh, glab":       defaultProfile + "  features:\n    gh:\n      enabled: true\n    glab:\n      enabled: true\n",
-		"default, node (feature)": defaultProfile + "  features:\n    node:\n      enabled: true\n",
+	// option marks a configuration that has a container option of its own
+	// (the egress restriction, nested Podman), so `runArgs` exists.
+	type head struct {
+		yaml   string
+		option bool
+	}
+	heads := map[string]head{
+		"default":                 {defaultProfile, false},
+		"sandbox":                 {sandboxProfile, false},
+		"sandbox with egress":     {sandboxProfile + egressOn, true},
+		"default with UID":        {defaultProfile + "  user:\n    uid: 501\n", false},
+		"sandbox, nested podman":  {sandboxProfile + "  sandbox:\n    nestedRuntime: podman\n", true},
+		"sandbox, ollama and gh":  {sandboxProfile + "  features:\n    ollama:\n      enabled: true\n    gh:\n      enabled: true\n", false},
+		"default, gh, glab":       {defaultProfile + "  features:\n    gh:\n      enabled: true\n    glab:\n      enabled: true\n", false},
+		"default, node (feature)": {defaultProfile + "  features:\n    node:\n      enabled: true\n", false},
 	}
 	entries := map[string]string{
 		"absent":           "",
@@ -240,18 +246,18 @@ func TestGenerateDevcontainer_OllamaHost_InactiveIsByteIdentical(t *testing.T) {
 		"enabled missing":  "    ollama-host:\n      version: \"\"\n",
 		"enabled null key": "    ollama-host: {}\n",
 	}
-	for hname, head := range heads {
-		base := runHost(t, head, false)
+	for hname, h := range heads {
+		base := runHost(t, h.yaml, false)
 		want := projectTexts(base.fs)
 		for ename, entry := range entries {
 			t.Run(hname+"/"+ename, func(t *testing.T) {
 				t.Parallel()
-				yaml := head
+				yaml := h.yaml
 				if entry != "" {
-					if strings.Contains(head, "  features:\n") {
-						yaml = head + entry
+					if strings.Contains(h.yaml, "  features:\n") {
+						yaml = h.yaml + entry
 					} else {
-						yaml = head + "  features:\n" + entry
+						yaml = h.yaml + "  features:\n" + entry
 					}
 				}
 				got := runHost(t, yaml, false)
@@ -270,9 +276,8 @@ func TestGenerateDevcontainer_OllamaHost_InactiveIsByteIdentical(t *testing.T) {
 				// literal pins the shape of the existing outputs: a
 				// configuration without any container option has no `runArgs`
 				// key (not even an empty one).
-				if !strings.Contains(hname, "egress") && !strings.Contains(hname, "podman") &&
-					strings.Contains(files[".devcontainer/devcontainer.json"], "runArgs") {
-					t.Errorf("devcontainer.json carries a runArgs key although no option is configured:\n%s", files[".devcontainer/devcontainer.json"])
+				if got := strings.Contains(files[".devcontainer/devcontainer.json"], "runArgs"); got != h.option {
+					t.Errorf("runArgs key present = %v, want %v:\n%s", got, h.option, files[".devcontainer/devcontainer.json"])
 				}
 				if n := len(hostNotices(got.resp.Warnings)); n != 0 {
 					t.Errorf("notices = %d, want 0 for an inactive entry", n)
@@ -319,6 +324,20 @@ func TestGenerateDevcontainer_OllamaHost_WritesNoVariableAndNoRelay(t *testing.T
 				t.Error("devcontainer.json must carry no forwardPorts for the connection")
 			}
 		})
+	}
+}
+
+// The notices of `ollama` and of `ollama-host` are told apart: with both
+// features active, the filter of the `ollama` tests finds the one notice of
+// `ollama`, and the filter of the connection finds the one of `ollama-host`.
+func TestGenerateDevcontainer_OllamaHost_NoticesDoNotOverlapWithOllama(t *testing.T) {
+	t.Parallel()
+	run := runHost(t, sandboxProfile+"  features:\n    ollama:\n      enabled: true\n    ollama-host:\n      enabled: true\n", false)
+	if n := len(ollamaNotices(run.resp.Warnings)); n != 1 {
+		t.Errorf("ollama notices = %d, want 1: %+v", n, run.resp.Warnings)
+	}
+	if n := len(hostNotices(run.resp.Warnings)); n != 1 {
+		t.Errorf("ollama-host notices = %d, want 1: %+v", n, run.resp.Warnings)
 	}
 }
 

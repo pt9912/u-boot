@@ -156,7 +156,7 @@ deklarierten Port.
 
 Eine Dev-Toolchain wird über den Devcontainer-Features-Katalog
 ergänzt (17 Built-in-Features: `git`, `docker-cli`,
-`node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` und `claude-code` (beide Drittanbieter), `gh` und `glab` (GitHub- und GitLab-CLI) `ollama` (nur CPU, nur im Sandbox-Profil) sowie `ollama-host` (eine `runArgs`-Zeile für einen Dienst des Hosts, kein Relay, beide Profile)):
+`node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` und `claude-code` (beide Drittanbieter), `gh` und `glab` (GitHub- und GitLab-CLI), `ollama` (nur CPU, nur im Sandbox-Profil) sowie `ollama-host` (eine `runArgs`-Zeile für einen Dienst des Hosts, kein Relay, beide Profile)):
 
 ```bash
 u-boot init my-service --devcontainer

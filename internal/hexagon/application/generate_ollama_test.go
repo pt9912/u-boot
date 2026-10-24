@@ -34,7 +34,7 @@ const (
 func ollamaNotices(ws []driving.WarningEntry) []driving.WarningEntry {
 	var out []driving.WarningEntry
 	for _, w := range ws {
-		if strings.Contains(w.Message, "feature ollama") {
+		if strings.Contains(w.Message, "feature ollama ") {
 			out = append(out, w)
 		}
 	}

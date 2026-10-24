@@ -564,9 +564,6 @@ func hostGatewayFeatureActive(dc *ubootYAMLDevcontainer) bool {
 	if dc == nil {
 		return false
 	}
-	if featureCatalogue()[featureOllamaHost].containerOption == "" {
-		return false
-	}
 	f, ok := dc.Features[featureOllamaHost]
 	return ok && f.Enabled != nil && *f.Enabled && f.Source == ""
 }
