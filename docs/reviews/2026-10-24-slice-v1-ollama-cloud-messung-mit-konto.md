@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Diff (Messskripte, Messprotokoll, Rohdaten, Planungsdokumente) gegen Slice-Plan, Zugangsregeln, Hard Rules und Register-Muster `zusage-weiter-als-messung` (Maintainability; nicht gegen die DoD).
 
-**Gegenstand:** Commit-Range `origin/main..HEAD` (`189d1787` bis `91b27571`, sieben Commits) für den Slice [`slice-v1-ollama-cloud-messung-mit-konto`](../plan/planning/in-progress/slice-v1-ollama-cloud-messung-mit-konto.md).
+**Gegenstand:** Commit-Range `origin/main..HEAD` (`189d1787` bis `91b27571`, sieben Commits) für den Slice [`slice-v1-ollama-cloud-messung-mit-konto`](../plan/planning/done/slice-v1-ollama-cloud-messung-mit-konto.md).
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `91b27571` ·
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-24
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-ollama-cloud-messung-mit-konto`](../plan/planning/in-progress/slice-v1-ollama-cloud-messung-mit-konto.md) (§1 Zugangsregeln und Messfälle, §2 DoD, §3 Plan, §6 Risiken)
+- Slice [`slice-v1-ollama-cloud-messung-mit-konto`](../plan/planning/done/slice-v1-ollama-cloud-messung-mit-konto.md) (§1 Zugangsregeln und Messfälle, §2 DoD, §3 Plan, §6 Risiken)
 - Messprotokoll [Messprotokoll](../messungen/slice-v1-ollama-cloud-messung-mit-konto/README.md) und alle Rohdaten dieses Verzeichnisses; Skripte unter `tools/messung/ollama-cloud-konto/`
 - [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten); [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md), [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md)
 - `AGENTS.md` (§3.1, §3.7, §3.9, §3.10), `harness/conventions.md` (Ablage-Regel), `harness/review.md`

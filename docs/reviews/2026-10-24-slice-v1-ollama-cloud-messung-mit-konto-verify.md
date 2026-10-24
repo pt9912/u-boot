@@ -2,7 +2,7 @@
 
 * Rolle: Verifier (`harness/verification.md`), frischer Kontext
 * Gegenstand: `git diff origin/main..HEAD` (HEAD `8283435a`, zehn Commits), Slice
-  [`slice-v1-ollama-cloud-messung-mit-konto`](../plan/planning/in-progress/slice-v1-ollama-cloud-messung-mit-konto.md)
+  [`slice-v1-ollama-cloud-messung-mit-konto`](../plan/planning/done/slice-v1-ollama-cloud-messung-mit-konto.md)
   (Welle [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md))
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)
 * Review: [`2026-10-24-slice-v1-ollama-cloud-messung-mit-konto.md`](2026-10-24-slice-v1-ollama-cloud-messung-mit-konto.md) (F-1 bis F-10 in `5cb018e0` behoben)
