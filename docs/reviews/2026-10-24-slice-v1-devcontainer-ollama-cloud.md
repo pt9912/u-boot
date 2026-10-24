@@ -3,7 +3,7 @@
 **Review-Art:** Code — gegen Plan, [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) (Accepted), Lastenheft 0.23.2 und Hard Rules.
 
 **Gegenstand:** `git diff 8ad49398..HEAD` (Commits `7f082a8a`, `5b983434`, `24711dd3`), Slice
-[`slice-v1-devcontainer-ollama-cloud`](../plan/planning/in-progress/slice-v1-devcontainer-ollama-cloud.md)
+[`slice-v1-devcontainer-ollama-cloud`](../plan/planning/done/slice-v1-devcontainer-ollama-cloud.md)
 (Welle [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md)).
 
 **Skill:** `.harness/skills/reviewer.md` @ `24711dd3` · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-24
