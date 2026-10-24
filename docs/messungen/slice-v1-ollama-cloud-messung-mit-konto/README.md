@@ -10,7 +10,7 @@ Dieses Protokoll liefert **Messwerte und eine Liste des Ungemessenen**; es entsc
 [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)).
 Das Protokoll des Vorgängers ohne Konto: [`slice-v1-ollama-cloud-messung`](../slice-v1-ollama-cloud-messung/README.md).
 
-**Stand dieses Protokolls: Weg (a) und Weg (b) gemessen; der Projektinhaber hat sich im Container selbst angemeldet. Nach Angabe des Projektinhabers hat die Anmeldung im Container auf der Schlüsselseite des Kontos keinen Eintrag erzeugt (nichts von heute); der Authentifizierungsweg ist ungeklärt (Abschnitt *Beobachtung des Projektinhabers*; Beobachtung, **kein Messwert** der Rohdaten).** Jede Aussage unten gilt
+**Stand dieses Protokolls: Weg (a) und Weg (b) gemessen; der Projektinhaber hat sich im Container selbst angemeldet. Nach Beobachtung des Projektinhabers (eigene Wiederholung der Anmeldung, nicht Teil der Messung) trägt die Anmeldung den Geräteschlüssel automatisch im Konto ein; nach der Messung stand dort kein Eintrag von heute, ob `signout` ihn entfernt hat, ist ungemessen (Abschnitt *Beobachtung des Projektinhabers*; **kein Messwert** der Rohdaten).** Jede Aussage unten gilt
 **bedingungsgleich**: *mit dem Konto des Projektinhabers, auf einem Linux-`amd64`-Host mit Docker 29.9.2 (lokale Engine), ein Host-Server, zwei Modelle, eine Claude-Code-Version, am 2026-10-24
 gemessen, headless (`claude -p`, kein interaktiver Ablauf)*. „Der Aufruf lieferte eine Antwort“ heißt nicht „Cloud-Modelle laufen“ und begründet keine Zusage.
 
@@ -214,7 +214,7 @@ standen nur auf seinem Terminal, in keiner Datei und nicht im Gespräch. Server 
 | Ob Claude Code das Suffix `[1m]` vor dem Senden entfernt | siehe K6; am Server nicht gelesen |
 | Docker Desktop, Colima, Podman, rootless Docker, `arm64` | Zusage-Menge ist Linux `amd64` mit lokaler Engine; ein anderer Host begründet keine Zusage |
 | Mehrere gleichzeitige Nutzer des Host-Servers über den Relay; Absicherung des Relays | der Relay lief nur während der Fälle, ohne fremde Container im Netz |
-| Weg (b): **Kontobindung der Anmeldung** — welcher Zustand (Datei im Volume, Konto, beides) die Antworten trägt, und was `ollama signout` im Konto bewirkt | nicht gemessen; gemessen ist nur der Ort der Schlüsseldateien im Volume; die Kontoseite wurde nicht vor und nicht nach `signout` gelesen, der Authentifizierungsweg ist ungeklärt (*Beobachtung des Projektinhabers*) |
+| Weg (b): **Kontobindung der Anmeldung** — welcher Zustand (Datei im Volume, Konto, beides) die Antworten trägt, und was `ollama signout` im Konto bewirkt | nicht gemessen; gemessen ist nur der Ort der Schlüsseldateien im Volume; die Kontoseite wurde nicht vor und nicht nach `signout` gelesen, ob `signout` einen Eintrag im Konto entfernt, ist nicht beobachtet (*Beobachtung des Projektinhabers*) |
 | Weg (b): **Authentifizierungsweg der Cloud-Anfragen** (welche Identität die Anfragen des Servers im Container trugen) | nicht gemessen; kein Verkehr des Servers zum Cloud-Dienst beobachtet |
 | Weg (b): **Nachweis, dass der Weg ohne Relay und ohne Gateway-Adresse lief** | die Rohdateien `rohdaten-06-*` enthalten keinen Relay-Start, keinen `host.docker.internal`-Eintrag (`/etc/hosts`-Zeile leer) und keine Anfrage an das Gateway; das spricht für Unabhängigkeit von Weg (a), ein eigener Nachweis (etwa Netzprotokoll oder Abwesenheit des Relays im Fall) fehlt |
 
@@ -222,15 +222,15 @@ standen nur auf seinem Terminal, in keiner Datei und nicht im Gespräch. Server 
 
 Der Projektinhaber berichtet, ohne Namen und Kontodaten:
 
-- **(a) Schlüsselseite:** Nach seiner Angabe wird ein Geräteschlüssel auf der Schlüsselseite des Kontos **explizit vom Nutzer eingetragen**, nicht automatisch durch die Anmeldung. Die Anmeldung im Container hat dort **keinen Eintrag erzeugt** (nichts von heute; es steht nur ein Eintrag, der nicht aus der Messung stammt).
-  Gemessen ist nur der **Ort der Schlüsseldateien** im Modell-Volume (Pfad, Größe, Rechte); die Dateien wurden nie gelesen.
-- **(b) Unklar:** Wie die Anmeldung im Container zustande kam (Browser-Bestätigung am Konto gegenüber Schlüsselliste) und was `ollama signout` im Konto bewirkt, ist **nicht gemessen**; die Kontoseite wurde weder vor noch nach `signout` gelesen
-  (`rohdaten-06-ende-1-114643.txt`: `You have signed out of ollama.com`, Exit 0). Der **Authentifizierungsweg** ist ungeklärt. Eine Aussage, warum kein Eintrag aus der Messung im Konto steht, trägt die Messung nicht.
+- **(a) Anmeldung trägt den Schlüssel ein:** Nach seiner Beobachtung bei einer **eigenen Wiederholung der Anmeldung von Hand** (außerhalb der Messung, nicht in den Rohdaten, nicht unter den 40 Prompts) trägt die Anmeldung den Geräteschlüssel **automatisch** auf der Schlüsselseite des Kontos ein; er erscheint
+  direkt nach der Anmeldung. Gemessen ist nur der **Ort der Schlüsseldateien** im Modell-Volume (Pfad, Größe, Rechte); die Dateien wurden nie gelesen.
+- **(b) Heutiger Stand:** Nach der Messung stand im Konto **kein Eintrag von heute**. Ob `ollama signout` (11:46:43 UTC, `rohdaten-06-ende-1-114643.txt`: `You have signed out of ollama.com`, Exit 0) den Eintrag entfernt hat, ist **nicht gemessen** (die Kontoseite wurde weder vor noch nach `signout` gelesen,
+  ob ein Eintrag nach `signout` verschwindet, hat der Projektinhaber nicht bestätigt). `signout` ist eine naheliegende, **ungemessene** Erklärung; andere Erklärungen sind nicht ausgeschlossen.
 - **(c) Anfragen:** Auf der Kontoseite der letzten Anfragen standen am selben Tag **28 Einträge** beider Modelle; davor nur ein Eintrag von vor drei Tagen. Der Projektinhaber gibt an, sie stammten nicht von ihm. Die Zahl entspricht den 28 Prompts mit Antwort dieses Protokolls;
   **Herkunft** und Zuordnung zu Weg (a) oder Weg (b) sind aus der Anzeige nicht ablesbar. Beobachtung ohne Schluss; sie begründet keine Aussage über Kontobindung, Authentifizierung oder Abrechnung.
 
-**Hinweis für die Folge-ADR:** Für Weg (b) stützt sich die ADR nicht auf eine Aussage über einen Geräteschlüssel im Konto (Anlage, Rolle, Verbleib) und nicht darauf, dass `signout` im Konto etwas entfernt; beides ist ungemessen. Gemessen sind nur der Ort der Schlüsseldateien im Modell-Volume
-und dass die Antworten nach Neuanlage des Containers mit demselben Volume ohne neue Anmeldung kamen.
+**Hinweis für die Folge-ADR:** Die Anmeldung trägt nach der (einmal wiederholten) Beobachtung des Projektinhabers einen Schlüssel im Konto ein; der **Rückbau im Konto durch den Nutzer bleibt zu bestätigen**. Die ADR sagt nicht zu, dass `signout` ihn entfernt (ungemessen). Welche Rolle der Schlüssel für die Cloud-Anfragen hat,
+ist nicht gemessen. Gemessen sind der Ort der Schlüsseldateien im Modell-Volume und dass die Antworten nach Neuanlage des Containers mit demselben Volume ohne neue Anmeldung kamen.
 
 ## Nutzerpfad je Profil — Weg (a) (Eingabe für ADR und Validator)
 
@@ -248,7 +248,7 @@ und dass die Antworten nach Neuanlage des Containers mit demselben Volume ohne n
 | Sandbox, Weg (b), `discover` | `ollama run <modell> "<Prompt>"`, `claude -p` mit `ANTHROPIC_BASE_URL=http://127.0.0.1:11434`, `ollama launch claude --model <m> --yes` | Antwort in 1 bis 2,5 s; `[1m]` im Namen nur für `claude` gültig | `rohdaten-06-discover-1-114452.txt`, `…-114507.txt` |
 | Sandbox, Weg (b), `restricted` | Liste des Generators plus `ollama.com`, Container neu mit demselben Volume | Anmeldung bleibt, Antwort ohne neue Anmeldung | `rohdaten-06-restricted-1-114624.txt` |
 | Sandbox, Weg (b) | `OLLAMA_NO_CLOUD=1` | „ollama cloud is disabled“, Exit 1 | `rohdaten-06-discover-1-114559.txt` |
-| Sandbox, Weg (b) | Rückabwicklung: `ollama signout`, Volume entfernen; Kontozustand prüfen | `You have signed out of ollama.com`; die Wirkung von `signout` im Konto ist nicht gemessen; der Authentifizierungsweg ist ungeklärt; der Projektinhaber bestätigte den Kontozustand (kein Eintrag aus der Messung) | `rohdaten-06-ende-1-114643.txt` |
+| Sandbox, Weg (b) | Rückabwicklung: `ollama signout`, Volume entfernen; Kontozustand prüfen | `You have signed out of ollama.com`; die Wirkung von `signout` im Konto ist nicht gemessen; ob `signout` einen Kontoeintrag entfernt, ist ungemessen; der Projektinhaber bestätigte den Kontozustand nach der Messung (kein Eintrag von heute) | `rohdaten-06-ende-1-114643.txt` |
 
 ## Zugangsdaten und Rohdaten
 
@@ -294,7 +294,7 @@ die zehn Mehr-Images sind die der Messung. Beim ersten Aufruf von `08-aufraeumen
 unberührt; Artefakt der Gegenprobe zum neuen Stand); der Aufruf wurde wiederholt.
 
 `08-aufraeumen.sh alles` nach Weg (b) (`rohdaten-08-alles.txt`, `rohdaten-08-alles-nachher.txt`): `objekte-mit-praefix-nachher-alles=0`, `relay-container-nachher=0`; Images wieder 85 wie vorher. Containerzahl und Volumes (899 gegen 914) enthalten fremde Arbeit.
-Der Kontozustand nach der Messung (kein Eintrag aus der Messung) ist vom Projektinhaber bestätigt (2026-10-24); warum kein Eintrag besteht, ist nicht gemessen (siehe *Beobachtung des Projektinhabers*).
+Der Kontozustand nach der Messung (kein Eintrag aus der Messung) ist vom Projektinhaber bestätigt (2026-10-24); ob `signout` einen Eintrag entfernt hat, ist nicht gemessen (siehe *Beobachtung des Projektinhabers*).
 
 ## Rohdaten-Eigenheiten (nur ausgewiesen)
 
