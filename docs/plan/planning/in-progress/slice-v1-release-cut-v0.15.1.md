@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; dieser Slice ändert `spec/` nicht; [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config), [`SPEC-050`](../../../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen) und [`SPEC-051`](../../../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten) tragen die Fixes schon, gelesen in `git diff v0.15.0..HEAD -- spec/spezifikation.md`).
 
-**Verantwortlich:** — bis zur Priorisierung (Rolle Implementer wird beim Start gesetzt); Freigaben: Projektinhaber.
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-24); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-24.
 
@@ -184,6 +184,8 @@ DoD vollständig, der Tag `v0.15.1` gesetzt und nach §6 der `releasing.md` kont
 - **R6 — Projekte mit nicht freigegebener Quelle brechen nach dem Update** (Verhaltensänderung für Skripte). Gegenmaßnahme: Lead nennt es als solche mit den zwei Auswegen; ein Patch-Release trägt sie, weil die Zusage schon galt ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)). — **Ausgang:** offen bis zur Closure.
 
 ## 7. Closure-Notiz
+
+**Entscheidungen beim Start** (2026-10-24, Implementer nach dem Auftrag des Hauptagenten, der sie als vom Projektleiter bestätigt benennt; ein Wortlaut des Projektinhabers liegt nicht vor): (1) Nummer `v0.15.1`; (2) Einstufung *Fixed*, kein *Security*, kein Advisory, M5b entfällt; (3) kein Vorab-Tag, M3 entfällt; (4) kein CI-Satz im Lead vor M2; (5) **Reichweite:** Push (M1) und Tag (M5) führt nur der Hauptagent, je Vorgang nach ausdrücklicher Freigabe des Projektinhabers; der Implementer pusht und taggt nie, auch nicht lokal; das volle `make test-docker` läuft lokal nicht (Paket-Zeitlimit, Speicher), die Docker-Tests laufen in M2 im CI.
 
 *Wird bei der Closure (Planner, nach M6) gefüllt: Was hat funktioniert · Was ging anders als geplant · Steering-Loop-Eintrag · Beobachtungs-Register · Folge-Slices · Risiken aus §6 · Drei Paarungen · Läufe und Abfragen von M0 bis M7 (Hauptagent).*
 
