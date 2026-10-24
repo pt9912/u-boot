@@ -320,7 +320,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up`, `devcontainer down` und `devcontainer shell` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt; bei `devcontainer up` und `devcontainer shell` hält es den Fortschritt zurück und gibt ihn nur bei einem Fehler aus; die Ausgabe der Shell von `devcontainer shell` ändert es nicht), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils, ein im Container aktivierter Login-Dienst (Feature `sshd`), die Lockerungen des Features `go` und die Warnung je Feature aus einer externen Quelle; in der Befehlsausgabe erzeugen `generate devcontainer`, `devcontainer up` und `devcontainer shell` (die Einbindung des Docker-Sockets in den Hilfs-Container) diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer`, `init`, `devcontainer up` und `devcontainer shell`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up`, `devcontainer down` und `devcontainer shell` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt; bei `devcontainer up` und `devcontainer shell` hält es den Fortschritt zurück und gibt ihn nur bei einem Fehler aus; die Ausgabe der Shell von `devcontainer shell` ändert es nicht), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils, ein im Container aktivierter Login-Dienst (Feature `sshd`), die Lockerungen des Features `go`, der Netzanschluss an den Host durch `ollama-host` im Sandbox-Profil und die Warnung je Feature aus einer externen Quelle; in der Befehlsausgabe erzeugen `generate devcontainer`, `devcontainer up` und `devcontainer shell` (die Einbindung des Docker-Sockets in den Hilfs-Container) diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer`, `init`, `devcontainer up` und `devcontainer shell`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -1274,6 +1274,7 @@ konfigurierten Clone-Quelle, siehe unten).
 | Workspace | benanntes Volume `<projekt>-workspace-${devcontainerId}`; das Repository wird im Container geklont | Bind-Mount des Projektordners |
 | Docker-Socket des Hosts (im erzeugten Devcontainer; der Hilfs-Container von `u-boot devcontainer up` und `u-boot devcontainer shell` bindet es ein, siehe 4.9) | nicht eingebunden; das Feature `docker-cli` wird abgewiesen (Exit-Code 10), für ein Feature aus einer externen Quelle sagt das Profil nichts zu (Warnung) | eingebunden, wenn ein Feature es tut, zum Beispiel `docker-cli` |
 | `--privileged` und zusätzliche Fähigkeiten | nein (außer mit verschachteltem Podman oder Docker, Docker verlangt `--privileged`, und außer den Lockerungen, die ein Feature wie `go` mitbringt und `u-boot` ausweist) | nein (was ein Feature wie `go` mitbringt, weist `u-boot` hier nicht aus) |
+| Netzanschluss an den Host (`host.docker.internal`) | nur mit dem Feature `ollama-host`; `u-boot` weist ihn als Sicherheitslockerung aus, auch unter `--quiet` | nur mit dem Feature `ollama-host`; gewöhnliche Warnung, entfällt unter `--quiet` |
 | Geheimnis-Verzeichnisse des Hosts (`~/.ssh`, `~/.aws`, …) | nicht eingebunden | nicht eingebunden |
 | Benutzer | `vscode`, nicht root | `vscode`, nicht root |
 
@@ -2114,15 +2115,16 @@ ollama run smollm2:135m "Reply with the single word OK."
     Kontextfenster; ohne das Suffix kam der Hinweis `Claude Code doesn't recognize the model
     "glm-5.3-flash:cloud", so it assumes a context window of 200k tokens`. `ollama run` und
     `ollama launch` lehnten den Namen mit `[1m]` ab (`Error: invalid model name`, Exit-Code 1,
-    ohne Namensanfrage); das ist mit einem Dienst des Hosts gemessen, im Container mit eigenem
-    Server nicht. **Nicht gemessen:** ob Claude Code das Suffix vor dem Senden entfernt.
-  - **Neuanlage mit demselben Volume:** zugesagt ist nichts. Im Handaufbau der Messung kam nach
-    der Neuanlage des Containers mit demselben Volume die Antwort ohne neue Anmeldung (ein Lauf);
+    ohne Namensanfrage); gemessen mit einem Dienst des Hosts und im Container mit eigenem
+    Server (dort nur bei gesetztem `OLLAMA_NO_CLOUD` beziehungsweise `OLLAMA_API_KEY`). **Nicht gemessen:** ob Claude Code das Suffix vor dem Senden entfernt.
+  - **Neuanlage mit demselben Volume:** zugesagt ist nichts. Im Handaufbau der Messung
+    (hinter der Egress-Restriktion, der Eintrag `ollama.com` von Hand gesetzt) kam nach der
+    Neuanlage des Containers mit demselben Volume die Antwort ohne neue Anmeldung (ein Lauf);
     welcher Teil des Volume-Inhalts sie trägt, ist nicht gemessen.
-  - **Standardprofil:** `u-boot` installiert dort kein Ollama (siehe *Nur im Sandbox-Profil*). Für
-    ein Cloud-Modell bietet `u-boot` im Standardprofil den
-    [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)
-    an.
+  - **Standardprofil:** `u-boot` installiert dort kein Ollama (siehe *Nur im Sandbox-Profil*). Das
+    Feature `ollama-host` (Abschnitt
+    [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional))
+    wirkt auch im Standardprofil.
   - **Grenzen der Messung (Cloud-Modelle):** Linux `amd64` (Ubuntu 24.04.5) mit lokaler
     Docker-Engine 29.9.2, Ollama-Client `0.40.6` (Pin des erzeugten Dockerfiles), Claude Code
     `2.1.310` und Node `v24.22.1` (nicht gepinnt, Stand beim Bau), die Modelle
@@ -2159,10 +2161,10 @@ u-boot generate devcontainer
 ```
 
 Das Feature `ollama-host` macht den Host aus dem Container unter dem Namen
-`host.docker.internal` adressierbar, damit ein Programm im Container einen Ollama-Dienst
-erreichen kann, der auf Ihrem Rechner läuft, etwa mit Ihrem angemeldeten Konto für
-Cloud-Modelle. Es wirkt im Standard- und im Sandbox-Profil und ist unabhängig vom Feature
-`ollama`. Es ist kein OCI-Feature und kein Dockerfile-Block und erscheint nicht unter
+`host.docker.internal` adressierbar. Ob ein Ollama-Dienst auf Ihrem Rechner von dort
+erreichbar ist, hängt von seiner Bindung, von einem Relay Ihrerseits und von der Engine ab
+(siehe die folgenden Punkte). Das Feature wirkt im Standard- und im Sandbox-Profil und ist
+unabhängig vom Feature `ollama`. Es ist kein OCI-Feature und kein Dockerfile-Block und erscheint nicht unter
 `features` in `devcontainer.json`.
 
 - **Was `u-boot` erzeugt:** genau eine Zeile in `runArgs` der `devcontainer.json`,
@@ -2203,8 +2205,8 @@ Cloud-Modelle. Es wirkt im Standard- und im Sandbox-Profil und ist unabhängig v
   Gemessen: zwei Läufe im Standardprofil und zwei von zwei Läufen in einem Container aus dem
   Image des Sandbox-Profils, den Sie selbst starten (mit der zusätzlichen Capability
   `NET_ADMIN`, ohne das Egress-Skript), jeweils mit den Features `claude-code` und `node` und
-  mit beiden Modellen. **Die Zeile hatten Sie von Hand gesetzt**, nicht `u-boot` erzeugt; die
-  Wirkung der erzeugten gegenüber der von Hand gesetzten Zeile ist nicht zugesagt. Der
+  mit beiden Modellen. **In der Messung war die Zeile von Hand gesetzt**, nicht von `u-boot`
+  erzeugt; die Wirkung der erzeugten gegenüber der von Hand gesetzten Zeile ist nicht zugesagt. Der
   Integrationstest von `u-boot` prüft nur, dass der Name im Container auflöst, nicht dass der
   Dienst antwortet.
 - **Hinter der Egress-Restriktion trägt der Anschluss nicht:** `host.docker.internal` löst
