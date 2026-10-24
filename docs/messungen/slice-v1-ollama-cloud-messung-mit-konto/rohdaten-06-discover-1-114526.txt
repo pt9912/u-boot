@@ -1,0 +1,64 @@
+== Weg (b), Modus discover, Lauf 1, Faelle: nocloud apikey, 2026-10-24T11:45:26.067Z
+AUSSAGE prompts-gestellt=29 obergrenze=40
+nft set allowed nicht lesbar: Error: No such file or directory
+-- K7: Server und Client mit OLLAMA_NO_CLOUD=1
+serve beendet: 0 Prozesse
+serve bereit: {"version":"0.40.6"}
+PROMPT 30/40 weg-b discover nocloud run:1
+---- 11:45:28.890 B-discover-nocloud-run
+befehl: ollama run glm-5.3-flash:cloud[1m] @PROMPT@ (env-namen: OLLAMA_NO_CLOUD ; prompt=1; stdin=0)
+ausgabe: 1 Zeilen nach Entfernen der Steuerzeichen, 26 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Error: invalid model name
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 0, laengste 0 Zeichen
+B-discover-nocloud-run exit=1 dauer=0.0s (124 = timeout nach 90s, 137 = beendet nach -k 5)
+AUSSAGE B-discover-nocloud-run-exit=1
+-- Namen im Resolver-Log waehrend B-discover-nocloud-run (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-discover-nocloud-run
+-- Dateien neu/geaendert seit der letzten Marke (B-discover-nocloud-run): Pfad, Groesse, Rechte, Einhaengepunkt
+PROMPT 31/40 weg-b discover nocloud launch:1
+---- 11:45:29.034 B-discover-nocloud-launch
+befehl: ollama launch claude --model glm-5.3-flash:cloud[1m] --yes (env-namen: OLLAMA_NO_CLOUD ; prompt=1; stdin=1)
+ausgabe: 1 Zeilen nach Entfernen der Steuerzeichen, 26 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Error: invalid model name
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 0, laengste 0 Zeichen
+B-discover-nocloud-launch exit=1 dauer=0.0s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE B-discover-nocloud-launch-exit=1
+-- Namen im Resolver-Log waehrend B-discover-nocloud-launch (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-discover-nocloud-launch
+-- Dateien neu/geaendert seit der letzten Marke (B-discover-nocloud-launch): Pfad, Groesse, Rechte, Einhaengepunkt
+serve beendet: 0 Prozesse
+serve bereit: {"version":"0.40.6"}
+-- K7: Server und Client mit OLLAMA_API_KEY=[entfernt] (Platzhalter, kein gueltiger Schluessel)
+serve beendet: 0 Prozesse
+serve bereit: {"version":"0.40.6"}
+PROMPT 32/40 weg-b discover apikey run:1
+---- 11:45:34.451 B-discover-apikey-run
+befehl: ollama run glm-5.3-flash:cloud[1m] @PROMPT@ (env-namen: OLLAMA_API_KEY ; prompt=1; stdin=0)
+ausgabe: 1 Zeilen nach Entfernen der Steuerzeichen, 26 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Error: invalid model name
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 0, laengste 0 Zeichen
+B-discover-apikey-run exit=1 dauer=0.0s (124 = timeout nach 90s, 137 = beendet nach -k 5)
+AUSSAGE B-discover-apikey-run-exit=1
+-- Namen im Resolver-Log waehrend B-discover-apikey-run (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-discover-apikey-run
+-- Dateien neu/geaendert seit der letzten Marke (B-discover-apikey-run): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.ollama/cache/model-recommendations.json 2041 600 /home/vscode/.ollama
+PROMPT 33/40 weg-b discover apikey launch:1
+---- 11:45:34.604 B-discover-apikey-launch
+befehl: ollama launch claude --model glm-5.3-flash:cloud[1m] --yes (env-namen: OLLAMA_API_KEY ; prompt=1; stdin=1)
+ausgabe: 1 Zeilen nach Entfernen der Steuerzeichen, 26 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Error: invalid model name
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 0, laengste 0 Zeichen
+B-discover-apikey-launch exit=1 dauer=0.0s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE B-discover-apikey-launch-exit=1
+-- Namen im Resolver-Log waehrend B-discover-apikey-launch (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-discover-apikey-launch
+-- Dateien neu/geaendert seit der letzten Marke (B-discover-apikey-launch): Pfad, Groesse, Rechte, Einhaengepunkt
+serve beendet: 0 Prozesse
+serve bereit: {"version":"0.40.6"}
+AUSSAGE prompts-gestellt=33 obergrenze=40
+== Ende, 2026-10-24T11:45:37.338Z

@@ -1,0 +1,37 @@
+== Weg (b), Modus discover, Lauf 1, Faelle: daten run:o, 2026-10-24T11:44:52.499Z
+AUSSAGE prompts-gestellt=22 obergrenze=40
+nft set allowed nicht lesbar: Error: No such file or directory
+-- K4: Resolver-Namen seit der Marke vor der Anmeldung (Anmeldeablauf, Serverstart)
+-- Namen im Resolver-Log ab Zeile 10 (Anzahl Anfragen A/AAAA)
+-- Zeilen im Log: 10
+-- Dateien neu/geaendert seit der letzten Marke (nach-anmeldung): Pfad, Groesse, Rechte, Einhaengepunkt
+-- ~/.ollama (Pfad, Groesse, Rechte, Eigentuemer; kein Inhalt)
+/home/vscode/.ollama 4096 755 vscode
+/home/vscode/.ollama/cache 4096 755 vscode
+/home/vscode/.ollama/cache/model-recommendations.json 2370 600 vscode
+/home/vscode/.ollama/id_ed25519 387 600 vscode
+/home/vscode/.ollama/id_ed25519.pub 81 644 vscode
+/home/vscode/.ollama/models 4096 755 vscode
+/home/vscode/.ollama/models/blobs 4096 755 vscode
+einhaengepunkt /home/vscode/.ollama/id_ed25519 -> /home/vscode/.ollama
+einhaengepunkt /home/vscode/.ollama/id_ed25519.pub -> /home/vscode/.ollama
+-- Einhaengepunkte (df): / /dev /dev/shm /etc/hosts /proc/acpi 
+PROMPT 23/40 weg-b discover run:o
+---- 11:44:52.975 B-discover-run-mo
+befehl: ollama run glm-5.3-flash:cloud @PROMPT@ (env-namen: keine; prompt=1; stdin=0)
+ausgabe: 16 Zeilen nach Entfernen der Steuerzeichen, 1825 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 16, laengste 75 Zeichen
+B-discover-run-mo exit=0 dauer=2.5s (124 = timeout nach 90s, 137 = beendet nach -k 5)
+AUSSAGE B-discover-run-mo-exit=0
+-- Namen im Resolver-Log waehrend B-discover-run-mo (Anzahl Anfragen A/AAAA)
+      2 ollama.com
+      4 registry.ollama.ai
+-- abgelehnte/unbekannte Namen waehrend B-discover-run-mo
+      1 dnsmasq[41]: cached ollama.com
+-- Dateien neu/geaendert seit der letzten Marke (B-discover-run-mo): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.ollama/models/blobs/sha256-3e780905abc0e7240dd1489935ec1e3c7fcf1854a6f4e7f8688f9bb0bdacb1a5 264 644 /home/vscode/.ollama
+/home/vscode/.ollama/models/blobs/sha256-f44f41395572aefb66f407f3f47426c307801f0578986a6044ee277da82be2a8 317 644 /home/vscode/.ollama
+/home/vscode/.ollama/models/manifests/registry.ollama.ai/library/glm-5.3-flash/cloud 426 644 /home/vscode/.ollama
+AUSSAGE prompts-gestellt=23 obergrenze=40
+== Ende, 2026-10-24T11:44:55.544Z

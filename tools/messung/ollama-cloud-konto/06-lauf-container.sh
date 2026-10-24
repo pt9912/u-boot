@@ -96,15 +96,14 @@ messen)
     nocloud)
       echo "-- K7: Server und Client mit OLLAMA_NO_CLOUD=1"
       ex stopserve; ex serve OLLAMA_NO_CLOUD=1
-      prompt_zaehlen "weg-b $modus nocloud run:1";    ex fall "B-$modus-nocloud-run" 90 1 0 OLLAMA_NO_CLOUD=1 ollama run "$M1" "@PROMPT@"
-      prompt_zaehlen "weg-b $modus nocloud launch:1"; ex fall "B-$modus-nocloud-launch" 120 1 1 OLLAMA_NO_CLOUD=1 ollama launch claude --model "$M1" --yes
+      prompt_zaehlen "weg-b $modus nocloud run:1";    ex fall "B-$modus-nocloud-run" 90 1 0 OLLAMA_NO_CLOUD=1 ollama run "$(modell o)" "@PROMPT@"
+      prompt_zaehlen "weg-b $modus nocloud launch:1"; ex fall "B-$modus-nocloud-launch" 120 1 1 OLLAMA_NO_CLOUD=1 ollama launch claude --model "$(modell o)" --yes
       ex stopserve; ex serve
       ;;
     apikey)
       echo "-- K7: Server und Client mit OLLAMA_API_KEY=platzhalter (Platzhalter, kein gueltiger Schluessel)"
       ex stopserve; ex serve OLLAMA_API_KEY=platzhalter
-      prompt_zaehlen "weg-b $modus apikey run:1";    ex fall "B-$modus-apikey-run" 90 1 0 OLLAMA_API_KEY=platzhalter ollama run "$M1" "@PROMPT@"
-      prompt_zaehlen "weg-b $modus apikey launch:1"; ex fall "B-$modus-apikey-launch" 120 1 1 OLLAMA_API_KEY=platzhalter ollama launch claude --model "$M1" --yes
+      prompt_zaehlen "weg-b $modus apikey run:1";    ex fall "B-$modus-apikey-run" 90 1 0 OLLAMA_API_KEY=platzhalter ollama run "$(modell o)" "@PROMPT@"
       ex stopserve; ex serve
       ;;
     *) echo "unbekannter Fall: $f" ;;

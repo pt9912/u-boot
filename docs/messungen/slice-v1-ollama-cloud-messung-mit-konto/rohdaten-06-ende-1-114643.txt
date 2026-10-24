@@ -1,0 +1,32 @@
+== Weg (b) Rueckabwicklung, 2026-10-24T11:46:43.316Z
+---- 11:46:43.398 B-signout
+befehl: ollama signout (env-namen: keine; prompt=0; stdin=0)
+You have signed out of ollama.com
+B-signout exit=0 dauer=0.6s (124 = timeout nach 30s, 137 = beendet nach -k 5)
+AUSSAGE B-signout-exit=0
+-- Namen im Resolver-Log waehrend B-signout (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-signout
+-- Dateien neu/geaendert seit der letzten Marke (B-signout): Pfad, Groesse, Rechte, Einhaengepunkt
+serve beendet: 0 Prozesse
+-- ~/.ollama (Pfad, Groesse, Rechte, Eigentuemer; kein Inhalt)
+/home/vscode/.ollama 4096 755 vscode
+/home/vscode/.ollama/backup 4096 755 vscode
+/home/vscode/.ollama/backup/config.json.1792842315 105 600 vscode
+/home/vscode/.ollama/backup/config.json.1792842390 104 600 vscode
+/home/vscode/.ollama/cache 4096 755 vscode
+/home/vscode/.ollama/cache/model-recommendations.json 2041 600 vscode
+/home/vscode/.ollama/config.json 105 600 vscode
+/home/vscode/.ollama/id_ed25519 387 600 vscode
+/home/vscode/.ollama/id_ed25519.pub 81 644 vscode
+/home/vscode/.ollama/models 4096 755 vscode
+/home/vscode/.ollama/models/blobs 4096 755 vscode
+/home/vscode/.ollama/models/manifests 4096 755 vscode
+/home/vscode/.ollama/models/manifests-v2 4096 755 vscode
+einhaengepunkt /home/vscode/.ollama/id_ed25519 -> /home/vscode/.ollama
+einhaengepunkt /home/vscode/.ollama/id_ed25519.pub -> /home/vscode/.ollama
+einhaengepunkt /home/vscode/.ollama/config.json -> /home/vscode/.ollama
+einhaengepunkt /home/vscode/.claude.json -> /
+-- Einhaengepunkte (df): / /dev /dev/shm /etc/hosts /proc/acpi 
+container/volume nach dem Entfernen: 0
+SCHRITT FUER DEN PROJEKTINHABER: den Geraeteschluessel dieses Wegwerf-Containers in den Kontoeinstellungen von ollama.com entfernen.
+AUSSAGE prompts-gestellt=40 obergrenze=40

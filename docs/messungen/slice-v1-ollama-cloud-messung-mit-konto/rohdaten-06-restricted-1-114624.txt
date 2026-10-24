@@ -1,0 +1,113 @@
+== Weg (b), Modus restricted, Lauf 1, Faelle: run:o claude:1 launch:o run:2, 2026-10-24T11:46:24.277Z
+AUSSAGE prompts-gestellt=36 obergrenze=40
+-- Neuanlage des Containers mit erhaltenem Volume (K5b)
+container u-boot-messung-ocloud-konto-b2 aus vsc-u-boot-messung-ocloud-konto-res-192cfb3f360863c5c75967abf7338029f98d69e803d0976d744c66f814ac5f70-uid:latest, Volume u-boot-messung-ocloud-konto-b-modelle auf /home/vscode/.ollama
+-- Egress-Skript lief nicht als postStartCommand; Aufruf wie dieses (HANDVARIANTE): sudo sh /usr/local/bin/u-boot-egress-init
+egress-init exit=0
+-- Status-Datei des Startscripts
+u-boot-status 1
+result=ok
+at=2026-10-24T11:46:25Z
+conf: server=/api.anthropic.com/1.1.1.1
+conf: server=/api.anthropic.com/8.8.8.8
+conf: nftset=/api.anthropic.com/4#ip#u_boot_egress#allowed
+conf: server=/api.github.com/1.1.1.1
+conf: server=/api.github.com/8.8.8.8
+conf: nftset=/api.github.com/4#ip#u_boot_egress#allowed
+conf: server=/codeload.github.com/1.1.1.1
+conf: server=/codeload.github.com/8.8.8.8
+conf: nftset=/codeload.github.com/4#ip#u_boot_egress#allowed
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/1.1.1.1
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/8.8.8.8
+conf: nftset=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/4#ip#u_boot_egress#allowed
+conf: server=/deb.debian.org/1.1.1.1
+conf: server=/deb.debian.org/8.8.8.8
+conf: nftset=/deb.debian.org/4#ip#u_boot_egress#allowed
+conf: server=/github.com/1.1.1.1
+conf: server=/github.com/8.8.8.8
+conf: nftset=/github.com/4#ip#u_boot_egress#allowed
+conf: server=/objects.githubusercontent.com/1.1.1.1
+conf: server=/objects.githubusercontent.com/8.8.8.8
+conf: nftset=/objects.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/raw.githubusercontent.com/1.1.1.1
+conf: server=/raw.githubusercontent.com/8.8.8.8
+conf: nftset=/raw.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/registry.npmjs.org/1.1.1.1
+conf: server=/registry.npmjs.org/8.8.8.8
+conf: nftset=/registry.npmjs.org/4#ip#u_boot_egress#allowed
+conf: server=/registry.ollama.ai/1.1.1.1
+conf: server=/registry.ollama.ai/8.8.8.8
+conf: nftset=/registry.ollama.ai/4#ip#u_boot_egress#allowed
+conf: server=/security.debian.org/1.1.1.1
+conf: server=/security.debian.org/8.8.8.8
+conf: nftset=/security.debian.org/4#ip#u_boot_egress#allowed
+modus=restricted benutzer=vscode HOME=/home/vscode zusatzzeilen=2
+zusatz: server=/ollama.com/1.1.1.1
+zusatz: nftset=/ollama.com/4#ip#u_boot_egress#allowed
+-- Namen der Umgebungsvariablen im Container (Werte nicht ausgegeben)
+HOME HOSTNAME LANG NVM_DIR NVM_SYMLINK_CURRENT PATH PWD SHLVL _ 
+AUSSAGE umgebung-container-verbotene-namen=0
+-- /etc/hosts-Zeile fuer host.docker.internal: 
+-- Einhaengepunkt von ~/.ollama und von HOME
+/home/vscode/.ollama ext4
+/
+serve bereit: {"version":"0.40.6"}
+nft set allowed: Elemente=1 172.17.0.1-enthalten=0
+PROMPT 37/40 weg-b restricted run:o
+---- 11:46:28.250 B-restricted-run-mo
+befehl: ollama run glm-5.3-flash:cloud @PROMPT@ (env-namen: keine; prompt=1; stdin=0)
+ausgabe: 6 Zeilen nach Entfernen der Steuerzeichen, 785 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 6, laengste 77 Zeichen
+B-restricted-run-mo exit=0 dauer=1.1s (124 = timeout nach 90s, 137 = beendet nach -k 5)
+AUSSAGE B-restricted-run-mo-exit=0
+-- Namen im Resolver-Log waehrend B-restricted-run-mo (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-restricted-run-mo
+-- Dateien neu/geaendert seit der letzten Marke (B-restricted-run-mo): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.ollama/cache/model-recommendations.json 2041 600 /home/vscode/.ollama
+PROMPT 38/40 weg-b restricted claude:1
+---- 11:46:29.516 B-restricted-claude-m1
+befehl: claude --model glm-5.3-flash:cloud[1m] -p @PROMPT@ (env-namen: ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN ; prompt=1; stdin=0)
+ausgabe: 2 Zeilen nach Entfernen der Steuerzeichen, 93 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+[claude-code:[entfernt]] {"model":"glm-5.3-flash:cloud[1m]","query_source":"sdk"}
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 1, laengste 2 Zeichen
+B-restricted-claude-m1 exit=0 dauer=1.0s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE B-restricted-claude-m1-exit=0
+-- Namen im Resolver-Log waehrend B-restricted-claude-m1 (Anzahl Anfragen A/AAAA)
+      1 api.anthropic.com
+-- abgelehnte/unbekannte Namen waehrend B-restricted-claude-m1
+-- Dateien neu/geaendert seit der letzten Marke (B-restricted-claude-m1): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.claude.json 852 600 /
+/home/vscode/.claude/backups/.claude.json.backup.1792842389662 84 600 /
+/home/vscode/.claude/projects/-home-vscode/8140ac8b-33db-4b86-96e5-50d7b7a7a37c.jsonl 131514 600 /
+PROMPT 39/40 weg-b restricted launch:o
+---- 11:46:30.608 B-restricted-launch-mo
+befehl: ollama launch claude --model glm-5.3-flash:cloud --yes (env-namen: keine; prompt=1; stdin=1)
+ausgabe: 3 Zeilen nach Entfernen der Steuerzeichen, 260 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+[claude-code:[entfernt]] {"model":"glm-5.3-flash:cloud","query_source":"sdk"}
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 2, laengste 170 Zeichen
+B-restricted-launch-mo exit=0 dauer=1.7s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE B-restricted-launch-mo-exit=0
+-- Namen im Resolver-Log waehrend B-restricted-launch-mo (Anzahl Anfragen A/AAAA)
+      1 api.anthropic.com
+-- abgelehnte/unbekannte Namen waehrend B-restricted-launch-mo
+-- Dateien neu/geaendert seit der letzten Marke (B-restricted-launch-mo): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.claude/projects/-home-vscode/b34bd6f4-2b7b-4090-88c3-bea8a5c03655.jsonl 131475 600 /
+/home/vscode/.ollama/backup/config.json.1792842390 104 600 /home/vscode/.ollama
+/home/vscode/.ollama/cache/model-recommendations.json 2041 600 /home/vscode/.ollama
+/home/vscode/.ollama/config.json 105 600 /home/vscode/.ollama
+PROMPT 40/40 weg-b restricted run:2
+---- 11:46:32.453 B-restricted-run-m2
+befehl: ollama run gpt-oss:120b-cloud @PROMPT@ (env-namen: keine; prompt=1; stdin=0)
+ausgabe: 5 Zeilen nach Entfernen der Steuerzeichen, 533 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 5, laengste 75 Zeichen
+B-restricted-run-m2 exit=0 dauer=0.4s (124 = timeout nach 90s, 137 = beendet nach -k 5)
+AUSSAGE B-restricted-run-m2-exit=0
+-- Namen im Resolver-Log waehrend B-restricted-run-m2 (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-restricted-run-m2
+-- Dateien neu/geaendert seit der letzten Marke (B-restricted-run-m2): Pfad, Groesse, Rechte, Einhaengepunkt
+AUSSAGE prompts-gestellt=40 obergrenze=40
+== Ende, 2026-10-24T11:46:32.956Z

@@ -1,0 +1,53 @@
+== Weg (b), Modus discover, Lauf 1, Faelle: nocloud apikey, 2026-10-24T11:45:59.523Z
+AUSSAGE prompts-gestellt=33 obergrenze=40
+nft set allowed nicht lesbar: Error: No such file or directory
+-- K7: Server und Client mit OLLAMA_NO_CLOUD=1
+serve beendet: 0 Prozesse
+serve bereit: {"version":"0.40.6"}
+PROMPT 34/40 weg-b discover nocloud run:1
+---- 11:46:02.385 B-discover-nocloud-run
+befehl: ollama run glm-5.3-flash:cloud @PROMPT@ (env-namen: OLLAMA_NO_CLOUD ; prompt=1; stdin=0)
+ausgabe: 1 Zeilen nach Entfernen der Steuerzeichen, 70 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Error: ollama cloud is disabled: remote model details are unavailable
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 0, laengste 0 Zeichen
+B-discover-nocloud-run exit=1 dauer=0.0s (124 = timeout nach 90s, 137 = beendet nach -k 5)
+AUSSAGE B-discover-nocloud-run-exit=1
+-- Namen im Resolver-Log waehrend B-discover-nocloud-run (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-discover-nocloud-run
+-- Dateien neu/geaendert seit der letzten Marke (B-discover-nocloud-run): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.ollama/cache/model-recommendations.json 2041 600 /home/vscode/.ollama
+PROMPT 35/40 weg-b discover nocloud launch:1
+---- 11:46:02.541 B-discover-nocloud-launch
+befehl: ollama launch claude --model glm-5.3-flash:cloud --yes (env-namen: OLLAMA_NO_CLOUD ; prompt=1; stdin=1)
+ausgabe: 2 Zeilen nach Entfernen der Steuerzeichen, 137 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+Warning: ignoring --model glm-5.3-flash:cloud because cloud is disabled
+Error: headless --yes launch for claude requires --model <model>
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 0, laengste 0 Zeichen
+B-discover-nocloud-launch exit=1 dauer=0.0s (124 = timeout nach 120s, 137 = beendet nach -k 5)
+AUSSAGE B-discover-nocloud-launch-exit=1
+-- Namen im Resolver-Log waehrend B-discover-nocloud-launch (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-discover-nocloud-launch
+-- Dateien neu/geaendert seit der letzten Marke (B-discover-nocloud-launch): Pfad, Groesse, Rechte, Einhaengepunkt
+serve beendet: 0 Prozesse
+serve bereit: {"version":"0.40.6"}
+-- K7: Server und Client mit OLLAMA_API_KEY=[entfernt] (Platzhalter, kein gueltiger Schluessel)
+serve beendet: 0 Prozesse
+serve bereit: {"version":"0.40.6"}
+PROMPT 36/40 weg-b discover apikey run:1
+---- 11:46:08.006 B-discover-apikey-run
+befehl: ollama run glm-5.3-flash:cloud @PROMPT@ (env-namen: OLLAMA_API_KEY ; prompt=1; stdin=0)
+ausgabe: 6 Zeilen nach Entfernen der Steuerzeichen, 731 Bytes (Inhalt wird nicht ausgewiesen)
+-- Zeilen, die nach einer Meldung aussehen (Muster sign|error|warn|fail|unauthori|denied|forbidden|not found|refused|cloud|requires|invalid|expired|limit|quota|rate|timeout|dial|lookup|connect|model; hoechstens 10, je 200 Zeichen)
+uebrige Zeilen (ohne Meldungsmuster, Inhalt nicht ausgewiesen): 6, laengste 75 Zeichen
+B-discover-apikey-run exit=0 dauer=1.4s (124 = timeout nach 90s, 137 = beendet nach -k 5)
+AUSSAGE B-discover-apikey-run-exit=0
+-- Namen im Resolver-Log waehrend B-discover-apikey-run (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-discover-apikey-run
+-- Dateien neu/geaendert seit der letzten Marke (B-discover-apikey-run): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.ollama/cache/model-recommendations.json 2041 600 /home/vscode/.ollama
+serve beendet: 0 Prozesse
+serve bereit: {"version":"0.40.6"}
+AUSSAGE prompts-gestellt=36 obergrenze=40
+== Ende, 2026-10-24T11:46:12.113Z

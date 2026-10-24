@@ -10,7 +10,7 @@ Dieses Protokoll liefert **Messwerte und eine Liste des Ungemessenen**; es entsc
 [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)).
 Das Protokoll des Vorgängers ohne Konto: [`slice-v1-ollama-cloud-messung`](../slice-v1-ollama-cloud-messung/README.md).
 
-**Stand dieses Protokolls: Weg (a) gemessen, Weg (b) wartet auf die Anmeldung durch den Projektinhaber (Abschnitt *Wartepunkt*).** Jede Aussage unten gilt
+**Stand dieses Protokolls: Weg (a) und Weg (b) gemessen; der Projektinhaber hat sich im Container selbst angemeldet. Offen: das Entfernen des Geräteschlüssels in den Kontoeinstellungen (Schritt des Projektinhabers).** Jede Aussage unten gilt
 **bedingungsgleich**: *mit dem Konto des Projektinhabers, auf einem Linux-`amd64`-Host mit Docker 29.9.2 (lokale Engine), ein Host-Server, zwei Modelle, eine Claude-Code-Version, am 2026-10-24
 gemessen, headless (`claude -p`, kein interaktiver Ablauf)*. „Der Aufruf lieferte eine Antwort“ heißt nicht „Cloud-Modelle laufen“ und begründet keine Zusage.
 
@@ -42,9 +42,9 @@ Modelle `glm-5.3-flash:cloud[1m]` (Modell 1) und `gpt-oss:120b-cloud` (Modell 2)
 | 3b | `05-lauf-host.sh bauen` | `rohdaten-05-bauen-1.txt` | Images der drei Projekte (kein Prompt) |
 | 4 | `04-relay.sh probe`, `start`, `stop` | `rohdaten-04-probe-*.txt`, `rohdaten-04-relay-{start,stop}-*.txt` | K1 ohne Relay; Relay für die Dauer eines Falls |
 | 5 | `05-lauf-host.sh <teil> <fall>…` mit `inner.sh` | `rohdaten-05-<teil>-<lauf>-<HHMMSS>.txt` | Weg (a), K1 bis K3; Teile `std`, `discover`, `restricted`, `allow`, `c`; Läufe 1 und 2 |
-| 6 | `06-lauf-container.sh` | `rohdaten-06-*` | Weg (b): **noch nicht gefahren** |
-| 7 | `07-anmeldung.sh` | **keine** (nur Terminal des Projektinhabers) | Anmeldung im Container |
-| 8 | `08-aufraeumen.sh weg-a` | `rohdaten-08-weg-a.txt`, `rohdaten-08-weg-a-nachher.txt` | Aufräumen von Container, Volumes, Netzen; die Images bleiben für Weg (b) |
+| 6 | `06-lauf-container.sh` | `rohdaten-06-*` | Weg (b): K4 bis K8 (Stufen `vorbereiten`, `messen discover`, `messen restricted`, `ende`) |
+| 7 | `07-anmeldung.sh` | **keine** (nur Terminal des Projektinhabers) | Anmeldung im Container (vom Projektinhaber ausgeführt) |
+| 8 | `08-aufraeumen.sh weg-a`, `08-aufraeumen.sh alles` | `rohdaten-08-weg-a{,-nachher}.txt`, `rohdaten-08-alles{,-nachher}.txt` | Aufräumen von Container, Volumes, Netzen; nach Weg (a) bleiben die Images für Weg (b), danach entfernt `alles` auch sie |
 | 9 | `09-suche.sh`, `10-uebernehmen.sh` | (Konsole) | Suche mit Ausnahmeliste; Stufe 2 |
 | — | Gegenproben | `rohdaten-09-gegenproben.txt` | rot gesehene Gegenstücke aller Wächter (Abschnitt *Gegenproben*) |
 
@@ -75,7 +75,7 @@ Dev-Container-CLI 0.89.0 (Features `claude-code:1`, `node:1`, Ollama-Block, `pos
 ## Prompt-Zähler (Entscheidung des Projektinhabers: höchstens 40)
 
 Gezählt wird jeder Aufruf, der einen Prompt an ein Cloud-Modell senden **könnte**, auch wenn er vorher an einer Meldung scheitert (`prompt_zaehlen` in `lib.sh`; Zähler außerhalb des Repos; die Obergrenze bricht mit Exit 99 ab, Gegenprobe
-in `rohdaten-09-gegenproben.txt`). **Stand nach Weg (a): 22 von 40.**
+in `rohdaten-09-gegenproben.txt`). **Stand am Ende: 40 von 40 (Weg a: 22, Weg b: 18); die Obergrenze ist erreicht, nicht überschritten.**
 
 | Nr. | Fall | Wirkung auf den Server |
 |---|---|---|
@@ -91,9 +91,14 @@ in `rohdaten-09-gegenproben.txt`). **Stand nach Weg (a): 22 von 40.**
 | 13 | `restricted` (K3a) `claude -p` Modell 1 | **keine Antwort**, Exit 124 nach 120 s (die Verbindung zum Gateway läuft in die Zeitgrenze, `curl` Exit 28; Menge `allowed` leer) |
 | 14 | `allow` (K3b) `claude -p` Modell 1 | **keine Antwort**, Exit 124 nach 120 s |
 | 15, 16 | `c` (K3c, Adresse von Hand erlaubt) `claude -p` Modell 1, Modell 2 | Antwort |
+| 23 bis 29 | Weg (b) `discover`: 23 `ollama run` Modell 1 (ohne `[1m]`), 24 `claude -p` Modell 1 (mit `[1m]`), 25 `claude -p` Modell 1 ohne `[1m]` (K6), 26 `ollama launch claude` Modell 1 (ohne `[1m]`), 27 `ollama run` Modell 2, 28 `claude -p` Modell 2, 29 `ollama launch claude` Modell 2 | Antwort |
+| 30 bis 33 | Weg (b) `nocloud` und `apikey` mit dem Namen `…[1m]` (`run`, `launch` je Fall) | **Client lehnt den Namen ab**, kein Verkehr; wertlos, vom Entwurf des Skripts verschuldet (der Name mit `[1m]` war aus Weg (a) als ungültig bekannt) |
+| 34, 35 | Weg (b) `OLLAMA_NO_CLOUD=1`: `ollama run`, `ollama launch claude` (ohne `[1m]`) | Meldungen „cloud is disabled“, Exit 1, kein Verkehr |
+| 36 | Weg (b) `OLLAMA_API_KEY=platzhalter`: `ollama run` (ohne `[1m]`) | Antwort |
+| 37 bis 40 | Weg (b) `restricted` mit Eintrag `ollama.com`: `ollama run` Modell 1, `claude -p` Modell 1, `ollama launch claude` Modell 1, `ollama run` Modell 2 | Antwort |
 
-Aufteilung der 22: mit Antwort 16 (Nr. 1, 2, 6, 8, 9, 10, 11, 12, 15 bis 22 ohne 13 und 14), ohne Wirkung auf den Server (abgelehnter oder leerer Name) 4 (Nr. 3, 4, 5, 7), durch die Egress-Restriktion blockiert 2 (Nr. 13, 14).
-Nach Wegen: Weg (a) 22 (Plan: 20; die zwei Überschreitungen sind die verschwendeten Prompts 5 und 7), Weg (b) 0 (Plan: 14 + 2 + 2 + 2 Reserve; für Weg (b) bleiben 18 von 40).
+Aufteilung der 40: mit Antwort 28 (Weg a: Nr. 1, 2, 6, 8 bis 12, 15 bis 22 = 16; Weg b: Nr. 23 bis 29, 36 bis 40 = 12), ohne Wirkung auf den Server 10 (Nr. 3, 4, 5, 7, 30 bis 35), durch die Egress-Restriktion blockiert 2 (Nr. 13, 14).
+Nach Wegen: Weg (a) 22 (Plan: 20; die zwei Überschreitungen sind die verschwendeten Prompts 5 und 7), Weg (b) 18 (Plan: 14 + 2 + 2 + 2 Reserve = 20 abzüglich der 2, die Weg (a) aus der Reserve nahm). Vier Prompts (Nr. 30 bis 33) verbrauchte ich mit einem Namen, den Weg (a) schon als ungültig gezeigt hatte; deshalb entfielen in `restricted` `claude:2` und `launch:2` und im Fall `apikey` der `launch`.
 
 ## Aussagen Weg (a): Host-Server, Claude Code im Container
 
@@ -148,27 +153,63 @@ Notation: *Lauf* zählt die Läufe mit neuem Container und frischem Volume; `n/n
 | `ollama run glm-5.3-flash:cloud[1m]` und `ollama launch claude --model glm-5.3-flash:cloud[1m] --yes`: `Error: invalid model name`, Exit 1, 0,0 s, **ohne Verkehr** — der Name mit `[1m]` ist für den Ollama-Client **kein gültiger Modellname** | `rohdaten-05-discover-1-110753.txt` (Nachtrag, siehe *Rohdaten-Eigenheiten*) |
 | `claude --model glm-5.3-flash:cloud[1m] -p` liefert eine Antwort (Exit 0); Claude Code gibt den Namen mit `[1m]` aus. Ob Claude Code das Suffix vor dem Senden entfernt (Anthropic-Konvention für ein Kontextfenster von einer Million) und der Server `glm-5.3-flash:cloud` sieht, ist **nicht gemessen** (kein Server-Log des Host-Servers gelesen; Weg (b) liefert den Gegenbeleg) | `rohdaten-05-std-*`, `rohdaten-05-discover-*` |
 
-## Wartepunkt: Weg (b) — Anmeldung im Container
+## Aussagen Weg (b): angemeldeter Ollama-Server im Container (Sandbox-Profil)
 
-Weg (b) (K4 bis K8: Anmeldung des Ollama-Servers im Container, Hosts nach der Anmeldung, Dateien, `OLLAMA_NO_CLOUD` mit Konto, `OLLAMA_API_KEY` mit Platzhalter, `launch` in `restricted` gegen `discover`,
-Neuanlage des Containers mit erhaltenem Volume) ist **nicht gemessen**. Die Anmeldung führt der Projektinhaber an seinem Terminal aus (`07-anmeldung.sh`); bis dahin stehen im Messordner das Image von `res`
-(`vsc-u-boot-messung-ocloud-konto-res-…-uid`) und die Skripte bereit, ein Container läuft nicht. Der Test der Stufe `vorbereiten` (Container, Resolver mit Protokoll, `ollama serve` ohne Anmeldung) lief ohne Prompt:
-Server `0.40.6` im Container, `id_ed25519` und `id_ed25519.pub` entstehen beim ersten Start des Servers im Modell-Volume (Rechte 600 und 644, 387 und 81 Byte). Die Rohdaten dieses Tests sind **nicht übernommen**
-(Stufe 1, außerhalb des Repos); die Stufe läuft für die Messung erneut und schreibt ihre eigenen Rohdaten.
+Die Anmeldung führte der Projektinhaber am 2026-10-24 selbst an seinem Terminal aus (`07-anmeldung.sh`, Container `u-boot-messung-ocloud-konto-b` aus dem Image von `res`, Modell-Volume `…-b-modelle`); URL und Code
+standen nur auf seinem Terminal, in keiner Datei und nicht im Gespräch. Server und Client im Container: Ollama `0.40.6`. Ein Lauf (Container neu, Volume neu). Die Messung nach der Anmeldung: `rohdaten-06-discover-1-*.txt`,
+`rohdaten-06-restricted-1-114624.txt`; Vorbereitung `rohdaten-06-vorbereiten-1-114212.txt`; Rückabwicklung `rohdaten-06-ende-1-114643.txt`.
 
-## Nicht gemessen — Stand nach Weg (a)
+### K4: Anmeldung
+
+| Aussage | Rohdaten |
+|---|---|
+| Vor der Anmeldung: der erste Start von `ollama serve` legt `id_ed25519` (387 Byte, Rechte 600) und `id_ed25519.pub` (81 Byte, 644) in `/home/vscode/.ollama` an, dazu `cache/model-recommendations.json` (2370 Byte); alle auf dem **Modell-Volume** (`df`-Einhängepunkt `/home/vscode/.ollama`, nicht im Wurzel-Dateisystem). Ein Workspace-Volume gibt es in diesem Container nicht (kein Pfad im Workspace) | `rohdaten-06-vorbereiten-1-114212.txt` |
+| **Hosts des Anmeldeablaufs:** der Resolver des Containers zeichnete zwischen der Marke vor der Anmeldung und dem ersten Aufruf danach **keine** Anfrage auf (Log unverändert bei 10 Zeilen). Der erste Modellaufruf danach fragt `ollama.com` (2 Anfragen) und `registry.ollama.ai` (4) an | `rohdaten-06-discover-1-114452.txt` |
+| **Dateien nach der Anmeldung:** gegenüber dem Zustand davor keine neue oder geänderte Datei (Pfad, Größe, Rechte von `id_ed25519` und `.pub` unverändert); die Anmeldung ändert den Geräteschlüssel im Volume also nicht sichtbar. Ob die Anmeldung als Zustand des Servers im Konto liegt, ist nicht gemessen | dieselbe |
+| **Überleben der Anmeldung:** der Container wurde entfernt und mit **demselben Volume neu angelegt** (K5b, Modus `restricted`); `ollama run` lieferte ohne neue Anmeldung eine Antwort (Exit 0). Die Anmeldung hängt damit am Volume (am Geräteschlüssel `id_ed25519`), nicht am Container | `rohdaten-06-restricted-1-114624.txt` |
+| **Geräteschlüssel und [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer):** Ort: Modell-Volume `/home/vscode/.ollama` (Dateien `id_ed25519`, `id_ed25519.pub`); nicht im Workspace-Volume, nicht im Wurzel-Dateisystem; überlebt die Neuanlage des Containers; fehlt nach Entfernen des Volumes. Die Wertung (Zugangsdatum ja/nein) trifft die Folge-ADR | dieselben |
+| Rückabwicklung: `ollama signout` im Container (`You have signed out of ollama.com`, Exit 0), Server beendet, Container und Volume entfernt (0 Objekte mit Präfix), Images entfernt. **Den Geräteschlüssel dieses Wegwerf-Containers in den Kontoeinstellungen entfernt der Projektinhaber** (Schritt offen bis zu seiner Bestätigung) | `rohdaten-06-ende-1-114643.txt`, `rohdaten-08-alles.txt` |
+
+### K5 und K8: Läufe, `launch` in `restricted` gegen `discover`
+
+| Aussage | Rohdaten | Läufe |
+|---|---|---|
+| `discover`: `ollama run` (Modell 1 ohne `[1m]`: 2,5 s; Modell 2: 1,3 s), `claude -p` (Modell 1 mit `[1m]` 1,4 s; ohne `[1m]` 1,3 s; Modell 2 1,2 s) und `ollama launch claude --model <m> --yes` (Modell 1 ohne `[1m]` 1,9 s; Modell 2 1,3 s): alle Exit 0 mit Antwort. Ein `ollama pull` ist nicht nötig; `run` zieht das Cloud-Modell selbst (Manifest 426 Byte und zwei Blobs von 264 und 307 bis 317 Byte, Namen `registry.ollama.ai`) | `rohdaten-06-discover-1-114452.txt`, `…-114507.txt` | 1 |
+| Namen im Resolver-Log (`discover`): `ollama run` → `ollama.com` und `registry.ollama.ai`; `claude -p` und `launch` → nur `api.anthropic.com`; `run` ein zweites Mal → nur `registry.ollama.ai` | dieselben | 1 |
+| `restricted` mit Liste des Generators **plus** Eintrag `ollama.com` (Handvariante: dieselben zwei Zeilen wie im Egress-Skript): `ollama run` (Modell 1 1,1 s, Modell 2 0,4 s), `claude -p` (1,0 s) und `ollama launch claude` (1,7 s) alle Exit 0 mit Antwort; im Resolver-Log nur `api.anthropic.com` (bei `claude` und `launch`). **K8:** in diesem Lauf verhält sich `launch` in `restricted` wie in `discover` (startet `claude`, Antwort); ohne `ollama.com` in der Liste ist `restricted` **nicht gemessen** (Kontingent) | `rohdaten-06-restricted-1-114624.txt` | 1 |
+| Dateien: `~/.ollama/config.json` (104/105 Byte) und `~/.ollama/backup/config.json.<zeit>` (von `launch`), `cache/model-recommendations.json` (2041 Byte), Manifest und Blobs unter `models/`: alle auf dem **Modell-Volume**; `~/.claude.json`, `~/.claude/projects/…jsonl`: Wurzel-Dateisystem | `rohdaten-06-discover-1-*`, `rohdaten-06-ende-1-114643.txt` | 1 |
+| Die Egress-Restriktion verlangte für Weg (b) im gemessenen Lauf **eine** Zeile mehr als die erzeugte Liste: `ollama.com` (`registry.ollama.ai` und der Blob-Host stehen bereits in der Liste). Ob der Lauf ohne den Eintrag scheitert, ist nicht gemessen; der Vorgänger (ohne Konto) zeigte für `restricted` den Lookup-Fehler `ollama.com` | `rohdaten-06-restricted-1-114624.txt` | 1 |
+
+### K6: Modellname `…[1m]`
+
+| Aussage | Rohdaten |
+|---|---|
+| `claude --model glm-5.3-flash:cloud[1m] -p` liefert eine Antwort und gibt **keinen** Hinweis zum Kontextfenster aus; `claude --model glm-5.3-flash:cloud -p` (ohne Suffix) liefert eine Antwort **mit** dem Hinweis `Claude Code doesn't recognize the model "glm-5.3-flash:cloud", so it assumes a context window of 200k tokens`. Claude Code behandelt `[1m]` also als eigene Angabe (Kontextfenster) und nicht als Teil des Ollama-Namens; ob es das Suffix vor dem Senden entfernt, ist am Server nicht gelesen. `ollama run` und `ollama launch` lehnen den Namen mit `[1m]` ab (Weg a, Weg b) | `rohdaten-06-discover-1-114507.txt` |
+
+### K7: Variablen
+
+| Aussage | Rohdaten |
+|---|---|
+| `OLLAMA_NO_CLOUD=1` (Server und Client): `ollama run glm-5.3-flash:cloud` → `Error: ollama cloud is disabled: remote model details are unavailable`, Exit 1; `ollama launch claude --model … --yes` → `Warning: ignoring --model glm-5.3-flash:cloud because cloud is disabled` und `Error: headless --yes launch for claude requires --model <model>`, Exit 1. Beides ohne Verkehr, **trotz Anmeldung** | `rohdaten-06-discover-1-114559.txt` |
+| `OLLAMA_API_KEY=platzhalter` (Server und Client, Platzhalter, kein gültiger Schlüssel): `ollama run glm-5.3-flash:cloud` liefert eine Antwort (Exit 0) wie ohne die Variable; keine geänderte Meldung. Die Wirkung eines **gültigen** Schlüssels ist nicht gemessen; der Platzhalter ändert das Verhalten bei bestehender Anmeldung nicht sichtbar. `ollama launch` mit der Variable ist nicht gemessen | dieselbe |
+| Die ersten beiden Versuche beider Fälle (`rohdaten-06-discover-1-114526.txt`) benutzten den Namen mit `[1m]` und scheiterten am Client (`invalid model name`); sie sind **wertlos** und wurden mit dem Namen ohne Suffix wiederholt (vier verschwendete Prompts, Nr. 30 bis 33) | `rohdaten-06-discover-1-114526.txt` |
+
+
+## Nicht gemessen
 
 | Nicht gemessen | Bemerkung |
 |---|---|
-| Weg (b) insgesamt (K4 bis K8) | wartet auf die Anmeldung (Wartepunkt) |
+| Weg (b): `restricted` **ohne** den Eintrag `ollama.com`; `launch` und `claude -p` mit dem zweiten Modell in `restricted`; `ollama launch` unter `OLLAMA_API_KEY`; ein zweiter Lauf | Kontingent (40 Prompts erreicht) |
+| Weg (b): Verhalten bei abgelaufener oder entfernter Anmeldung (nach dem Entfernen des Geräteschlüssels im Konto); ob der Server den Schlüssel im Konto prüft | nicht beobachtet; der Schlüssel wird erst nach dem Lauf entfernt |
+| Weg (b): Verkehr des Servers im Container zum Cloud-Dienst | der Resolver des Containers sah beim Aufruf nur `ollama.com`/`registry.ollama.ai`; die Verbindungen selbst und weitere Hosts (Anmelde-Rückkanal) sind nicht beobachtet; die Anmeldung selbst erzeugte keine Namensanfrage im Container |
 | `ollama run`/`ollama launch` hinter der Egress-Restriktion mit dem Host-Server | Kontingent; `claude -p` zeigt die Sperre |
 | Hosts des Host-Servers zum Cloud-Dienst | liegen außerhalb des Containers |
 | Hosts im Standardprofil | das Image trägt kein `dnsmasq`; kein Resolver-Protokoll |
 | Größe und Zahl der Anfragen, die ein `claude -p` an den Dienst sendet; Kontingent-Verbrauch | nicht beobachtbar; ein Prompt kann mehrere Anfragen auslösen |
 | Interaktiver Ablauf von Claude Code und von `ollama launch claude` (Terminal mit Tastatur) | alles headless |
-| Wirkung eines gültigen `OLLAMA_API_KEY` | nur Platzhalter vorgesehen; nicht gemessen |
+| Wirkung eines gültigen `OLLAMA_API_KEY` | nur der Platzhalter wurde gemessen (Weg b, keine sichtbare Wirkung bei bestehender Anmeldung); mit gültigem Schlüssel nicht gemessen |
 | Andere Modelle, andere Versionen von Ollama (Server `0.40.10`, Client `0.40.6`), Claude Code (`2.1.310`) | ein Lauf je Kombination |
-| Ob `[1m]` von Claude Code vor dem Senden entfernt wird | siehe K6 |
+| Ob Claude Code das Suffix `[1m]` vor dem Senden entfernt | siehe K6; am Server nicht gelesen |
 | Docker Desktop, Colima, Podman, rootless Docker, `arm64` | Zusage-Menge ist Linux `amd64` mit lokaler Engine; ein anderer Host begründet keine Zusage |
 | Mehrere gleichzeitige Nutzer des Host-Servers über den Relay; Absicherung des Relays | der Relay lief nur während der Fälle, ohne fremde Container im Netz |
 
@@ -183,9 +224,16 @@ Server `0.40.6` im Container, `id_ed25519` und `id_ed25519.pub` entstehen beim e
 | Sandbox, `restricted` | wie Standard, Liste des Generators | **keine Meldung**, `claude -p` hängt bis zur Zeitgrenze (120 s im Skript); `curl` Zeitüberschreitung | `rohdaten-05-restricted-*` |
 | Sandbox, `restricted` | `u-boot config set devcontainer.sandbox.egress.allow host.docker.internal`, Neuanlage des Containers | unverändert: Zeitüberschreitung, Menge leer | `rohdaten-05-allow-*` |
 | Sandbox, `restricted` | Adresse von Hand in die Menge eingetragen (Handvariante) | Antwort | `rohdaten-05-c-1-112130.txt` |
+| Sandbox, Weg (b) | `ollama` und `claude-code` aktivieren, `generate devcontainer`, Container bauen (Image von `res`) | wie im Vorgänger; der Container enthält Ollama `0.40.6` | `rohdaten-02.txt` |
+| Sandbox, Weg (b) | `ollama serve` im Container starten, `ollama signin` im Container | URL und Code nur auf dem Terminal des Projektinhabers (nicht aufgenommen); Bestätigung im Browser des Projektinhabers; im Container keine Namensanfrage und keine neue Datei | `rohdaten-06-discover-1-114452.txt` |
+| Sandbox, Weg (b), `discover` | `ollama run <modell> "<Prompt>"`, `claude -p` mit `ANTHROPIC_BASE_URL=http://127.0.0.1:11434`, `ollama launch claude --model <m> --yes` | Antwort in 1 bis 2,5 s; `[1m]` im Namen nur für `claude` gültig | `rohdaten-06-discover-1-114452.txt`, `…-114507.txt` |
+| Sandbox, Weg (b), `restricted` | Liste des Generators plus `ollama.com`, Container neu mit demselben Volume | Anmeldung bleibt, Antwort ohne neue Anmeldung | `rohdaten-06-restricted-1-114624.txt` |
+| Sandbox, Weg (b) | `OLLAMA_NO_CLOUD=1` | „ollama cloud is disabled“, Exit 1 | `rohdaten-06-discover-1-114559.txt` |
+| Sandbox, Weg (b) | Rückabwicklung: `ollama signout`, Volume entfernen, Schlüssel im Konto entfernen | `You have signed out of ollama.com`; der letzte Schritt liegt beim Projektinhaber | `rohdaten-06-ende-1-114643.txt` |
 
 ## Zugangsdaten und Rohdaten
 
+- **Anmeldung im Container (Weg b):** nur der Projektinhaber, an seinem Terminal; die Anmelde-URL und der Code stehen in keiner Datei, keinem Skriptprotokoll und nicht im Gespräch; der Implementer hat die Anmeldung weder ausgeführt noch gesehen. Der Geräteschlüssel im Container wurde nie gelesen (nur Pfad, Größe, Rechte).
 - **Zugang:** der Projektinhaber ist am Host-Server angemeldet; kein Skript liest, setzt oder reicht ein Zugangsdatum; **keine Datei des Hosts** (kein `~/.ollama`, kein `~/.claude`) wurde gelesen, kopiert oder eingebunden;
   der Host-Server wurde nur aus Containern über das Netz angesprochen. Der Platzhalter `ANTHROPIC_AUTH_TOKEN=ollama` steht nur im Aufruf im Container; die Umgebung des Hosts trug in allen Läufen
   keinen der geprüften Namen (`rohdaten-00-vorlauf.txt`, `rohdaten-01.txt`: `umgebung-pruefung exit=0`, Gegenprobe: sieben gesetzte Namen schlagen an).
@@ -215,7 +263,12 @@ Das Wort „Schlüsselblock“ in der ersten Zeile von (1) steht dort ohne die K
 die zehn Mehr-Images sind die der Messung. Beim ersten Aufruf von `08-aufraeumen.sh` entfernte das Skript seinen eigenen Filter-Container der Schwärzung und brach ab (Skriptfehler, behoben: `lib.sh` lässt `<Präfix>-redact-…`
 unberührt; Artefakt der Gegenprobe zum neuen Stand); der Aufruf wurde wiederholt.
 
+`08-aufraeumen.sh alles` nach Weg (b) (`rohdaten-08-alles.txt`, `rohdaten-08-alles-nachher.txt`): `objekte-mit-praefix-nachher-alles=0`, `relay-container-nachher=0`; Images wieder 85 wie vorher. Containerzahl und Volumes (899 gegen 914) enthalten fremde Arbeit.
+Der Geräteschlüssel des Wegwerf-Containers im Konto ist **nicht** entfernt: Schritt des Projektinhabers.
+
 ## Rohdaten-Eigenheiten (nur ausgewiesen)
+
+- Weg (b): `rohdaten-06-vorbereiten-1-114212.txt` ist die Vorbereitung, die `07-anmeldung.sh` für den Projektinhaber aufrief; zwei frühere Testläufe von `vorbereiten` und `ende` (11:26 UTC, ohne Anmeldung) sind nicht übernommen. `nft set allowed nicht lesbar` im Modus `discover` ist erwartet (kein Egress-Skript).
 
 - `rohdaten-05-discover-1-110753.txt` ist ein **Nachtrag**: die Rohdatei dieses Aufrufs wurde vom nächsten Aufruf desselben Teils und Laufs überschrieben (gleicher Dateiname; behoben: die Uhrzeit steht jetzt im Namen). Der Text ist die
   Konsolenausgabe des Aufrufs, wörtlich übernommen, die erste Zeile weist es aus. Der Aufruf `discover k1 nft` (11:06:40 UTC, vor dem Messen der Prompts) ist nicht erhalten; `K1` wurde im selben Lauf mit Datei wiederholt (`…-1-111102.txt`).

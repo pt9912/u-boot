@@ -1,0 +1,39 @@
+== Weg (b) vorbereiten, 2026-10-24T11:42:12.194Z
+container u-boot-messung-ocloud-konto-b aus vsc-u-boot-messung-ocloud-konto-res-192cfb3f360863c5c75967abf7338029f98d69e803d0976d744c66f814ac5f70-uid:latest, Volume u-boot-messung-ocloud-konto-b-modelle auf /home/vscode/.ollama
+modus=discover benutzer=vscode HOME=/home/vscode zusatzzeilen=0
+-- Namen der Umgebungsvariablen im Container (Werte nicht ausgegeben)
+HOME HOSTNAME LANG NVM_DIR NVM_SYMLINK_CURRENT PATH PWD SHLVL _ 
+AUSSAGE umgebung-container-verbotene-namen=0
+-- /etc/hosts-Zeile fuer host.docker.internal: 
+-- Einhaengepunkt von ~/.ollama und von HOME
+/home/vscode/.ollama ext4
+/
+serve bereit: {"version":"0.40.6"}
+-- Version des Servers und des Clients im Container
+---- 11:42:14.682 B-version
+befehl: ollama --version (env-namen: keine; prompt=0; stdin=0)
+ollama version is 0.40.6
+B-version exit=0 dauer=0.0s (124 = timeout nach 25s, 137 = beendet nach -k 5)
+AUSSAGE B-version-exit=0
+-- Namen im Resolver-Log waehrend B-version (Anzahl Anfragen A/AAAA)
+-- abgelehnte/unbekannte Namen waehrend B-version
+-- Dateien neu/geaendert seit der letzten Marke (B-version): Pfad, Groesse, Rechte, Einhaengepunkt
+/home/vscode/.ollama/cache/model-recommendations.json 2370 600 /home/vscode/.ollama
+/home/vscode/.ollama/id_ed25519 387 600 /home/vscode/.ollama
+/home/vscode/.ollama/id_ed25519.pub 81 644 /home/vscode/.ollama
+-- Zustand vor der Anmeldung: Dateien (der erste Start des Servers legt den Geraeteschluessel an)
+-- Dateien neu/geaendert seit der letzten Marke (vor-anmeldung): Pfad, Groesse, Rechte, Einhaengepunkt
+/tmp/sign.mark 3 644 /
+-- ~/.ollama (Pfad, Groesse, Rechte, Eigentuemer; kein Inhalt)
+/home/vscode/.ollama 4096 755 vscode
+/home/vscode/.ollama/cache 4096 755 vscode
+/home/vscode/.ollama/cache/model-recommendations.json 2370 600 vscode
+/home/vscode/.ollama/id_ed25519 387 600 vscode
+/home/vscode/.ollama/id_ed25519.pub 81 644 vscode
+/home/vscode/.ollama/models 4096 755 vscode
+/home/vscode/.ollama/models/blobs 4096 755 vscode
+einhaengepunkt /home/vscode/.ollama/id_ed25519 -> /home/vscode/.ollama
+einhaengepunkt /home/vscode/.ollama/id_ed25519.pub -> /home/vscode/.ollama
+-- Einhaengepunkte (df): / /dev /dev/shm /etc/hosts /proc/acpi 
+Marke fuer K4 gesetzt (Zeile im Resolver-Log: 10)
+AUSSAGE prompts-gestellt=22 obergrenze=40
