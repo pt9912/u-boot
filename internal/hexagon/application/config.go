@@ -630,6 +630,10 @@ func lookupFeatureEntry(cfg ubootYAMLConfig, name domain.FeatureName) (ubootYAML
 // would be a separate slice — for now the byte-equal contract is
 // the simplest spec-conformant implementation (LH-FA-CONF-002 only
 // requires "valid non-empty source strings").
+//
+// This is the one comparison of three callers: [revalidateFeatureEntry]
+// (`config set …source`), the doctor check `devcontainer.features.allowlist`
+// and [unlistedFeatureSources] (`generate devcontainer`).
 func featureSourceInAllow(cfg ubootYAMLConfig, src string) bool {
 	if cfg.Devcontainer == nil || cfg.Devcontainer.FeatureSources == nil {
 		return false

@@ -345,8 +345,9 @@ type devcontainerFeatureData struct {
 //     load-time reject) or `*Enabled == false` (registered but
 //     deactivated).
 //   - When an entry's `Source` override is non-empty, render it
-//     verbatim (T4 enforces allowlist membership — T3 trusts the
-//     value here). When `Source` is empty, look up the canonical
+//     verbatim (the allowlist membership is checked by
+//     [unlistedFeatureSources] in generateDevcontainer, before this
+//     list is rendered). When `Source` is empty, look up the canonical
 //     OCI ref via [featureFor]; unknown names without a source
 //     override are silently skipped here so T4 can surface them
 //     with the proper Exit-Code-10 path.
@@ -609,7 +610,9 @@ func forgeCLIWarnings(dc *ubootYAMLDevcontainer) []driving.WarningEntry {
 //
 // `Enabled fehlt` is *not* an error here (Plan: Doctor-Warn, not a
 // load-time reject) — that check lives in T5's doctor pipeline.
-// `Source set but not in Allow` is also deferred (T4 enforcement).
+// `Source set but not in Allow` is checked elsewhere, where the flag of
+// the call is known: [unlistedFeatureSources] in generateDevcontainer,
+// [revalidateFeatureEntry] and the doctor check.
 func validateDevcontainerFeatures(dc *ubootYAMLDevcontainer) error {
 	if dc == nil {
 		return nil
@@ -644,6 +647,65 @@ func validateDevcontainerFeatures(dc *ubootYAMLDevcontainer) error {
 		}
 	}
 	return nil
+}
+
+// featureSourceViolation names one enabled entry whose `source:` override is
+// outside the effective allowlist.
+type featureSourceViolation struct {
+	feature string
+	source  string
+}
+
+// unlistedFeatureSources returns the enabled entries of cfg whose `source:`
+// override is not in the effective allowlist, sorted by feature name. The
+// effective allowlist is `devcontainer.featureSources.allow` plus flagSources
+// (the `--allow-external-feature-sources` entries of the same call), merged in
+// the form of [normaliseFeatureSources] and not written anywhere. The
+// comparison is [featureSourceInAllow]; deactivated entries and entries
+// without `enabled` render nothing and are not asked.
+func unlistedFeatureSources(cfg ubootYAMLConfig, flagSources []string) ([]featureSourceViolation, error) {
+	if cfg.Devcontainer == nil {
+		return nil, nil
+	}
+	var existing []string
+	if cfg.Devcontainer.FeatureSources != nil {
+		existing = cfg.Devcontainer.FeatureSources.Allow
+	}
+	merged, err := normaliseFeatureSources(append(append([]string{}, existing...), flagSources...))
+	if err != nil {
+		return nil, err
+	}
+	effective := cfg
+	dc := *cfg.Devcontainer
+	dc.FeatureSources = &ubootYAMLFeatureSources{Allow: merged}
+	effective.Devcontainer = &dc
+
+	var out []featureSourceViolation
+	for _, name := range sortedFeatureNames(cfg.Devcontainer.Features) {
+		entry := cfg.Devcontainer.Features[name]
+		if entry.Enabled == nil || !*entry.Enabled || entry.Source == "" {
+			continue
+		}
+		if !featureSourceInAllow(effective, entry.Source) {
+			out = append(out, featureSourceViolation{feature: name, source: entry.Source})
+		}
+	}
+	return out, nil
+}
+
+// featureSourceViolationMessage is the text of the rejection of
+// `generate devcontainer`: per entry the feature and the source, then the ways
+// out in this order (allow the source, switch the feature off) and the rule of
+// the comparison.
+func featureSourceViolationMessage(violations []featureSourceViolation) string {
+	parts := make([]string, 0, len(violations))
+	for _, v := range violations {
+		parts = append(parts, fmt.Sprintf(
+			"devcontainer.features.%s: external source %q is not in devcontainer.featureSources.allow; allow it with `u-boot config set devcontainer.featureSources.allow %s` or `--allow-external-feature-sources %s`, or switch the feature off with `u-boot config set devcontainer.features.%s.enabled false`",
+			v.feature, v.source, v.source, v.source, v.feature))
+	}
+	return strings.Join(parts, "; ") +
+		". Comparison is byte-equal; trailing slashes and host case must match"
 }
 
 // featureVersionNeedsSource is the single statement of the rule "a

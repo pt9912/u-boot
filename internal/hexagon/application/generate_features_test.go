@@ -689,7 +689,7 @@ func TestGenerateDevcontainer_FeaturesHomebrewSdkman(t *testing.T) {
 func TestGenerateDevcontainer_FeaturesHomebrew_ExternalOverrideNoWarning(t *testing.T) {
 	t.Parallel()
 	svc, fs := newGenerateService(t)
-	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://ghcr.io/stu-bell/devcontainer-features\n  features:\n    homebrew:\n      enabled: true\n      source: https://ghcr.io/stu-bell/devcontainer-features/homebrew\n      version: \"1\"\n")
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://ghcr.io/stu-bell/devcontainer-features/homebrew\n  features:\n    homebrew:\n      enabled: true\n      source: https://ghcr.io/stu-bell/devcontainer-features/homebrew\n      version: \"1\"\n")
 	resp, err := generateSandbox(svc, false)
 	if err != nil {
 		t.Fatalf("generate: %v", err)
@@ -925,7 +925,7 @@ func TestGenerateDevcontainer_ClaudeCodeNodeNotice(t *testing.T) {
 		"with node":                {"devcontainer:\n  enabled: true\n  features:\n" + on + "    node:\n      enabled: true\n", 0},
 		"node switched off":        {"devcontainer:\n  enabled: true\n  features:\n" + on + "    node:\n      enabled: false\n", 1},
 		"claude-code switched off": {"devcontainer:\n  enabled: true\n  features:\n    claude-code:\n      enabled: false\n", 0},
-		"own source":               {"devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://ghcr.io/me/features\n  features:\n    claude-code:\n      enabled: true\n      source: https://ghcr.io/me/features/claude-code\n", 0},
+		"own source":               {"devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://ghcr.io/me/features/claude-code\n  features:\n    claude-code:\n      enabled: true\n      source: https://ghcr.io/me/features/claude-code\n", 0},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {

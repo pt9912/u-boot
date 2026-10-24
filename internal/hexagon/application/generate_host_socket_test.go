@@ -200,7 +200,7 @@ func TestGenerateDevcontainer_SandboxHostSocketFeature_OnlyActiveEntryIsRejected
 		{"another entry", sandboxFeaturesHead + "    node:\n      enabled: true\n", 0},
 		{
 			"source override",
-			sandboxDockerCLIYAML + "      source: oci://registry.example.test/features/docker-outside-of-docker\n",
+			"devcontainer:\n  enabled: true\n  profile: sandbox\n  featureSources:\n    allow:\n      - oci://registry.example.test/features/docker-outside-of-docker\n  features:\n    docker-cli:\n      enabled: true\n      source: oci://registry.example.test/features/docker-outside-of-docker\n",
 			1,
 		},
 	}

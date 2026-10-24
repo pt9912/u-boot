@@ -770,8 +770,9 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	// the prior order wrote u-boot.yaml first and produced a
 	// mutation leak (allowlist extended + comments lost) when the
 	// later plan-and-execute aborted with ErrGenerateManualConflict.
-	// T3's renderer does not enforce the allowlist, so the rest of
-	// the flow reading an unmodified u-boot.yaml is safe.
+	// The allowlist check below adds the flag entries to the list it
+	// reads instead of writing them, so the rest of the flow reads an
+	// unmodified u-boot.yaml.
 	if err := validateAllowExternalFeatureSourcesEntries(req.AllowExternalFeatureSources); err != nil {
 		return driving.GenerateResponse{}, err
 	}
@@ -787,6 +788,19 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	}
 
 	features := collectDevcontainerFeatures(cfg)
+
+	// LH-FA-DEV-003 / LH-NFA-SEC-004: every source of an enabled feature
+	// stands in the effective allowlist (the list plus the flag entries of
+	// this call) before the profile rejection, so a call with both
+	// violations ends in this code, and before any plan and write.
+	unlisted, err := unlistedFeatureSources(cfg, req.AllowExternalFeatureSources)
+	if err != nil {
+		return driving.GenerateResponse{}, fmt.Errorf("generate devcontainer: %w: %w", driving.ErrConfigValueInvalid, err)
+	}
+	if len(unlisted) > 0 {
+		return driving.GenerateResponse{}, fmt.Errorf("generate devcontainer: %w: %s",
+			driving.ErrConfigValueInvalid, featureSourceViolationMessage(unlisted))
+	}
 
 	sandbox := req.Sandbox || profileIsSandbox(cfg.Devcontainer)
 	// LH-FA-DEV-006: the rejection stands before any plan and write, so a

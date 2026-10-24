@@ -338,7 +338,7 @@ func TestRun_Generate_SandboxFeatureWarnings(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
-	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"
+	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - oci://registry.example.test/acme\n"
 	const features = "  features:\n    go:\n      enabled: true\n    acme:\n      enabled: true\n      source: oci://registry.example.test/acme\n"
 	want := []string{
 		"Warning (LH-FA-DEV-006): security relaxation for the devcontainer feature go: --cap-add=SYS_PTRACE",
@@ -441,6 +441,92 @@ func TestRun_Generate_SandboxHostSocketFeatureIsRejected(t *testing.T) {
 	errOut.Reset()
 	if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != 0 {
 		t.Fatalf("default profile with docker-cli: exit %d, want 0; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+}
+
+// LH-FA-DEV-003, LH-NFA-SEC-004, LH-FA-CLI-006 at the user path (real
+// adapters): an enabled feature whose source is outside the allowlist ends
+// `generate devcontainer` with exit 10 and the code LH-FA-DEV-003, also under
+// `--dry-run` and `--json`, and creates nothing. Each way out of the message
+// leads to exit 0: allowing the source in the list, the flag of the call (the
+// list gains the source only without `--dry-run`) and switching the feature off.
+func TestRun_Generate_UnlistedFeatureSourceIsRejected(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const src = "https://example.test/features/evil"
+	const project = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    evil:\n      enabled: true\n      source: " + src + "\n"
+	runArgs := func(args ...string) (int, string, string) {
+		var out, errOut bytes.Buffer
+		code := run(context.Background(), args, &out, &errOut)
+		return code, out.String(), errOut.String()
+	}
+
+	dir := writeFeatureProject(t, project)
+	before, err := os.ReadFile(filepath.Join(dir, "u-boot.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{
+		{"generate", "devcontainer"},
+		{"generate", "devcontainer", "--dry-run"},
+	} {
+		if code, out, errOut := runArgs(args...); code != 10 {
+			t.Fatalf("%v: exit %d, want 10; stdout=%q stderr=%q", args, code, out, errOut)
+		}
+	}
+	code, out, errOut := runArgs("--json", "generate", "devcontainer")
+	if code != 10 {
+		t.Fatalf("--json: exit %d, want 10; stdout=%q stderr=%q", code, out, errOut)
+	}
+	var env devcontainerRunEnvelope
+	if err := json.Unmarshal([]byte(out), &env); err != nil {
+		t.Fatalf("--json envelope: %v\n%s", err, out)
+	}
+	if env.ExitCode != 10 || len(env.Diagnostics) != 1 || env.Diagnostics[0].Code != "LH-FA-DEV-003" || env.Diagnostics[0].Level != "error" {
+		t.Errorf("envelope = %+v, want exit code 10 and one error diagnostic LH-FA-DEV-003", env)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".devcontainer")); err == nil {
+		t.Error("the rejected calls created .devcontainer")
+	}
+	if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !bytes.Equal(after, before) {
+		t.Errorf("u-boot.yaml changed:\n%s", after)
+	}
+
+	// Way out 1: allow the source in the list.
+	writeFeatureProject(t, project)
+	if code, out, errOut := runArgs("config", "set", "devcontainer.featureSources.allow", src); code != 0 {
+		t.Fatalf("config set …featureSources.allow: exit %d; stdout=%q stderr=%q", code, out, errOut)
+	}
+	if code, out, errOut := runArgs("generate", "devcontainer"); code != 0 {
+		t.Fatalf("generate after the allowlist way out: exit %d; stdout=%q stderr=%q", code, out, errOut)
+	}
+
+	// Way out 2: the flag of the same call.
+	dir = writeFeatureProject(t, project)
+	if code, out, errOut := runArgs("generate", "devcontainer", "--dry-run", "--allow-external-feature-sources", src); code != 0 {
+		t.Fatalf("--dry-run with the flag: exit %d; stdout=%q stderr=%q", code, out, errOut)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".devcontainer")); err == nil {
+		t.Error("--dry-run with the flag created .devcontainer")
+	}
+	if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !bytes.Equal(after, []byte(project)) {
+		t.Errorf("--dry-run with the flag changed u-boot.yaml:\n%s", after)
+	}
+	if code, out, errOut := runArgs("generate", "devcontainer", "--allow-external-feature-sources", src); code != 0 {
+		t.Fatalf("generate with the flag: exit %d; stdout=%q stderr=%q", code, out, errOut)
+	}
+	if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !strings.Contains(string(after), "- "+src) {
+		t.Errorf("the flag source is not in the list:\n%s", after)
+	}
+
+	// Way out 3: switch the feature off.
+	writeFeatureProject(t, project)
+	if code, out, errOut := runArgs("config", "set", "devcontainer.features.evil.enabled", "false"); code != 0 {
+		t.Fatalf("config set …evil.enabled false: exit %d; stdout=%q stderr=%q", code, out, errOut)
+	}
+	if code, out, errOut := runArgs("generate", "devcontainer"); code != 0 {
+		t.Fatalf("generate after switching the feature off: exit %d; stdout=%q stderr=%q", code, out, errOut)
 	}
 }
 
