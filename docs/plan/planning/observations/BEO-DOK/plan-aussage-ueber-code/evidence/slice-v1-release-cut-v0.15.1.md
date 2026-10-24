@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-release-cut-v0.15.1`](../../../../done/slice-v1-release-cut-v0.15.1.md)
+**Fund:** Nachlauf-Review [`2026-10-24-slice-v1-release-cut-v0.15.1-nachlauf`](../../../../../../reviews/2026-10-24-slice-v1-release-cut-v0.15.1-nachlauf.md) NL-1 (LOW): Der Plan (§3 Umsetzung Punkt 10) sagte, die Messaussage stehe „gleichlautend an den vier Stellen“. Gleichlautend sind nur die beiden READMEs untereinander (EN und DE sinngleich); der CHANGELOG nennt die Auswege einzeln und `node`, die READMEs nur „with the ways out“. Der Release-Text war nicht breiter als der Beleg; die Aussage stand im Plan über den Text. Im Plan berichtigt (Closure).
+
+**Beleg-Qualität:** belegt durch den Nachlauf-Review (Satz gegen Text gelesen). Die Dateiliste der Plan-Tabelle war vollständig (Review und Nachlauf NL-3). Rückfall nach der Verkörperung, Gegenstand ein Text statt Code; keine weitere Schärfung entschieden.
