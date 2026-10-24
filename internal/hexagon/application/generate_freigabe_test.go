@@ -136,6 +136,21 @@ func TestGenerateDevcontainer_FreigabeIgnoresInactiveEntries(t *testing.T) {
 	}
 }
 
+// A catalogue key without `source:` needs no allowlist entry: the catalogue
+// source is a built-in, not an external one.
+func TestGenerateDevcontainer_FreigabeCatalogueKeyNeedsNoList(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  features:\n    node:\n      enabled: true\n")
+	if _, err := generateWithFlag(svc, driving.PreviewNone); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	feats, _ := devcontainerJSONMap(t, fs)["features"].(map[string]any)
+	if _, ok := feats["ghcr.io/devcontainers/features/node:1"]; !ok {
+		t.Errorf("catalogue key not rendered: %v", feats)
+	}
+}
+
 // T6: two violations at once (unlisted source and `docker-cli` in the sandbox
 // profile): the allowlist rejection comes first and carries ErrConfigValueInvalid,
 // not ErrInvalidSandboxSetting.
