@@ -2054,13 +2054,16 @@ gibt es nicht: `version` ohne `source` weist `u-boot` mit Exit-Code `10` ab, und
 unter [Externe Feature-Quellen freigeben](#externe-feature-quellen-freigeben)) ohne
 Dockerfile-Block.
 
-Steht in `u-boot.yaml` ein `version` zu `gh` oder `glab` ohne `source`, lehnen
-`u-boot generate devcontainer` und jedes weitere `u-boot config set` die Datei mit
-Exit-Code `10` ab, und `u-boot doctor` meldet in der Prüfung `uboot.yaml.valid` einen
-Fehler. Die Abhilfe: Entfernen Sie den Eintrag `version` in `u-boot.yaml` von Hand; danach
-läuft `u-boot generate devcontainer` wieder. Zurzeit meldet auch
-`u-boot config set devcontainer.features.gh.version <Wert>` ohne `source` Erfolg und
-schreibt den Eintrag, und erst der nächste Befehl lehnt die Datei ab.
+`u-boot config set devcontainer.features.gh.version <Wert>` (ebenso für `glab` und
+`ollama`) weist den Wert ohne `source` mit Exit-Code `10` ab und lässt die Datei
+unverändert, auch mit `--dry-run` und `--diff`. Setzen Sie zuerst die `source` (in einem
+Aufruf mit mehreren Paaren steht das Paar der `source` vor dem Paar der `version`).
+
+Steht in `u-boot.yaml` schon ein `version` zu `gh` oder `glab` ohne `source` (etwa von
+Hand eingetragen), lehnen `u-boot generate devcontainer` und jedes weitere
+`u-boot config set` die Datei mit Exit-Code `10` ab, und `u-boot doctor` meldet in der
+Prüfung `uboot.yaml.valid` einen Fehler. Die Abhilfe: Entfernen Sie den Eintrag `version`
+in `u-boot.yaml` von Hand; danach läuft `u-boot generate devcontainer` wieder.
 
 **Anmeldung in kurzer Form.** `u-boot` meldet nichts an und speichert kein Token; die
 Werkzeuge lesen es aus einer Umgebungsvariable, `GH_TOKEN` für `gh` und `GITLAB_TOKEN` für
@@ -2401,7 +2404,7 @@ mit `--json` einen strukturierten Hinweis in `data.hint` (`command`, `action`,
 | `devcontainer.profile` | Devcontainer-Profil | `sandbox` | ja |
 | `devcontainer.user.uid` | Benutzer-ID im Container | 1 bis 65535 (Standard 1000) | ja |
 | `devcontainer.features.<name>.enabled` | Feature aktiv | `true` / `false` | ja |
-| `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21` | ja |
+| `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`) | ja |
 | `devcontainer.features.<name>.source` | externe Feature-Quelle | URL aus der Freigabeliste | ja |
 | `devcontainer.featureSources.allow` | Freigabeliste externer Quellen | URLs, kommagetrennt | ja |
 | `devcontainer.sandbox.nestedRuntime` | Container-Laufzeit im Sandbox | `none` / `podman` / `docker` | ja |

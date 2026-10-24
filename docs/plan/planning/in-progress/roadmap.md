@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+Ohne Welle in Arbeit: [`slice-v1-config-set-validiert-feature-version`](slice-v1-config-set-validiert-feature-version.md) (`config set` prüft die `version` eines Dockerfile-Block-Features wie `generate`).
 
 ## Nächste Wellen
 

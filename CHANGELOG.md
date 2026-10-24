@@ -11,6 +11,10 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Fixed
+
+- `u-boot config set devcontainer.features.<feature>.version <value>` (also with several path/value pairs in one call) now checks the value like `u-boot generate devcontainer` ([`LH-FA-CONF-005`](spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)): for `ollama`, `gh` and `glab`, a `version` without `source` ends with exit code `10` and leaves `u-boot.yaml` unchanged, also with `--dry-run` and `--diff`. Before, the call reported success and wrote the entry, after which `generate`, `doctor` and every further `config set` rejected the project. A file that already carries such an entry is still rejected; remove the `version` entry by hand.
+
 ## [0.15.0] - 2026-10-23
 
 Fifteenth release. **Forge CLIs in the devcontainer: the catalogue features `gh` (GitHub CLI) and `glab` (GitLab CLI).**
