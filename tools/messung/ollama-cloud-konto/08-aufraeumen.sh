@@ -19,7 +19,7 @@ echo "-- vorher (rohdaten-01-vorher.txt)"; cat "$vorher"
 echo "-- vor dem Aufraeumen"; bestand
 echo "-- Entfernen"
 for v in std res alw; do
-  docker ps -a -q --filter "label=devcontainer.local_folder=/w/$(vname "$v")" | while read -r c; do echo "entferne container der Dev-Container-CLI $c ($v)"; docker rm -f -v "$c" > /dev/null; done
+  docker ps -a -q --filter "label=devcontainer.local_folder=$(wdir "$v")" | while read -r c; do echo "entferne container der Dev-Container-CLI $c ($v)"; docker rm -f -v "$c" > /dev/null; done
 done
 praefix_entfernen
 echo "-- nachher (rohdaten-08-$stufe-nachher.txt)"

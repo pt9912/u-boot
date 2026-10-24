@@ -29,11 +29,11 @@ gateway=172.17.0.1   # Gateway des Netzes bridge (gelesen in 04-relay.sh: host-g
 
 cli() { # <variante> <argumente...>
   local v=$1 P; P=$(vname "$1"); shift
-  docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$(vdir "$v")":/w/"$P" -w /w/"$P" "$CLI" devcontainer "$@" --workspace-folder /w/"$P"
+  docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$(vdir "$v")":"$(wdir "$v")" -w "$(wdir "$v")" "$CLI" devcontainer "$@" --workspace-folder "$(wdir "$v")"
 }
 entfernen() { # <variante>: Container der CLI und Volumes des Projekts (frisches Volume je Lauf)
   local v=$1 pat="^$(vname "$1")-" n
-  docker ps -a -q --filter "label=devcontainer.local_folder=/w/$(vname "$v")" | while read -r c; do docker rm -f -v "$c" > /dev/null; done
+  docker ps -a -q --filter "label=devcontainer.local_folder=$(wdir "$v")" | while read -r c; do docker rm -f -v "$c" > /dev/null; done
   docker volume ls -q | while read -r n; do [[ $n =~ $pat ]] && docker volume rm "$n" > /dev/null; done
 }
 hoch() { # <variante>: Container der CLI starten; gibt die Container-ID auf stdout aus, Meldungen auf stderr
@@ -42,13 +42,14 @@ hoch() { # <variante>: Container der CLI starten; gibt die Container-ID auf stdo
   cli "$v" up --log-level info --remove-existing-container 2>&1 | grep -v -E '^\[[0-9]+ ms\]|^\s*$' | tail -12 | redact > "$ROH/rohdaten-05-up-$v-$LAUF.txt"
   rc=${PIPESTATUS[0]}
   echo "devcontainer up $v exit=$rc dauer=$(sekunden "$s" "$(date +%s.%N)")s" >&2
-  docker ps -q --filter "label=devcontainer.local_folder=/w/$(vname "$v")" | head -1
+  docker ps -q --filter "label=devcontainer.local_folder=$(wdir "$v")" | head -1
 }
 
 if [ "$teil" = bauen ]; then
   rohdaten "rohdaten-05-bauen-$LAUF.txt"
   echo "== bauen (devcontainer up der drei Projekte, kein Prompt), $(now)"
-  for v in res alw std; do c=$(hoch "$v"); echo "container $v: ${c:-keiner}"; aussage "bauen-$v-container=$([ -n "$c" ] && echo ja || echo nein)"; entfernen "$v"; done
+  liste=("${faelle[@]}"); [ "${liste[0]}" = k1 ] && liste=(res alw std)   # ohne Angabe alle drei; sonst die genannten Varianten
+  for v in "${liste[@]}"; do c=$(hoch "$v"); echo "container $v: ${c:-keiner}"; aussage "bauen-$v-container=$([ -n "$c" ] && echo ja || echo nein)"; entfernen "$v"; done
   echo "image res: $(bild)"
   exit 0
 fi
@@ -81,7 +82,11 @@ ex() { docker exec -u vscode -w /home/vscode "$c" bash /tmp/inner.sh "$@"; }
 
 relay_an=0
 relay() { # start|stop
-  if [ "$1" = start ]; then "$here/04-relay.sh" start > /dev/null 2>&1 || { echo "Abbruch: Relay nicht gestartet"; exit 3; }; relay_an=1; echo "relay: gestartet"
+  local i
+  if [ "$1" = start ]; then
+    # ein fremder Container kann kurz im Netz haengen (etwa ein Gate-Lauf im Nachbar-Repo): bis zu vier Versuche, dann Abbruch
+    for i in 1 2 3 4; do "$here/04-relay.sh" start > /dev/null 2>&1 && break; [ "$i" = 4 ] && { echo "Abbruch: Relay nicht gestartet"; exit 3; }; sleep 15; done
+    relay_an=1; echo "relay: gestartet"
   else "$here/04-relay.sh" stop > /dev/null 2>&1; relay_an=0; echo "relay: entfernt (docker ps -a: $(docker ps -a --format '{{.Names}}' | grep -c -x "$RELAY") Relay-Container)"; fi
 }
 trap '[ "$relay_an" = 1 ] && "$here/04-relay.sh" stop > /dev/null 2>&1; exec >&- 2>&-; sleep 3' EXIT

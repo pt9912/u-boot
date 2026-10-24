@@ -13,11 +13,16 @@ RELAY_IMAGE='alpine/socat@sha256:603174b77eebaba25ba8f8ebb15e1234d6600409554e95d
 modus=${1:-}
 case "$modus" in
 start)
-  rohdaten "rohdaten-04-relay-start-${LAUF:-1}.txt"
+  rohdaten "rohdaten-04-relay-start-$(date -u +%H%M%S).txt"
   echo "== Relay start, $(now)"
   docker rm -f "$RELAY" > /dev/null 2>&1
-  fremde=0; pat="^(vsc-)?$PFX"
-  for n in $(docker network inspect bridge --format '{{range .Containers}}{{.Name}} {{end}}'); do [[ $n =~ $pat ]] || fremde=$((fremde + 1)); done
+  fremde=0; pat="^(vsc-)?$PFX"; lpat="/$PFX-(std|res|alw)\$"
+  # zur Messung gehoeren: Namen mit dem Praefix (auch die Filter-Container der Schwaerzung) und Container der Dev-Container-CLI mit dem Label
+  # devcontainer.local_folder auf ein Projekt der Messung
+  for id in $(docker network inspect bridge --format '{{range .Containers}}{{.Name}} {{end}}'); do
+    lf=$(docker inspect -f '{{index .Config.Labels "devcontainer.local_folder"}}' "$id" 2> /dev/null)
+    [[ $id =~ $pat ]] || [[ $lf =~ $lpat ]] || fremde=$((fremde + 1))
+  done
   echo "container im Netz bridge, die nicht zur Messung gehoeren: $fremde (Namen nicht ausgewiesen)"
   [ "$fremde" = 0 ] || { echo "Abbruch: fremde Container im Messnetz"; exit 3; }
   read -r adr _ < <(docker run --rm --add-host=host.docker.internal:host-gateway "$BASE" getent hosts host.docker.internal)
@@ -34,7 +39,7 @@ start)
   aussage "relay-gateway-adresse=$adr relay-gebunden-nur-an-diese-adresse=$(docker run --rm --network host "$BASE" sh -c "ss -ltn | grep -c '0.0.0.0:$PORT'" | grep -q '^0$' && echo ja || echo nein)"
   ;;
 stop)
-  rohdaten "rohdaten-04-relay-stop-${LAUF:-1}.txt"
+  rohdaten "rohdaten-04-relay-stop-$(date -u +%H%M%S).txt"
   echo "== Relay stop, $(now)"
   docker rm -f "$RELAY" > /dev/null 2>&1
   echo "docker ps -a nach dem Entfernen: Relay-Container vorhanden: $(docker ps -a --format '{{.Names}}' | grep -c -x "$RELAY")"

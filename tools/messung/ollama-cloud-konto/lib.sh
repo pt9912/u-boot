@@ -79,7 +79,7 @@ u() { local d=$1; shift; docker run --rm -v "$WORK/$d":/w -w /w -u "$(id -u):$(i
 # eine Variable (Wert beginnt mit $ oder %) und Zeilen AUSSAGE bleiben stehen; redact-probe.sh pinnt die Formen, nicht die Vollstaendigkeit.
 # Deshalb nehmen die Skripte keinen Antwort-Inhalt auf (inner.sh), durchsucht 09-suche.sh die Rohdaten und werden sie von Hand gelesen.
 redact() {
-  docker run --rm -i "$BASE" sed -u -E \
+  docker run --rm -i --name "$PFX-redact-$$-$RANDOM" "$BASE" sed -u -E \
     -e '/^-----BEGIN [A-Z ]*PRIVATE KEY-----/,/^-----END [A-Z ]*PRIVATE KEY-----/c\[Schluesselblock entfernt]' \
     -e 's/^[A-Za-z0-9+\/]{40,}={0,2}$/[lange Base64-Zeile entfernt]/' \
     -e 's/^ANTWORT.*$/ANTWORT [entfernt]/' \
@@ -164,6 +164,10 @@ praefix_entfernen() {
 
 # Image des Projekts res (Name, den die Dev-Container-CLI vergibt; der Container der CLI nutzt das Image mit der Endung -uid).
 bild() { docker images --format '{{.Repository}}:{{.Tag}}' | grep -E "^vsc-$PFX-res-.*-uid:" | head -1; }
+
+# Pfad des Projekts in der Sicht der Dev-Container-CLI. Das Standardprofil mountet den Workspace als Bind-Mount (kein Volume): die Quelle muss ein
+# Pfad des Docker-Hosts sein, daher dort der Host-Pfad; res und alw haben Volumes und brauchen nur einen Pfad im CLI-Container.
+wdir() { if [ "$1" = std ]; then vdir std; else echo "/w/$(vname "$1")"; fi; }
 
 # Variante -> Projektverzeichnis, Projektname. Varianten: std (Standardprofil, ohne Ollama im Container), res (Sandbox mit Egress), alw (wie res
 # plus Eintrag host.docker.internal in egress.allow). Alle drei tragen die Handvariante --add-host=host.docker.internal:host-gateway in runArgs.
