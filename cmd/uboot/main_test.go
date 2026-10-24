@@ -530,6 +530,34 @@ func TestRun_Generate_UnlistedFeatureSourceIsRejected(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-003 at the user path (real adapters): the allowlist rule holds in
+// the sandbox profile as well; an unlisted source there, without any other
+// violation, ends with exit 10 and the code LH-FA-DEV-003 and creates nothing.
+func TestRun_Generate_UnlistedFeatureSourceIsRejectedInSandboxProfile(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const project = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    evil:\n      enabled: true\n      source: https://example.test/features/evil\n"
+	dir := writeFeatureProject(t, project)
+	var out, errOut bytes.Buffer
+	if code := run(context.Background(), []string{"--json", "generate", "devcontainer"}, &out, &errOut); code != 10 {
+		t.Fatalf("exit %d, want 10; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+	var env devcontainerRunEnvelope
+	if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+		t.Fatalf("--json envelope: %v\n%s", err, out.String())
+	}
+	if len(env.Diagnostics) != 1 || env.Diagnostics[0].Code != "LH-FA-DEV-003" || env.Diagnostics[0].Level != "error" {
+		t.Errorf("envelope = %+v, want one error diagnostic LH-FA-DEV-003", env)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".devcontainer")); err == nil {
+		t.Error("the rejected call created .devcontainer")
+	}
+	if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !bytes.Equal(after, []byte(project)) {
+		t.Errorf("u-boot.yaml changed:\n%s", after)
+	}
+}
+
 // devcontainerRunEnvelope is the part of the `--json` envelope the
 // devcontainer wiring tests read.
 type devcontainerRunEnvelope struct {

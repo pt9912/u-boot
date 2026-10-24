@@ -167,6 +167,44 @@ func TestGenerateDevcontainer_FreigabeBeforeSandboxRejection(t *testing.T) {
 	}
 }
 
+// The allowlist rule holds in the sandbox profile as well: an unlisted source
+// there, without any other violation, ends in ErrConfigValueInvalid and writes
+// nothing.
+func TestGenerateDevcontainer_FreigabeSandboxProfileOnlyUnlistedSource(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    evil:\n      enabled: true\n      source: "+freigabeSource+"\n")
+	writes, mkdirs := len(fs.writes), len(fs.mkdirs)
+	_, err := generateWithFlag(svc, driving.PreviewNone)
+	if !errors.Is(err, driving.ErrConfigValueInvalid) {
+		t.Fatalf("err = %v, want ErrConfigValueInvalid", err)
+	}
+	if len(fs.writes) != writes || len(fs.mkdirs) != mkdirs {
+		t.Errorf("rejected call wrote: writes %v, mkdirs %v", fs.writes[writes:], fs.mkdirs[mkdirs:])
+	}
+}
+
+// Several unlisted entries: one message, entries sorted by feature name and
+// joined by "; ", the comparison sentence once at the end.
+func TestGenerateDevcontainer_FreigabeSeveralUnlistedSortedByName(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  features:\n    zeta:\n      enabled: true\n      source: https://example.test/features/z\n    alpha:\n      enabled: true\n      source: https://example.test/features/a\n")
+	_, err := generateWithFlag(svc, driving.PreviewNone)
+	if !errors.Is(err, driving.ErrConfigValueInvalid) {
+		t.Fatalf("err = %v, want ErrConfigValueInvalid", err)
+	}
+	msg := err.Error()
+	a := strings.Index(msg, "devcontainer.features.alpha: external source")
+	z := strings.Index(msg, "; devcontainer.features.zeta: external source")
+	if a < 0 || z < 0 || a > z {
+		t.Errorf("entries not sorted by name and joined by \"; \": %s", msg)
+	}
+	if n := strings.Count(msg, "Comparison is byte-equal"); n != 1 || !strings.HasSuffix(msg, "host case must match") {
+		t.Errorf("comparison sentence count = %d, want once at the end: %s", n, msg)
+	}
+}
+
 // T8: the message names feature, source, the ways out in this order (allow,
 // then disable) and the byte-equal comparison; each part has its own pin.
 func TestGenerateDevcontainer_FreigabeMessageParts(t *testing.T) {
@@ -218,6 +256,8 @@ func TestFeatureSourceAllow_ThreeCallersAgree(t *testing.T) {
 		{"trailing slash in list", base, "  featureSources:\n    allow:\n      - " + base + "/\n", false},
 		{"trailing slash in source", base + "/", "  featureSources:\n    allow:\n      - " + base + "\n", false},
 		{"host case", base, "  featureSources:\n    allow:\n      - https://example.test/features/x\n", false},
+		{"query in source", base + "?a=b", "  featureSources:\n    allow:\n      - " + base + "\n", false},
+		{"userinfo in source", "https://user@Example.test/features/x", "  featureSources:\n    allow:\n      - " + base + "\n", false},
 		{"empty list", base, "  featureSources:\n    allow: []\n", false},
 		{"no block", base, "", false},
 	}
