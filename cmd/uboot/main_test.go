@@ -807,3 +807,182 @@ func TestRun_EgressList_ForgeCLIHostOrigins(t *testing.T) {
 		}
 	}
 }
+
+// LH-FA-DEV-003, LH-FA-DEV-006, LH-FA-CLI-005 at the user path with the real
+// adapters: `config set devcontainer.features.ollama-host.enabled true` is
+// accepted; `generate devcontainer` writes the one `runArgs` line and gives one
+// notice in both profiles. In the sandbox profile the notice is a security
+// relaxation and stays under `--quiet`, with the restriction it adds the
+// sentence that the connection does not work behind it; in the default profile
+// `--quiet` drops it. The notice carries no identifier in its text and
+// nothing about models.
+func TestRun_Generate_OllamaHostNotices(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"
+	const restriction = "  sandbox:\n    egress:\n      enabled: true\n"
+	const behind = "this connection does not work behind it"
+	for _, tc := range []struct {
+		name       string
+		profile    string
+		wantCode   string
+		quietShows bool
+		wantBehind bool
+	}{
+		{"default profile", "", "LH-FA-DEV-003", false, false},
+		{"sandbox profile", "  profile: sandbox\n", "LH-FA-DEV-006", true, false},
+		{"sandbox profile with restriction", "  profile: sandbox\n" + restriction, "LH-FA-DEV-006", true, true},
+		{"default profile with restriction flag", restriction, "LH-FA-DEV-003", false, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := writeFeatureProject(t, head+tc.profile)
+			var out, errOut bytes.Buffer
+			if code := run(context.Background(), []string{"config", "set", "devcontainer.features.ollama-host.enabled", "true"}, &out, &errOut); code != 0 {
+				t.Fatalf("config set: exit %d, stdout=%q stderr=%q", code, out.String(), errOut.String())
+			}
+			out.Reset()
+			if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != 0 {
+				t.Fatalf("generate devcontainer: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
+			}
+			want := "Warning (" + tc.wantCode + "): devcontainer feature ollama-host adds the container option --add-host=host.docker.internal:host-gateway"
+			if n := strings.Count(out.String(), want); n != 1 {
+				t.Errorf("stdout contains %q %d times, want 1:\n%s", want, n, out.String())
+			}
+			if got := strings.Contains(out.String(), behind); got != tc.wantBehind {
+				t.Errorf("sentence about the restriction present = %v, want %v:\n%s", got, tc.wantBehind, out.String())
+			}
+			raw, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "devcontainer.json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(string(raw), `"--add-host=host.docker.internal:host-gateway"`) {
+				t.Errorf("devcontainer.json lacks the runArgs line:\n%s", raw)
+			}
+
+			out.Reset()
+			errOut.Reset()
+			if code := run(context.Background(), []string{"--quiet", "generate", "devcontainer"}, &out, &errOut); code != 0 {
+				t.Fatalf("--quiet generate devcontainer: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
+			}
+			shown := strings.Contains(out.String()+errOut.String(), "ollama-host")
+			if shown != tc.quietShows {
+				t.Errorf("notice under --quiet shown = %v, want %v:\nstdout=%q\nstderr=%q", shown, tc.quietShows, out.String(), errOut.String())
+			}
+			if tc.quietShows && strings.Contains(out.String(), behind) != tc.wantBehind {
+				t.Errorf("the sentence about the restriction must stay with the one notice under --quiet:\n%s", out.String())
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-003 at the user path: `version` without `source` on `ollama-host`
+// ends `generate devcontainer` and `config set` with exit 10, in every
+// preview mode, and neither writes a file nor changes u-boot.yaml.
+func TestRun_OllamaHostVersionWithoutSourceExits10(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"
+	dir := writeFeatureProject(t, head+"  features:\n    ollama-host:\n      enabled: true\n      version: \"1\"\n")
+	before, err := os.ReadFile(filepath.Join(dir, "u-boot.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{
+		{"generate", "devcontainer"},
+		{"generate", "devcontainer", "--dry-run"},
+	} {
+		var out, errOut bytes.Buffer
+		if code := run(context.Background(), args, &out, &errOut); code != 10 {
+			t.Fatalf("%v: exit %d, want 10; stdout=%q stderr=%q", args, code, out.String(), errOut.String())
+		}
+		if strings.Contains(out.String()+errOut.String(), "Dockerfile") {
+			t.Errorf("%v: the message must not speak of the Dockerfile:\nstdout=%q\nstderr=%q", args, out.String(), errOut.String())
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".devcontainer")); err == nil {
+		t.Error("the rejected calls created .devcontainer")
+	}
+	if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !bytes.Equal(after, before) {
+		t.Errorf("u-boot.yaml changed:\n%s", after)
+	}
+
+	dir = writeFeatureProject(t, head+"  features:\n    ollama-host:\n      enabled: true\n")
+	before, err = os.ReadFile(filepath.Join(dir, "u-boot.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, flags := range [][]string{nil, {"--dry-run"}, {"--diff"}} {
+		args := append([]string{"config", "set", "devcontainer.features.ollama-host.version", "2"}, flags...)
+		var out, errOut bytes.Buffer
+		if code := run(context.Background(), args, &out, &errOut); code != 10 {
+			t.Fatalf("%v: exit %d, want 10; stdout=%q stderr=%q", args, code, out.String(), errOut.String())
+		}
+		if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !bytes.Equal(after, before) {
+			t.Errorf("%v changed u-boot.yaml:\n%s", args, after)
+		}
+	}
+}
+
+// LH-FA-DEV-005 at the user path: `generate devcontainer --dry-run` with an
+// active `ollama-host` writes nothing and still gives the notice.
+func TestRun_Generate_OllamaHostDryRunWritesNothing(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	dir := writeFeatureProject(t, "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    ollama-host:\n      enabled: true\n")
+	var out, errOut bytes.Buffer
+	if code := run(context.Background(), []string{"generate", "devcontainer", "--dry-run"}, &out, &errOut); code != 0 {
+		t.Fatalf("dry-run: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+	if !strings.Contains(out.String(), "ollama-host") {
+		t.Errorf("the notice is missing under --dry-run:\n%s", out.String())
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".devcontainer")); err == nil {
+		t.Error("--dry-run created .devcontainer")
+	}
+}
+
+// LH-FA-DEV-008 at the user path: the connection adds no host to the egress
+// list; `egress list` names no host with the origin `feature:ollama-host`, no
+// `ollama.com`, no `host.docker.internal`.
+func TestRun_EgressList_OllamaHostAddsNoHost(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	list := func(features string) map[string]string {
+		writeFeatureProject(t, "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  profile: sandbox\n"+features+
+			"  sandbox:\n    egress:\n      enabled: true\n")
+		var out, errOut bytes.Buffer
+		if code := run(context.Background(), []string{"egress", "list", "--json"}, &out, &errOut); code != 0 {
+			t.Fatalf("egress list: exit %d, stderr=%q", code, errOut.String())
+		}
+		var env struct {
+			Data struct {
+				Hosts []struct {
+					Host    string   `json:"host"`
+					Sources []string `json:"sources"`
+				} `json:"hosts"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+			t.Fatalf("invalid JSON: %v\n%s", err, out.String())
+		}
+		origins := map[string]string{}
+		for _, h := range env.Data.Hosts {
+			origins[h.Host] = strings.Join(h.Sources, ",")
+		}
+		return origins
+	}
+	with := list("  features:\n    ollama:\n      enabled: true\n    ollama-host:\n      enabled: true\n")
+	without := list("  features:\n    ollama:\n      enabled: true\n")
+	if !reflect.DeepEqual(with, without) {
+		t.Errorf("hosts with ollama-host:\n%v\nwant those without it:\n%v", with, without)
+	}
+	for host, origin := range with {
+		if strings.Contains(origin, "ollama-host") || host == "ollama.com" || host == "host.docker.internal" {
+			t.Errorf("host %s (origin %q) must not come from the connection", host, origin)
+		}
+	}
+}

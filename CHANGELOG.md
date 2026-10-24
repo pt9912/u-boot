@@ -11,6 +11,14 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- Catalogue feature `ollama-host` ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)): `u-boot config set devcontainer.features.ollama-host.enabled true`, then `u-boot generate devcontainer` writes one line into `runArgs` of `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, in the default and in the sandbox profile, and nothing else for the connection: no relay, no environment variable, no host in the egress list. It is no OCI feature and renders no key under `features`; `version` without `source` ends with exit code `10` like for `ollama`, `gh` and `glab`. `generate devcontainer` discloses the connection with one notice per run; in the sandbox profile it is a security relaxation and stays visible under `--quiet`, and while the egress restriction is active it adds that the connection does not work behind it (a warning, no error). Pinned by tests, including one run of the container started by `u-boot devcontainer up` that resolves `host.docker.internal`; that a service of the host is reachable is not tested.
+
+### Changed
+
+- In the default profile, `devcontainer.json` carries a `runArgs` key when the feature `ollama-host` is active; without it the file is byte-identical to before.
+
 ## [0.15.1] - 2026-10-24
 
 Patch release. **Two checks of the feature entries in `u-boot.yaml` now run where they were promised.** `u-boot generate devcontainer` rejects the source of an enabled feature that is not on the allowlist, and `u-boot config set devcontainer.features.<feature>.version <value>` rejects a `version` without `source` for `ollama`, `gh` and `glab`.

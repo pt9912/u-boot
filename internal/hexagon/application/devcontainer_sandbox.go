@@ -82,7 +82,10 @@ func profileIsSandbox(dc *ubootYAMLDevcontainer) bool {
 // devcontainer templates from the project name, the parsed
 // `devcontainer:` sub-tree (may be nil) and the resolved sandbox
 // state. UID stays 0 (= emit nothing) for the default 1000 so the
-// pre-0.3.0 output remains byte-identical (LH-FA-DEV-004).
+// pre-0.3.0 output remains byte-identical (LH-FA-DEV-004). `RunArgs` is empty
+// in the default profile unless the `ollama-host` feature is active; in the
+// sandbox profile the container option of that feature follows the options
+// of `nestedRuntime` and of the egress restriction.
 func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bool, cloneURL string) templateData {
 	data := templateData{Name: name}
 	if dc != nil && dc.User != nil && dc.User.UID != nil && *dc.User.UID != domain.DefaultContainerUID {
@@ -91,6 +94,7 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	data.Gh = dockerfileBlockFeatureActive(dc, featureGh)
 	data.Glab = dockerfileBlockFeatureActive(dc, featureGlab)
 	if !sandbox {
+		data.RunArgs = hostGatewayRunArgs(dc)
 		return data
 	}
 	data.Sandbox = true
@@ -125,6 +129,7 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 		data.RunArgs = append(data.RunArgs, egressRelaxation())
 		postStart = append([]string{"sudo sh /usr/local/bin/u-boot-egress-init"}, postStart...)
 	}
+	data.RunArgs = append(data.RunArgs, hostGatewayRunArgs(dc)...)
 	data.PostStart = strings.Join(postStart, " && ")
 	data.PostCreate = composePostCreate(postCreate, cloneURL)
 	return data

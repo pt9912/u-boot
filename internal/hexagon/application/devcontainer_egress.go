@@ -76,8 +76,10 @@ func egressDockerAptHost() string { return "download.docker.com" }
 // not measured). The sign-in hosts and the hosts of telemetry, updates, MCP
 // and plugins are not listed; the user adds them to `egress.allow`. The
 // `ollama` row lists the manifest host and the blob host of the model pull
-// (measured for two models at one time and place; `ollama.com` is not
-// needed and the install hosts are used by the image build only). The `gh`
+// (measured for two local models at one time and place; the pull of a local
+// model does not need `ollama.com`, a call of a cloud model asks it and the
+// user adds it to `egress.allow`; the install hosts are used by the image
+// build only). The `ollama-host` entry has no row: it adds no host. The `gh`
 // row lists the two GitHub hosts and the `glab` row `gitlab.com`; hosts that
 // follow a sign-in, telemetry, update hosts and the hosts of `glab duo` and
 // `glab orbit` are not listed.

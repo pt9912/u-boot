@@ -144,7 +144,9 @@ func normaliseFeatureSources(in []string) ([]string, error) {
 // source/version resolution when [ubootYAMLDevcontainerFeature.Source]
 // is empty). A new OCI-feature entry in [featureCatalogue] needs no
 // other code; an entry with `dockerfileBlock` additionally needs the
-// Dockerfile block it names (see [dockerfileBlockFeatureActive]).
+// Dockerfile block it names (see [dockerfileBlockFeatureActive]), an
+// entry with `containerOption` the rendering of that option (see
+// [hostGatewayFeatureActive]).
 //
 // `source` is the canonical OCI ref **without** URL scheme (e.g.
 // `ghcr.io/devcontainers/features/node`) because devcontainer.json
@@ -167,6 +169,15 @@ type featureCatalogueEntry struct {
 	// `features`. A `source:` override turns it into an external OCI
 	// feature without the block.
 	dockerfileBlock bool
+	// containerOption marks an entry that is no OCI feature either and has
+	// no Dockerfile block: it adds this one option to `runArgs` of the
+	// generated `devcontainer.json`, in both profiles (`ollama-host`). Like
+	// `dockerfileBlock` it has no `source`, no `defaultVersion`, no
+	// `publisher` and renders no key under `features`; a `source:` override
+	// turns it into an external OCI feature without the option. The option
+	// is not one of `relaxations`, which only disclose what an OCI feature
+	// asks for in its metadata.
+	containerOption string
 	// bindsHostSocket marks a feature that mounts the container-engine
 	// socket of the host into the container (its metadata `mounts`). The
 	// sandbox profile rejects an active entry with it (LH-FA-DEV-006).
@@ -179,12 +190,26 @@ type featureCatalogueEntry struct {
 	relaxations []string
 }
 
-// Catalogue keys of the Dockerfile-block features.
+// Catalogue keys of the Dockerfile-block features and of the entry that adds
+// a container option.
 const (
-	featureOllama = "ollama"
-	featureGh     = "gh"
-	featureGlab   = "glab"
+	featureOllama     = "ollama"
+	featureGh         = "gh"
+	featureGlab       = "glab"
+	featureOllamaHost = "ollama-host"
 )
+
+// hostGatewayOption is the `runArgs` entry of the `ollama-host` feature: it
+// makes `host.docker.internal` resolve to the gateway address of the
+// container's network.
+const hostGatewayOption = "--add-host=host.docker.internal:host-gateway"
+
+// hasNoSource reports whether the entry has no OCI source of its own: it is a
+// Dockerfile block or a container option. Such an entry takes no `version:`
+// without a `source:` override and renders no key under `features`.
+func (e featureCatalogueEntry) hasNoSource() bool {
+	return e.dockerfileBlock || e.containerOption != ""
+}
 
 // featureCatalogue lists the built-in devcontainer-feature catalogue
 // per LH-FA-DEV-003 + T0-Outcomes (c). Built-in entries
@@ -194,7 +219,8 @@ const (
 // that source in [ubootYAMLFeatureSources.Allow] (T4 enforcement).
 //
 // `defaultVersion` is the per-entry pin (the major-version slug of the
-// upstream tag); an entry with `dockerfileBlock` carries none.
+// upstream tag); an entry with `dockerfileBlock` or `containerOption`
+// carries none.
 //
 // `bindsHostSocket` and `relaxations` carry the security properties of the
 // pinned feature version, taken from its metadata (`mounts`, `privileged`,
@@ -287,6 +313,10 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 		featureGlab: {
 			shortDesc:       "GitLab CLI (Dockerfile block)",
 			dockerfileBlock: true,
+		},
+		featureOllamaHost: {
+			shortDesc:       "Connection to an Ollama service of the host (container option; no relay)",
+			containerOption: hostGatewayOption,
 		},
 	}
 }
@@ -483,8 +513,9 @@ func projectFeatureEntry(name string, entry ubootYAMLDevcontainerFeature) (devco
 //
 // Returns ("", "", false) for the orphan case (no Source override
 // and the name is not in the catalogue) — caller skips silently — and
-// for a Dockerfile-block entry without Source override (`ollama`, `gh`,
-// `glab`): it renders no key, so the drift check stays silent for it.
+// for an entry without OCI source and without Source override (a
+// Dockerfile block: `ollama`, `gh`, `glab`; a container option:
+// `ollama-host`): it renders no key, so the drift check stays silent for it.
 // Slice-followup-devcontainer-features-drift-doctor Review-Followup
 // S1 extracted this helper to remove the synthetic-`Enabled=&true`-
 // probe in [projectAllFeatureEntries].
@@ -501,7 +532,7 @@ func projectFeatureSourceVersion(name, source, version string) (resolvedSource, 
 		return "", "", false
 	}
 	cat, found := featureFor(featureName)
-	if !found || cat.dockerfileBlock {
+	if !found || cat.hasNoSource() {
 		return "", "", false
 	}
 	v := version
@@ -524,6 +555,65 @@ func dockerfileBlockFeatureActive(dc *ubootYAMLDevcontainer, key string) bool {
 	}
 	f, ok := dc.Features[key]
 	return ok && f.Enabled != nil && *f.Enabled && f.Source == ""
+}
+
+// hostGatewayFeatureActive reports whether the `ollama-host` entry is enabled
+// without a `source:` override. Only then `runArgs` carries its container
+// option, in both profiles. A nil sub-tree (`init --devcontainer`) is false.
+func hostGatewayFeatureActive(dc *ubootYAMLDevcontainer) bool {
+	if dc == nil {
+		return false
+	}
+	if featureCatalogue()[featureOllamaHost].containerOption == "" {
+		return false
+	}
+	f, ok := dc.Features[featureOllamaHost]
+	return ok && f.Enabled != nil && *f.Enabled && f.Source == ""
+}
+
+// hostGatewayRunArgs returns the `runArgs` entries of the active `ollama-host`
+// feature: the one container option of its catalogue entry, or none.
+func hostGatewayRunArgs(dc *ubootYAMLDevcontainer) []string {
+	if !hostGatewayFeatureActive(dc) {
+		return nil
+	}
+	return []string{featureCatalogue()[featureOllamaHost].containerOption}
+}
+
+// ollamaHostWarnings returns the one notice `generate devcontainer` gives for
+// an active `ollama-host` feature, in both profiles. The text names the
+// option and the condition under which the service of the host is reachable;
+// it makes no statement about the models the service serves. With the sandbox
+// profile the connection is a security relaxation
+// ([driving.WarningEntry.SecurityRelaxation], visible under `--quiet`) and,
+// while the egress restriction is active, the same entry says that the
+// connection does not work behind it. Without the sandbox profile the notice
+// is an ordinary warning that `--quiet` drops, and no restriction arises.
+func ollamaHostWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
+	if !hostGatewayFeatureActive(dc) {
+		return nil
+	}
+	msg := "devcontainer feature ollama-host adds the container option " + hostGatewayOption +
+		" so that the container can address a service on the host"
+	code := "LH-FA-DEV-003"
+	if sandbox {
+		code = "LH-FA-DEV-006"
+		msg += "; the profile limits damage and is not an isolation boundary"
+	}
+	msg += ". Whether the service is reachable depends on the address it listens on and on the container engine: " +
+		"on Linux with a local Docker engine, a service that listens only on the loopback address of the host " +
+		"is reachable only through a relay or another binding that you set up; " +
+		"u-boot starts no relay and changes no file of the service."
+	if sandbox && egressEnabled(dc) {
+		msg += " The egress restriction is active: this connection does not work behind it, and u-boot adds no address to the allowlist."
+	}
+	return []driving.WarningEntry{{
+		Code:               code,
+		Level:              "warn",
+		Message:            msg,
+		Subject:            ".devcontainer/devcontainer.json",
+		SecurityRelaxation: sandbox,
+	}}
 }
 
 // ollamaWarnings returns the one notice `generate devcontainer` gives for
@@ -595,9 +685,9 @@ func forgeCLIWarnings(dc *ubootYAMLDevcontainer) []driving.WarningEntry {
 //   - Every non-empty `Source:` value passes [validateFeatureSource]
 //     (URL-format check only — allowlist-membership enforcement is
 //     T4's job).
-//   - A Dockerfile-block entry (`ollama`, `gh`, `glab`) has no `Version:` override
-//     without a `Source:` override: its pin hangs on the checksums in
-//     the Dockerfile, so another version could not be checked.
+//   - An entry without OCI source (a Dockerfile block: `ollama`, `gh`, `glab`;
+//     a container option: `ollama-host`) has no `Version:` override
+//     without a `Source:` override: see [featureVersionNeedsSource].
 //   - Every entry in [ubootYAMLFeatureSources.Allow] passes
 //     [validateFeatureSource] (T4 will additionally silent-dedupe at
 //     write time; here we only reject invalid entries).
@@ -642,8 +732,8 @@ func validateDevcontainerFeatures(dc *ubootYAMLDevcontainer) error {
 			}
 		}
 		if featureVersionNeedsSource(k, entry) {
-			return fmt.Errorf("%w: features.%s.version: the %s installation is pinned in the Dockerfile; "+
-				"a version override needs a source: override", ErrInvalidFeatureSource, k, k)
+			return fmt.Errorf("%w: features.%s.version: %s; a version override needs a source: override",
+				ErrInvalidFeatureSource, k, featureWithoutVersionReason(k))
 		}
 	}
 	return nil
@@ -708,12 +798,22 @@ func featureSourceViolationMessage(violations []featureSourceViolation) string {
 		". Comparison is byte-equal; trailing slashes and host case must match"
 }
 
-// featureVersionNeedsSource is the single statement of the rule "a
-// Dockerfile-block feature has no `version:` without a `source:`".
-// [validateDevcontainerFeatures] (read path) and [revalidateFeatureEntry]
-// (write path of config set) both ask it.
+// featureVersionNeedsSource is the single statement of the rule "an entry
+// without OCI source (a Dockerfile block or a container option) has no
+// `version:` without a `source:`". [validateDevcontainerFeatures] (read
+// path) and [revalidateFeatureEntry] (write path of config set) both ask it.
 func featureVersionNeedsSource(name string, entry ubootYAMLDevcontainerFeature) bool {
-	return entry.Source == "" && entry.Version != "" && featureCatalogue()[name].dockerfileBlock
+	return entry.Source == "" && entry.Version != "" && featureCatalogue()[name].hasNoSource()
+}
+
+// featureWithoutVersionReason is the reason, per entry type, that the entry
+// takes no `version:` without a `source:`; both rejections of
+// [featureVersionNeedsSource] quote it.
+func featureWithoutVersionReason(name string) string {
+	if featureCatalogue()[name].dockerfileBlock {
+		return "the " + name + " installation is pinned in the Dockerfile"
+	}
+	return name + " is no OCI feature and has no version"
 }
 
 // ErrDevcontainerJSONUnparsable signals that the devcontainer.json

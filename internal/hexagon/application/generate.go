@@ -820,6 +820,7 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	warnings = append(warnings, thirdPartyFeatureWarnings(cfg)...)
 	warnings = append(warnings, agentNodeWarnings(cfg.Devcontainer)...)
 	warnings = append(warnings, ollamaWarnings(cfg.Devcontainer, sandbox)...)
+	warnings = append(warnings, ollamaHostWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, forgeCLIWarnings(cfg.Devcontainer)...)
 	plans, err := s.planDevcontainerFiles(req.BaseDir, data)
 	if err != nil {

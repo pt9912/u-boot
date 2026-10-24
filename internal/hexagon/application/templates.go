@@ -85,8 +85,9 @@ type templateData struct {
 
 	// Egress switches on the LH-FA-DEV-008 outbound restriction;
 	// EgressHosts is the effective allowlist baked into the startup
-	// script. RunArgs / PostCreate / PostStart are the composed
-	// `runArgs` entries and lifecycle commands of the sandbox profile.
+	// script. RunArgs is the composed `runArgs` list (options of the sandbox
+	// profile, then the `ollama-host` option in either profile);
+	// PostCreate / PostStart are the lifecycle commands of the sandbox profile.
 	Egress      bool
 	EgressHosts []string
 	RunArgs     []string

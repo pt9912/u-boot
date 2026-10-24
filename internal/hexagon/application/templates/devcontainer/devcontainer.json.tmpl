@@ -36,6 +36,8 @@
     "{{.}}": "${localEnv:{{.}}}"
 {{- end}}
   },
+{{- else if .RunArgs}}
+  "runArgs": [{{range $i, $a := .RunArgs}}{{if $i}}, {{end}}"{{$a}}"{{end}}],
 {{- end}}
 {{- if .ForwardPorts}}
   "forwardPorts": [{{range $i, $p := .ForwardPorts}}{{if $i}}, {{end}}{{$p}}{{end}}],

@@ -324,6 +324,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"kubectl-helm",
 		"node",
 		"ollama",
+		"ollama-host",
 		"postgres-client",
 		"python",
 		"sdkman",
@@ -356,6 +357,8 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 //   - A Dockerfile-block entry (`ollama`, `gh`, `glab`) carries no source, default
 //     version or publisher; the generated Dockerfile holds its pin
 //     (ADR-0024 decision 2).
+//   - A container-option entry (`ollama-host`) carries no source, default
+//     version or publisher either, and its option is a `--` option.
 func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 	t.Parallel()
 	const sourcePrefix = "ghcr.io/devcontainers/features/"
@@ -378,6 +381,18 @@ func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 				}
 				if !strings.Contains(blockSandboxDockerfile(t, key), "ARG "+strings.ToUpper(key)+"_VERSION=") {
 					t.Errorf("Dockerfile template lacks the pin ARG %s_VERSION for the Dockerfile-block entry %q", strings.ToUpper(key), key)
+				}
+				return
+			}
+			if entry.ContainerOption != "" {
+				// A container-option entry has no OCI source, version or
+				// publisher and no Dockerfile block; its one option is a
+				// `docker run` option.
+				if entry.Source != "" || entry.DefaultVersion != "" || entry.Publisher != "" {
+					t.Errorf("container-option entry %q must carry no source, defaultVersion or publisher: %+v", key, entry)
+				}
+				if !strings.HasPrefix(entry.ContainerOption, "--") {
+					t.Errorf("container-option entry %q: ContainerOption = %q, want a `--` option", key, entry.ContainerOption)
 				}
 				return
 			}

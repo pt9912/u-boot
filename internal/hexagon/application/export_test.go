@@ -311,6 +311,9 @@ type FeatureCatalogueEntryForTest struct {
 	// the generated Dockerfile carries, in the default and in the sandbox
 	// profile.
 	DockerfileBlock bool
+	// ContainerOption is the one `runArgs` entry of an entry without OCI
+	// source and without Dockerfile block.
+	ContainerOption string
 	// BindsHostSocket marks a feature that mounts the container-engine
 	// socket of the host.
 	BindsHostSocket bool
@@ -330,6 +333,7 @@ func FeatureCatalogueForTest() map[string]FeatureCatalogueEntryForTest {
 			ShortDesc:       v.shortDesc,
 			Publisher:       v.publisher,
 			DockerfileBlock: v.dockerfileBlock,
+			ContainerOption: v.containerOption,
 			BindsHostSocket: v.bindsHostSocket,
 			Relaxations:     v.relaxations,
 		}
@@ -350,6 +354,7 @@ func FeatureForTest(name domain.FeatureName) (FeatureCatalogueEntryForTest, bool
 		ShortDesc:       entry.shortDesc,
 		Publisher:       entry.publisher,
 		DockerfileBlock: entry.dockerfileBlock,
+		ContainerOption: entry.containerOption,
 		BindsHostSocket: entry.bindsHostSocket,
 		Relaxations:     entry.relaxations,
 	}, true
