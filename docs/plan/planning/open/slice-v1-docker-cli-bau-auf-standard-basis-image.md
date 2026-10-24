@@ -47,7 +47,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Die Quellen der Katalog-Features, die Render-Schlüssel externer Quellen und die Freigabeprüfung (N1 bis N3)** — [`slice-v1-katalog-features-quellen-und-freigabe`](slice-v1-katalog-features-quellen-und-freigabe.md): andere Ursache und kein Entscheid des Projektinhabers über Optionen oder Basis-Image.
+- **Die Quellen der Katalog-Features, die Render-Schlüssel externer Quellen (N1 und N2)** — [`slice-v1-katalog-features-quellen-und-freigabe`](slice-v1-katalog-features-quellen-und-freigabe.md), und **die Freigabeprüfung in `generate` (N3)** — [`slice-v1-generate-prueft-freigabeliste`](slice-v1-generate-prueft-freigabeliste.md): andere Ursache und kein Entscheid des Projektinhabers über Optionen oder Basis-Image.
 - **Der Mount von `docker-cli`, die Abweisung im Sandbox-Profil und die Ausweisungen** — geliefert in [`slice-v1-sandbox-features-socket-und-lockerungen`](../done/slice-v1-sandbox-features-socket-und-lockerungen.md); sie hängen nicht daran, dass der Bau gelingt (sie sagen, was das Feature einbindet, nicht, dass der Bau gelingt).
 - **Eine Prüfung anderer Katalog-Features auf dieselbe Ursache** — nicht gemessen; der Slice misst `docker-cli`. Findet die Messung ein weiteres Feature, das mit dem Basis-Image nicht baut, nennt sie es und der Projektinhaber entscheidet über einen eigenen Vorgang.
 
