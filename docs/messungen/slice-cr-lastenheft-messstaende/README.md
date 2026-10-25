@@ -25,6 +25,7 @@ ist deshalb die Ablage.
 --- SKIP: TestE2E_SandboxDevcontainer_NestedPodman_Build (22.38s)
 --- SKIP: TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress (29.03s)
 --- SKIP: TestE2E_SandboxDevcontainer_NestedPodman (22.35s)
+--- SKIP: TestE2E_SandboxDevcontainer_StatusFiles_VFS (30.89s)
 --- PASS: TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild (30.52s)
 --- PASS: TestE2E_SandboxDevcontainer_NestedDocker (37.84s)
 --- PASS: TestE2E_SandboxDevcontainer_NestedDocker_Degradation (30.89s)
@@ -34,16 +35,18 @@ ist deshalb die Ablage.
 --- PASS: TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild (16.95s)
 ```
 
-Die drei `SKIP`-Zeilen tragen im Log dieselbe Meldung (Zeilen `sandbox_devcontainer_docker_test.go:691`, `:737` und `:778`):
+Das Log hat vier `SKIP`-Zeilen mit derselben Meldung: die drei Podman-Tests (`sandbox_devcontainer_docker_test.go:691`, `:737` und `:778`) und `TestE2E_SandboxDevcontainer_StatusFiles_VFS` (`sandbox_status_docker_test.go:173`; der Auszug oben nennt es wegen des verschachtelten Podman mit):
 `host restricts unprivileged user namespaces (kernel.apparmor_restrict_unprivileged_userns=1); nested Podman cannot run here, degradation verified`.
 Der Runner hat also den Wert `1`; die Tests prüfen dort die Degradation (nach ihrer Meldung) und überspringen den Lauf von
 `podman build` und den Start von `podman`.
 
 ## Lesehilfen
 
-- **Belegt** ist der Pass von `TestE2E_SandboxDevcontainer_Ollama` (Bau des erzeugten Dockerfiles, Server auf der Loopback-Adresse,
-  `library=cpu`, Pull hinter der Egress-Restriktion, Modell überlebt das Löschen des Containers) und von
-  `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild` auf einem `amd64`-Runner mit Docker; ebenso `NestedDocker*`.
+- **Belegt** ist der Pass von `TestE2E_SandboxDevcontainer_Ollama`. Das Log trägt für ihn nur die Zeile `--- PASS`; was der Pass
+  einschließt (Bau des erzeugten Dockerfiles, Server auf der Loopback-Adresse, `library=cpu`, Pull hinter der Egress-Restriktion,
+  Modell überlebt das Löschen des Containers), ist aus den Assertions des Testcodes abgeleitet
+  (`internal/e2e/sandbox_devcontainer_docker_test.go`, Prüfliste um die Zeilen 1307 und 1324), nicht aus Markern im Log. Belegt ist ebenso der Pass von
+  `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild` und der `NestedDocker*`-Tests auf einem `amd64`-Runner mit Docker.
 - **Nicht belegt** ist durch die CI der Lauf von `podman build` und der Start von `podman` auf `amd64`: der Runner hat
   `kernel.apparmor_restrict_unprivileged_userns=1`. Diese Zusagen stützen sich auf die Messungen
   [`slice-v1-egress-dns-upstream-schliessen`](../slice-v1-egress-dns-upstream-schliessen/README.md) (Linux `amd64`, Wert `0`)
