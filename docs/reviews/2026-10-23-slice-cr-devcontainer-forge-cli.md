@@ -6,7 +6,7 @@
 
 **Skill:** `.harness/skills/reviewer.md` · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-23
 
-**Eingangs-Kontext:** Slice [`slice-cr-devcontainer-forge-cli`](../plan/planning/done/slice-cr-devcontainer-forge-cli.md) (§1, §3, §6, §7 Freigabe), Entwurf [`wortlaut-entwurf.md`](../messungen/slice-v1-forge-cli-quellen-messung/wortlaut-entwurf.md), `spec/lastenheft.md` (Diff), `AGENTS.md` §3.4, §3.7, §3.10, §5 Regel 6, Welle-Datei, `open/README.md`, [`slice-cr-lastenheft-messstaende`](../plan/planning/open/slice-cr-lastenheft-messstaende.md).
+**Eingangs-Kontext:** Slice [`slice-cr-devcontainer-forge-cli`](../plan/planning/done/slice-cr-devcontainer-forge-cli.md) (§1, §3, §6, §7 Freigabe), Entwurf [`wortlaut-entwurf.md`](../messungen/slice-v1-forge-cli-quellen-messung/wortlaut-entwurf.md), `spec/lastenheft.md` (Diff), `AGENTS.md` §3.4, §3.7, §3.10, §5 Regel 6, Welle-Datei, `open/README.md`, [`slice-cr-lastenheft-messstaende`](../plan/planning/in-progress/slice-cr-lastenheft-messstaende.md).
 
 **Sensor:** `make gates` selbst gelaufen, Exit-Code 0 (Log im Scratchpad). `make test-docker`, `make verify-depguard`: nicht gelaufen, kein Code-, Docker- oder Importregel-Pfad im Diff.
 
@@ -39,7 +39,7 @@
 
 ### F-3 LOW
 - `quelle`: AGENTS.md §3.10 (Zeilenangaben im Plan nach Änderung nachziehen)
-- `pfad`: [`slice-cr-lastenheft-messstaende`](../plan/planning/open/slice-cr-lastenheft-messstaende.md) · „Zeile 409, [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Absatz `ollama`)“
+- `pfad`: [`slice-cr-lastenheft-messstaende`](../plan/planning/in-progress/slice-cr-lastenheft-messstaende.md) · „Zeile 409, [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Absatz `ollama`)“
 - `klasse`: plan-aussage-ueber-code
 - `befund`: Der Diff zieht die Versionsangaben jenes Slice nach, nicht aber seine Zeilenangaben: Ollama-Absatz steht jetzt in Zeile 411 (Plan: 409), `podman`-Zeilen 467/469 (Plan: 463/465), Historie 0.12.0/0.15.0 Zeilen 1588/1591 (Plan: 1568/1571; 0.7.0 und 0.13.0 analog). Die Verschiebung durch die vier neuen Zeilen vor DEV-007 ist von diesem Diff verursacht, die Historie-Angaben waren schon vorher veraltet.
 - `risiko`: Der Implementer des Messstände-CR liest eine Zeile, die nicht mehr stimmt.
@@ -49,7 +49,7 @@
 - `quelle`: Maintainability
 - `pfad`: `spec/lastenheft.md` · „hat die Messung keine Signatur gefunden“
 - `klasse`: messung-im-vertragstext
-- `befund`: Der freigegebene Absatz nennt „die Messung“ und „Suchmuster“ im Vertragstext (Ollama-Absatz nennt Messstand im selben Abschnitt). Das ist freigegeben und wird vom Folgeslice [`slice-cr-lastenheft-messstaende`](../plan/planning/open/slice-cr-lastenheft-messstaende.md) gegebenenfalls erfasst; kein Befund gegen den Diff.
+- `befund`: Der freigegebene Absatz nennt „die Messung“ und „Suchmuster“ im Vertragstext (Ollama-Absatz nennt Messstand im selben Abschnitt). Das ist freigegeben und wird vom Folgeslice [`slice-cr-lastenheft-messstaende`](../plan/planning/in-progress/slice-cr-lastenheft-messstaende.md) gegebenenfalls erfasst; kein Befund gegen den Diff.
 - `risiko`: keines für diesen Diff; Hinweis für den Messstände-CR.
 - `verifizierbar`: Review-only.
 
