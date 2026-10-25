@@ -101,7 +101,7 @@ DoD-Abgleich: siehe Tabelle oben; Punkte 1, 2, 4, 5 erfüllt, Punkt 3 (Tag, M2, 
 Carveouts:
 - Neu: none
 - Gelöst: none
-- Unverändert: Carveout 2 (zwei Zusage-Mengen für `ollama`, Anker [`slice-cr-lastenheft-messstaende`](../plan/planning/in-progress/slice-cr-lastenheft-messstaende.md)), im Lead als Grenze benannt
+- Unverändert: Carveout 2 (zwei Zusage-Mengen für `ollama`, Anker [`slice-cr-lastenheft-messstaende`](../plan/planning/done/slice-cr-lastenheft-messstaende.md)), im Lead als Grenze benannt
 
 Nicht ausgeführt:
 - `make test-docker`, `make ci`, `make fullbuild` — Auftrag/Speicher; Produktcode im Diff nur `var version`; Implementer-Belege gelesen. Ersatz: M2 (CI auf dem Push-Tip) mit Zählung der SKIPs

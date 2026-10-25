@@ -13,7 +13,7 @@
 Scope:
 - Slice: [`slice-cr-lastenheft-ollama-cloud-modelle`](../plan/planning/done/slice-cr-lastenheft-ollama-cloud-modelle.md)
 - IDs: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (geändert); [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (unverändert); [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md) (unverändert)
-- Artefakte (Diff `origin/main..HEAD`, 10 Dateien): `spec/lastenheft.md` (+12/−4, fünf Hunks: Zeile 9, 191, 407 bis 418, 460, 1604 bis 1606), Slice-Plan (neu in `in-progress/`), `roadmap.md`, `carveouts.md` (+2), `open/README.md`, `in-progress/slice-cr-lastenheft-messstaende.md`, `welle-ollama-cloud-modelle.md`, drei Review-Reports. Kein Go-Code, kein Docker-Pfad, keine Importregel. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+- Artefakte (Diff `origin/main..HEAD`, 10 Dateien): `spec/lastenheft.md` (+12/−4, fünf Hunks: Zeile 9, 191, 407 bis 418, 460, 1604 bis 1606), Slice-Plan (neu in `in-progress/`), `roadmap.md`, `carveouts.md` (+2), `open/README.md`, `done/slice-cr-lastenheft-messstaende.md`, `welle-ollama-cloud-modelle.md`, drei Review-Reports. Kein Go-Code, kein Docker-Pfad, keine Importregel. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 
 ### Sensors (selbst gefahren)
 
@@ -140,7 +140,7 @@ Die Zusage-Menge ist [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-d
 | Befund | Urteil | Beleg |
 |---|---|---|
 | F-1 bis F-4 (MEDIUM, Reichweite, Aufrufbedingungen, Bedingungen am zweiten Absatz, Nicht-zugesagt-Listen) | behoben (Fassung 2), Rest F-4 in N-1 | Nachlauf 1 Tabelle „Prüfung der Vorreport-Befunde“; von mir gegen das Lastenheft `0.23.2` gelesen (Zeilen 414, 418) |
-| F-5 (MEDIUM, zwei Zusage-Mengen) | **begründet angenommen**, nicht behoben | Wortlaut weist die Trennung aus („Diese Zusage gilt für den Weg zu Cloud-Modellen; sie ist von der Zusage zur Installation … getrennt“); Carveout 2 mit Plan-Anker [`slice-cr-lastenheft-messstaende`](../plan/planning/in-progress/slice-cr-lastenheft-messstaende.md) und Trigger; Frage G6 Standard „Carveout, Welle-Closure prüft vor dem Release-Cut“. Abweichung von [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) *Folgepflicht* („der Messstand im Absatz entfällt“) ist als Planänderung ausgewiesen und freigegeben (Frage F3); der Messstand steht weiter in Zeile 412 |
+| F-5 (MEDIUM, zwei Zusage-Mengen) | **begründet angenommen**, nicht behoben | Wortlaut weist die Trennung aus („Diese Zusage gilt für den Weg zu Cloud-Modellen; sie ist von der Zusage zur Installation … getrennt“); Carveout 2 mit Plan-Anker [`slice-cr-lastenheft-messstaende`](../plan/planning/done/slice-cr-lastenheft-messstaende.md) und Trigger; Frage G6 Standard „Carveout, Welle-Closure prüft vor dem Release-Cut“. Abweichung von [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) *Folgepflicht* („der Messstand im Absatz entfällt“) ist als Planänderung ausgewiesen und freigegeben (Frage F3); der Messstand steht weiter in Zeile 412 |
 | F-6 (LOW, Bindung) | behoben | Fassung 2, Zeile 418: „Lauscht der Dienst nur auf der Loopback-Adresse …, ist er … ohne einen Relay des Nutzers nicht erreichbar; für einen Dienst mit anderer Bindung gibt es keine Zusage“ |
 | F-7 (LOW, Carveouts) | behoben | `carveouts.md` +2 Zeilen (Prüfung 3) |
 | F-8 (LOW, Zeilenangaben im Messstände-CR) | behoben | Diff `slice-cr-lastenheft-messstaende.md`: Zeilen 1101, 433, 1509 und 1584, 412, 472, 474, 1588 bis 1596 auf den Stand `0.23.2`; am Bestand gegengelesen (`gemessen ohne Docker-Kommunikation` in Zeile 1101). Rest-Hinweis V-5 | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
@@ -178,7 +178,7 @@ Das Lastenheft `0.23.2` sagt zu, was die tieferen Straten und der Code nicht tra
 Das Inventar [`carveouts.md`](../plan/planning/in-progress/carveouts.md) trägt beide als **temporär** (Diff +2 Zeilen):
 
 - **Carveout 1:** Plan-Anker [`welle-ollama-cloud-modelle`](../plan/planning/done/welle-ollama-cloud-modelle.md) §4 (Folge-Slices `slice-v1-devcontainer-ollama-cloud`, `slice-v2-spec-ollama-cloud`, Kennungen vorläufig) und die *Folgepflicht* der ADR; **Trigger:** beide Folge-Slices liegen in `done/`; der Zwischenzustand erreicht keinen Release. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
-- **Carveout 2:** Plan-Anker [`slice-cr-lastenheft-messstaende`](../plan/planning/in-progress/slice-cr-lastenheft-messstaende.md) (Datei besteht, Frage 1); **Trigger:** der Slice liegt in `done/`; die Bindung vor dem Release-Cut entscheidet der Projektinhaber (Frage G6).
+- **Carveout 2:** Plan-Anker [`slice-cr-lastenheft-messstaende`](../plan/planning/done/slice-cr-lastenheft-messstaende.md) (Datei besteht, Frage 1); **Trigger:** der Slice liegt in `done/`; die Bindung vor dem Release-Cut entscheidet der Projektinhaber (Frage G6).
 
 Urteil: **erfüllt**. Beide Spannungen sind ausgewiesen, haben Plan-Anker und Trigger; die Reihenfolge CR → Code → Spezifikation ist die der ADR. Zwei Anmerkungen ohne Blockade:
 
@@ -196,7 +196,7 @@ Die ADR-*Folgepflicht* nennt außerdem `CHANGELOG.md` und die Golden-Zeile in `h
 | `spec/lastenheft.md` | ja (Stellen 1 bis 7, Zeilen am Stand vor dem CR gelesen) |
 | `docs/plan/planning/in-progress/roadmap.md` | ja |
 | `docs/plan/planning/open/README.md` | ja |
-| `docs/plan/planning/in-progress/slice-cr-lastenheft-messstaende.md` | ja | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+| `docs/plan/planning/done/slice-cr-lastenheft-messstaende.md` | ja | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 | `docs/plan/planning/welle-ollama-cloud-modelle.md` | ja |
 | `docs/plan/planning/in-progress/carveouts.md` | ja |
 | `docs/plan/planning/done/slice-cr-lastenheft-ollama-cloud-modelle.md` („diese Datei“) | ja | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
@@ -211,7 +211,7 @@ Die Aussagen der Plan-Tabelle zu den Zeilen des Messstände-CR (412, 472, 474, 1
 
 - **V-2 (LOW)** `slice-cr-lastenheft-ollama-cloud-modelle.md` §6: Risiko 1 („weiter offen bis zum zweiten Nachlauf-Review“), Risiko 4 („weiter offen: Nachlauf-Review über genau den Diff der Fassung 3 … vor dem Verifier“), Risiko 5/7 sind Zustandsmarker mit Ablaufpunkt; das zweite Nachlauf-Review liegt vor. Ebenso §1 Kopf der Fassung 3: „Es folgen das Nachlauf-Review über genau diesen Diff und der Verifier.“ Aufgabe: auf den Ist-Stand setzen (Planner, mit der Closure; jedes Risiko braucht dort einen Ausgang). <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 - **V-3 (LOW)** §7 *Beleg-Tabelle* fehlt (DoD Punkt 2); §6 Risiko 4 verweist für die Aufträge an den Code-Slice auf „Welle-Datei §5“, die Aufträge stehen in Welle §4, Zeile `slice-v1-devcontainer-ollama-cloud` (§5 enthält Abhängigkeiten und Fragen). Die Herkunftstabellen in §1 tragen die Beleg-Funktion; entweder §7 verweist auf sie, oder die Tabelle wird aus dem Abschnitt „Satz-gegen-Zusage-Menge“ dieses Reports übernommen. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
-- **V-5 (INFO)** `in-progress/slice-cr-lastenheft-messstaende.md` Zeile 29: „… der vor diesem Slice läuft und Lastenheft `0.23.0` erzeugt“; der CR endet bei `0.23.2`. Der Satz beschreibt die Vergabe beim Start; mit Zustandswort „erzeugt“ ist er für einen Leser der Closure missverständlich. Vorschlag: „… ab `0.23.0`, am Stand `0.23.2` gelesen“. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+- **V-5 (INFO)** `done/slice-cr-lastenheft-messstaende.md` Zeile 29: „… der vor diesem Slice läuft und Lastenheft `0.23.0` erzeugt“; der CR endet bei `0.23.2`. Der Satz beschreibt die Vergabe beim Start; mit Zustandswort „erzeugt“ ist er für einen Leser der Closure missverständlich. Vorschlag: „… ab `0.23.0`, am Stand `0.23.2` gelesen“. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 
 ---
 

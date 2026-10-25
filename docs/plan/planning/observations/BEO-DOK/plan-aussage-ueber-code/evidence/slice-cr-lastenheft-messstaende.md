@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-cr-lastenheft-messstaende`](../../../../in-progress/slice-cr-lastenheft-messstaende.md)
+**Vorgang:** [`slice-cr-lastenheft-messstaende`](../../../../done/slice-cr-lastenheft-messstaende.md)
 **Fund:** Verification-Report [`2026-10-25-slice-cr-lastenheft-messstaende-verify`](../../../../../../reviews/2026-10-25-slice-cr-lastenheft-messstaende-verify.md) V-2 (LOW): Nach der Fix-Runde zum Review trug `open/README.md` Zeile 33 noch „Review, Verifier und Closure stehen aus“ (Zustandsmarker mit Ablaufpunkt, nicht auf den Ist-Stand gesetzt); die Plan-Tabelle führte `open/README.md` mit „Zeile 33 und Zeile 73“, der Diff berührt nur Zeile 33; `carveouts.md` stand als „update“ in der Tabelle, hat im Diff bis zur Closure keine Änderung. Behoben in `16f71344`.
 
 **Beleg-Qualität:** am Baum bestätigt (Verifier: `git diff --stat 0d50bfd7..HEAD` gegen die Plan-Tabelle). Rückfall nach der Verkörperung in `AGENTS.md` §3.10, Klasse „Zustandsmarker nach der letzten Fix-Runde“. Der Ausgang wird nicht zugewiesen.

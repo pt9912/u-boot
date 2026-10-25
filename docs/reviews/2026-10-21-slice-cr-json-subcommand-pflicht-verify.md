@@ -116,7 +116,7 @@ Der Diff umfasst 13 Dateien. Eine davon kommt aus dem fremden Commit `cecf6876`:
 - `roadmap.md`
 - der Slice (Rename `open/` → `in-progress/`)
 - `open/README.md`
-- die Messstände-CR [`slice-cr-lastenheft-messstaende`](../plan/planning/in-progress/slice-cr-lastenheft-messstaende.md)
+- die Messstände-CR [`slice-cr-lastenheft-messstaende`](../plan/planning/done/slice-cr-lastenheft-messstaende.md)
 - der Review-Report (Zeile `docs/reviews/`)
 - `benutzerhandbuch.md`
 - `jsonenvelope_test.go`

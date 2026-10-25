@@ -1,7 +1,7 @@
 # Messprotokoll: CI-Lauf der Integrationstests auf `amd64` (Ollama, verschachteltes Podman und Docker)
 
 Beleg M5 des Slice
-[`slice-cr-lastenheft-messstaende`](../../plan/planning/in-progress/slice-cr-lastenheft-messstaende.md)
+[`slice-cr-lastenheft-messstaende`](../../plan/planning/done/slice-cr-lastenheft-messstaende.md)
 (Einordnung der Zusage-Menge: dort, §1 *Messlage* und *Herkunft jedes Satzes*). Die Messung ist das Lesen eines
 vorhandenen CI-Logs; es gibt kein Skript und keine Rohdatei außer dem Auszug unten. Gelesen am 2026-10-25 mit
 `gh api repos/pt9912/u-boot/actions/jobs/121082471598/logs`; GitHub bewahrt das Log nur begrenzt auf, der Auszug
