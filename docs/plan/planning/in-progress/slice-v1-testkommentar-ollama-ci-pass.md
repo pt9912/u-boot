@@ -57,7 +57,7 @@ Die Tabelle nennt jede Datei, die der Diff berührt ([`AGENTS.md`](../../../../A
 
 | Datei / Komponente | Änderungs-Art | Begründung / Fundstelle |
 |---|---|---|
-| `internal/e2e/sandbox_devcontainer_docker_test.go` | update (nur Kommentarzeilen 1246 bis 1253) | Doc-Kommentar vor `TestE2E_SandboxDevcontainer_Ollama`; [`AGENTS.md`](../../../../AGENTS.md) §3.7. Kein Test, der neu hinzukommt: der Test selbst ändert sich nicht, und ein Kommentar hat keinen Test (die Kopplung an `-v` ist eine Grenze des Aufrufs, keine Bedingung in Spec oder Handbuch, §3.10 letzter Punkt gilt nicht) |
+| `internal/e2e/sandbox_devcontainer_docker_test.go` | update (nur Kommentarzeilen 1246 bis 1254, gelesen nach der Fix-Runde) | Doc-Kommentar vor `TestE2E_SandboxDevcontainer_Ollama`; [`AGENTS.md`](../../../../AGENTS.md) §3.7. Kein Test, der neu hinzukommt: der Test selbst ändert sich nicht, und ein Kommentar hat keinen Test (die Kopplung an `-v` ist eine Grenze des Aufrufs, keine Bedingung in Spec oder Handbuch, §3.10 letzter Punkt gilt nicht) |
 | `docs/plan/planning/in-progress/slice-v1-testkommentar-ollama-ci-pass.md` | neu (dieser Plan), später update (DoD, §7), `git mv` nach `done/` | Lifecycle; Move getrennt vom Inhalt ([`AGENTS.md`](../../../../AGENTS.md) §3.3) |
 | `docs/plan/planning/open/README.md` | update (Zeile im *Bestand*) | Tabelle führt jeden Slice; Zeile gelesen: Spalten *Datei* und *Gegenstand* |
 | `docs/plan/planning/observations/BEO-CLI/kommentar-beschreibt-abwesendes/` | update bei der Closure (neue Datei `evidence/slice-v1-testkommentar-ollama-ci-pass.md`, `state.md`) | neunter Beleg; die Beobachtung ist verkörpert (`AGENTS.md §3.9`); bisher acht Dateien in `evidence/`, gezählt am 2026-10-25 |
@@ -112,7 +112,7 @@ Beleg-Tabelle, vom Planner vorgelegt (jede Zeile ist eine Fundstelle, die der Im
 
 Mögliche Fassung für den Schluss des Kommentars (nur Richtung; der Implementer prüft jede Aussage vor dem Eintrag selbst): „The test needs network access and about 1.5 GB of download. Its pass shows in the CI output only while `test-docker` in `repo.mk` runs `go test -v`.“
 
-**Umsetzung (Implementer):** Beleg-Tabelle gegen den Stand gelesen; der Schluss des Kommentars lautet jetzt „… about 1.5 GB of download. The architecture is not asserted in the test; its pass shows in the CI output only while the `test-docker` target in `repo.mk` runs `go test -v`.“ (`internal/e2e/sandbox_devcontainer_docker_test.go`, Zeilen 1252 bis 1254).
+**Umsetzung (Implementer):** Beleg-Tabelle gegen den Stand gelesen; der Schluss des Kommentars lautet jetzt „… about 1.5 GB of download. The test asserts no architecture; the test's pass appears in the CI output only while the `test-docker` target in `repo.mk` runs `go test -v`.“ (`internal/e2e/sandbox_devcontainer_docker_test.go`, Zeilen 1252 bis 1254).
 
 | Satz im Kommentar | Fundstelle (gelesen) |
 |---|---|

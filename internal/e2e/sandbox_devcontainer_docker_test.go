@@ -1249,8 +1249,8 @@ ollama list | grep -E '^smollm2:135m' > /dev/null && echo MODEL_SURVIVES_CONTAIN
 // loopback only (the container address refuses), runs on the CPU, pulls a
 // model through the two default-allowlist hosts while an unlisted host stays
 // blocked; the model survives the removal of the container. The test needs
-// network access and about 1.5 GB of download. The architecture is not
-// asserted in the test; its pass shows in the CI output only while the
+// network access and about 1.5 GB of download. The test asserts no
+// architecture; the test's pass appears in the CI output only while the
 // `test-docker` target in `repo.mk` runs `go test -v`.
 func TestE2E_SandboxDevcontainer_Ollama(t *testing.T) {
 	requireDocker(t)
