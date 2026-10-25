@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+Ohne Welle in Arbeit: [`slice-v1-testkommentar-ollama-ci-pass`](slice-v1-testkommentar-ollama-ci-pass.md) (Testkommentar vor `TestE2E_SandboxDevcontainer_Ollama` nennt die Kopplung an `-v`; [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features); hält keinen Release auf).
 
 ## Nächste Wellen
 
