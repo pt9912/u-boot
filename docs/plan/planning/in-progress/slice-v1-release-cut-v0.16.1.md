@@ -178,7 +178,52 @@ Der Implementer bereitet vor (Commits lokal, Gates lokal) und **führt M1 und M5
 
 ### Umsetzung (Implementer)
 
-*(wird vom Implementer gefüllt: Commits, M0, Ist gegen Plan, Sensoren mit Exit-Codes, M-T mit Ausgabe, Abgleich der Plan-Tabelle gegen `git diff --stat <Plan-Commit>..HEAD`, Kommentar-Selbstcheck [`AGENTS.md`](../../../../AGENTS.md) §3.9.)*
+**Commits** (Plan-Commit `f9cc5e87`): `c238bc71` reiner Move nach `in-progress/` · `cb62453c` Verweis-Nachzug · `1d092bd0` Start (Verantwortlich, Entscheidungen in §7, Roadmap-Zeiger, Zustandsmarker in `open/README.md`) · `bde533fc` **Cut-Commit**. Keine Commit-Message trägt eine `SPEC-`/`ARC-`Kennung. Kein Push, kein Tag.
+
+**M0:** `date +%F` = `2026-10-25` (Ortszeit), gelesen beim Start und nach dem Cut-Commit; `CHANGELOG.md` (`## [0.16.1] - 2026-10-25`), Tabellenzeile beider READMEs und Handbuch-`Stand` tragen dasselbe Datum (das Handbuch-`Stand` stand schon auf `2026-10-25`). Der Hauptagent wiederholt M0 vor M1 und vor M5.
+
+**Diff-Befehl aus §1** (`git diff v0.16.0..HEAD -- ':!docs' ':!spec' ':!*.md'`): vor dem Cut-Commit genau eine Datei, `internal/e2e/sandbox_devcontainer_docker_test.go`, Änderungszeilen nur `//`-Zeilen; nach dem Cut-Commit (`bde533fc`) `--stat`: `Dockerfile` (3 Zeilen), `cmd/uboot/main.go` (1 Zeile), `repo.mk` (3 Zeilen) und die Testdatei, sonst nichts; die Zeilen der drei Versionsstellen sind `0.16.0-dev` → `0.16.1-dev` samt Kommentar-Erwähnungen. Die Aussage „Code des Binary unverändert“ trägt. Vor dem Handoff wiederholt (siehe unten, Abgleich).
+
+**Ist gegen Plan:** Der Lead steht so im CHANGELOG, wie §3 ihn vorschlägt (Wortlaut unverändert, kein Zeichen verdichtet); der Eintrag unter `### Changed` ist wörtlich übernommen (Frage 3), die Kommentar-Änderung der Testdatei hat keinen Eintrag (Frage 4). Die Tabellenzeile `v0.16.1` steht in beiden READMEs nach der Zeile `v0.16.0` (EN wörtlich nach §3, DE sinngleich mit dem Namen „Zusagen in Worten“). Der Status-Block beider READMEs wurde nur in der Versionsangabe geändert (`v0.16.1`); die Sätze zur Zusage-Menge und zur CI standen schon im Stand des Lastenheft `0.24.0` (gelesen, README.md Zeilen 13 und 16). Handbuch: fünf Versionsstellen (`:4`, `:82`, `:108`, `:135`, `:3207`), `Stand` unverändert gleich dem Tag-Datum. `releasing.md` ohne Diff (Zeiger „zuletzt“ `:56`–`:57` nennt `v0.16.0`, richtig bis zur Closure). Abweichung vom Plan: keine. Beim Lesen aufgefallen und **nicht** geändert (Plan: „kein Diff, gelesen“): der Status-Block von `README.md` Zeile 13 sagt für `ollama` „measured on Colima, arm64, in two runs on one Linux x86_64 host and in one CI run on `amd64`“, der Lead sagt für Colima „probe image written by hand; the Dockerfile that `u-boot` generates was not measured on Colima“; der Reviewer prüft, ob die Zeile neben dem Lead zu breit ist (Beleg-Tabelle, Zeile Colima).
+
+**Sensoren** (Docker, Host `linux/amd64`; Exit-Codes der `make`-Prozesse; auf `bde533fc`, `make gates` zusätzlich auf dem Arbeitsbaum davor):
+
+| Sensor | Ergebnis |
+|---|---|
+| `make gates` | Exit 0: `lint` 0 issues; `coverage-gate` 92,10 % gegen 90 %; `docs-check` 895 Dateien, 0 Befunde; `baseline-verify` v6.18.1 OK, 54 Dateien; `ablage-pruefung` 26 Fälle, 0 Fehlschläge. Der Lauf traf den Arbeitsbaum des Cut-Commits (Inhalt gleich `bde533fc`); nach den letzten Doku-Commits läuft er erneut (siehe unten) |
+| `make ci` | Exit 0: `govulncheck` „No vulnerabilities found.“; `image-scan`: `u-boot:latest (debian 12.15)` 0, `usr/local/bin/u-boot` 0 |
+| `make build VERSION=0.16.1` | Exit 0; `docker run --rm u-boot:latest --version` = `u-boot version 0.16.1`; OCI-Label `org.opencontainers.image.version` = `0.16.1` (lokal, nicht gepusht) |
+| `make doc-immutable RANGE="v0.16.0..HEAD"` | Exit 0, 895 Dateien, 0 Befunde |
+| `make doc-trace` | Exit 0, 84 Anforderungen, 0 Waisen |
+| `make doc-commits RANGE="origin/main..HEAD"` | Exit 0, 895 Dateien, 0 Befunde |
+| `make doc-planning` | Exit 0, 895 Dateien, 0 Befunde |
+| `make fullbuild` | **nicht gelaufen**: Auftrag nennt `make ci` und den Bau mit `VERSION=0.16.1`; `fullbuild` ist `ci` plus Runtime-Image-Build, beides gelaufen (`ci`, `build`). `publish` baut das Image mit dem Tag erneut |
+| `make test-docker` | **nicht gelaufen**, gezielt: Paket-Zeitlimit und Netz ([`BEO-E2E/e2e-paket-am-zeitlimit`](../observations/BEO-E2E/e2e-paket-am-zeitlimit/observation.md)); der Produktcode-Diff gegen `v0.16.0` ist eine Zeile (`var version`), die Docker-Tests laufen in M2 auf dem Push-Tip. Das DoD-Kriterium „gelaufen oder Auslassung begründet“ ist mit dieser Begründung erfüllt; die Zahl der übersprungenen Tests liefert M2 |
+| `make verify-depguard` | **nicht gelaufen**: keine Importregel und kein Go-Import berührt |
+
+**M-T ausgeführt (Trockenlauf des Tap-Pfads).** Befehl: `docker run -i --rm --network none -v /Development/u-boot:/src:ro u-boot:test bash < <Skript>` (Image aus `make gates`, Arbeitsbaum schreibgeschützt; Skript im Scratchpad, nicht im Repo; Fixture nach `sumsFull` in `cmd/uboot/homebrew_scripts_test.go`; Stellvertreter für `curl` und `git` im `PATH`). Ausgabe:
+
+```text
+(1)  homebrew-formula-fill.sh v0.16.1 <sums> scripts/homebrew-formula.rb.tmpl <Ausgabe>   exit=0   (vier url-Zeilen mit v0.16.1)
+(2a) tap-formula-check.sh v0.16.1 <Ausgabe>   exit=0
+(2b) tap-formula-check.sh v0.16.0 <Ausgabe>   exit=1
+     tap-nachzug: the u-boot.rb asset of v0.16.0 does not carry four download URLs of v0.16.0 (found 4 url lines, 0 of v0.16.0).
+(2c) tap-formula-check.sh v0.16.1 mit einer URL des Tags v0.16.0: exit=1 (3 von 4 Zeilen mit v0.16.1)
+(3)  tap-nachzug.sh, TAP_TOKEN=dummy, TAG=v0.16.1:   exit=0
+     Protokoll: curl … /releases/download/v0.16.1/u-boot.rb -o <tmp> · git clone --depth 1 … · git diff --quiet -- Formula/u-boot.rb · git … add Formula/u-boot.rb · git … commit -m u-boot 0.16.1 · git push origin HEAD
+     tap-nachzug: pt9912/homebrew-u-boot updated to v0.16.1.
+(3b) tap-nachzug.sh mit TAG=v0.16.0 gegen dieselbe Formel: exit=1, Protokoll nur der curl-Aufruf, 0 clone-Aufrufe, 0 push-Aufrufe
+```
+
+Rot gesehen: (2b), (2c) und (3b) sind die rote Gegenprobe der Prüfung auf den Tag. **Grenze, wie in M-T benannt:** `is_stable == 'true'` und der Workflow-Schritt, der echte `curl` gegen das Release-Asset, der echte `git push` und das Token sind nicht geprobt; der Stellvertreter von `git` meldet immer eine Änderung. Befund: keiner; kein Skript geändert. `tap-check` (M4) ist Sache des Hauptagenten.
+
+**Beleg-Tabelle (Abgleich der Texte):** Jede Aussage des Lead steht in der Tabelle in §3; der Lead ist der Vorschlag aus §3 ohne Änderung. Kein Run-Identifier, keine CI-Aussage zum Push-Tip, keine Sicherheitsaussage, kein Datum außer dem des CI-Laufs (2026-10-25) und dem Release-Datum der Überschrift. Kein „byte-identical“. Das Wort „unified“ steht nur in der Verneinung („not unified“).
+
+**Abgleich der Plan-Tabelle** (`git diff --stat f9cc5e87..HEAD`, Stand nach `bde533fc`): `CHANGELOG.md`, `Dockerfile`, `README.md`, `README.de.md`, `cmd/uboot/main.go`, `repo.mk`, `docs/user/benutzerhandbuch.md`, `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/open/README.md`, dieser Slice — jede Zeile hat einen Plan-Eintrag, jeder Eintrag mit Diff einen Diff. Kein Diff, belegt durch Lesung: `docs/maintainer/releasing.md` (`:56`–`:57` „zuletzt“ `v0.16.0`), `docs/plan/planning/in-progress/carveouts.md` (Zeile 77 „Done“), `spec/lastenheft.md` Zeile 9 (`0.24.0`) und `docs/plan/adr/` (`make doc-immutable` Exit 0), `internal/e2e/sandbox_devcontainer_docker_test.go` (Kommentar-Diff liegt vor dem Plan-Commit), `Dockerfile` Pin `ARG GO_VERSION` und `repo.mk` `TRIVY_VERSION` unverändert (nicht in der `--stat`-Zeile), `.github/workflows/`, `scripts/`, `packaging/`, `Makefile`, `go.mod`, `tools/`, `d-check.mk`, `docs/maintainer/quality.md`, übrige `cmd/uboot/` und `internal/` (nicht in `--stat`). Die Zeilen der Review- und Verification-Reports kommen später (Reviewer, Verifier). Die Suche nach `0.16.0-dev` im Baum außerhalb von Planung, Reviews und Messprotokollen liefert 0 Treffer; `0.16.0` steht außerhalb davon nur in den Tabellenzeilen `v0.16.0` beider READMEs (Geschichte) und im Abschnitt `[0.16.0]` des CHANGELOG.
+
+**Kommentar-Selbstcheck** ([`AGENTS.md`](../../../../AGENTS.md) §3.9): (a) die Kommentare in `repo.mk` und `Dockerfile` nennen den geltenden Wert `0.16.1-dev`, keiner beschreibt Entferntes; der Lead im CHANGELOG ist Release-Prosa, kein Code-Kommentar, und enthält „no longer“ in der Aussage über die Form des Vertragstexts („in words and no longer as the environment of a measurement“) — das ist der Wortlaut des Plans und beschreibt die geltende Form, ausgewiesen für den Reviewer; (b) der alte Wert `0.16.0-dev` steht im Baum nicht mehr außerhalb von Planung, Reviews und Messprotokollen; (c) keine neue Funktion.
+
+**Rot gesehen — Grenze:** Kein Test pinnt die Nummer; eine falsche Versionszeile färbt kein Gate. Die Wächter sind die Prüfung `--version` = Tag im Workflow `publish` (nach dem Push) und die lokale Gegenprobe: `make build VERSION=0.16.1` meldet `0.16.1` (Label `0.16.1`), der Standardbau meldet `0.16.1-dev` (`make gates` baut mit `UBOOT_VERSION=0.16.1-dev`). Für die Lead-Sätze gibt es keinen Wächter im Repo (Aussagen über Zusage und Messlage, belegt durch die Beleg-Tabelle und die Messprotokolle, nicht durch einen Test).
 
 ## 4. Trigger
 
