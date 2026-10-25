@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Ohne Welle in Arbeit: [`slice-cr-lastenheft-messstaende`](../done/slice-cr-lastenheft-messstaende.md) (Lastenheft-CR auf `0.24.0`: Zusage-Menge statt Messstand in [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); hält keinen Release auf).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
