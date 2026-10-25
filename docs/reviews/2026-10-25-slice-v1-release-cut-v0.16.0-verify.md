@@ -2,7 +2,7 @@
 
 * Rolle: Verifier (`harness/verification.md`), frischer Kontext
 * Gegenstand: `git diff 7956e157..HEAD` (HEAD `c2cf2202`; Move `2b5714c7`, Verweis-Nachzug `ea309e70`, Start `e8c42ef1`, Cut `39e4772d`, Umsetzung `f35f2e8c`, Gate-Eintrag `d1c1abc3`, Review-Report `1b28f793`/`b0ba2256`, Fix LOW-1 `c2cf2202`), Slice
-  [`slice-v1-release-cut-v0.16.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.16.0.md) (Minor `v0.16.0`)
+  [`slice-v1-release-cut-v0.16.0`](../plan/planning/done/slice-v1-release-cut-v0.16.0.md) (Minor `v0.16.0`)
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md); Review-Report [`2026-10-25-slice-v1-release-cut-v0.16.0`](2026-10-25-slice-v1-release-cut-v0.16.0.md); Validator-Bericht [`2026-10-24-welle-ollama-cloud-modelle-validierung`](2026-10-24-welle-ollama-cloud-modelle-validierung.md)
 * Nicht Gegenstand: Push, Tag, `publish`, Tap (Hauptagent, M1 bis M6) und die Closure (M8)
 
@@ -92,7 +92,7 @@ Aufgeräumt: das Image `u-boot:latest` (Bau dieser Prüfung) ist entfernt; es be
 ## Verification Evidence (Block nach `harness/verification.md`)
 
 Scope:
-- Slice: [`slice-v1-release-cut-v0.16.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.16.0.md)
+- Slice: [`slice-v1-release-cut-v0.16.0`](../plan/planning/done/slice-v1-release-cut-v0.16.0.md)
 - IDs: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md)
 - Artefakte: `CHANGELOG.md`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`
 

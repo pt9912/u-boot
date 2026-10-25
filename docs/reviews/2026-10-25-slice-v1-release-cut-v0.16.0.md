@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (`.harness/skills/reviewer.md`), frischer Kontext
 * Gegenstand: `git diff 7956e157..HEAD` (HEAD `d1c1abc3`; Move `2b5714c7`, Verweis-Nachzug `ea309e70`, Start `e8c42ef1`, Cut `39e4772d`, Umsetzung `f35f2e8c`, Gate-Eintrag `d1c1abc3`), Slice
-  [`slice-v1-release-cut-v0.16.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.16.0.md)
+  [`slice-v1-release-cut-v0.16.0`](../plan/planning/done/slice-v1-release-cut-v0.16.0.md)
   (Minor `v0.16.0`, Einstufung *Added*/*Changed*, kein Advisory); Muster: Cuts `v0.15.0` und `v0.15.1`
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md), Validator-Bericht [`2026-10-24-welle-ollama-cloud-modelle-validierung`](2026-10-24-welle-ollama-cloud-modelle-validierung.md) (Auflagen A-1 bis A-3)
 * Nicht Gegenstand: DoD-Prüfung (Verifier)
