@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (frischer Kontext), Datum 2026-10-25
 * Gegenstand: Diff `f9cc5e87..HEAD` (Move `c238bc71`, Nachzug `cb62453c`, Start `1d092bd0`, Cut `bde533fc`, Umsetzungsvermerk `34809217`), Slice [`slice-v1-release-cut-v0.16.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.16.1.md)
-* Maßstab: Plan, Beleg-Tabelle (§3), `AGENTS.md` §3.7, §3.9, §3.10, §5 Regel 6, `docs/maintainer/releasing.md`, Lastenheft 0.24.0, Messprotokoll `docs/messungen/slice-cr-lastenheft-messstaende/`. Keine DoD-Prüfung (Verifier).
+* Maßstab: Plan, Beleg-Tabelle (§3), `AGENTS.md` §3.7, §3.9, §3.10, §5 Regel 6, `docs/maintainer/releasing.md`, Lastenheft 0.24.0, Messprotokoll [`slice-cr-lastenheft-messstaende`](../messungen/slice-cr-lastenheft-messstaende/README.md). Keine DoD-Prüfung (Verifier).
 
 ## Zusammenfassung
 
@@ -12,7 +12,7 @@
 
 ### F-1 MEDIUM
 * `kategorie`: MEDIUM
-* `quelle`: Lastenheft 0.24.0 `LH-FA-DEV-007` (Zeile 474), Beobachtung `BEO-DOK/zusage-weiter-als-messung`
+* `quelle`: Lastenheft 0.24.0 [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Zeile 474), Beobachtung `BEO-DOK/zusage-weiter-als-messung`
 * `pfad`: `CHANGELOG.md` · "`podman build` (for images from Docker Hub) and the start of `podman` under Docker are promised on the same two."
 * `klasse`: zusage-weiter-als-fundstelle (Bedingung fehlt)
 * `befund`: Das Lastenheft sagt den Start von `podman` nur auf Hosts zu, die verschachtelte User-Namespaces erlauben (`kernel.apparmor_restrict_unprivileged_userns=0`, in der VM bei Colima) und auf denen `/dev/fuse` und `/dev/net/tun` vorhanden sind; bei Wert `1` endet das Startscript mit Exit-Code `11` (Zeile 474), und `podman build` gilt nur "auf den Hosts, auf denen `podman` ... startet" (Zeile 472). Der Zusagesatz im Lead nennt "the same two" ohne diese Voraussetzung; der Wert `0` erscheint erst im Messsatz darunter, dort als Messumgebung und nicht als Bedingung der Zusage. Die Tabellenzeile in `README.md` (Spalte `v0.16.1`) und `README.de.md` fasst die Zusage ebenso ohne Voraussetzung.
