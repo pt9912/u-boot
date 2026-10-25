@@ -1381,8 +1381,8 @@ build` über den Alias ebenso; ein `RUN` mit Netz zu einem erlaubten Host
 (`apt-get update`) läuft auch hinter der Egress-Restriktion mit der
 Default-Allowlist (gemessen mit `debian:stable-slim`); für `alpine:3` hinter der Restriktion sind Pull und Build gemessen, ein `RUN` mit Netz nicht. Der Blob-Host von Docker Hub kann sich ändern; ein nicht gelisteter Name löst hinter der Restriktion nicht auf. Auf Linux x86_64 (`amd64`, native Docker Engine 29.9.1) läuft ein `podman build` hinter der Restriktion ebenfalls durch (Abschnitt zur Egress-Beschränkung).
 **Zugesagt** ist `podman build` für Images von Docker Hub (`docker.io`) auf einem Linux-Host mit lokaler Engine (`amd64`) und unter Colima (`arm64`). **Nicht
-gemessen:** andere Hosts, Docker Desktop, Podman als Host-Engine; die CI übersprang am 2026-10-25 die Docker-Tests mit `nestedRuntime: podman`, weil der Runner
-`kernel.apparmor_restrict_unprivileged_userns=1` hat. **Nicht zugesagt:** `buildx`, `docker compose` und `# syntax=`-Frontends.
+gemessen:** andere Hosts, Docker Desktop, Podman als Host-Engine; die CI übersprang am 2026-10-25 die Docker-Tests zum Bau mit `podman build` und zum Start von `podman`, weil der Runner
+`kernel.apparmor_restrict_unprivileged_userns=1` hat (der Test zum falschen Pin mit `nestedRuntime: podman` bestand). **Nicht zugesagt:** `buildx`, `docker compose` und `# syntax=`-Frontends.
 
 Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
 `devcontainer.sandbox.onUnavailable` (`warn` ist der Standard, `fail` bricht ab):
@@ -2170,8 +2170,8 @@ ollama run smollm2:135m "Reply with the single word OK."
   sind **zwei Messläufe auf einem Host**; in der CI bestand der Docker-Test der Installation
   (Bau des erzeugten Dockerfiles, Server auf der Loopback-Adresse, `library=cpu`, Pull, Modell
   überlebt das Löschen des Containers) am 2026-10-25 auf einem `amd64`-Runner mit Ubuntu 24.04;
-  die Docker-Tests mit `nestedRuntime: podman` übersprang die CI, weil der Runner
-  `kernel.apparmor_restrict_unprivileged_userns=1` hat. Unter Colima (`arm64`) ist ein von Hand
+  die Docker-Tests zum Bau mit `podman build` und zum Start von `podman` übersprang die CI, weil der Runner
+  `kernel.apparmor_restrict_unprivileged_userns=1` hat (der Test zum falschen Pin mit `nestedRuntime: podman` bestand). Unter Colima (`arm64`) ist ein von Hand
   nachgeschriebenes Probe-Image gemessen, der Bau des erzeugten Dockerfiles nicht. Nicht gemessen: Docker Desktop, Linux hinter einer VM, größere
   Modelle und Mindest-Speicher, ein Start des Servers über die
   `devcontainer.json` (gemessen ist der Start von Hand und der Egress-Start durch die
@@ -2470,7 +2470,7 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   (`amd64`, native Docker Engine 29.9.1, 2026-10-19) in zwei Läufen gemessen, zusammen mit dem
   Feature `ollama`; `podman build` auf `amd64` hinter der Egress-Beschränkung läuft durch, braucht aber
   bei einem Namen außerhalb der Liste etwa 36 Sekunden je Name länger
-  (siehe *Namensauflösung und ihre Grenze* im Abschnitt zur Egress-Beschränkung); die CI übersprang am 2026-10-25 die Docker-Tests mit `nestedRuntime: podman`, weil der Runner `kernel.apparmor_restrict_unprivileged_userns=1` hat.
+  (siehe *Namensauflösung und ihre Grenze* im Abschnitt zur Egress-Beschränkung); die CI übersprang am 2026-10-25 die Docker-Tests zum Bau mit `podman build` und zum Start von `podman`, weil der Runner `kernel.apparmor_restrict_unprivileged_userns=1` hat (der Test zum falschen Pin mit `nestedRuntime: podman` bestand).
   Podman 6 unterstützt nur cgroups v2 (laut Release-Notes, nicht gemessen);
   Hosts mit cgroups v1 sind davon betroffen.
   Unter einer Ubuntu-24.04-VM mit dem Schalter
