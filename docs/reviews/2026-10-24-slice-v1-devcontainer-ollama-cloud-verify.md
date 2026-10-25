@@ -4,7 +4,7 @@
 
 **Gegenstand:** `git diff 8ad49398..HEAD` (Commits `7f082a8a`, `5b983434`, `24711dd3`, `3cd2e700`, `377bc72b`, `490a1a58`), Slice
 [`slice-v1-devcontainer-ollama-cloud`](../plan/planning/done/slice-v1-devcontainer-ollama-cloud.md)
-(Welle [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md)).
+(Welle [`welle-ollama-cloud-modelle`](../plan/planning/done/welle-ollama-cloud-modelle.md)).
 
 **Maßstab:** [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Absatz `ollama-host`, Fassung 0.23.2),
 [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),

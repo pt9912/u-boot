@@ -177,7 +177,7 @@ Das Lastenheft `0.23.2` sagt zu, was die tieferen Straten und der Code nicht tra
 
 Das Inventar [`carveouts.md`](../plan/planning/in-progress/carveouts.md) trägt beide als **temporär** (Diff +2 Zeilen):
 
-- **Carveout 1:** Plan-Anker [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md) §4 (Folge-Slices `slice-v1-devcontainer-ollama-cloud`, `slice-v2-spec-ollama-cloud`, Kennungen vorläufig) und die *Folgepflicht* der ADR; **Trigger:** beide Folge-Slices liegen in `done/`; der Zwischenzustand erreicht keinen Release. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+- **Carveout 1:** Plan-Anker [`welle-ollama-cloud-modelle`](../plan/planning/done/welle-ollama-cloud-modelle.md) §4 (Folge-Slices `slice-v1-devcontainer-ollama-cloud`, `slice-v2-spec-ollama-cloud`, Kennungen vorläufig) und die *Folgepflicht* der ADR; **Trigger:** beide Folge-Slices liegen in `done/`; der Zwischenzustand erreicht keinen Release. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 - **Carveout 2:** Plan-Anker [`slice-cr-lastenheft-messstaende`](../plan/planning/open/slice-cr-lastenheft-messstaende.md) (Datei besteht, Frage 1); **Trigger:** der Slice liegt in `done/`; die Bindung vor dem Release-Cut entscheidet der Projektinhaber (Frage G6).
 
 Urteil: **erfüllt**. Beide Spannungen sind ausgewiesen, haben Plan-Anker und Trigger; die Reihenfolge CR → Code → Spezifikation ist die der ADR. Zwei Anmerkungen ohne Blockade:

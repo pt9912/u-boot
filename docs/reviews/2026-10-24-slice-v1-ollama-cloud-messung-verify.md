@@ -3,7 +3,7 @@
 * Rolle: Verifier (`harness/verification.md`), frischer Kontext
 * Gegenstand: `git diff e60956c3..HEAD` (HEAD `952cb06c`), Slice
   [`slice-v1-ollama-cloud-messung`](../plan/planning/done/slice-v1-ollama-cloud-messung.md)
-  (Welle [`welle-ollama-cloud-modelle`](../plan/planning/welle-ollama-cloud-modelle.md))
+  (Welle [`welle-ollama-cloud-modelle`](../plan/planning/done/welle-ollama-cloud-modelle.md))
 * Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)
 * Review: [`2026-10-24-slice-v1-ollama-cloud-messung.md`](2026-10-24-slice-v1-ollama-cloud-messung.md) (HIGH-1, MEDIUM-1, LOW und INFO in `952cb06c` behoben)
 * Protokoll: [`README.md`](../messungen/slice-v1-ollama-cloud-messung/README.md)
