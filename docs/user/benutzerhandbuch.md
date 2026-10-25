@@ -1379,9 +1379,10 @@ Gemessen ist das mit eingehängtem Volume.
 `RUN` und `COPY` baut kalt, aus dem Layer-Cache und mit `--no-cache`; `docker
 build` über den Alias ebenso; ein `RUN` mit Netz zu einem erlaubten Host
 (`apt-get update`) läuft auch hinter der Egress-Restriktion mit der
-Default-Allowlist (gemessen mit `debian:stable-slim`); für `alpine:3` hinter der Restriktion sind Pull und Build gemessen, ein `RUN` mit Netz nicht. Der Blob-Host von Docker Hub kann sich ändern; ein nicht gelisteter Name löst hinter der Restriktion nicht auf. **Nicht
-gemessen:** andere Hosts, andere Architekturen (amd64), CI, Docker Desktop, Podman als
-Host-Engine. **Nicht zugesagt:** `buildx`, `docker compose` und `# syntax=`-Frontends.
+Default-Allowlist (gemessen mit `debian:stable-slim`); für `alpine:3` hinter der Restriktion sind Pull und Build gemessen, ein `RUN` mit Netz nicht. Der Blob-Host von Docker Hub kann sich ändern; ein nicht gelisteter Name löst hinter der Restriktion nicht auf. Auf Linux x86_64 (`amd64`, native Docker Engine 29.9.1) läuft ein `podman build` hinter der Restriktion ebenfalls durch (Abschnitt zur Egress-Beschränkung).
+**Zugesagt** ist `podman build` für Images von Docker Hub (`docker.io`) auf einem Linux-Host mit lokaler Engine (`amd64`) und unter Colima (`arm64`). **Nicht
+gemessen:** andere Hosts, Docker Desktop, Podman als Host-Engine; die CI übersprang am 2026-10-25 die Docker-Tests mit `nestedRuntime: podman`, weil der Runner
+`kernel.apparmor_restrict_unprivileged_userns=1` hat. **Nicht zugesagt:** `buildx`, `docker compose` und `# syntax=`-Frontends.
 
 Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
 `devcontainer.sandbox.onUnavailable` (`warn` ist der Standard, `fail` bricht ab):
@@ -2155,7 +2156,9 @@ ollama run smollm2:135m "Reply with the single word OK."
     claude`, Kontingent und Kosten, `arm64`, Docker Desktop, Colima, Podman, rootless Docker, ein
     gültiger `OLLAMA_API_KEY`, das Sandbox-Profil, wie `u-boot` es ohne Egress-Restriktion
     erzeugt, andere Modelle und Versionen, abgelaufene oder entfernte Anmeldung.
-- **Grenzen der Messung:** Zwei Messumgebungen (auf dem `amd64`-Host zwei Läufe), Ollama `0.40.6`:
+- **Grenzen der Messung:** Zugesagt ist die Installation auf einem Linux-Host mit lokaler
+  Docker-Engine (`amd64`) und unter Colima (`arm64`); gemessen sind zwei Umgebungen
+  (auf dem `amd64`-Host zwei Läufe), Ollama `0.40.6`:
   Docker 29.5.2 auf Colima 0.10.3 (`arm64`) und, am 2026-10-19, Linux x86_64 (`amd64`) mit
   einer nativen Docker Engine 29.9.1 ohne VM (Kernel 6.8, `kernel.apparmor_restrict_unprivileged_userns=0`,
   `/dev/fuse` und `/dev/net/tun` vorhanden). Auf dem `amd64`-Host baute das erzeugte
@@ -2164,8 +2167,12 @@ ollama run smollm2:135m "Reply with the single word OK."
   überstanden das Löschen des Containers und den Neuaufbau, und die Kombination mit
   `nestedRuntime: podman` und mit `nestedRuntime: docker` baute, ließ die Paketliste unverändert
   und führte einen kleinen verschachtelten Container aus, während der Server und ein Pull liefen. Das
-  sind **zwei Messläufe auf einem Host, kein Lauf in der CI**: Ein CI-Lauf von `amd64` ist nicht
-  gemessen. Nicht gemessen: Docker Desktop, Linux hinter einer VM, größere
+  sind **zwei Messläufe auf einem Host**; in der CI bestand der Docker-Test der Installation
+  (Bau des erzeugten Dockerfiles, Server auf der Loopback-Adresse, `library=cpu`, Pull, Modell
+  überlebt das Löschen des Containers) am 2026-10-25 auf einem `amd64`-Runner mit Ubuntu 24.04;
+  die Docker-Tests mit `nestedRuntime: podman` übersprang die CI, weil der Runner
+  `kernel.apparmor_restrict_unprivileged_userns=1` hat. Unter Colima (`arm64`) ist ein von Hand
+  nachgeschriebenes Probe-Image gemessen, der Bau des erzeugten Dockerfiles nicht. Nicht gemessen: Docker Desktop, Linux hinter einer VM, größere
   Modelle und Mindest-Speicher, ein Start des Servers über die
   `devcontainer.json` (gemessen ist der Start von Hand und der Egress-Start durch die
   Dev-Container-CLI). GPU-Beschleunigung und die Verwaltung von Modellen durch `u-boot`
@@ -2454,7 +2461,8 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   zusätzlich unter Colima (Linux-VM); nur diese beiden Hosts sagt das Lastenheft zu.
   **Nicht geprüft und nicht zugesagt:** Docker Desktop,
   Podman als Host-Engine, VS Code und Codespaces.
-- `nestedRuntime: podman`: Podman 6.1.4 und `podman build` sind unter Docker auf
+- `nestedRuntime: podman`: zugesagt unter Docker auf einem Linux-Host mit lokaler Engine
+  (`amd64`) und unter Colima (`arm64`). Podman 6.1.4 und `podman build` sind unter Docker auf
   Colima (arm64) mit erlaubten verschachtelten User-Namespaces gemessen; für
   amd64 sind Download, Prüfsumme, Signatur und Versionsabfrage unter Emulation
   geprüft. Ein verschachtelter Lauf (`podman run` eines kleinen Images, ohne und
@@ -2462,7 +2470,7 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   (`amd64`, native Docker Engine 29.9.1, 2026-10-19) in zwei Läufen gemessen, zusammen mit dem
   Feature `ollama`; `podman build` auf `amd64` hinter der Egress-Beschränkung läuft durch, braucht aber
   bei einem Namen außerhalb der Liste etwa 36 Sekunden je Name länger
-  (siehe *Namensauflösung und ihre Grenze* im Abschnitt zur Egress-Beschränkung); die CI ist nicht gemessen.
+  (siehe *Namensauflösung und ihre Grenze* im Abschnitt zur Egress-Beschränkung); die CI übersprang am 2026-10-25 die Docker-Tests mit `nestedRuntime: podman`, weil der Runner `kernel.apparmor_restrict_unprivileged_userns=1` hat.
   Podman 6 unterstützt nur cgroups v2 (laut Release-Notes, nicht gemessen);
   Hosts mit cgroups v1 sind davon betroffen.
   Unter einer Ubuntu-24.04-VM mit dem Schalter
