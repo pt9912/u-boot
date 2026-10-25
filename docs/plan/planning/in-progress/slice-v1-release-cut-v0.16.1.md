@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; das Lastenheft `0.24.0` lieferte der CR; dieser Slice ändert `spec/` nicht).
 
-**Verantwortlich:** — bis zum Start (setzt der Implementer beim Übergang nach `in-progress/`); Freigaben: Projektinhaber.
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-25); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-25.
 
@@ -211,6 +211,8 @@ Der Ausgang jedes Risikos wird bei der Closure festgeschrieben.
 ## 7. Closure-Notiz
 
 *(Platzhalter bis zur Closure.)*
+
+**Entscheidungen beim Start** (2026-10-25, Implementer nach dem Auftrag des Hauptagenten; der Projektinhaber hat `v0.16.1` als Patch bestellt (2026-10-25) und die Standards des Plans gelten lassen; ein Wortlaut einer Freigabe zu einzelnen Fragen liegt nicht vor): Frage 1: Lead in der Form aus §3, im CHANGELOG so gesetzt, wie er dort stehen soll; der Hauptagent legt ihn dem Projektinhaber vor M1 im Wortlaut vor. Frage 2: Patch `v0.16.1`, Einstufung *Changed*, kein Advisory — Begründung: kein neuer Befehl, keine neue Option, keine Verhaltensänderung des Binary (der Diff gegen `v0.16.0` außerhalb von `docs/`, `spec/` und `*.md` besteht nur aus `//`-Zeilen einer Testdatei); die Gegenposition (Minor wegen der um Linux `amd64` gewachsenen Zusage-Menge im Vertrag) bleibt benannt und liegt beim Projektinhaber. Frage 3: der Eintrag `[Unreleased]` wandert wörtlich unter `[0.16.1]`. Frage 4: die Änderung des Testkommentars bekommt keinen CHANGELOG-Eintrag und keinen Lead-Satz (ohne Wirkung für den Nutzer). Frage 5: keine Messung vor dem Cut; der Lead nennt die Grenzen (Colima `arm64` nur Probe-Image, `podman` auf `amd64` ohne CI-Gate). Frage 6 (M3): kein Vorab-Tag, direkt stabil. Frage 7: Zeile `v0.16.1` unter *Nächste Wellen* steht seit dem Plan-Commit. Reichweite: Push (M1) und Tag (M5) führt nur der Hauptagent nach ausdrücklicher Freigabe des Projektinhabers; der Implementer pusht und taggt nicht.
 
 **Fragen an den Projektinhaber (gesammelt vom Planner, 2026-10-25; Standard in Klammern, gilt bis zur Antwort):**
 

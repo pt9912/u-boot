@@ -17,13 +17,13 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+**v0.16.1 (Patch-Release ohne Welle-Datei: Lastenheft 0.24.0 nennt die Zusage-Mengen von `ollama` und `podman` im Wortlaut)** — Slice: [`slice-v1-release-cut-v0.16.1`](slice-v1-release-cut-v0.16.1.md) (Push und Tag stehen aus).
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| `v0.16.1` (Patch-Release ohne Welle-Datei: Lastenheft `0.24.0` nennt die Zusage-Mengen von `ollama` und `podman` im Sandbox-Devcontainer im Wortlaut statt als Messstand, Nachzug in Handbuch, READMEs und `CHANGELOG.md`; der Code des Binary bleibt unverändert; Einstufung *Changed*) | Auftrag des Projektinhabers (eingetreten: Patch-Release, 2026-10-25); die Inhalts-Slices [`slice-cr-lastenheft-messstaende`](../done/slice-cr-lastenheft-messstaende.md) und [`slice-v1-testkommentar-ollama-ci-pass`](../done/slice-v1-testkommentar-ollama-ci-pass.md) liegen in `done/` (eingetreten) | [`slice-v1-release-cut-v0.16.1`](../in-progress/slice-v1-release-cut-v0.16.1.md) (Plan in `open/`); Push und Tag je nach Freigabe des Projektinhabers | S |
+| `v0.16.1` (Patch-Release ohne Welle-Datei: Lastenheft `0.24.0` nennt die Zusage-Mengen von `ollama` und `podman` im Sandbox-Devcontainer im Wortlaut statt als Messstand, Nachzug in Handbuch, READMEs und `CHANGELOG.md`; der Code des Binary bleibt unverändert; Einstufung *Changed*) | Auftrag des Projektinhabers (eingetreten: Patch-Release, 2026-10-25); die Inhalts-Slices [`slice-cr-lastenheft-messstaende`](../done/slice-cr-lastenheft-messstaende.md) und [`slice-v1-testkommentar-ollama-ci-pass`](../done/slice-v1-testkommentar-ollama-ci-pass.md) liegen in `done/` (eingetreten) | [`slice-v1-release-cut-v0.16.1`](../in-progress/slice-v1-release-cut-v0.16.1.md) (Slice in `in-progress/`); Push und Tag je nach Freigabe des Projektinhabers | S |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 
