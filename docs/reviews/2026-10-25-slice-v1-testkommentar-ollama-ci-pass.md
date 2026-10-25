@@ -8,7 +8,7 @@
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-testkommentar-ollama-ci-pass`](../plan/planning/in-progress/slice-v1-testkommentar-ollama-ci-pass.md): Befund, DoD, Plan-/Beleg-Tabelle, Risiken, §7
+- [`slice-v1-testkommentar-ollama-ci-pass`](../plan/planning/done/slice-v1-testkommentar-ollama-ci-pass.md): Befund, DoD, Plan-/Beleg-Tabelle, Risiken, §7
 - [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md) Entscheidung 10 (gelesen, unverändert)
 - [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
 - `AGENTS.md` §3.7, §3.9, §3.10

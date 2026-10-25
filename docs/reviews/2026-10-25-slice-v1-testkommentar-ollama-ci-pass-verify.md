@@ -4,7 +4,7 @@
 
 **Gegenstand:** `git diff 09ddacdd..HEAD` (Inhalt `18c6a68c`, Fix-Runde `941010d0`)
 
-**Eingang:** [`slice-v1-testkommentar-ollama-ci-pass`](../plan/planning/in-progress/slice-v1-testkommentar-ollama-ci-pass.md) (DoD, Plan-/Beleg-Tabelle, Risiken, §7), Review-Report [`2026-10-25-slice-v1-testkommentar-ollama-ci-pass`](2026-10-25-slice-v1-testkommentar-ollama-ci-pass.md) (F-1 bis F-4), [`harness/verification.md`](../../harness/verification.md), Bezug [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features).
+**Eingang:** [`slice-v1-testkommentar-ollama-ci-pass`](../plan/planning/done/slice-v1-testkommentar-ollama-ci-pass.md) (DoD, Plan-/Beleg-Tabelle, Risiken, §7), Review-Report [`2026-10-25-slice-v1-testkommentar-ollama-ci-pass`](2026-10-25-slice-v1-testkommentar-ollama-ci-pass.md) (F-1 bis F-4), [`harness/verification.md`](../../harness/verification.md), Bezug [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features).
 
 **Verdikt:** DoD erfüllt, Review-Findings F-1 bis F-3 behoben, F-4 belegt. Keine Abweichung gegen den Plan, die ein Rückführen verlangt. Zwei Hinweise (V-1, V-2, beide LOW/INFO) und die Closure-Liste für den Planner unten.
 
