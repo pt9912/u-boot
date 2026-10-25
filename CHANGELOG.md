@@ -11,6 +11,13 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-10-25
+
+Patch release. **The Lastenheft (0.24.0) now states where `ollama` and `podman` are promised in the sandbox devcontainer, in words and no longer as the environment of a measurement. The code of the binary is unchanged; only its version string differs.**
+`ollama` (the installation, CPU only) is promised on a Linux host (`amd64`) with a local Docker engine and on Colima (`arm64`); `podman build` (for images from Docker Hub) and the start of `podman` under Docker are promised on the same two. Cloud models of Ollama and `ollama-host` stay promised only on a Linux host (`amd64`) with a local Docker engine, as in `[0.16.0]`; the two sets of `ollama` are kept apart, not unified. Every other host and engine stays not promised.
+**What is measured, and what is not:** `ollama` on Linux `amd64`: two runs on one Linux x86_64 host and one passing CI run on an `amd64` runner (Ubuntu 24.04, 2026-10-25). `podman build` and the start of `podman` on Linux `amd64`: measured on Linux x86_64 with `kernel.apparmor_restrict_unprivileged_userns=0`; **the CI has no gate for them**: its runner has the value `1`, so the CI skips the tests for `podman build` and for the start of `podman`. Colima (`arm64`): the promise for `ollama` stays as before and rests on a probe image written by hand; the Dockerfile that `u-boot` generates was not measured on Colima. The user manual records these limits.
+No new command and no new option. Lastenheft 0.24.0.
+
 ### Changed
 
 - The Lastenheft (0.24.0) states the promised conditions of the feature `ollama` and of `podman` in the sandbox devcontainer as sets instead of as the environment of a measurement: `ollama` is promised on a Linux host (`amd64`) with a local Docker engine and on Colima (`arm64`), `podman build` (for images from Docker Hub) and the start of `podman` on the same two. The two sets of `ollama` that the "Limit of the Lastenheft" of `0.16.0` names remain (the installation: Linux `amd64` and Colima `arm64`; cloud models and host connection: Linux `amd64` only); the Lastenheft now states both in its wording instead of as the environment of a measurement and keeps them apart, it does not unify them. Linux `amd64` is now promised for the installation of `ollama` (two runs on one host and a passing CI run) and for `podman`; the promise for Colima (`arm64`) stays, and every other host and engine stays not promised. The user manual records that the CI passed the Docker test of the `ollama` installation on `amd64` and skipped the tests for `podman build` and for the start of `podman` because its runner restricts nested user namespaces.
@@ -1547,7 +1554,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.16.1...HEAD
+[0.16.1]: https://github.com/pt9912/u-boot/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/pt9912/u-boot/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/pt9912/u-boot/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/pt9912/u-boot/compare/v0.14.0...v0.15.0
