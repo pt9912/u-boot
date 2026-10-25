@@ -58,7 +58,7 @@ Die Tabelle nennt jede Datei, die der Diff berührt ([`AGENTS.md`](../../../../A
 | Datei / Komponente | Änderungs-Art | Begründung / Fundstelle |
 |---|---|---|
 | `internal/e2e/sandbox_devcontainer_docker_test.go` | update (nur Kommentarzeilen 1246 bis 1253) | Doc-Kommentar vor `TestE2E_SandboxDevcontainer_Ollama`; [`AGENTS.md`](../../../../AGENTS.md) §3.7. Kein Test, der neu hinzukommt: der Test selbst ändert sich nicht, und ein Kommentar hat keinen Test (die Kopplung an `-v` ist eine Grenze des Aufrufs, keine Bedingung in Spec oder Handbuch, §3.10 letzter Punkt gilt nicht) |
-| `docs/plan/planning/open/slice-v1-testkommentar-ollama-ci-pass.md` | neu (dieser Plan), später update (DoD, §7), `git mv` nach `done/` | Lifecycle; Move getrennt vom Inhalt ([`AGENTS.md`](../../../../AGENTS.md) §3.3) |
+| `docs/plan/planning/in-progress/slice-v1-testkommentar-ollama-ci-pass.md` | neu (dieser Plan), später update (DoD, §7), `git mv` nach `done/` | Lifecycle; Move getrennt vom Inhalt ([`AGENTS.md`](../../../../AGENTS.md) §3.3) |
 | `docs/plan/planning/open/README.md` | update (Zeile im *Bestand*) | Tabelle führt jeden Slice; Zeile gelesen: Spalten *Datei* und *Gegenstand* |
 | `docs/plan/planning/observations/BEO-CLI/kommentar-beschreibt-abwesendes/` | update bei der Closure (neue Datei `evidence/slice-v1-testkommentar-ollama-ci-pass.md`, `state.md`) | neunter Beleg; die Beobachtung ist verkörpert (`AGENTS.md §3.9`); bisher acht Dateien in `evidence/`, gezählt am 2026-10-25 |
 | `docs/plan/planning/done/slice-cr-lastenheft-messstaende.md` | unverändert | §7 *Folge-Schritte* (b) benennt diesen Schritt; gelesen: Zeile 309; die Datei ist `done/` und trägt den Hinweis bereits, die Verweise auf diesen Slice zieht `make slice-mv` bei der Closure nach, falls nötig |
