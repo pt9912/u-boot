@@ -16,7 +16,7 @@ Anlass: Review-Finding F-15 ([`2026-10-19-slice-v1-devcontainer-ollama-amd64-mes
 
 **Berührte Spec-Stellen:** — (Lastenheft ist Rang 1 und ändert Anforderungstexte und seine Historie; `SPEC-*` und `ARC-*` bleiben unverändert, gelesen in §3). Der Verweis zeigt aufwärts: Das Lastenheft nennt diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** Implementer (Start 2026-10-25); Freigabe: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-19; auf den Ist-Stand nach `v0.16.0` fortgeschrieben am 2026-10-25 (Lastenheft `0.23.2`, Zeilen und Zitate am Bestand gelesen).
 
@@ -229,7 +229,28 @@ DoD vollständig, Review-Report (und Nachlauf-Review, falls eine Fix-Runde Laste
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt.)*
+Reihenfolge dieser Sektion: Version und Start · Freigabe je Stelle · Vorab-Suche mit Fundstellen · Abgleich Lastenheft gegen §1 · Verifikation mit Exit-Codes · Closure (Closure-Notiz wird bei der Closure gefüllt).
+
+### Version und Start
+
+Start am 2026-10-25 (`date +%F`, Ortszeit). Versionsfeld gelesen: `0.23.2` (Zeile 9), letzte Historie-Zeile `0.23.2` (Zeile 1606). Zeilen 412, 414, 418, 472, 474 und 1604 bis 1606 wie in §1 zitiert (Zeichen für Zeichen: *Alt* der Stellen 1 bis 4 steht im Lastenheft `0.23.2`, `grep -F` beziehungsweise `grep -F -x` je 1 Treffer). Vergeben: **`0.24.0`** (Frage 7, Entscheidung des Projektinhabers). `in-progress/` trug vorher nur `carveouts.md`, `README.md`, `roadmap.md`. Die Datei hat 1613 Zeilen (nicht 1606, wie §3 vermerkt): nach der Historie-Tabelle folgt ab Zeile 1607 ein Schlussabsatz (Status-Wechsel `Entwurf` nach `Accepted`); die Zeilen 9 bis 1606 stimmen mit §1 überein.
+
+### Freigabe je Stelle
+
+Projektinhaber, 2026-10-25, eigene Rückfrage, Antwort „Freigeben wie vorgelegt“ (Vorlage ungekürzt mit *Alt* und *Neu*):
+
+| Stelle | Entscheidung | Wortlaut |
+|---|---|---|
+| 1 | Ja, Variante 1a-II (Linux `amd64` mit lokaler Docker-Engine und Colima `arm64`; die Zusage für Colima bleibt) | wie in §1 *Neu*, Zeichen für Zeichen; Links als Anker innerhalb der Datei |
+| 2 | Ja („von Docker Hub (`docker.io`)“; beide Umgebungen) | wie in §1 *Neu*, Zeichen für Zeichen; Links als Anker innerhalb der Datei |
+| 3 | Ja (Start von `podman`: Linux `amd64` und Colima `arm64`) | wie in §1 *Neu*, Zeichen für Zeichen; Links als Anker innerhalb der Datei |
+| 4 | Ja (die Halbsätze „in dem er/es geprüft ist“ werden zu „in dem folgenden Aufbau“, Zeilen 414 und 418) | wie in §1 *Neu*, Zeichen für Zeichen |
+| 5 | Ja | Versionsfeld `0.24.0`, Historie-Zeile `0.24.0` mit dem *Neu*-Text der Stelle 5, Datum 2026-10-25 (`date +%F`), sonst Wortlaut §1; Links als Anker innerhalb der Datei |
+| 6, 8 | Ja (keine Änderung) | wie in §1 |
+
+Fragen: 1a und 1b beide Umgebungen, 5 mit Docker-Hub-Zusatz, 7 `0.24.0` (vorab entschieden); 1c Lesart „Trigger der Entscheidung 10 ist eingetreten“, keine Folge-ADR; 1d Carveout „zwei Zusage-Mengen“ bei der Closure aufgelöst; 2 ältere Historie-Zeilen bleiben Chronik; 4 streichen; 6 „Ubuntu-24.04-VM“ bleibt; 8 `gh`/`glab` nicht in diesem Slice (alle Standard). **Abweichung gegen den Entwurf in §1:** keine. Die Varianten 1a-I, 1b-II und 5-II sind nicht gewählt.
+
+*Closure-Notiz: wird bei der Closure gefüllt.*
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
