@@ -8,9 +8,9 @@
 
 **Eingangs-Kontext:**
 
-- `slice-v1-testkommentar-ollama-ci-pass` (in-progress): Befund, DoD, Plan-/Beleg-Tabelle, Risiken, §7
-- `ADR-0024` Entscheidung 10 (gelesen, unverändert)
-- `LH-FA-DEV-003`
+- [`slice-v1-testkommentar-ollama-ci-pass`](../plan/planning/in-progress/slice-v1-testkommentar-ollama-ci-pass.md): Befund, DoD, Plan-/Beleg-Tabelle, Risiken, §7
+- [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md) Entscheidung 10 (gelesen, unverändert)
+- [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
 - `AGENTS.md` §3.7, §3.9, §3.10
 - `internal/e2e/sandbox_devcontainer_docker_test.go` Zeilen 1225 bis 1335, `repo.mk` Ziel `test-docker`, `.github/workflows/integration.yml`
 
@@ -37,7 +37,7 @@
    - (b) die genannten Symbole `test-docker`, `repo.mk`, `go test -v` bestehen unverändert; der Diff benennt keinen um.
    - (c) zwischen Doc-Kommentar und `TestE2E_SandboxDevcontainer_Ollama` steht nichts Eingeschobenes.
    - „its pass shows“ ist mit dem Bezug aus F-1 mehrdeutig, sonst verständlich.
-3. **Alter Wortlaut im Baum:** `grep -rn "visible pass"` und `"not a verification"` selbst wiederholt. Treffer nur in `CHANGELOG.md` Zeile 190 (ausgelieferte Version, anderer Wortlaut), im Slice selbst, in `done/slice-cr-lastenheft-messstaende.md`, `done/slice-v1-devcontainer-ollama-amd64-messung.md` und im Verifier-Report `2026-10-25-slice-cr-lastenheft-messstaende-verify.md`. Kein Treffer in Code, Spec, Handbuch, README, `harness/`. ADR-0024 unverändert (`git diff` zeigt keine Änderung unter `docs/plan/adr/`).
+3. **Alter Wortlaut im Baum:** `grep -rn "visible pass"` und `"not a verification"` selbst wiederholt. Treffer nur in `CHANGELOG.md` Zeile 190 (ausgelieferte Version, anderer Wortlaut), im Slice selbst, in [`slice-cr-lastenheft-messstaende`](../plan/planning/done/slice-cr-lastenheft-messstaende.md), [`slice-v1-devcontainer-ollama-amd64-messung`](../plan/planning/done/slice-v1-devcontainer-ollama-amd64-messung.md) und im Verifier-Report [`2026-10-25-slice-cr-lastenheft-messstaende-verify`](2026-10-25-slice-cr-lastenheft-messstaende-verify.md). Kein Treffer in Code, Spec, Handbuch, README, `harness/`. Die ADR zu Ollama im Sandbox-Devcontainer ist unverändert (`git diff` zeigt keine Änderung unter `docs/plan/adr/`).
 4. **Build (Docker-only, Image `u-boot:test-docker-tools`):** `gofmt -l internal/e2e/` ohne Ausgabe; `go vet -tags docker ./internal/e2e/` ohne Befund; `go test -tags docker -run XXX -count=1 ./internal/e2e/` ergibt `ok … [no tests to run]`. Kein Docker-Testlauf, kein volles `make test-docker` (Kommentar-Diff; Begründung im Slice-DoD, hier geteilt).
 5. **Plan-Tabelle gegen `git diff --stat`:** alle vier Diff-Dateien stehen in der Tabelle; Roadmap-Zeile ist als „update, bei Closure zurück auf ‚Nichts in Arbeit.‘“ geführt und nennt den Grund (`planning-drift`). Roadmap-Zwischenzeile „Ohne Welle in Arbeit: …“ trägt Zustand und Anker, keine Chronik; `make docs-check` im Gate-Lauf grün. Abweichungen: F-2, F-3.
 6. **`make gates`:** Exit 0 (lint, test, coverage-gate, docs-check, baseline-verify, ablage-pruefung inklusive 26 Fälle ohne Fehlschlag).
@@ -50,14 +50,14 @@
 | Kommentar gegen §3.9 (a), (b), (c) | geprüft, ohne Befund |
 | Zusage- und Grenz-Teil des Kommentars gegen Testcode | geprüft, ohne Befund |
 | `repo.mk`, `integration.yml` (Kopplung an `-v`) | geprüft, ohne Befund |
-| `ADR-0024` Entscheidung 10 (unverändert) | geprüft, ohne Befund |
+| ADR zu Ollama im Sandbox-Devcontainer, Entscheidung 10 (unverändert) | geprüft, ohne Befund |
 | Alter Wortlaut im Baum | geprüft, ohne Befund |
 | `roadmap.md` Zwischenzeile | geprüft, ohne Befund |
 | Build mit Tag `docker` (gofmt, vet, Kompilat) | geprüft, ohne Befund |
 | `make gates` | geprüft, grün |
 | `make test-docker` (voll) | nicht gelaufen: Kommentar-Diff, rund 15 Minuten und 1,5 GB Download, pinnt nichts, was der Diff ändert |
 | `make verify-depguard` | nicht gelaufen: keine Importregeln berührt |
-| `docs/messungen/slice-cr-lastenheft-messstaende/README.md` | nur als Kontext gelesen; nicht Teil des Diffs |
+| Messprotokoll unter `docs/messungen/` zum Lastenheft-Messstand | nur als Kontext gelesen; nicht Teil des Diffs |
 | DoD-Konformität des Slice | nicht geprüft: Verifier-Aufgabe |
 
 ## Summary
