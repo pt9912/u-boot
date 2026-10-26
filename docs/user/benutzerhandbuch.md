@@ -2,7 +2,7 @@
 
 Handbuch-Version: 2.0
 Software-Version: v0.16.1
-Stand: 2026-10-25
+Stand: 2026-10-26
 
 ---
 

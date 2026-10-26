@@ -11,7 +11,7 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
-## [0.16.1] - 2026-10-25
+## [0.16.1] - 2026-10-26
 
 Patch release. **The Lastenheft (0.24.0) now states where `ollama` and `podman` are promised in the sandbox devcontainer, in words and no longer as the environment of a measurement. The code of the binary is unchanged; only its version string differs.**
 `ollama` (the installation, CPU only) is promised on a Linux host (`amd64`) with a local Docker engine and on Colima (`arm64`); `podman build` (for images from Docker Hub) and the start of `podman` under Docker are promised on the same two. For `podman`, the promise holds only on hosts that allow nested user namespaces (`kernel.apparmor_restrict_unprivileged_userns=0` on the container host, inside the VM on Colima) and when `/dev/fuse` and `/dev/net/tun` exist on the container host; with the value `1`, the start script ends with exit code `11`. Cloud models of Ollama and `ollama-host` stay promised only on a Linux host (`amd64`) with a local Docker engine, as in `[0.16.0]`; the two sets of `ollama` are kept apart, not unified. Every other host and engine stays not promised.
