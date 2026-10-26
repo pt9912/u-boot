@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-25.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-26.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -17,13 +17,12 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**v0.16.1 (Patch-Release ohne Welle-Datei: Lastenheft 0.24.0 nennt die Zusage-Mengen von `ollama` und `podman` im Wortlaut)** — Slice: [`slice-v1-release-cut-v0.16.1`](slice-v1-release-cut-v0.16.1.md) (Push und Tag stehen aus; der Zeiger entfällt bei der Closure, M8).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| `v0.16.1` (Patch-Release ohne Welle-Datei: Lastenheft `0.24.0` nennt die Zusage-Mengen von `ollama` und `podman` im Sandbox-Devcontainer im Wortlaut statt als Messstand, Nachzug in Handbuch, READMEs und `CHANGELOG.md`; der Code des Binary bleibt unverändert; Einstufung *Changed*) | Auftrag des Projektinhabers (eingetreten: Patch-Release, 2026-10-25); die Inhalts-Slices [`slice-cr-lastenheft-messstaende`](../done/slice-cr-lastenheft-messstaende.md) und [`slice-v1-testkommentar-ollama-ci-pass`](../done/slice-v1-testkommentar-ollama-ci-pass.md) liegen in `done/` (eingetreten) | [`slice-v1-release-cut-v0.16.1`](../in-progress/slice-v1-release-cut-v0.16.1.md) (Slice in `in-progress/`); Push und Tag je nach Freigabe des Projektinhabers (Zeile wandert bei der Closure, M8) | S |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 
@@ -105,6 +104,7 @@ flowchart LR
 | v0.15.1 (Patch-Release ohne Welle-Datei: `generate devcontainer` prüft die Freigabeliste der Feature-Quellen, `config set …features.<feature>.version` prüft `version` ohne `source` bei `ollama`, `gh` und `glab`; Einstufung *Fixed*, kein Advisory; Lastenheft 0.22.0; trägt die Fixes [`slice-v1-generate-prueft-freigabeliste`](../done/slice-v1-generate-prueft-freigabeliste.md) und [`slice-v1-config-set-validiert-feature-version`](../done/slice-v1-config-set-validiert-feature-version.md)) | 2026-10-24 | [`slice-v1-release-cut-v0.15.1`](../done/slice-v1-release-cut-v0.15.1.md) — Tag `v0.15.1` auf `9612cd92` |
 | welle-ollama-cloud-modelle (Cloud-Modelle von Ollama mit Claude Code im Container des Sandbox-Profils und das Katalog-Feature `ollama-host` im Devcontainer; Ausgang A mit enger Zusage-Menge Z1 bis Z13, [`ADR-0036`](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md); Lastenheft 0.23.2, [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil); Release `v0.16.0` (Nummer vom Projektinhaber bestätigt am 2026-10-24); Zusage Linux-Host `amd64` mit lokaler Engine, der Weg über `u-boot devcontainer up` nicht gemessen; offene Entscheidungen (Z4) und Register-Ausgänge in der Welle-Datei §7) | 2026-10-25 | [`slice-v1-release-cut-v0.16.0`](../done/slice-v1-release-cut-v0.16.0.md) (Detailquelle); [`slice-v1-ollama-cloud-messung`](../done/slice-v1-ollama-cloud-messung.md); [`slice-v1-ollama-cloud-messung-mit-konto`](../done/slice-v1-ollama-cloud-messung-mit-konto.md); [`slice-v1-adr-ollama-cloud-modelle`](../done/slice-v1-adr-ollama-cloud-modelle.md); [`slice-cr-lastenheft-ollama-cloud-modelle`](../done/slice-cr-lastenheft-ollama-cloud-modelle.md); [`slice-v1-devcontainer-ollama-cloud`](../done/slice-v1-devcontainer-ollama-cloud.md); [`slice-v2-spec-ollama-cloud`](../done/slice-v2-spec-ollama-cloud.md); Validator-Bericht [`2026-10-24-welle-ollama-cloud-modelle-validierung`](../../../reviews/2026-10-24-welle-ollama-cloud-modelle-validierung.md); Welle-Datei [`welle-ollama-cloud-modelle`](../done/welle-ollama-cloud-modelle.md) §7 |
 | v0.16.0 (Cloud-Modelle von Ollama mit Claude Code im Container des Sandbox-Profils und das Katalog-Feature `ollama-host` (eine Zeile in `runArgs`, beide Profile, ausgewiesen); zugesagt für einen Linux-Host `amd64` mit lokaler Docker-Engine, der Weg über `u-boot devcontainer up` nicht gemessen, der Dienst des Hosts nur über einen Relay des Nutzers; Lastenheft 0.23.2; trägt die Welle `welle-ollama-cloud-modelle`) | 2026-10-25 | [`slice-v1-release-cut-v0.16.0`](../done/slice-v1-release-cut-v0.16.0.md) — Tag `v0.16.0` auf `0f4a6afc` |
+| v0.16.1 (Patch-Release ohne Welle-Datei: Lastenheft 0.24.0 nennt die Zusage-Mengen von `ollama` und `podman` im Sandbox-Devcontainer im Wortlaut statt als Messstand, Nachzug in Handbuch, READMEs und `CHANGELOG.md`; der Code des Binary bleibt unverändert; Einstufung *Changed*; trägt [`slice-cr-lastenheft-messstaende`](../done/slice-cr-lastenheft-messstaende.md) und [`slice-v1-testkommentar-ollama-ci-pass`](../done/slice-v1-testkommentar-ollama-ci-pass.md)) | 2026-10-26 | [`slice-v1-release-cut-v0.16.1`](../done/slice-v1-release-cut-v0.16.1.md) — Tag `v0.16.1` auf `ae4e06cb` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen
