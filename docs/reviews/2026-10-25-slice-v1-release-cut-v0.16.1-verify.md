@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-release-cut-v0.16.1
 
 * Rolle: Verifier (frischer Kontext), Datum 2026-10-25
-* Gegenstand: `git diff f9cc5e87..HEAD` (`HEAD` = `28295c07`; Move `c238bc71`, Nachzug `cb62453c`, Start `1d092bd0`, Cut `bde533fc`, Umsetzung `34809217`, Review `53fffebf`/`9c101499`, Fix-Runde `28295c07`), Slice [`slice-v1-release-cut-v0.16.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.16.1.md), Review-Report [`2026-10-25-slice-v1-release-cut-v0.16.1`](2026-10-25-slice-v1-release-cut-v0.16.1.md)
+* Gegenstand: `git diff f9cc5e87..HEAD` (`HEAD` = `28295c07`; Move `c238bc71`, Nachzug `cb62453c`, Start `1d092bd0`, Cut `bde533fc`, Umsetzung `34809217`, Review `53fffebf`/`9c101499`, Fix-Runde `28295c07`), Slice [`slice-v1-release-cut-v0.16.1`](../plan/planning/done/slice-v1-release-cut-v0.16.1.md), Review-Report [`2026-10-25-slice-v1-release-cut-v0.16.1`](2026-10-25-slice-v1-release-cut-v0.16.1.md)
 * Frage: Wurde der Cut richtig gebaut, gemessen an Plan, DoD, Lastenheft [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) und [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) und den selbst gefahrenen Sensoren? Maßstab: [`harness/verification.md`](../../harness/verification.md).
 * Nichts geändert außer diesem Report; nicht gepusht, nicht getaggt.
 
@@ -112,7 +112,7 @@ Elf Dateien im Diff vor diesem Report: `CHANGELOG.md`, `Dockerfile`, `README.md`
 
 ## Verification Evidence (Kurzform)
 
-Scope: Slice [`slice-v1-release-cut-v0.16.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.16.1.md); IDs [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`ADR-0004`](../plan/adr/0004-ci-system.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`ADR-0017`](../plan/adr/0017-linux-pakete-nfpm.md); Artefakte CHANGELOG, READMEs, Handbuch, drei Versionszeilen.
+Scope: Slice [`slice-v1-release-cut-v0.16.1`](../plan/planning/done/slice-v1-release-cut-v0.16.1.md); IDs [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`ADR-0004`](../plan/adr/0004-ci-system.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`ADR-0017`](../plan/adr/0017-linux-pakete-nfpm.md); Artefakte CHANGELOG, READMEs, Handbuch, drei Versionszeilen.
 Carveouts: neu keine, gelöst keine, unverändert alle (kein Diff an `carveouts.md`).
 Nicht ausgeführt: `make test-docker` (Speicher/Zeitlimit; Docker-Pfade in M2), `make fullbuild` (Teile einzeln gelaufen), `make verify-depguard` (keine Importregel berührt), M-T-Grenze (`is_stable`, echter `curl`/`push`, Token).
 Commit / Artefakt: `HEAD` `28295c07`; lokales Image `u-boot:latest` (Version 0.16.1) nach der Prüfung entfernt.

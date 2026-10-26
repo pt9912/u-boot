@@ -1,7 +1,7 @@
 # Review-Report: slice-v1-release-cut-v0.16.1
 
 * Rolle: Reviewer (frischer Kontext), Datum 2026-10-25
-* Gegenstand: Diff `f9cc5e87..HEAD` (Move `c238bc71`, Nachzug `cb62453c`, Start `1d092bd0`, Cut `bde533fc`, Umsetzungsvermerk `34809217`), Slice [`slice-v1-release-cut-v0.16.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.16.1.md)
+* Gegenstand: Diff `f9cc5e87..HEAD` (Move `c238bc71`, Nachzug `cb62453c`, Start `1d092bd0`, Cut `bde533fc`, Umsetzungsvermerk `34809217`), Slice [`slice-v1-release-cut-v0.16.1`](../plan/planning/done/slice-v1-release-cut-v0.16.1.md)
 * Maßstab: Plan, Beleg-Tabelle (§3), `AGENTS.md` §3.7, §3.9, §3.10, §5 Regel 6, `docs/maintainer/releasing.md`, Lastenheft 0.24.0, Messprotokoll [`slice-cr-lastenheft-messstaende`](../messungen/slice-cr-lastenheft-messstaende/README.md). Keine DoD-Prüfung (Verifier).
 
 ## Zusammenfassung
