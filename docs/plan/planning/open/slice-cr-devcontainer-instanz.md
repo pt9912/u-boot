@@ -16,7 +16,7 @@ Anlass: Projektinhaber, 2026-10-31 (Weg A des Entwurfs [`slice-v1-devcontainer-i
 
 **Berührte Spec-Stellen:** `lastenheft.md`, Abschnitt zu [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der CR nicht; [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) folgt im Code-Slice.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (gesetzt beim Start, 2026-10-31)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-31.
 
