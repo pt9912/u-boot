@@ -69,12 +69,12 @@ Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 - [x] **Schutz** (Weg A): Ein Test oder eine Lint-Regel färbt sich rot, wenn im Nicht-Test-Code wieder ein Pfad-Literal `"u-boot.yaml"` außerhalb der Konstante entsteht; die rot färbende Mutation ist benannt und gemessen.
 - [x] **Konvention in der Sicht-Spec:** `spec/architecture.md` nennt die Konstante als die eine Stelle des Dateinamens, ohne Wellen, Slices oder ADRs ([`AGENTS.md`](../../../../AGENTS.md) §3.4).
 - [x] `make gates` grün (im Modus der Umgebung).
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis `BEO-<KUERZEL>/<slug>/` oder eine weitere Datei in dessen `evidence/`; **kein Zaehler wird gesetzt**, er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7 notiert.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis `BEO-<KUERZEL>/<slug>/` oder eine weitere Datei in dessen `evidence/`; **kein Zaehler wird gesetzt**, er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7 notiert.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo **ohne** Wellen-Betrieb hier geprüft, im Repo **mit** Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
 
 ## 3. Plan (vor Code)
@@ -95,6 +95,9 @@ Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest
 | `harness/replay.md` | unverändert | Der Slice ändert kein Generator-Verhalten; gelesen §Scope (Zeilen 8 bis 19: Replay gilt für Pfade, die User-Artefakte erzeugen) und §Verification Evidence (Zeilen 86 bis 98: Replay-Block nur, „wenn ein Slice Generatorverhalten ändert“); der Diff ersetzt Pfad-Literale durch eine Konstante gleichen Werts, Ausgabe und Golden-Cases bleiben gleich |
 | `internal/hexagon/domain/config_test.go` | neu (Fix-Runde) | pinnt die Spec-Aussagen zu `ConfigFileCandidates()`: genau ein Eintrag gleich `ConfigFileName`, frische Slice je Aufruf |
 | diese Datei | update | DoD-Häkchen des Implementers, Tabelle gegen `git diff --stat` abgeglichen; `docs/plan/planning/open/README.md` und die Moves liegen in den Start-Commits, nicht im Diff dieses Vorgangs |
+| `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/open/README.md`, `docs/plan/planning/open/slice-v1-konfigdatei-alternativer-name.md` | update (Closure) | Zählung 32 statt 33 in der Roadmap-Zeile, in der Indexzeile (dort zusätzlich „geliefert“) und im Entwurf des Folge-Slice (Satz „Der Name ist fest“); Verweis-Nachzug des Moves durch `make slice-mv` |
+| `docs/plan/planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/evidence/`, `…/plan-aussage-ueber-code/evidence/` | neu (Closure) | je eine Evidence-Datei `slice-v1-konfigdatei-name-als-konstante.md` (Aufzählung in §7) |
+| `docs/reviews/2026-10-31-slice-v1-konfigdatei-name-als-konstante*.md` | neu | die drei Reports: Review, Nachlauf, Verification |
 
 ## 4. Trigger
 
@@ -128,9 +131,35 @@ dasteht.
 - **Ein neuer Test oder eine Lint-Regel ohne rot färbende Mutation** ([`AGENTS.md`](../../../../AGENTS.md) §3.6). — **Ausgang:** bei Closure.
 - **Die Zählung ist unvollständig:** `"u-boot.yaml"` kann in einer Form stehen, die das Muster `"u-boot\.yaml"` nicht trifft (etwa in einer Raw-String oder als Teil eines Pfades mit Schrägstrich). — **Ausgang:** bei Closure.
 
+Ausgänge der Closure stehen in §7 (Risiken aus §6).
+
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt: Was hat funktioniert · Was ging anders als geplant · Steering-Loop-Eintrag · Beobachtungs-Register · Folge-Slices · Risiken aus §6 · Drei Paarungen.)*
+Reports: [Review](../../../reviews/2026-10-31-slice-v1-konfigdatei-name-als-konstante.md) (0 HIGH, 1 MEDIUM, 2 LOW, 2 INFO), [Nachlauf](../../../reviews/2026-10-31-slice-v1-konfigdatei-name-als-konstante-nachlauf.md) (0 HIGH, 0 MEDIUM, 2 LOW, 1 INFO), [Verification](../../../reviews/2026-10-31-slice-v1-konfigdatei-name-als-konstante-verify.md) (0 HIGH, 0 MEDIUM, 2 LOW, 2 INFO).
+
+- **Was hat funktioniert:**
+  - **Die Ersetzung ist wertgleich.** Review und Verifier lasen jede Hunk der 15 Dateien unter `internal/hexagon/application/`: Jede Stelle ersetzt `"u-boot.yaml"` durch `domain.ConfigFileName`, Meldungstexte, Testdateien und Golden-Dateien stehen nicht im Diff. `grep -rn '"u-boot\.yaml"' --include=*.go internal cmd` ohne Testdateien liefert 2 Treffer (die Konstante in `domain/config.go` und den Doc-Kommentar zu `Label` in `doctor.go`).
+  - **Der Schutz ist scharf.** `TestConfigFileNameLiteralOnlyInDomain` (Paket `application_test`, `go/parser`) wurde viermal unabhängig mit Mutationen gemessen: vom Implementer, vom Reviewer (Literal in einer neuen Datei unter `internal/hexagon/application/`, String-Literal in `cmd/uboot/`, Raw-String in `internal/adapter/driving/cli/`), vom Nachlauf-Reviewer (geteilte Slice-Rückgabe und zweiter Eintrag gegen die Tests in `config_test.go`) und vom Verifier (neue Datei `zz_mutation.go` mit `filepath.Join(x, "u-boot.yaml")`: `make test` Exit 2, der Test nennt die Fundstelle). Danach jeweils Arbeitsbaum sauber und grün.
+  - **`make gates` grün** im Docker-Modus (Verifier, Exit 0): Coverage 92,10 % bei Schwelle 90 %, `d-check` 930 Dateien, 0 Befunde. `make verify-depguard` grün (alle 9 Regeln); `.golangci.yml` ist unverändert, kein `//nolint`.
+  - **Golden-/Replay-Cases:** „unverändert grün“ stützt sich auf `make gates`; ein eigener Replay-Lauf fand nicht statt (Verifier F-2). Der Beleg ist, dass keine Golden-Datei im Diff steht und die Suite grün ist. Zusage von [`harness/replay.md`](../../../../harness/replay.md): Replay-Block nur bei geändertem Generatorverhalten; der Diff ändert keines (Review und Nachlauf lasen §Scope und §Verification Evidence).
+- **Was ging anders als geplant:**
+  - **Zählung 33 Treffer, 32 Literale.** Der Plan und der erste Commit führten 33 „Pfad-Literale“; das war die Trefferzahl von `grep`, ein Treffer ist der Doc-Kommentar zu `Label` in `doctor.go` (3 Literale und 1 Kommentar). Der Review (F-2) berichtigte auf 32 Literale; der Nachlauf (F-1) fand die 33 noch in Titel, Ziel, Weg A, Weg C, Plan-Tabelle und §4, der Verifier (F-1) in der Roadmap-Zeile. Alle geltenden Aussagen stehen jetzt auf 32 (auch Indexzeile in `open/`, Entwurf des Folge-Slice); Wiedergaben der Planung (Architect-Befund, Weg C) bleiben mit dem Hinweis auf die Berichtigung.
+  - **Die Sicht-Spec trug Bedingungen ohne Test.** Der Aufzählungspunkt sagte „bei jedem Aufruf eine frische Liste“ und „Suchreihenfolge“, kein Test rief `ConfigFileCandidates()` auf (Review F-1, MEDIUM). Behoben mit `domain/config_test.go` (genau ein Eintrag gleich `ConfigFileName`, frische Slice je Aufruf) und Streichen der „Suchreihenfolge“. Der Nachlauf (F-2) fand den Allquantor „Jeder Pfad zur Konfigurationsdatei greift darauf zu“, gepinnt war nur die Negativseite, die Funktion hat im Nicht-Test-Code keinen Aufrufer: gestrichen. Offen als INFO (Verifier I-1): „der Name, den `init` anlegt“ hat keinen eigenen Test, mittelbar gedeckt durch die Bestandstests.
+  - **Die Liste ist eine Funktion statt einer Variable** (`ConfigFileCandidates() []string`), weil `gochecknoglobals` aktiv ist (Architect-Befund in §1).
+  - **Der Schutz ist ein Go-Test statt einer Lint-Regel,** weil `forbidigo` Bezeichner matcht, keine String-Literale, und `goconst` nicht aktiv ist; ein neuer Linter ändert das Profil und bräuchte eine Folge-ADR ([`ADR-0003`](../../adr/0003-solid-nahes-lint-profil.md)). Das Profil ist unverändert.
+  - **Prozess:** Die Reviewer- und Verifier-Agenten hatten kein Edit-Werkzeug; sie legten ihre Reports per `cp` aus der Vorlage an und füllten sie mit `Write` (in den Reports vermerkt, `diff -q` vor dem Ausfüllen gleich).
+- **Steering-Loop-Eintrag:** Lehre: Eine Zählung im Plan nennt den Befehl **und** die Kategorie, die er zählt (Literal, Kommentar, Meldungstext); „Treffer“ ist keine Zahl von Literalen. Beim Berichtigen einer Zahl sucht der Autor sie im ganzen Slice-Text, in Roadmap und Index (Muster [`AGENTS.md`](../../../../AGENTS.md) §3.9 (b), dort für Kommentare). Gezählt, nicht verkörpert: Es wurde keine Regel, kein Sensor und keine Spec-Lücke neu verkörpert; beide Klassen zählen als Rückfall in bestehenden Beobachtungen (unten), die Regel dazu steht in `AGENTS.md` §3.10. Sensor-Grenze des Schutz-Tests (benannt, nicht behoben): Er erfasst nur ein `BasicLit` mit dem Wert `u-boot.yaml` (auch als Raw-String, `strconv.Unquote`); Zusammensetzungen (`"u-boot" + ".yaml"`, `fmt.Sprintf`) und Teilpfade wie `".u-boot.yaml"` fallen durch; der Wächter `scanned == 0` zählt `internal` und `cmd` zusammen; der Test läuft nur im Gesamtlauf von `make test`, ein Filter (`RUN`) überspringt ihn (Review F-4, Verifier I-2).
+- **Beobachtungs-Register (`../observations/`):** keine neue Beobachtung angelegt; zwei Rückfälle als Evidence-Datei `evidence/slice-v1-konfigdatei-name-als-konstante.md` fortgeschrieben:
+  - [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md): Review F-1 und Nachlauf F-2 (Bedingungen der Sicht-Spec ohne pinnenden Test). Stand: 27 Dateien unter `evidence/` (vorher 26), Zähler folgt aus den Dateien, über der Schwelle, Ausgang beim Projektinhaber, unverändert.
+  - [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md): Review F-2 und F-3, Nachlauf F-1, Verification F-1 (Trefferzahl statt Literalzahl, nachgezogene Zahl nicht überall, „unverändert“ ohne gelesene Aussage). Stand: 62 Dateien unter `evidence/` (vorher 61), über der Schwelle, Ausgang beim Projektinhaber, unverändert.
+  - Die `state.md` beider Beobachtungen ist in dieser Closure nicht fortgeschrieben; der Zähler folgt aus den Dateien. Die übrigen Befunde (Schutz erfasst nur das eigenständige Literal, Test-Zeile ohne Wirkung, Verifier-Befund zu Golden-Cases ohne eigenen Lauf) passen zu keiner vorhandenen Beobachtung; sie sind einmalig und stehen in den Reports. Die Sichtung in §8 (keine Beobachtung zu Dateinamen-Literalen) bleibt: kein Verzeichnis zu diesem Gegenstand angelegt.
+- **Folge-Slices:** [`slice-v1-konfigdatei-alternativer-name`](../open/slice-v1-konfigdatei-alternativer-name.md) liegt in `open/` (Lastenheft-CR für einen zweiten akzeptierten Namen; dieser Slice schuf die Voraussetzung: Konstante und Kandidatenliste mit einem Eintrag).
+- **Risiken aus §6:** je Risiko genau ein Ausgang, in der Reihenfolge von §6:
+  - Verhaltensänderung bei einer Ersetzung: **entfallen**: Review und Verifier lasen jede ersetzte Stelle (wertgleich, keine Meldungstexte im Diff); Bestandstests und Golden-Cases unverändert grün (`make gates`, kein eigener Replay-Lauf, siehe oben).
+  - Der Schutz schlägt falsch an: **entfallen**: kein Fehlalarm bekannt; der Test ist grün auf dem Bestand mit 506 Testzeilen und 251 Zeilen Meldungstext und Kommentar, weil er nur ein eigenständiges Literal im Nicht-Test-Code erfasst; der Doc-Kommentar zu `Label` löst nicht aus (Kommentare werden nicht geparst). Die Grenze steht in der Sensor-Grenze oben.
+  - Ein neuer Test ohne rot färbende Mutation: **entfallen**: die Mutationen sind benannt und von Implementer, Reviewer, Nachlauf-Reviewer und Verifier gemessen (siehe oben).
+  - Die Zählung ist unvollständig: **entfallen**, Grenze benannt: Raw-Strings und eigenständige Literale sind erfasst (Verifier I-2; Raw-Strings mit dem Namen kommen sonst nur in Kommentaren und CLI-Hilfetexten vor, Produkttext); zusammengesetzte Pfade nicht; das ist die Sensor-Grenze des Tests und kein Fall des Slice-Ziels. Eine Beobachtung dazu besteht nicht, also kein „weiter offen“.
+- **Drei Paarungen:** Anker: kein Eintrag mit dem Feld `liegt in` in diesem Slice (nichts verkörpert), nichts zu paaren. Folge-Slice: [`slice-v1-konfigdatei-alternativer-name`](../open/slice-v1-konfigdatei-alternativer-name.md) ist eine Datei in `open/`; kein Risiko mit Ausgang „weiter offen“ oder „eingetreten“. Register: beide Evidence-Dateien existieren (`evidence/slice-v1-konfigdatei-name-als-konstante.md` in den zwei oben genannten Verzeichnissen).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

@@ -34,7 +34,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 **Befund** (gelesen am 2026-10-31; [`AGENTS.md`](../../../../AGENTS.md) §3.10):
 
-- **Der Name ist fest.** `u-boot` kennt nur `u-boot.yaml` (33 Pfad-Literale in 15 Dateien des Application-Layers, siehe [`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md)); es gibt keine Suche nach einem anderen Namen und keine Option dafür. d-check dagegen liest `.d-check.yml` aus der Wurzel und kennt `-config`.
+- **Der Name ist fest.** `u-boot` kennt nur `u-boot.yaml` (32 Pfad-Literale in 15 Dateien des Application-Layers, siehe [`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md)); es gibt keine Suche nach einem anderen Namen und keine Option dafür. d-check dagegen liest `.d-check.yml` aus der Wurzel und kennt `-config`.
 - **Drei Stellen tragen mehr als das Lesen:** `collisionError` (`internal/hexagon/application/initproject.go`, Zeile 935) erkennt nur `u-boot.yaml`, `compose.yaml` und `.env.example` als harte Marker eines bestehenden Projekts ([`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen)); `credentialScanFiles` (`doctor_sandbox.go`, Zeilen 58 bis 64) nennt `u-boot.yaml` unter den Dateien, die `u-boot doctor` auf Klartext-Zugangsdaten prüft — eine Konfiguration unter anderem Namen bliebe ungeprüft; `init` legt `u-boot.yaml` an (`initproject.go`, Zeile 854).
 - **Nutzertexte:** `README.md` und `README.de.md` nennen `u-boot.yaml` je siebenmal, das Benutzerhandbuch 42-mal; Meldungstexte im Nicht-Test-Code tragen den Namen 251-mal als Wort ([`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md), Befund).
 
