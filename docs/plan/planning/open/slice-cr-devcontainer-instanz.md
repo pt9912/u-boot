@@ -11,10 +11,10 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Welle:** ohne Welle (wie der Code-Slice; Release-Zuordnung beim Projektinhaber, die Roadmap ist nicht geändert). Zweiter von drei Slices: ihm geht [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md) voraus (Messwerte), ihm folgt [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md) (Code, Tests, Docker-Test, Doku). Vorbild des Ablaufs: [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md).
 
-**Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Änderung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes: nur Anwendung, keine Änderung), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (nennen „je Instanz“ für Workspace und Docker-Speicher; Änderung nur, wenn der Projektinhaber Stelle 5 annimmt).
+**Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Änderung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes: nur Anwendung, keine Änderung), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (nennen „je Instanz“ für Workspace und Docker-Speicher; unverändert, siehe Entscheidung 2).
 Anlass: Projektinhaber, 2026-10-31 (Weg A des Entwurfs [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md); Anforderung: Instanzen teilen kein Volume).
 
-**Berührte Spec-Stellen:** `lastenheft.md`, Abschnitt zu [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der CR nicht; [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) folgt im Code-Slice.
+**Berührte Spec-Stellen:** `lastenheft.md`, Abschnitt zu [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der CR nicht; [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) folgt im Code-Slice.
 
 **Verantwortlich:** —
 
@@ -31,119 +31,154 @@ des Lastenhefts, auf den Slice-Plan angewandt); die vier Klassen des
 Ausschlusses stehen in **eben diesem Abschnitt** des Baseline-Regelwerks,
 zusammen mit der Begründungs-Pflicht je Punkt.
 
-**Ziel:** Die Zusage „ein Projekt kann mehrere benannte Devcontainer gleichzeitig haben; `up`, `down` und `shell` wählen den Container mit `--instance <name>`; jede Instanz hat eigene Volumes“ steht im Lastenheft, auf die **nächste freie Minor-Version** (`0.25.0`; gelesen am 2026-10-31: Kopf des Lastenhefts `0.24.0`, letzte Historie-Zeile `0.24.0` — **Vorbehalt:** vergeben wird beim Start des Slice, nach einem erneuten Blick auf die Historie, denn andere Entwürfe in `open/` können einen CR vor diesem schreiben), **mit den Messwerten des Mess-Slice** und in der vom Projektinhaber freigegebenen Fassung. Der Code-Slice beginnt erst danach.
+**Ziel:** Die Zusage „ein Projekt kann mehrere benannte Devcontainer (Instanzen) gleichzeitig haben; `up`, `down` und `shell` wählen den Container mit `--instance <name>`; im Sandbox-Profil hat jede Instanz eigene Volumes“ steht im Lastenheft, mit den Messwerten des Mess-Slice und in der vom Projektinhaber freigegebenen Fassung. Die Versionsnummer (voraussichtlich `0.25.0`; gelesen am 2026-10-31: Kopf des Lastenhefts `0.24.0`, letzte Historie-Zeile `0.24.0`, Zeilen 9 und 1607) wird erst bei der Annahme aus der dann gültigen Historie gelesen. Der Code-Slice beginnt erst danach.
 
-**Dieser Wortlaut ist ein ENTWURF zur Freigabe durch den Projektinhaber.** Stellen, deren Inhalt vom Messwert abhängt, tragen einen Platzhalter `⟦M<Nr>: …⟧` (die Nummer ist die Messfrage in [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md) §1). Ein Platzhalter wird vor der Vorlage zur Freigabe durch den Messwert ersetzt oder die Aussage gestrichen; ein Wortlaut mit Platzhalter geht nicht zur Freigabe. Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen Verweise als Anker `#…` der Datei.
+**Dieser Wortlaut ist ein ENTWURF zur Freigabe durch den Projektinhaber.** Er steht nur in dieser Datei; `spec/lastenheft.md` ist nicht geändert und wird erst nach der Freigabe geschrieben. Alle Messwert-Platzhalter sind aus dem Protokoll [`docs/messungen/slice-v1-devcontainer-instanz-messung`](../../../messungen/slice-v1-devcontainer-instanz-messung/README.md), der Closure-Notiz des Mess-Slice (§7) und dem Verification-Report [`2026-10-31-slice-v1-devcontainer-instanz-messung-verify`](../../../reviews/2026-10-31-slice-v1-devcontainer-instanz-messung-verify.md) (Abschnitt 5, Platzhalter des CR) ersetzt. **Offen ist, was die Tabelle „Vor der Freigabe zu entscheiden“ nennt:** die Fassung (i) oder (ii) zu `up` ohne `--instance` (an den Stellen 1 und 4 in zwei Fassungen), die Versionsnummer und die Historie-Zeile. Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen Verweise als Anker `#…` der Datei, hier als Pfad von `open/` aus.
+
+**Entschieden (Projektinhaber, 2026-10-31):**
+
+1. **Namensregel der Instanz:** Zeichen `a` bis `z`, `0` bis `9` und `-`; Rand (erstes und letztes Zeichen) nur Buchstabe oder Ziffer; Länge 1 bis 32; ein ungültiger Name endet mit Exit-Code `10`. Die leere Zeichenkette und ein Name mit `=` sind ausgeschlossen (gemessen: die Dev-Container-CLI lehnt die leere Zeichenkette als Label-Wert mit Exit-Code `1` ab; bei `=` im Wert kehrt `devcontainer up` nicht zurück, Ursache nicht geklärt; Protokoll M8 und Abschnitt Hänger). Die Obergrenze 32 ist eine Entscheidung, kein Messwert: gemessen sind Label-Werte bis Länge 128 ohne Befund, eine Grenze darunter hat die Messung nicht gefunden.
+2. **Begriff „Instanz“:** [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) bleiben unverändert (dort heißt „je Instanz“ der einzelne Devcontainer). Der CR definiert „Instanz“ einmal, in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Stelle 1). Das Glossar (§15, Zeile 1542 ff.) hat keinen Eintrag zu „Instanz“ (gelesen: Zeilen 1542 bis 1556; `grep -i instanz` trifft das Lastenheft nur in den Zeilen 416, 473 und der Historie), also kein Glossar-Eintrag.
+3. **Flag:** `--instance <name>` an `up`, `down` und `shell`.
 
 **Warum eine Lastenheft-Änderung:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) beschreibt `up`, `down` und `shell` für den Devcontainer „des Projekts“ ohne Instanz; ein neues öffentliches Flag und eine Zusage zur Isolation (Volumes) sind Produktverhalten. Der Entwurf [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md) sah einen CR bereits vor.
 
+### Vor der Freigabe zu entscheiden
+
+| # | Frage | Optionen | Empfehlung des Planners |
+|---|---|---|---|
+| 1 | **`up`, `down`, `shell` ohne `--instance`** (Messfrage M6, Stellen 1 und 4) | (i) wirken nur auf den Container ohne Instanz-Label (Bestandscontainer und Standard); gibt es im Projekt nur Container von Instanzen, endet `up` ohne `--instance` mit Exit-Code `10` und einem Hinweis auf `--instance`, `u-boot` prüft das vor dem Aufruf der CLI. (ii) `up` übernimmt wie die CLI: den Container ohne Instanz, wenn es ihn gibt, sonst den zuletzt angelegten Container einer Instanz | **(i)** — Begründung unten |
+| 2 | **Versionsnummer des Lastenhefts** | `0.25.0`, wenn beim Schreiben noch die nächste freie Minor-Version; sonst die dann nächste | erst bei Annahme aus der Historie lesen |
+| 3 | **Historie-Zeile** (Stelle 6) | Datum der Annahme und Wortlaut des Halbsatzes zu `up` ohne `--instance` (hängt an 1); Verweis „Vereinbarung mit dem Projektinhaber“ | nach Entscheidung 1 und der Annahme |
+
+**Begründung der Empfehlung (i).** Gemessen ist (Protokoll M2 und M6): Die Dev-Container-CLI hängt die Volume-Namen an `${devcontainerId}`, und der Wert hängt von den Id-Labels ab — ohne `--id-label` ergibt einen anderen Wert als mit nur `--id-label devcontainer.local_folder=<Ordner>` (alle sechs Läufe „Gleich: nein“). Gäbe `u-boot` dem Standard-Container ein eigenes Id-Label, änderte sich seine `devcontainerId` und damit die Namen seiner Volumes: Bestehende Projekte fänden ihren Workspace nicht wieder. Deshalb bleibt der Container ohne Instanz label-frei, und die Trennung läuft über das Instanz-Label. Gemessen ist außerdem: Ist ein Container ohne Flag da, trifft `up` ohne Flag ihn weiter, auch wenn danach eine Instanz angelegt wurde; gibt es nur Instanzen, **übernimmt** die CLI mit `up` ohne Flag den zuletzt angelegten Instanz-Container (Sandbox-Profil, 6 von 6 Läufen, Vermutung zum Mechanismus nicht gemessen) — in dem Fall würde ohne eigene Prüfung eine Instanz ohne Namen angesprochen. Fassung (ii) nimmt dieses Risiko hin; zusätzlich trifft die Suche nach dem ersten Treffer von `docker ps -a` bei einer neueren Instanz neben einem Bestandscontainer die Instanz (Protokoll M6, umgekehrt), während `up` der CLI den Bestandscontainer bevorzugt — `down` und `shell` ohne Flag und `up` könnten also auf verschiedene Container wirken, solange die Suche nicht angepasst wird.
+
+**Prüfung von (i) am Code** (gelesen am 2026-10-31):
+
+- `FindContainer` (`internal/adapter/driven/docker/inspector.go`, Zeilen 75 bis 100) filtert allein mit `docker ps -a --no-trunc --filter label=devcontainer.local_folder=<Ordner>` und nimmt den ersten Treffer. Für (i) müsste die Suche Container mit dem Instanz-Label ausschließen; ob `docker ps` ein fehlendes Label per `--filter` ausdrücken kann, ist nicht gelesen und nicht gemessen (eine Auswertung des Label-Werts über `--format` in `u-boot` ist denkbar, nicht gemessen).
+- `runArgs` (`internal/adapter/driven/docker/devcontainer_launcher.go`, Zeilen 284 bis 303) ruft `devcontainer up --workspace-folder <Ordner>` ohne `--id-label` und reicht nur `--remove-existing-container` an die CLI; die Prüfung „nur Instanz-Container vorhanden → Exit-Code `10`“ muss deshalb **vor** diesem Aufruf in `u-boot` liegen. Wo genau, hängt an den Aufrufstellen von `FindContainer` (`internal/hexagon/application/devcontainer_start.go` und `devcontainer_fallback.go`, laut Entwurf des Code-Slice); diese Dateien sind **nicht gelesen**.
+- [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) (gelesen: Kontext, Entscheidung, Konsequenzen): Volume-Namen enthalten `-${devcontainerId}`; „eine Instanz ist ein Ordner“; das Schema ist die Grundlage der Begründung oben. Dass die ADR „Instanz“ für „Ordner“ verwendet, ist ein dritter Gebrauch des Wortes; die Folge-ADR des Code-Slice schärft sie (Entwurf des Code-Slice, Bezug).
+
 ### Gefundener Stand (gelesen am 2026-10-31)
 
-- [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeilen 497 bis 507): acht Spiegelstriche — `up` (mit `--recreate`), `down`, `shell`, Hilfs-Container und Socket, Zugangsdaten, Fehlerklassen, Zusage-Menge und Nicht-Ziele. Keiner nennt eine Instanz.
-- **„Instanz“ ist im Lastenheft schon besetzt:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Zeile 473) sagt „Der Daemon-Speicher liegt in einem benannten Volume je Instanz“; gemeint ist der einzelne Container (`${devcontainerId}`), nicht ein vom Nutzer vergebener Name. Der Wortlaut unten führt deshalb die **benannte Instanz** und lässt „je Instanz“ in den Nachbarn unberührt, außer der Projektinhaber nimmt Stelle 5 an.
-- [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) (Zeilen 1147 bis 1149): die Zeilen `devcontainer up`, `devcontainer down`, `devcontainer shell` nennen Zweck und Priorität, keine Flags (nicht geändert, Vorschlag; die Vorab-Suche bestätigt es am Start).
-- [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Zeile 189) zählt `devcontainer up`, `down` und `shell` unter den ändernden Befehlen unter `--quiet`; das Flag ändert daran nichts (Vorschlag, nicht geändert).
+- [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeilen 497 bis 508): Überschrift, Einleitungsabsatz (499), acht Spiegelstriche — `up` (501, mit `--recreate`), `down` (502), `shell` (503), Hilfs-Container und Socket (504), Zugangsdaten (505), Fehlerklassen (506), Zusage-Menge (507) und Nicht-Ziele (508). Keiner nennt eine Instanz.
+- [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Zeile 473) sagt „Der Daemon-Speicher liegt in einem benannten Volume je Instanz“; gemeint ist der einzelne Container (`${devcontainerId}`), nicht ein vom Nutzer vergebener Name. Unverändert (Entscheidung 2); der Wortlaut unten sagt „benannte Instanz“ und definiert den Begriff in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten).
+- [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) (Zeilen 1147 bis 1149): die Zeilen `devcontainer up`, `devcontainer down`, `devcontainer shell` nennen Zweck und Priorität, keine Flags (nicht geändert).
+- [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Zeile 189) zählt `devcontainer up`, `down` und `shell` unter den ändernden Befehlen unter `--quiet`; das Flag ändert daran nichts (nicht geändert).
+- [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Zeilen 227 und 236): `10` ist der fachliche Validierungsfehler, „typische Zuordnung: Struktur-, Namens- und Konfigurationsvalidierung“; ein ungültiger Instanzname fällt darunter. Der Fall „nur Instanz-Container vorhanden“ (Fassung (i)) ist kein Namensfehler, sondern ein Zustand des Projekts; `10` ist hier die Entscheidung des Projektinhabers (2026-10-31), nach dem Wortlaut der Tabelle zu `11` (Umgebungs-/Prüfungsfehler) wäre auch eine andere Zuordnung denkbar — nicht Gegenstand.
 - Das `--json`-Schema (`command: devcontainer`, [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) ist **nicht gelesen**: ob die Ausgabe von `up` ein Feld für die Instanz bekommt, ist eine Frage der Spezifikation im Code-Slice; der Wortlaut unten sagt dazu nichts.
 - Die Egress-, Ressourcen- und Zweig-Fragen berührt der CR nicht (siehe unten).
 
 ### Wortlaut (alt/neu; ENTWURF, nicht freigegeben)
 
-**Stelle 1 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), erster Spiegelstrich (`up`), Satz zu `--recreate`.**
+Die Alt-Stellen sind aus `spec/lastenheft.md` wörtlich übernommen; die Zeile steht dabei. Im Lastenheft sind Verweise Anker `(#…)` der Datei, hier Pfade von `open/` aus; der Text ist sonst unverändert. „Neu“ ist der vollständige Spiegelstrich, die geänderten Stellen sind **fett**. Das Lastenheft ist Zielbild des Befehls: Belegt sind die gemessenen Aufbauten und das Verhalten der Dev-Container-CLI und der Engine; dass `u-boot devcontainer up --instance` so arbeitet, pinnt erst der Docker-Test des Code-Slice ([`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md)).
 
-Alt:
+**Stelle 1 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Zeile 501 (`up`): `--instance` und die Definition der Instanz.**
 
-> `--recreate` entfernt einen vorhandenen Container und legt ihn neu an; benannte Volumes bleiben erhalten.
+Alt (Zeile 501):
+
+> - `u-boot devcontainer up` startet den Devcontainer des Projekts im Basisverzeichnis mit der Dev-Container-CLI, die `u-boot` in einem kurzlebigen Hilfs-Container ausführt. Das Hilfs-Image baut `u-boot` lokal aus gepinnten Quellen; der erste Aufruf braucht Netzzugriff. `--recreate` entfernt einen vorhandenen Container und legt ihn neu an; benannte Volumes bleiben erhalten. Nach dem Start weist der Befehl die Degradations-Fallbacks des Containers aus ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)).
+
+Neu, Fassung (i) (Empfehlung):
+
+> - `u-boot devcontainer up` startet den Devcontainer des Projekts im Basisverzeichnis mit der Dev-Container-CLI, die `u-boot` in einem kurzlebigen Hilfs-Container ausführt. Das Hilfs-Image baut `u-boot` lokal aus gepinnten Quellen; der erste Aufruf braucht Netzzugriff. `--recreate` entfernt einen vorhandenen Container und legt ihn neu an; benannte Volumes bleiben erhalten. **Eine Instanz ist ein vom Nutzer benannter Devcontainer des Projekts; der Container ohne Instanz ist der Devcontainer des Projekts im Sinn des ersten Satzes. Mit `--instance <name>` startet, sucht und ersetzt (mit `--recreate`) der Befehl nur den Container dieser Instanz; mehrere Instanzen desselben Projektordners können gleichzeitig laufen. Ohne `--instance` wirkt der Befehl nur auf den Container ohne Instanz; gibt es im Projekt nur Container von Instanzen und keinen Container ohne Instanz, endet `up` ohne `--instance` mit Exit-Code `10` und einem Hinweis auf `--instance`, statt den Container einer Instanz zu übernehmen.** Nach dem Start weist der Befehl die Degradations-Fallbacks des Containers aus ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)).
+
+Neu, Fassung (ii):
+
+> - … (wie Fassung (i) bis „mehrere Instanzen desselben Projektordners können gleichzeitig laufen“) **Ohne `--instance` wirkt der Befehl auf den Container ohne Instanz, wenn es ihn gibt, sonst auf den zuletzt angelegten Container einer Instanz.** Nach dem Start weist der Befehl die Degradations-Fallbacks des Containers aus (…).
+
+Vorbehalt zu (ii): Ob `down` und `shell` ohne Flag dieselbe Wahl treffen wie `up`, ist nicht gemessen (die Suche von `u-boot` nimmt den ersten Treffer von `docker ps -a`, die CLI bevorzugt den Container ohne Instanz); der Wortlaut (ii) setzt voraus, dass der Code-Slice beide angleicht.
+
+**Stelle 2 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Zeilen 502 (`down`) und 503 (`shell`).**
+
+Alt (Zeile 502):
+
+> - `u-boot devcontainer down` stoppt den Container; er entfernt weder den Container noch seine Volumes.
 
 Neu:
 
-> `--recreate` entfernt einen vorhandenen Container und legt ihn neu an; benannte Volumes bleiben erhalten. Mit `--instance <name>` wählt der Befehl eine benannte Instanz des Devcontainers dieses Projekts: Er startet, sucht und ersetzt (mit `--recreate`) nur den Container dieser Instanz, und mehrere Instanzen desselben Projektordners können gleichzeitig laufen. Ohne `--instance` wirkt der Befehl ⟦M6: Entscheidung des Projektinhabers offen. Gemessen (Sandbox-Profil, Dev-Container-CLI 0.89.0, sechs Läufe) übernimmt die CLI mit nur dem Label `devcontainer.local_folder` neben laufenden Instanzen den zuletzt angelegten Container einer Instanz und legt keinen eigenen an; „nur auf den Container ohne Instanz“ ist **nicht** das Verhalten der CLI. Soll der Wortlaut „nur auf den Container ohne Instanz“ lauten, muss der Code-Slice das gegen die CLI herstellen (und `FindContainer` auf den Container ohne Instanz-Label einschränken); soll er „auf den zuletzt angelegten Container des Projekts“ lauten, steht das hier. Für das Standardprofil ist das Verhalten neben laufenden Instanzen nicht gemessen — kein Satz dazu⟧.
+> - `u-boot devcontainer down` stoppt den Container; er entfernt weder den Container noch seine Volumes. **Mit `--instance <name>` stoppt er nur den Container dieser Instanz und lässt die übrigen Container des Projekts laufen; ohne `--instance` gilt für die Wahl des Containers die Regel des Spiegelstrichs zu `up` (Fassung (i): nur der Container ohne Instanz).**
 
-**Stelle 2 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), zweiter und dritter Spiegelstrich (`down`, `shell`).**
+*Beleg und Vorbehalt:* Gemessen ist das Verhalten der Engine und der CLI (`docker stop` eines Containers lässt die übrigen N − 1 laufen; `devcontainer up --remove-existing-container` mit den Labels einer Instanz entfernt nur deren Container, `devcontainerId` und alle Volumes bleiben; alle sechs Läufe, Protokoll M7). Nicht gemessen ist `u-boot devcontainer down --instance`; der Satz ist Zielbild des Befehls, der Docker-Test des Code-Slice pinnt ihn. Der Satz „stoppt nur“ steht im Wortlaut, weil er das Verhalten der Engine beschreibt, das der Befehl herstellen soll, nicht weil `down --instance` gemessen wäre.
 
-Alt (zweiter Spiegelstrich, ganz):
+Alt (Zeile 503, erster Satz; die weiteren Sätze der Zeile bleiben unverändert):
 
-> `u-boot devcontainer down` stoppt den Container; er entfernt weder den Container noch seine Volumes.
+> - `u-boot devcontainer shell` startet den Devcontainer wie `u-boot devcontainer up` ohne `--recreate` und öffnet danach eine interaktive Shell im Container, mit dem Benutzer und dem Arbeitsverzeichnis, die der Start meldet.
 
-Neu:
+Neu (erster Satz):
 
-> `u-boot devcontainer down` stoppt den Container; er entfernt weder den Container noch seine Volumes. Mit `--instance <name>` stoppt er nur den Container dieser Instanz ⟦M7: die übrigen Container des Projekts laufen weiter⟧.
+> - `u-boot devcontainer shell` startet den Devcontainer wie `u-boot devcontainer up` ohne `--recreate` **(mit `--instance <name>` den Container dieser Instanz)** und öffnet danach eine interaktive Shell im Container, mit dem Benutzer und dem Arbeitsverzeichnis, die der Start meldet.
 
-Alt (dritter Spiegelstrich, erster Satz):
-
-> `u-boot devcontainer shell` startet den Devcontainer wie `u-boot devcontainer up` ohne `--recreate` und öffnet danach eine interaktive Shell im Container, mit dem Benutzer und dem Arbeitsverzeichnis, die der Start meldet.
-
-Neu (nur der erste Satz; die folgenden Sätze bleiben):
-
-> `u-boot devcontainer shell` startet den Devcontainer wie `u-boot devcontainer up` ohne `--recreate` (auch mit `--instance <name>`, dann den Container dieser Instanz) und öffnet danach eine interaktive Shell im Container, mit dem Benutzer und dem Arbeitsverzeichnis, die der Start meldet.
-
-**Stelle 3 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), neuer Spiegelstrich nach dem zu `shell`: Isolation je Instanz (Zusage nur für das Gemessene).**
+**Stelle 3 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), neuer Spiegelstrich nach Zeile 503: Isolation je Instanz (Zusage nur für das Gemessene).**
 
 Alt: — (neu).
 
 Neu:
 
-> Bis zu ⟦M9: Zahl der gemessenen Instanzen, höchstens vier; Fassung A: „vier“, wenn die Messung vier Stufen vollständig trägt, Fassung B: die höchste vollständig gemessene Zahl, wenn der Host eine Stufe nicht trägt (Abbruch mit Befund im Mess-Slice)⟧ gleichzeitig laufende Instanzen desselben Projekts teilen im Sandbox-Profil untereinander kein Volume (alle Volumes paarweise verschieden): Jede hat ein eigenes Workspace-Volume ⟦M3: und, soweit aktiviert, eigene Volumes für den Speicher von Docker, den Speicher von Podman und die Modelle von Ollama — Familien nur aufzählen, die die Messung getrennt gezeigt hat⟧; eine Datei im Workspace der einen Instanz ist in der anderen nicht sichtbar. Gemessen ist das mit ⟦M9: Zahl der gemessenen Instanzen⟧ gleichzeitig laufenden Instanzen, ⟦M10: jede mit höchstens 1 CPU und 3 GB Arbeitsspeicher (Messbedingung je Instanz, Vorgabe des Projektinhabers; nur aufnehmen, wenn die zurückgelesene Grenze am Container im Protokoll steht)⟧, auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine ⟦M0: Dev-Container-CLI-Version, Docker-Version, Speicher und CPU des Hosts nur, wenn die Zusage-Menge sie nennen soll — Vorschlag: nicht nennen, sie stehen im Handbuch⟧. Im Standardprofil teilen die Instanzen den Projektordner (Bind-Mount) ⟦M3: gemessen⟧; dort ist keine Isolation zugesagt. Nicht zugesagt sind mehr als ⟦M9: dieselbe Zahl⟧ gleichzeitige Instanzen, Instanzen mit mehr oder ohne Begrenzung von CPU und Arbeitsspeicher ⟦M10: nur mit M10 oben⟧, das Verhalten unter Last, die Größe und die Dauer des Starts weiterer Instanzen ⟦M4, M5: sonst Zahlen der Messung nennen oder streichen — Vorschlag: nicht nennen⟧, andere Hosts und Engines als gemessen sowie der Einsatz einer Instanz auf einem anderen Zweig. Kann `u-boot` die Isolation nicht herstellen ⟦M2: nur aufnehmen, wenn `${devcontainerId}` nicht mit dem zweiten Id-Label wechselt — dann Fassung (2) der Messung; wechselt es, entfällt dieser Satz⟧, endet der Befehl mit Exit-Code `10`.
+> - **Bis zu vier gleichzeitig laufende Instanzen desselben Projekts teilen im Sandbox-Profil ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)) kein Volume: Jede Instanz hat ein eigenes Workspace-Volume und, soweit aktiviert, ein eigenes Volume für den Docker-Speicher (`nestedRuntime: docker`, [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) und für die Modelle des Features `ollama`; eine Datei im Workspace-Volume einer Instanz ist in keiner anderen Instanz sichtbar. Gemessen ist das mit zwei, drei und vier gleichzeitig laufenden Instanzen, jede mit höchstens einer CPU und 3 GiB Arbeitsspeicher (Grenze samt Swap), im Sandbox-Profil mit `nestedRuntime: docker` und dem Feature `ollama`, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine. Nicht zugesagt sind mehr als vier Instanzen, der Speicher von Podman (`nestedRuntime: podman`), Instanzen mit mehr oder ohne Begrenzung von CPU und Arbeitsspeicher, das Verhalten unter Last (etwa bei einem Go-Build oder einem Modell-Pull), mit kaltem Cache oder bei kaltem Bau des Images, Dauer und Platzbedarf des Starts, andere Hosts und Engines als gemessen und die Isolation im Standardprofil: Dort teilen alle Instanzen den Projektordner (Bind-Mount).**
 
-**Stelle 4 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Spiegelstrich „Fehlerklassen“.**
+*Belege der Einzelaussagen* (Protokoll, Rohdaten `rohdaten-stufe{2,3,4}-lauf{1,2}.txt`): Volume-Namen 3 × N (6, 9, 12), je Familie paarweise verschieden, in allen sechs Läufen (M2/M3); Inhaltsprobe über alle Paare (Datei im Workspace, Datei im Modell-Volume, Image im verschachtelten Docker): 0 Paare mit sichtbarem Fremdinhalt (M3); Grenze zurückgelesen an den Instanzen der Sandbox-Phase (`HostConfig.Memory=3221225472`, `MemorySwap=3221225472`, `NanoCpus=1000000000`; M5); Grenze in keinem Lauf erreicht, `OOMKilled=false`, rund 55 bis 62 MiB je Instanz direkt nach dem Start (M5); Standardprofil: alle N Instanzen und der Host sehen dieselbe Datei im Projektordner (M3); Podman nicht messbar auf dem Messhost (`kernel.apparmor_restrict_unprivileged_userns = 1`, M0, M3). „Bis zu vier“ ist die höchste vollständig gemessene Zahl; Stufe 4 lief mit gelockerter Vorprüfung auf Entscheidung des Projektinhabers (Closure-Notiz des Mess-Slice §7), ohne Swap-Druck; das gehört in die Closure, nicht in das Lastenheft. Nicht im Wortlaut, weil nicht gemessen oder nur Deutung: die Host-Größen (Speicher, CPU), Dev-Container-CLI- und Docker-Version (Vorschlag des Verifiers: nicht nennen; sie stehen im Protokoll), Zahlen zu Dauer und Platz (Handbuch, nicht Lastenheft), der Mechanismus der Übernahme bei `up` ohne `--instance` (Vermutung), die Ursache des Hängers bei `=`. Die Annahme „1 CPU und 3 GiB je Instanz, nicht für alle zusammen“ ist die Deutung des Planners der Vorgabe des Projektinhabers und nicht zurückgefragt.
 
-Alt (Anfang): „Fehlerklassen ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)): Exit-Code `10`, wenn das Basisverzeichnis keine Devcontainer-Konfiguration enthält; …“
+**Stelle 4 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Zeile 506 (Fehlerklassen).**
 
-Neu (zusätzlicher Halbsatz hinter dem ersten Fall; der Rest bleibt):
+Alt (Zeile 506):
 
-> Exit-Code `10`, wenn das Basisverzeichnis keine Devcontainer-Konfiguration enthält, **und wenn der Name der Instanz ungültig ist** (ein Name besteht aus Kleinbuchstaben, Ziffern und Bindestrichen, beginnt und endet mit einem Buchstaben oder einer Ziffer und ist ⟦M8: höchstens 32⟧ Zeichen lang; die leere Angabe ist ungültig); …
+> - Fehlerklassen ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)): Exit-Code `10`, wenn das Basisverzeichnis keine Devcontainer-Konfiguration enthält; `11`, wenn Docker nicht erreichbar oder die Engine nicht lokal ist oder wenn ein Startscript des Containers wegen eines Umgebungsproblems abbricht (wie bei `doctor`); `11` auch, wenn die Statusdatei den Abbruch aus einem früheren Start desselben Containers meldet; ein erneutes `up` ohne `--recreate` endet dann wieder mit `11`; `12` bei Fehlern beim Bau oder Start, die kein Umgebungsproblem sind.
 
-*Vorschlag mit Begründung (der Projektinhaber entscheidet):* **Zeichensatz `[a-z0-9-]`, Rand nur Buchstabe oder Ziffer, Länge 1 bis 32.** Der Name wird Label-Wert am Container und Suchwert im Filter von `docker ps`; ein geschlossener, kleiner Zeichensatz schließt Zeichen aus, die ein Filter, ein Shell-Aufruf oder ein Volume-Name anders lesen (Doppelpunkt, Komma, Gleichheitszeichen, Leerzeichen, Anführungszeichen); Kleinbuchstaben vermeiden zwei Instanzen, die sich nur durch Groß- und Kleinschreibung unterscheiden und auf Dateisystemen ohne Unterscheidung kollidieren würden; der Bindestrich-Rand folgt den Namensregeln von Docker; die Obergrenze 32 lässt Platz unter den Längengrenzen der Docker-Namen, wenn der Name in einen Namen eingeht ⟦M8: Obergrenze gegen die gemessene Grenze von Label-Wert und Docker-Namen prüfen und notfalls senken, nie anheben⟧. Gegenposition: weiter Zeichensatz (Unterstrich, Punkt, Großbuchstaben) für Namen wie `feature_x.1` — kleinerer Kreis ist leichter zu erweitern als zu verengen.
+Neu, Fassung (i) (Empfehlung):
 
-**Stelle 5 — [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Begriff „je Instanz“ (optional, Entscheidung des Projektinhabers).**
+> - Fehlerklassen ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)): Exit-Code `10`, wenn das Basisverzeichnis keine Devcontainer-Konfiguration enthält, **wenn der Name der Instanz ungültig ist (ein Name besteht aus Kleinbuchstaben, Ziffern und Bindestrichen, beginnt und endet mit einem Buchstaben oder einer Ziffer und ist 1 bis 32 Zeichen lang; die leere Zeichenkette und ein Name mit `=` sind ungültig) und wenn `up` ohne `--instance` auf ein Projekt trifft, in dem es nur Container von Instanzen gibt**; `11`, wenn Docker nicht erreichbar … (der Rest der Zeile bleibt wörtlich wie in Alt).
 
-Alt (Beispiel [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Zeile 473): „Der Daemon-Speicher liegt in einem benannten Volume je Instanz.“
+Neu, Fassung (ii): wie (i) ohne den Halbsatz „und wenn `up` ohne `--instance` auf ein Projekt trifft, in dem es nur Container von Instanzen gibt“.
 
-Neu (Vorschlag, wenn angenommen): „Der Daemon-Speicher liegt in einem benannten Volume je Devcontainer (je benannter Instanz, wenn `--instance` gesetzt ist).“ — die Fassung ersetzt „Instanz“ in den Nachbarstellen durch „Devcontainer“, damit der Begriff nur noch bei [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) die benannte Instanz meint. *Alternative: unverändert lassen* (der Wortlaut bleibt dann so, wie er ist, und „benannte Instanz“ grenzt ab); die Vorab-Suche zählt die Fundstellen von „Instanz“ im Lastenheft, bevor der Projektinhaber entscheidet.
+*Begründung der Namensregel* (Entscheidung 1): Der Name wird Label-Wert am Container und Suchwert im Filter von `docker ps`; ein kleiner, geschlossener Zeichensatz schließt die Zeichen aus, die ein Filter, ein Shell-Aufruf oder ein Name anders lesen; Kleinbuchstaben vermeiden zwei Instanzen, die sich nur in der Groß- und Kleinschreibung unterscheiden; der Rand folgt den Namensregeln von Docker (Annahme, nicht gelesen); `=` ist durch den Zeichensatz ausgeschlossen, die leere Zeichenkette durch die Länge 1 (gemessen: Exit-Code `1` der CLI, `Unmatched argument format`; `=`: `up` hängt). Ein kleinerer Kreis ist leichter zu erweitern als zu verengen.
 
-**Stelle 6 — Nicht-Ziele, [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), letzter Spiegelstrich.**
+**Stelle 5 — Nicht-Ziele, [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Zeile 508.**
 
-Alt:
+Alt (Zeile 508):
 
-> Nicht-Ziele: `u-boot` startet keinen Agenten ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)), und der Befehl startet nicht den Compose-Stack ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)).
+> - Nicht-Ziele: `u-boot` startet keinen Agenten ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)), und der Befehl startet nicht den Compose-Stack ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)).
 
-(Im Lastenheft stehen dort Anker-Links der Datei `#…`; hier der Pfad von `open/` aus.)
+Neu:
 
-Neu (Anhang):
+> - Nicht-Ziele: `u-boot` startet keinen Agenten ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)), und der Befehl startet nicht den Compose-Stack ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)). **Zu Instanzen: `u-boot` führt keine Liste der Instanzen, räumt keine auf, wählt keinen Zweig je Instanz und verteilt keine Arbeit auf Instanzen; der Compose-Stack gehört nicht zu einer Instanz.**
 
-> … Nicht-Ziele zu Instanzen: `u-boot` verwaltet keine Liste der Instanzen und räumt keine auf, wählt keinen Zweig je Instanz und verteilt keine Arbeit auf Instanzen; der Compose-Stack gehört nicht zur Instanz.
+**Stelle 6 — Versionsfeld und Historie (§16).**
 
-**Stelle 7 — Versionsfeld und Historie (§16).**
+Alt: `| Version          | 0.24.0 |` (Zeile 9; Stand 2026-10-31).
 
-Alt: `| Version          | 0.24.0 |` (Stand 2026-10-31).
+Neu: `| Version          | 0.25.0 |` — erst bei Annahme; die Nummer ist die dann nächste freie Minor-Version aus der Historie (letzte Zeile heute `0.24.0`, Zeile 1607).
 
-Neu: `| Version          | 0.25.0 |` ⟦Vorbehalt: nächste freie Minor-Version beim Start, aus der Historie gelesen⟧.
+Neue Historie-Zeile (Fassung (i); bei (ii) entfällt „und `up` ohne `--instance` bei nur Instanz-Containern“):
 
-Neue Historie-Zeile:
+> | 0.25.0 | ⟦Datum der Annahme⟧ | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten): benannte Instanz an `u-boot devcontainer up`, `down` und `shell` (`--instance <name>`; mehrere Devcontainer desselben Projekts gleichzeitig; ohne `--instance` wirkt der Befehl nur auf den Container ohne Instanz); Namensregel (Kleinbuchstaben, Ziffern, Bindestriche, 1 bis 32 Zeichen), Exit-Code `10` bei ungültigem Namen und bei `up` ohne `--instance`, wenn es nur Container von Instanzen gibt; Isolation der Volumes für bis zu vier gleichzeitige Instanzen im Sandbox-Profil mit `nestedRuntime: docker` und `ollama`, jede mit höchstens einer CPU und 3 GiB, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Engine; nicht zugesagt: mehr als vier Instanzen, Podman-Speicher, andere Grenzen, Last, Dauer und Platz, andere Hosts, Isolation im Standardprofil, Zweig je Instanz. | Vereinbarung mit dem Projektinhaber |
 
-> | 0.25.0 | ⟦Datum der Freigabe⟧ | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (im Lastenheft als Anker `#…` der Datei): benannte Instanz an `u-boot devcontainer up`, `down` und `shell` (`--instance <name>`, mehrere Devcontainer desselben Projekts gleichzeitig; Isolation der Volumes im Sandbox-Profil für die gemessenen Aufbauten, Exit-Code `10` bei ungültigem Namen ⟦M2: und bei nicht herstellbarer Isolation⟧); nicht zugesagt: mehr als ⟦M9: Zahl der gemessenen Instanzen⟧ Instanzen, Last, andere Hosts als gemessen, Instanzen im Standardprofil isoliert, Zweig je Instanz. | Vereinbarung mit dem Projektinhaber |
+*(Der Verweis auf die Entscheidung steht im Lastenheft als Anker `#…` der Datei; das Datum ist die einzige Stelle im Wortlaut, die erst bei der Annahme feststeht.)*
 
-### Überblick: wovon der Wortlaut vom Messwert abhängt
+### Nicht-Zusagen aus dem Verification-Report: wo sie im Wortlaut stehen
 
-| Platzhalter | Stelle | Messfrage | Fällt der Messwert anders aus … |
-|---|---|---|---|
-| ⟦M0⟧ | 3 | Dev-Container-CLI- und Docker-Version | Zusage-Menge steht mit exakt diesen Versionen |
-| ⟦M9⟧ | 3, 7 | Zahl der Stufen, die der Mess-Slice vollständig gemessen hat (Anforderung des Projektinhabers: Isolation mit drei und vier Instanzen) | trägt der Host vier, steht „vier“; sonst die höchste vollständig gemessene Zahl (Abbruch mit Befund, nicht Weglassen); die Zahl steht an allen drei Stellen gleich |
-| ⟦M10⟧ | 3 | Messbedingung je Instanz `--cpus=1 --memory=3g` (Vorgabe des Projektinhabers; Annahme „je Instanz“, im Mess-Slice §1 ausgewiesen) | nennt das Protokoll die Grenze nicht zurückgelesen oder hat der Projektinhaber „für alle zusammen“ gemeint, entfällt oder ändert sich der Halbsatz; kein Versprechen für größere oder keine Limits |
-| ⟦M2⟧ | 3, 4, 7 | wechselt `${devcontainerId}` mit dem zweiten Id-Label | wechselt es nicht: Stellen 3 und 7 nennen den Abbruch mit Exit-Code `10` oder der CR wartet auf einen Slice, der die Lücke schließt (Mess-Slice §4) |
-| ⟦M3⟧ | 3 | getrennte Volumes je Familie, Standardprofil geteilt | nur die gemessenen Familien stehen im Satz |
-| ⟦M4, M5⟧ | 3 | Image geteilt, Dauer, Platz | Vorschlag: keine Zahl im Lastenheft, nur im Handbuch |
-| ⟦M6⟧ | 1 (und 2) | `up` ohne Flag neben einer Instanz | **gemessen:** die CLI übernimmt den zuletzt angelegten Instanz-Container (Sandbox-Profil, 6 von 6 Läufen); der Satz ist an das Verhalten angepasst oder an eine Zusage des Code-Slice, Entscheidung des Projektinhabers |
-| ⟦M7⟧ | 2 | `down` stoppt nur die Instanz | sonst Satz streichen |
-| ⟦M8⟧ | 4 | Grenze von Label-Wert und Docker-Namen | Obergrenze nur senken, nie anheben |
+| Nicht in einen Lastenheft-Wortlaut als Zusage | Stelle |
+|---|---|
+| mehr als vier Instanzen | Stelle 3 (Nicht zugesagt), Stelle 6 |
+| andere Hosts und Engines | Stelle 3, Stelle 6 |
+| Isolation durch Podman | Stelle 3 (Nicht zugesagt), Stelle 6 |
+| Dauer- und Platzzahlen | Stelle 3 (Nicht zugesagt: Dauer und Platzbedarf), keine Zahl im Wortlaut |
+| Verbrauch unter Go-Build, Modell-Pull, kaltem Cache oder kaltem Bau; Last | Stelle 3 (Nicht zugesagt), „im Zustand direkt nach dem Start“ |
+| Isolation im Standardprofil | Stelle 3 (Bind-Mount geteilt, nicht zugesagt), Stelle 6 |
+| Mechanismus der Übernahme bei `up` ohne Flag (Vermutung) | nicht im Wortlaut; Begleittext zu Stelle 3 und Begründung (i) nennen ihn als nicht gemessen |
+| Ursache des Hängers bei `=` | nicht im Wortlaut; Stelle 4 schließt `=` über den Zeichensatz aus, ohne die Ursache zu behaupten |
+| dass `u-boot devcontainer up --instance` so arbeitet | Vorbehalt vor Stelle 1 (Zielbild; der Docker-Test des Code-Slice pinnt den Befehl), Begleittext zu Stelle 2 |
+| Messbedingung „1 CPU und 3 GiB je Instanz“ als Versprechen über den Zustand direkt nach dem Start hinaus | Stelle 3: „jede mit höchstens …, im Zustand direkt nach dem Start“, „Nicht zugesagt: andere Grenzen, Last“ |
 
-**Keine Änderung** (gelesen, bewusst nicht angefasst): [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) Regeln zum Hilfs-Container (die Instanz ändert den Socket-Mount nicht), die Zusage-Menge-Zeile von [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) („Linux-Host `amd64`, lokale Engine“; die neue Zusage bleibt innerhalb), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) und [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) (siehe oben, Vorschlag).
+**Keine Änderung** (gelesen, bewusst nicht angefasst): [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (auch die Regeln zum Hilfs-Container: die Instanz ändert den Socket-Mount nicht) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Entscheidung 2: „je Instanz“ bleibt, der Begriff ist dort der einzelne Devcontainer), die Zusage-Menge-Zeile 507 von [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) („Linux-Host `amd64`, lokale Engine“; die neue Zusage bleibt innerhalb), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) und [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), das Glossar (kein Eintrag zu „Instanz“).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Messung und Wahl der Lückenlösung** — [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md); der CR trägt nur, was dort gemessen ist.
+- **Messung** — [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md); der CR trägt nur, was dort gemessen ist.
 - **Code, Tests, Spezifikation, Handbuch, `CHANGELOG.md`** — [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md); das Lastenheft ist Zielbild, der Code folgt.
-- **Welchen Zweig eine Instanz bearbeitet, Agenten verteilen, Compose-Stack je Instanz, Last bei vielen Instanzen** — im Entwurf des Code-Slice ausgeschlossen (§1 dort); der CR führt sie als Nicht-Ziele oder gar nicht.
+- **Welchen Zweig eine Instanz bearbeitet, Agenten verteilen, Compose-Stack je Instanz, Last bei vielen Instanzen** — im Entwurf des Code-Slice ausgeschlossen (§1 dort); der CR führt sie als Nicht-Ziele (Stelle 5) oder als Nicht-Zusage (Stelle 3).
 - **Entscheidung über Release oder Welle** — beim Projektinhaber (Roadmap nicht geändert).
+- **Änderung an `spec/lastenheft.md`** — erst nach der Freigabe dieses Wortlauts.
 
 ## 2. Definition of Done
 
@@ -152,8 +187,8 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 gehört zurück zur Zerlegung. Gezählt wird nur, was mit dem Umfang wächst — die
 Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 
-- [ ] **Wortlaut ohne Platzhalter:** Alle `⟦…⟧` des Entwurfs sind durch Messwerte ersetzt oder die Aussagen gestrichen; der Wortlaut ist dem Projektinhaber Stelle für Stelle vorgelegt (Alt/Neu), der Vorschlag zu Zeichensatz und Länge (Stelle 4) und die Fragen zu Stelle 5 sind entschieden, die Freigabe ist in §7 vermerkt.
-- [ ] **Lastenheft `0.25.0`** (oder die dann nächste freie Version) geschrieben: Stellen 1 bis 4, 6, 7 (und 5, wenn angenommen) in der freigegebenen Fassung, Versionsfeld, Historie-Zeile mit Datum (Verweis „Vereinbarung mit dem Projektinhaber“).
+- [ ] **Wortlaut ohne offene Entscheidung:** Der Wortlaut ist dem Projektinhaber Stelle für Stelle vorgelegt (Alt/Neu); die Entscheidungen der Tabelle „Vor der Freigabe zu entscheiden“ (Fassung (i) oder (ii), Versionsnummer, Historie-Zeile) sind getroffen, die Fassung ist auf die gewählte reduziert, die Freigabe ist in §7 vermerkt.
+- [ ] **Lastenheft `0.25.0`** (oder die dann nächste freie Version) geschrieben: Stellen 1 bis 6 in der freigegebenen Fassung, Versionsfeld, Historie-Zeile mit Datum (Verweis „Vereinbarung mit dem Projektinhaber“).
 - [ ] **Vorab-Suche und Nachzug:** `grep -i` über `spec/lastenheft.md` nach `Instanz`, `devcontainer up`, `devcontainer down`, `devcontainer shell`, `recreate`, `Volume`, `quiet` und `json` ist in §7 festgehalten; mitzuändernde Stellen: keine über die freigegebenen hinaus.
 - [ ] `make gates` grün; `make doc-trace` ohne neue Waise. Läufe und Exit-Codes in §7.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
@@ -174,27 +209,27 @@ Aussagen-Berührung steht hier gar nicht.
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/lastenheft.md` | update | Stellen 1 bis 4, 6, 7 (und 5); gelesen: Kopf (Zeilen 1 bis 10), [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeilen 497 bis 507), Fundstellen per `grep` (Zeilen 189, 191, 457, 473, 1147 bis 1149), Historie bis `0.24.0` (Zeile 1607) |
-| `docs/plan/planning/open/slice-cr-devcontainer-instanz.md` (diese Datei) | update | Wortlaut ohne Platzhalter, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
-| `docs/plan/planning/open/slice-v1-devcontainer-instanz-label.md` | update | Zustandsmarker „CR freigegeben“ im Start-Trigger, Verweis-Nachzug der Moves |
+| `spec/lastenheft.md` | update (erst nach der Freigabe) | Stellen 1 bis 6; gelesen: Kopf (Zeile 9), [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeilen 497 bis 508), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Zeilen 218 bis 236), Glossar (Zeilen 1542 bis 1556), Fundstellen per `grep` (Zeilen 189, 191, 457, 473, 1147 bis 1149), Historie bis `0.24.0` (Zeile 1607) |
+| `docs/plan/planning/open/slice-cr-devcontainer-instanz.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
+| `docs/plan/planning/open/slice-v1-devcontainer-instanz-label.md` | update | Namensregel (Entscheidung 1) und Test-Auftrag zu Fassung (i) (Exit-Code `10`, Prüfung vor dem Aufruf der CLI); Zustandsmarker „CR freigegeben“ im Start-Trigger, Verweis-Nachzug der Moves |
 | `docs/plan/planning/open/README.md` | update | Zeile dieses Slice auf „geliefert“; Verweis-Nachzug der Moves (`make slice-mv`) |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `docs/plan/planning/observations/` | update, neu | Register bei der Closure (§7) |
 | `spec/spezifikation.md`, `spec/architecture.md`, `docs/user/`, `README.md`, `README.de.md`, `CHANGELOG.md`, `internal/**` | unverändert | der CR ändert kein Produktverhalten; der Code-Slice zieht nach |
 
-Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md)): `grep -i` über `spec/lastenheft.md` nach den Begriffen der DoD; ausgeführt vor dem Lastenheft-Commit, Treffer in §7.
+Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md)): `grep -i` über `spec/lastenheft.md` nach den Begriffen der DoD; ausgeführt vor dem Lastenheft-Commit, Treffer in §7. Vorab (diesen Entwurf): `grep -i instanz` — Treffer nur in den Zeilen 416, 473 und der Historie (0.4.0, 0.5.0, 0.22.0), kein Glossar-Eintrag.
 
 ## 4. Trigger
 
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md) liegt in `done/` (Messwerte und Urteil zur Kernfrage liegen vor); der Projektinhaber hat den Wortlaut freigegeben (Gespräch); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md) liegt in `done/` (eingetreten); der Projektinhaber hat den Wortlaut freigegeben (Gespräch) und die Entscheidungen der Tabelle getroffen; kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
-- `in-progress` → `next` (zu groß): Der Wortlaut verlangt mehr als eine Anforderung oder eine Entscheidung, die der Mess-Slice nicht getroffen hat (etwa die Lückenlösung bei Fassung (2) des Urteils).
-- `in-progress` → `open` (blockiert): keine Freigabe des Wortlauts, oder die Messung hat die Kernfrage nicht entschieden (Fassung (3)); das Lastenheft bleibt unverändert, kein Code-Slice startet.
+- `in-progress` → `next` (zu groß): Der Wortlaut verlangt mehr als eine Anforderung oder eine Entscheidung, die der Mess-Slice nicht getroffen hat.
+- `in-progress` → `open` (blockiert): keine Freigabe des Wortlauts; das Lastenheft bleibt unverändert, kein Code-Slice startet.
 
 ## 5. Closure-Trigger
 
@@ -211,16 +246,15 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 **einen** Ausgang, und kein Slice geht nach `done/`, während eines ohne Ausgang
 dasteht.
 
-- **Ein Satz im Lastenheft stützt sich auf einen Messwert, den der Mess-Slice nicht liefert** ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)); vor der Freigabe wird die Liste „nicht gemessen“ Satz für Satz gegen den Wortlaut gelesen (geschärfte Regel aus [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) §7). — **Ausgang:** bei Closure.
-- **Der Begriff „Instanz“ kollidiert mit „je Instanz“ in [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).** — **Ausgang:** bei Closure (Stelle 5: Entscheidung des Projektinhabers).
+- **Ein Satz im Lastenheft stützt sich auf einen Messwert, den der Mess-Slice nicht liefert** ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)); vor der Freigabe wird die Liste „nicht gemessen“ Satz für Satz gegen den Wortlaut gelesen (geschärfte Regel aus [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) §7; die Tabelle „Nicht-Zusagen“ in §1 ist dieser Abgleich). — **Ausgang:** bei Closure.
 - **Das Standardprofil teilt den Projektordner:** Eine Zusage „Instanzen sind isoliert“ ohne die Einschränkung auf das Sandbox-Profil wäre falsch. — **Ausgang:** bei Closure (Stelle 3 nennt die Grenze).
-- **Die Version `0.25.0` ist vergeben, wenn der Slice startet:** andere Entwürfe in `open/` mit eigenem Lastenheft-CR können sie früher nehmen. — **Ausgang:** bei Closure (Version beim Start aus der Historie lesen).
-- **Die Zusage nennt mehr Instanzen, als der Host des Mess-Slice getragen hat** (Anforderung: bis zu vier). — **Ausgang:** bei Closure (⟦M9⟧ wird gegen die Messwert-Tabelle des Mess-Slice §7 gelesen; nicht gemessene Stufen stehen nicht im Wortlaut).
-- **Die Kernfrage fällt ungünstig aus** (Volumes geteilt): Der Wortlaut ändert sich oder der CR wartet auf einen Vorgang vor ihm. — **Ausgang:** bei Closure.
+- **Die Annahme „1 CPU und 3 GiB je Instanz“ ist eine Deutung der Vorgabe** (nicht für alle Instanzen zusammen) und nicht zurückgefragt; sie steht als Messbedingung in Stelle 3. — **Ausgang:** bei Closure (Rückfrage an den Projektinhaber bei der Vorlage).
+- **Die Fassung (i) verlangt eine Prüfung in `u-boot` vor dem Aufruf der CLI und eine Suche, die Container mit Instanz-Label ausschließt;** beides ist nicht gelesen oder gemessen (Begründung (i)). — **Ausgang:** weiter offen → [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md) (Test-Auftrag dort).
+- **Die Version `0.25.0` ist vergeben, wenn der Slice startet:** andere Entwürfe in `open/` mit eigenem Lastenheft-CR können sie früher nehmen. — **Ausgang:** bei Closure (Version bei der Annahme aus der Historie lesen).
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt: Freigabe des Wortlauts (Datum, Fassung) · Vorab-Suche mit Treffern · Review und Verification · Steering-Loop-Eintrag · Beobachtungs-Register · Folge-Slices · Risiken aus §6 · Grenzen · Drei Paarungen · Abgleich der Plan-Tabelle gegen `git diff --stat`.)*
+*(Wird bei der Closure gefüllt: Freigabe des Wortlauts (Datum, Fassung (i) oder (ii)) · Vorab-Suche mit Treffern · Review und Verification · Steering-Loop-Eintrag · Beobachtungs-Register · Folge-Slices · Risiken aus §6 · Grenzen · Drei Paarungen · Abgleich der Plan-Tabelle gegen `git diff --stat`.)*
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
@@ -238,6 +272,6 @@ Hälften.
 
 **Vorgelagert — Sub-Area-Wahl prüfen:** berührt wird allein `spec/` (DOK, Greenfield) laut [`harness/conventions.md`](../../../../harness/conventions.md#modus-deklaration-pro-sub-area); die Schwelle (zwei von drei Achsen) ist laut Modus-Deklaration erfüllt.
 
-**Vorgelagert — offene Beobachtungen sichten:** Das Register ([`observations/`](../observations/)) ist nach den Titeln durchgesehen. Gelesen: [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) als Verweis aus [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) §7 (Inhalt hier nicht gelesen; die Regel daraus steht in §6). [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) gilt (`AGENTS.md` §3.10): Jede Bedingung im Wortlaut („nur im Sandbox-Profil“, „kein geteiltes Volume“, „Exit-Code `10` bei ungültigem Namen“) braucht im Code-Slice einen pinnenden Test oder entfällt.
+**Vorgelagert — offene Beobachtungen sichten:** Das Register ([`observations/`](../observations/)) ist nach den Titeln durchgesehen. Gelesen: [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) als Verweis aus [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) §7 (Inhalt hier nicht gelesen; die Regel daraus steht in §6) und [`BEO-APP/container-identitaet-nur-ueber-label`](../observations/BEO-APP/container-identitaet-nur-ueber-label/observation.md) (Kopf und Trigger; der Messbeleg des Mess-Slice liegt als Evidence-Datei dort). [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) gilt (`AGENTS.md` §3.10): Jede Bedingung im Wortlaut („nur im Sandbox-Profil“, „kein geteiltes Volume“, „Exit-Code `10` bei ungültigem Namen“, „Exit-Code `10` bei nur Container von Instanzen“) braucht im Code-Slice einen pinnenden Test oder entfällt.
 
 Alle berührten Sub-Areas sind Greenfield (kein Modus-Begründungsblock nötig).
