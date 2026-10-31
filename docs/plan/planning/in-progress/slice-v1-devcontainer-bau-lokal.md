@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-031`](../../../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows) (neuer lokaler Modus), [`SPEC-008`](../../../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) (Spalte *Zweck* der Pflicht-Targets), [`SPEC-025`](../../../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles) (die Stages rufen das gemeinsame Skript), [`SPEC-032`](../../../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage) (Coverage-Lauf, falls Test und Coverage ein Lauf werden).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (gesetzt beim Start, 2026-10-31)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-31.
 
