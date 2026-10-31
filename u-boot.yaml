@@ -1,0 +1,22 @@
+schemaVersion: 1
+project:
+  name: u-boot
+devcontainer:
+  enabled: true
+  profile: sandbox
+  sandbox:
+    nestedRuntime: docker
+  features:
+    gh:
+      enabled: true
+    node:
+      enabled: true
+      version: 2.1.1
+    claude-code:
+      enabled: true
+      version: 1.0.5
+    ollama:
+      enabled: true
+    homebrew:
+      enabled: true
+      version: 2.0.5

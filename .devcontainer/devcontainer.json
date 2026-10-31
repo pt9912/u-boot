@@ -1,0 +1,30 @@
+// BEGIN U-BOOT MANAGED BLOCK: init
+{
+  "name": "u-boot",
+  "build": {
+    "dockerfile": "./Dockerfile",
+    "context": "."
+  },
+  "workspaceMount": "",
+  "workspaceFolder": "/workspaces/u-boot",
+  "runArgs": ["--privileged"],
+  "mounts": [
+    "source=u-boot-workspace-${devcontainerId},target=/workspaces/u-boot,type=volume",
+    "source=u-boot-docker-${devcontainerId},target=/var/lib/docker,type=volume",
+    "source=u-boot-ollama-${devcontainerId},target=/home/vscode/.ollama,type=volume"
+  ],
+  "postCreateCommand": "[ -d .git ] || git clone -- https://github.com/pt9912/u-boot.git .",
+  "postStartCommand": "sudo sh /usr/local/bin/u-boot-docker-init",
+  "remoteEnv": {
+    "GIT_TOKEN": "${localEnv:GIT_TOKEN}",
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+    "GH_TOKEN": "${localEnv:GH_TOKEN}"
+  },
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0.5": {},
+    "ghcr.io/devcontainers/features/node:2.1.1": {},
+    "ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2.0.5": {}
+  },
+  "remoteUser": "vscode"
+}
+// END U-BOOT MANAGED BLOCK: init
