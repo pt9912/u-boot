@@ -1,0 +1,46 @@
+# Messlauf M0 slice-v1-devcontainer-bau-lokal
+# Datum: 2026-10-31T09:44:46Z
+# Host: Linux x86_64, Docker 29.9.2
+# GO_VERSION=1.27.3 GOLANGCI_LINT_VERSION=v2.14.0
+
+## A. Test-Cache (Quelle unveraendert, Caches in benannten Volumes)
+LAUF test_kalt                  wall=  11.9s  ok_cached=0 ok_neu=24 ohne_tests=0 FAIL=0
+LAUF test_warm                  wall=   0.9s  ok_cached=24 ok_neu=0 ohne_tests=0 FAIL=0
+LAUF cover_kalt                 wall=   5.5s  ok_cached=0 ok_neu=24 ohne_tests=0 FAIL=0
+LAUF cover_warm                 wall=   1.2s  ok_cached=24 ok_neu=0 ohne_tests=0 FAIL=0
+LAUF cover_ohne_pkgliste        wall=   4.6s  ok_cached=0 ok_neu=24 ohne_tests=0 FAIL=0
+LAUF cover_ohne_pkgliste2       wall=   0.8s  ok_cached=24 ok_neu=0 ohne_tests=0 FAIL=0
+
+## B. Eine Testdatei geaendert (Kopie der Quellen, eine Zeile angehaengt)
+# geaenderte Datei: internal/hexagon/domain/addon_dependency_test.go
+LAUF test_nach_aenderung        wall=   1.4s  ok_cached=23 ok_neu=1 ohne_tests=0 FAIL=0
+LAUF cover_nach_aenderung       wall=   1.8s  ok_cached=23 ok_neu=1 ohne_tests=0 FAIL=0
+
+## C. Lint-Image golangci/golangci-lint:v2.14.0
+Unable to find image 'golangci/golangci-lint:v2.14.0' locally
+v2.14.0: Pulling from golangci/golangci-lint
+Digest: sha256:ad862ba6b3798cbe0fd9fd7408d498fd74fbd2623a92406b2fd3898faf0bf98f
+Status: Downloaded newer image for golangci/golangci-lint:v2.14.0
+go version go1.27.1 linux/amd64
+bash: /usr/bin/bash
+sh: /usr/bin/sh
+golangci-lint has version 2.14.0 built with go1.27.0 from 114493f9 on 2026-09-24T11:07:15Z
+
+## D. make gates im Docker-Modus (Wanduhr)
+GATES lauf=1 status=ok wall=  89.9s
+GATES lauf=2 status=ok wall=  89.3s
+
+## E. Coverage-Profil aus dem Cache (Go 1.27.3, Quelle unveraendert)
+--- Lauf kalt
+go: downloading gopkg.in/yaml.v3 v3.0.1
+go: downloading github.com/spf13/cobra v1.10.2
+go: downloading github.com/spf13/pflag v1.0.9
+gecachte Pakete: 0 von 24
+Profil: 127585 Zeilen, 10988323 Bytes
+Profil sha256: d67bfbb7bff61bde02ffe633e199a0439f458cc1952a234c12e4fb5ee7201a70
+total:												(statements)					92.1%
+--- Lauf warm
+gecachte Pakete: 24 von 24
+Profil: 127585 Zeilen, 10988323 Bytes
+Profil sha256: 70735400ea980fa8a351199e5096af288a6b2c4bc49ed8ee94245821ca54bb37
+total:												(statements)					92.1%

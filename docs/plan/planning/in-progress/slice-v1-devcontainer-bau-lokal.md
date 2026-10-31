@@ -79,6 +79,8 @@ Aussagen-Berührung steht hier gar nicht.
 
 **Schritt M0 (vor jedem Code): Messlauf.** Klärt, ob `go test` mit Coverage-Profil Ergebnisse cached, und misst `make gates` im Docker-Modus als Ausgangswert (Wanduhr, der Ablauf ist parallel). Das Ergebnis legt fest, ob Test und Coverage im lokalen Modus ein Lauf werden ([ADR-0037](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md) Entscheidung 7).
 
+**Ergebnis M0** (gemessen am 2026-10-31, Linux `amd64`, ein Lauf je Zelle, [Messprotokoll](../../../messungen/slice-v1-devcontainer-bau-lokal/README.md)): `go test` cached auch mit `-coverpkg` und `-coverprofile` (24 von 24 Paketen aus dem Cache, 0,8 bis 1,2 s gegen 4,6 bis 11,9 s kalt); das Profil des gecachten Laufs hat dieselbe Größe und dieselbe Summe (92,1 %) wie das des kalten. Nach der Änderung einer Testdatei lief 1 von 24 Paketen neu. Das Lint-Image hat `bash` und Go `1.27.1` (nicht `1.27.3`). `make gates` im Docker-Modus: 89,9 s und 89,3 s. **Folge:** Test und Coverage bleiben im lokalen Modus zwei Targets, beide aus dem Cache; [`SPEC-032`](../../../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage) bleibt unverändert, die Folge-ADR des Architect-Reports entfällt; `scripts/bau.sh` darf für `lint` `bash` voraussetzen.
+
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
 | `docs/plan/adr/README.md` | unverändert | Gelesen: Zeile 65 trägt die Indexzeile für [ADR-0037](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md) (Commit `b371e262`); der Architect-Report F-6 berichtigt die frühere Planzeile „update“ |
