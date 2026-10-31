@@ -543,7 +543,7 @@ if [ "$stufe" != namen ]; then
   if [ "$have" -ge "$need" ]; then echo "(d) Speicher: erfuellt"
   elif [ "$stufe" = 4 ] && [ "$have" -ge 9437184 ] && [ "$(awk '/^SwapFree:/{print $2}' /proc/meminfo)" -ge 8388608 ]; then
     RELAXED=1
-    echo "(d) Speicher: NICHT nach Slice-Schwelle erfuellt; ABWEICHUNG VON DER VORPRUEFUNG DES SLICE (Projektinhaber, 2026-10-31, nur Stufe 4): Start erlaubt, weil MemAvailable >= 9 GiB (drei Instanzen) und SwapFree >= 8 GiB ($(awk '/^SwapFree:/{print $2}' /proc/meminfo) kB); Instanzgrenze bleibt --memory=3g --memory-swap=3g; Ueberwachung von Host-Swap und vmstat si/so; Stufe gilt als unter Swap-Druck, wenn der Host-Swap waechst"
+    echo "(d) Speicher: NICHT nach Slice-Schwelle erfuellt; ABWEICHUNG VON DER VORPRUEFUNG DES SLICE (Projektinhaber, 2026-10-31, nur Stufe 4): Start erlaubt, weil MemAvailable >= 9 GiB (drei Instanzen) und SwapFree >= 8 GiB ($(awk '/^SwapFree:/{print $2}' /proc/meminfo) kB); Instanzgrenze bleibt --memory=3g --memory-swap=3g; Ueberwachung von Host-Swap und vmstat si/so; Swap-Druck heisst: der Host-Swap waechst um mehr als 256 MiB oder si+so bleibt dauerhaft hoch"
   else echo "(d) Speicher: NICHT erfuellt"; ok=0; fi
   avail_gb=$(df -BG --output=avail / | tail -n 1 | tr -dc 0-9)
   echo "(d) freier Platz der Docker-Wurzel (Dateisystem /): ${avail_gb} GB (benoetigt 40 GB)"
