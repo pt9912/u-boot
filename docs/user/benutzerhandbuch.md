@@ -3,6 +3,8 @@
 Handbuch-Version: 2.0
 Software-Version: v0.16.1
 Stand: 2026-10-26
+Team: Projekt `u-boot` (<https://github.com/pt9912/u-boot>)
+Änderungen am Produkt: [`CHANGELOG.md`](../../CHANGELOG.md)
 
 ---
 
@@ -588,6 +590,12 @@ Strg-C abbrechen; das gilt als normales Ende (Exit-Code 0).
 - Ein Dienstname, den Compose nicht kennt, endet mit Exit-Code 12.
 
 ### 4.7 Die Umgebung prüfen
+
+#### Voraussetzung
+
+`u-boot` ist installiert (siehe [Installation](#2-installation)). Sie führen den Befehl im
+Verzeichnis Ihres Projekts aus. Fehlt dort die `u-boot.yaml`, meldet `u-boot doctor` eine
+Warnung, dass das Verzeichnis kein `u-boot`-Projekt ist (Beispiel unten).
 
 #### Vorgehen
 
@@ -1699,9 +1707,9 @@ registry.npmjs.org  feature:claude-code, feature:node
   nicht gemessen, und es gibt keinen Test dafür.
 - **Messstand:** Die Aussagen dieses Abschnitts sind auf Docker 29.5.2 mit Colima 0.10.3 (arm64) und
   `dnsmasq` 2.91 gemessen. Zusätzlich gibt es Messungen auf einem nativen Linux-x86_64-Host mit Docker 29.9.1
-  (2026-10-19, zwei Läufe): der Pull von Modellen hinter der Beschränkung, das erneute Ausführen
-  des Startscripts (frühere Fassung) und der Verkehr verschachtelter Container (siehe unten und den Abschnitt zu
-  Ollama). Docker Desktop ist nicht gemessen.
+  (zwei Läufe): der Pull von Modellen hinter der Beschränkung und der Verkehr verschachtelter
+  Container (siehe unten und den Abschnitt zu Ollama). Das erneute Ausführen des Startscripts ist
+  nicht gemessen (siehe unten). Docker Desktop ist nicht gemessen.
 - Für `claude-code` nimmt die Liste nur den API-Host und die npm-Registry auf; die
   Hosts der Anmeldung sowie von Telemetrie, Fehlerberichten, MCP-Connectors,
   Updates und Plugins sind **nicht aufgenommen** und werden bei Bedarf in
@@ -1757,19 +1765,15 @@ registry.npmjs.org  feature:claude-code, feature:node
   nie aussetzt: Eine Zählung von null heißt „kein Treffer“, nicht „kein Fenster“,
   weil die Sonde nur in Abständen von Millisekunden abtastet. Schlägt die
   Transaktion fehl, meldet das Script das, schreibt den Status `failed` und endet
-  mit Exit-Code 11, auch bei `warn`; das bisherige Regelwerk und der bisherige
-  DNS-Server bleiben bestehen (ein Test pinnt das mit einer ungültigen
+  mit Exit-Code 11, auch bei `warn`; das zuvor geltende Regelwerk und der zuvor
+  laufende DNS-Server bleiben bestehen (ein Test pinnt das mit einer ungültigen
   Regelzeile).
-  **Nicht gemessen** für diese Fassung: die Zeiten auf `amd64`, Docker Desktop und
+  **Nicht gemessen:** die Zeiten auf `amd64`, Docker Desktop und
   in der CI, die Zeiten unter Last des Hosts, mit verschachtelter Laufzeit und die
   IPv6-Tabelle (geprüft ist nur, dass beide Tabellen bestehen und die
-  IPv6-Kette verwirft und Loopback zulässt, nicht ein Fenster). Gemessen ist nur die **frühere Fassung**, die ihre Tabellen löschte
-  und danach neu aufbaute (Linux, `amd64`, ein Host, zwei Messungen zu je 30 Läufen):
-  In 27 und 28 Läufen wurde währenddessen ein Verbindungsversuch zum Gateway
-  (Port 9) nicht verworfen, sondern vom Gateway abgelehnt, bis zu 48 und 50 ms
-  lang (eine Untergrenze); in 30 und 27 Läufen ließ sich ein erlaubter Name für
-  30 bis 76 Millisekunden nicht auflösen. Diese Zahlen sagen nichts über die
-  neue Fassung. Die Beschränkung bleibt eine Leitplanke und keine
+  IPv6-Kette verwirft und Loopback zulässt, nicht ein Fenster). Ob beim erneuten Ausführen ein Zeitraum ohne Beschränkung
+  entsteht oder die Auflösung eines erlaubten Namens kurz aussetzt, ist nicht
+  gemessen. Die Beschränkung bleibt eine Leitplanke und keine
   Sicherheitsgrenze.
 - Der Pull eines Images mit verschachteltem Docker lief direkt nach dem Start der Beschränkung in
   einem von zwei vollständigen Läufen in eine Zeitüberschreitung (`i/o timeout`) und gelang 15 Sekunden später;
@@ -1958,10 +1962,11 @@ keinen Berechtigungsmodus.
   `raw.githubusercontent.com` sind ohnehin in der Basisliste. Wer einen dieser Hosts
   braucht, trägt ihn in `devcontainer.sandbox.egress.allow` ein. Im Test lief die
   CLI mit gesperrtem Telemetrie-Host.
-- **Grenzen der Messung:** Dev-Container-CLI 0.89.0, Colima, arm64, Basis-Image
-  `mcr.microsoft.com/devcontainers/base:debian`, Claude Code 2.1.302, Feature `1.0.5`;
-  der Pin `1` schwimmt, spätere Versionen können abweichen. Ein echter Login und
-  eine echte Anfrage mit gültigem Schlüssel wurden nicht ausgeführt.
+- **Geprüft und nicht geprüft:** Geprüft ist die Kombination aus Dev-Container-CLI
+  0.89.0 auf Colima (arm64), dem Basis-Image `mcr.microsoft.com/devcontainers/base:debian`,
+  Claude Code 2.1.302 und dem Feature in Version `1.0.5`. Der Eintrag legt nur die
+  Hauptversion `1` des Features fest; spätere Versionen können abweichen. Nicht geprüft
+  sind ein Login und eine Anfrage mit gültigem Schlüssel.
 
 #### Ollama (optional)
 
@@ -2481,6 +2486,11 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   mehr.
 
 ### 4.12 Vorlagen nutzen
+
+#### Voraussetzung
+
+`u-boot` ist installiert (siehe [Installation](#2-installation)). Für eine eigene Vorlage liegt
+sie als Verzeichnis auf Ihrem Rechner.
 
 #### Vorgehen
 
