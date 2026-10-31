@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle (wie der Code-Slice; Release-Zuordnung beim Projektinhaber, die Roadmap ist nicht geändert). Zweiter von drei Slices: ihm geht [`slice-v1-devcontainer-instanz-messung`](slice-v1-devcontainer-instanz-messung.md) voraus (Messwerte), ihm folgt [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md) (Code, Tests, Docker-Test, Doku). Vorbild des Ablaufs: [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md).
+**Welle:** ohne Welle (wie der Code-Slice; Release-Zuordnung beim Projektinhaber, die Roadmap ist nicht geändert). Zweiter von drei Slices: ihm geht [`slice-v1-devcontainer-instanz-messung`](../next/slice-v1-devcontainer-instanz-messung.md) voraus (Messwerte), ihm folgt [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md) (Code, Tests, Docker-Test, Doku). Vorbild des Ablaufs: [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Änderung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes: nur Anwendung, keine Änderung), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (nennen „je Instanz“ für Workspace und Docker-Speicher; Änderung nur, wenn der Projektinhaber Stelle 5 annimmt).
 Anlass: Projektinhaber, 2026-10-31 (Weg A des Entwurfs [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md); Anforderung: Instanzen teilen kein Volume).
@@ -33,7 +33,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 **Ziel:** Die Zusage „ein Projekt kann mehrere benannte Devcontainer gleichzeitig haben; `up`, `down` und `shell` wählen den Container mit `--instance <name>`; jede Instanz hat eigene Volumes“ steht im Lastenheft, auf die **nächste freie Minor-Version** (`0.25.0`; gelesen am 2026-10-31: Kopf des Lastenhefts `0.24.0`, letzte Historie-Zeile `0.24.0` — **Vorbehalt:** vergeben wird beim Start des Slice, nach einem erneuten Blick auf die Historie, denn andere Entwürfe in `open/` können einen CR vor diesem schreiben), **mit den Messwerten des Mess-Slice** und in der vom Projektinhaber freigegebenen Fassung. Der Code-Slice beginnt erst danach.
 
-**Dieser Wortlaut ist ein ENTWURF zur Freigabe durch den Projektinhaber.** Stellen, deren Inhalt vom Messwert abhängt, tragen einen Platzhalter `⟦M<Nr>: …⟧` (die Nummer ist die Messfrage in [`slice-v1-devcontainer-instanz-messung`](slice-v1-devcontainer-instanz-messung.md) §1). Ein Platzhalter wird vor der Vorlage zur Freigabe durch den Messwert ersetzt oder die Aussage gestrichen; ein Wortlaut mit Platzhalter geht nicht zur Freigabe. Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen Verweise als Anker `#…` der Datei.
+**Dieser Wortlaut ist ein ENTWURF zur Freigabe durch den Projektinhaber.** Stellen, deren Inhalt vom Messwert abhängt, tragen einen Platzhalter `⟦M<Nr>: …⟧` (die Nummer ist die Messfrage in [`slice-v1-devcontainer-instanz-messung`](../next/slice-v1-devcontainer-instanz-messung.md) §1). Ein Platzhalter wird vor der Vorlage zur Freigabe durch den Messwert ersetzt oder die Aussage gestrichen; ein Wortlaut mit Platzhalter geht nicht zur Freigabe. Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen Verweise als Anker `#…` der Datei.
 
 **Warum eine Lastenheft-Änderung:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) beschreibt `up`, `down` und `shell` für den Devcontainer „des Projekts“ ohne Instanz; ein neues öffentliches Flag und eine Zusage zur Isolation (Volumes) sind Produktverhalten. Der Entwurf [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md) sah einen CR bereits vor.
 
@@ -140,7 +140,7 @@ Neue Historie-Zeile:
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Messung und Wahl der Lückenlösung** — [`slice-v1-devcontainer-instanz-messung`](slice-v1-devcontainer-instanz-messung.md); der CR trägt nur, was dort gemessen ist.
+- **Messung und Wahl der Lückenlösung** — [`slice-v1-devcontainer-instanz-messung`](../next/slice-v1-devcontainer-instanz-messung.md); der CR trägt nur, was dort gemessen ist.
 - **Code, Tests, Spezifikation, Handbuch, `CHANGELOG.md`** — [`slice-v1-devcontainer-instanz-label`](slice-v1-devcontainer-instanz-label.md); das Lastenheft ist Zielbild, der Code folgt.
 - **Welchen Zweig eine Instanz bearbeitet, Agenten verteilen, Compose-Stack je Instanz, Last bei vielen Instanzen** — im Entwurf des Code-Slice ausgeschlossen (§1 dort); der CR führt sie als Nicht-Ziele oder gar nicht.
 - **Entscheidung über Release oder Welle** — beim Projektinhaber (Roadmap nicht geändert).
@@ -189,7 +189,7 @@ Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-instanz-messung`](slice-v1-devcontainer-instanz-messung.md) liegt in `done/` (Messwerte und Urteil zur Kernfrage liegen vor); der Projektinhaber hat den Wortlaut freigegeben (Gespräch); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-instanz-messung`](../next/slice-v1-devcontainer-instanz-messung.md) liegt in `done/` (Messwerte und Urteil zur Kernfrage liegen vor); der Projektinhaber hat den Wortlaut freigegeben (Gespräch); kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
