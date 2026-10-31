@@ -51,10 +51,31 @@ Beide Skripte laufen über Docker, der Host braucht keine Go-Toolchain; die Quel
 
 Der Hash des Profils ist in beiden Läufen verschieden; Größe und Summe sind gleich. Warum der Hash abweicht (etwa die Reihenfolge der Blöcke), ist nicht untersucht.
 
+**F. Lokaler Modus im Image des Devcontainers** (nach der Umsetzung; Skript `im-container.sh`, Rohdaten [`roh-lokal.txt`](roh-lokal.txt)): Das Image aus `.devcontainer/Dockerfile` (`docker build`, ohne die Features aus `devcontainer.json`), privilegiert gestartet mit einem Volume für `/var/lib/docker`, das Repo als Bind-Mount unter `/workspaces/u-boot`, verschachtelter Docker 29.9.2 mit `overlayfs`. Aufruf:
+
+```bash
+docker build -t uboot-devc-test -f .devcontainer/Dockerfile .devcontainer
+docker run --rm --privileged -v uboot-test-docker:/var/lib/docker -v "$PWD":/workspaces/u-boot \
+  -v "$PWD/tools/messung/devcontainer-bau-lokal":/m:ro -w /workspaces/u-boot uboot-devc-test bash /m/im-container.sh
+```
+
+| Messgröße | Ergebnis |
+|---|---|
+| Werkzeuge im Image | Go 1.27.3, `golangci-lint` 2.14.0; `BUILD_MODE=local`, `GOTOOLCHAIN=local`, `GOCACHE` und `GOMODCACHE` im Workspace |
+| `make modus-pruefung` | OK (8 Targets, beide Modi, Teillauf für `gates` abgelehnt) |
+| `make test PKG=./internal/hexagon/domain/...` | Teillauf, 5,0 s (erster Aufruf, mit Übersetzen) |
+| `make gates PKG=./x` | abgelehnt (`repo.mk`, „PKG and RUN make a partial run, which is no evidence“) |
+| `make gates` Lauf 1 (kalt) | grün, 42,7 s |
+| `make gates` Lauf 2 (warm) | grün, 26,4 s |
+| `make lint` / `make test` / `make coverage-gate` (warm, einzeln) | 0,7 s / 0,4 s / 1,0 s |
+| Coverage | 92,10 % (Schwelle 90 %) |
+
+Zum Vergleich der Docker-Modus auf dem Host nach dem Umbau des `Dockerfile`: `make gates` grün, 91,1 s (vorher 89,9 s und 89,3 s).
+
 ## Lesehilfen
 
 - Nur der Lauf `go test ./...` kalt ist vollständig kalt. Die beiden `-coverprofile`-Läufe „kalt“ liefen danach im selben Cache-Volume; ihr Build-Cache war schon warm, die Zeiten sind darum nicht mit dem ersten vergleichbar. Aussagekräftig ist die Zahl aus dem Cache (Spalte „aus dem Cache“).
-- Die Wanduhr der Docker-Läufe in D enthält Kontext-Übertragung und Image-Layer (Docker-Modus); der lokale Modus ist noch nicht gebaut. Eine Messung dazu steht nach der Umsetzung in §7 des Slice.
+- Die Wanduhr der Docker-Läufe in D enthält Kontext-Übertragung und Image-Layer (Docker-Modus). Die 26,4 s des warmen lokalen Laufs (F) bestehen zum größten Teil aus den Gates, die kein Go brauchen: Die Einzelzeiten von `lint`, `test` und `coverage-gate` liegen zusammen bei etwa 2 s; der Rest ist `ablage-pruefung`, `docs-check` und `baseline-verify` (im Docker-Modus gemessen: 14,4 s, 6,3 s und 0,1 s, in F nicht einzeln gemessen).
 
 ## Was daraus folgt
 
@@ -64,4 +85,4 @@ Der Hash des Profils ist in beiden Läufen verschieden; Größe und Summe sind g
 
 ## Grenzen
 
-Ein Lauf je Zelle, ein Host (Linux `amd64`). Nicht gemessen: andere Hosts und Architekturen (macOS mit Colima, `arm64`), die Streuung der Zeiten, der lokale Modus im Devcontainer, Verhalten bei einer geänderten Nicht-Testdatei (abhängige Pakete laufen laut Go ebenfalls neu; hier nicht gemessen).
+Ein Lauf je Zelle, ein Host (Linux `amd64`). Nicht gemessen: andere Hosts und Architekturen (macOS mit Colima, `arm64`), die Streuung der Zeiten, Verhalten bei einer geänderten Nicht-Testdatei (abhängige Pakete laufen laut Go ebenfalls neu). Zu F: Das Image kam aus `docker build` ohne die Features von `devcontainer.json` (`node`, `claude-code`, `homebrew`); der Workspace war ein Bind-Mount des Arbeitsbaums, nicht das Volume mit dem Clone, das der Devcontainer sonst nutzt; die Dateisystem-Eigenschaften beider können sich unterscheiden. Ein Start über `u-boot devcontainer up` mit dem neuen Dockerfile ist nicht gemessen.

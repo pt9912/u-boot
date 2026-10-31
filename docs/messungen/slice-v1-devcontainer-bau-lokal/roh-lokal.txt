@@ -1,0 +1,33 @@
+== Benutzer: vscode uid=1000
+== Docker: server 29.9.2, storage overlayfs
+== Werkzeuge
+go version go1.27.3 linux/amd64
+golangci-lint has version 2.14.0 built with go1.27.0 from 114493f9 on 2026-09-24T11:07:15Z
+BUILD_MODE=local GOTOOLCHAIN=local
+GOCACHE=/workspaces/u-boot/.cache/go-build GOMODCACHE=/workspaces/u-boot/.cache/go-mod GOFLAGS=-mod=readonly -buildvcs=false
+== make modus-pruefung
+modus-pruefung: OK (8 targets, both modes; partial run refused for gates)
+== make -n test (lokal)
+PKG="" RUN="" bash scripts/bau.sh test
+== Teillauf: make test PKG=./internal/hexagon/domain/...
+PKG="./internal/hexagon/domain/..." RUN="" bash scripts/bau.sh test
+ok  	github.com/pt9912/u-boot/internal/hexagon/domain	0.011s
+wall=5.0s
+== make gates PKG=x muss abgelehnt werden
+repo.mk:93: *** PKG and RUN make a partial run, which is no evidence: not with gates, record-gates, ci or fullbuild.  Stop.
+== make gates (lokaler Modus), Lauf 1 (kalt)
+gates exit=0 wall=42.7s
+github.com/pt9912/u-boot/internal/hexagon/domain/diagnostic.go:130:				HasErrors					100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:94:				NewConfigHintError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:98:				Error						100.0%
+coverage-gate: OK — coverage 92.10% meets threshold 90%
+== make gates, Lauf 2 (warm)
+gates exit=0 wall=26.4s
+github.com/pt9912/u-boot/internal/hexagon/domain/diagnostic.go:130:				HasErrors					100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:94:				NewConfigHintError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:98:				Error						100.0%
+coverage-gate: OK — coverage 92.10% meets threshold 90%
+== Einzelzeiten, Lauf 3 (warm)
+lint           exit=0 wall=0.7s
+test           exit=0 wall=0.4s
+coverage-gate  exit=0 wall=1.0s
