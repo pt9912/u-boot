@@ -80,12 +80,19 @@
 - **Fragment-Re-Generierung:** `d-check.mk` ist generiert; Handaenderungen daran
   gehen beim naechsten Lauf des Werkzeugs verloren und gehoeren stattdessen in
   `repo.mk` (eigene Targets) oder in `.d-check.yml` (Konfiguration).
-- **Gate-Image-Stand:** `v0.86.1`, digest-gepinnt in `d-check.mk`
+- **Gate-Image-Stand:** `v0.90.0`, digest-gepinnt in `d-check.mk`
   ([`slice-harness-ai-harness-init-adoption`](../../docs/plan/planning/done/slice-harness-ai-harness-init-adoption.md)).
-  Der Pin kommt mit dem Programm des Werkzeugs; es gibt fuer ihn **keine**
-  Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline, s. Abschnitt
-  Freshness-Audit). Ein neuer Stand kommt mit einem neueren Programm; danach
-  Trockenlauf gegen die **unveraenderte** `.d-check.yml` (Regression).
+  Der Pin wird von Hand gehoben und steht dem Programm des Werkzeugs voraus:
+  neuer Tag und Digest in `d-check.mk`, der Rest der Datei aus
+  `d-check --print-mk` des neuen Stands mit den Anpassungen der Kopfzeilen
+  (`docs-check` statt `doc-check`, Digest-Pin, keine Kennungen in den
+  Hilfetexten); jedes neue Target steht im Gate-Index
+  [`harness/mk/ai-harness-init.md`](../mk/ai-harness-init.md). Es gibt fuer den
+  Pin **keine** Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline,
+  s. Abschnitt Freshness-Audit). Nach jedem Bump Trockenlauf gegen die
+  **unveraenderte** `.d-check.yml` (Regression). Ein Lauf des Werkzeugs
+  schreibt `d-check.mk` mit dem Pin seines Programms neu; danach ist der Pin
+  erneut zu heben.
 - **Aufloesungs-Trigger:** Der Teil "Modul-Auswahl bei d-check-Upgrade
   re-evaluieren" ist mit dem Bump auf `v0.51.1` **eingeloest**: Delta gesichtet,
   Kandidaten benannt, Auswahl bewusst vertagt (Protokoll im Slice
