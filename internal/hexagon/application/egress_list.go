@@ -7,6 +7,7 @@ import (
 	iofs "io/fs"
 	"path/filepath"
 
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
@@ -66,7 +67,7 @@ func (s *EgressListService) List(_ context.Context, req driving.EgressListReques
 // [driving.ErrEgressFileSystem], an unparsable or schema-invalid document
 // [driving.ErrConfigSchemaInvalid] (as `config list` classifies them).
 func (s *EgressListService) readConfig(baseDir string) (ubootYAMLConfig, error) {
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
 		return ubootYAMLConfig{}, fmt.Errorf("%w: probe %q: %w", driving.ErrEgressFileSystem, path, err)

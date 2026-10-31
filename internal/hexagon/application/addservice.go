@@ -592,7 +592,7 @@ func (s *AddServiceService) handleMissingDependencies(ctx context.Context, req d
 //     LH-FA-ADD-005 only describes six wohlgeformte states, so
 //     malformed lives outside the state machine.
 func detectServiceState(fs driven.FileSystem, yaml driven.YAMLCodec, baseDir string, svc domain.ServiceName) (domain.ServiceState, error) {
-	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
+	yamlPath := filepath.Join(baseDir, domain.ConfigFileName)
 	yamlExists, err := fs.Exists(yamlPath)
 	if err != nil {
 		return 0, fmt.Errorf("check u-boot.yaml: %w", err)

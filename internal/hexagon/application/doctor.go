@@ -575,8 +575,8 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 	diag, ok := s.loadProjectYAML(projectFileProbe{
 		ID:          checkIDUbootYaml,
 		BaseDir:     baseDir,
-		RelPath:     "u-boot.yaml",
-		Label:       "u-boot.yaml",
+		RelPath:     domain.ConfigFileName,
+		Label:       domain.ConfigFileName,
 		MissingMsg:  "u-boot.yaml not present — directory is not a u-boot project.",
 		MissingHint: "Run `u-boot init` to create one (LH-FA-INIT-001).",
 	}, &cfg)
@@ -745,7 +745,7 @@ func (s *DoctorService) devcontainerSeverity(baseDir string) domain.Severity {
 // or a wrapped error; missing files surface as iofs.ErrNotExist via
 // the FileSystem adapter.
 func (s *DoctorService) loadUbootYAML(baseDir string) (ubootYAMLConfig, error) {
-	body, err := s.fs.ReadFile(filepath.Join(baseDir, "u-boot.yaml"))
+	body, err := s.fs.ReadFile(filepath.Join(baseDir, domain.ConfigFileName))
 	if err != nil {
 		return ubootYAMLConfig{}, err
 	}

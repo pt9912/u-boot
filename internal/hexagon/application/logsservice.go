@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
@@ -117,7 +118,7 @@ func (s *LogsService) Logs(ctx context.Context, req driving.LogsRequest) (drivin
 // errors are wrapped without the project-not-initialized sentinel —
 // they are technical, not fachlich.
 func (s *LogsService) checkProjectInitialized(baseDir string) error {
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
 		return fmt.Errorf("logs service: Exists(%q): %w: %w", path, driving.ErrLogsFileSystem, err)

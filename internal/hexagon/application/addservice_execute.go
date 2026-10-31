@@ -85,7 +85,7 @@ func (s *AddServiceService) executeAdd(_ context.Context, baseDir string, plan s
 // existed) and maps to ErrProjectNotInitialized. Parse errors are
 // reported as non-sentinel pre-write fails.
 func (s *AddServiceService) loadAndParseUBootYAML(baseDir string) ([]byte, iofs.FileMode, ubootYAMLConfig, error) {
-	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
+	yamlPath := filepath.Join(baseDir, domain.ConfigFileName)
 	body, mode, exists, err := s.loadForPatch(yamlPath)
 	if err != nil {
 		return nil, 0, ubootYAMLConfig{}, err
@@ -387,7 +387,7 @@ func (s *AddServiceService) buildExecutePlan(
 		if err != nil {
 			return executePlan{}, fmt.Errorf("plan: patch u-boot.yaml: %w", err)
 		}
-		ep.UBootYAML = &fileWrite{Path: "u-boot.yaml", Body: patched, Mode: yamlMode}
+		ep.UBootYAML = &fileWrite{Path: domain.ConfigFileName, Body: patched, Mode: yamlMode}
 	}
 
 	composeOut, composeChanged, err := s.planComposePatches(plan, composeBody, tmpls)

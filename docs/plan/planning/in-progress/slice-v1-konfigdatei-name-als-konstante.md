@@ -65,10 +65,10 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 gehört zurück zur Zerlegung. Gezählt wird nur, was mit dem Umfang wächst — die
 Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 
-- [ ] **Konstante und Ersetzung** ([`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration)): Im Nicht-Test-Code steht das Pfad-Literal `"u-boot.yaml"` nur noch in der Konstante (Zählung: eine Stelle statt 33); das Verhalten ist unverändert (alle Tests und die Golden-/Replay-Cases unverändert grün).
-- [ ] **Schutz** (Weg A): Ein Test oder eine Lint-Regel färbt sich rot, wenn im Nicht-Test-Code wieder ein Pfad-Literal `"u-boot.yaml"` außerhalb der Konstante entsteht; die rot färbende Mutation ist benannt und gemessen.
-- [ ] **Konvention in der Sicht-Spec:** `spec/architecture.md` nennt die Konstante als die eine Stelle des Dateinamens, ohne Wellen, Slices oder ADRs ([`AGENTS.md`](../../../../AGENTS.md) §3.4).
-- [ ] `make gates` grün (im Modus der Umgebung).
+- [x] **Konstante und Ersetzung** ([`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration)): Im Nicht-Test-Code steht das Pfad-Literal `"u-boot.yaml"` nur noch in der Konstante (Zählung: eine Stelle statt 33); das Verhalten ist unverändert (alle Tests und die Golden-/Replay-Cases unverändert grün).
+- [x] **Schutz** (Weg A): Ein Test oder eine Lint-Regel färbt sich rot, wenn im Nicht-Test-Code wieder ein Pfad-Literal `"u-boot.yaml"` außerhalb der Konstante entsteht; die rot färbende Mutation ist benannt und gemessen.
+- [x] **Konvention in der Sicht-Spec:** `spec/architecture.md` nennt die Konstante als die eine Stelle des Dateinamens, ohne Wellen, Slices oder ADRs ([`AGENTS.md`](../../../../AGENTS.md) §3.4).
+- [x] `make gates` grün (im Modus der Umgebung).
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
@@ -90,10 +90,10 @@ Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest
 |---|---|---|
 | `internal/hexagon/domain/config.go` | neu | die eine Stelle für den Dateinamen: die Liste der Kandidaten (ein Eintrag, `u-boot.yaml`) und der Name, den `init` anlegt (Arbeitsnamen `ConfigFileCandidates` und `ConfigFileName`); im Paket `domain` gibt es `config.go` bisher nicht, `configpath.go` bleibt unverändert und nennt den Namen nur in Doc-Kommentaren (gelesen: Zeilen 1 bis 25) |
 | `internal/hexagon/application/config.go`, `generate.go`, `doctor.go`, `initproject.go`, `addservice_execute.go`, `removeservice.go`, `devcontainer_start.go`, `devcontainer_egress.go`, `doctor_sandbox.go`, `config_many.go`, `upservice.go`, `logsservice.go`, `egress_list.go`, `downservice.go`, `addservice.go` | update | 33 Pfad-Literale durch die Konstante ersetzen (Fundstellen im Befund; die Zeilennummern liest der Implementer am Ist-Stand) |
-| neue Testdatei in `internal/hexagon/application/` (Paket `application_test`) | neu | Schutz (Weg A): `go/parser`-Test nach dem Muster von `jsontestutil/drift_test.go`; `.golangci.yml` bleibt unverändert (siehe §1, Architect-Prüfung) |
+| `internal/hexagon/application/config_filename_literal_test.go` (Paket `application_test`) | neu | Schutz (Weg A): `go/parser`-Test nach dem Muster von `jsontestutil/drift_test.go`; `.golangci.yml` bleibt unverändert (siehe §1, Architect-Prüfung) |
 | `spec/architecture.md` | update | die Konvention als Satz in §2.1 `hexagon/domain` (gelesen: Zeilen 71 bis 81), als Aufzählungspunkt nach „Weiterer Bestand“ (Zeile 78); der Satz nennt Datei, Konstante und Kandidaten-Funktion und kommt ohne Welle, Slice und ADR aus ([`AGENTS.md`](../../../../AGENTS.md) §3.4) |
 | `harness/replay.md` | unverändert, prüfen | Der Slice ändert kein Generator-Verhalten; nicht gelesen |
-| diese Datei, `docs/plan/planning/open/README.md` | update | Zeile dieses Slice; Moves per `make slice-mv` |
+| diese Datei | update | DoD-Häkchen des Implementers, Tabelle gegen `git diff --stat` abgeglichen; `docs/plan/planning/open/README.md` und die Moves liegen in den Start-Commits, nicht im Diff dieses Vorgangs |
 
 ## 4. Trigger
 

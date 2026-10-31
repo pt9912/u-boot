@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
@@ -138,7 +139,7 @@ func volumeDifference(before, after []string) []string {
 // exists. Mirrors [UpService.checkProjectInitialized] so the two
 // use cases produce identical sentinel-mapping behaviour at the CLI.
 func (s *DownService) checkProjectInitialized(baseDir string) error {
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
 		return fmt.Errorf("down service: Exists(%q): %w: %w", path, driving.ErrDownFileSystem, err)

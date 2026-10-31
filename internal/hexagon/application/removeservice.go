@@ -510,7 +510,7 @@ func (s *RemoveServiceService) planBlockRemoval(baseDir, filename string, svc do
 // classifies states above [domain.ServiceStateUnregistered] when
 // u-boot.yaml is present and parseable.
 func (s *RemoveServiceService) planYAMLDisable(baseDir string, svc domain.ServiceName) (plannedRemoveFile, error) {
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	body, err := s.fs.ReadFile(path)
 	if err != nil {
 		return plannedRemoveFile{}, fmt.Errorf("remove: read u-boot.yaml: %w: %w", driving.ErrRemoveFileSystem, err)
@@ -533,7 +533,7 @@ func (s *RemoveServiceService) planYAMLDisable(baseDir string, svc domain.Servic
 	}
 	return plannedRemoveFile{
 		path:    path,
-		relPath: "u-boot.yaml",
+		relPath: domain.ConfigFileName,
 		content: patched,
 		mode:    mode,
 	}, nil

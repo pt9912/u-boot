@@ -233,7 +233,7 @@ func (s *GenerateService) runGenerate(ctx context.Context, req driving.GenerateR
 // and `UpService.checkProjectInitialized` so M7 produces the same
 // sentinel-mapping behaviour at the CLI.
 func (s *GenerateService) checkProjectInitialized(baseDir string) error {
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
 		// Multi-`%w` (T3): zwei Sentinels gewrappt — ErrGenerateFileSystem
@@ -266,7 +266,7 @@ func (s *GenerateService) checkProjectInitialized(baseDir string) error {
 // parameter — preferable to leave the read at the handler boundary so
 // future handlers stay self-sufficient.
 func (s *GenerateService) readProjectConfig(baseDir string) (ubootYAMLConfig, error) {
-	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
+	yamlPath := filepath.Join(baseDir, domain.ConfigFileName)
 	body, err := s.fs.ReadFile(yamlPath)
 	if err != nil {
 		if errors.Is(err, iofs.ErrNotExist) {
@@ -912,7 +912,7 @@ func (s *GenerateService) persistSandboxProfile(baseDir string, write bool) (boo
 	if !write {
 		return false, nil
 	}
-	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
+	yamlPath := filepath.Join(baseDir, domain.ConfigFileName)
 	body, err := s.fs.ReadFile(yamlPath)
 	if err != nil {
 		return false, fmt.Errorf("generate devcontainer: read %q: %w: %w",
@@ -949,7 +949,7 @@ func (s *GenerateService) writeDevcontainerPhase(
 	}
 	writeProfile := req.Sandbox && !profileIsSandbox(cfg.Devcontainer)
 	if len(req.AllowExternalFeatureSources) > 0 || writeProfile {
-		if err := journal.captureFile(filepath.Join(req.BaseDir, "u-boot.yaml")); err != nil {
+		if err := journal.captureFile(filepath.Join(req.BaseDir, domain.ConfigFileName)); err != nil {
 			return fail(err)
 		}
 	}
@@ -961,7 +961,7 @@ func (s *GenerateService) writeDevcontainerPhase(
 		return fail(err)
 	}
 	if profileWritten {
-		changed = append(changed, "u-boot.yaml")
+		changed = append(changed, domain.ConfigFileName)
 	}
 	return changed, hasWrite, hasReplace, profileWritten, nil
 }
@@ -1225,7 +1225,7 @@ func (s *GenerateService) applyAllowExternalFeatureSources(baseDir string, sourc
 	if len(sources) == 0 {
 		return nil
 	}
-	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
+	yamlPath := filepath.Join(baseDir, domain.ConfigFileName)
 	body, err := s.fs.ReadFile(yamlPath)
 	if err != nil {
 		return fmt.Errorf("generate devcontainer: read %q: %w: %w",

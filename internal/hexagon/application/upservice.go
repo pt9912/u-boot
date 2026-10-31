@@ -160,7 +160,7 @@ func (s *UpService) partialSnapshot(ctx context.Context, baseDir string) []domai
 // exists. Permission/IO errors are wrapped without the project-not-
 // initialized sentinel — they are technical, not fachlich.
 func (s *UpService) checkProjectInitialized(baseDir string) error {
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
 		return fmt.Errorf("up service: Exists(%q): %w: %w", path, driving.ErrUpFileSystem, err)

@@ -382,7 +382,7 @@ func referencedEnvNames(command, text string) ([]string, error) {
 // returns none: the fallback disclosure and the exit code 11 of a start
 // script abort need the configuration, and their absence is no error here.
 func (s *DevcontainerStartService) fallbackProbes(baseDir string) []fallbackProbe {
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	if exists, err := s.fs.Exists(path); err != nil || !exists {
 		return nil
 	}

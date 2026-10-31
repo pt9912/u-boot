@@ -141,7 +141,7 @@ func (s *ConfigService) SetMany(_ context.Context, req driving.ConfigSetManyRequ
 		return resp, nil
 	}
 	fs, recorder := s.selectFS(req.PreviewMode)
-	path := filepath.Join(req.BaseDir, "u-boot.yaml")
+	path := filepath.Join(req.BaseDir, domain.ConfigFileName)
 	if err := fs.WriteFile(path, cur, defaultFileMode); err != nil {
 		return driving.ConfigSetManyResponse{}, fmt.Errorf("%w: write %q: %w", driving.ErrConfigFileSystem, path, err)
 	}

@@ -516,7 +516,7 @@ func (s *InitProjectService) existingContainerFallbackWarnings(ctx context.Conte
 	if !req.Devcontainer || req.PreviewMode == driving.PreviewDryRun {
 		return nil
 	}
-	body, err := s.fs.ReadFile(filepath.Join(req.BaseDir, "u-boot.yaml"))
+	body, err := s.fs.ReadFile(filepath.Join(req.BaseDir, domain.ConfigFileName))
 	if err != nil {
 		return nil
 	}
@@ -625,7 +625,7 @@ func (s *InitProjectService) initFromTemplate(ctx context.Context, req driving.I
 	// The default-flow has per-file existence handling (planTemplatedFiles
 	// → actionWrite vs actionReplaceBlock vs Err), but the template
 	// path here is fresh-init only.
-	ubootPath := filepath.Join(req.BaseDir, "u-boot.yaml")
+	ubootPath := filepath.Join(req.BaseDir, domain.ConfigFileName)
 	ubootExists, err := s.fs.Exists(ubootPath)
 	if err != nil {
 		return driving.InitProjectResponse{}, fmt.Errorf("check existing u-boot.yaml: %w", err)
@@ -851,7 +851,7 @@ func devcontainerFileTemplates() []fileTemplate {
 // LH-SA-FILE-002 LH-FA-INIT-005 strict-YAML / steering file), so a re-init
 // without --backup always aborts.
 func (s *InitProjectService) planUBootYAML(req driving.InitProjectRequest) (filePlan, error) {
-	ft := fileTemplate{Path: "u-boot.yaml", TemplateName: "", Managed: false}
+	ft := fileTemplate{Path: domain.ConfigFileName, TemplateName: "", Managed: false}
 	return s.planFile(req.BaseDir, ft, req.Force, req.Backup)
 }
 
@@ -932,7 +932,7 @@ func (s *InitProjectService) planFile(baseDir string, ft fileTemplate, force, ba
 // keeps the CLI message faithful to what the tool actually
 // observed.
 func collisionError(path string) error {
-	for _, marker := range []string{"u-boot.yaml", "compose.yaml", ".env.example"} {
+	for _, marker := range []string{domain.ConfigFileName, "compose.yaml", ".env.example"} {
 		if path == marker {
 			return fmt.Errorf("%w: %s present", driving.ErrProjectExists, path)
 		}

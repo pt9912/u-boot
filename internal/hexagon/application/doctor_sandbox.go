@@ -59,7 +59,7 @@ func credentialPatterns() []*regexp.Regexp {
 // credentials (relative to the project root).
 func credentialScanFiles() []string {
 	return []string{
-		"u-boot.yaml", "compose.yaml", ".env.example",
+		domain.ConfigFileName, "compose.yaml", ".env.example",
 		".devcontainer/devcontainer.json", ".devcontainer/Dockerfile", ".devcontainer/sandbox-init.sh", ".devcontainer/docker-init.sh",
 	}
 }

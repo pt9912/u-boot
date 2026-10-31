@@ -225,7 +225,7 @@ func (s *ConfigService) setEgressAllow(
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: marshal u-boot.yaml: %v", driving.ErrConfigSchemaInvalid, err)
 	}
 	fs, recorder := s.selectFS(req.PreviewMode)
-	path := filepath.Join(req.BaseDir, "u-boot.yaml")
+	path := filepath.Join(req.BaseDir, domain.ConfigFileName)
 	if err := fs.WriteFile(path, rewritten, defaultFileMode); err != nil {
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w", driving.ErrConfigFileSystem, path, err)
 	}

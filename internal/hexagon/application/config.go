@@ -272,7 +272,7 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	// mutation is captured instead of written to disk; PreviewNone
 	// writes to production. Reads above used s.fs (real state).
 	fs, recorder := s.selectFS(req.PreviewMode)
-	path := filepath.Join(req.BaseDir, "u-boot.yaml")
+	path := filepath.Join(req.BaseDir, domain.ConfigFileName)
 	if err := fs.WriteFile(path, patched, defaultFileMode); err != nil {
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
 			driving.ErrConfigFileSystem, path, err)
@@ -667,7 +667,7 @@ func (s *ConfigService) readUbootYAMLBody(baseDir string) ([]byte, ubootYAMLConf
 	if err := s.checkProjectInitialized(baseDir); err != nil {
 		return nil, ubootYAMLConfig{}, err
 	}
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	body, err := s.fs.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, iofs.ErrNotExist) {
@@ -705,7 +705,7 @@ func (s *ConfigService) Show(_ context.Context, req driving.ConfigShowRequest) (
 	if err := s.checkProjectInitialized(req.BaseDir); err != nil {
 		return driving.ConfigShowResponse{}, err
 	}
-	path := filepath.Join(req.BaseDir, "u-boot.yaml")
+	path := filepath.Join(req.BaseDir, domain.ConfigFileName)
 	body, err := s.fs.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, iofs.ErrNotExist) {
@@ -735,7 +735,7 @@ func (s *ConfigService) readUbootYAML(baseDir string) (ubootYAMLConfig, error) {
 	if err := s.checkProjectInitialized(baseDir); err != nil {
 		return ubootYAMLConfig{}, err
 	}
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	body, err := s.fs.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, iofs.ErrNotExist) {
@@ -896,7 +896,7 @@ func extractDevcontainerFeatureValue(cfg ubootYAMLConfig, path domain.ConfigPath
 // sentinel-mapping behaviour at the CLI. Shared between all
 // three methods (slice-m8-config.md §T2).
 func (s *ConfigService) checkProjectInitialized(baseDir string) error {
-	path := filepath.Join(baseDir, "u-boot.yaml")
+	path := filepath.Join(baseDir, domain.ConfigFileName)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
 		return fmt.Errorf("config service: Exists(%q): %w", path, err)
@@ -1009,7 +1009,7 @@ func (s *ConfigService) setFeatureSourcesAllow(
 	// Stage 5: WriteFile through the PreviewMode-selected FS (T4) —
 	// list-path mirror of the scalar Set write routing.
 	fs, recorder := s.selectFS(req.PreviewMode)
-	path := filepath.Join(req.BaseDir, "u-boot.yaml")
+	path := filepath.Join(req.BaseDir, domain.ConfigFileName)
 	if err := fs.WriteFile(path, rewritten, defaultFileMode); err != nil {
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
 			driving.ErrConfigFileSystem, path, err)
