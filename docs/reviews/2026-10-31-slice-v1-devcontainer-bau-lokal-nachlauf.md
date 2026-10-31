@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/in-progress/slice-v1-devcontainer-bau-lokal.md), Nachlauf zur Fix-Runde — 2026-10-31
+# Review-Report: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/done/slice-v1-devcontainer-bau-lokal.md), Nachlauf zur Fix-Runde — 2026-10-31
 
 **Review-Art:** Code (mit Doku-Anteil: Spezifikation, Messprotokoll, Plan) gegen Plan, Entscheidung und Hard Rules (Wartbarkeit), als Nachlauf zur Fix-Runde des ersten Reports. Die DoD-Frage gehört dem Verifier und wird hier nicht beantwortet. Nichts vom Implementer ist ungeprüft übernommen: Behebungen, Rekursion von `packages`, Quoting und `modus-pruefung` sind am Code, an `make -n`-Läufen, an einer Go-Attrappe im Scratchpad und an Mutationen gelesen.
 
@@ -11,7 +11,7 @@
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
 - Erster Report: [`2026-10-31-slice-v1-devcontainer-bau-lokal`](2026-10-31-slice-v1-devcontainer-bau-lokal.md) (Befunde F-1 bis F-10, Verdikt Merge-blockierend: ja). Die Befund-IDs dieses Nachlaufs tragen das Präfix N-, damit sie nicht mit denen des ersten Reports kollidieren.
-- [`slice-v1-devcontainer-bau-lokal`](../plan/planning/in-progress/slice-v1-devcontainer-bau-lokal.md) (§2 DoD, §3 Plan-Tabelle, §6 Risiken)
+- [`slice-v1-devcontainer-bau-lokal`](../plan/planning/done/slice-v1-devcontainer-bau-lokal.md) (§2 DoD, §3 Plan-Tabelle, §6 Risiken)
 - [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md) (`Accepted`, unverändert)
 - [`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows) und [`SPEC-008`](../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) (Vertragstext der Fix-Runde; der Diff ändert nur die Zeile des lokalen Modus in dieser Spec)
 - `AGENTS.md` §3.1, §3.4, §3.6, §3.7, §3.9, §3.10 (Hard Rules), `.github/workflows/publish.yml`

@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/in-progress/slice-v1-devcontainer-bau-lokal.md) — 2026-10-31
+# Verification-Report: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/done/slice-v1-devcontainer-bau-lokal.md) — 2026-10-31
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD, [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md), [`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows) und [`SPEC-008`](../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) und den ausgeführten Sensoren? Form nach [`harness/verification.md`](../../harness/verification.md). Außer dieser Datei ist nichts geändert, nichts committet, nichts gepusht; `git status` war am Ende leer.
 
@@ -9,7 +9,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/in-progress/slice-v1-devcontainer-bau-lokal.md)
+- Slice: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/done/slice-v1-devcontainer-bau-lokal.md)
 - IDs: [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md), [`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows), [`SPEC-008`](../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles), [`SPEC-025`](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles) und [`SPEC-032`](../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage) (beide unverändert), [`LH-NFA-PORT-002`](../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten)
 - Artefakte: `repo.mk`, `Dockerfile`, `scripts/bau.sh`, `.devcontainer/Dockerfile`, `spec/spezifikation.md`, `spec/architecture.md`, `AGENTS.md`, `docs/maintainer/quality.md`, `harness/README.md`, `.d-check.yml`, `.gitignore`, `.dockerignore`, `tools/messung/devcontainer-bau-lokal/`, [Messprotokoll-Verzeichnis](../messungen/slice-v1-devcontainer-bau-lokal/)
 

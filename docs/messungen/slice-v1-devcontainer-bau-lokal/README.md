@@ -1,6 +1,6 @@
 # Messprotokoll: Messlauf M0 zu `slice-v1-devcontainer-bau-lokal`
 
-Messung vor dem Code des Slice [`slice-v1-devcontainer-bau-lokal`](../../plan/planning/in-progress/slice-v1-devcontainer-bau-lokal.md) (Schritt M0 in dessen §3) für die Entscheidung [`ADR-0037`](../../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md), Entscheidung 7.
+Messung vor dem Code des Slice [`slice-v1-devcontainer-bau-lokal`](../../plan/planning/done/slice-v1-devcontainer-bau-lokal.md) (Schritt M0 in dessen §3) für die Entscheidung [`ADR-0037`](../../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md), Entscheidung 7.
 
 ## Messstand
 

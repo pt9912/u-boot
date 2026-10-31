@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/in-progress/slice-v1-devcontainer-bau-lokal.md) — 2026-10-31
+# Review-Report: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/done/slice-v1-devcontainer-bau-lokal.md) — 2026-10-31
 
 **Review-Art:** Code (mit Doku-Anteil: Spezifikation, Architektur-Sicht, `AGENTS.md`, Maintainer-Doku, Messprotokoll) gegen Plan, Entscheidung und Hard Rules (Wartbarkeit). Die DoD-Frage gehört dem Verifier und wird hier nicht beantwortet. Nichts vom Implementer ist ungeprüft übernommen: Docker-Modus-Gleichwertigkeit, Rezepte, Randfälle und Plan-Aussagen sind am Code, an `make -n`-Läufen und am Diff gelesen.
 
@@ -10,7 +10,7 @@
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- [`slice-v1-devcontainer-bau-lokal`](../plan/planning/in-progress/slice-v1-devcontainer-bau-lokal.md) (§1 Befund und Abgrenzung, §2 DoD, §3 Plan-Tabelle samt Ergebnis M0, §6 Risiken)
+- [`slice-v1-devcontainer-bau-lokal`](../plan/planning/done/slice-v1-devcontainer-bau-lokal.md) (§1 Befund und Abgrenzung, §2 DoD, §3 Plan-Tabelle samt Ergebnis M0, §6 Risiken)
 - [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md) (`Accepted`, nicht änderbar; Entscheidungen 1 bis 8), [`ADR-0004`](../plan/adr/0004-ci-system.md) (CI unverändert), [`ADR-0013`](../plan/adr/0013-dokumentationsreferenzmodell.md) (Referenzmodell)
 - Architect-Report zum Slice: [`2026-10-31-slice-v1-devcontainer-bau-lokal-architect`](2026-10-31-slice-v1-devcontainer-bau-lokal-architect.md)
 - [`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows), [`SPEC-008`](../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles), [`SPEC-025`](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles), [`SPEC-032`](../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage) (gelesen, unverändert), `spec/architecture.md` (Abschnitt Tests)
