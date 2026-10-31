@@ -31,9 +31,9 @@ des Lastenhefts, auf den Slice-Plan angewandt); die vier Klassen des
 Ausschlusses stehen in **eben diesem Abschnitt** des Baseline-Regelwerks,
 zusammen mit der Begründungs-Pflicht je Punkt.
 
-**Ziel:** Die Zusage „ein Projekt kann mehrere benannte Devcontainer (Instanzen) gleichzeitig haben; `up`, `down` und `shell` wählen den Container mit `--instance <name>`; im Sandbox-Profil hat jede Instanz eigene Volumes“ steht im Lastenheft, mit den Messwerten des Mess-Slice und in der vom Projektinhaber freigegebenen Fassung. Die Versionsnummer (voraussichtlich `0.25.0`; gelesen am 2026-10-31: Kopf des Lastenhefts `0.24.0`, letzte Historie-Zeile `0.24.0`, Zeilen 9 und 1607) wird erst bei der Annahme aus der dann gültigen Historie gelesen. Der Code-Slice beginnt erst danach.
+**Ziel:** Die Zusage „ein Projekt kann mehrere benannte Devcontainer (Instanzen) gleichzeitig haben; `up`, `down` und `shell` wählen den Container mit `--instance <name>`; im Sandbox-Profil hat jede Instanz eigene Volumes“ steht im Lastenheft, mit den Messwerten des Mess-Slice und in der vom Projektinhaber freigegebenen Fassung. Die Versionsnummer ist `0.25.0` (Lastenheft Kopf Zeile 9, Historie-Zeile 1609, Datum 2026-10-31). Der Code-Slice beginnt erst nach diesem Slice.
 
-**Dieser Wortlaut ist ein ENTWURF zur Freigabe durch den Projektinhaber.** Er steht nur in dieser Datei; `spec/lastenheft.md` ist nicht geändert und wird erst nach der Freigabe geschrieben. Alle Messwert-Platzhalter sind aus dem Protokoll [`docs/messungen/slice-v1-devcontainer-instanz-messung`](../../../messungen/slice-v1-devcontainer-instanz-messung/README.md), der Closure-Notiz des Mess-Slice (§7) und dem Verification-Report [`2026-10-31-slice-v1-devcontainer-instanz-messung-verify`](../../../reviews/2026-10-31-slice-v1-devcontainer-instanz-messung-verify.md) (Abschnitt 5, Platzhalter des CR) ersetzt. **Offen bleiben nur die Versionsnummer und das Datum der Historie-Zeile** (Abschnitt „Entscheidungen des Projektinhabers“). Die Spec-Dateien sind Zielbild: Aussagen über noch ungemessene Teile, etwa `down --instance`, dürfen als Zielbild im Wortlaut stehen. Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen Verweise als Anker `#…` der Datei, hier als Pfad von `open/` aus.
+**Dieser Wortlaut ist vom Projektinhaber freigegeben und im Lastenheft `0.25.0` geschrieben** (Freigabe in §7). Er bleibt hier als Beleg stehen. Alle Messwert-Platzhalter sind aus dem Protokoll [`docs/messungen/slice-v1-devcontainer-instanz-messung`](../../../messungen/slice-v1-devcontainer-instanz-messung/README.md), der Closure-Notiz des Mess-Slice (§7) und dem Verification-Report [`2026-10-31-slice-v1-devcontainer-instanz-messung-verify`](../../../reviews/2026-10-31-slice-v1-devcontainer-instanz-messung-verify.md) (Abschnitt 5, Platzhalter des CR) ersetzt. Keine Entscheidung ist offen (Abschnitt „Entscheidungen des Projektinhabers“). Die Spec-Dateien sind Zielbild: Aussagen über noch ungemessene Teile, etwa `down --instance`, dürfen als Zielbild im Wortlaut stehen. Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen Verweise als Anker `#…` der Datei, hier als Pfad von der Slice-Datei aus.
 
 ### Entscheidungen des Projektinhabers (2026-10-31)
 
@@ -43,7 +43,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 4. **`up`, `down` und `shell` ohne `--instance` (Messfrage M6): Fassung (i).** Ohne `--instance` wirken die Befehle nur auf den Container ohne Instanz (Bestandscontainer und Standard). Gibt es im Projekt nur Container von Instanzen und keinen Container ohne Instanz, endet `up` ohne `--instance` mit Exit-Code `10` und einem Hinweis auf `--instance`, ebenso `down` und `shell` (Entscheidung desselben Tages, symmetrisch zu `up`); `u-boot` prüft das vor dem Aufruf der Dev-Container-CLI, weil die CLI sonst eine Instanz übernähme (gemessen für `up`; ob `down` und `shell` die CLI vor der Prüfung aufrufen, ist nicht gelesen). Die Fassung, nach der `up` wie die CLI den zuletzt angelegten Container übernimmt, ist verworfen.
 5. **Spec-Dateien sind Zielbild:** Aussagen über noch ungemessene Teile (etwa `down --instance`) dürfen als Zielbild im Wortlaut stehen. Was gemessen ist und was nicht, steht in diesem Slice (Begleittexte, Tabelle „Nicht-Zusagen“), nicht im Vertragstext.
 
-**Offen bleiben nur:** die Versionsnummer (aus der Historie lesen; vorläufig `0.25.0`, Kopf des Lastenhefts heute `0.24.0`, letzte Historie-Zeile `0.24.0`, Zeilen 9 und 1607 — am Ist-Stand gelesen, keine Lastenheft-Änderung seit `0.24.0`) und das Datum der Historie-Zeile (Tag der Annahme).
+**Version und Datum:** `0.25.0`, Historie-Zeile mit Datum 2026-10-31 (Lastenheft Zeilen 9 und 1609).
 
 **Warum eine Lastenheft-Änderung:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) beschreibt `up`, `down` und `shell` für den Devcontainer „des Projekts“ ohne Instanz; ein neues öffentliches Flag und eine Zusage zur Isolation (Volumes) sind Produktverhalten. Der Entwurf [`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md) sah einen CR bereits vor.
 
@@ -65,9 +65,9 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 - Das `--json`-Schema (`command: devcontainer`, [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) ist **nicht gelesen**: ob die Ausgabe von `up` ein Feld für die Instanz bekommt, ist eine Frage der Spezifikation im Code-Slice; der Wortlaut unten sagt dazu nichts.
 - Die Egress-, Ressourcen- und Zweig-Fragen berührt der CR nicht (siehe unten).
 
-### Wortlaut (alt/neu; ENTWURF, nicht freigegeben)
+### Wortlaut (alt/neu; im Lastenheft 0.25.0 geschrieben)
 
-Die Alt-Stellen sind aus `spec/lastenheft.md` wörtlich übernommen; die Zeile steht dabei. Im Lastenheft sind Verweise Anker `(#…)` der Datei, hier Pfade von `open/` aus; der Text ist sonst unverändert. „Neu“ ist der vollständige Spiegelstrich, die geänderten Stellen sind **fett**. Das Lastenheft ist Zielbild des Befehls: Belegt sind die gemessenen Aufbauten und das Verhalten der Dev-Container-CLI und der Engine; dass `u-boot devcontainer up --instance` so arbeitet, pinnt erst der Docker-Test des Code-Slice ([`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md)).
+Die Alt-Stellen sind aus `spec/lastenheft.md` wörtlich übernommen; die Zeile steht dabei. Im Lastenheft sind Verweise Anker `(#…)` der Datei, hier Pfade von der Slice-Datei aus; der Text ist sonst unverändert. „Neu“ ist der vollständige Spiegelstrich, die geänderten Stellen sind **fett**. Das Lastenheft ist Zielbild des Befehls: Belegt sind die gemessenen Aufbauten und das Verhalten der Dev-Container-CLI und der Engine; dass `u-boot devcontainer up --instance` so arbeitet, pinnt erst der Docker-Test des Code-Slice ([`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md)).
 
 **Stelle 1 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Zeile 501 (`up`): `--instance` und die Definition der Instanz.**
 
@@ -133,15 +133,15 @@ Neu:
 
 **Stelle 6 — Versionsfeld und Historie (§16).**
 
-Alt: `| Version          | 0.24.0 |` (Zeile 9; Stand 2026-10-31).
+Alt: `| Version          | 0.24.0 |` (Zeile 9).
 
-Neu: `| Version          | 0.25.0 |` — erst bei Annahme; die Nummer ist die dann nächste freie Minor-Version aus der Historie (letzte Zeile heute `0.24.0`, Zeile 1607).
+Neu: `| Version          | 0.25.0 |` (Zeile 9; die Historie-Zeile `0.24.0` steht davor).
 
 Neue Historie-Zeile:
 
-> | 0.25.0 | ⟦Datum der Annahme⟧ | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten): benannte Instanz an `u-boot devcontainer up`, `down` und `shell` (`--instance <name>`; mehrere Devcontainer desselben Projekts gleichzeitig; ohne `--instance` wirkt der Befehl nur auf den Container ohne Instanz); Namensregel (Kleinbuchstaben, Ziffern, Bindestriche, 1 bis 32 Zeichen), Exit-Code `10` bei ungültigem Namen und bei `up`, `down` und `shell` ohne `--instance`, wenn es nur Container von Instanzen gibt; Isolation der Volumes für bis zu vier gleichzeitige Instanzen im Sandbox-Profil mit `nestedRuntime: docker` und `ollama`, jede mit höchstens einer CPU und 3 GiB, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Engine; nicht zugesagt: mehr als vier Instanzen, Podman-Speicher, andere Grenzen, Last, Dauer und Platz, andere Hosts, Isolation im Standardprofil, Zweig je Instanz. | Vereinbarung mit dem Projektinhaber |
+> | 0.25.0 | 2026-10-31 | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten): benannte Instanz an `u-boot devcontainer up`, `down` und `shell` (`--instance <name>`; mehrere Devcontainer desselben Projekts gleichzeitig; ohne `--instance` wirkt der Befehl nur auf den Container ohne Instanz); Namensregel (Kleinbuchstaben, Ziffern, Bindestriche, 1 bis 32 Zeichen), Exit-Code `10` bei ungültigem Namen und bei `up`, `down` und `shell` ohne `--instance`, wenn es nur Container von Instanzen gibt; Isolation der Volumes für bis zu vier gleichzeitige Instanzen im Sandbox-Profil mit `nestedRuntime: docker` und `ollama`, jede mit höchstens einer CPU und 3 GiB, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Engine; nicht zugesagt: mehr als vier Instanzen, Podman-Speicher, andere Grenzen, Last, Dauer und Platz, andere Hosts, Isolation im Standardprofil, Zweig je Instanz. | Vereinbarung mit dem Projektinhaber |
 
-*(Der Verweis auf die Entscheidung steht im Lastenheft als Anker `#…` der Datei; das Datum ist die einzige Stelle im Wortlaut, die erst bei der Annahme feststeht.)*
+*(Der Verweis auf die Anforderung steht im Lastenheft als Anker `#…` der Datei.)*
 
 ### Nicht-Zusagen aus dem Verification-Report: wo sie im Wortlaut stehen
 
@@ -166,7 +166,7 @@ Neue Historie-Zeile:
 - **Code, Tests, Spezifikation, Handbuch, `CHANGELOG.md`** — [`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md); das Lastenheft ist Zielbild, der Code folgt.
 - **Welchen Zweig eine Instanz bearbeitet, Agenten verteilen, Compose-Stack je Instanz, Last bei vielen Instanzen** — im Entwurf des Code-Slice ausgeschlossen (§1 dort); der CR führt sie als Nicht-Ziele (Stelle 5) oder als Nicht-Zusage (Stelle 3).
 - **Entscheidung über Release oder Welle** — beim Projektinhaber (Roadmap nicht geändert).
-- **Änderung an `spec/lastenheft.md`** — erst nach der Freigabe dieses Wortlauts.
+- **Änderung an `spec/lastenheft.md` über die sechs Stellen hinaus** — der Diff des Lastenhefts trägt nur diese (Verification-Report, Abschnitt 4).
 
 ## 2. Definition of Done
 
@@ -175,17 +175,17 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 gehört zurück zur Zerlegung. Gezählt wird nur, was mit dem Umfang wächst — die
 Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 
-- [ ] **Wortlaut ohne offene Entscheidung:** Der Wortlaut ist dem Projektinhaber Stelle für Stelle vorgelegt (Alt/Neu); die Entscheidungen des Projektinhabers (Abschnitt in §1) sind eingearbeitet; offen sind nur Versionsnummer und Datum der Historie-Zeile; die Freigabe ist in §7 vermerkt.
+- [x] **Wortlaut ohne offene Entscheidung:** Der Wortlaut ist dem Projektinhaber Stelle für Stelle vorgelegt (Alt/Neu); die Entscheidungen des Projektinhabers (Abschnitt in §1) sind eingearbeitet; Version und Datum der Historie-Zeile stehen im Lastenheft; die Freigabe ist in §7 vermerkt.
 - [x] **Lastenheft `0.25.0`** (oder die dann nächste freie Version) geschrieben: Stellen 1 bis 6 in der freigegebenen Fassung, Versionsfeld, Historie-Zeile mit Datum (Verweis „Vereinbarung mit dem Projektinhaber“).
-- [ ] **Vorab-Suche und Nachzug:** `grep -i` über `spec/lastenheft.md` nach `Instanz`, `devcontainer up`, `devcontainer down`, `devcontainer shell`, `recreate`, `Volume`, `quiet` und `json` ist in §7 festgehalten; mitzuändernde Stellen: keine über die freigegebenen hinaus.
-- [ ] `make gates` grün; `make doc-trace` ohne neue Waise. Läufe und Exit-Codes in §7.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] **Vorab-Suche und Nachzug:** `grep -i` über `spec/lastenheft.md` nach `Instanz`, `devcontainer up`, `devcontainer down`, `devcontainer shell`, `recreate`, `Volume`, `quiet` und `json` ist in §7 festgehalten; mitzuändernde Stellen: keine über die freigegebenen hinaus.
+- [x] `make gates` grün; `make doc-trace` ohne neue Waise. Läufe und Exit-Codes in §7.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8); der Review läuft über die **freigegebene** Fassung.
-- [ ] Doku-Update: kein Handbuch, kein `CHANGELOG.md` (kein Produktverhalten; der Code-Slice zieht nach).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [x] Doku-Update: kein Handbuch, kein `CHANGELOG.md` (kein Produktverhalten; der Code-Slice zieht nach). `git diff --stat f7d89606..HEAD` nennt weder `docs/user/` noch READMEs noch `CHANGELOG.md`.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo **ohne** Wellen-Betrieb hier geprüft, im Repo **mit** Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
 
 ## 3. Plan (vor Code)
@@ -197,22 +197,22 @@ Aussagen-Berührung steht hier gar nicht.
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/lastenheft.md` | update (erst nach der Freigabe) | Stellen 1 bis 6; gelesen: Kopf (Zeile 9), [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeilen 497 bis 508), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Zeilen 218 bis 236), Glossar (Zeilen 1542 bis 1556), Fundstellen per `grep` (Zeilen 189, 191, 457, 473, 1147 bis 1149), Historie bis `0.24.0` (Zeile 1607) |
+| `spec/lastenheft.md` | update | Stellen 1 bis 6 (Commit `772685aa`, Zusage-Form von Stelle 3 in `af06dc71`); gelesen vor der Änderung: Kopf (Zeile 9), [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeilen 497 bis 508), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Zeilen 218 bis 236), Glossar (Zeilen 1542 bis 1556), Fundstellen per `grep` (Zeilen 189, 191, 457, 473, 1147 bis 1149), Historie bis `0.24.0` (Zeile 1607); Ist-Stand nach der Änderung: Zeilen 9, 501 bis 509, 1609 |
 | `docs/plan/planning/in-progress/slice-cr-devcontainer-instanz.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
-| `docs/plan/planning/open/slice-v1-devcontainer-instanz-label.md` | update | Namensregel (Entscheidung 1) und Test-Auftrag zu Entscheidung 4 (Exit-Code `10`, Prüfung vor dem Aufruf der CLI); Zustandsmarker „CR freigegeben“ im Start-Trigger, Verweis-Nachzug der Moves |
-| `docs/plan/planning/open/README.md` | update | Zeile dieses Slice auf „geliefert“; Verweis-Nachzug der Moves (`make slice-mv`) |
-| `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
-| `docs/plan/planning/observations/` | update, neu | Register bei der Closure (§7) |
+| `docs/plan/planning/open/slice-v1-devcontainer-instanz-label.md` | im Diff der Commits vor der Closure nicht enthalten | Namensregel und Test-Auftrag zu Entscheidung 4 stehen dort bereits (Zeile 51, gelesen vom Verifier); der Verweis-Nachzug auf `done/` entsteht erst beim Move (`make slice-mv`) |
+| `docs/plan/planning/open/README.md` | update (Closure) | Zeile dieses Slice auf „geliefert (liegt in `done/`)“; weiterer Verweis-Nachzug beim Move (`make slice-mv`) |
+| `docs/reviews/` (drei Reports) | neu | Review, Nachlauf-Review und Verification nach `harness/review.md` und `harness/verification.md` |
+| `docs/plan/planning/observations/` | update, neu | Closure (§7): zwei Evidence-Dateien (`BEO-DOK/plan-aussage-ueber-code`, `BEO-DOK/vertragsaenderung-nach-review`) und deren `state.md` |
 | `spec/spezifikation.md`, `spec/architecture.md`, `docs/user/`, `README.md`, `README.de.md`, `CHANGELOG.md`, `internal/**` | unverändert | der CR ändert kein Produktverhalten; der Code-Slice zieht nach |
 
-Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md)): `grep -i` über `spec/lastenheft.md` nach den Begriffen der DoD; ausgeführt vor dem Lastenheft-Commit, Treffer in §7. Vorab (diesen Entwurf): `grep -i instanz` — Treffer nur in den Zeilen 416, 473 und der Historie (0.4.0, 0.5.0, 0.22.0), kein Glossar-Eintrag.
+Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md)): `grep -i` über `spec/lastenheft.md` nach den Begriffen der DoD; ausgeführt vor dem Lastenheft-Commit, Treffer in §7. Vorab (am Entwurf): `grep -i instanz` — Treffer nur in den Zeilen 416, 473 und der Historie (0.4.0, 0.5.0, 0.22.0), kein Glossar-Eintrag.
 
 ## 4. Trigger
 
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md) liegt in `done/` (eingetreten); der Projektinhaber hat den Wortlaut freigegeben (Gespräch) und die Entscheidungen der Tabelle getroffen; kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md) liegt in `done/` (eingetreten); der Projektinhaber hat den Wortlaut freigegeben und die Entscheidungen der Tabelle getroffen (Vermerk in §7); kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
@@ -234,16 +234,75 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 **einen** Ausgang, und kein Slice geht nach `done/`, während eines ohne Ausgang
 dasteht.
 
-- **Ein Satz im Lastenheft stützt sich auf einen Messwert, den der Mess-Slice nicht liefert** ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)); vor der Freigabe wird die Liste „nicht gemessen“ Satz für Satz gegen den Wortlaut gelesen (geschärfte Regel aus [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) §7; die Tabelle „Nicht-Zusagen“ in §1 ist dieser Abgleich). — **Ausgang:** bei Closure.
+- **Ein Satz im Lastenheft stützt sich auf einen Messwert, den der Mess-Slice nicht liefert** ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)); vor der Freigabe wird die Liste „nicht gemessen“ Satz für Satz gegen den Wortlaut gelesen (geschärfte Regel aus [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) §7; die Tabelle „Nicht-Zusagen“ in §1 ist dieser Abgleich). — **Ausgang:** entfallen: Review und Verifier lasen den Neutext auf Messsprache und auf Aussagen weiter als die Messung ohne Befund dieser Klasse (Verification-Report, Abschnitt 4); die Zusage-Form von Stelle 3 stellte die Fix-Runde `af06dc71` her.
 - **Eine Accepted-ADR trägt einen Satz, den dieser CR überholt:** [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) (Variante D) sagt „zwei Instanzen aus **demselben** Ordner bleiben eine Instanz“. Die Folge-ADR des Code-Slice löst diesen Satz per `Supersedes (teilweise)` oder `Schärft` ab; [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) wird nicht umgeschrieben (`AGENTS.md` §3.5). Der Wortlaut dieses CR nennt keine ADR. — **Ausgang:** weiter offen → [`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md) (Folge-ADR dort in §3).
-- **Das Standardprofil teilt den Projektordner:** Eine Zusage „Instanzen sind isoliert“ ohne die Einschränkung auf das Sandbox-Profil wäre falsch. — **Ausgang:** bei Closure (Stelle 3 nennt die Grenze).
-- **Die Annahme „1 CPU und 3 GiB je Instanz“ ist eine Deutung der Vorgabe** (nicht für alle Instanzen zusammen) und nicht zurückgefragt; sie steht als Messbedingung in Stelle 3. — **Ausgang:** bei Closure (Rückfrage an den Projektinhaber bei der Vorlage).
+- **Das Standardprofil teilt den Projektordner:** Eine Zusage „Instanzen sind isoliert“ ohne die Einschränkung auf das Sandbox-Profil wäre falsch. — **Ausgang:** entfallen: Das Lastenheft sagt im Isolations-Spiegelstrich (Zeile 504), dass im Standardprofil alle Instanzen den Projektordner teilen (Bind-Mount), und nennt die Isolation dort als nicht zugesagt.
+- **Die Annahme „1 CPU und 3 GiB je Instanz“ ist eine Deutung der Vorgabe** (nicht für alle Instanzen zusammen) und nicht zurückgefragt; sie steht als Messbedingung in Stelle 3. — **Ausgang:** weiter offen: Die Deutung „1 CPU und 3 GiB je Instanz, nicht für alle zusammen“ ist nicht bestätigt (in keiner Datei vermerkt, Verification-Report, Abschnitt 5); sie steht als Messbedingung („jede mit höchstens einer CPU und 3 GiB Arbeitsspeicher“) im Lastenheft, Zeile 504. Die Bestätigung liegt beim Projektinhaber.
 - **Entscheidung 4 verlangt eine Prüfung in `u-boot` vor dem Aufruf der CLI und eine Suche, die Container mit Instanz-Label ausschließt;** beides ist nicht gelesen oder gemessen (Begründung zu Entscheidung 4). — **Ausgang:** weiter offen → [`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md) (Test-Auftrag dort).
-- **Die Version `0.25.0` ist vergeben, wenn der Slice startet:** andere Entwürfe in `open/` mit eigenem Lastenheft-CR können sie früher nehmen. — **Ausgang:** bei Closure (Version bei der Annahme aus der Historie lesen).
+- **Die Version `0.25.0` ist vergeben, wenn der Slice startet:** andere Entwürfe in `open/` mit eigenem Lastenheft-CR können sie früher nehmen. — **Ausgang:** entfallen: `0.25.0` ist aus der Historie gelesen und vergeben (Lastenheft Zeilen 9 und 1609).
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt: Freigabe des Wortlauts (Datum) · Vorab-Suche mit Treffern · Review und Verification · Steering-Loop-Eintrag · Beobachtungs-Register · Folge-Slices · Risiken aus §6 · Grenzen · Drei Paarungen · Abgleich der Plan-Tabelle gegen `git diff --stat`.)*
+Reports: [Review](../../../reviews/2026-10-31-slice-cr-devcontainer-instanz.md) (Plan-Review über `772685aa`: 0 HIGH, 0 MEDIUM, 2 LOW, 3 INFO), [Nachlauf-Review](../../../reviews/2026-10-31-slice-cr-devcontainer-instanz-nachlauf.md) (über die Fix-Runde `af06dc71`: 0 HIGH, 0 MEDIUM, 0 LOW, 1 INFO), [Verification](../../../reviews/2026-10-31-slice-cr-devcontainer-instanz-verify.md) (0 HIGH, 0 MEDIUM, 2 LOW, 2 INFO; Verdikt: Lastenheft-Text erfüllt, Prozess-Punkte lagen beim Planner, bereit für die Closure nach Nachzug von F-1 und F-2). Gegenstand: `git log f7d89606..a7a14ade`, Lastenheft `0.25.0` (`772685aa`, Zusage-Form von Stelle 3 in `af06dc71`).
+
+**Freigabe des Wortlauts.** Der Projektinhaber gab den Wortlaut am 2026-10-31 im Gespräch frei und traf die Entscheidungen 1 bis 5 des Abschnitts „Entscheidungen des Projektinhabers (2026-10-31)“ in §1: (1) Namensregel der Instanz, (2) Begriff „Instanz“ einmal in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), (3) Flag `--instance <name>`, (4) Fassung (i) für `up`, `down` und `shell` ohne Flag, (5) Spec-Dateien als Zielbild. Die Freigabe ist nur im Gespräch belegt, in keiner Datei außer diesem Vermerk. Das Lastenheft `0.25.0` trägt die Historie-Zeile vom 2026-10-31 mit der Quelle „Vereinbarung mit dem Projektinhaber“. Der Neutext der Stellen 1 bis 6 in §1 stimmt wörtlich mit dem Lastenheft überein (Verifier: Teilstring-Test je Stelle; Planner: Teilstring-Test der Zeilen für Stelle 1, 2, 3, 5, 6 nach dem Einsetzen des Datums, alle ohne Abweichung).
+
+**Vorab-Suche** (`grep -i` über `spec/lastenheft.md`, ausgeführt nach dem Lastenheft-Commit, Zeilennummern am Stand `HEAD`; die Zeilen 501 bis 509, 1609 und Zeile 9 sind der Diff):
+
+| Suchwort | Treffer (Zeilen) |
+|---|---|
+| `Instanz` | 416 473 501 502 503 504 507 509 1586 1587 1604 1609 |
+| `devcontainer up` | 189 191 414 457 501 503 1148 1609 |
+| `devcontainer down` | 189 502 1149 |
+| `devcontainer shell` | 189 191 196 457 503 1150 1602 |
+| `recreate` | 501 503 507 |
+| `quiet` | 184 189 196 198 1590 1591 1592 1593 1596 1600 1605 |
+| `Volume` | 210 214 412 414 456 473 491 501 502 504 534 536 566 626 671 1226 1593 1597 1607 1609 |
+| `json` | 23 Zeilen, nicht einzeln gelesen (siehe Grenzen); der Wortlaut sagt nichts zu `--json` |
+
+Bewertung der Treffer außerhalb des Diffs (jede Zeile an der Stelle gelesen):
+
+- **416** (`Instanz`): „selbst gehostete Instanzen (GitHub Enterprise, GitLab Self-Managed)“ — ein vierter Gebrauch des Wortes, ohne Bezug zu Devcontainern. Unberührt, weil kein Devcontainer gemeint ist.
+- **473** ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)): „Der Daemon-Speicher liegt in einem benannten Volume je Instanz“ — gemeint ist der einzelne Devcontainer (Entscheidung 2). Unberührt, weil [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) den Begriff einmal definiert und die Zusage zum Docker-Speicher in Zeile 504 auf [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) verweist.
+- **189 und 191** ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)): `devcontainer up`, `down`, `shell` unter den ändernden Befehlen unter `--quiet`; Zeile 191 nennt den Hilfs-Container von `u-boot devcontainer up` und `u-boot devcontainer shell` (Socket-Ausweisung). Unberührt: `--instance` ändert weder die Ausgabeklasse der Befehle noch den Hilfs-Container (ein kurzlebiger Container je Aufruf, nicht der Devcontainer des Projekts).
+- **196** (`--quiet`): „Die Shell, die `u-boot devcontainer shell` öffnet, ist nicht Ausgabe von `u-boot`; `--quiet` wirkt nur auf die Ausgabe des Starts.“ Unberührt: Die Shell in einer Instanz ist ebenso keine Ausgabe von `u-boot`.
+- **414** (Feature `ollama`): „der Ablauf mit Anmeldung in dem Container, den `u-boot devcontainer up` aus der erzeugten Konfiguration startet“ ist als nicht zugesagt geführt. Unberührt: Der Singular benennt einen Container je Aufruf, keinen „Devcontainer des Projekts“; eine Instanz erweitert diese Zusage nicht, weil sie eine Nicht-Zusage ist. Das „Volume der Modelle“ im Aufbau des Ablaufs ist der Aufbau des Nutzers, keine Instanz.
+- **457** ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)): „der kurzlebige Hilfs-Container von `u-boot devcontainer up` und `u-boot devcontainer shell` gehört nicht zum erzeugten Ergebnis“. Unberührt: Der Hilfs-Container bleibt gleich; die Instanz ändert den Socket-Mount nicht.
+- **412, 456, 491** (`Volume`): beschreiben je Container „ein benanntes Volume“ für Modelle beziehungsweise Workspace. Unberührt: Die Sätze sagen nichts über die Zahl der Container eines Projekts; die neue Zusage zu eigenen Volumes je Instanz steht in Zeile 504.
+- **210, 214, 534, 536, 566, 626, 671, 1226** (`Volume`): Volumes des Compose-Stacks (`u-boot down --volumes`, `--purge`, Dienste-Volumes). Unberührt: anderer Befehl, andere Volumes.
+- **1148 bis 1150** ([`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle)): Befehlstabelle ohne Flags. Unberührt (Tabelle nennt bei keinem Befehl ein Flag).
+- Historie 1586 1587 1590 bis 1605: ältere Zeilen, Chronik, nicht geändert.
+
+**Singular und Plural von „Devcontainer des Projekts“.** Das Lastenheft führt die Wendung nur an Zeile 501 (`grep` nach „Devcontainer des Projekts“ und „Container des Projekts“: 501 und 502, beide in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)); dort definiert der Neutext, dass der Begriff in diesem Abschnitt den Container ohne Instanz meint. Außerhalb des Abschnitts steht die Wendung nicht; der Gebrauch „Container“ in den Zeilen 189 bis 196, 414 und 457 ist je Aufruf gemeint. Die Vorab-Suche findet keine Stelle, die über die freigegebenen hinaus mitzuändern ist.
+
+**Läufe.** `make gates` (Verifier, Docker-Modus, auf `3e99b4db`): Exit 0; `baseline-verify: v6.18.1 OK — 54 Dateien`; `coverage-gate: OK — coverage 92.10% meets threshold 90%`; `d-check: 945 Datei(en) geprüft, 0 Befund(e)`; `ablage-pruefung: OK`, 26 Fälle, 0 Fehlschläge. `make doc-trace` (Verifier): Exit 0, 84 Anforderungen, 0 Waisen. Nicht ausgeführt: `make test-docker`, `make verify-depguard`, `make ci`, `make fullbuild` (kein Code, kein Release-Pfad berührt).
+
+- **Was hat funktioniert:**
+  - **Der Wortlaut ging als Alt/Neu je Stelle und mit der Tabelle „Nicht-Zusagen“ in die Freigabe;** der Neutext der sechs Stellen im Lastenheft ist wörtlich der freigegebene (maschineller Zeichenvergleich durch Review, Nachlauf, Verifier und Planner), und der Diff des Lastenhefts trägt nur diese Stellen (Verifier, Abschnitt 4).
+  - **Die Abgrenzung der Zusage hielt:** Messbedingung, Zusage-Menge und „Nicht zugesagt“ stehen im Lastenheft ohne Messsprache; Review und Verifier fanden keine Aussage weiter als die Messung.
+  - **Der Nachlauf-Review über die Fix-Runde lief als eigene Datei vor dem Verifier** (0 Befunde außer der wiederholten Markerlücke).
+- **Was ging anders als geplant:**
+  - **Der Lastenheft-Commit `772685aa` ging vor dem Review auf `origin/main`.** Der Implementer committete zwischen der Prüfung des Hauptagenten und dem Push; §4 und §5 sehen den Review vor dem Lastenheft-Commit vor. Kein Release, korrigierbar; der Review danach fand 0 HIGH und 0 MEDIUM, ein Revert war nicht nötig (Review, Negativbefund „Revert-Frage“).
+  - **„Gemessen ist das mit …“ stand im Vertragstext** (Review F-2: das einzige „gemessen“ im Hauptteil; die Historie `0.24.0` hatte Prüfzustands-Sprache durch die Zusage-Menge im Wortlaut ersetzt). Die Fix-Runde `af06dc71` stellte auf die Zusage-Form („Zugesagt ist das für …“, „andere Hosts und Engines“) um; Stückzahlen, Grenzen, Profil und Host-Klasse blieben unverändert (Nachlauf-Review, Prüfpunkt 2).
+  - **Die Zustandsmarker im Slice blieben nach der Freigabe stehen** („ENTWURF zur Freigabe“, „nicht geändert“, „erst nach der Freigabe“, Platzhalter für das Datum; Review F-1, im Nachlauf wiederholt, Verification F-1). Dazu führte die Plan-Tabelle zwei Dateien als „update“, die nicht im Diff standen (Verification F-2). Beides ist in dieser Closure auf den Ist-Stand gesetzt.
+  - **Prozess:** Reviewer und Verifier hatten kein Edit-Werkzeug; der Verifier legte seinen Report per `cp` aus der Vorlage an und füllte ihn mit `Write` (vermerkt im Report). Die `state.md` der zwei Beobachtungen und die Evidence-Dateien schrieb der Planner mit Edit und Write.
+- **Steering-Loop-Eintrag:** Lehre (zweiteilig): (a) Ein Wortlaut, der ins Lastenheft geschrieben wird, geht durch den Review, bevor ein Commit auf `origin/main` landet; eine Fix-Runde mit Lastenheft-Diff bekommt einen Nachlauf-Review als eigene Datei vor dem Verifier. (b) Die Zustandsmarker eines Wortlaut-Entwurfs („ENTWURF“, „erst nach der Freigabe“, Platzhalter) werden in demselben Zug auf den Ist-Stand gesetzt, in dem das Lastenheft geschrieben wird, nicht erst in der Closure. Gezählt, nicht verkörpert: Es wurde keine Regel, kein Sensor und keine Spec-Lücke verkörpert; Teil (a) zählt in [`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md), Teil (b) in [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) (bereits verkörpert in `AGENTS.md` §3.10; Rückfall, keine weitere Schärfung entschieden). Das Prüfzustands-Verb im Vertragstext (Review F-2) passt zu keiner vorhandenen Beobachtung ohne Dehnung ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) handelt von Zusagen weiter als die Messung, hier war die Zusage-Menge richtig und das Verb falsch); einmaliges Auftreten, kein Verzeichnis angelegt.
+- **Beobachtungs-Register (`../observations/`):** keine neue Beobachtung angelegt; zwei Evidence-Dateien `evidence/slice-cr-devcontainer-instanz.md` ergänzt, `state.md` beider nachgeführt, kein Zähler gesetzt:
+  - [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md): abgelaufene Zustandsmarker im Slice und zwei Plan-Zeilen ohne Diff (Review F-1, Nachlauf F-1, Verification F-1 und F-2). Stand: **63 Dateien** unter `evidence/` (vorher 62), Ausgang `verkörpert` unverändert.
+  - [`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md): Lastenheft-Commit vor dem Review gepusht; Fix-Runde mit Lastenheft-Diff nach dem Review, Nachlauf-Review als eigene Datei vor dem Verifier. Stand: **17 Dateien** unter `evidence/` (vorher 16), Ausgang weiter beim Projektinhaber.
+  - Kein neuer Beleg: [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) (Verification I-1 betrifft den Code-Slice, kein Befund gegen diesen Slice) und [`BEO-DOK/freigabe-vorlage-verdichtet-den-entwurf`](../observations/BEO-DOK/freigabe-vorlage-verdichtet-den-entwurf/observation.md) (ob die Vorlage an den Projektinhaber den Entwurf verdichtete, ist in keinem Report belegt).
+- **Folge-Slices:** [`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md) (Code, Tests, Docker-Test, Spezifikation, Handbuch, `CHANGELOG.md`): Der Start-Trigger „beide Vorgänger in `done/`“ ist mit dem Move dieses Slice erfüllt. Hinweise an den Code-Slice: (1) Die Folge-ADR zu [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) löst den Satz „zwei Instanzen aus demselben Ordner bleiben eine Instanz“ per `Supersedes (teilweise)` oder `Schärft` ab; [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) wird nicht umgeschrieben (`AGENTS.md` §3.5). (2) Jede Bedingung des Lastenhefts („Exit-Code `10` bei ungültigem Namen“, „bei nur Containern von Instanzen“, „kein geteiltes Volume“) braucht einen pinnenden Test oder entfällt ([`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)). (3) Prüfung „nur Instanz-Container“ vor dem Aufruf der Dev-Container-CLI und eine Suche, die Container mit Instanz-Label ausschließt (Risiko 5).
+- **Risiken aus §6:** je Risiko genau ein Ausgang, in der Reihenfolge von §6:
+  - Satz stützt sich auf einen nicht gelieferten Messwert: **entfallen** (Review und Verifier ohne Befund dieser Klasse; Tabelle „Nicht-Zusagen“ in §1).
+  - Accepted-ADR trägt einen überholten Satz: **weiter offen → [`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md)** (Folge-ADR dort; Hinweis (1) oben).
+  - Standardprofil teilt den Projektordner: **entfallen** (Lastenheft Zeile 504 nennt die Grenze).
+  - Deutung „1 CPU und 3 GiB je Instanz, nicht für alle zusammen“: **weiter offen:** Deutung nicht bestätigt, steht als Messbedingung im Lastenheft; die Bestätigung liegt beim Projektinhaber.
+  - Prüfung in `u-boot` vor dem Aufruf der CLI und eingeschränkte Suche: **weiter offen → [`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md)** (Test-Auftrag dort).
+  - Version `0.25.0`: **entfallen** (vergeben, Lastenheft Zeilen 9 und 1609).
+- **Drei Paarungen:** Anker: kein Eintrag mit dem Feld `liegt in` in diesem Slice (nichts verkörpert), nichts zu paaren. Folge-Slice: [`slice-v1-devcontainer-instanz-label`](../open/slice-v1-devcontainer-instanz-label.md) liegt in `open/`; die Risiken mit Ausgang „weiter offen“ (2 und 5) zeigen auf ihn. Register: die zwei Evidence-Dateien `evidence/slice-cr-devcontainer-instanz.md` existieren (je ein Verzeichnis oben). Das Paarungen-Häkchen der DoD setzt der Hauptagent nach dem Move.
+- **Abgleich der Plan-Tabelle gegen `git diff --stat f7d89606..HEAD`** (Stand nach der letzten Fix-Runde `af06dc71`, Nachlauf-Report und Verification-Report; `HEAD` = `a7a14ade`): Der Diff nennt `spec/lastenheft.md`, diesen Slice und drei Reports unter `docs/reviews/`; alle stehen in der Plan-Tabelle. Die Zeilen für `open/slice-v1-devcontainer-instanz-label.md` (Verweis-Nachzug erst beim Move) und `open/README.md` sind berichtigt; die Closure fügt hinzu: `open/README.md` und zwei Evidence-Dateien und deren `state.md` unter `observations/`. Der Abgleich gegen den Diff mit der Closure wiederholt der Hauptagent beim Commit.
+- **Carveouts:** keine neu, keine gelöst, keine berührt. Die Roadmap ist nicht geändert (Release-Zuordnung beim Projektinhaber).
+- **Grenzen der Closure:** (1) Der Planner hat die Zeilen 189, 191, 196, 414, 416, 457, 473 und die `Volume`-Treffer im Kontext der Fundzeile gelesen, die `json`-Treffer (23 Zeilen) und die `quiet`-Treffer 184 und 198 nicht einzeln; für `json` stützt er sich darauf, dass der Wortlaut nichts zum Schema sagt (Slice §1, Gefundener Stand; Review, Negativbefund `--quiet`/`--json`). (2) Freigabe und Entscheidungen 1 bis 5 sind nur im Gespräch belegt. (3) Der Planner hat den Teilstring-Test der Stellen 1, 2, 3, 5 und 6 selbst gefahren, Stelle 4 (gekürzt im Slice mit „…“) nicht; sie ist vom Verifier gefahren. (4) Das Lastenheft ist Zielbild: Dass `u-boot devcontainer up --instance` so arbeitet, pinnt erst der Docker-Test des Code-Slice; `make test-docker` lief nicht.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
