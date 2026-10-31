@@ -1,8 +1,8 @@
-# Review-Report: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/open/slice-v1-devcontainer-bau-lokal.md) — 2026-10-31
+# Review-Report: [`slice-v1-devcontainer-bau-lokal`](../plan/planning/next/slice-v1-devcontainer-bau-lokal.md) — 2026-10-31
 
 **Review-Art:** Plan — Plan-Review der Rolle Architect gegen Spec und ADR (`harness/roles.md`: „Passt die Lösung zu ADRs und Architektur?“). Kein Code-Review und keine DoD-Prüfung; beides gehört Reviewer und Verifier.
 
-**Gegenstand:** Slice-Plan [`slice-v1-devcontainer-bau-lokal`](../plan/planning/open/slice-v1-devcontainer-bau-lokal.md) im Stand des Commits `b371e262` (vor der Einarbeitung dieser Befunde) und die zugehörige [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md) (`Accepted`, unverändert gelassen).
+**Gegenstand:** Slice-Plan [`slice-v1-devcontainer-bau-lokal`](../plan/planning/next/slice-v1-devcontainer-bau-lokal.md) im Stand des Commits `b371e262` (vor der Einarbeitung dieser Befunde) und die zugehörige [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md) (`Accepted`, unverändert gelassen).
 
 **Skill:** keiner; die Rolle Architect (Agent `architect`) führt kein Skill-File unter `.harness/skills/`. Der Auftrag stand im Aufruf. **Modell:** nicht angegeben (Subagent; die Modell-ID liegt dem Auftraggeber nicht vor) · **Datum:** 2026-10-31
 
@@ -25,7 +25,7 @@
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde — ohne
 diese Liste ist der Lauf nicht reproduzierbar):
 
-- [`slice-v1-devcontainer-bau-lokal`](../plan/planning/open/slice-v1-devcontainer-bau-lokal.md) (§1 bis §8)
+- [`slice-v1-devcontainer-bau-lokal`](../plan/planning/next/slice-v1-devcontainer-bau-lokal.md) (§1 bis §8)
 - [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md) (`Accepted`), [`ADR-0004`](../plan/adr/0004-ci-system.md) (CI-System, Docker-only), [`ADR-0013`](../plan/adr/0013-dokumentationsreferenzmodell.md) (Referenzmodell)
 - [`LH-NFA-PORT-002`](../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten); [`LH-FA-BUILD-007`](../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow) (im Lastenheft entfallen, Zeilen 896 bis 898)
 - [`SPEC-008`](../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles), [`SPEC-025`](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles), [`SPEC-026`](../../spec/spezifikation.md#spec-026--komposition-der-ci-pipeline-github-actions), [`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows), [`SPEC-032`](../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage); `spec/architecture.md`
