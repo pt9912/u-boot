@@ -1,0 +1,161 @@
+
+######## M0: Messstand
+Zeit (UTC): 2026-10-31T15:38:54Z
+Stufe/Modus: namen
+Host: Linux 7.0.0-42-generic x86_64; uname -m: x86_64
+u-boot: u-boot version 0.16.1-dev (/Development/u-boot/bin/u-boot-linux-amd64)
+Docker Client 29.9.2 (linux/amd64), Server 29.9.2 (linux/amd64)
+Engine: Ubuntu 26.04.1 LTS; Name claude-u-boot; Treiber overlayfs; Cgroup 2 (systemd); MemoryLimit true SwapLimit true; CPUs 8; MemTotal 16361078784; Kernel 7.0.0-42-generic; Architektur x86_64; Wurzel /var/lib/docker; Context-Endpunkt: lokal
+docker context: default; DOCKER_HOST=<ungesetzt>
+               total        used        free      shared  buff/cache   available
+Mem:           15603        2436        3132          13       10386       13166
+Swap:          16383           0       16383
+Plattenplatz /: /dev/sda1       301G   71G  218G  25% /
+kernel.apparmor_restrict_unprivileged_userns = 1
+Hilfs-Image vorhanden (Bestand): u-boot-devcontainer-cli:0.89.0-f1a94cce795e ed569ec37d56 
+
+######## Vorpruefung
+(a) docker info antwortet: ja
+(a) MemoryLimit/SwapLimit wahr, cgroup v2: ja
+(b) Inventur vorher (Rohdaten):
+--- docker ps -a
+exciting_boyd	vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db-uid	Up 4 hours
+--- docker volume ls
+u-boot-docker-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+u-boot-ollama-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+uboot-test-docker
+u-boot-workspace-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+--- docker images
+alpine:3	be2656061b53
+busybox:1.36	73aaf090f3d8
+docker:29-cli	6fae2214c312
+ghcr.io/pt9912/d-check:<none>	3e0b9779a71e
+ghcr.io/pt9912/d-check:<none>	d8ce395beb78
+golang:1.27.3	2920bb124f1a
+golangci/golangci-lint:v2.14.0	ad862ba6b379
+mcr.microsoft.com/devcontainers/base:debian	71b6fe7c4e07
+nginx:alpine	785835ea65db
+node:22-bookworm	0e5f90657369
+otel/opentelemetry-collector:0.108.0	241f629c92fb
+postgres:16-alpine	0cefaabd882e
+quay.io/keycloak/keycloak:26.0	09a381c715ab
+u-boot:coverage	e05228e913d8
+u-boot-devcontainer-cli:0.89.0-f1a94cce795e	ed569ec37d56
+uboot-devc-test:latest	fbd637dc490a
+u-boot:lint	7934c249cecd
+u-boot:test-docker-tools	7adc155e9e59
+u-boot:test	e946f01eefdc
+vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db:latest	d23273099630
+vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db-uid:latest	2b6f4c3b5d1b
+(c) kein Objekt mit Praefix ubmess-/vsc-ubmess- vorhanden: ja
+(e) kernel.apparmor_restrict_unprivileged_userns = 1: Podman-Familie NICHT MESSBAR auf diesem Host (Host wird nicht umgestellt)
+
+######## Hilfs-Image bauen (ubmess-devcontainer-cli)
+Bau: 1 s; Image-ID ubmess-devcontainer-cli:0.89.0: 6d377216bbae
+Image-ID u-boot-devcontainer-cli (Bestand): u-boot-devcontainer-cli:0.89.0-f1a94cce795e=ed569ec37d56 
+Dev-Container-CLI: 0.89.0
+Tag des Mess-Images: 0.89.0 (Kontextdateien: 8f1b7ae256ab aed937e9b210 3b13630c9ea4 )
+
+######## M8: Label-Werte (Standardprofil)
+Projekt ubmess-1 (standard, limit) in /tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1
+  json: 4:  "runArgs": ["--memory=3g", "--memory-swap=3g", "--cpus=1"],
+
+-- Name (Laenge 1): a
+up ubmess-helper-1 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=a] -> exit=0 dauer=3 s containerId=7181503558e5
+  Ergebnis: {"outcome":"success","containerId":"7181503558e568ac137c3d6f41ad6755f7aa0dda6469bb74b2fd4deb963a68d3","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=1 gleich dem Eingabewert: ja Wert=a
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 32): aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+up ubmess-helper-2 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] -> exit=0 dauer=3 s containerId=0fbf89ef0717
+  Ergebnis: {"outcome":"success","containerId":"0fbf89ef071712faa8c8f2b1f10244319fac486e7bfd00ede7ed8072cae7dcfb","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=32 gleich dem Eingabewert: ja Wert=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 63): aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+up ubmess-helper-3 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] -> exit=0 dauer=3 s containerId=8fa81dfe00e8
+  Ergebnis: {"outcome":"success","containerId":"8fa81dfe00e8dc7fce54ffc3fb00c0f87b257fdb13f07ffe73e9330f6ff261cb","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=63 gleich dem Eingabewert: ja Wert=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 64): aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+up ubmess-helper-4 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] -> exit=0 dauer=3 s containerId=9661fb19f68d
+  Ergebnis: {"outcome":"success","containerId":"9661fb19f68d5cdaf02de02f3a0e8bf53a0484d9e1c9c9cb1b20741b6cda19ab","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=64 gleich dem Eingabewert: ja Wert=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 128): aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+up ubmess-helper-5 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] -> exit=0 dauer=3 s containerId=bfdf28bdc6fd
+  Ergebnis: {"outcome":"success","containerId":"bfdf28bdc6fd8d17848cd5cc1b927f08a8206b2c6c19766d216d9b778a8b4721","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=128 gleich dem Eingabewert: ja Wert=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 3): Abc
+up ubmess-helper-6 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=Abc] -> exit=0 dauer=3 s containerId=e525738035bc
+  Ergebnis: {"outcome":"success","containerId":"e525738035bc9885c070d8dad0f9358b4b80b0846154251541fed1917303e67a","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=3 gleich dem Eingabewert: ja Wert=Abc
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 5): abc-1
+up ubmess-helper-7 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=abc-1] -> exit=0 dauer=3 s containerId=8c62267499fb
+  Ergebnis: {"outcome":"success","containerId":"8c62267499fb8dd673342eef4e22b27684c7485d717a60ffb4ea901846dc3b0b","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=5 gleich dem Eingabewert: ja Wert=abc-1
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 5): abc_1
+up ubmess-helper-8 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=abc_1] -> exit=0 dauer=3 s containerId=d80709e46da3
+  Ergebnis: {"outcome":"success","containerId":"d80709e46da38b73b015f437d66b19551cfc10ef0bd6bf6c16fd7b116d363bf1","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=5 gleich dem Eingabewert: ja Wert=abc_1
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 5): abc.1
+up ubmess-helper-9 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=abc.1] -> exit=0 dauer=3 s containerId=7e039ec6fc6b
+  Ergebnis: {"outcome":"success","containerId":"7e039ec6fc6bd027d8c87bf4eded97dfb747cdac360560289970028f00265103","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=5 gleich dem Eingabewert: ja Wert=abc.1
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 4): .abc
+up ubmess-helper-10 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=.abc] -> exit=0 dauer=3 s containerId=8482cc32cb58
+  Ergebnis: {"outcome":"success","containerId":"8482cc32cb58ff25795b85618eaa526af01209248f9b8a0beb61f537f655d30d","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=4 gleich dem Eingabewert: ja Wert=.abc
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 4): _abc
+up ubmess-helper-11 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=_abc] -> exit=0 dauer=3 s containerId=a13c46fa151e
+  Ergebnis: {"outcome":"success","containerId":"a13c46fa151e6c1335c5542c06c7c0856271076c28e068f14336283a240f8ebf","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=4 gleich dem Eingabewert: ja Wert=_abc
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 4): -abc
+up ubmess-helper-12 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.MXMxPGAM1o/ubmess-1 --id-label u-boot.instance=-abc] -> exit=0 dauer=3 s containerId=4a8c7307d914
+  Ergebnis: {"outcome":"success","containerId":"4a8c7307d914a921491f35aa0ed976f7f62cd1b6aa488067d619a7369602cd61","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Label-Wert am Container: laenge=4 gleich dem Eingabewert: ja Wert=-abc
+  docker ps --filter label=u-boot.instance=<Name> trifft: 1 Container (erwartet 1; Filter mit Wert des Labels)
+  Treffer mit dem ganzen Namen im Filter 'label=u-boot.instance' (nur Schluessel): 1
+
+-- Name (Laenge 4): abc.
+
+######## Aufraeumen (trap)
+Arbeitsordner entfernt
+
+######## M9: Inventur nachher und Differenz
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Differenz img (vorher -> nachher; leer = keine)
+--- Reste mit Praefix ubmess-/vsc-ubmess-:
+keine
+--- Platz nachher: 218G frei auf / (Docker-Wurzel liegt auf /)
+
+######## Ende
+Stand der Stufe: vollstaendig

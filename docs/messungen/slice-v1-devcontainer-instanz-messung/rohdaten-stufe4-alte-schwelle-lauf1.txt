@@ -1,0 +1,70 @@
+
+######## M0: Messstand
+Zeit (UTC): 2026-10-31T14:53:34Z
+Stufe/Modus: 4
+Host: Linux 7.0.0-42-generic x86_64; uname -m: x86_64
+u-boot: u-boot version 0.16.1-dev (/Development/u-boot/bin/u-boot-linux-amd64)
+Docker Client 29.9.2 (linux/amd64), Server 29.9.2 (linux/amd64)
+Engine: Ubuntu 26.04.1 LTS; Name claude-u-boot; Treiber overlayfs; Cgroup 2 (systemd); MemoryLimit true SwapLimit true; CPUs 8; MemTotal 16361078784; Kernel 7.0.0-42-generic; Architektur x86_64; Wurzel /var/lib/docker; Context-Endpunkt: lokal
+docker context: default; DOCKER_HOST=<ungesetzt>
+               total        used        free      shared  buff/cache   available
+Mem:           15603        2348        3389          13       10217       13254
+Swap:          16383           0       16383
+Plattenplatz /: /dev/sda1       301G   71G  218G  25% /
+kernel.apparmor_restrict_unprivileged_userns = 1
+Hilfs-Image vorhanden (Bestand): u-boot-devcontainer-cli:0.89.0-f1a94cce795e ed569ec37d56 
+
+######## Vorpruefung
+(a) docker info antwortet: ja
+(a) MemoryLimit/SwapLimit wahr, cgroup v2: ja
+(b) Inventur vorher (Rohdaten):
+--- docker ps -a
+exciting_boyd	vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db-uid	Up 3 hours
+--- docker volume ls
+u-boot-docker-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+u-boot-ollama-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+uboot-test-docker
+u-boot-workspace-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+--- docker images
+alpine:3	be2656061b53
+busybox:1.36	73aaf090f3d8
+docker:29-cli	6fae2214c312
+ghcr.io/pt9912/d-check:<none>	3e0b9779a71e
+ghcr.io/pt9912/d-check:<none>	d8ce395beb78
+golang:1.27.3	2920bb124f1a
+golangci/golangci-lint:v2.14.0	ad862ba6b379
+mcr.microsoft.com/devcontainers/base:debian	71b6fe7c4e07
+nginx:alpine	785835ea65db
+node:22-bookworm	0e5f90657369
+otel/opentelemetry-collector:0.108.0	241f629c92fb
+postgres:16-alpine	0cefaabd882e
+quay.io/keycloak/keycloak:26.0	09a381c715ab
+u-boot:coverage	e05228e913d8
+u-boot-devcontainer-cli:0.89.0-f1a94cce795e	ed569ec37d56
+uboot-devc-test:latest	fbd637dc490a
+u-boot:lint	7934c249cecd
+u-boot:test-docker-tools	7adc155e9e59
+u-boot:test	e946f01eefdc
+vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db:latest	d23273099630
+vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db-uid:latest	2b6f4c3b5d1b
+(c) kein Objekt mit Praefix ubmess-/vsc-ubmess- vorhanden: ja
+(d) MemAvailable 13525120 kB; benoetigt 14155776 kB (N x 3 GiB + 1,5 GiB, N=4; 3 GiB wie --memory=3g)
+(d) Speicher: NICHT erfuellt
+(d) freier Platz der Docker-Wurzel (Dateisystem /): 218 GB (benoetigt 40 GB)
+(d) Platz: erfuellt
+(e) kernel.apparmor_restrict_unprivileged_userns = 1: Podman-Familie NICHT MESSBAR auf diesem Host (Host wird nicht umgestellt)
+BEFUND: Vorpruefung nicht erfuellt; Stufe 4 wird nicht gemessen, nichts wurde angelegt oder geaendert.
+
+######## Aufraeumen (trap)
+Arbeitsordner entfernt
+
+######## M9: Inventur nachher und Differenz
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Differenz img (vorher -> nachher; leer = keine)
+--- Reste mit Praefix ubmess-/vsc-ubmess-:
+keine
+--- Platz nachher: 218G frei auf / (Docker-Wurzel liegt auf /)
+
+######## Ende
+Stand der Stufe: nicht gemessen, Vorpruefung nicht erfuellt

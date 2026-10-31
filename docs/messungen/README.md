@@ -32,3 +32,4 @@ Die Regel steht in [`harness/conventions.md`](../../harness/conventions.md#ablag
 | [`slice-cr-lastenheft-messstaende`](slice-cr-lastenheft-messstaende/README.md) | keine (Lesen eines CI-Logs) |
 | [`slice-v1-devcontainer-bau-lokal`](slice-v1-devcontainer-bau-lokal/README.md) | `tools/messung/devcontainer-bau-lokal/` |
 | [`slice-v1-devcontainer-ressourcenlimits`](slice-v1-devcontainer-ressourcenlimits/README.md) | `tools/messung/devcontainer-ressourcenlimits/` |
+| [`slice-v1-devcontainer-instanz-messung`](slice-v1-devcontainer-instanz-messung/README.md) | `tools/messung/devcontainer-instanz/` |

@@ -1,0 +1,339 @@
+
+######## M0: Messstand
+Zeit (UTC): 2026-10-31T14:59:03Z
+Stufe/Modus: 3
+Host: Linux 7.0.0-42-generic x86_64; uname -m: x86_64
+u-boot: u-boot version 0.16.1-dev (/Development/u-boot/bin/u-boot-linux-amd64)
+Docker Client 29.9.2 (linux/amd64), Server 29.9.2 (linux/amd64)
+Engine: Ubuntu 26.04.1 LTS; Name claude-u-boot; Treiber overlayfs; Cgroup 2 (systemd); MemoryLimit true SwapLimit true; CPUs 8; MemTotal 16361078784; Kernel 7.0.0-42-generic; Architektur x86_64; Wurzel /var/lib/docker; Context-Endpunkt: lokal
+docker context: default; DOCKER_HOST=<ungesetzt>
+               total        used        free      shared  buff/cache   available
+Mem:           15603        2456        3079          13       10419       13146
+Swap:          16383           0       16383
+Plattenplatz /: /dev/sda1       301G   71G  217G  25% /
+kernel.apparmor_restrict_unprivileged_userns = 1
+Hilfs-Image vorhanden (Bestand): u-boot-devcontainer-cli:0.89.0-f1a94cce795e ed569ec37d56 
+
+######## Vorpruefung
+(a) docker info antwortet: ja
+(a) MemoryLimit/SwapLimit wahr, cgroup v2: ja
+(b) Inventur vorher (Rohdaten):
+--- docker ps -a
+exciting_boyd	vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db-uid	Up 3 hours
+--- docker volume ls
+u-boot-docker-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+u-boot-ollama-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+uboot-test-docker
+u-boot-workspace-1rl6sq13t76r39a7uv6v0ff5ltb5mu4o8isc7v5ba4g1nec1a2ip
+--- docker images
+alpine:3	be2656061b53
+busybox:1.36	73aaf090f3d8
+docker:29-cli	6fae2214c312
+ghcr.io/pt9912/d-check:<none>	3e0b9779a71e
+ghcr.io/pt9912/d-check:<none>	d8ce395beb78
+golang:1.27.3	2920bb124f1a
+golangci/golangci-lint:v2.14.0	ad862ba6b379
+mcr.microsoft.com/devcontainers/base:debian	71b6fe7c4e07
+nginx:alpine	785835ea65db
+node:22-bookworm	0e5f90657369
+otel/opentelemetry-collector:0.108.0	241f629c92fb
+postgres:16-alpine	0cefaabd882e
+quay.io/keycloak/keycloak:26.0	09a381c715ab
+u-boot:coverage	e05228e913d8
+u-boot-devcontainer-cli:0.89.0-f1a94cce795e	ed569ec37d56
+uboot-devc-test:latest	fbd637dc490a
+u-boot:lint	7934c249cecd
+u-boot:test-docker-tools	7adc155e9e59
+u-boot:test	e946f01eefdc
+vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db:latest	d23273099630
+vsc-u-boot-7deb90896b6cb5902c94187da33f4129c07d8bcc13dcbbe8b628de4aee0ef1db-uid:latest	2b6f4c3b5d1b
+(c) kein Objekt mit Praefix ubmess-/vsc-ubmess- vorhanden: ja
+(d) MemAvailable 13453480 kB; benoetigt 11010048 kB (N x 3 GiB + 1,5 GiB, N=3; 3 GiB wie --memory=3g)
+(d) Speicher: erfuellt
+(d) freier Platz der Docker-Wurzel (Dateisystem /): 217 GB (benoetigt 40 GB)
+(d) Platz: erfuellt
+(e) kernel.apparmor_restrict_unprivileged_userns = 1: Podman-Familie NICHT MESSBAR auf diesem Host (Host wird nicht umgestellt)
+
+######## Hilfs-Image bauen (ubmess-devcontainer-cli)
+Bau: 1 s; Image-ID ubmess-devcontainer-cli:0.89.0: e215eda8d0d3
+Image-ID u-boot-devcontainer-cli (Bestand): u-boot-devcontainer-cli:0.89.0-f1a94cce795e=ed569ec37d56 
+Dev-Container-CLI: 0.89.0
+Tag des Mess-Images: 0.89.0 (Kontextdateien: 8f1b7ae256ab aed937e9b210 3b13630c9ea4 )
+
+######## [S3-limit] Sandbox-Profil, 3 Instanzen, limit
+Projekt ubmess-1 (sandbox, limit) in /tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1
+  json: 10:  "runArgs": ["--memory=3g", "--memory-swap=3g", "--cpus=1", "--privileged"],
+  json: 11:  "mounts": [
+  json: 12:    "source=ubmess-1-workspace-${devcontainerId},target=/workspaces/ubmess-1,type=volume",
+  json: 13:    "source=ubmess-1-docker-${devcontainerId},target=/var/lib/docker,type=volume",
+  json: 14:    "source=ubmess-1-ollama-${devcontainerId},target=/home/vscode/.ollama,type=volume"
+Platz frei vorher: 217G; docker volume ls (ubmess-): 0
+  df: TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+  df: Images          31        1         14.87GB   2.984GB (20%)
+  df: Containers      1         1         61.32MB   0B (0%)
+  df: Local Volumes   4         3         279.5MB   18.97MB (6%)
+  df: Build Cache     834       0         41.17GB   34.04GB
+
+######## [S3-limit] M1/M4/M5: Start der Instanzen nacheinander
+-- Instanz 1
+  [host] MemAvailable 13141 MiB; loadavg 2.07 1.46 1.19; Mem used 2461 MiB, free 3069 MiB Swap used 0 MiB 
+up ubmess-helper-1 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1 --id-label u-boot.instance=i1] -> exit=0 dauer=4 s containerId=aecc11c74af3
+  Ergebnis: {"outcome":"success","containerId":"aecc11c74af35963dffc97be7902fe2638fae9373dd5fae287b434f63b09fda3","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  verschachtelter Docker antwortet nach: 0 s
+  Images vsc-ubmess-* auf dem Host: vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid:latest=3947a2ca1826 vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927:latest=6c357a3ed23e 
+  Grenze zurueckgelesen: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=true OOMKilled=false Running=true ExitCode=0
+  [host] MemAvailable 13095 MiB; loadavg 2.07 1.47 1.19; Mem used 2499 MiB, free 3030 MiB Swap used 0 MiB 
+-- Instanz 2
+  [host] MemAvailable 13102 MiB; loadavg 2.07 1.47 1.19; Mem used 2500 MiB, free 3029 MiB Swap used 0 MiB 
+up ubmess-helper-2 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1 --id-label u-boot.instance=i2] -> exit=0 dauer=5 s containerId=1c8b030e16ef
+  Ergebnis: {"outcome":"success","containerId":"1c8b030e16efa61c1b8a9d5220397932bc95adfdff657cbc9adfdad11b34ea50","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  verschachtelter Docker antwortet nach: 0 s
+  Images vsc-ubmess-* auf dem Host: vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid:latest=1467ee0fb329 vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927:latest=907263f556a3 
+  Grenze zurueckgelesen: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=true OOMKilled=false Running=true ExitCode=0
+  [host] MemAvailable 13059 MiB; loadavg 2.22 1.51 1.21; Mem used 2544 MiB, free 2984 MiB Swap used 0 MiB 
+-- Instanz 3
+  [host] MemAvailable 13059 MiB; loadavg 2.22 1.51 1.21; Mem used 2544 MiB, free 2984 MiB Swap used 0 MiB 
+up ubmess-helper-3 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1 --id-label u-boot.instance=i3] -> exit=0 dauer=5 s containerId=f34b97ffbf4e
+  Ergebnis: {"outcome":"success","containerId":"f34b97ffbf4e2f34be42ce1d9d36a41ffcbf6bef1fd4dec0be65c602dd25d727","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  verschachtelter Docker antwortet nach: 0 s
+  Images vsc-ubmess-* auf dem Host: vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid:latest=89f43e82e9be vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927:latest=b4f1f89082a4 
+  Grenze zurueckgelesen: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=true OOMKilled=false Running=true ExitCode=0
+  [host] MemAvailable 12996 MiB; loadavg 2.77 1.64 1.25; Mem used 2607 MiB, free 2920 MiB Swap used 0 MiB 
+Dauer der Starts (s): i1=4 i2=5 i3=5 
+
+######## [S3-limit] M1: Container und Labels
+Instanz 1: aecc11c74af35963dffc97be7902fe2638fae9373dd5fae287b434f63b09fda3
+  devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1
+  devcontainer.config_file=
+  u-boot.instance=i1
+  Zahl der Labels insgesamt: 9
+  Image=sha256:3947a2ca18269806bc8ff485b672df90f9bd97458620115a6e7073608936dda1 Config.Image=vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid
+  Einhaengungen mit docker.sock: 
+  Label-Namen: dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.local_folder devcontainer.metadata u-boot.instance version 
+Instanz 2: 1c8b030e16efa61c1b8a9d5220397932bc95adfdff657cbc9adfdad11b34ea50
+  devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1
+  devcontainer.config_file=
+  u-boot.instance=i2
+  Zahl der Labels insgesamt: 9
+  Image=sha256:1467ee0fb329d59ceb4c6af015a09889d09cafda613b38de32467ca60979f5b0 Config.Image=vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid
+  Einhaengungen mit docker.sock: 
+  Label-Namen: dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.local_folder devcontainer.metadata u-boot.instance version 
+Instanz 3: f34b97ffbf4e2f34be42ce1d9d36a41ffcbf6bef1fd4dec0be65c602dd25d727
+  devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1
+  devcontainer.config_file=
+  u-boot.instance=i3
+  Zahl der Labels insgesamt: 9
+  Image=sha256:89f43e82e9be40a777c7cac0a2298f26392e2b2dd33ecd1af3b77050f12b9ca7 Config.Image=vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid
+  Einhaengungen mit docker.sock: 
+  Label-Namen: dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.local_folder devcontainer.metadata u-boot.instance version 
+Container-IDs paarweise verschieden: 3 von 3
+docker ps -a --filter label=devcontainer.local_folder=<Ordner>:
+f34b97ffbf4e instance=i3 Up 2 seconds
+1c8b030e16ef instance=i2 Up 7 seconds
+aecc11c74af3 instance=i1 Up 12 seconds
+
+######## [S3-limit] M2/M3: Volume-Namen (Instanz x Familie) und aufgeloestes devcontainerId
+Instanz 1: devcontainerId=08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1
+    workspace -> ubmess-1-workspace-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1
+    docker -> ubmess-1-docker-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1
+    ollama -> ubmess-1-ollama-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1
+    containers -> <keine>
+Instanz 2: devcontainerId=0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g
+    workspace -> ubmess-1-workspace-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g
+    docker -> ubmess-1-docker-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g
+    ollama -> ubmess-1-ollama-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g
+    containers -> <keine>
+Instanz 3: devcontainerId=1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+    workspace -> ubmess-1-workspace-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+    docker -> ubmess-1-docker-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+    ollama -> ubmess-1-ollama-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+    containers -> <keine>
+Familie workspace: 3 verschiedene Namen bei 3 Instanzen -> paarweise verschieden: ja
+Familie docker: 3 verschiedene Namen bei 3 Instanzen -> paarweise verschieden: ja
+Familie ollama: 3 verschiedene Namen bei 3 Instanzen -> paarweise verschieden: ja
+devcontainerId paarweise verschieden: 3 von 3
+docker volume ls (ubmess-) nach dem Start:
+  ubmess-1-docker-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g
+  ubmess-1-docker-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+  ubmess-1-docker-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1
+  ubmess-1-ollama-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g
+  ubmess-1-ollama-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+  ubmess-1-ollama-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1
+  ubmess-1-workspace-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g
+  ubmess-1-workspace-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+  ubmess-1-workspace-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1
+Zahl der Volumes mit Praefix ubmess-1-: 9  (erwartet: 3 Familien x 3 = 9)
+
+######## [S3-limit] M3: Inhaltsprobe ueber alle Paare
+Instanz 1: Marker in Workspace und Modell-Volume geschrieben
+Instanz 1: Image ubmess-probe-1:1 im verschachtelten Docker
+Instanz 2: Marker in Workspace und Modell-Volume geschrieben
+Instanz 2: Image ubmess-probe-2:1 im verschachtelten Docker
+Instanz 3: Marker in Workspace und Modell-Volume geschrieben
+Instanz 3: Image ubmess-probe-3:1 im verschachtelten Docker
+Datei/Image von Instanz 1 in Instanz 2: workspace=absent ollama=absent docker-image=absent
+Datei/Image von Instanz 1 in Instanz 3: workspace=absent ollama=absent docker-image=absent
+Datei/Image von Instanz 2 in Instanz 1: workspace=absent ollama=absent docker-image=absent
+Datei/Image von Instanz 2 in Instanz 3: workspace=absent ollama=absent docker-image=absent
+Datei/Image von Instanz 3 in Instanz 1: workspace=absent ollama=absent docker-image=absent
+Datei/Image von Instanz 3 in Instanz 2: workspace=absent ollama=absent docker-image=absent
+Eigene Daten Instanz 1 sichtbar: workspace=ws-1 ollama=ol-1 image=sha256:73aaf090f3d8
+Eigene Daten Instanz 2 sichtbar: workspace=ws-2 ollama=ol-2 image=sha256:73aaf090f3d8
+Eigene Daten Instanz 3 sichtbar: workspace=ws-3 ollama=ol-3 image=sha256:73aaf090f3d8
+Paare mit sichtbarem Fremdinhalt: 0
+
+######## [S3-limit] M5: Ressourcen bei 3 laufenden Instanzen
+  [host] MemAvailable 12958 MiB; loadavg 2.65 1.65 1.26; Mem used 2644 MiB, free 2863 MiB Swap used 0 MiB 
+aecc11c74af3 mem=61.32MiB / 3GiB (2.00%) cpu=0.51% pids=20
+1c8b030e16ef mem=58.19MiB / 3GiB (1.89%) cpu=0.55% pids=20
+f34b97ffbf4e mem=56.18MiB / 3GiB (1.83%) cpu=0.50% pids=20
+Instanz 1: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=true OOMKilled=false Running=true ExitCode=0
+Instanz 2: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=true OOMKilled=false Running=true ExitCode=0
+Instanz 3: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=true OOMKilled=false Running=true ExitCode=0
+Platz frei jetzt: 217G
+  df: TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+  df: Images          33        2         14.96GB   2.984GB (19%)
+  df: Containers      4         4         61.94MB   0B (0%)
+  df: Local Volumes   13        12        300.6MB   18.97MB (6%)
+  df: Build Cache     852       0         41.17GB   34.04GB
+Groesse der neuen Volumes und Images (docker system df -v):
+  REPOSITORY                                                                          TAG                   IMAGE ID       CREATED          SIZE      SHARED SIZE   UNIQUE SIZE   CONTAINERS
+  vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid   latest                89f43e82e9be   15 seconds ago   1.99GB    1.995GB       25.22kB       1
+  vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927       latest                b4f1f89082a4   5 minutes ago    1.99GB    1.995GB       20.84kB       0
+  ubmess-devcontainer-cli                                                             0.89.0                e215eda8d0d3   5 minutes ago    1.8GB     1.792GB       7.108MB       0
+  f34b97ffbf4e   vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid   "/bin/sh -c 'echo Co…"   3               209kB     14 seconds ago   Up 13 seconds   heuristic_booth
+  VOLUME NAME                                                               LINKS     SIZE
+  ubmess-1-docker-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1      1         7.047MB
+  ubmess-1-ollama-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g      1         5B
+  ubmess-1-workspace-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t   1         5B
+  ubmess-1-docker-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t      1         7.047MB
+  ubmess-1-ollama-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t      1         5B
+  ubmess-1-ollama-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1      1         5B
+  ubmess-1-workspace-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g   1         5B
+  ubmess-1-docker-0a7juqv3uvi1nodqdvpe403maga118e2v7pnm5rv45o79pgn8u5g      1         7.047MB
+  ubmess-1-workspace-08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1   1         5B
+
+######## [S3-limit] M6: up ohne Flag neben 3 Instanzen
+MemAvailable 13266948 kB >= 4718592 kB (3 GiB + 1,5 GiB): M6 laeuft
+up ubmess-helper-4 [] -> exit=0 dauer=1 s containerId=f34b97ffbf4e
+  Ergebnis: {"outcome":"success","containerId":"f34b97ffbf4e2f34be42ce1d9d36a41ffcbf6bef1fd4dec0be65c602dd25d727","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+Neuer Container (ohne Flag): f34b97ffbf4e; gleich einem der Instanz-Container: 1
+  devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1
+  devcontainer.config_file=
+  u-boot.instance=i3
+  Zahl der Labels insgesamt: 9
+  Image=sha256:89f43e82e9be40a777c7cac0a2298f26392e2b2dd33ecd1af3b77050f12b9ca7 Config.Image=vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid
+  Einhaengungen mit docker.sock: 
+  Label-Namen: dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.local_folder devcontainer.metadata u-boot.instance version 
+devcontainerId des Containers ohne Flag: 1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t; gleich dem einer Instanz: 1
+Volumes des Containers ohne Flag:
+    ubmess-1-workspace-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+    ubmess-1-ollama-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+    ubmess-1-docker-1j1g20j295stgsdon6mrrevbo80vkkuf13l84nafji0h7pptgm7t
+
+docker ps -a --filter label=devcontainer.local_folder=<Ordner> trifft:
+f34b97ffbf4e instance=i3 Up 16 seconds
+1c8b030e16ef instance=i2 Up 20 seconds
+aecc11c74af3 instance=i1 Up 25 seconds
+Treffer: 3 (Instanzen 3 + ohne Flag 1 = 4 erwartet bei eigenem Container)
+FindContainer-Form (erster Treffer): f34b97ffbf4e
+Aufruf ohne Flag hat den Container einer Instanz uebernommen (Instanz i3); nichts entfernt
+
+######## [S3-limit] M7: --remove-existing-container, docker stop
+vor: i1=aecc11c74af3 i2=1c8b030e16ef i3=f34b97ffbf4e 
+up ubmess-helper-5 [--remove-existing-container --id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1 --id-label u-boot.instance=i1] -> exit=0 dauer=5 s containerId=877e699c4f2b
+  Ergebnis: {"outcome":"success","containerId":"877e699c4f2b2892622bbdbd4402fa49f850e8e4b04e5e73d51d7bc1ea2c2f8c","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+Instanz 1 neu: 877e699c4f2b; alter Container noch da: nein
+Instanz 2 noch derselbe Container und laeuft: 1c8b030e16ef true
+Instanz 3 noch derselbe Container und laeuft: f34b97ffbf4e true
+devcontainerId Instanz 1 nach --remove-existing-container: 08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1 (vorher 08r1jg54or6ac6l6ee7o19kf3fv7ph0pmmppcrb104pknj9p0uv1)
+Daten von Instanz 1 nach Neuanlage: workspace=ws-1 ollama=ol-1 image=sha256:73aaf090f3d8
+nach docker stop der Instanz 2:
+877e699c4f2b instance=i1 Up 3 seconds
+f34b97ffbf4e instance=i3 Up 22 seconds
+1c8b030e16ef instance=i2 Exited (0) Less than a second ago
+Volumes aller Instanzen noch vorhanden:       9 ok 
+
+######## [S3-limit] M2 Bezug: ohne Flag und nur mit devcontainer.local_folder
+up ubmess-helper-6 [] -> exit=0 dauer=4 s containerId=4cd55ba464b3
+  Ergebnis: {"outcome":"success","containerId":"4cd55ba464b3bee491e0dc3d136538d9aed7b4a56a950fd55538cee7c0ffcec2","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+devcontainerId ohne Flag: 1mprn170koinptuikq7vlar39coni2rnbmariqnhdmsauqf0ahk2
+  devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1
+  devcontainer.config_file=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1/.devcontainer/devcontainer.json
+  u-boot.instance=
+  Zahl der Labels insgesamt: 9
+  Image=sha256:630a54d3804b0a8af86db2e431d1704e29906c6700a8d584fa3c49f811c54cc2 Config.Image=vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid
+  Einhaengungen mit docker.sock: 
+  Label-Namen: dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+up ubmess-helper-7 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1] -> exit=0 dauer=5 s containerId=e4ee768996a2
+  Ergebnis: {"outcome":"success","containerId":"e4ee768996a2a81c9551016fc91e0ad550b7d78b07414381ce44d5d5cabb6476","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+devcontainerId mit --id-label devcontainer.local_folder: 11ib36gineopql5v7e971qfneov4pp134q3gri0so1onpnhm0025
+  devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-1
+  devcontainer.config_file=
+  u-boot.instance=
+  Zahl der Labels insgesamt: 8
+  Image=sha256:cfe297371008cff898dff23366361a27e455b3b0dbf03c4a4c2a9d7ff13c52b9 Config.Image=vsc-ubmess-1-6163212a444269f8870fa135dc62fe8869f91342c6d97603fdfc7a25b941f927-uid
+  Einhaengungen mit docker.sock: 
+  Label-Namen: dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.local_folder devcontainer.metadata version 
+Gleich: nein
+Gleich dem Wert einer Instanz (i1): nein
+
+######## [T3-standard] Standardprofil, 3 Instanzen, limit
+Projekt ubmess-2 (standard, limit) in /tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-2
+  json: 4:  "runArgs": ["--memory=3g", "--memory-swap=3g", "--cpus=1"],
+-- Instanz 1
+up ubmess-helper-8 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-2 --id-label u-boot.instance=i1] -> exit=0 dauer=3 s containerId=463997e9eb48
+  Ergebnis: {"outcome":"success","containerId":"463997e9eb483e62327d34eb659d4e1b2a21f3e76f502400ea86eb2afa66f026","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-2","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Grenze zurueckgelesen: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=false OOMKilled=false Running=true ExitCode=0
+-- Instanz 2
+up ubmess-helper-9 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-2 --id-label u-boot.instance=i2] -> exit=0 dauer=3 s containerId=448fa66c31d9
+  Ergebnis: {"outcome":"success","containerId":"448fa66c31d97ab094cd06f7b2c2e8eb0be214fb6e5d6306ec8ef028081fde8a","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-2","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Grenze zurueckgelesen: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=false OOMKilled=false Running=true ExitCode=0
+-- Instanz 3
+up ubmess-helper-10 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-2 --id-label u-boot.instance=i3] -> exit=0 dauer=3 s containerId=58a559e28b92
+  Ergebnis: {"outcome":"success","containerId":"58a559e28b92a0f97a4e6fff3c6796b946262029d572e009d78a0de21fed58c3","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-2","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Grenze zurueckgelesen: Memory=3221225472 MemorySwap=3221225472 NanoCpus=1000000000 Privileged=false OOMKilled=false Running=true ExitCode=0
+Mounts der Instanz 1:
+  bind /tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-2 -> /workspaces/ubmess-2
+
+Volumes der Instanzen (leer = Bind-Mount): 
+-- M3 Standardprofil: Datei im Projektordner
+Instanz 1 sieht ubmess-marker-1: std-1
+Instanz 2 sieht ubmess-marker-1: std-1
+Instanz 3 sieht ubmess-marker-1: std-1
+Host sieht die Datei im Projektordner: std-1
+
+######## [T3-standard] M6 umgekehrt: Bestandscontainer ohne Flag, danach Instanz
+up ubmess-helper-11 [] -> exit=0 dauer=3 s containerId=507b683d6c0a
+  Ergebnis: {"outcome":"success","containerId":"507b683d6c0a53ec4314a0a97fd42a085276842f53818041c06a2e92ec95ed15","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-2","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-2
+  devcontainer.config_file=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-2/.devcontainer/devcontainer.json
+  u-boot.instance=
+  Zahl der Labels insgesamt: 9
+  Image=sha256:fe788958958cc504a854a02e0d8d2ff52b61facc2d5515e2733218f25bdbed1c Config.Image=vsc-ubmess-2-69d616db083d39a4076673e819d0b217f68bc4146068bf6c8066ca380b1b6540-uid
+  Einhaengungen mit docker.sock: 
+  Label-Namen: dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+up ubmess-helper-12 [--id-label devcontainer.local_folder=/tmp/claude-1000/-Development-u-boot/c9a21911-8809-487d-8cda-2b4e733058ba/scratchpad/tmp.aAsnwHfRUZ/ubmess-2 --id-label u-boot.instance=i1] -> exit=0 dauer=3 s containerId=c570caddeace
+  Ergebnis: {"outcome":"success","containerId":"c570caddeaced32fc3ff9b5eb843882ee3eff8b31520dc9e0d3748d8a9279b0b","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-2","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+Instanz i1 uebernimmt den Bestandscontainer: nein (neuer Container c570caddeace)
+Container danach (Filter local_folder):
+c570caddeace instance=i1 Up Less than a second
+507b683d6c0a instance= Up 3 seconds
+Erneut ohne Flag:
+up ubmess-helper-13 [] -> exit=0 dauer=1 s containerId=507b683d6c0a
+  Ergebnis: {"outcome":"success","containerId":"507b683d6c0a53ec4314a0a97fd42a085276842f53818041c06a2e92ec95ed15","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-2","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+ohne Flag trifft: 507b683d6c0a (Bestandscontainer 507b683d6c0a); Container gesamt: 2
+
+######## Aufraeumen (trap)
+Arbeitsordner entfernt
+
+######## M9: Inventur nachher und Differenz
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Differenz img (vorher -> nachher; leer = keine)
+--- Reste mit Praefix ubmess-/vsc-ubmess-:
+keine
+--- Platz nachher: 217G frei auf / (Docker-Wurzel liegt auf /)
+
+######## Ende
+Stand der Stufe: vollstaendig
