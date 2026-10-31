@@ -98,7 +98,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 nicht die Antwort: Pfad-Berührung ist nicht hinreichend, und eine
 Aussagen-Berührung steht hier gar nicht.
 
-Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest sie am Ist-Stand nach ([`AGENTS.md`](../../../../AGENTS.md) §3.10). Eine Zeile „prüfen“ nennt eine Datei, die der Planner nicht oder nicht an der berührten Stelle gelesen hat. Die Tabelle nennt Weg A; für B und C gilt das Ende des Abschnitts. Die Datei `internal/hexagon/application/config.go` ändert gerade der Slice [`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md) (in `in-progress/`); dieser Slice startet erst danach (§4).
+Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest sie am Ist-Stand nach ([`AGENTS.md`](../../../../AGENTS.md) §3.10). Eine Zeile „prüfen“ nennt eine Datei, die der Planner nicht oder nicht an der berührten Stelle gelesen hat. Die Tabelle nennt Weg A; für B und C gilt das Ende des Abschnitts. Die Datei `internal/hexagon/application/config.go` ändert gerade der Slice [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md) (in `in-progress/`); dieser Slice startet erst danach (§4).
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
@@ -145,7 +145,7 @@ Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): Der Projektinhaber hat den Slice priorisiert und einem Release zugeordnet; `Verantwortlich:` gesetzt; der Projektinhaber hat den Weg (A, B oder C) entschieden; bei A oder B ist der Lastenheft-CR freigegeben (Wortlaut-Freigabe vor dem Code); kein anderer Slice in `in-progress/` (WIP-Limit 1; heute liegt dort [`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md), der `config.go` ändert). Die Messungen aus §1 sind der erste Schritt und können den Weg ändern.
+**Start** (`next` → `in-progress`): Der Projektinhaber hat den Slice priorisiert und einem Release zugeordnet; `Verantwortlich:` gesetzt; der Projektinhaber hat den Weg (A, B oder C) entschieden; bei A oder B ist der Lastenheft-CR freigegeben (Wortlaut-Freigabe vor dem Code); kein anderer Slice in `in-progress/` (WIP-Limit 1; heute liegt dort [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md), der `config.go` ändert). Die Messungen aus §1 sind der erste Schritt und können den Weg ändern.
 
 **Rückführungen — vorab benannt:**
 

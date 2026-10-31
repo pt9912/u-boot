@@ -11,7 +11,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Welle:** Vorschlag Release `v0.17.0` (Roadmap *Nächste Wellen*): Der Slice ändert einen Vertrag des Produkts (Name der Konfigurationsdatei) und gehört damit in ein Release. Die Zuordnung entscheidet der Projektinhaber; bis dahin ist er ohne Welle geführt. Anlass: Wunsch des Projektinhabers vom 2026-10-31, die Datei wie `.d-check.yml` als `.u-boot.yml` schreiben zu können.
 
-**Bezug:** [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) (Konfigurationsdatei), [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) (Erkennung eines bestehenden Projekts, harte Marker), [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) (Überschreibschutz). Voraussetzung: [`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md) (die eine Stelle für den Namen).
+**Bezug:** [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) (Konfigurationsdatei), [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) (Erkennung eines bestehenden Projekts, harte Marker), [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) (Überschreibschutz). Voraussetzung: [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md) (die eine Stelle für den Namen).
 
 **Berührte Spec-Stellen:** nicht gelesen — prüfen (die Spezifikation nennt `u-boot.yaml` an vielen Stellen; Suche beim Start).
 
@@ -34,9 +34,9 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 **Befund** (gelesen am 2026-10-31; [`AGENTS.md`](../../../../AGENTS.md) §3.10):
 
-- **Der Name ist fest.** `u-boot` kennt nur `u-boot.yaml` (32 Pfad-Literale in 15 Dateien des Application-Layers, siehe [`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md)); es gibt keine Suche nach einem anderen Namen und keine Option dafür. d-check dagegen liest `.d-check.yml` aus der Wurzel und kennt `-config`.
+- **Der Name ist fest.** `u-boot` kennt nur `u-boot.yaml` (32 Pfad-Literale in 15 Dateien des Application-Layers, siehe [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md)); es gibt keine Suche nach einem anderen Namen und keine Option dafür. d-check dagegen liest `.d-check.yml` aus der Wurzel und kennt `-config`.
 - **Drei Stellen tragen mehr als das Lesen:** `collisionError` (`internal/hexagon/application/initproject.go`, Zeile 935) erkennt nur `u-boot.yaml`, `compose.yaml` und `.env.example` als harte Marker eines bestehenden Projekts ([`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen)); `credentialScanFiles` (`doctor_sandbox.go`, Zeilen 58 bis 64) nennt `u-boot.yaml` unter den Dateien, die `u-boot doctor` auf Klartext-Zugangsdaten prüft — eine Konfiguration unter anderem Namen bliebe ungeprüft; `init` legt `u-boot.yaml` an (`initproject.go`, Zeile 854).
-- **Nutzertexte:** `README.md` und `README.de.md` nennen `u-boot.yaml` je siebenmal, das Benutzerhandbuch 42-mal; Meldungstexte im Nicht-Test-Code tragen den Namen 251-mal als Wort ([`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md), Befund).
+- **Nutzertexte:** `README.md` und `README.de.md` nennen `u-boot.yaml` je siebenmal, das Benutzerhandbuch 42-mal; Meldungstexte im Nicht-Test-Code tragen den Namen 251-mal als Wort ([`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md), Befund).
 
 **Wege** (Entscheidung des Projektinhabers vor dem Start; der Slice wählt nicht):
 
@@ -90,7 +90,7 @@ Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `internal/hexagon/domain/config.go` | update | die Liste der Kandidaten (aus [`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md)) bekommt den zweiten Eintrag; die Rangfolge-Regel kommt in die Domäne, das Prüfen auf vorhandene Dateien in die Application |
+| `internal/hexagon/domain/config.go` | update | die Liste der Kandidaten (aus [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md)) bekommt den zweiten Eintrag; die Rangfolge-Regel kommt in die Domäne, das Prüfen auf vorhandene Dateien in die Application |
 | `internal/hexagon/application/` (die 15 Dateien mit dem Pfad-Literal) | update | jede Stelle liest über die Auflösung statt über den festen Namen; nach dem Vorgänger-Slice greifen sie auf die Konstante zu |
 | `internal/hexagon/application/initproject.go` | update | `collisionError` (Zeile 935): harte Marker über alle Kandidaten; Anlegen der Datei (Zeile 854) und Laden (Zeile 519) |
 | `internal/hexagon/application/doctor_sandbox.go` | update | `credentialScanFiles` (Zeilen 58 bis 64) prüft jeden vorhandenen Kandidaten |
@@ -107,7 +107,7 @@ Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): [`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md) liegt in `done/`; `Verantwortlich:` gesetzt; der Projektinhaber hat den Weg (A, B oder C) und die drei Entscheidungen aus §1 getroffen und den Lastenheft-CR freigegeben; kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md) liegt in `done/`; `Verantwortlich:` gesetzt; der Projektinhaber hat den Weg (A, B oder C) und die drei Entscheidungen aus §1 getroffen und den Lastenheft-CR freigegeben; kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
@@ -129,7 +129,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 **einen** Ausgang, und kein Slice geht nach `done/`, während eines ohne Ausgang
 dasteht.
 
-- **Eine Konfiguration unter dem neuen Namen bleibt ungeprüft** (Klartext-Zugangsdaten, Überschreibschutz), weil eine der Stellen mit der Namensliste vergessen wird. — **Ausgang:** bei Closure; Vorsorge: die Liste steht an einer Stelle ([`slice-v1-konfigdatei-name-als-konstante`](../in-progress/slice-v1-konfigdatei-name-als-konstante.md)), und ein Test pro Stelle.
+- **Eine Konfiguration unter dem neuen Namen bleibt ungeprüft** (Klartext-Zugangsdaten, Überschreibschutz), weil eine der Stellen mit der Namensliste vergessen wird. — **Ausgang:** bei Closure; Vorsorge: die Liste steht an einer Stelle ([`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md)), und ein Test pro Stelle.
 - **Zwei Konfigurationen in einem Projekt** (zwei Namen): stiller Vorrang verdeckt Abweichungen. — **Ausgang:** bei Closure (die Regel aus §1).
 - **Skripte und Dokumentation nennen weiter `u-boot.yaml`:** Der Standard von `init` ändert sich nicht; Nutzer, die ihn ändern, müssen ihre Skripte nachziehen. — **Ausgang:** bei Closure.
 - **Zusage weiter als die Messung** ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)): Das Handbuch nennt nur gemessene Fälle. — **Ausgang:** bei Closure.

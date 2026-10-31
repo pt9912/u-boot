@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-konfigdatei-name-als-konstante`](../plan/planning/in-progress/slice-v1-konfigdatei-name-als-konstante.md) — 2026-10-31
+# Review-Report: [`slice-v1-konfigdatei-name-als-konstante`](../plan/planning/done/slice-v1-konfigdatei-name-als-konstante.md) — 2026-10-31
 
 **Review-Art:** Code gegen Plan, Entscheidungen und Hard Rules (Wartbarkeit). Die DoD-Frage gehört dem Verifier. Nichts vom Implementer ist übernommen: Zählung, Ersetzungen, Schutz-Test, Mutationen und Spec-Aussage sind am Code und an eigenen Läufen geprüft.
 
@@ -10,7 +10,7 @@
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- [`slice-v1-konfigdatei-name-als-konstante`](../plan/planning/in-progress/slice-v1-konfigdatei-name-als-konstante.md) (§1 Befund, Wege und Architect-Prüfung, §2 DoD, §3 Plan-Tabelle, §6 Risiken)
+- [`slice-v1-konfigdatei-name-als-konstante`](../plan/planning/done/slice-v1-konfigdatei-name-als-konstante.md) (§1 Befund, Wege und Architect-Prüfung, §2 DoD, §3 Plan-Tabelle, §6 Risiken)
 - [`ADR-0003`](../plan/adr/0003-solid-nahes-lint-profil.md) (Lint-Profil unverändert; Schutz als Test statt Lint-Regel)
 - [`LH-FA-CONF-002`](../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration)
 - `spec/architecture.md` (Abschnitt `hexagon/domain`), [`SPEC-034`](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)

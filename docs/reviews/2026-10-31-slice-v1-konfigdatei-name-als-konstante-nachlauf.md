@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-konfigdatei-name-als-konstante`](../plan/planning/in-progress/slice-v1-konfigdatei-name-als-konstante.md) (Nachlauf zur Fix-Runde) — 2026-10-31
+# Review-Report: [`slice-v1-konfigdatei-name-als-konstante`](../plan/planning/done/slice-v1-konfigdatei-name-als-konstante.md) (Nachlauf zur Fix-Runde) — 2026-10-31
 
 **Review-Art:** Code gegen Plan, Entscheidungen und Hard Rules (Wartbarkeit). Nachlauf im frischen Kontext zur Fix-Runde der Befunde F-1 bis F-3 des ersten Reports. Die DoD-Frage gehört dem Verifier.
 
@@ -10,7 +10,7 @@
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- [`slice-v1-konfigdatei-name-als-konstante`](../plan/planning/in-progress/slice-v1-konfigdatei-name-als-konstante.md) und der erste Report [erste Report](2026-10-31-slice-v1-konfigdatei-name-als-konstante.md)
+- [`slice-v1-konfigdatei-name-als-konstante`](../plan/planning/done/slice-v1-konfigdatei-name-als-konstante.md) und der erste Report [erste Report](2026-10-31-slice-v1-konfigdatei-name-als-konstante.md)
 - [`LH-FA-CONF-002`](../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration)
 - `spec/architecture.md` (Aufzählungspunkt „Name der Konfigurationsdatei“ unter `hexagon/domain`)
 - `AGENTS.md` (Hard Rules §3.2, §3.4, §3.6, §3.7, §3.9, §3.10), `harness/review.md`, `harness/replay.md`

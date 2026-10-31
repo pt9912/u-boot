@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**Dateiname der Konfiguration als eine Konstante (ohne Welle-Datei: Konstante und Kandidatenliste im Domain-Layer statt 32 Pfad-Literale)** — Slice: [`slice-v1-konfigdatei-name-als-konstante`](slice-v1-konfigdatei-name-als-konstante.md) (in Arbeit).
+**Dateiname der Konfiguration als eine Konstante (ohne Welle-Datei: Konstante und Kandidatenliste im Domain-Layer statt 32 Pfad-Literale)** — Slice: [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md) (in Arbeit).
 
 ## Nächste Wellen
 
