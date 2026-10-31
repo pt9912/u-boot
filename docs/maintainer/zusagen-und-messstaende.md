@@ -986,9 +986,9 @@ geprüft. Die Spiegelstriche unten tragen die Belege und Messvorbehalte.
 ### 3.15 Messbedingungen der Spezifikation ([`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes))
 
 Die Spezifikation ([`spezifikation.md`](../../spec/spezifikation.md)) beschreibt das Zielbild und trägt keine Messbedingungen.
-Die Sätze unten sind wörtlich übernommen; was in der Spezifikation ausdrücklich als „bleibt in der Spec bis zur
-Entscheidung“ steht, steht dort noch, bis der Projektinhaber über Zusage-Menge oder Streichung entscheidet. Die
-Verhaltensaussagen und die Grenzen der Zusage bleiben in der Spezifikation.
+Die Sätze unten sind wörtlich übernommen. Die drei Stellen, die der Projektinhaber am 2026-10-31 entschieden hat, sind in der
+Spezifikation umgesetzt (Wortlaut vorher und nachher am Ende des Abschnitts). Die Verhaltensaussagen und die Grenzen der
+Zusage bleiben in der Spezifikation.
 
 - **Zusage:** [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten).
 - **Fundstelle:** Die Aussagen zu Sitzungsende, Signalen, Art der Shell und den Engines 29.9.2 und 28.0.4 stammen aus dem
@@ -1011,8 +1011,29 @@ Verhaltensaussagen und die Grenzen der Zusage bleiben in der Spezifikation.
   sind nicht zugesagt, und die Meldungen sind für den Client 29.9.2 gemessen.“
 - **Wortlaut, Aufzählungspunkt „Grenzen der Erkennung“ (Zeile zum fehlenden Benutzer auf der Engine 28.0.4):**
   „(aus der Form abgeleitet, nicht gefahren)“ — nach der Aussage, der Befehl endete dann mit `12` statt `0`.
-- **Zurückgestellt:** Die Sätze aus „Messbedingungen“ (Aufzählungspunkt, Sitzungsende), „Gemessen ist das …“ (Lebenszyklus) und
-  „(aus der Form abgeleitet, nicht gefahren)“ bleiben in der Spec bis zur Entscheidung des Projektinhabers.
+- **Umgesetzt nach Entscheidung des Projektinhabers (2026-10-31).** Die drei Stellen stehen so in der Spec; der Wortlaut
+  vorher steht oben.
+  - Aufzählungspunkt „Messbedingungen“ (Sitzungsende, Signale, Art der Shell): jetzt „**Reichweite** der Aussagen zum Ende der
+    Sitzung, zu den Signalen und zur Art der Shell: Sie sind zugesagt für Container mit dem Basis-Image
+    `mcr.microsoft.com/devcontainers/base:debian`, deren Hauptprozess ein Dauerlauf ist; für einen von `devcontainer up`
+    erzeugten Container sind sie nicht zugesagt, für andere Basis-Images ebenfalls nicht. Andere Engines, Hosts und
+    Terminals sind nicht zugesagt.“ Grund der Nachschärfung: Die Signal- und Shell-Tests
+    (`internal/adapter/driven/docker/devcontainer_shell_docker_test.go`, `newShellContainer`) starten einen einfachen Container
+    mit `docker run -d <Image> sleep 3600`; kein Test läuft gegen einen von `devcontainer up` erzeugten Container. Fassung vor
+    der Nachschärfung: „… zugesagt für Container mit dem Basis-Image `mcr.microsoft.com/devcontainers/base:debian`; für andere
+    Basis-Images sind sie nicht zugesagt. Andere Engines, Hosts und Terminals sind nicht zugesagt.“ Das Basis-Image steht im Planungsdokument `slice-v1-devcontainer-shell-fundament` (Zeile
+    „Messung vor dem Bau“: Basis-Images `mcr.microsoft.com/devcontainers/base:debian` und `busybox:1.36`; welche Aussage auf
+    welchem Image lief, nennt die Zeile nicht). Gestrichen sind Docker 29.9.2, `sleep 3600`, das Pseudo-Terminal von `script` und „ein Lauf je
+    Fall“.
+  - Lebenszyklus-Absatz: jetzt „Das gilt für die gepinnte Version der CLI, für Befehle in der Form einer Zeichenkette, die
+    gelingen, unter Linux `amd64` mit lokaler Engine.“ Der Absatz endet weiter mit „… und andere Hosts und Engines“ in der
+    Aufzählung des Nicht-Zugesagten. Fundstelle der
+    Zusage-Menge (Linux-Host, lokale Engine, `amd64`): [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten).
+  - Punkt „Grenzen der Erkennung“: der Satz „Diese Zeile ist auch das, was ein `docker exec -u <Benutzer der Sitzung> <anderer
+    Container>` innerhalb der Sitzung gegen eine Engine dieser Form als einzige Ausgabe erzeugen würde; der Launcher trennt
+    beides nicht, der Befehl endete dann mit `12` statt `0` (aus der Form abgeleitet, nicht gefahren).“ ist aus der Spec
+    gestrichen. Er bleibt hier als **unbelegte Beobachtung**: Kein Test pinnt ihn (ein Einheitstest in
+    `devcontainer_shell_test.go` prüft die Zeile eines anderen Benutzers, nicht den Fall innerhalb der Sitzung).
 
 **Historie von `spec/spezifikation.md`: gestrichene Messaussagen im Wortlaut vor der Änderung** (Fundstelle: `git show
 HEAD:spec/spezifikation.md`, Tabellenzeilen 1474 bis 1477, alle vom 2026-10-19):
