@@ -70,7 +70,7 @@ unten listet jedes Subkommando.
 
 ### Vorgefertigtes Binary (empfohlen)
 
-Statisch gelinkte Single-File-Binaries werden ab `v0.2.0` mit jedem
+Statisch gelinkte Single-File-Binaries werden mit jedem
 `v*`-GitHub-Release für sechs Plattformen (Linux/macOS/Windows ×
 amd64/arm64) ausgeliefert. Kein Docker-Daemon nötig — das ist die
 host-native Form für `doctor`, `init` und alle anderen Subkommandos.
@@ -118,23 +118,24 @@ Invoke-WebRequest `
 .\u-boot.exe --version
 ```
 
-Eine bestimmte Version pinnst du mit
-`releases/download/v0.3.0/u-boot-<os>-<arch>[.exe]` statt
-`latest/download/`.
+Eine bestimmte Version wählen Sie mit
+`releases/download/v<VERSION>/u-boot-<os>-<arch>[.exe]` statt
+`latest/download/`. `<VERSION>` steht für eine Release-Nummer aus der
+[Release-Liste](https://github.com/pt9912/u-boot/releases).
 
 ### Pull von GHCR (alternativ für Container-/CI-Workflows)
 
 ```bash
-docker pull ghcr.io/pt9912/u-boot:0.3.0    # gepinntes Tag
-docker pull ghcr.io/pt9912/u-boot:latest   # stabiler Floating-Tag
-docker run --rm ghcr.io/pt9912/u-boot:0.3.0 --version
+docker pull ghcr.io/pt9912/u-boot:<VERSION>   # gepinntes Tag, ohne führendes v
+docker pull ghcr.io/pt9912/u-boot:latest      # stabiler Floating-Tag
+docker run --rm ghcr.io/pt9912/u-boot:<VERSION> --version
 ```
 
-Das Distroless-Image läuft als non-root UID 65532; mountet euer
-Projekt mit `--user "$(id -u):$(id -g)"`, damit erzeugte Dateien
-euch gehören. `doctor` läuft ab v0.2.0 im container-aware Modus:
-die vier Host-Prerequisite-Checks werden mit `SeverityInfo`
-geskipped statt als False-Positives zu feuern.
+Das Distroless-Image läuft als non-root UID 65532; binden Sie Ihr
+Projekt mit `--user "$(id -u):$(id -g)"` ein, damit erzeugte Dateien
+Ihnen gehören. `doctor` läuft im Container im container-aware Modus:
+die vier Prüfungen der Host-Voraussetzungen werden als Info
+übersprungen, statt Fehlalarme zu melden.
 
 ## Quickstart
 

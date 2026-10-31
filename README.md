@@ -69,8 +69,7 @@ are described in the [user manual](docs/user/benutzerhandbuch.md) (German).
 ### Pre-built binary (recommended)
 
 Single-file static binaries are attached to every `v*` GitHub Release
-for six platforms (Linux/macOS/Windows × amd64/arm64) starting with
-`v0.2.0`. No Docker daemon required — this is the host-native form for
+for six platforms (Linux/macOS/Windows × amd64/arm64). No Docker daemon required — this is the host-native form for
 `doctor`, `init`, and all other subcommands.
 
 **Linux / macOS:**
@@ -117,22 +116,23 @@ Invoke-WebRequest `
 ```
 
 Pin a specific version with
-`releases/download/v0.3.0/u-boot-<os>-<arch>[.exe]` instead of
-`latest/download/`.
+`releases/download/v<VERSION>/u-boot-<os>-<arch>[.exe]` instead of
+`latest/download/`. `<VERSION>` stands for a release number from the
+[release list](https://github.com/pt9912/u-boot/releases).
 
 ### Pull from GHCR (alternative for container/CI workflows)
 
 ```bash
-docker pull ghcr.io/pt9912/u-boot:0.3.0    # pinned tag
-docker pull ghcr.io/pt9912/u-boot:latest   # stable-floating
-docker run --rm ghcr.io/pt9912/u-boot:0.3.0 --version
+docker pull ghcr.io/pt9912/u-boot:<VERSION>   # pinned tag, without a leading v
+docker pull ghcr.io/pt9912/u-boot:latest      # stable-floating
+docker run --rm ghcr.io/pt9912/u-boot:<VERSION> --version
 ```
 
 The distroless image runs as non-root UID 65532; mount your project
 with `--user "$(id -u):$(id -g)"` so written files are owned by you.
-`doctor` runs in container-aware mode (since v0.2.0): the four
-host-prerequisite checks are skipped with `SeverityInfo` instead of
-firing as false positives.
+`doctor` runs in container-aware mode in the container: the four
+host-prerequisite checks are skipped and reported as info instead of
+raising false alarms.
 
 ## Quickstart
 
