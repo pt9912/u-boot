@@ -1962,11 +1962,9 @@ keinen Berechtigungsmodus.
   `raw.githubusercontent.com` sind ohnehin in der Basisliste. Wer einen dieser Hosts
   braucht, trägt ihn in `devcontainer.sandbox.egress.allow` ein. Im Test lief die
   CLI mit gesperrtem Telemetrie-Host.
-- **Geprüft und nicht geprüft:** Geprüft ist die Kombination aus Dev-Container-CLI
-  0.89.0 auf Colima (arm64), dem Basis-Image `mcr.microsoft.com/devcontainers/base:debian`,
-  Claude Code 2.1.302 und dem Feature in Version `1.0.5`. Der Eintrag legt nur die
-  Hauptversion `1` des Features fest; spätere Versionen können abweichen. Nicht geprüft
-  sind ein Login und eine Anfrage mit gültigem Schlüssel.
+- **Voraussetzungen und Grenzen:** Das Feature läuft unter Colima (`arm64`). Der Eintrag
+  legt nur die Hauptversion `1` des Features fest; spätere Versionen können abweichen. Nicht
+  zugesagt sind die Anmeldung und eine Anfrage mit gültigem Schlüssel.
 
 #### Ollama (optional)
 
@@ -2149,39 +2147,29 @@ ollama run smollm2:135m "Reply with the single word OK."
     Feature `ollama-host` (Abschnitt
     [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional))
     wirkt auch im Standardprofil.
-  - **Grenzen der Messung (Cloud-Modelle):** Linux `amd64` (Ubuntu 24.04.5) mit lokaler
-    Docker-Engine 29.9.2, Ollama-Client `0.40.6` (Pin des erzeugten Dockerfiles), Claude Code
-    `2.1.310` und Node `v24.22.1` (nicht gepinnt, Stand beim Bau), die Modelle
-    `glm-5.3-flash:cloud` und `gpt-oss:120b-cloud`, ohne Terminal, mit einem Konto des Projekts,
-    am 2026-10-24, 40 Prompts. Ein bis drei Läufe je Aussage,
-    ein Lauf zählt einen Container mit neuem Volume; die Läufe mit Konto liefen als Handvarianten
-    (Aufruf der Dev-Container-CLI statt `u-boot devcontainer up`, `docker exec`, Platzhalter im
-    Aufruf). **Nicht gemessen:** der interaktive Ablauf von Claude Code und von `ollama launch
-    claude`, Kontingent und Kosten, `arm64`, Docker Desktop, Colima, Podman, rootless Docker, ein
-    gültiger `OLLAMA_API_KEY`, das Sandbox-Profil, wie `u-boot` es ohne Egress-Restriktion
-    erzeugt, andere Modelle und Versionen, abgelaufene oder entfernte Anmeldung.
-- **Grenzen der Messung:** Zugesagt ist die Installation auf einem Linux-Host mit lokaler
-  Docker-Engine (`amd64`) und unter Colima (`arm64`); gemessen sind zwei Umgebungen
-  (auf dem `amd64`-Host zwei Läufe), Ollama `0.40.6`:
-  Docker 29.5.2 auf Colima 0.10.3 (`arm64`) und, am 2026-10-19, Linux x86_64 (`amd64`) mit
-  einer nativen Docker Engine 29.9.1 ohne VM (Kernel 6.8, `kernel.apparmor_restrict_unprivileged_userns=0`,
-  `/dev/fuse` und `/dev/net/tun` vorhanden). Auf dem `amd64`-Host baute das erzeugte
-  Dockerfile (Prüfsumme bestanden), der Server lauschte nur auf `127.0.0.1:11434` und meldete
-  `library=cpu`, Pull und Lauf der beiden Modelle gelangen hinter der Beschränkung, die Modelle
-  überstanden das Löschen des Containers und den Neuaufbau, und die Kombination mit
-  `nestedRuntime: podman` und mit `nestedRuntime: docker` baute, ließ die Paketliste unverändert
-  und führte einen kleinen verschachtelten Container aus, während der Server und ein Pull liefen. Das
-  sind **zwei Messläufe auf einem Host**; in der CI bestand der Docker-Test der Installation
-  (Bau des erzeugten Dockerfiles, Server auf der Loopback-Adresse, `library=cpu`, Pull, Modell
-  überlebt das Löschen des Containers) am 2026-10-25 auf einem `amd64`-Runner mit Ubuntu 24.04;
-  die Docker-Tests zum Bau mit `podman build` und zum Start von `podman` übersprang die CI, weil der Runner
-  `kernel.apparmor_restrict_unprivileged_userns=1` hat (der Test zum falschen Pin mit `nestedRuntime: podman` bestand). Unter Colima (`arm64`) ist ein von Hand
-  nachgeschriebenes Probe-Image gemessen, der Bau des erzeugten Dockerfiles nicht. Nicht gemessen: Docker Desktop, Linux hinter einer VM, größere
-  Modelle und Mindest-Speicher, ein Start des Servers über die
-  `devcontainer.json` (gemessen ist der Start von Hand und der Egress-Start durch die
-  Dev-Container-CLI). GPU-Beschleunigung und die Verwaltung von Modellen durch `u-boot`
-  gibt es nicht. Die Messung der Cloud-Modelle steht im Punkt *Cloud-Modelle von Ollama* oben,
-  die des Anschlusses an einen Dienst des Hosts im folgenden Abschnitt.
+  - **Voraussetzungen und Grenzen (Cloud-Modelle):** Zugesagt ist Linux `amd64` mit lokaler
+    Docker-Engine. Anmeldung und Cloud-Aufrufe funktionieren in einem Container, den Sie
+    selbst starten; der Weg über `u-boot devcontainer up` ist nicht zugesagt. Claude Code und
+    Node sind nicht gepinnt, ihre Versionen können abweichen. **Nicht zugesagt:** der
+    interaktive Ablauf von Claude Code und von `ollama launch claude`, Kontingent und Kosten,
+    `arm64`, Docker Desktop, Colima, Podman, rootless Docker, ein gültiger `OLLAMA_API_KEY`, das
+    Sandbox-Profil, wie `u-boot` es ohne Egress-Restriktion erzeugt, andere Modelle und
+    Versionen, abgelaufene oder entfernte Anmeldung.
+- **Voraussetzungen und Grenzen:** Zugesagt ist die Installation auf einem Linux-Host mit
+  lokaler Docker-Engine (`amd64`) und unter Colima (`arm64`). Auf dem `amd64`-Host baut das
+  erzeugte Dockerfile, der Server lauscht nur auf `127.0.0.1:11434` und nutzt nur die CPU, Pull
+  und Lauf der Modelle gelingen hinter der Egress-Beschränkung, die Modelle überstehen das
+  Löschen des Containers und den Neuaufbau, und `nestedRuntime: podman` und
+  `nestedRuntime: docker` lassen sich zusammen mit dem Server nutzen. `nestedRuntime: podman`
+  setzt dafür voraus, dass verschachtelte User-Namespaces erlaubt sind
+  (`kernel.apparmor_restrict_unprivileged_userns=0`) und `/dev/fuse` und `/dev/net/tun`
+  vorhanden sind. Unter Colima (`arm64`) stützt sich die Zusage auf ein von Hand
+  nachgeschriebenes Probe-Image; der Bau des von `u-boot` erzeugten Dockerfiles ist dort nicht
+  zugesagt. **Nicht zugesagt:** Docker Desktop, Linux hinter einer VM, größere Modelle und
+  Mindest-Speicher, ein Start des Servers über die `devcontainer.json`. GPU-Beschleunigung und
+  die Verwaltung von Modellen durch `u-boot` gibt es nicht. Die Cloud-Modelle stehen im Punkt
+  *Cloud-Modelle von Ollama* oben, der Anschluss an einen Dienst des Hosts im folgenden
+  Abschnitt.
 
 #### Anschluss an einen Ollama-Dienst des Hosts (optional)
 
@@ -2245,12 +2233,11 @@ unabhängig vom Feature `ollama`. Es ist kein OCI-Feature und kein Dockerfile-Bl
   ändert das nicht. `u-boot` trägt keine Adresse ein und warnt beim Erzeugen, ohne
   abzubrechen. **Nicht gemessen:** ein Weg, der die Adresse erlaubt, und `ollama run` und
   `ollama launch` mit dem Dienst des Hosts hinter der Restriktion.
-- **Grenzen der Messung:** Linux `amd64` (Ubuntu 24.04.5) mit lokaler Docker-Engine 29.9.2,
-  Ollama-Client `0.40.6`, Dienst des Hosts `0.40.10` auf `127.0.0.1:11434`, Claude Code
-  `2.1.310`, die Modelle `glm-5.3-flash:cloud` und `gpt-oss:120b-cloud`, ohne Terminal, mit
-  einem Konto des Projekts, am 2026-10-24. Ein bis drei Läufe je Aussage, als Handvarianten
-  (die Zeile von Hand gesetzt, der Relay ein Hilfs-Container, Platzhalter im Aufruf).
-  **Nicht gemessen:** Docker Desktop, Colima, Podman, rootless Docker, `arm64`, Windows, ein
+- **Voraussetzungen und Grenzen:** Zugesagt ist Linux `amd64` mit lokaler Docker-Engine und
+  einem Ollama-Dienst auf dem Host (`127.0.0.1:11434`). Der Weg über `u-boot devcontainer up`
+  ist nicht zugesagt; die Aufrufe laufen in einem Container, den Sie selbst starten, mit der
+  Zeile in `runArgs` von Hand und einem Relay als Hilfs-Container. **Nicht zugesagt:**
+  Docker Desktop, Colima, Podman, rootless Docker, `arm64`, Windows, ein
   Dienst mit anderer Bindung, die Erreichbarkeit durch einen fremden Container, das
   Sandbox-Profil, wie `u-boot` es ohne Egress-Restriktion erzeugt, der interaktive Ablauf von
   Claude Code, Kontingent und Kosten, ein Aufruf bei gesetztem `ANTHROPIC_API_KEY`.
@@ -2394,14 +2381,10 @@ geprüft. Die Spiegelstriche unten tragen die Belege und Messvorbehalte.
   Dockerfile, der Bau ist nicht gelaufen); die Kombination mit `ollama` und
   `nestedRuntime` über die Reihenfolge der Blöcke im Dockerfile, die Volumes und die Hosts
   hinaus.
-- **Grenzen der Messung:** Linux `amd64` (x86_64), lokale Docker Engine 29.9.2,
-  Dev-Container-CLI 0.89.0, Basis-Image `mcr.microsoft.com/devcontainers/base:debian`,
-  `gh` 2.103.0, `glab` 1.124.0, gemessen am 2026-10-23, ein gewerteter Lauf je Aussage.
-  Es wurde kein Token angelegt oder verwendet, die Aufrufe liefen ohne Terminal. Die
-  Aufrufe der Werkzeuge liefen in Containern, deren Dockerfile den Block von Hand trug
-  (dasselbe Archiv wie im erzeugten Block); am von `u-boot` erzeugten Dockerfile laufen in
-  einem Docker-Test der Bau in beiden Profilen, die Versionen, ein Aufruf von `glab` gegen
-  ein öffentliches Projekt hinter der Egress-Beschränkung und die Token-Referenzen.
+- **Voraussetzungen und Grenzen:** Zugesagt ist Linux `amd64` mit lokaler Docker-Engine. Der
+  Bau in beiden Profilen, ein Aufruf von `glab` gegen ein öffentliches Projekt hinter der
+  Egress-Beschränkung und die Token-Referenzen sind durch einen Docker-Test abgedeckt. Nicht
+  zugesagt ist ein Aufruf von `gh` oder `glab` mit gültigem Token.
 
 #### Zugangsdaten (Git und Agent)
 
