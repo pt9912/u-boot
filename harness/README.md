@@ -74,7 +74,7 @@ Diese Datei dupliziert sie nicht.
 | `make ci` | `gates` + `govulncheck` + `image-scan` | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | `make fullbuild` | volle Closure: `ci` + Runtime-Image-Build | — |
 
-**Modus.** `make gates` läuft im Modus der Umgebung (`BUILD_MODE`): im Devcontainer `local` (die Toolchain des Containers, `scripts/bau.sh`), am Host und in der CI `docker` (der Standard). Das ist der Nachweis für Handoff und Closure; ein zweiter Lauf im anderen Modus gehört nicht zum Prozess. Ein Teillauf (`PKG`, `RUN`) ist kein Nachweis und wird mit `gates` abgelehnt ([`ADR-0037`](../docs/plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md)).
+**Modus.** `make gates` läuft im Modus der Umgebung (`BUILD_MODE`): im Devcontainer `local` (die Toolchain des Containers, `scripts/bau.sh`; Targets, die Container starten, etwa `docs-check`, brauchen dort weiter einen Docker-Daemon, den der Devcontainer verschachtelt bereitstellt), am Host und in der CI `docker` (der Standard). Das ist der Nachweis für Handoff und Closure; ein zweiter Lauf im anderen Modus gehört nicht zum Prozess. Ein Teillauf (`PKG`, `RUN`) ist kein Nachweis und wird mit `gates` abgelehnt ([`ADR-0037`](../docs/plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md)).
 
 **Werkzeuge — genannt, weil der Lauf sie braucht, aber kein Gate:**
 

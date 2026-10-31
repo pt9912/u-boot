@@ -1,0 +1,67 @@
+# Rohdaten G: govulncheck, build-binaries, test-docker im lokalen Modus (Zusammenfassung des Skripts im-container-rest.sh)
+# Lauf 1 (alle drei Schritte)
+== Benutzer: vscode uid=1000
+== Docker: server 29.9.2, storage overlayfs
+BUILD_MODE=local
+== make govulncheck
+govulncheck      exit=0 wall=6.9s
+go: downloading golang.org/x/sync v0.23.0
+GOFLAGS=-buildvcs=false "$(go env GOPATH)/bin/govulncheck" ./...
+No vulnerabilities found.
+== make build-binaries
+build-binaries   exit=0 wall=26.8s
+go: downloading github.com/inconshreveable/mousetrap v1.1.0
+==> /tmp/tmp.O79qndl5Wf/u-boot-windows-arm64.exe (UBOOT_VERSION=0.16.1-dev)
+[build-binaries] 6 binaries built in bin/ (local mode)
+u-boot-darwin-amd64
+u-boot-darwin-arm64
+u-boot-linux-amd64
+u-boot-linux-arm64
+u-boot-windows-amd64.exe
+u-boot-windows-arm64.exe
+== make test-docker (bis zu 30 Minuten)
+test-docker      exit=2 wall=652.0s
+    --- PASS: TestErrInitFileSystem_DistinctFromOtherInitSentinels/ErrTemplateConflictsWithFlag (0.00s)
+    --- PASS: TestErrInitFileSystem_DistinctFromOtherInitSentinels/ErrBaseDirMissing (0.00s)
+PASS
+ok  	github.com/pt9912/u-boot/internal/hexagon/port/driving	0.005s
+FAIL
+make: *** [repo.mk:148: test-docker] Error 1
+== Zusammenfassung test-docker: PASS/FAIL/SKIP
+PASS=5025 FAIL=9 SKIP=1
+
+# Lauf 2 (nur test-docker, Log gesichert)
+== Benutzer: vscode uid=1000
+== Docker: server 29.9.2, storage overlayfs
+BUILD_MODE=local STEPS=test-docker
+== make test-docker (bis zu 30 Minuten)
+test-docker      exit=2 wall=646.1s
+    --- PASS: TestErrInitFileSystem_DistinctFromOtherInitSentinels/ErrTemplateConflictsWithFlag (0.00s)
+    --- PASS: TestErrInitFileSystem_DistinctFromOtherInitSentinels/ErrBaseDirMissing (0.00s)
+PASS
+ok  	github.com/pt9912/u-boot/internal/hexagon/port/driving	(cached)
+FAIL
+make: *** [repo.mk:148: test-docker] Error 1
+== test-docker: Zählung (oberste Ebene)
+PASS=1621 FAIL=9 SKIP=1
+== fehlgeschlagene Tests
+--- FAIL: TestLauncher_Docker_S6_ValueIsNeverInImageLabelFileOrCommandLine (5.74s)
+--- FAIL: TestLauncher_Docker_S5_GuardFalsifiedIntegrityBreaksTheBuild (2.48s)
+--- FAIL: TestE2E_ForgeCLI_PinMismatchBreaksBuild (2.51s)
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_Build (1.55s)
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress (7.26s)
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman (1.55s)
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild (14.78s)
+--- FAIL: TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild (10.26s)
+--- FAIL: TestE2E_SandboxDevcontainer_StatusFiles_VFS (1.66s)
+== Paketergebnisse
+FAIL	github.com/pt9912/u-boot/internal/adapter/driven/docker	184.661s
+FAIL	github.com/pt9912/u-boot/internal/e2e	645.404s
+
+# Vergleich: make test-docker im Docker-Modus am Host
+make test-docker (Docker-Modus, Host) exit=0 wall=1619s
+PASS=1627 FAIL=0 SKIP=4
+--- SKIP: TestE2E_SandboxDevcontainer_NestedPodman_Build (57.93s)
+--- SKIP: TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress (70.81s)
+--- SKIP: TestE2E_SandboxDevcontainer_NestedPodman (57.01s)
+--- SKIP: TestE2E_SandboxDevcontainer_StatusFiles_VFS (38.61s)

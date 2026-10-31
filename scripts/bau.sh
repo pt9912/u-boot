@@ -3,16 +3,18 @@
 #
 # ZUSAGE. Das Dockerfile (Stages compile, lint, test, coverage) und der lokale
 # Modus von repo.mk (BUILD_MODE=local) rufen dieses Skript; beide führen damit
-# dieselben Befehle aus. Das Skript setzt je Stage nur, was die RUN-Zeile des
-# Dockerfile gesetzt hat: CGO_ENABLED=0 bei compile, test und coverage. GOFLAGS
-# kommt aus der Umgebung (Docker: ENV der Stage deps; lokal: ENV im
-# .devcontainer/Dockerfile). lint setzt nichts: Die Stage baut auf dem Image
-# golangci/golangci-lint und kennt weder GOFLAGS noch CGO_ENABLED.
+# dieselben Befehle aus. Das Skript setzt CGO_ENABLED=0 bei compile, test und
+# coverage und sonst nichts. GOFLAGS kommt aus der Umgebung (Docker: ENV der
+# Stage deps; lokal: ENV im .devcontainer/Dockerfile). lint setzt nichts: Die
+# Stage baut auf dem Image golangci/golangci-lint und kennt weder GOFLAGS noch
+# CGO_ENABLED.
 #
 # AUFRUF.   bau.sh compile | lint | test | coverage
 # UMGEBUNG. compile:  BAU_COMPILE_OUT  Ausgabepfad des Binary (Standard /tmp/u-boot)
-#           test:     PKG  Paketliste (Standard ./...), RUN  Filter für -run
-#                     (ein Teillauf; er ist kein Nachweis, siehe repo.mk)
+#           test:     BAU_PKG  Paketliste, durch Leerzeichen getrennt (Standard ./...),
+#                     BAU_RUN  Filter für -run (ein Teillauf; er ist kein Nachweis,
+#                     siehe repo.mk). Die Werte kommen über die Umgebung, nicht über
+#                     die Kommandozeile: ein Anführungszeichen im Filter bleibt Text.
 #           coverage: OUT  Verzeichnis für Profil und Funktionsliste (Standard /out),
 #                     COVERAGE_THRESHOLD  Schwelle in Prozent (Pflicht)
 #
@@ -32,12 +34,13 @@ case "$stage" in
     ;;
   test)
     args=()
-    if [[ -n "${RUN:-}" ]]; then
-      args+=(-run "$RUN")
+    if [[ -n "${BAU_RUN:-}" ]]; then
+      args+=(-run "$BAU_RUN")
     fi
-    # PKG bleibt ungequotet: eine Liste von Paketen ist mehrere Argumente.
-    # shellcheck disable=SC2086
-    CGO_ENABLED=0 go test ${args[@]+"${args[@]}"} ${PKG:-./...}
+    # Die Paketliste wird an Leerzeichen getrennt, ohne dass die Shell Muster
+    # (etwa ein Stern) gegen Dateien auflöst.
+    read -r -a pkgs <<<"${BAU_PKG:-./...}"
+    CGO_ENABLED=0 go test ${args[@]+"${args[@]}"} "${pkgs[@]}"
     ;;
   coverage)
     : "${COVERAGE_THRESHOLD:?COVERAGE_THRESHOLD is required}"

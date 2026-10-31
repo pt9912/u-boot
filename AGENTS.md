@@ -78,7 +78,8 @@ und Security-Gates laufen über `make`. Am Host und in der CI nutzt `make`
 Docker (Docker-Modus, `BUILD_MODE=docker`, der Standard); der Host braucht nur
 Docker und GNU `make`. Im Devcontainer des Repos (`BUILD_MODE=local`) führen
 dieselben Targets ihre Befehle mit der dort installierten, gepinnten Toolchain
-aus ([`SPEC-031`](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows),
+aus; Targets, die Container starten (etwa `docs-check`), nutzen den dort
+verschachtelten Docker-Daemon ([`SPEC-031`](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows),
 [`ADR-0037`](docs/plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md)). Der
 Nachweis für einen Handoff ist `make gates` im Modus der Umgebung; ein Teillauf
 (`PKG`, `RUN`) zählt nicht.

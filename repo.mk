@@ -126,6 +126,11 @@ ifeq ($(BUILD_MODE),local)
 # devcontainer, .devcontainer/Dockerfile). The commands come from
 # scripts/bau.sh, the script the Dockerfile stages call as well. The build and
 # test cache of Go stays between runs, so a repeated run is not a rebuild.
+# PKG and RUN reach the script through the environment (BAU_PKG, BAU_RUN), not
+# through the command line of the recipe: a quote in the value stays text. They
+# apply to `test` only.
+export BAU_PKG := $(TEST_PKG)
+export BAU_RUN := $(TEST_RUN)
 
 deps: ## Resolve Go module dependencies (Docker mode: deps stage; local mode: go mod download).
 	go mod download
@@ -137,7 +142,7 @@ lint: ## golangci-lint with the project profile (Docker mode: lint stage; local 
 	bash scripts/bau.sh lint
 
 test: ## Run the Go tests (Docker mode: test stage; local mode: PKG=… RUN=… makes a partial run, which is no evidence).
-	PKG="$(TEST_PKG)" RUN="$(TEST_RUN)" bash scripts/bau.sh test
+	bash scripts/bau.sh test
 
 test-docker: ## Run //go:build docker integration tests against a Docker daemon (Docker mode: the host daemon; local mode: the daemon of the environment).
 	go test -v -tags docker -timeout 30m ./...
@@ -223,7 +228,11 @@ run: build ## Smoke test: run `u-boot --help` from the built image.
 BIN_DIR    ?= bin
 PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64
 
-packages: build-binaries ## Build the .deb and .rpm packages (amd64, arm64) with nfpm (slice-v2-distro-pakete).
+# packages always builds its binaries in the Docker mode, whatever BUILD_MODE
+# says: a package is a release artefact, and release artefacts come from the
+# Docker mode (SPEC-031). nfpm runs in a container as well.
+packages: ## Build the .deb and .rpm packages (amd64, arm64) with nfpm (slice-v2-distro-pakete); binaries from the Docker mode.
+	$(MAKE) BUILD_MODE=docker build-binaries
 	./scripts/build-packages.sh $(VERSION) $(BIN_DIR) packages
 
 ifeq ($(BUILD_MODE),local)
@@ -289,13 +298,18 @@ image-scan: build ## Trivy scan of the runtime image (LH-QA-003 third gate).
 verify-depguard: ## Verify all nine depguard layer rules fire (LH-FA-ARCH-003).
 	bash scripts/verify-depguard.sh
 
-# modus-pruefung pins the two modes of BUILD_MODE with `make -n`: the targets
-# that have a local variant call no `docker build` in the local mode and call
-# `docker build` or `docker run` in the Docker mode (the default); a partial
-# run (PKG, RUN) is refused together with the evidence targets. On demand, not
-# part of `gates` (a dry run costs seconds, but the rule it guards changes
-# rarely). A mutation that turns it red: a `docker build` line in a local
-# recipe, or a local recipe without its Docker counterpart.
+# modus-pruefung pins the conditions of SPEC-031 with `make -n`:
+#   - the targets with a local variant call no `docker build` in the local mode
+#     and `docker build` or `docker run` in the Docker mode (the default);
+#   - `build`, `run`, `image-scan` and `packages` call docker in both modes;
+#   - a BUILD_MODE other than docker and local is an error;
+#   - PKG and RUN are an error in the Docker mode, ignored when they come from
+#     the environment, and refused together with gates, record-gates, ci and
+#     fullbuild in the local mode, while gates without them is accepted.
+# On demand, not part of `gates` (a dry run costs seconds, but the rules it
+# guards change rarely). Mutations that turn it red: a `docker build` line in a
+# local recipe; a missing $(error …) line for BUILD_MODE, for PKG in the Docker
+# mode or for an evidence target.
 MODUS_TARGETS := deps compile lint test test-docker coverage-gate govulncheck build-binaries
 modus-pruefung: ## Check that the local mode calls no docker build and the Docker mode does (make -n).
 	@set -e; \
@@ -305,11 +319,25 @@ modus-pruefung: ## Check that the local mode calls no docker build and the Docke
 	    if ! $(MAKE) -s -n BUILD_MODE=docker $$t 2>&1 | grep -q 'docker \(build\|run\)'; then \
 	        echo "modus-pruefung: $$t calls no docker in the Docker mode"; exit 1; fi; \
 	done; \
-	for v in PKG=./x RUN=X; do \
-	    if $(MAKE) -s -n BUILD_MODE=local gates $$v >/dev/null 2>&1; then \
-	        echo "modus-pruefung: gates accepts $$v (a partial run is no evidence)"; exit 1; fi; \
+	for t in build run image-scan packages; do \
+	    if ! $(MAKE) -s -n BUILD_MODE=local $$t 2>&1 | grep -q 'docker \(build\|run\)'; then \
+	        echo "modus-pruefung: $$t calls no docker in the local mode"; exit 1; fi; \
 	done; \
-	echo "modus-pruefung: OK ($(words $(MODUS_TARGETS)) targets, both modes; partial run refused for gates)"
+	if $(MAKE) -s -n BUILD_MODE=foo test >/dev/null 2>&1; then \
+	    echo "modus-pruefung: an unknown BUILD_MODE is accepted"; exit 1; fi; \
+	if $(MAKE) -s -n BUILD_MODE=docker test PKG=./x >/dev/null 2>&1; then \
+	    echo "modus-pruefung: PKG is accepted in the Docker mode"; exit 1; fi; \
+	if ! PKG=./x RUN=X $(MAKE) -s -n BUILD_MODE=docker test >/dev/null 2>&1; then \
+	    echo "modus-pruefung: PKG or RUN from the environment is refused (only the command line counts)"; exit 1; fi; \
+	for g in gates record-gates ci fullbuild; do \
+	    for v in PKG=./x RUN=X; do \
+	        if $(MAKE) -s -n BUILD_MODE=local $$g $$v >/dev/null 2>&1; then \
+	            echo "modus-pruefung: $$g accepts $$v (a partial run is no evidence)"; exit 1; fi; \
+	    done; \
+	done; \
+	if ! $(MAKE) -s -n BUILD_MODE=local gates >/dev/null 2>&1; then \
+	    echo "modus-pruefung: gates without PKG and RUN is refused in the local mode"; exit 1; fi; \
+	echo "modus-pruefung: OK ($(words $(MODUS_TARGETS)) targets in both modes; build, run, image-scan, packages in docker; BUILD_MODE, PKG and RUN rules)"
 
 # ---- gate chain ------------------------------------------------------------
 
