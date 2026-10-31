@@ -141,10 +141,10 @@ compile: ## Fast compile feedback, no tests/lint (Docker mode: compile stage; lo
 lint: ## golangci-lint with the project profile (Docker mode: lint stage; local mode: golangci-lint run).
 	bash scripts/bau.sh lint
 
-test: ## Run the Go tests (Docker mode: test stage; local mode: PKG=… RUN=… makes a partial run, which is no evidence).
+test: ## Run the Go tests (Docker mode: test stage; local mode: PKG=… RUN=… makes a partial run, which is no evidence; write a $ in RUN as $$).
 	bash scripts/bau.sh test
 
-test-docker: ## Run //go:build docker integration tests against a Docker daemon (Docker mode: the host daemon; local mode: the daemon of the environment).
+test-docker: ## Run //go:build docker integration tests against a Docker daemon (Docker mode: the host daemon; local mode: the nested daemon of the devcontainer, where the tests are no evidence, see SPEC-031).
 	go test -v -tags docker -timeout 30m ./...
 
 coverage-gate: ## Coverage threshold gate, bootstrap-aware (LH-FA-BUILD-008; Docker mode: coverage stage; local mode: scripts/bau.sh).
@@ -301,11 +301,12 @@ verify-depguard: ## Verify all nine depguard layer rules fire (LH-FA-ARCH-003).
 # modus-pruefung pins the conditions of SPEC-031 with `make -n`:
 #   - the targets with a local variant call no `docker build` in the local mode
 #     and `docker build` or `docker run` in the Docker mode (the default);
-#   - `build`, `run`, `image-scan` and `packages` call docker in both modes;
+#   - `build`, `run`, `image-scan`, `packages` and `docs-check` call docker in
+#     both modes;
 #   - a BUILD_MODE other than docker and local is an error;
 #   - PKG and RUN are an error in the Docker mode, ignored when they come from
 #     the environment, and refused together with gates, record-gates, ci and
-#     fullbuild in the local mode, while gates without them is accepted.
+#     fullbuild in the local mode, while these four without them are accepted.
 # On demand, not part of `gates` (a dry run costs seconds, but the rules it
 # guards change rarely). Mutations that turn it red: a `docker build` line in a
 # local recipe; a missing $(error …) line for BUILD_MODE, for PKG in the Docker
@@ -319,7 +320,7 @@ modus-pruefung: ## Check that the local mode calls no docker build and the Docke
 	    if ! $(MAKE) -s -n BUILD_MODE=docker $$t 2>&1 | grep -q 'docker \(build\|run\)'; then \
 	        echo "modus-pruefung: $$t calls no docker in the Docker mode"; exit 1; fi; \
 	done; \
-	for t in build run image-scan packages; do \
+	for t in build run image-scan packages docs-check; do \
 	    if ! $(MAKE) -s -n BUILD_MODE=local $$t 2>&1 | grep -q 'docker \(build\|run\)'; then \
 	        echo "modus-pruefung: $$t calls no docker in the local mode"; exit 1; fi; \
 	done; \
@@ -335,9 +336,11 @@ modus-pruefung: ## Check that the local mode calls no docker build and the Docke
 	            echo "modus-pruefung: $$g accepts $$v (a partial run is no evidence)"; exit 1; fi; \
 	    done; \
 	done; \
-	if ! $(MAKE) -s -n BUILD_MODE=local gates >/dev/null 2>&1; then \
-	    echo "modus-pruefung: gates without PKG and RUN is refused in the local mode"; exit 1; fi; \
-	echo "modus-pruefung: OK ($(words $(MODUS_TARGETS)) targets in both modes; build, run, image-scan, packages in docker; BUILD_MODE, PKG and RUN rules)"
+	for g in gates record-gates ci fullbuild; do \
+	    if ! $(MAKE) -s -n BUILD_MODE=local $$g >/dev/null 2>&1; then \
+	        echo "modus-pruefung: $$g without PKG and RUN is refused in the local mode"; exit 1; fi; \
+	done; \
+	echo "modus-pruefung: OK ($(words $(MODUS_TARGETS)) targets in both modes; build, run, image-scan, packages, docs-check in docker; BUILD_MODE, PKG and RUN rules)"
 
 # ---- gate chain ------------------------------------------------------------
 

@@ -197,6 +197,15 @@ Pins gegen Compose-veröffentlichte Ports funktionieren.
 CI-Lauf, sodass ein übersprungener Test dort von einem bestandenen
 unterscheidbar ist.
 
+Im Devcontainer (`BUILD_MODE=local`) startet das Target keinen Test-Container,
+sondern führt `go test -tags docker` gegen den dort verschachtelten
+Docker-Daemon aus. Die Tests sind dort nicht als Nachweis zugesagt
+([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)):
+Gemessen scheiterten im verschachtelten Daemon 9 Tests, im Docker-Modus am
+selben Host keiner ([Messprotokoll](../messungen/slice-v1-devcontainer-bau-lokal/README.md),
+Abschnitt G). Den Nachweis liefern der Docker-Modus an einem Host mit lokaler
+Engine und die CI.
+
 CI-Pfad: separater Workflow `.github/workflows/integration.yml`
 (siehe §6). Aktuell mit `continue-on-error: true` als
 Stabilisierungs-Maßnahme; Aufhebung nach drei aufeinanderfolgenden

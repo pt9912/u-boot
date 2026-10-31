@@ -62,12 +62,14 @@ docker run --rm --privileged -v uboot-test-docker:/var/lib/docker -v "$PWD":/wor
 | Messgröße | Ergebnis |
 |---|---|
 | Werkzeuge im Image | Go 1.27.3, `golangci-lint` 2.14.0; `BUILD_MODE=local`, `GOTOOLCHAIN=local`, `GOCACHE` und `GOMODCACHE` im Workspace |
-| `make modus-pruefung` | OK (8 Targets, beide Modi, Teillauf für `gates` abgelehnt) |
-| `make test PKG=./internal/hexagon/domain/...` | Teillauf, 5,0 s (erster Aufruf, mit Übersetzen) |
+| `make modus-pruefung` | OK (8 Targets in beiden Modi; `build`, `run`, `image-scan`, `packages`, `docs-check` mit Docker; Regeln für `BUILD_MODE`, `PKG` und `RUN`) |
+| `make test PKG=./internal/hexagon/domain/...` | Teillauf, 5,2 s (erster Aufruf, mit Übersetzen) |
 | `make gates PKG=./x` | abgelehnt (`repo.mk`, „PKG and RUN make a partial run, which is no evidence“) |
-| `make gates` Lauf 1 (nach dem Teillauf davor, leeres Docker-Volume: das d-check-Image wird im Lauf geladen) | grün, 42,7 s |
-| `make gates` Lauf 2 (warm) | grün, 26,4 s |
-| `make lint` / `make test` / `make coverage-gate` (warm, einzeln) | 0,7 s / 0,4 s / 1,0 s |
+| `make gates` Lauf 1 (nach dem Teillauf davor, leeres Docker-Volume: das d-check-Image wird im Lauf geladen) | grün, 43,4 s |
+| `make gates` Lauf 2 (warm) | grün, 26,0 s |
+| `make lint` / `make test` / `make coverage-gate` (warm, einzeln) | 0,7 s / 0,4 s / 1,2 s |
+
+Stand der Rezepte: der Endstand nach der Fix-Runde und den Befunden des Nachlauf-Reviews (`BAU_PKG`/`BAU_RUN`, erweitertes `modus-pruefung`, `packages` aus dem Docker-Modus); `.cache` und das Docker-Volume waren vor dem Lauf leer. Ein früherer Lauf auf dem Stand vor der Fix-Runde ergab 42,7 s und 26,4 s sowie 0,7 s, 0,4 s und 1,0 s einzeln; seine Rohdaten sind durch diese ersetzt.
 | Coverage | 92,10 % (Schwelle 90 %) |
 
 Zum Vergleich der Docker-Modus auf dem Host nach dem Umbau des `Dockerfile`: `make gates` grün, 91,1 s (vorher 89,9 s und 89,3 s).
@@ -87,7 +89,8 @@ Einordnung nach den Meldungen im Log: Bei vier Tests (`NestedPodman`, `NestedPod
 
 ## Lesehilfen
 
-- Lauf 1 von `make gates` in F ist nicht vollständig kalt: Der Teillauf `make test PKG=…` davor hat den Modulcache gefüllt und das Paket `domain` übersetzt; kalt ist nur das Docker-Volume des verschachtelten Daemons.
+- Lauf 1 von `make gates` in F ist nicht vollständig kalt: Der Teillauf `make test PKG=…` davor lief im selben leeren `.cache` und hat vermutlich den Modulcache und das Paket `domain` gewärmt (das Rohprotokoll zeigt von diesem Lauf nur die Ergebniszeilen); kalt ist das Docker-Volume des verschachtelten Daemons.
+- Die zwei Läufe von `make test-docker` in G zählen verschieden: Der erste Lauf zählte Zeilen `=== RUN` und `--- PASS` (5025), der zweite nur die Testfunktionen der obersten Ebene (1621). Die Zahl der Fehlschläge (9) ist in beiden gleich und die Zählweise im Vergleich mit dem Docker-Modus (1627) die des zweiten.
 - Nur der Lauf `go test ./...` kalt ist vollständig kalt. Die beiden `-coverprofile`-Läufe „kalt“ liefen danach im selben Cache-Volume; ihr Build-Cache war schon warm, die Zeiten sind darum nicht mit dem ersten vergleichbar. Aussagekräftig ist die Zahl aus dem Cache (Spalte „aus dem Cache“).
 - Die Wanduhr der Docker-Läufe in D enthält Kontext-Übertragung und Image-Layer (Docker-Modus). Die 26,4 s des warmen lokalen Laufs (F) bestehen zum größten Teil aus den Gates, die kein Go brauchen: Die Einzelzeiten von `lint`, `test` und `coverage-gate` liegen zusammen bei etwa 2 s; der Rest ist `ablage-pruefung`, `docs-check` und `baseline-verify` (im Docker-Modus gemessen: 14,4 s, 6,3 s und 0,1 s, in F nicht einzeln gemessen).
 
