@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** —. Das Verhalten bleibt gleich. Die Konvention „der Name steht an einer Stelle“ geht in die Sicht-Spec (`spec/architecture.md`, siehe §3), weil sie im Code entsteht ([`harness/conventions.md`](../../../../harness/conventions.md#modus-deklaration-pro-sub-area), Modus der Sub-Area APP).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (gesetzt beim Start, 2026-10-31)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-31.
 
@@ -41,7 +41,9 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 **Wege** (Entscheidung des Projektinhabers vor dem Start; der Slice wählt nicht):
 
-- **A, Konstante, Ersetzung und Schutz:** Eine exportierte Konstante im Domain-Layer (Arbeitsname `ConfigFileName`), die 33 Stellen greifen darauf zu, und ein Test oder eine Lint-Regel schlägt an, wenn im Nicht-Test-Code wieder ein Pfad-Literal `"u-boot.yaml"` entsteht. Die Lint-Regel würde das Profil in `.golangci.yml` ergänzen ([ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) zum Profil; nicht gelesen — prüfen), ein Test liegt im Application-Paket und liest Quelltext.
+- **A, Konstante, Ersetzung und Schutz:** Eine exportierte Konstante im Domain-Layer (Arbeitsname `ConfigFileName`), die 33 Stellen greifen darauf zu, und ein Test oder eine Lint-Regel schlägt an, wenn im Nicht-Test-Code wieder ein Pfad-Literal `"u-boot.yaml"` entsteht. Architect-Prüfung (2026-10-31, gelesen): Eine Lint-Regel scheidet aus. `forbidigo` in `.golangci.yml` (Zeile 64) matcht Bezeichner, keine String-Literale, und `goconst` ist nicht aktiv; ein neuer Linter ändert das Profil, das [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) („Linter-Liste 1:1“) festlegt, und bräuchte eine Folge-ADR. Der Schutz ist deshalb ein Go-Test im Paket `application_test` (Muster: `internal/adapter/driving/cli/jsontestutil/drift_test.go`, Quelltext und Dokumente lesen), der per `go/parser` die Nicht-Test-Dateien unter `internal` und `cmd` nach einem `BasicLit` mit dem Wert `"u-boot.yaml"` absucht und nur `internal/hexagon/domain/config.go` ausnimmt. Rot färbende Mutation: in einer beliebigen Datei von `internal/hexagon/application/` wieder `filepath.Join(baseDir, "u-boot.yaml")` schreiben. Weder Test noch Ausnahme berühren [`AGENTS.md`](../../../../AGENTS.md) §3.2 oder §3.6 (kein `//nolint`, keine Lockerung).
+- **Architect-Befund zur Form der Liste:** `gochecknoglobals` ist aktiv (`.golangci.yml`, Zeile 34); eine Kandidaten-Liste als Paket-Variable fällt durch. Die Liste ist eine Funktion (`ConfigFileCandidates() []string`, liefert bei jedem Aufruf eine frische Slice), der angelegte Name eine Konstante.
+- **Architect-Befund zur Zählung:** 33 Literale `"u-boot.yaml"` in 15 Dateien bestätigt (`grep -rn '"u-boot\.yaml"' --include=*.go internal cmd`, ohne Testdateien), Verteilung wie oben. Keine Raw-Strings und keine Zusammensetzungen (Suche nach `` `u-boot.yaml` `` trifft nur Kommentare und die CLI-Hilfetexte in `adapter/driving/cli/config.go`, Zeilen 160, 189, 243: Produkttext, bleibt). Zwei Literale sind keine Pfade im engen Sinn: `doctor.go:579` (`Label`, Anzeigetext) und `generate.go:964` (`changed = append(changed, "u-boot.yaml")`, Ausgabeliste); beide tragen denselben Namen und gehören zu den 33, der Wortlaut der Ausgabe bleibt bei einem Kandidaten gleich. `doctor_sandbox.go:62` steht in einer Liste mit `compose.yaml` und `.env.example` (Marker-Liste, wie `collisionError`).
 - **B, Konstante und Ersetzung ohne Schutz:** Kleiner, aber das nächste Literal schleicht sich unbemerkt wieder ein (dieselbe Klasse wie jeder Wert, der von Hand gleich gehalten wird).
 - **C, nichts.** Eine Namensänderung bleibt eine Suche über 33 Stellen.
 
@@ -88,8 +90,8 @@ Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest
 |---|---|---|
 | `internal/hexagon/domain/config.go` | neu | die eine Stelle für den Dateinamen: die Liste der Kandidaten (ein Eintrag, `u-boot.yaml`) und der Name, den `init` anlegt (Arbeitsnamen `ConfigFileCandidates` und `ConfigFileName`); im Paket `domain` gibt es `config.go` bisher nicht, `configpath.go` bleibt unverändert und nennt den Namen nur in Doc-Kommentaren (gelesen: Zeilen 1 bis 25) |
 | `internal/hexagon/application/config.go`, `generate.go`, `doctor.go`, `initproject.go`, `addservice_execute.go`, `removeservice.go`, `devcontainer_start.go`, `devcontainer_egress.go`, `doctor_sandbox.go`, `config_many.go`, `upservice.go`, `logsservice.go`, `egress_list.go`, `downservice.go`, `addservice.go` | update | 33 Pfad-Literale durch die Konstante ersetzen (Fundstellen im Befund; die Zeilennummern liest der Implementer am Ist-Stand) |
-| Schutz-Test im Paket `application` oder `.golangci.yml` | neu / update (prüfen) | Weg A; ein Test, der den Quelltext liest, oder ein Eintrag im Lint-Profil; die Wahl und das Verhältnis zu [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) sind offen und nicht gelesen |
-| `spec/architecture.md` | update | die Konvention als Satz im Abschnitt der Domain-Schicht; die genaue Stelle ist nicht gelesen — prüfen |
+| neue Testdatei in `internal/hexagon/application/` (Paket `application_test`) | neu | Schutz (Weg A): `go/parser`-Test nach dem Muster von `jsontestutil/drift_test.go`; `.golangci.yml` bleibt unverändert (siehe §1, Architect-Prüfung) |
+| `spec/architecture.md` | update | die Konvention als Satz in §2.1 `hexagon/domain` (gelesen: Zeilen 71 bis 81), als Aufzählungspunkt nach „Weiterer Bestand“ (Zeile 78); der Satz nennt Datei, Konstante und Kandidaten-Funktion und kommt ohne Welle, Slice und ADR aus ([`AGENTS.md`](../../../../AGENTS.md) §3.4) |
 | `harness/replay.md` | unverändert, prüfen | Der Slice ändert kein Generator-Verhalten; nicht gelesen |
 | diese Datei, `docs/plan/planning/open/README.md` | update | Zeile dieses Slice; Moves per `make slice-mv` |
 

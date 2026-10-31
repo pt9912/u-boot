@@ -115,7 +115,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 
 **Rückführungen — vorab benannt:**
 
-- `in-progress` → `next` (zu groß, zurück zur Zerlegung): Weg A berührt das Lastenheft — dann ist das ein Lastenheft-CR-Slice vor dem Code; oder die Messung zeigt, dass `devcontainerId` nicht mit dem Id-Label wechselt und die Volumes geteilt würden (dann ändert sich das Schema der Mounts, ein eigener Vorgang).
+- `in-progress` → `next` (zu groß, zurück zur Zerlegung): Weg A berührt das Lastenheft — dann ist das ein Lastenheft-CR-Slice vor dem Code; oder die Messung zeigt, dass `devcontainerId` nicht mit dem Id-Label wechselt und die Volumes geteilt würden: dann gilt die Anforderung des Projektinhabers (Isolation, §6); ändert sich dafür das Schema der Mounts, ist das ein eigener Vorgang vor diesem Slice.
 - `in-progress` → `open` (blockiert): Die Messung kann zwei parallele Instanzen nicht herstellen.
 
 ## 5. Closure-Trigger
@@ -134,7 +134,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 dasteht.
 
 - **Mehrdeutige Suche:** Tragen zwei Container dasselbe Label `devcontainer.local_folder`, kann der Treffer der falsche sein ([`BEO-APP/container-identitaet-nur-ueber-label`](../observations/BEO-APP/container-identitaet-nur-ueber-label/observation.md)); ein Instanz-Label löst das nur, wenn **alle** drei Aufrufer von `FindContainer` es mitgeben. — **Ausgang:** bei Closure.
-- **Volumes und Image je Instanz** sind angenommen, nicht gemessen; wechselt die `devcontainerId` nicht mit dem Id-Label, teilen sich zwei Instanzen ein Workspace-Volume. — **Ausgang:** bei Closure (die Messung steht am Anfang).
+- **Volumes und Image je Instanz** sind angenommen, nicht gemessen. **Anforderung des Projektinhabers (2026-10-31):** Zwei Instanzen teilen sich kein Volume; jede läuft isoliert (eigenes Workspace-Volume, eigener Docker-Speicher). Wechselt die `devcontainerId` nicht mit dem Id-Label, ist das kein hinnehmbarer Zustand, sondern eine Lücke, die der Slice schließt (etwa indem `u-boot` den Instanznamen in die Volume-Namen der erzeugten Konfiguration aufnimmt) oder bei der `--instance` mit Exit-Code `10` abbricht, solange die Isolation nicht gilt. — **Ausgang:** bei Closure (die Messung steht am Anfang).
 - **Bestandscontainer ohne Instanz-Label:** Ein vor der Änderung angelegter Container trägt nur `devcontainer.local_folder`; ohne Flag muss er weiter gefunden werden. — **Ausgang:** bei Closure.
 - **Zusage weiter als die Messung** ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)): zwei Instanzen auf einem Host sind kein Beleg für viele oder für andere Hosts. — **Ausgang:** bei Closure.
 - **Ressourcen:** Jede Instanz läuft mit `--privileged`, hat einen verschachtelten Docker mit eigenem Speicher und einen kalten Go-Cache im Workspace-Volume; Platz und Zeit sind nicht gemessen. — **Ausgang:** bei Closure.
