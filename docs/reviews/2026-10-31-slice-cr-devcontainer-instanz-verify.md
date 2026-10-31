@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-cr-devcontainer-instanz`](../plan/planning/in-progress/slice-cr-devcontainer-instanz.md) — 2026-10-31
+# Verification-Report: [`slice-cr-devcontainer-instanz`](../plan/planning/done/slice-cr-devcontainer-instanz.md) — 2026-10-31
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und den ausgeführten Sensoren? Form nach [`harness/verification.md`](../../harness/verification.md). Die Vorlage `review-report.template.md` der vendored Baseline wurde per `cp` angelegt (`diff -q` gegen die Vorlage: identisch) und dann mit `Write` ersetzt, weil kein `Edit` zur Verfügung stand; Form nach den vorhandenen `-verify.md`-Reports. Außer dieser Datei ist nichts geändert, nichts committet.
 
@@ -9,7 +9,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-cr-devcontainer-instanz`](../plan/planning/in-progress/slice-cr-devcontainer-instanz.md)
+- Slice: [`slice-cr-devcontainer-instanz`](../plan/planning/done/slice-cr-devcontainer-instanz.md)
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Änderung); [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (unverändert); keine ADR berührt
 - Artefakte: `spec/lastenheft.md` (Zeile 9, Zeilen 501 bis 509, Zeile 1609), der Slice
 

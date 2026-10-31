@@ -2,14 +2,14 @@
 
 **Review-Art:** Plan — Wortlaut-Review der Fix-Runde gegen den Plan (Stelle 3, „Neu“), die Entscheidung des Projektinhabers (2026-10-31) und die Hard Rules.
 
-**Gegenstand:** Commit `af06dc71` (Basis `565eecb5`/`772685aa`): Isolations-Spiegelstrich in `spec/lastenheft.md` und „Neu“-Text der Stelle 3 im Slice [`slice-cr-devcontainer-instanz`](../plan/planning/in-progress/slice-cr-devcontainer-instanz.md). Vorläufer-Report: [`2026-10-31-slice-cr-devcontainer-instanz`](2026-10-31-slice-cr-devcontainer-instanz.md) (Befund F-2).
+**Gegenstand:** Commit `af06dc71` (Basis `565eecb5`/`772685aa`): Isolations-Spiegelstrich in `spec/lastenheft.md` und „Neu“-Text der Stelle 3 im Slice [`slice-cr-devcontainer-instanz`](../plan/planning/done/slice-cr-devcontainer-instanz.md). Vorläufer-Report: [`2026-10-31-slice-cr-devcontainer-instanz`](2026-10-31-slice-cr-devcontainer-instanz.md) (Befund F-2).
 
 **Skill:** `.harness/skills/reviewer.md` @ 3ec45359 ·
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-31
 
 **Eingangs-Kontext:**
 
-- Slice-Plan [`slice-cr-devcontainer-instanz`](../plan/planning/in-progress/slice-cr-devcontainer-instanz.md) (Stelle 3 „Neu“)
+- Slice-Plan [`slice-cr-devcontainer-instanz`](../plan/planning/done/slice-cr-devcontainer-instanz.md) (Stelle 3 „Neu“)
 - [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten); Form-Vergleich [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) und [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Zusage-Mengen, Historie 0.24.0)
 - `AGENTS.md` (Hard Rules 3.4, 3.7, 3.10)
 
@@ -19,7 +19,7 @@
 
 | ID | Kategorie | Befund | Quelle | Pfad | Verifizierbar | Klasse |
 |---|---|---|---|---|---|---|
-| F-1 | INFO | Der Slice trägt weiter die Zustandsmarker „ENTWURF zur Freigabe“ und „nicht freigegeben“, obwohl das Lastenheft freigegeben und geschrieben ist; das ist der offene Punkt F-1 des Vorläufer-Reports, von diesem Commit weder berührt noch verschlimmert. | `AGENTS.md` §3.10 (Zustandsmarker mit Ablaufpunkt) | [`slice-cr-devcontainer-instanz`](../plan/planning/in-progress/slice-cr-devcontainer-instanz.md) · „Dieser Wortlaut ist ein ENTWURF zur Freigabe durch den Projektinhaber“ | nein — Review-only | Zustandsmarker im Plan nach Ablauf nicht nachgezogen (Wiederholung, Vorläufer F-1) |
+| F-1 | INFO | Der Slice trägt weiter die Zustandsmarker „ENTWURF zur Freigabe“ und „nicht freigegeben“, obwohl das Lastenheft freigegeben und geschrieben ist; das ist der offene Punkt F-1 des Vorläufer-Reports, von diesem Commit weder berührt noch verschlimmert. | `AGENTS.md` §3.10 (Zustandsmarker mit Ablaufpunkt) | [`slice-cr-devcontainer-instanz`](../plan/planning/done/slice-cr-devcontainer-instanz.md) · „Dieser Wortlaut ist ein ENTWURF zur Freigabe durch den Projektinhaber“ | nein — Review-only | Zustandsmarker im Plan nach Ablauf nicht nachgezogen (Wiederholung, Vorläufer F-1) |
 
 ## Negativbefunde
 

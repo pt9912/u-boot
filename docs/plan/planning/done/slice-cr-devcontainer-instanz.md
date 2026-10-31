@@ -198,7 +198,7 @@ Aussagen-Berührung steht hier gar nicht.
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
 | `spec/lastenheft.md` | update | Stellen 1 bis 6 (Commit `772685aa`, Zusage-Form von Stelle 3 in `af06dc71`); gelesen vor der Änderung: Kopf (Zeile 9), [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeilen 497 bis 508), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Zeilen 218 bis 236), Glossar (Zeilen 1542 bis 1556), Fundstellen per `grep` (Zeilen 189, 191, 457, 473, 1147 bis 1149), Historie bis `0.24.0` (Zeile 1607); Ist-Stand nach der Änderung: Zeilen 9, 501 bis 509, 1609 |
-| `docs/plan/planning/in-progress/slice-cr-devcontainer-instanz.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
+| `docs/plan/planning/done/slice-cr-devcontainer-instanz.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
 | `docs/plan/planning/open/slice-v1-devcontainer-instanz-label.md` | im Diff der Commits vor der Closure nicht enthalten | Namensregel und Test-Auftrag zu Entscheidung 4 stehen dort bereits (Zeile 51, gelesen vom Verifier); der Verweis-Nachzug auf `done/` entsteht erst beim Move (`make slice-mv`) |
 | `docs/plan/planning/open/README.md` | update (Closure) | Zeile dieses Slice auf „geliefert (liegt in `done/`)“; weiterer Verweis-Nachzug beim Move (`make slice-mv`) |
 | `docs/reviews/` (drei Reports) | neu | Review, Nachlauf-Review und Verification nach `harness/review.md` und `harness/verification.md` |

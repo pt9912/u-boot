@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**Mehrere Devcontainer je Projekt, Lastenheft-CR (ohne Welle-Datei: benannte Instanz an `up`, `down` und `shell`, Isolation für das Gemessene; zweiter von drei Slices vor dem Code)** — Slice: [`slice-cr-devcontainer-instanz`](slice-cr-devcontainer-instanz.md) (in Arbeit).
+**Mehrere Devcontainer je Projekt, Lastenheft-CR (ohne Welle-Datei: benannte Instanz an `up`, `down` und `shell`, Isolation für das Gemessene; zweiter von drei Slices vor dem Code)** — Slice: [`slice-cr-devcontainer-instanz`](../done/slice-cr-devcontainer-instanz.md) (in Arbeit).
 
 ## Nächste Wellen
 
