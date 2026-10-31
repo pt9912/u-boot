@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-26.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-31.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**Bauen im Devcontainer (ohne Welle-Datei: lokaler Modus für die Pflicht-Targets, Entscheidung [ADR-0037](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md))** — Slice: [`slice-v1-devcontainer-bau-lokal`](slice-v1-devcontainer-bau-lokal.md) (in Arbeit).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
