@@ -1,6 +1,6 @@
 # Messprotokoll: mehrere Devcontainer-Instanzen desselben Projektordners (zwei, drei und vier Instanzen)
 
-Messung zum Slice [`slice-v1-devcontainer-instanz-messung`](../../plan/planning/in-progress/slice-v1-devcontainer-instanz-messung.md) ([`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)). Gemessen ist, was die Dev-Container-CLI des Hilfs-Images tut, wenn N gleichzeitige Instanzen desselben Projektordners über ein zweites Id-Label unterschieden werden. Es lief **nicht** `u-boot devcontainer up`: Das Skript spiegelt den `docker run` von `runArgs` (`internal/adapter/driven/docker/devcontainer_launcher.go`) und hängt `--id-label` an.
+Messung zum Slice [`slice-v1-devcontainer-instanz-messung`](../../plan/planning/done/slice-v1-devcontainer-instanz-messung.md) ([`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)). Gemessen ist, was die Dev-Container-CLI des Hilfs-Images tut, wenn N gleichzeitige Instanzen desselben Projektordners über ein zweites Id-Label unterschieden werden. Es lief **nicht** `u-boot devcontainer up`: Das Skript spiegelt den `docker run` von `runArgs` (`internal/adapter/driven/docker/devcontainer_launcher.go`) und hängt `--id-label` an.
 
 ## Messstand
 

@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-devcontainer-instanz-messung`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-messung.md) — 2026-10-31
+# Review-Report: [`slice-v1-devcontainer-instanz-messung`](../plan/planning/done/slice-v1-devcontainer-instanz-messung.md) — 2026-10-31
 
 **Review-Art:** Code gegen Plan, Entscheidungen und Hard Rules (Wartbarkeit), angewandt auf einen Mess-Slice (Skript, Messprotokoll, Rohdaten). Die DoD-Frage gehört dem Verifier. Nichts vom Implementer ist übernommen: Volume-Namen, Inhaltsproben, Grenzen, Dauern, Überwachung und Namenslauf sind in den Rohdaten selbst nachgezählt.
 
@@ -10,7 +10,7 @@
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- [`slice-v1-devcontainer-instanz-messung`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-messung.md) (§1 Messfragen, Messbedingung, Vorprüfung, §2 DoD, §3 Plan-Tabelle, §6 Risiken)
+- [`slice-v1-devcontainer-instanz-messung`](../plan/planning/done/slice-v1-devcontainer-instanz-messung.md) (§1 Messfragen, Messbedingung, Vorprüfung, §2 DoD, §3 Plan-Tabelle, §6 Risiken)
 - [`ADR-0015`](../plan/adr/0015-sandbox-volumes-pro-instanz.md), [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) (Socket-Haltung des Hilfs-Containers)
 - [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)
 - `AGENTS.md` §3.2, §3.6, §3.7, §3.9, §3.10; `harness/review.md`; `harness/conventions.md` §Ablage von Messprotokollen und Skripten
