@@ -963,8 +963,10 @@ eingebundenen Projektordner anlegt, gehören im Standardprofil der Benutzer-ID a
 `devcontainer.user.uid` (Standard 1000). Setzen Sie sie auf Ihre
 Host-UID, wenn Sie die Dateien als Host-Benutzer bearbeiten wollen.
 
-**Voraussetzung.** Der Befehl setzt einen Linux-Host mit lokaler Docker-Engine auf `amd64`
-voraus. `u-boot up` startet den Devcontainer nicht mit.
+**Voraussetzung.** Der Befehl braucht Docker mit einer lokalen Engine; ohne `docker` im
+`PATH`, ohne antwortenden Daemon oder mit einer entfernten Engine (zum Beispiel
+`DOCKER_HOST=tcp://…`) endet er mit Exit-Code 11. `u-boot up` startet den Devcontainer
+nicht mit.
 
 ### 4.10 Devcontainer-Features nutzen
 
@@ -1947,9 +1949,9 @@ ollama run smollm2:135m "Reply with the single word OK."
   **Voraussetzung:** Der Ablauf setzt einen Container aus dem Image voraus, das `u-boot` mit
   den Features `ollama`, `node` und `claude-code` im Sandbox-Profil erzeugt, **den Sie selbst
   starten** (mit der zusätzlichen Capability `NET_ADMIN`, ohne das Egress-Skript, ohne
-  Workspace-Volume, mit einem Volume für die Modelle), Aufrufe ohne Terminal, auf einem
-  Linux-Host (`amd64`) mit lokaler Docker-Engine. Claude Code und Node sind nicht gepinnt,
-  ihre Versionen können abweichen.
+  Workspace-Volume, mit einem Volume für die Modelle), Aufrufe ohne Terminal, mit einer
+  lokalen Docker-Engine. Claude Code und Node sind nicht gepinnt, ihre Versionen können
+  abweichen.
 
   - **`ANTHROPIC_API_KEY`:** `claude -p` setzt voraus, dass die Variable bei dem Aufruf nicht
     gesetzt ist. Das erzeugte Sandbox-Profil mit `claude-code` trägt die Referenz auf die

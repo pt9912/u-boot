@@ -989,7 +989,7 @@ Die Aussage ist hier als Prüflücke geführt; das Handbuch nennt nur die Voraus
 
 | Handbuch-Stelle | Voraussetzung im Handbuch | Wortlaut der Aussage |
 |---|---|---|
-| 4.9, Ende des Abschnitts „Den Devcontainer ohne Editor starten und stoppen“ | Der Befehl setzt einen Linux-Host mit lokaler Docker-Engine auf `amd64` voraus. | Abschnitt 3.2, „Features und Reichweite“ |
+| 4.9, Ende des Abschnitts „Den Devcontainer ohne Editor starten und stoppen“ | Der Befehl braucht Docker mit einer lokalen Engine (sonst Exit-Code 11). „Linux-Host“ und `amd64` sind die zugesagte Menge des Lastenhefts und keine Voraussetzung, die das Handbuch aufstellt: ob der Befehl auf `arm64` oder auf anderen Hosts läuft, ist nicht gemessen. | Abschnitt 3.2, „Features und Reichweite“ |
 | 4.11, Podman, „Voraussetzungen und Verhalten des Baus“ | `podman build` holt Images von Docker Hub und setzt verschachtelte User-Namespaces voraus. | Abschnitt 3.4, „Gemessen und zugesagt“ |
 | 4.11, „Grenzen“ | Die verschachtelten Laufzeiten setzen Docker als Engine auf dem Container-Host voraus. | Abschnitt 3.13, erster Punkt |
 | 4.11, Ollama, Cloud-Modelle | Der Ablauf setzt einen selbst gestarteten Container aus dem Sandbox-Image mit `NET_ADMIN`, ohne Egress-Skript, ohne Workspace-Volume, auf Linux `amd64` mit lokaler Docker-Engine voraus; `claude -p` setzt voraus, dass `ANTHROPIC_API_KEY` nicht gesetzt ist. | Abschnitt 3.10, „Cloud-Modelle: Messung und Zusage“ |
