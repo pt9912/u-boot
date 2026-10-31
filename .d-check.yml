@@ -11,9 +11,13 @@
 # tragen repo-relative Links (../templates/…) und werden nicht gewertet.
 # Der Glob ist tag-agnostisch (**), damit künftige vendored Stände
 # automatisch erfasst sind; .harness/skills/ bleibt bewusst prüfbar.
+# .cache/** ist der Go-Build-, Test- und Modul-Cache des Devcontainers
+# (GOCACHE und GOMODCACHE, .devcontainer/Dockerfile): fremde Abhaengigkeiten mit
+# eigenen Markdown-Dateien, kein Repo-Inhalt; .gitignore und .dockerignore
+# schliessen ihn ebenso aus.
 scan:
   roots: ["."]
-  ignore: [".harness/baseline/**"]
+  ignore: [".harness/baseline/**", ".cache/**"]
 modules: [links, anchors, ids, matrix, planning, targets]
 
 # Linkpflicht für Kennungen — Muster aus tools/check_refs.py übersetzt

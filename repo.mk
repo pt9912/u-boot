@@ -28,11 +28,15 @@
 
 # u-boot — developer environment bootloader for Docker-based projects.
 #
-# Docker-only workflow (LH-FA-BUILD-007): build/lint/test/coverage all
-# run via `docker build --target <stage>` inside containers. The repo
-# has no host-side Go toolchain requirement; only Docker and `make` are
-# expected on the host. `make` is a deliberate carveout to
-# LH-NFA-PORT-002 — it is the only host dependency beyond Docker.
+# Docker-only workflow (LH-FA-BUILD-007): in the Docker mode (BUILD_MODE=docker,
+# the default) build/lint/test/coverage all run via
+# `docker build --target <stage>` inside containers. The repo has no
+# host-side Go toolchain requirement; only Docker and `make` are expected on
+# the host. `make` is a deliberate carveout to LH-NFA-PORT-002 — it is the
+# only host dependency beyond Docker. The devcontainer sets BUILD_MODE=local
+# (.devcontainer/Dockerfile): there the targets run with the toolchain
+# installed in the container (scripts/bau.sh); CI and hosts stay in the
+# Docker mode.
 #
 # Quality gates (LH-FA-BUILD-006):
 #   make gates       — inner-loop mandatory gates (lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung).
@@ -40,6 +44,8 @@
 #   make fullbuild   — ci plus build (runtime image).
 
 IMAGE                   ?= u-boot
+# Hebung von GO_VERSION und GOLANGCI_LINT_VERSION betrifft drei Stellen:
+# Dockerfile (ARG), diese Datei und .devcontainer/Dockerfile (hand-written part).
 GO_VERSION              ?= 1.27.3
 GOLANGCI_LINT_VERSION   ?= v2.14.0
 GOVULNCHECK_VERSION     ?= v1.8.0
@@ -64,6 +70,30 @@ VERSION                 ?= 0.16.1-dev
 TRIVY_VERSION           ?= 0.70.0
 THRESHOLD               ?= 90
 
+# BUILD_MODE selects where the build targets run: `docker` (default) builds
+# the Dockerfile stages, `local` runs the commands with the toolchain of the
+# environment (the devcontainer). The mode is explicit; there is no detection
+# of a `go` on the PATH.
+BUILD_MODE              ?= docker
+ifeq ($(filter $(BUILD_MODE),docker local),)
+$(error BUILD_MODE must be docker or local, not '$(BUILD_MODE)')
+endif
+
+# PKG and RUN narrow `make test` to a partial run (local mode only). Only a
+# value given on the command line counts; a PKG or RUN in the environment is
+# ignored. A partial run is no evidence: it is refused together with the
+# evidence targets.
+TEST_PKG := $(if $(filter command%,$(origin PKG)),$(PKG))
+TEST_RUN := $(if $(filter command%,$(origin RUN)),$(RUN))
+ifneq ($(strip $(TEST_PKG)$(TEST_RUN)),)
+ifeq ($(BUILD_MODE),docker)
+$(error PKG and RUN exist in the local mode only (BUILD_MODE=local))
+endif
+ifneq ($(filter gates record-gates ci fullbuild,$(MAKECMDGOALS)),)
+$(error PKG and RUN make a partial run, which is no evidence: not with gates, record-gates, ci or fullbuild)
+endif
+endif
+
 # `--progress=plain` gives full, line-by-line BuildKit logs that survive
 # CI log truncation. Locally the default (`auto`) keeps the compact TUI.
 PROGRESS_FLAG :=
@@ -86,23 +116,50 @@ DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
 .DEFAULT_GOAL := help
 
 .PHONY: deps compile lint test test-docker coverage coverage-gate build build-binaries run clean \
-        ci fullbuild govulncheck packages image-scan verify-depguard ablage-pruefung
+        ci fullbuild govulncheck packages image-scan verify-depguard ablage-pruefung modus-pruefung
 
 # ---- inner-loop ------------------------------------------------------------
 
-deps: ## Resolve Go module dependencies (deps-cache layer).
+ifeq ($(BUILD_MODE),local)
+
+# Local mode: the targets run with the toolchain of the environment (the
+# devcontainer, .devcontainer/Dockerfile). The commands come from
+# scripts/bau.sh, the script the Dockerfile stages call as well. The build and
+# test cache of Go stays between runs, so a repeated run is not a rebuild.
+
+deps: ## Resolve Go module dependencies (Docker mode: deps stage; local mode: go mod download).
+	go mod download
+
+compile: ## Fast compile feedback, no tests/lint (Docker mode: compile stage; local mode: go build).
+	bash scripts/bau.sh compile
+
+lint: ## golangci-lint with the project profile (Docker mode: lint stage; local mode: golangci-lint run).
+	bash scripts/bau.sh lint
+
+test: ## Run the Go tests (Docker mode: test stage; local mode: PKG=… RUN=… makes a partial run, which is no evidence).
+	PKG="$(TEST_PKG)" RUN="$(TEST_RUN)" bash scripts/bau.sh test
+
+test-docker: ## Run //go:build docker integration tests against a Docker daemon (Docker mode: the host daemon; local mode: the daemon of the environment).
+	go test -v -tags docker -timeout 30m ./...
+
+coverage-gate: ## Coverage threshold gate, bootstrap-aware (LH-FA-BUILD-008; Docker mode: coverage stage; local mode: scripts/bau.sh).
+	OUT=coverage COVERAGE_THRESHOLD=$(THRESHOLD) bash scripts/bau.sh coverage
+
+else
+
+deps:
 	$(DOCKER_BUILD) --target deps -t $(IMAGE):deps .
 
-compile: ## Fast compile feedback (no tests/lint).
+compile:
 	$(DOCKER_BUILD) --target compile -t $(IMAGE):compile .
 
-lint: ## golangci-lint with the project profile.
+lint:
 	$(DOCKER_BUILD) $(NO_CACHE_FILTER_LINT) --target lint -t $(IMAGE):lint .
 
-test: ## Run `go test ./...` inside Docker.
+test:
 	$(DOCKER_BUILD) $(NO_CACHE_FILTER_TEST) --target test -t $(IMAGE):test .
 
-test-docker: ## Run //go:build docker integration tests against the host docker daemon.
+test-docker:
 	@# Two-step target (slice-m6-docker-integrationstests Sub-T4):
 	@# 1) Build the `test-docker-tools` Dockerfile stage — golang +
 	@#    docker-ce-cli + docker-compose-plugin (from the official
@@ -138,11 +195,13 @@ test-docker: ## Run //go:build docker integration tests against the host docker 
 	    $(IMAGE):test-docker-tools \
 	    go test -v -tags docker -timeout 30m ./...
 
-coverage-gate: ## Coverage threshold gate (bootstrap-aware, LH-FA-BUILD-008).
+coverage-gate:
 	$(DOCKER_BUILD) $(NO_CACHE_FILTER_COVERAGE) \
 	    --target coverage \
 	    --build-arg COVERAGE_THRESHOLD=$(THRESHOLD) \
 	    -t $(IMAGE):coverage .
+
+endif
 
 # Alias for ergonomics; the gate is the same target.
 coverage: coverage-gate
@@ -167,7 +226,16 @@ PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 wi
 packages: build-binaries ## Build the .deb and .rpm packages (amd64, arm64) with nfpm (slice-v2-distro-pakete).
 	./scripts/build-packages.sh $(VERSION) $(BIN_DIR) packages
 
-build-binaries: ## Cross-compile u-boot binaries for all release platforms.
+ifeq ($(BUILD_MODE),local)
+
+build-binaries: ## Cross-compile u-boot binaries for all release platforms (Docker mode: binary-archive stage; local mode: go build; the release pipeline uses the Docker mode).
+	@mkdir -p $(BIN_DIR)
+	@bash -c 'set -o pipefail; out=$$(mktemp -d); trap "rm -rf $$out" EXIT; UBOOT_VERSION="$(VERSION)" PLATFORMS="$(PLATFORMS)" OUT_DIR="$$out" sh scripts/build-binary-archive.sh | tar --no-same-owner -xf - -C "$(BIN_DIR)"'
+	@echo "[build-binaries] $(words $(PLATFORMS)) binaries built in $(BIN_DIR)/ (local mode)"
+
+else
+
+build-binaries:
 	@mkdir -p $(BIN_DIR)
 	$(DOCKER_BUILD) --target binary-archive -t $(IMAGE):binary-archive .
 	@docker run --rm \
@@ -176,17 +244,29 @@ build-binaries: ## Cross-compile u-boot binaries for all release platforms.
 	    | tar --no-same-owner -xf - -C $(BIN_DIR)
 	@echo "[build-binaries] $(words $(PLATFORMS)) binaries built in $(BIN_DIR)/"
 
+endif
+
 # ---- security gates --------------------------------------------------------
 
 # govulncheck runs inside an ephemeral Go container with the project
 # mounted in. Pinned via GOVULNCHECK_VERSION (ADR-0004 pin policy);
 # routine upgrade documented in the commit body.
-govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006).
+ifeq ($(BUILD_MODE),local)
+
+govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006; Docker mode: golang container; local mode: the toolchain of the environment).
+	GOFLAGS=-buildvcs=false go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
+	GOFLAGS=-buildvcs=false "$$(go env GOPATH)/bin/govulncheck" ./...
+
+else
+
+govulncheck:
 	docker run --rm \
 	    -v "$(CURDIR)":/src -w /src \
 	    -e GOFLAGS=-buildvcs=false \
 	    golang:$(GO_VERSION) \
 	    sh -c "go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) && govulncheck ./..."
+
+endif
 
 # image-scan reproduces the third PR-blocking ci.yml job locally.
 # Builds the runtime image, then runs Trivy against it inside an
@@ -208,6 +288,28 @@ image-scan: build ## Trivy scan of the runtime image (LH-QA-003 third gate).
 # depguard config changes.
 verify-depguard: ## Verify all nine depguard layer rules fire (LH-FA-ARCH-003).
 	bash scripts/verify-depguard.sh
+
+# modus-pruefung pins the two modes of BUILD_MODE with `make -n`: the targets
+# that have a local variant call no `docker build` in the local mode and call
+# `docker build` or `docker run` in the Docker mode (the default); a partial
+# run (PKG, RUN) is refused together with the evidence targets. On demand, not
+# part of `gates` (a dry run costs seconds, but the rule it guards changes
+# rarely). A mutation that turns it red: a `docker build` line in a local
+# recipe, or a local recipe without its Docker counterpart.
+MODUS_TARGETS := deps compile lint test test-docker coverage-gate govulncheck build-binaries
+modus-pruefung: ## Check that the local mode calls no docker build and the Docker mode does (make -n).
+	@set -e; \
+	for t in $(MODUS_TARGETS); do \
+	    if $(MAKE) -s -n BUILD_MODE=local $$t 2>&1 | grep -q 'docker build'; then \
+	        echo "modus-pruefung: $$t calls docker build in the local mode"; exit 1; fi; \
+	    if ! $(MAKE) -s -n BUILD_MODE=docker $$t 2>&1 | grep -q 'docker \(build\|run\)'; then \
+	        echo "modus-pruefung: $$t calls no docker in the Docker mode"; exit 1; fi; \
+	done; \
+	for v in PKG=./x RUN=X; do \
+	    if $(MAKE) -s -n BUILD_MODE=local gates $$v >/dev/null 2>&1; then \
+	        echo "modus-pruefung: gates accepts $$v (a partial run is no evidence)"; exit 1; fi; \
+	done; \
+	echo "modus-pruefung: OK ($(words $(MODUS_TARGETS)) targets, both modes; partial run refused for gates)"
 
 # ---- gate chain ------------------------------------------------------------
 

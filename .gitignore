@@ -48,3 +48,6 @@ Thumbs.db
 
 # Linux-Pakete (scripts/build-packages.sh)
 /packages/
+
+# Go build, test and module cache of the devcontainer (GOCACHE, GOMODCACHE under the workspace)
+/.cache/

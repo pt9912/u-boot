@@ -4,9 +4,10 @@
 # u-boot — developer environment bootloader for Docker-based projects.
 #
 # Docker-only workflow per LH-FA-BUILD-007: the repository carries no
-# host-side Go toolchain requirement. Build / lint / test / coverage all
-# run via `docker build --target <stage> -t u-boot:<stage> .` and are
-# wrapped in the Makefile.
+# host-side Go toolchain requirement. In the Docker mode (the default) build /
+# lint / test / coverage all run via
+# `docker build --target <stage> -t u-boot:<stage> .` and are wrapped in the
+# Makefile; the devcontainer adds a local mode (BUILD_MODE=local in repo.mk).
 #
 # Stages (LH-FA-BUILD-001):
 #   deps      — Go module resolution (cache layer).
@@ -21,7 +22,12 @@
 #
 # Pin policy (LH-FA-BUILD-003): GO_VERSION and GOLANGCI_LINT_VERSION are
 # routine pins, hebung without separate ADR; rationale goes into the
-# commit body.
+# commit body. Hebung betrifft drei Stellen: this file, repo.mk and
+# .devcontainer/Dockerfile (hand-written part behind the managed block).
+#
+# The commands of the stages compile, lint, test and coverage live in
+# scripts/bau.sh; the local mode of repo.mk (BUILD_MODE=local) calls the same
+# script inside the devcontainer.
 # ---------------------------------------------------------------------------
 
 # Global build args. Both must be declared before the first FROM so they
@@ -59,7 +65,7 @@ RUN mkdir -p "$GOMODCACHE" && go mod download
 FROM deps AS compile
 
 COPY . .
-RUN CGO_ENABLED=0 go build -o /tmp/u-boot ./cmd/uboot
+RUN bash scripts/bau.sh compile
 
 # ---- lint ------------------------------------------------------------------
 # Use the Debian-based golangci-lint image (no `-alpine` suffix). u-boot
@@ -73,13 +79,13 @@ FROM golangci/golangci-lint:${GOLANGCI_LINT_VERSION} AS lint
 WORKDIR /src
 COPY --from=deps /go/pkg/mod /go/pkg/mod
 COPY . .
-RUN golangci-lint run ./...
+RUN bash scripts/bau.sh lint
 
 # ---- test ------------------------------------------------------------------
 FROM deps AS test
 
 COPY . .
-RUN CGO_ENABLED=0 go test ./...
+RUN bash scripts/bau.sh test
 
 # ---- test-docker-tools -----------------------------------------------------
 # Image für die `//go:build docker`-Adapter-Integrationstests. Baut auf
@@ -117,33 +123,17 @@ RUN apt-get update -qq && \
 # the stage measures coverage against them; THRESHOLD is overridable via
 # `make coverage-gate THRESHOLD=…`.
 #
-# `pipefail` is set explicitly via SHELL so that `go test … | tee …`
-# propagates the `go test` exit code instead of being masked by tee.
+# The commands live in scripts/bau.sh, which sets `pipefail` itself so that
+# `go test … | tee …` propagates the `go test` exit code instead of being
+# masked by tee. The local mode of repo.mk (BUILD_MODE=local) calls the same
+# script.
 FROM deps AS coverage
-
-SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
 ARG COVERAGE_THRESHOLD=90
 ENV COVERAGE_THRESHOLD=${COVERAGE_THRESHOLD}
 
 COPY . .
-RUN mkdir -p /out && \
-    COVERPKG=$(go list ./internal/... 2>/dev/null | tr '\n' ',' | sed 's/,$//') && \
-    if [ -z "$COVERPKG" ]; then \
-        echo "coverage: no production packages in ./internal/... yet — bootstrap mode"; \
-        : > /out/coverage.out; \
-        : > /out/coverage-func.txt; \
-        export COVERAGE_BOOTSTRAP=1; \
-    else \
-        CGO_ENABLED=0 go test \
-            -coverpkg="$COVERPKG" \
-            -coverprofile=/out/coverage.out \
-            -covermode=atomic \
-            ./... && \
-        go tool cover -func=/out/coverage.out | tee /out/coverage-func.txt; \
-        export COVERAGE_BOOTSTRAP=0; \
-    fi && \
-    bash scripts/coverage-gate.sh /out/coverage-func.txt "$COVERAGE_THRESHOLD"
+RUN OUT=/out bash scripts/bau.sh coverage
 
 # ---- build -----------------------------------------------------------------
 FROM deps AS build

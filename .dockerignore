@@ -34,3 +34,6 @@ coverage*
 
 # The .dockerignore itself is not needed inside the image.
 .dockerignore
+
+# Go build, test and module cache of the devcontainer; never part of a build context
+.cache

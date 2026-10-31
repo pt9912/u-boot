@@ -67,11 +67,14 @@ Diese Datei dupliziert sie nicht.
 | `make govulncheck` | Go-Vulnerability-Scan | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | `make image-scan` | Trivy HIGH/CRITICAL gegen das Runtime-Image | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | [`make verify-depguard`](sensors/verify-depguard.md) | on-demand: die `depguard`-Regeln feuern wirklich | [`ADR-0003`](../docs/plan/adr/0003-solid-nahes-lint-profil.md) |
+| `make modus-pruefung` | on-demand: die zwei Modi von `BUILD_MODE` mit `make -n`: im lokalen Modus ruft keines der acht Targets mit lokaler Variante `docker build`, im Docker-Modus (Standard) ruft jedes `docker build` oder `docker run`; `gates` lehnt `PKG` und `RUN` ab | [`ADR-0037`](../docs/plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md) |
 | `make doc-immutable RANGE="<base>..<head>"` | on-demand: Accepted-ADRs sind über eine Commit-Range unverändert (lokal `STAGED=1`); Aufruf mit Argument, daher nicht im Makefile-Gate-Index | [`MR-005`](conventions.md#mr-005) |
 | `make ablage-pruefung` | Positivliste der Ablage: im Planning-Baum nur `*.md` und die drei `.gitkeep`, unter `observations/` nur Beobachtungsform, unter `docs/` kein Skript und kein Dockerfile; mit Wächter-Test; prüft den Git-Index, eine ungestagte Datei färbt das Gate nicht | [Ablage-Regel](conventions.md#ablage-von-messprotokollen-und-skripten), [`slice-v1-messskripte-nach-tools`](../docs/plan/planning/done/slice-v1-messskripte-nach-tools.md) |
 | `make gates` | alle inneren Gates: `lint` + `test` + `coverage-gate` + `docs-check` + `baseline-verify` + `ablage-pruefung`; endet mit `record-gates` | [`MR-012`](conventions.md#mr-012) |
 | `make ci` | `gates` + `govulncheck` + `image-scan` | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | `make fullbuild` | volle Closure: `ci` + Runtime-Image-Build | — |
+
+**Modus.** `make gates` läuft im Modus der Umgebung (`BUILD_MODE`): im Devcontainer `local` (die Toolchain des Containers, `scripts/bau.sh`), am Host und in der CI `docker` (der Standard). Das ist der Nachweis für Handoff und Closure; ein zweiter Lauf im anderen Modus gehört nicht zum Prozess. Ein Teillauf (`PKG`, `RUN`) ist kein Nachweis und wird mit `gates` abgelehnt ([`ADR-0037`](../docs/plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md)).
 
 **Werkzeuge — genannt, weil der Lauf sie braucht, aber kein Gate:**
 
