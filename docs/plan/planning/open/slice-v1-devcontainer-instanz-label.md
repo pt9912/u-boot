@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Es gibt keine Closure-Bedingung, die von der DoD dieses Slice verschieden ist. Anlass: Der Projektinhaber will mehrere Agenten getrennt arbeiten lassen und statt Git-Worktrees mehrere Devcontainer desselben Projekts starten (Gespräch am 2026-10-31).
+**Welle:** Release `v0.17.0` (geplant, Roadmap *Nächste Wellen*; die Welle-Datei entsteht bei der Eröffnung). Die Closure-Bedingung der Welle (alle Slices in `done/`, `make gates` und Replay grün, Release-Cut mit Tag) ist von der DoD dieses Slice verschieden. Anlass: Der Projektinhaber will mehrere Agenten getrennt arbeiten lassen und statt Git-Worktrees mehrere Devcontainer desselben Projekts starten (Gespräch am 2026-10-31).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (`up`, `down` und `shell`), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil: Workspace im benannten Volume je Instanz), [ADR-0028](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) und [ADR-0031](../../adr/0031-devcontainer-shell-ohne-editor.md) (aktive ADRs zu `up` und `shell`; im Volltext nicht gelesen).
 
@@ -45,6 +45,8 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 - **A, `--instance <name>` an `up`, `down` und `shell`:** `u-boot` übergibt der CLI zwei Id-Labels (`devcontainer.local_folder=<Ordner>` und ein eigenes Label mit dem Instanznamen, Arbeitsname `u-boot.instance`), und `FindContainer` filtert auf beide. Ohne Flag bleibt es beim heutigen Aufruf. Neue öffentliche Flags: vermutlich ein Lastenheft-CR ([`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) nennt keine Instanz).
 - **B, Git-Worktrees als Projektordner, kein Produktcode:** Jeder Worktree ist ein eigener Projektordner und damit ein eigener Container (eigenes `devcontainer.local_folder`); das Handbuch beschreibt den Weg. Der Container klont weiter aus `origin`, der Worktree liefert nur die Identität. Nicht gemessen.
 - **C, nichts im Produkt.** Das Problem bleibt.
+
+**Entschieden (Projektinhaber, 2026-10-31): Weg A.** Offen bleiben der Wortlaut des Lastenheft-CR (Freigabe durch den Projektinhaber, vor dem Code), der Name des Flags im Wortlaut, Zeichensatz und Länge des Instanznamens und die Messung der Volume-Namen (siehe §6).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 

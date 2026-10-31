@@ -30,7 +30,7 @@ des Lastenhefts, auf den Slice-Plan angewandt); die vier Klassen des
 Ausschlusses stehen in **eben diesem Abschnitt** des Baseline-Regelwerks,
 zusammen mit der Begründungs-Pflicht je Punkt.
 
-**Ziel:** Der Name der Konfigurationsdatei steht im Nicht-Test-Code an genau einer Stelle als Konstante im Domain-Layer, alle Pfad-Literale greifen darauf zu, das Verhalten bleibt unverändert, und ein neues Literal fällt auf.
+**Ziel:** Der Name der Konfigurationsdatei steht im Nicht-Test-Code an genau einer Stelle, in der neuen Datei `internal/hexagon/domain/config.go` (Wunsch des Projektinhabers), alle Pfad-Literale greifen darauf zu, das Verhalten bleibt unverändert, und ein neues Literal fällt auf. Die Stelle trägt den Namen als Liste von Kandidaten mit genau einem Eintrag (`u-boot.yaml`), damit ein zweiter akzeptierter Name wie `.u-boot.yml` später ein Eintrag der Liste ist und keine Änderung an 33 Stellen.
 
 **Befund** (gelesen und gezählt am 2026-10-31; [`AGENTS.md`](../../../../AGENTS.md) §3.10):
 
@@ -47,7 +47,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Eine Änderung des Namens oder seine Konfigurierbarkeit** (`.u-boot.yaml`, `u-boot.yml`). Das ändert den Vertrag (Marker beim Init, Rückwärtskompatibilität alter Projekte) und braucht einen Lastenheft-CR; dieser Slice ist nur die Voraussetzung dafür.
+- **Ein zweiter akzeptierter Name** (`.u-boot.yml`, Wunsch des Projektinhabers vom 2026-10-31, außerdem denkbar `u-boot.yml` und `.u-boot.yaml`). Das ändert den Vertrag: welche Datei `init` anlegt, wie die Marker beim Init eine vorhandene Konfiguration erkennen (`collisionError` in `initproject.go`, Zeile 935, listet `u-boot.yaml`, `compose.yaml`, `.env.example`), die Rangfolge, wenn mehrere Namen vorliegen, und die Rückwärtskompatibilität alter Projekte; es braucht einen Lastenheft-CR. Der Entwurf [`slice-v1-konfigdatei-alternativer-name`](slice-v1-konfigdatei-alternativer-name.md) trägt es; dieser Slice schafft nur die Voraussetzung (die Liste von Kandidaten mit einem Eintrag).
 - **Meldungstexte, Kommentare und Testliterale** (insgesamt 251 und 506 Zeilen mit dem Text). Der Name ist dort Wort im Satz oder Erwartungswert eines Tests; ihn aus einer Konstante zusammenzusetzen macht Texte schwerer lesbar und die Tests weniger unabhängig vom Code, den sie prüfen.
 - **Der Name in erzeugten Dateien und Vorlagen** (Templates, README-Texte, Handbuch). Sie sind Ausgabe, keine Pfade, und Gegenstand der Replay-/Golden-Cases ([`harness/replay.md`](../../../../harness/replay.md)); eine Änderung dort wäre ein Verhaltensvorgang.
 - **Weitere Dateinamen-Literale** (`compose.yaml`, `.env.example`, `.devcontainer/devcontainer.json`). Sie sind eine eigene Frage, die der Befund nicht gezählt hat; der Slice misst nur `u-boot.yaml`.
@@ -86,7 +86,7 @@ Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `internal/hexagon/domain/configpath.go` oder eine neue Datei im selben Paket | update / neu | die Konstante (Arbeitsname `ConfigFileName`); `configpath.go` liegt im Domain-Layer und nennt den Namen bisher nur in Doc-Kommentaren (gelesen: Zeilen 1 bis 25) |
+| `internal/hexagon/domain/config.go` | neu | die eine Stelle für den Dateinamen: die Liste der Kandidaten (ein Eintrag, `u-boot.yaml`) und der Name, den `init` anlegt (Arbeitsnamen `ConfigFileCandidates` und `ConfigFileName`); im Paket `domain` gibt es `config.go` bisher nicht, `configpath.go` bleibt unverändert und nennt den Namen nur in Doc-Kommentaren (gelesen: Zeilen 1 bis 25) |
 | `internal/hexagon/application/config.go`, `generate.go`, `doctor.go`, `initproject.go`, `addservice_execute.go`, `removeservice.go`, `devcontainer_start.go`, `devcontainer_egress.go`, `doctor_sandbox.go`, `config_many.go`, `upservice.go`, `logsservice.go`, `egress_list.go`, `downservice.go`, `addservice.go` | update | 33 Pfad-Literale durch die Konstante ersetzen (Fundstellen im Befund; die Zeilennummern liest der Implementer am Ist-Stand) |
 | Schutz-Test im Paket `application` oder `.golangci.yml` | neu / update (prüfen) | Weg A; ein Test, der den Quelltext liest, oder ein Eintrag im Lint-Profil; die Wahl und das Verhältnis zu [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) sind offen und nicht gelesen |
 | `spec/architecture.md` | update | die Konvention als Satz im Abschnitt der Domain-Schicht; die genaue Stelle ist nicht gelesen — prüfen |
