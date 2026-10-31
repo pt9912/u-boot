@@ -56,7 +56,7 @@ Alt:
 
 Neu:
 
-> `--recreate` entfernt einen vorhandenen Container und legt ihn neu an; benannte Volumes bleiben erhalten. Mit `--instance <name>` wählt der Befehl eine benannte Instanz des Devcontainers dieses Projekts: Er startet, sucht und ersetzt (mit `--recreate`) nur den Container dieser Instanz, und mehrere Instanzen desselben Projektordners können gleichzeitig laufen. Ohne `--instance` wirkt der Befehl ⟦M6: nur auf den Container ohne Instanz; er legt neben einer laufenden Instanz einen eigenen Container an und übernimmt den der Instanz nicht — gilt nur, wenn die Messung das zeigt; sonst Satz anpassen⟧.
+> `--recreate` entfernt einen vorhandenen Container und legt ihn neu an; benannte Volumes bleiben erhalten. Mit `--instance <name>` wählt der Befehl eine benannte Instanz des Devcontainers dieses Projekts: Er startet, sucht und ersetzt (mit `--recreate`) nur den Container dieser Instanz, und mehrere Instanzen desselben Projektordners können gleichzeitig laufen. Ohne `--instance` wirkt der Befehl ⟦M6: Entscheidung des Projektinhabers offen. Gemessen (Sandbox-Profil, Dev-Container-CLI 0.89.0, sechs Läufe) übernimmt die CLI mit nur dem Label `devcontainer.local_folder` neben laufenden Instanzen den zuletzt angelegten Container einer Instanz und legt keinen eigenen an; „nur auf den Container ohne Instanz“ ist **nicht** das Verhalten der CLI. Soll der Wortlaut „nur auf den Container ohne Instanz“ lauten, muss der Code-Slice das gegen die CLI herstellen (und `FindContainer` auf den Container ohne Instanz-Label einschränken); soll er „auf den zuletzt angelegten Container des Projekts“ lauten, steht das hier. Für das Standardprofil ist das Verhalten neben laufenden Instanzen nicht gemessen — kein Satz dazu⟧.
 
 **Stelle 2 — [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), zweiter und dritter Spiegelstrich (`down`, `shell`).**
 
@@ -132,7 +132,7 @@ Neue Historie-Zeile:
 | ⟦M2⟧ | 3, 4, 7 | wechselt `${devcontainerId}` mit dem zweiten Id-Label | wechselt es nicht: Stellen 3 und 7 nennen den Abbruch mit Exit-Code `10` oder der CR wartet auf einen Slice, der die Lücke schließt (Mess-Slice §4) |
 | ⟦M3⟧ | 3 | getrennte Volumes je Familie, Standardprofil geteilt | nur die gemessenen Familien stehen im Satz |
 | ⟦M4, M5⟧ | 3 | Image geteilt, Dauer, Platz | Vorschlag: keine Zahl im Lastenheft, nur im Handbuch |
-| ⟦M6⟧ | 1 (und 2) | `up` ohne Flag neben einer Instanz | übernimmt die CLI den Container der Instanz, ändert sich der Satz zum Standardverhalten |
+| ⟦M6⟧ | 1 (und 2) | `up` ohne Flag neben einer Instanz | **gemessen:** die CLI übernimmt den zuletzt angelegten Instanz-Container (Sandbox-Profil, 6 von 6 Läufen); der Satz ist an das Verhalten angepasst oder an eine Zusage des Code-Slice, Entscheidung des Projektinhabers |
 | ⟦M7⟧ | 2 | `down` stoppt nur die Instanz | sonst Satz streichen |
 | ⟦M8⟧ | 4 | Grenze von Label-Wert und Docker-Namen | Obergrenze nur senken, nie anheben |
 
