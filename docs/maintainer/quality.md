@@ -206,6 +206,10 @@ selben Host keiner ([Messprotokoll](../messungen/slice-v1-devcontainer-bau-lokal
 Abschnitt G). Den Nachweis liefern der Docker-Modus an einem Host mit lokaler
 Engine und die CI.
 
+Welche Aussagen des Benutzerhandbuchs zugesagt, nicht zugesagt, gemessen oder nicht
+gemessen sind (Hosts, Versionen, Läufe, CI-Verhalten einzelner Docker-Tests), steht in
+[`zusagen-und-messstaende.md`](zusagen-und-messstaende.md).
+
 CI-Pfad: separater Workflow `.github/workflows/integration.yml`
 (siehe §6). Aktuell mit `continue-on-error: true` als
 Stabilisierungs-Maßnahme; Aufhebung nach drei aufeinanderfolgenden

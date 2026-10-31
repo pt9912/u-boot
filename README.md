@@ -8,7 +8,7 @@ configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
 > **Status:** current version `v0.16.1` (GHCR image, six-platform binaries,
-> `.deb`/`.rpm` packages, Homebrew tap). Promises, conditions and limits are in the
+> `.deb`/`.rpm` packages, Homebrew tap). The tasks, options and prerequisites are in the
 > [user manual](docs/user/benutzerhandbuch.md); what each release changed is in
 > [`CHANGELOG.md`](CHANGELOG.md) and on the
 > [GitHub releases page](https://github.com/pt9912/u-boot/releases).
@@ -51,7 +51,7 @@ are described in the [user manual](docs/user/benutzerhandbuch.md) (German).
 
 ## What makes it trustworthy?
 
-- **Written requirements.** What `u-boot` promises is specified in the [Lastenheft](spec/lastenheft.md) (German).
+- **Written requirements.** What `u-boot` does is specified in the [Lastenheft](spec/lastenheft.md) (German).
 - **Hexagonal architecture.** Layer rules enforced by `depguard` at
   every `make gates`; the ports/adapters split is a recorded
   architecture decision.
@@ -208,7 +208,7 @@ Re-init on an existing project requires an explicit strategy
 
 For consumers of `u-boot`:
 
-- Docker Engine ≥ 24.0.0 or Podman ≥ 4.0 (drop-in supported; not promised for `devcontainer up`/`down`/`shell`)
+- Docker Engine ≥ 24.0.0 or Podman ≥ 4.0 (drop-in supported)
 - Docker Compose ≥ 2.20.0 or `podman compose`
 - Git
 - Optional, to start the devcontainer: VS Code with the Dev Containers extension, the Dev Container CLI, or Docker alone with `u-boot devcontainer up` and `u-boot devcontainer shell`

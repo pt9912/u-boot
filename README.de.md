@@ -9,7 +9,7 @@ OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
 > **Stand:** aktuelle Version `v0.16.1` (GHCR-Image, sechs Plattform-Binaries,
-> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Zusagen, Bedingungen und Grenzen stehen im
+> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Aufgaben, Optionen und Voraussetzungen stehen im
 > [Benutzerhandbuch](docs/user/benutzerhandbuch.md); was jedes Release geändert hat,
 > steht in [`CHANGELOG.md`](CHANGELOG.md) und auf der
 > [GitHub-Release-Seite](https://github.com/pt9912/u-boot/releases).
@@ -52,7 +52,7 @@ unten listet jedes Subkommando.
 
 ## Was macht es vertrauenswürdig?
 
-- **Schriftliche Anforderungen.** Was `u-boot` zusagt, steht im [Lastenheft](spec/lastenheft.md).
+- **Schriftliche Anforderungen.** Was `u-boot` leistet, steht im [Lastenheft](spec/lastenheft.md).
 - **Hexagonale Architektur.** Schicht-Regeln werden bei jedem
   `make gates` durch `depguard` enforced; die Port/Adapter-Trennung
   ist eine festgehaltene Architekturentscheidung.
@@ -212,7 +212,7 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien).
 
 Für Konsumenten von `u-boot`:
 
-- Docker Engine ≥ 24.0.0 oder Podman ≥ 4.0 (Drop-in unterstützt; für `devcontainer up`/`down`/`shell` nicht zugesagt)
+- Docker Engine ≥ 24.0.0 oder Podman ≥ 4.0 (Drop-in unterstützt)
 - Docker Compose ≥ 2.20.0 oder `podman compose`
 - Git
 - Optional, zum Starten des Devcontainers: VS Code mit der Dev-Containers-Extension, die Dev-Container-CLI oder Docker allein mit `u-boot devcontainer up` und `u-boot devcontainer shell`
