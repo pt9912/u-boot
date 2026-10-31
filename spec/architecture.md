@@ -52,7 +52,7 @@ Sechs Schichten plus Wiring, klare Verantwortungen und einseitig gerichtete Abh�
 Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Richtung** ist nicht überall identisch: `application` importiert nur Ports (Interfaces) und kennt die konkreten Adapter nicht; Dependency Injection findet im Wiring (`cmd/uboot/`) statt. Die innere Welt (`hexagon/`) kennt die äußere Welt (`adapter/`) **nicht** — das wird per `depguard` durchgesetzt ([`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln), siehe §5).
 
 
-**Komponenten.** Jeder Kasten des Diagramms trägt eine Kennung; sie ist eine Adresse, damit ein Slice sagen kann, welche Komponente er berührt, und keine Anforderung.
+**Komponenten.** Jeder Kasten des Diagramms trägt eine Kennung; sie ist eine Adresse, damit andere Dokumente auf eine Komponente verweisen können, und keine Anforderung.
 
 | ID | Komponente | Rolle |
 |---|---|---|

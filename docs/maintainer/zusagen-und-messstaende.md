@@ -983,6 +983,50 @@ geprüft. Die Spiegelstriche unten tragen die Belege und Messvorbehalte.
   - README.de.md: „Zusagen, Bedingungen und Grenzen stehen im Benutzerhandbuch“.
   - README.de.md: „Was `u-boot` zusagt, steht im Lastenheft.“
 
+### 3.15 Messbedingungen der Spezifikation ([`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes))
+
+Die Spezifikation ([`spezifikation.md`](../../spec/spezifikation.md)) beschreibt das Zielbild und trägt keine Messbedingungen.
+Die Sätze unten sind wörtlich übernommen; was in der Spezifikation ausdrücklich als „bleibt in der Spec bis zur
+Entscheidung“ steht, steht dort noch, bis der Projektinhaber über Zusage-Menge oder Streichung entscheidet. Die
+Verhaltensaussagen und die Grenzen der Zusage bleiben in der Spezifikation.
+
+- **Zusage:** [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten).
+- **Fundstelle:** Die Aussagen zu Sitzungsende, Signalen, Art der Shell und den Engines 29.9.2 und 28.0.4 stammen aus dem
+  Planungsdokument [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md)
+  (Docker 29.9.2, Basis-Image `devcontainers/base:debian`, Test unter `script`, Runner-Engine 28.0.4). Die Lebenszyklus-Aussage
+  stammt aus dem Test `TestDevcontainerUp_Docker_AlreadyRunningLifecycleCounters`
+  (`internal/e2e/devcontainer_start_docker_test.go`). **Für die Shell-Aussagen gibt es kein Messprotokoll unter
+  `docs/messungen/`.** Das Protokoll [`slice-v1-devcontainer-instanz-messung`](../messungen/slice-v1-devcontainer-instanz-messung/README.md)
+  (Docker 29.9.2, Dev-Container-CLI 0.89.0) trägt sie nicht; es misst Namen, Abbruch und Hänger.
+- **Wortlaut, Aufzählungspunkt „Messbedingungen“ (Aussagen zum Ende der Sitzung, zu den Signalen und zur Art der Shell):**
+  „**Messbedingungen** der Aussagen zum Ende der Sitzung, zu den Signalen und zur Art der Shell: Docker 29.9.2 als Engine und
+  Client, Linux `amd64`, lokale Engine; der Container ist ein `sleep 3600` des Basis-Images
+  `mcr.microsoft.com/devcontainers/base:debian`, nicht ein von `devcontainer up` erzeugter; das Terminal ist ein
+  Pseudo-Terminal von `script`; ein Lauf je Fall. Andere Engines, Hosts und Terminals sind nicht zugesagt.“
+- **Wortlaut, Absatz „Lebenszyklus-Befehle bei `up` gegen einen laufenden Container“ (zweiter Satz):**
+  „Gemessen ist das mit der gepinnten Version der CLI, mit Befehlen in der Form einer Zeichenkette, die gelingen, unter Linux
+  `amd64` mit lokaler Engine (Docker 29.9.2), ein Lauf je Aufruf.“
+- **Wortlaut, Aufzählungspunkt „Grenzen der Erkennung“ (Ende des Punkts „Engine-Abhängigkeit“):**
+  „Messbedingungen: zwei Engines (29.9.2 und 28.0.4), Client 29.9.2, Linux `amd64`, ein Lauf je Fall; andere Engine-Versionen
+  sind nicht zugesagt, und die Meldungen sind für den Client 29.9.2 gemessen.“
+- **Wortlaut, Aufzählungspunkt „Grenzen der Erkennung“ (Zeile zum fehlenden Benutzer auf der Engine 28.0.4):**
+  „(aus der Form abgeleitet, nicht gefahren)“ — nach der Aussage, der Befehl endete dann mit `12` statt `0`.
+- **Zurückgestellt:** Die Sätze aus „Messbedingungen“ (Aufzählungspunkt, Sitzungsende), „Gemessen ist das …“ (Lebenszyklus) und
+  „(aus der Form abgeleitet, nicht gefahren)“ bleiben in der Spec bis zur Entscheidung des Projektinhabers.
+
+**Historie von `spec/spezifikation.md`: gestrichene Messaussagen im Wortlaut vor der Änderung** (Fundstelle: `git show
+HEAD:spec/spezifikation.md`, Tabellenzeilen 1474 bis 1477, alle vom 2026-10-19):
+
+- Zeile 1474 (`SPEC-046`): „… und Abgrenzung zum laufenden Container (ein Neustart behält die alte Liste, gemessen in einem
+  Lauf).“ Gestrichen: „, gemessen in einem Lauf“.
+- Zeile 1475 (`SPEC-019`): „… und die Subdomain-Aussage mit Messstand: gepinnte und gemessene Fälle getrennt, der übergeordnete
+  Name bei geteilter IP-Adresse als nicht geprüft ausgewiesen, der offene Upstream-Resolver ohne `sudo` als gemessen; …“ Die
+  Zeile steht in der Spec unverändert im alten Wortlaut (F-5 des Reviews).
+- Zeile 1476 (`SPEC-047`): „… `SPEC-019` die Zeile `ollama` (zwei Hosts, Stabilität des Blob-Hosts ungemessen), …“ Gestrichen:
+  „, Stabilität des Blob-Hosts ungemessen“.
+- Zeile 1477 (`SPEC-045`): „… dass ein Prozess ohne `sudo` die Statusdatei ersetzen kann (Verzeichnis gehört `vscode`, gemessen
+  in einem Lauf).“ Gestrichen: „, gemessen in einem Lauf“.
+
 ## 4. Was das Handbuch als Voraussetzung führt
 
 Die Aussage ist hier als Prüflücke geführt; das Handbuch nennt nur die Voraussetzung, die Nutzer erfüllen müssen.
