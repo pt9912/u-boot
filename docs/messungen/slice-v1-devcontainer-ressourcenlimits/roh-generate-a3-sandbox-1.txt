@@ -1,0 +1,3 @@
+time=2026-10-31T13:23:08.141Z level=INFO msg="generate devcontainer: updated-block" project=demo forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile]"
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it

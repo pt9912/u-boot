@@ -1,0 +1,2 @@
+time=2026-10-31T13:22:52.465Z level=INFO msg="generate devcontainer: created" project=demo forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile]"
+Generated devcontainer (.devcontainer/devcontainer.json, .devcontainer/Dockerfile).

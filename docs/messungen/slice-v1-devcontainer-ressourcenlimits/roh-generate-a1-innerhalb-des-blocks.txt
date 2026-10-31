@@ -1,0 +1,2 @@
+time=2026-10-31T13:23:08.090Z level=INFO msg="generate devcontainer: updated-block" project=demo forwardPorts=[] features=0 changed=[.devcontainer/devcontainer.json]
+Updated devcontainer managed block (.devcontainer/devcontainer.json).

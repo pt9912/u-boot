@@ -1,0 +1,2 @@
+devcontainer already up to date; no changes.
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it

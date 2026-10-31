@@ -1,0 +1,10 @@
+// BEGIN U-BOOT MANAGED BLOCK: init
+{
+  "name": "demo",
+  "build": {
+    "dockerfile": "./Dockerfile",
+    "context": "."
+  },
+  "remoteUser": "vscode"
+}
+// END U-BOOT MANAGED BLOCK: init

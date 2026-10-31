@@ -1,0 +1,16 @@
+// BEGIN U-BOOT MANAGED BLOCK: init
+{
+  "name": "demo",
+  "build": {
+    "dockerfile": "./Dockerfile",
+    "context": "."
+  },
+  "workspaceMount": "",
+  "workspaceFolder": "/workspaces/demo",
+  "mounts": ["source=demo-workspace-${devcontainerId},target=/workspaces/demo,type=volume"],
+  "remoteEnv": {
+    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+  },
+  "remoteUser": "vscode"
+}
+// END U-BOOT MANAGED BLOCK: init
