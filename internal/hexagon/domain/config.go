@@ -7,7 +7,7 @@ package domain
 const ConfigFileName = "u-boot.yaml"
 
 // ConfigFileCandidates lists the file names the project
-// configuration may carry, in lookup order. The list holds
+// configuration may carry. The list holds
 // [ConfigFileName] only. Each call returns a fresh slice, so callers
 // may modify the result.
 func ConfigFileCandidates() []string {

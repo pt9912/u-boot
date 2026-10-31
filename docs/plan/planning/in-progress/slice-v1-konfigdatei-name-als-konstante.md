@@ -34,7 +34,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 **Befund** (gelesen und gezählt am 2026-10-31; [`AGENTS.md`](../../../../AGENTS.md) §3.10):
 
-- **33 Pfad-Literale `"u-boot.yaml"` in 15 Dateien**, alle unter `internal/hexagon/application/`: `config.go` (6), `generate.go` (6), `doctor.go` (4), `initproject.go` (4), `addservice_execute.go` (2), `removeservice.go` (2) und je eines in `devcontainer_start.go`, `devcontainer_egress.go`, `doctor_sandbox.go`, `config_many.go`, `upservice.go`, `logsservice.go`, `egress_list.go`, `downservice.go`, `addservice.go` (Zählung mit `grep -rn '"u-boot\.yaml"' --include=*.go internal cmd`, Testdateien ausgenommen). Adapter und `cmd/` tragen das Literal nicht.
+- **32 Pfad-Literale `"u-boot.yaml"` in 15 Dateien** (berichtigt in der Fix-Runde nach dem Review; die Trefferzahl 33 von `grep -rn '"u-boot\.yaml"' --include=*.go internal cmd` am Stand `076437c2` zählte einen Doc-Kommentar in `doctor.go` mit, das Beispiel `"u-boot.yaml"` zu `Label`), alle unter `internal/hexagon/application/`: `config.go` (6), `generate.go` (6), `doctor.go` (3 Literale, 4 Treffer), `initproject.go` (4), `addservice_execute.go` (2), `removeservice.go` (2) und je eines in `devcontainer_start.go`, `devcontainer_egress.go`, `doctor_sandbox.go`, `config_many.go`, `upservice.go`, `logsservice.go`, `egress_list.go`, `downservice.go`, `addservice.go` (Zählung mit `grep -rn '"u-boot\.yaml"' --include=*.go internal cmd`, Testdateien ausgenommen). Adapter und `cmd/` tragen das Literal nicht.
 - **Eine Konstante gibt es nicht** (Suche nach `ConfigFile`, `configFileName` und ähnlichen Namen ohne Treffer). `internal/hexagon/domain/configpath.go` liegt im Domain-Layer, nennt den Namen nur in Doc-Kommentaren und trägt `ConfigPathKind` und `ConfigPath`, nicht den Dateinamen.
 - **Die Schichtregel erlaubt den Ort.** `.golangci.yml`, Regel `domain-isoliert` (Zeilen 173 bis 184): Der Domain-Layer darf `application`, `port` und `adapter` nicht importieren; die Regel `application-no-adapter` verbietet der Application nur Adapter. Application importiert Domain heute schon.
 - **Weitere Vorkommen des Textes `u-boot.yaml`:** insgesamt 251 Zeilen im Nicht-Test-Go (Literale, Meldungstexte und Kommentare) und 506 Zeilen in 78 Testdateien. Die Meldungstexte sind Produkttext an den Nutzer und tragen den Namen als Wort.
@@ -65,7 +65,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 gehört zurück zur Zerlegung. Gezählt wird nur, was mit dem Umfang wächst — die
 Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 
-- [x] **Konstante und Ersetzung** ([`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration)): Im Nicht-Test-Code steht das Pfad-Literal `"u-boot.yaml"` nur noch in der Konstante (Zählung: eine Stelle statt 33); das Verhalten ist unverändert (alle Tests und die Golden-/Replay-Cases unverändert grün).
+- [x] **Konstante und Ersetzung** ([`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration)): Im Nicht-Test-Code steht das Pfad-Literal `"u-boot.yaml"` nur noch in der Konstante (32 Pfad-Literale ersetzt; `grep -rn '"u-boot\.yaml"' --include=*.go internal cmd` ohne Testdateien liefert am Stand `836dea1b` 2 Treffer: die Konstante in `domain/config.go` und den Doc-Kommentar zu `Label` in `doctor.go`, der kein Literal ist; der Test zählt Literale und ist grün); das Verhalten ist unverändert (alle Tests und die Golden-/Replay-Cases unverändert grün).
 - [x] **Schutz** (Weg A): Ein Test oder eine Lint-Regel färbt sich rot, wenn im Nicht-Test-Code wieder ein Pfad-Literal `"u-boot.yaml"` außerhalb der Konstante entsteht; die rot färbende Mutation ist benannt und gemessen.
 - [x] **Konvention in der Sicht-Spec:** `spec/architecture.md` nennt die Konstante als die eine Stelle des Dateinamens, ohne Wellen, Slices oder ADRs ([`AGENTS.md`](../../../../AGENTS.md) §3.4).
 - [x] `make gates` grün (im Modus der Umgebung).
@@ -92,7 +92,8 @@ Gelesen am 2026-10-31; die Zeilennummern verschieben sich, der Implementer liest
 | `internal/hexagon/application/config.go`, `generate.go`, `doctor.go`, `initproject.go`, `addservice_execute.go`, `removeservice.go`, `devcontainer_start.go`, `devcontainer_egress.go`, `doctor_sandbox.go`, `config_many.go`, `upservice.go`, `logsservice.go`, `egress_list.go`, `downservice.go`, `addservice.go` | update | 33 Pfad-Literale durch die Konstante ersetzen (Fundstellen im Befund; die Zeilennummern liest der Implementer am Ist-Stand) |
 | `internal/hexagon/application/config_filename_literal_test.go` (Paket `application_test`) | neu | Schutz (Weg A): `go/parser`-Test nach dem Muster von `jsontestutil/drift_test.go`; `.golangci.yml` bleibt unverändert (siehe §1, Architect-Prüfung) |
 | `spec/architecture.md` | update | die Konvention als Satz in §2.1 `hexagon/domain` (gelesen: Zeilen 71 bis 81), als Aufzählungspunkt nach „Weiterer Bestand“ (Zeile 78); der Satz nennt Datei, Konstante und Kandidaten-Funktion und kommt ohne Welle, Slice und ADR aus ([`AGENTS.md`](../../../../AGENTS.md) §3.4) |
-| `harness/replay.md` | unverändert, prüfen | Der Slice ändert kein Generator-Verhalten; nicht gelesen |
+| `harness/replay.md` | unverändert | Der Slice ändert kein Generator-Verhalten; gelesen §Scope (Zeilen 8 bis 19: Replay gilt für Pfade, die User-Artefakte erzeugen) und §Verification Evidence (Zeilen 86 bis 98: Replay-Block nur, „wenn ein Slice Generatorverhalten ändert“); der Diff ersetzt Pfad-Literale durch eine Konstante gleichen Werts, Ausgabe und Golden-Cases bleiben gleich |
+| `internal/hexagon/domain/config_test.go` | neu (Fix-Runde) | pinnt die Spec-Aussagen zu `ConfigFileCandidates()`: genau ein Eintrag gleich `ConfigFileName`, frische Slice je Aufruf |
 | diese Datei | update | DoD-Häkchen des Implementers, Tabelle gegen `git diff --stat` abgeglichen; `docs/plan/planning/open/README.md` und die Moves liegen in den Start-Commits, nicht im Diff dieses Vorgangs |
 
 ## 4. Trigger
@@ -113,7 +114,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Closure- und Lerneintrag-Regeln — zwei beobachtbare Kriterien **und** ein
 Lerneintrag; ohne ihn ist der Slice nur abgelegt.
 
-DoD vollständig; `make gates` grün; die Zählung nennt eine Stelle statt 33; Golden-/Replay-Cases unverändert grün; Review-Report und Verification-Report liegen vor; die Closure-Notiz mit Steering-Loop-Lerneintrag ist geschrieben.
+DoD vollständig; `make gates` grün; die Zählung nennt ein Literal in der Konstante statt 32 (§2); Golden-/Replay-Cases unverändert grün; Review-Report und Verification-Report liegen vor; die Closure-Notiz mit Steering-Loop-Lerneintrag ist geschrieben.
 
 ## 6. Risiken und offene Punkte
 
