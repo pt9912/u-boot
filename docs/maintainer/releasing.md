@@ -63,12 +63,13 @@ Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
    `cmd/uboot/main.go` (`var version`), `repo.mk` (`VERSION ?=`), `Dockerfile`
    (`ARG UBOOT_VERSION=`), jeweils samt Kommentar-Erwähnungen. Der Tag-Build überschreibt
    den Wert per `UBOOT_VERSION`; der `-dev`-Stand gilt für lokale Builds.
-3. **READMEs** (`README.md`, `README.de.md`): Status-Block und eine Zeile in der
-   Releases-Tabelle, in Worten für den Benutzer und ohne Anforderungs-, ADR- oder
-   Spec-Kennungen ([`AGENTS.md`](../../AGENTS.md) §5; die Kennungen stehen im CHANGELOG).
-   Der Status-Block nennt den aktuellen Stand (Version, Zusagen, Grenzen), keine Chronik
-   und kein „released"; das Datum steht nur in der Tabellenzeile und im CHANGELOG und wird
-   vor dem Tag gegen das Tag-Datum gehalten (§5); §7 prüft es nachher noch einmal.
+3. **READMEs** (`README.md`, `README.de.md`): die Versionsangabe in der Status-Zeile (eine
+   Zeile mit der aktuellen Version und den Zeigern auf Handbuch und CHANGELOG), ohne
+   Anforderungs-, ADR- oder Spec-Kennungen ([`AGENTS.md`](../../AGENTS.md) §5). Die Zusagen,
+   Bedingungen und Grenzen eines Releases stehen im Handbuch und im CHANGELOG, nicht im
+   README; das README trägt weder eine Release-Tabelle noch eine Chronik und kein „released".
+   Das Datum steht im CHANGELOG und wird vor dem Tag gegen das Tag-Datum gehalten (§5); §7
+   prüft es nachher noch einmal.
 4. **Roadmap** (`docs/plan/planning/in-progress/roadmap.md`): den Release unter „Offene Wellen"
    führen, bis der Tag gesetzt ist; danach nach „Abgeschlossene Wellen".
 5. **Release-Cut-Slice** nach dem Muster der früheren Cuts anlegen und nach dem Tag nach
@@ -114,9 +115,9 @@ GO_VERSION`, `repo.mk` `GO_VERSION`), siehe CHANGELOG-Einträge zu Toolchain-Bum
 
 ## 5. Tag setzen (Maintainer-Aktion)
 
-Vor jedem Tag (auch dem Vorab-Tag) `date +%F` prüfen und das Datum in CHANGELOG, in der
-Tabellenzeile beider READMEs und im Handbuch-`Stand` gegen das Tag-Datum halten; weicht es
-ab, ist das ein weiterer Cut-Commit vor dem Tag.
+Vor jedem Tag (auch dem Vorab-Tag) `date +%F` prüfen und das Datum in CHANGELOG und im
+Handbuch-`Stand` gegen das Tag-Datum halten; weicht es ab, ist das ein weiterer Cut-Commit
+vor dem Tag.
 
 ```bash
 git switch main && git pull --ff-only
@@ -160,7 +161,7 @@ auf „kein Absturz" geprüft). `brew audit --strict --online` gatet den Lauf; e
 - Roadmap: Welle nach „Abgeschlossene Wellen", Tag-Commit-Hash und Datum eintragen.
 - Release-Cut-Slice nach `done/` (Closure-Notiz mit Hash und Sensoren).
 - CHANGELOG-Datum auf das tatsächliche Tag-Datum prüfen (`git log -1 --format=%cs vX.Y.Z`); dasselbe
-  Datum steht in der Tabellenzeile beider READMEs und im Handbuch-`Stand`.
+  Datum steht im Handbuch-`Stand`.
 - Vorab-Tags aufräumen: Release und Tag löschen (§5) und die GHCR-Tags der Vorab-Versionen entfernen;
   das braucht für `gh` die Scopes `read:packages` und `delete:packages`, sonst über die Web-Oberfläche.
 - Job `tap` prüfen (§6): Er läuft nur bei stabilen Tags, ein Vorab-Tag probt ihn nicht. Schlägt er fehl,
