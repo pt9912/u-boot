@@ -68,9 +68,9 @@ docker run --rm --privileged -v uboot-test-docker:/var/lib/docker -v "$PWD":/wor
 | `make gates` Lauf 1 (nach dem Teillauf davor, leeres Docker-Volume: das d-check-Image wird im Lauf geladen) | grün, 43,4 s |
 | `make gates` Lauf 2 (warm) | grün, 26,0 s |
 | `make lint` / `make test` / `make coverage-gate` (warm, einzeln) | 0,7 s / 0,4 s / 1,2 s |
+| Coverage | 92,10 % (Schwelle 90 %) |
 
 Stand der Rezepte: der Endstand nach der Fix-Runde und den Befunden des Nachlauf-Reviews (`BAU_PKG`/`BAU_RUN`, erweitertes `modus-pruefung`, `packages` aus dem Docker-Modus); `.cache` und das Docker-Volume waren vor dem Lauf leer. Ein früherer Lauf auf dem Stand vor der Fix-Runde ergab 42,7 s und 26,4 s sowie 0,7 s, 0,4 s und 1,0 s einzeln; seine Rohdaten sind durch diese ersetzt.
-| Coverage | 92,10 % (Schwelle 90 %) |
 
 Zum Vergleich der Docker-Modus auf dem Host nach dem Umbau des `Dockerfile`: `make gates` grün, 91,1 s (vorher 89,9 s und 89,3 s).
 
@@ -86,6 +86,20 @@ Zum Vergleich der Docker-Modus auf dem Host nach dem Umbau des `Dockerfile`: `ma
 Die 9 fehlgeschlagenen Tests des zweiten Laufs (dieselbe Zahl wie im ersten; die Namen des ersten sind nicht gesichert): `TestLauncher_Docker_S6_ValueIsNeverInImageLabelFileOrCommandLine`, `TestLauncher_Docker_S5_GuardFalsifiedIntegrityBreaksTheBuild`, `TestE2E_ForgeCLI_PinMismatchBreaksBuild`, `TestE2E_SandboxDevcontainer_NestedPodman`, `…_NestedPodman_Build`, `…_NestedPodman_BuildEgress`, `…_NestedPodman_PinMismatchBreaksBuild`, `…_Ollama_PinMismatchBreaksBuild`, `TestE2E_SandboxDevcontainer_StatusFiles_VFS`.
 
 Einordnung nach den Meldungen im Log: Bei vier Tests (`NestedPodman`, `NestedPodman_Build`, `NestedPodman_BuildEgress`, `StatusFiles_VFS`) steht „restricted host: init exit 0, want 11“. Der Test erwartet bei `kernel.apparmor_restrict_unprivileged_userns=1` den Exit 11 des Startscripts und überspringt dann; im Docker-Modus am Host sind genau diese vier `SKIP`. Im verschachtelten Daemon endete das Startscript mit Exit 0. Bei vier weiteren (`S5`, `ForgeCLI_PinMismatch`, `NestedPodman_PinMismatch`, `Ollama_PinMismatch`) bricht der Bau im verschachtelten Daemon ab (`npm ci`, `curl`, `apt-get`), und der Test schlägt dennoch fehl; die erwartete Ursache (Prüfsumme) ist aus den gekürzten Zeilen nicht zu erkennen. Bei `S6` steht „the value was on a command line“. **Die Ursache dieser fünf ist nicht geklärt.**
+
+**H. Der echte Devcontainer** (Skript `im-devcontainer.sh`, Rohdaten [`roh-devcontainer.txt`](roh-devcontainer.txt)): Gestartet mit `make dev-up` (`u-boot devcontainer up`, Features `node:2.1.1`, `claude-code:1.0.5`, `homebrew:2.0.5`, `ollama`, `gh` aus `devcontainer.json`, das neue `.devcontainer/Dockerfile`), danach der Arbeitsbaum per `tar` nach `/tmp/ws` im Container kopiert; das Workspace-Volume mit dem alten Clone blieb unangetastet. Aufruf im Container über `u-boot --quiet devcontainer shell < tools/messung/devcontainer-bau-lokal/im-devcontainer.sh`.
+
+| Messgröße | Ergebnis |
+|---|---|
+| `make dev-up` | Exit 0, 334 s (Bau mit allen Features; ein Teil der Image-Ebenen war aus früheren Läufen im Cache), Benutzer `vscode`, Workspace `/workspaces/u-boot` |
+| Umgebung im Container | `BUILD_MODE=local`, `GOTOOLCHAIN=local`, `GOFLAGS=-mod=readonly -buildvcs=false`, `GOCACHE` und `GOMODCACHE` unter `/workspaces/u-boot/.cache` |
+| Werkzeuge | `go` 1.27.3 (`/usr/local/go/bin/go`), `golangci-lint` 2.14.0, Node v26.13.0, `claude` 2.1.316, `ollama` 0.40.6, `gh` 2.103.0, Docker 29.9.2 (verschachtelt, `overlayfs`), GNU Make 4.4.1, git 2.56.0, Homebrew 7.0.11 |
+| Cache im Workspace-Volume | `/workspaces/u-boot` gehört `vscode`; `.cache` entsteht beim ersten Aufruf, beide Cache-Verzeichnisse sind schreibbar |
+| `make modus-pruefung` | OK (0,6 s) |
+| `make gates` (zwei Läufe hintereinander) | grün, 26,5 s und 27,7 s; der Cache im Volume stammt hier schon vom Lauf davor |
+| `make lint` / `make test` / `make coverage-gate` (einzeln) | 0,6 s / 0,4 s / 1,3 s |
+
+Der erste Lauf dieser Prüfung, vor der Korrektur unten, ergab für `make gates` 48,6 s mit leerem Cache im Volume und 26,2 s im zweiten Lauf (Rohdaten ersetzt). Er fand außerdem einen Fehler im Wächter: `make modus-pruefung` war im echten Container rot („a go on the PATH switches the mode“), weil die Prüfung den Standardmodus als `docker` voraussetzte, im Devcontainer aber `BUILD_MODE=local` in der Umgebung steht. Reproduziert auf dem Host mit `BUILD_MODE=local make modus-pruefung`, behoben mit `env -u BUILD_MODE` in der Prüfung; mit und ohne die Variable in der Umgebung ist der Wächter jetzt grün.
 
 ## Lesehilfen
 
@@ -104,4 +118,4 @@ Einordnung nach den Meldungen im Log: Bei vier Tests (`NestedPodman`, `NestedPod
 
 ## Grenzen
 
-Ein Lauf je Zelle, ein Host (Linux `amd64`). Nicht gemessen: andere Hosts und Architekturen (macOS mit Colima, `arm64`), die Streuung der Zeiten, Verhalten bei einer geänderten Nicht-Testdatei (abhängige Pakete laufen laut Go ebenfalls neu). Zu F: Das Image kam aus `docker build` ohne die Features von `devcontainer.json` (`node`, `claude-code`, `homebrew`); der Workspace war ein Bind-Mount des Arbeitsbaums, nicht das Volume mit dem Clone, das der Devcontainer sonst nutzt; die Dateisystem-Eigenschaften beider können sich unterscheiden. Ein Start über `u-boot devcontainer up` mit dem neuen Dockerfile ist nicht gemessen.
+Ein Lauf je Zelle, ein Host (Linux `amd64`). Nicht gemessen: andere Hosts und Architekturen (macOS mit Colima, `arm64`), die Streuung der Zeiten, Verhalten bei einer geänderten Nicht-Testdatei (abhängige Pakete laufen laut Go ebenfalls neu). Zu F: Das Image kam aus `docker build` ohne die Features von `devcontainer.json` (`node`, `claude-code`, `homebrew`); der Workspace war ein Bind-Mount des Arbeitsbaums, nicht das Volume mit dem Clone, das der Devcontainer sonst nutzt; die Dateisystem-Eigenschaften beider können sich unterscheiden. Der Start über `u-boot devcontainer up` mit dem neuen Dockerfile ist in H gemessen (ein Lauf, Linux `amd64`, lokale Engine); in H lief `make gates` auf einer Kopie des Arbeitsbaums unter `/tmp/ws`, nicht auf dem Clone im Workspace-Volume, und `test-docker` wurde dort nicht gefahren (siehe G).

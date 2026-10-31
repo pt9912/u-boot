@@ -1,0 +1,42 @@
+== Benutzer und Umgebung
+whoami=vscode uid=1000 shell=/bin/bash
+BUILD_MODE=local GOTOOLCHAIN=local
+GOFLAGS=-mod=readonly -buildvcs=false
+GOCACHE=/workspaces/u-boot/.cache/go-build
+GOMODCACHE=/workspaces/u-boot/.cache/go-mod
+== Werkzeuge
+go            go version go1.27.3 linux/amd64
+golangci-lint golangci-lint has version 2.14.0 built with go1.27.0 from 114493f9 on 
+node          v26.13.0
+claude        2.1.316 (Claude Code)
+ollama        Warning: client version is 0.40.6
+gh            gh version 2.103.0 (2026-10-21)
+docker        Docker version 29.9.2, build a82e528
+make          GNU Make 4.4.1
+git           git version 2.56.0
+brew          Homebrew 7.0.11-79-ge277871
+go liegt in: /usr/local/go/bin/go
+== Workspace-Volume
+drwxr-xr-x 16 vscode vscode 4096 Oct 31 11:34 /workspaces/u-boot
+drwxr-xr-x 4 vscode vscode 4096 Oct 31 11:34 /workspaces/u-boot/.cache
+GOCACHE und GOMODCACHE schreibbar
+drwxr-xr-x 258 vscode vscode 4096 Oct 31 11:34 /workspaces/u-boot/.cache/go-buil
+drwxr-xr-x   5 vscode vscode 4096 Oct 31 11:34 /workspaces/u-boot/.cache/go-mod
+== Docker-Daemon im Container
+server 29.9.2, storage overlayfs
+== make im lokalen Modus (Arbeitsbaum unter /tmp/ws)
+modus-pruefung         exit=0 wall=0.6s
+gates-lauf-1           exit=0 wall=26.5s
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:94:				NewConfigHintError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:98:				Error						100.0%
+coverage-gate: OK — coverage 92.10% meets threshold 90%
+gates-lauf-2           exit=0 wall=27.7s
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:94:				NewConfigHintError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:98:				Error						100.0%
+coverage-gate: OK — coverage 92.10% meets threshold 90%
+einzeln-lint           exit=0 wall=0.6s
+einzeln-test           exit=0 wall=0.4s
+einzeln-coverage-gate  exit=0 wall=1.3s
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:94:				NewConfigHintError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:98:				Error						100.0%
+coverage-gate: OK — coverage 92.10% meets threshold 90%

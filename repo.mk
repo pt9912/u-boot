@@ -306,7 +306,10 @@ verify-depguard: ## Verify all nine depguard layer rules fire (LH-FA-ARCH-003).
 #   - a BUILD_MODE other than docker and local is an error;
 #   - PKG and RUN are an error in the Docker mode, ignored when they come from
 #     the environment, and refused together with gates, record-gates, ci and
-#     fullbuild in the local mode, while these four without them are accepted.
+#     fullbuild in the local mode, while these four without them are accepted;
+#   - the Dockerfile stages compile, lint, test and coverage and the local
+#     recipes call scripts/bau.sh, the local `deps` is `go mod download`, and a
+#     `go` on the PATH does not switch the mode.
 # On demand, not part of `gates` (a dry run costs seconds, but the rules it
 # guards change rarely). Mutations that turn it red: a `docker build` line in a
 # local recipe; a missing $(error …) line for BUILD_MODE, for PKG in the Docker
@@ -326,8 +329,26 @@ modus-pruefung: ## Check that the local mode calls no docker build and the Docke
 	done; \
 	if $(MAKE) -s -n BUILD_MODE=foo test >/dev/null 2>&1; then \
 	    echo "modus-pruefung: an unknown BUILD_MODE is accepted"; exit 1; fi; \
-	if $(MAKE) -s -n BUILD_MODE=docker test PKG=./x >/dev/null 2>&1; then \
-	    echo "modus-pruefung: PKG is accepted in the Docker mode"; exit 1; fi; \
+	for v in PKG=./x RUN=X; do \
+	    if $(MAKE) -s -n BUILD_MODE=docker test $$v >/dev/null 2>&1; then \
+	        echo "modus-pruefung: $$v is accepted in the Docker mode"; exit 1; fi; \
+	done; \
+	for t in compile lint test coverage-gate; do \
+	    if ! $(MAKE) -s -n BUILD_MODE=local $$t 2>&1 | grep -q 'scripts/bau.sh'; then \
+	        echo "modus-pruefung: the local recipe of $$t does not call scripts/bau.sh"; exit 1; fi; \
+	done; \
+	for s in compile lint test; do \
+	    if ! grep -q "^RUN bash scripts/bau.sh $$s\$$" Dockerfile; then \
+	        echo "modus-pruefung: the Dockerfile stage $$s does not call scripts/bau.sh"; exit 1; fi; \
+	done; \
+	if ! grep -q '^RUN OUT=/out bash scripts/bau.sh coverage$$' Dockerfile; then \
+	    echo "modus-pruefung: the Dockerfile stage coverage does not call scripts/bau.sh"; exit 1; fi; \
+	if ! $(MAKE) -s -n BUILD_MODE=local deps 2>&1 | grep -q 'go mod download'; then \
+	    echo "modus-pruefung: the local recipe of deps is not go mod download"; exit 1; fi; \
+	fake=$$(mktemp -d); printf '#!/bin/sh\nexit 0\n' > "$$fake/go"; chmod +x "$$fake/go"; \
+	if ! env -u BUILD_MODE PATH="$$fake:$$PATH" $(MAKE) -s -n test 2>&1 | grep -q 'docker build'; then \
+	    rm -rf "$$fake"; echo "modus-pruefung: a go on the PATH switches the mode (it must not)"; exit 1; fi; \
+	rm -rf "$$fake"; \
 	if ! PKG=./x RUN=X $(MAKE) -s -n BUILD_MODE=docker test >/dev/null 2>&1; then \
 	    echo "modus-pruefung: PKG or RUN from the environment is refused (only the command line counts)"; exit 1; fi; \
 	for g in gates record-gates ci fullbuild; do \
