@@ -120,7 +120,7 @@ trace:
 #   build-binaries   — Release-Artefakte, kein Inner-Loop-Sensor
 #   packages         — .deb/.rpm-Release-Artefakte (ADR-0017), kein Sensor
 targets:
-  makefiles: [Makefile, "harness/mk/*.mk", "*.mk"]
+  makefiles: [Makefile, "harness/mk/*.mk", "tools/mk/*.mk", "*.mk"]
   doc-tables: [harness/README.md, harness/mk/ai-harness-init.md]
   authority: [harness/README.md, harness/mk/ai-harness-init.md]
   authority-disjoint: true

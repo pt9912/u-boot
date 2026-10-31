@@ -80,6 +80,9 @@ Diese Datei dupliziert sie nicht.
 | `make record-gates` | stempelt Content-Hash und HEAD nach `.harness/state/`, nur nach grünen Checks; der Stop-Hook liest den Stempel | kein Gate, [`MR-012`](conventions.md#mr-012) |
 | `make slice-mv` | bewegt einen Slice per `git mv` (`SLICE=slice-<Kennung> TO=<open\|next\|in-progress\|done>`) und zieht Verweise nach, prüft nichts | kein Gate, [`MR-012`](conventions.md#mr-012) | <!-- d-check:ignore (Make-Target, keine Slice-Kennung) -->
 | `make hooks-install` | aktiviert den `commit-msg`-Hook im Klon (`core.hooksPath`) | kein Gate, [`MR-012`](conventions.md#mr-012) |
+| `make dev-up` | startet den Devcontainer mit `u-boot devcontainer up` (`RECREATE=1` legt ihn neu an); braucht das Binary `u-boot` auf dem Host | kein Gate |
+| `make dev-down` | stoppt den Devcontainer mit `u-boot devcontainer down` | kein Gate |
+| `make dev-shell` | startet den Devcontainer und öffnet eine Shell darin | kein Gate |
 
 **Targets der Werkzeug-Fragmente:** [`mk/ai-harness-init.md`](mk/ai-harness-init.md) — der Teil dieses Index, den `ai-harness-init` bei jedem Lauf neu schreibt; was das Repo über eines dieser Targets entscheidet, steht in dieser Zeile ([`MR-012`](conventions.md#mr-012)).
 

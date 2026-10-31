@@ -239,3 +239,7 @@ clean: ## Remove local build artefacts and built images.
 	    $(IMAGE):latest $(IMAGE):deps $(IMAGE):compile \
 	    $(IMAGE):lint $(IMAGE):test $(IMAGE):coverage 2>/dev/null || true
 	@echo "[clean] artefacts and images removed"
+
+# ---- Devcontainer ----------------------------------------------------------
+
+include tools/mk/devcontainer.mk
