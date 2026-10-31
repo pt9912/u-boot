@@ -198,7 +198,7 @@ Aussagen-Berührung steht hier gar nicht.
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
 | `spec/lastenheft.md` | update (erst nach der Freigabe) | Stellen 1 bis 6; gelesen: Kopf (Zeile 9), [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeilen 497 bis 508), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Zeilen 218 bis 236), Glossar (Zeilen 1542 bis 1556), Fundstellen per `grep` (Zeilen 189, 191, 457, 473, 1147 bis 1149), Historie bis `0.24.0` (Zeile 1607) |
-| `docs/plan/planning/next/slice-cr-devcontainer-instanz.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
+| `docs/plan/planning/in-progress/slice-cr-devcontainer-instanz.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
 | `docs/plan/planning/open/slice-v1-devcontainer-instanz-label.md` | update | Namensregel (Entscheidung 1) und Test-Auftrag zu Entscheidung 4 (Exit-Code `10`, Prüfung vor dem Aufruf der CLI); Zustandsmarker „CR freigegeben“ im Start-Trigger, Verweis-Nachzug der Moves |
 | `docs/plan/planning/open/README.md` | update | Zeile dieses Slice auf „geliefert“; Verweis-Nachzug der Moves (`make slice-mv`) |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
