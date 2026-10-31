@@ -711,7 +711,7 @@ die Abdeckung über alle Kommandos hinweg vergleicht, existiert heute nicht.
 - **Domäne:** klassische Property/Value-Tests; keine Mocks nötig.
 - **Application:** Fake-Implementierungen der Driven-Ports im `_test.go`-Paket; keine echte Docker-Engine.
 - **Adapter (driven):** Integrationstests gegen echte Systeme, soweit lokal verfügbar (z. B. Docker-Engine für `adapter/driven/docker`). Ohne Docker-Engine werden diese Tests via Build-Tag (`//go:build docker`) ausgeschlossen. Build-Tag-Konvention:
-  - Default ist *aus*: `make test` (Stage `test` im Dockerfile, [`SPEC-025`](spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)) führt Tag-getaggte Tests nicht aus und bleibt damit auch ohne Docker-Socket grün.
+  - Default ist *aus*: `make test` (im Docker-Modus die Stage `test` im Dockerfile, [`SPEC-025`](spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles); im lokalen Modus derselbe Befehl aus `scripts/bau.sh`) führt Tag-getaggte Tests nicht aus und bleibt damit auch ohne Docker-Socket grün.
   - Lokal mit verfügbarer Docker-Engine: `go test -tags docker ./...`.
   - In CI: ein separater Stage / ein separates Make-Target aktiviert das Tag und mountet das Docker-Socket; dieser Pfad ist nicht Bestandteil von `make gates`, sondern ergänzt `make ci` als optionales Integrations-Smoketest-Ziel.
   - Pro Test-Datei mit dem entsprechenden Tag: erste Zeile `//go:build docker`, leere Zeile, dann `package …`.

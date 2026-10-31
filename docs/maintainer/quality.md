@@ -20,14 +20,20 @@ Konfigurations- und Schwellwerte hier.
 
 ## 1. Statische Analyse (`golangci-lint`)
 
-Statische Analyse läuft Docker-basiert über die `lint`-Stage des
-Top-Level-`Dockerfile` ([SPEC-025](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)):
+Statische Analyse läuft im Docker-Modus (Standard, Host und CI) über die
+`lint`-Stage des Top-Level-`Dockerfile`
+([SPEC-025](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)):
 
 ```bash
 docker build --target lint -t u-boot:lint .
 # oder bequemer:
 make lint
 ```
+
+Im Devcontainer des Repos (`BUILD_MODE=local`, dort gesetzt) ruft `make lint`
+dasselbe Skript (`scripts/bau.sh lint`) mit dem installierten
+`golangci-lint` auf, ohne `docker build`
+([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)).
 
 Die Stage führt `golangci-lint run ./...` mit Default-Lintern und dem
 SOLID-nahen Zusatzprofil aus:
@@ -307,8 +313,9 @@ Pflichten `ci.yml`:
     + `aquasecurity/trivy-action` (`severity: HIGH,CRITICAL`,
     `exit-code: 1`).
 - **Runner:** `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
-- **Keine Host-Toolchain:** Docker-only ([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)); der
-  Workflow installiert weder Go noch `golangci-lint` am Runner.
+- **Keine Host-Toolchain:** Docker-only im Docker-Modus ([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows));
+  die Workflows setzen `BUILD_MODE` nicht, und der Workflow installiert weder
+  Go noch `golangci-lint` am Runner.
 - **Actions SHA-gepinnt** mit Tag-Kommentar, z. B.
   `uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2`.
   Pin-Hebung ist Routine.
