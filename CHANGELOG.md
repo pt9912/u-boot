@@ -11,6 +11,10 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Changed
+
+- Documentation: the README files and the user manual state that the Homebrew tap serves Linux (`arm64` and `amd64`) as well as macOS; the formula already carried the Linux binaries, and the manual no longer says that Linux-Brew is not promised. The READMEs no longer carry the release table and the long status block; promises, conditions and limits are in the user manual and this changelog.
+
 ## [0.16.1] - 2026-10-26
 
 Patch release. **The Lastenheft (0.24.0) now states where `ollama` and `podman` are promised in the sandbox devcontainer, in words and no longer as the environment of a measurement. The code of the binary is unchanged; only its version string differs.**

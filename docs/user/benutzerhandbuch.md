@@ -108,11 +108,10 @@ Für eine bestimmte Version ersetzen Sie `latest/download` durch
 `download/v0.16.1`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
 jeweiligen Release.
 
-### Homebrew (macOS)
+### Homebrew (macOS und Linux)
 
 Für stabile Releases gibt es einen Homebrew-Tap für macOS (Apple Silicon und
-Intel). Unter Linux nutzen Sie das Binary oder das Container-Image; Linux-Brew
-ist nicht zugesagt:
+Intel) und für Linux (`arm64` und `amd64`):
 
 ```bash
 brew tap pt9912/u-boot
@@ -3188,8 +3187,8 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 
 ### Unterstützte Plattformen
 
-Binary: Linux, macOS und Windows, je `amd64` und `arm64`. Homebrew: macOS,
-`amd64` und `arm64`. Pakete: Linux `amd64` und `arm64` (`.deb`,
+Binary: Linux, macOS und Windows, je `amd64` und `arm64`. Homebrew: macOS und Linux,
+je `amd64` und `arm64`. Pakete: Linux `amd64` und `arm64` (`.deb`,
 `.rpm`). Container-Image: `ghcr.io/pt9912/u-boot`.
 
 ---

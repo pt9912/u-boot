@@ -84,7 +84,7 @@ chmod +x u-boot && sudo mv u-boot /usr/local/bin/
 u-boot --version
 ```
 
-**macOS with Homebrew** (stable releases; Apple Silicon and Intel):
+**Homebrew** (stable releases; macOS and Linux, `arm64` and `amd64`):
 
 ```bash
 brew tap pt9912/u-boot
