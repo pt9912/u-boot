@@ -68,7 +68,7 @@ Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register ([`observations/`](../observations/)) fortgeschrieben, oder in §7 „keine Beobachtung angefallen“.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo **ohne** Wellen-Betrieb hier geprüft.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo **ohne** Wellen-Betrieb hier geprüft.
 
 ## 3. Plan (vor Code)
 
@@ -177,7 +177,7 @@ Alle Zeiten: Linux `amd64`, lokale Engine, **ein Lauf je Zelle**, keine Streuung
   - `node:2.1.1` mit `claude-code:1.0.5`: **entfallen**: `make dev-up` baut mit allen Features, Exit 0, 334 s (Messung H).
   - Hook-Guard blockt `go` in der Befehlsposition: **weiter offen** → `BEO-WZG/host-werkzeug-ausserhalb-docker` (der Guard ist unverändert; ein Lauf eines Agenten im Devcontainer ist nicht gemessen, die Entscheidung zum Guard steht dort aus).
   - `GOCACHE` im Workspace-Volume wächst ohne Grenze: **entfallen** als Risiko des Slice, mit Einschränkung: `.cache/` ist aus Git, Docker-Kontext und Doku-Scan ausgenommen und ohne Folge löschbar (ein Lauf mit leerem Cache kostete 48,6 s); das Wachstum selbst ist nicht gemessen, eine Größe liegt nicht vor.
-- **Drei Paarungen:** Anker: kein Eintrag mit dem Feld für einen Herkunfts-Anker in diesem Slice, nichts zu paaren. Folge-Slice: die drei Folge-Slices sind Dateien in `open/`; jedes Risiko mit Ausgang „weiter offen“ hat sein Verzeichnis im Register, keines mit Ausgang „eingetreten“. Register: zur Prüfung nach dem Move (letztes DoD-Item).
+- **Drei Paarungen:** Anker: kein Eintrag mit dem Feld für einen Herkunfts-Anker in diesem Slice, nichts zu paaren. Folge-Slice: die drei Folge-Slices sind Dateien in `open/`; jedes Risiko mit Ausgang „weiter offen“ hat sein Verzeichnis im Register, keines mit Ausgang „eingetreten“. Register: `make docs-check` nach dem Move ohne Befund (924 Dateien, 0 Befunde); jeder Verweis des Slice auf eine Beobachtung löst auf.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
