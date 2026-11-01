@@ -243,7 +243,7 @@ func TestDevcontainerInstance_Docker_TwoInstancesAreIsolated(t *testing.T) {
 
 	// Without a container without an instance: exit 10, no helper container,
 	// no change to the containers.
-	baseVolume := dcInspect(t, existing.ContainerID).volumeAt(dcWorkspaceDest)
+	baseVolume := dcInspect(t, existing.ContainerID).volumeAt(dcWorkspacePath(dir))
 	dcMustDocker(t, "rm", "-f", existing.ContainerID)
 	t.Cleanup(func() {
 		if baseVolume != "" {
