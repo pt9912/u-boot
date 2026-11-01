@@ -121,7 +121,8 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt ([`AGENTS.md
 | `README.md`, `README.de.md`, `docs/user/` | unverändert (belegt) | Suche am 2026-11-01 nach `LH-`, `slice-` und `Warning (LH` in `docs/user`, `README.md`, `README.de.md`: kein Treffer; wörtliche Hilfe-Zitate nicht gefunden |
 | `docs/maintainer/cli-json-contract.md` | unverändert | Zeilen mit Kennung betreffen `diagnostics.code` und Verweise im Maintainer-Dokument (kein Nutzertext); Beispiel Zeile 1269 trägt keine Kennung in `message` |
 | `internal/hexagon/application/templates/**`, `internal/adapter/driven/externaltemplates/templates/basic/*.tmpl` | update (Kommentare ohne Kennungen, Frage 3: im selben Slice) | erzeugte Dateien; Golden: `template_init_test.go` (byte-identisch zur Standard-Init-Ausgabe) |
-| `docs/plan/planning/open/slice-v1-hilfetexte-ohne-kennungen.md`, `docs/plan/planning/open/README.md` | neu / update | Lifecycle; Zeile im Bestand |
+| `docs/plan/planning/in-progress/slice-v1-hilfetexte-ohne-kennungen.md`, `docs/plan/planning/open/README.md` | update | Lifecycle-Move; Zeile aus dem Bestand von `open/` entfernt |
+| `docs/reviews/2026-11-01-slice-v1-hilfetexte-ohne-kennungen.md`, `…-verify.md` | neu | Review- und Verifikations-Report |
 | `docs/plan/planning/observations/BEO-CLI/kennung-in-cli-ausgabe/` | update bei der Closure (`state.md`, `evidence/slice-v1-hilfetexte-ohne-kennungen.md`) | Ausgang der Beobachtung |
 
 ## 4. Trigger

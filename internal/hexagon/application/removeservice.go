@@ -311,7 +311,7 @@ func (s *RemoveServiceService) volumesPurgedWarnings(req driving.RemoveServiceRe
 		return nil
 	}
 	if s.engine != nil && req.PreviewMode != driving.PreviewDryRun {
-		return nil // the real removal runs; no "deferred" warning
+		return nil // the real removal runs; no warning that no volume is removed
 	}
 	return []driving.WarningEntry{
 		{

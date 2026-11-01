@@ -57,7 +57,7 @@ type removeFlags struct {
 //     Symmetrie, plus Defense gegen Default-`""`-Drift in
 //     künftigen [domain.ServiceState]-Erweiterungen.
 //   - VolumesPurged: *bool — `false` ist ein valider Success-Wert
-//     (ohne entfernte Volumes); plain `bool`+omitempty würde den
+//     (no volume removed); plain `bool`+omitempty würde den
 //     Error-Pfad-Zero und Success-Pfad-false identisch droppen
 //     (Pattern analog [cliJSONEnvelope.DryRun]/`Diff` in
 //     jsonenvelope.go:34-37).
@@ -476,7 +476,7 @@ func printRemoveSummary(out, errOut io.Writer, resp driving.RemoveServiceRespons
 	}
 	if resp.PurgeAttempted {
 		// Real removal ran: failures / undeterminable volumes arrive as
-		// warnings (one per volume); the legacy "deferred" prose is moot.
+		// warnings (one per volume); the "removed no volume" warning does not apply.
 		for _, w := range resp.Warnings {
 			fmt.Fprintf(errOut, "\nWARNING: %s\n", w.Message)
 		}
