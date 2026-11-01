@@ -14,9 +14,10 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
-// sessionConfig is a configuration in the shape the generator writes for the
-// sandbox profile (`remoteEnv` with the entry of the Git token and the entry
-// of an agent) plus a reference of another form in `mounts`.
+// sessionConfig is a hand-written configuration with the form of the
+// `remoteEnv` entries the generator writes (the entry of the Git token and one
+// entry of an agent, not the full list of the generator) plus a reference of
+// another form in `mounts`.
 const sessionConfig = `{
   "name": "demo",
   "mounts": ["source=${localEnv:HOME}/.cache,target=/cache,type=bind"],
@@ -37,7 +38,7 @@ func TestSessionEnvNames(t *testing.T) {
 		want []string
 	}{
 		{"none", `{"image": "debian"}`, nil},
-		{"the shape the generator writes", sessionConfig, []string{"ANTHROPIC_API_KEY", "GIT_TOKEN"}},
+		{"the entry form the generator writes", sessionConfig, []string{"ANTHROPIC_API_KEY", "GIT_TOKEN"}},
 		{"space around the colon", `{"A" :   "${localEnv:A}"}`, []string{"A"}},
 		{"sorted and distinct", `{"B": "${localEnv:B}", "A": "${localEnv:A}", "again": {"B": "${localEnv:B}"}}`, []string{"A", "B"}},
 		{"another name in the reference", `{"A": "${localEnv:B}"}`, nil},

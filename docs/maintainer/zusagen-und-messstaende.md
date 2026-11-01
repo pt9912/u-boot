@@ -564,9 +564,15 @@ keinen Berechtigungsmodus.
   Cloud-Modelle von Ollama gilt die Zusage nur bei nicht gesetztem `ANTHROPIC_API_KEY` im
   Aufruf; ob eine leere Variable dabei wie eine nicht gesetzte wirkt, ist nicht gemessen
   (siehe [Ollama](../user/benutzerhandbuch.md#ollama-optional)).
-  `u-boot` reicht nur diese eine Variable durch; andere Wege (etwa ein Token mit
-  `CLAUDE_CODE_OAUTH_TOKEN` oder ein Login mit `/login` im Container) gehören nicht zur
-  Zusage und sind nicht gemessen. Wohin ein Login im Container seine Zugangsdaten
+  Neben `ANTHROPIC_API_KEY` trägt `devcontainer.json` die Referenz auf
+  `CLAUDE_CODE_OAUTH_TOKEN`; mit einem Platzhalter kommt die Variable über
+  `u-boot devcontainer shell` im Container an, ungesetzt kommt sie ungesetzt an, leer
+  gesetzt leer (je 2 Läufe), und `claude -p` mit dem Platzhalter endet mit der Antwort
+  „401 OAuth access token is invalid“ (1 Lauf; Linux `amd64`, lokale Engine, 2026-11-01,
+  `docs/messungen/slice-v1-devcontainer-claude-oauth-token/`). Ein Lauf mit einem
+  gültigen Token ist nicht gefahren; mit gesetztem Token im Ollama-Ablauf ist nicht
+  gemessen. Andere Variablen reicht `u-boot` nicht durch; ein Login mit `/login` im
+  Container gehört nicht zur Zusage und ist nicht gemessen. Wohin ein Login im Container seine Zugangsdaten
   schreibt, ist nicht gemessen; das Home von `vscode` liegt nicht im
   Workspace-Volume (gemessen: das einzige Volume des Containers ist
   `/workspaces/<projekt>`).
@@ -586,8 +592,9 @@ keinen Berechtigungsmodus.
   `platform.claude.com`, `claude.com`; laut Dokumentation von Anthropic, nicht
   gemessen: ein echter Login ist ohne Konto nicht messbar) stehen **nicht** in der
   Liste: Wer sich im Container anmeldet, ergänzt sie in `devcontainer.sandbox.egress.allow`.
-  Der Weg über einen Abo-Login oder `CLAUDE_CODE_OAUTH_TOKEN` ist nicht zugesagt
-  und nicht gemessen.
+  Der Weg über einen Abo-Login im Container ist nicht zugesagt und nicht gemessen;
+  für `CLAUDE_CODE_OAUTH_TOKEN` bedeutet das: Ob ein gültiges Token hinter der
+  Egress-Restriktion mit der Default-Liste angenommen wird, ist nicht gemessen.
   Mit dem generierten Allowlist-Container erreichte die CLI die API (Antwort
   „Invalid API key“ auf einen absichtlich falschen Schlüssel), `example.com`
   blieb gesperrt.

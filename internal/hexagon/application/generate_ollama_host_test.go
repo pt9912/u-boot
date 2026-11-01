@@ -410,11 +410,11 @@ func TestGenerateDevcontainer_OllamaHost_AddsNoCredentialVariable(t *testing.T) 
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	if want := []string{"ANTHROPIC_API_KEY", "GH_TOKEN", "GITLAB_TOKEN", "GIT_TOKEN"}; !reflect.DeepEqual(keys, want) {
+	if want := []string{"ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "GH_TOKEN", "GITLAB_TOKEN", "GIT_TOKEN"}; !reflect.DeepEqual(keys, want) {
 		t.Errorf("remoteEnv keys = %v, want exactly %v", keys, want)
 	}
 	raw := generatedFile(with.fs, ".devcontainer/devcontainer.json")
-	if !strings.Contains(raw, "\"GIT_TOKEN\": \"${localEnv:GIT_TOKEN}\",\n    \"ANTHROPIC_API_KEY\": \"${localEnv:ANTHROPIC_API_KEY}\",\n    \"GH_TOKEN\": \"${localEnv:GH_TOKEN}\",\n    \"GITLAB_TOKEN\": \"${localEnv:GITLAB_TOKEN}\"\n") {
+	if !strings.Contains(raw, "\"GIT_TOKEN\": \"${localEnv:GIT_TOKEN}\",\n    \"ANTHROPIC_API_KEY\": \"${localEnv:ANTHROPIC_API_KEY}\",\n    \"CLAUDE_CODE_OAUTH_TOKEN\": \"${localEnv:CLAUDE_CODE_OAUTH_TOKEN}\",\n    \"GH_TOKEN\": \"${localEnv:GH_TOKEN}\",\n    \"GITLAB_TOKEN\": \"${localEnv:GITLAB_TOKEN}\"\n") {
 		t.Errorf("remoteEnv is not the fixed list of references:\n%s", raw)
 	}
 }

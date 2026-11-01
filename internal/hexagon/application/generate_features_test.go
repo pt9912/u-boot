@@ -959,7 +959,7 @@ func TestGenerateDevcontainer_ClaudeCodeNodeNotice(t *testing.T) {
 func TestGenerateDevcontainer_ClaudeCodeCredentialReference(t *testing.T) {
 	t.Parallel()
 	const gitOnly = "  \"remoteEnv\": {\n    \"GIT_TOKEN\": \"${localEnv:GIT_TOKEN}\"\n  },\n"
-	const withAgent = "  \"remoteEnv\": {\n    \"GIT_TOKEN\": \"${localEnv:GIT_TOKEN}\",\n    \"ANTHROPIC_API_KEY\": \"${localEnv:ANTHROPIC_API_KEY}\"\n  },\n"
+	const withAgent = "  \"remoteEnv\": {\n    \"GIT_TOKEN\": \"${localEnv:GIT_TOKEN}\",\n    \"ANTHROPIC_API_KEY\": \"${localEnv:ANTHROPIC_API_KEY}\",\n    \"CLAUDE_CODE_OAUTH_TOKEN\": \"${localEnv:CLAUDE_CODE_OAUTH_TOKEN}\"\n  },\n"
 	const on = "    claude-code:\n      enabled: true\n"
 	cases := map[string]struct {
 		yaml string
@@ -1068,6 +1068,9 @@ func TestGenerateDevcontainer_SshdAndClaudeCodeTogether(t *testing.T) {
 			}
 			if n := strings.Count(body, `"ANTHROPIC_API_KEY"`); n != wantAgent {
 				t.Errorf("ANTHROPIC_API_KEY reference appears %d times, want %d", n, wantAgent)
+			}
+			if n := strings.Count(body, `"CLAUDE_CODE_OAUTH_TOKEN"`); n != wantAgent {
+				t.Errorf("CLAUDE_CODE_OAUTH_TOKEN reference appears %d times, want %d", n, wantAgent)
 			}
 			if got := len(sshdLoginWarnings(resp.Warnings)); got != tc.wantLogin {
 				t.Errorf("login warnings = %d, want %d: %+v", got, tc.wantLogin, resp.Warnings)

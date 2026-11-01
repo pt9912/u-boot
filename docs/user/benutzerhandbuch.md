@@ -844,8 +844,8 @@ u-boot devcontainer shell
 ```
 
 - **Umgebung.** Die Variablen, die das erzeugte `devcontainer.json` als Einträge
-  `"NAME": "${localEnv:NAME}"` weitergibt (im Sandbox-Profil `GIT_TOKEN`, der Schlüssel eines
-  Agenten und die Token-Variablen von `gh` und `glab`), sind in der Shell gesetzt, soweit sie auf dem Host gesetzt sind; eine auf dem Host nicht
+  `"NAME": "${localEnv:NAME}"` weitergibt (im Sandbox-Profil `GIT_TOKEN`, die Variablen eines Agenten
+  (`ANTHROPIC_API_KEY`, `CLAUDE_CODE_OAUTH_TOKEN`) und die Token-Variablen von `gh` und `glab`), sind in der Shell gesetzt, soweit sie auf dem Host gesetzt sind; eine auf dem Host nicht
   gesetzte Variable fehlt in der Shell. Verweise in anderer Form (etwa ein Pfad in `mounts`, ein
   anderer Name, ein Standardwert) gibt `shell` nicht weiter und sagt dafür nichts zu.
 - **Ausgabe.** Alles, was `u-boot` selbst ausgibt (die Ausweisung des Sockets, der Fortschritt des
@@ -1289,7 +1289,8 @@ konfigurierten Clone-Quelle, siehe unten).
 
 3. Zugangsdaten für `https`-Remotes geben Sie zur Laufzeit mit, nicht in Dateien:
    Setzen Sie vor dem Start des Containers die Umgebungsvariable `GIT_TOKEN` auf
-   dem Host. Mit dem Feature `claude-code` gilt dasselbe für `ANTHROPIC_API_KEY`,
+   dem Host. Mit dem Feature `claude-code` gilt dasselbe für `ANTHROPIC_API_KEY`
+   oder `CLAUDE_CODE_OAUTH_TOKEN`,
    mit `gh` für `GH_TOKEN` und mit `glab` für `GITLAB_TOKEN`
    (siehe [Zugangsdaten](#zugangsdaten-git-und-agent)).
 
@@ -1863,15 +1864,24 @@ keinen Berechtigungsmodus.
   Node.js selbst nachzuinstallieren, Node.js ohne `npm` liefert. `u-boot generate
   devcontainer` weist darauf hin, wenn `claude-code` ohne `node` aktiv ist.
 - **Zugangsdaten:** Im Sandbox-Profil trägt `devcontainer.json` bei aktivem Feature
-  die Referenz `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` neben
-  `GIT_TOKEN`, nie einen Wert. Setzen Sie `ANTHROPIC_API_KEY` in der Host-Umgebung,
+  die Referenzen `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` und
+  `"CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}"` neben
+  `GIT_TOKEN`, nie einen Wert. Setzen Sie `ANTHROPIC_API_KEY` (API-Schlüssel) oder
+  `CLAUDE_CODE_OAUTH_TOKEN` (Token eines Abonnements) in der Host-Umgebung,
   bevor Sie den Container starten (laut Dokumentation von Anthropic hat der Schlüssel
-  Vorrang vor dem Login mit einem Abonnement). Ist die
-  Variable auf dem Host nicht gesetzt, ist sie im Container nicht gesetzt. Ohne
-  Schlüssel meldet die CLI „Not logged in“. Für
+  Vorrang vor dem Login mit einem Abonnement). Ist eine
+  Variable auf dem Host nicht gesetzt, ist sie im Container nicht gesetzt; eine leer
+  gesetzte kommt leer an. Ohne
+  Schlüssel und Token meldet die CLI „Not logged in“. Das Token steht in der
+  Umgebung der Sitzung von `u-boot devcontainer shell`; in einer Shell, die Sie mit `docker exec` öffnen, gilt
+  `remoteEnv` nicht. Jeder Prozess in dieser Sitzung sieht die Variable, auch jeder
+  Befehl, den ein Agent dort ausführt. Mit verschachteltem Docker läuft der Container
+  mit `--privileged` (siehe Abschnitt 4.11); das Token liegt dann in einer Umgebung
+  mit weitreichenden Rechten. Nutzen Sie nur ein Token, das Sie widerrufen können, und
+  widerrufen Sie es bei Anthropic, sobald Sie Missbrauch vermuten. Für
   Cloud-Modelle von Ollama muss `ANTHROPIC_API_KEY` im Aufruf nicht gesetzt sein
-  (siehe [Ollama](#ollama-optional)).
-  `u-boot` reicht nur diese eine Variable durch. Das Home von `vscode` liegt nicht im
+  (siehe [Ollama](#ollama-optional)); setzen Sie dort auch `CLAUDE_CODE_OAUTH_TOKEN` nicht.
+  `u-boot` reicht nur diese beiden Variablen für Claude Code durch. Das Home von `vscode` liegt nicht im
   Workspace-Volume (das einzige Volume des Containers ist `/workspaces/<projekt>`).
 - **Was das Feature mitbringt:** Das Feature bringt kein `mounts`,
   `capAdd`, `privileged` und keinen Entrypoint mit (`installsAfter`: das Feature
@@ -2229,7 +2239,8 @@ erzeugten Datei:
 - `devcontainer.json` enthält nur die Referenz
   `"GIT_TOKEN": "${localEnv:GIT_TOKEN}"`. Setzen Sie `GIT_TOKEN` in der
   Host-Umgebung, bevor Sie den Container starten. Mit dem Feature `claude-code`
-  kommt `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` hinzu, mit `gh` und `glab`
+  kommen `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` und
+  `"CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}"` hinzu, mit `gh` und `glab`
   `"GH_TOKEN": "${localEnv:GH_TOKEN}"` und `"GITLAB_TOKEN": "${localEnv:GITLAB_TOKEN}"`
   (siehe [Forge-CLIs](#forge-clis-optional)); ohne diese Features bleibt die Datei
   unverändert. Die Features `ollama` und `ollama-host` ergänzen keine Variable.
@@ -2241,7 +2252,7 @@ erzeugten Datei:
   Shell, die Sie ohne Editor mit `docker exec` öffnen, gilt `remoteEnv` nicht, und `GIT_TOKEN`
   ist dort nicht gesetzt; geben Sie die Variable mit `docker exec -e GIT_TOKEN` mit (Abschnitt
   4.9, „Im Container arbeiten“). Im Sandbox-Profil öffnet `u-boot devcontainer shell` die
-  Shell mit `GIT_TOKEN`, dem Schlüssel des Agenten und den Token-Variablen von `gh` und
+  Shell mit `GIT_TOKEN`, den Variablen des Agenten (Schlüssel und Token) und den Token-Variablen von `gh` und
   `glab`, soweit sie auf dem Host gesetzt sind; im Standardprofil gibt `shell` nur die
   Variablen weiter, auf die die `devcontainer.json` verweist (siehe
   [Forge-CLIs](#forge-clis-optional)).
@@ -2254,8 +2265,10 @@ erzeugten Datei:
   Erkennen eines Schlüssels in Text verwendet, sowie ein Wert für
   `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` oder `CLAUDE_CODE_OAUTH_TOKEN`), vor einer
   fehlenden Token-Quelle bei einem `https`-Clone und, bei aktivem Feature
-  `claude-code`, vor einer fehlenden Referenz auf `ANTHROPIC_API_KEY` in
-  `devcontainer.json`, bei aktivem `gh` oder `glab` ebenso auf `GH_TOKEN`
+  `claude-code`, vor einer fehlenden Referenz auf `ANTHROPIC_API_KEY` oder
+  `CLAUDE_CODE_OAUTH_TOKEN` in `devcontainer.json` (beide Referenzen gehören in die Datei,
+  auch wenn Sie nur einen der beiden Wege nutzen; fehlt eine, erzeugen Sie die Datei mit
+  `u-boot generate devcontainer` neu), bei aktivem `gh` oder `glab` ebenso auf `GH_TOKEN`
   beziehungsweise `GITLAB_TOKEN`. Die Prüfung liest nur Projektdateien; sie sieht weder die
   Umgebung des Hosts noch einen Schlüssel in einer anderen Datei. Bekannte Grenze:
   Der Ausdruck für eine Zuweisung kann einen Platzhalter nicht von einem Wert
@@ -2466,6 +2479,7 @@ aus, damit die Dateien in `.devcontainer/` zur Projektdatei passen.
 | `DOCKER_HOST` | Adresse des Docker- oder Podman-Daemons |
 | `GIT_TOKEN` | Zugangsdaten für `https`-Remotes im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt) |
 | `ANTHROPIC_API_KEY` | API-Schlüssel für das Feature `claude-code` im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt; `devcontainer.json` trägt nur die Referenz) |
+| `CLAUDE_CODE_OAUTH_TOKEN` | OAuth-Token eines Abonnements für das Feature `claude-code` im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt; `devcontainer.json` trägt nur die Referenz) |
 | `GH_TOKEN` | Token für das Feature `gh` im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt; `devcontainer.json` trägt nur die Referenz) |
 | `GITLAB_TOKEN` | Token für das Feature `glab` im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt; `devcontainer.json` trägt nur die Referenz) |
 

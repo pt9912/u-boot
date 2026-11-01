@@ -367,7 +367,7 @@ func TestGenerateDevcontainer_ForgeCLI_RemoteEnvReferences(t *testing.T) {
 		"gh":             {sandboxProfile + featuresYAML(ghEntry), env("GH_TOKEN")},
 		"glab":           {sandboxProfile + featuresYAML(glabEntry), env("GITLAB_TOKEN")},
 		"both":           {sandboxProfile + featuresYAML(glabEntry, ghEntry), env("GH_TOKEN", "GITLAB_TOKEN")},
-		"with claude":    {sandboxProfile + featuresYAML(glabEntry, ghEntry, claude), env("ANTHROPIC_API_KEY", "GH_TOKEN", "GITLAB_TOKEN")},
+		"with claude":    {sandboxProfile + featuresYAML(glabEntry, ghEntry, claude), env("ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "GH_TOKEN", "GITLAB_TOKEN")},
 		"disabled":       {sandboxProfile + featuresYAML("    gh:\n      enabled: false\n"), env()},
 		"no feature":     {sandboxProfile, env()},
 		"source for gh":  {sandboxProfile + "  featureSources:\n    allow:\n      - https://" + external + "\n" + featuresYAML("    gh:\n      enabled: true\n      source: https://"+external+"\n"), env()},
