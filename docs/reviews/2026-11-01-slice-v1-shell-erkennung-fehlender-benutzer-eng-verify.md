@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Verifikation gegen Plan, DoD, Entscheidungen und Sensors (Modul 11: „Bauen wir es richtig?“). Kein Review des Diffs und keine Validierung.
 
-**Gegenstand:** Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../plan/planning/open/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) (Weg A, Entscheidung des Projektinhabers 2026-11-01), HEAD `59fbd8a2` (Merge des Zweigs `worktree-agent-afb663c9f1176132c`), Diff `350cdc72..HEAD`: 13 Dateien, 324 Einfügungen, 28 Löschungen. Der Slice liegt in `open/`.
+**Gegenstand:** Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../plan/planning/next/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) (Weg A, Entscheidung des Projektinhabers 2026-11-01), HEAD `59fbd8a2` (Merge des Zweigs `worktree-agent-afb663c9f1176132c`), Diff `350cdc72..HEAD`: 13 Dateien, 324 Einfügungen, 28 Löschungen. Der Slice liegt in `open/`.
 
 **Skill:** `.harness/skills/verifier.md` existiert nicht; die Rolle folgt `harness/roles.md` und `harness/verification.md`.
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-11-01
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../plan/planning/open/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) (§1 Gewählt, §2 DoD, §3 Plan, §5 Closure-Trigger, §6 Risiken)
+- [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../plan/planning/next/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) (§1 Gewählt, §2 DoD, §3 Plan, §5 Closure-Trigger, §6 Risiken)
 - [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 - [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Punkt *Sitzung*, Tabelle der Exit-Codes Spalte `0`, Punkt *Exit-Code `12`*, Grenzen der Erkennung, Änderungsprotokoll)
 - [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md), [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md), [`ADR-0039`](../plan/adr/0039-devcontainer-shell-dritter-aufruf-bei-fehlendem-benutzer.md) (Proposed)
