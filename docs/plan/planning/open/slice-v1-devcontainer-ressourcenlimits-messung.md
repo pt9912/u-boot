@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Folge-Slice von [`slice-v1-devcontainer-ressourcenlimits`](../in-progress/slice-v1-devcontainer-ressourcenlimits.md), das mit eingeschränktem Gegenstand geschlossen wurde (Entscheidung des Projektinhabers, 2026-11-01); Priorisierung und Release-Zuordnung beim Projektinhaber. Eine Closure-Bedingung, die von der DoD dieses Slice verschieden ist, gibt es nicht.
+**Welle:** ohne Welle. Folge-Slice von [`slice-v1-devcontainer-ressourcenlimits`](../done/slice-v1-devcontainer-ressourcenlimits.md), das mit eingeschränktem Gegenstand geschlossen wurde (Entscheidung des Projektinhabers, 2026-11-01); Priorisierung und Release-Zuordnung beim Projektinhaber. Eine Closure-Bedingung, die von der DoD dieses Slice verschieden ist, gibt es nicht.
 
 **Bezug:** [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zusage nur Linux-Host `amd64` mit lokaler Engine).
 
@@ -23,7 +23,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Die Messungen 1, 2, 4 und 5 aus §1 von [`slice-v1-devcontainer-ressourcenlimits`](../in-progress/slice-v1-devcontainer-ressourcenlimits.md) sind auf einer Engine gefahren, die Grenzen anwendet (Linux-Host `amd64`, lokale, nicht verschachtelte Engine, zum Beispiel ein CI-Runner), mit mindestens zwei Läufen je Zelle; Messung 3 bleibt Abgrenzung (andere Hosts und Engines: nicht zugesagt). Danach entscheidet der Projektinhaber über Wortlaut der Zusage, Diagnose-Code und Werteformat.
+**Ziel:** Die Messungen 1, 2, 4 und 5 aus §1 von [`slice-v1-devcontainer-ressourcenlimits`](../done/slice-v1-devcontainer-ressourcenlimits.md) sind auf einer Engine gefahren, die Grenzen anwendet (Linux-Host `amd64`, lokale, nicht verschachtelte Engine, zum Beispiel ein CI-Runner), mit mindestens zwei Läufen je Zelle; Messung 3 bleibt Abgrenzung (andere Hosts und Engines: nicht zugesagt). Danach entscheidet der Projektinhaber über Wortlaut der Zusage, Diagnose-Code und Werteformat.
 
 **Herkunft.** Die verschachtelte Engine des Devcontainers dieses Repos kann keine Grenze anwenden (Exit `125` an der cgroup); die Messungen 1, 2, 4 und 5 sind dort nicht gefahren, Messung 6 nur für Meldungen vor dem Start; der CI-Lauf des Jobs `integration-docker` hat die beiden Docker-Tests einmal bestanden (Protokoll [`slice-v1-devcontainer-ressourcenlimits`](../../../messungen/slice-v1-devcontainer-ressourcenlimits/README.md)).
 

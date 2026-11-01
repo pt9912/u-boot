@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-v1-devcontainer-ressourcenlimits`](../plan/planning/in-progress/slice-v1-devcontainer-ressourcenlimits.md) — 2026-11-01
+# Verification-Report: [`slice-v1-devcontainer-ressourcenlimits`](../plan/planning/done/slice-v1-devcontainer-ressourcenlimits.md) — 2026-11-01
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und den ausgeführten Sensoren? Form nach [`harness/verification.md`](../../harness/verification.md) und den vorhandenen `-verify.md`-Reports. Außer dieser Datei ist nichts geändert, nichts committet; die zwei Mutationsläufe unten sind mit `git checkout -- internal/` zurückgenommen, `git status --short` war danach leer.
 
@@ -9,7 +9,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-ressourcenlimits`](../plan/planning/in-progress/slice-v1-devcontainer-ressourcenlimits.md)
+- Slice: [`slice-v1-devcontainer-ressourcenlimits`](../plan/planning/done/slice-v1-devcontainer-ressourcenlimits.md)
 - IDs: [`LH-FA-CONF-002`](../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Code `10`), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (keine Ausweisung als Lockerung), [`SPEC-053`](../../spec/spezifikation.md#spec-053--grenzen-für-arbeitsspeicher-und-cpu-des-devcontainers-schlüssel-werte-und-runargs), [`SPEC-005`](../../spec/spezifikation.md#spec-005--schema-der-projektkonfiguration-u-bootyaml), [`SPEC-040`](../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config); keine ADR berührt (Entscheidung zu Punkt 7: keine ADR; der Diff enthält keine)
 - Review-Report: [`2026-11-01-slice-v1-devcontainer-ressourcenlimits`](2026-11-01-slice-v1-devcontainer-ressourcenlimits.md) (F-1 bis F-6, nachgebessert in `780e04df`)
 - Messprotokoll: [`slice-v1-devcontainer-ressourcenlimits`](../messungen/slice-v1-devcontainer-ressourcenlimits/README.md)
