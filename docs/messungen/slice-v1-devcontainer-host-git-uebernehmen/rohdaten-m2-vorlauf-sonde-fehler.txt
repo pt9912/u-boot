@@ -1,0 +1,100 @@
+# Messung schwer (m2) — 2026-11-01T14:27:04Z
+# Host: Linux 7.0.0-42-generic x86_64
+# Docker: 29.9.2 / Server 29.9.2 (linux/amd64)
+# u-boot: u-boot version 0.17.0-dev
+# Hilfs-Image: ubmess-devcontainer-cli:0.89.0
+# Token-Platzhalter (Länge): 36
+# Wiederholungen je Zelle: 2
+
+## M2: remoteEnv mit ${localEnv:…} in den Lebenszyklus-Befehlen der Dev-Container-CLI
+## (reine CLI-Probe, nicht über u-boot; minimaler Devcontainer mit postCreateCommand,
+##  Alpine-Basis, Workspace als Bind-Mount, Ergebnis-Datei im Wegwerf-Ordner)
+### Zelle M2-A, Wiederholung 1: remoteEnv-Referenz, GIT_TOKEN im Host-Umfeld gesetzt (Platzhalter)
+befehl: dir=$(prepare_m2); docker run --rm -i --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --mount type=bind,source="$dir",target="$dir" -e GIT_TOKEN=platzh-m8-git-token-0123456789abcdef ubmess-devcontainer-cli:0.89.0 devcontainer up --workspace-folder "$dir" >"$dir/cli-out.txt" 2>&1; echo "cli-exit=$?"; cat "$dir/m2-ergebnis.txt" 2>/dev/null || echo 'm2-ergebnis.txt fehlt'; tail -c 1500 "$dir/cli-out.txt"
+exit-status: 0
+--- stdout
+cli-exit=0
+37
+gt-vorhanden=ja
+026-11-01T14:27:05.813Z] #5 exporting config sha256:553c7c8d77ab0342539725465c0c79708c6ec64f882e819a6ec37aef2874c8c8 done
+#5 exporting attestation manifest sha256:f2e99371e6a6824989eaf254a49c3105d2061d833fc6ac99473c1c5ad3b313e0 0.0s done
+#5 exporting manifest list sha256:bc19c5ec1249fa068b62fc7b71a55fdbb0257ea470f59c694f7815c02aef77dc 0.0s done
+#5 naming to docker.io/library/vsc-m2ws-27791-78926e9ea5b2c8860adc83eafd601f653b18938f52859eb52a001adb56dc5df3:latest done
+#5 unpacking to docker.io/library/vsc-m2ws-27791-78926e9ea5b2c8860adc83eafd601f653b18938f52859eb52a001adb56dc5df3:latest done
+#5 DONE 0.1s
+
+[2026-11-01T14:27:05.891Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.Vte86DJM8x/m2ws-27791,target=/workspaces/x -l devcontainer.local_folder=/tmp/tmp.Vte86DJM8x/m2ws-27791 -l devcontainer.config_file=/tmp/tmp.Vte86DJM8x/m2ws-27791/.devcontainer/devcontainer.json -u root --entrypoint /bin/sh vsc-m2ws-27791-78926e9ea5b2c8860adc83eafd601f653b18938f52859eb52a001adb56dc5df3 -c echo Container started
+[2026-11-01T14:27:06.166Z] Container started
+[2026-11-01T14:27:06.393Z] Running the postCreateCommand from devcontainer.json...
+
+{"outcome":"success","containerId":"cb97cb796a37d4f691b343521e9aea4747f413a2a9df88d220a1b23dbcd727bf","remoteUser":"root","remoteWorkspaceFolder":"/workspaces/x","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
+--- stderr
+
+### Zelle M2-A, Wiederholung 2: remoteEnv-Referenz, GIT_TOKEN im Host-Umfeld gesetzt (Platzhalter)
+befehl: dir=$(prepare_m2); docker run --rm -i --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --mount type=bind,source="$dir",target="$dir" -e GIT_TOKEN=platzh-m8-git-token-0123456789abcdef ubmess-devcontainer-cli:0.89.0 devcontainer up --workspace-folder "$dir" >"$dir/cli-out.txt" 2>&1; echo "cli-exit=$?"; cat "$dir/m2-ergebnis.txt" 2>/dev/null || echo 'm2-ergebnis.txt fehlt'; tail -c 1500 "$dir/cli-out.txt"
+exit-status: 0
+--- stdout
+cli-exit=0
+37
+gt-vorhanden=ja
+c8cbf3b37e34a7c541e63d2d9f629 done
+#5 exporting config sha256:553c7c8d77ab0342539725465c0c79708c6ec64f882e819a6ec37aef2874c8c8 done
+#5 exporting attestation manifest sha256:658e877e8de6abd522f68864c1197098426ae200697c69b49098b4b2d377dcf8 0.0s done
+#5 exporting manifest list sha256:ec2b09671e6c9e5a8b0f94f4878ae978b88fa722d2c7dfeddf982858f3b499ac done
+#5 naming to docker.io/library/vsc-m2ws-3438-f3f96e04a99763d6c3a3fe0c37e3d8e379032f696cbf3826b24339a7495a43c5:latest done
+#5 unpacking to docker.io/library/vsc-m2ws-3438-f3f96e04a99763d6c3a3fe0c37e3d8e379032f696cbf3826b24339a7495a43c5:latest done
+#5 DONE 0.1s
+
+[2026-11-01T14:27:08.225Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.Vte86DJM8x/m2ws-3438,target=/workspaces/x -l devcontainer.local_folder=/tmp/tmp.Vte86DJM8x/m2ws-3438 -l devcontainer.config_file=/tmp/tmp.Vte86DJM8x/m2ws-3438/.devcontainer/devcontainer.json -u root --entrypoint /bin/sh vsc-m2ws-3438-f3f96e04a99763d6c3a3fe0c37e3d8e379032f696cbf3826b24339a7495a43c5 -c echo Container started
+[2026-11-01T14:27:08.488Z] Container started
+[2026-11-01T14:27:08.741Z] Running the postCreateCommand from devcontainer.json...
+
+{"outcome":"success","containerId":"54ce32753b07f7e708225337dce9dff57cdda3f67e5d039b750bc3a320243bde","remoteUser":"root","remoteWorkspaceFolder":"/workspaces/x","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
+--- stderr
+
+### Zelle M2-B, Wiederholung 1: remoteEnv-Referenz, GIT_TOKEN im Host-Umfeld ungesetzt
+befehl: dir=$(prepare_m2); docker run --rm -i --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --mount type=bind,source="$dir",target="$dir" ubmess-devcontainer-cli:0.89.0 devcontainer up --workspace-folder "$dir" >"$dir/cli-out.txt" 2>&1; echo "cli-exit=$?"; cat "$dir/m2-ergebnis.txt" 2>/dev/null || echo 'm2-ergebnis.txt fehlt'; tail -c 1500 "$dir/cli-out.txt"
+exit-status: 0
+--- stdout
+cli-exit=0
+1
+gt-vorhanden=ja
+4a7c541e63d2d9f629 done
+#5 exporting config sha256:553c7c8d77ab0342539725465c0c79708c6ec64f882e819a6ec37aef2874c8c8 done
+#5 exporting attestation manifest sha256:8d3289ce70f272fc1b0735a6eb3cc3d616592ceb5a19d4596883ca776ead6509 0.0s done
+#5 exporting manifest list sha256:65a2267e57c1cb1dd58a300e50dea096d1afcb005cc946366d7d1302ed25ff70 0.0s done
+#5 naming to docker.io/library/vsc-m2ws-19975-acb3dac535c251e18a432d6d4b0bf5492fbc7e762102644eba71074ac106409f:latest done
+#5 unpacking to docker.io/library/vsc-m2ws-19975-acb3dac535c251e18a432d6d4b0bf5492fbc7e762102644eba71074ac106409f:latest done
+#5 DONE 0.1s
+
+[2026-11-01T14:27:10.494Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.Vte86DJM8x/m2ws-19975,target=/workspaces/x -l devcontainer.local_folder=/tmp/tmp.Vte86DJM8x/m2ws-19975 -l devcontainer.config_file=/tmp/tmp.Vte86DJM8x/m2ws-19975/.devcontainer/devcontainer.json -u root --entrypoint /bin/sh vsc-m2ws-19975-acb3dac535c251e18a432d6d4b0bf5492fbc7e762102644eba71074ac106409f -c echo Container started
+[2026-11-01T14:27:10.749Z] Container started
+[2026-11-01T14:27:10.982Z] Running the postCreateCommand from devcontainer.json...
+
+{"outcome":"success","containerId":"b97692a69919ec8d707172f2b04402001a77a6702b3ff1c4b4fa5900557db09b","remoteUser":"root","remoteWorkspaceFolder":"/workspaces/x","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
+--- stderr
+
+### Zelle M2-B, Wiederholung 2: remoteEnv-Referenz, GIT_TOKEN im Host-Umfeld ungesetzt
+befehl: dir=$(prepare_m2); docker run --rm -i --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --mount type=bind,source="$dir",target="$dir" ubmess-devcontainer-cli:0.89.0 devcontainer up --workspace-folder "$dir" >"$dir/cli-out.txt" 2>&1; echo "cli-exit=$?"; cat "$dir/m2-ergebnis.txt" 2>/dev/null || echo 'm2-ergebnis.txt fehlt'; tail -c 1500 "$dir/cli-out.txt"
+exit-status: 0
+--- stdout
+cli-exit=0
+1
+gt-vorhanden=ja
+porting attestation manifest sha256:b4fbf9e7c696599d24a194a7b8b737b1d807010a4c34a95978eec5d5967652b8 0.0s done
+#5 exporting manifest list sha256:4ad269605f82e116b0923d6dff5f544d584f0a79eeceef98d47cac77e409e98b
+
+[2026-11-01T14:27:12.487Z] #5 exporting manifest list sha256:4ad269605f82e116b0923d6dff5f544d584f0a79eeceef98d47cac77e409e98b 0.0s done
+#5 naming to docker.io/library/vsc-m2ws-31138-23e0ef7f21cb5ee712a038a45c38bb9f31b6beae8f5057ce509c9b712cb8b4ad:latest done
+#5 unpacking to docker.io/library/vsc-m2ws-31138-23e0ef7f21cb5ee712a038a45c38bb9f31b6beae8f5057ce509c9b712cb8b4ad:latest done
+#5 DONE 0.1s
+
+[2026-11-01T14:27:12.555Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.Vte86DJM8x/m2ws-31138,target=/workspaces/x -l devcontainer.local_folder=/tmp/tmp.Vte86DJM8x/m2ws-31138 -l devcontainer.config_file=/tmp/tmp.Vte86DJM8x/m2ws-31138/.devcontainer/devcontainer.json -u root --entrypoint /bin/sh vsc-m2ws-31138-23e0ef7f21cb5ee712a038a45c38bb9f31b6beae8f5057ce509c9b712cb8b4ad -c echo Container started
+[2026-11-01T14:27:12.785Z] Container started
+[2026-11-01T14:27:13.022Z] Running the postCreateCommand from devcontainer.json...
+
+{"outcome":"success","containerId":"366d33719b9fd4fb99be97cb42d87edbf66b07ac8586b6d8f5bb972dae776e65","remoteUser":"root","remoteWorkspaceFolder":"/workspaces/x","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
+--- stderr
+
+
+# Ende 2026-11-01T14:27:13Z

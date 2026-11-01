@@ -1,0 +1,562 @@
+# Messung leicht (M1, M3, M4, M5, M7-Probe) — 2026-11-01T14:18:32Z
+# Host: Linux 7.0.0-42-generic x86_64
+# git: git version 2.53.0
+# gh: gh version 2.46.0 (2025-12-13 Ubuntu 2.46.0-4)
+# Wiederholungen je Zelle: 2
+
+## M1: Git-Identität aus GIT_AUTHOR_* / GIT_COMMITTER_* (ohne Konfigurationsdatei)
+## (GIT_CONFIG_GLOBAL und GIT_CONFIG_SYSTEM auf /dev/null, Wegwerf-Repository)
+### Zelle M1-A, Wiederholung 1: alle vier Variablen gesetzt; Commit, Autor und Committer gelesen
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_NAME=h-name GIT_AUTHOR_EMAIL=h-email GIT_COMMITTER_NAME=c-name GIT_COMMITTER_EMAIL=c-email git commit -q --allow-empty -m m && git log --format='%an|%ae|%cn|%ce' -1
+exit-status: 0
+--- stdout
+h-name|h-email|c-name|c-email
+--- stderr
+
+### Zelle M1-A, Wiederholung 2: alle vier Variablen gesetzt; Commit, Autor und Committer gelesen
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_NAME=h-name GIT_AUTHOR_EMAIL=h-email GIT_COMMITTER_NAME=c-name GIT_COMMITTER_EMAIL=c-email git commit -q --allow-empty -m m && git log --format='%an|%ae|%cn|%ce' -1
+exit-status: 0
+--- stdout
+h-name|h-email|c-name|c-email
+--- stderr
+
+### Zelle M1-B, Wiederholung 1: nur GIT_AUTHOR_NAME und GIT_AUTHOR_EMAIL gesetzt
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_NAME=h-name GIT_AUTHOR_EMAIL=h-email git commit -q --allow-empty -m m && git log --format='%an|%ae|%cn|%ce' -1
+exit-status: 128
+--- stdout
+--- stderr
+Committer identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'builder@claude-u-boot-ollama.(none)')
+
+### Zelle M1-B, Wiederholung 2: nur GIT_AUTHOR_NAME und GIT_AUTHOR_EMAIL gesetzt
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_NAME=h-name GIT_AUTHOR_EMAIL=h-email git commit -q --allow-empty -m m && git log --format='%an|%ae|%cn|%ce' -1
+exit-status: 128
+--- stdout
+--- stderr
+Committer identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'builder@claude-u-boot-ollama.(none)')
+
+### Zelle M1-C, Wiederholung 1: nur GIT_AUTHOR_NAME (keine E-Mail)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_NAME=h-name git commit -q --allow-empty -m m && git log --format='%an|%ae|%cn|%ce' -1
+exit-status: 128
+--- stdout
+--- stderr
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'builder@claude-u-boot-ollama.(none)')
+
+### Zelle M1-C, Wiederholung 2: nur GIT_AUTHOR_NAME (keine E-Mail)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_NAME=h-name git commit -q --allow-empty -m m && git log --format='%an|%ae|%cn|%ce' -1
+exit-status: 128
+--- stdout
+--- stderr
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'builder@claude-u-boot-ollama.(none)')
+
+### Zelle M1-D, Wiederholung 1: nur GIT_AUTHOR_EMAIL (kein Name)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_EMAIL=h-email git commit -q --allow-empty -m m && git log --format='%an|%ae|%cn|%ce' -1
+exit-status: 128
+--- stdout
+--- stderr
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: empty ident name (for <h-email>) not allowed
+
+### Zelle M1-D, Wiederholung 2: nur GIT_AUTHOR_EMAIL (kein Name)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_EMAIL=h-email git commit -q --allow-empty -m m && git log --format='%an|%ae|%cn|%ce' -1
+exit-status: 128
+--- stdout
+--- stderr
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: empty ident name (for <h-email>) not allowed
+
+### Zelle M1-E, Wiederholung 1: keine Variable, keine Konfiguration (negativer Referenzfall)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && git commit -q --allow-empty -m m
+exit-status: 128
+--- stdout
+--- stderr
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'builder@claude-u-boot-ollama.(none)')
+
+### Zelle M1-E, Wiederholung 2: keine Variable, keine Konfiguration (negativer Referenzfall)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && git commit -q --allow-empty -m m
+exit-status: 128
+--- stdout
+--- stderr
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'builder@claude-u-boot-ollama.(none)')
+
+### Zelle M1-F, Wiederholung 1: git var GIT_AUTHOR_IDENT mit allen vier Variablen
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_NAME=h-name GIT_AUTHOR_EMAIL=h-email GIT_COMMITTER_NAME=c-name GIT_COMMITTER_EMAIL=c-email git var GIT_AUTHOR_IDENT; echo "exit=$?"
+exit-status: 0
+--- stdout
+h-name <h-email> 1793542713 +0000
+exit=0
+--- stderr
+
+### Zelle M1-F, Wiederholung 2: git var GIT_AUTHOR_IDENT mit allen vier Variablen
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && GIT_AUTHOR_NAME=h-name GIT_AUTHOR_EMAIL=h-email GIT_COMMITTER_NAME=c-name GIT_COMMITTER_EMAIL=c-email git var GIT_AUTHOR_IDENT; echo "exit=$?"
+exit-status: 0
+--- stdout
+h-name <h-email> 1793542713 +0000
+exit=0
+--- stderr
+
+### Zelle M1-G, Wiederholung 1: git var GIT_AUTHOR_IDENT ohne Identität (negativer Referenzfall)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && git var GIT_AUTHOR_IDENT; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=128
+--- stderr
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'builder@claude-u-boot-ollama.(none)')
+
+### Zelle M1-G, Wiederholung 2: git var GIT_AUTHOR_IDENT ohne Identität (negativer Referenzfall)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/initXXXX"); cd "$T" && git init -q . && git var GIT_AUTHOR_IDENT; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=128
+--- stderr
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'builder@claude-u-boot-ollama.(none)')
+
+
+## M3: gh auth token auf dem Host
+## (Länge und SHA-256-Präfix statt des Werts; der Token selbst wird nie ausgegeben)
+### Zelle M3-A, Wiederholung 1: unveränderte Umgebung; Token-Länge, Nichtleere, SHA-256-Präfix, Exit-Code
+befehl: T=$(mktemp -d "$TMP/ghXXXX"); if O=$(gh auth token 2>"$T/err"); then L=${#O}; P=$(printf '%s' "$O" | sha256sum | cut -c1-16); echo "exit=0 laenge=$L leere-ausgabe=$([ $L -eq 0 ] && echo ja || echo nein) sha256-praefix=$P"; else echo "exit=$? (Fehler)"; cat "$T/err"; fi
+exit-status: 0
+--- stdout
+exit=0 laenge=93 leere-ausgabe=nein sha256-praefix=b3fee5287a13c8d8
+--- stderr
+
+### Zelle M3-A, Wiederholung 2: unveränderte Umgebung; Token-Länge, Nichtleere, SHA-256-Präfix, Exit-Code
+befehl: T=$(mktemp -d "$TMP/ghXXXX"); if O=$(gh auth token 2>"$T/err"); then L=${#O}; P=$(printf '%s' "$O" | sha256sum | cut -c1-16); echo "exit=0 laenge=$L leere-ausgabe=$([ $L -eq 0 ] && echo ja || echo nein) sha256-praefix=$P"; else echo "exit=$? (Fehler)"; cat "$T/err"; fi
+exit-status: 0
+--- stdout
+exit=0 laenge=93 leere-ausgabe=nein sha256-praefix=b3fee5287a13c8d8
+--- stderr
+
+### Zelle M3-B, Wiederholung 1: gh nicht im PATH (PATH auf ein leeres Verzeichnis)
+befehl: T=$(mktemp -d "$TMP/nopathXXXX"); mkdir "$T/b"; PATH="$T/b" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=127
+--- stderr
+bash: line 1: gh: command not found
+
+### Zelle M3-B, Wiederholung 2: gh nicht im PATH (PATH auf ein leeres Verzeichnis)
+befehl: T=$(mktemp -d "$TMP/nopathXXXX"); mkdir "$T/b"; PATH="$T/b" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=127
+--- stderr
+bash: line 1: gh: command not found
+
+### Zelle M3-C, Wiederholung 1: nicht angemeldet: leere gh-Konfiguration (GH_CONFIG_DIR auf Wegwerf-Verzeichnis)
+befehl: T=$(mktemp -d "$TMP/nologinXXXX"); mkdir "$T/cfg"; env -u GH_TOKEN GH_CONFIG_DIR="$T/cfg" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+no oauth token found for github.com
+
+### Zelle M3-C, Wiederholung 2: nicht angemeldet: leere gh-Konfiguration (GH_CONFIG_DIR auf Wegwerf-Verzeichnis)
+befehl: T=$(mktemp -d "$TMP/nologinXXXX"); mkdir "$T/cfg"; env -u GH_TOKEN GH_CONFIG_DIR="$T/cfg" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+no oauth token found for github.com
+
+### Zelle M3-D, Wiederholung 1: mit --hostname github.com (expliziter Host)
+befehl: gh auth token --hostname github.com >/dev/null 2>&1; echo "exit=$? (Token-Inhalt nicht gelesen)"
+exit-status: 0
+--- stdout
+exit=0 (Token-Inhalt nicht gelesen)
+--- stderr
+
+### Zelle M3-D, Wiederholung 2: mit --hostname github.com (expliziter Host)
+befehl: gh auth token --hostname github.com >/dev/null 2>&1; echo "exit=$? (Token-Inhalt nicht gelesen)"
+exit-status: 0
+--- stdout
+exit=0 (Token-Inhalt nicht gelesen)
+--- stderr
+
+### Zelle M3-E, Wiederholung 1: GH_TOKEN in der Umgebung gesetzt (Vorgangsweise: Vorrang der Umgebungsvariable)
+befehl: O=$(GH_TOKEN=platzhalter-gh-token-0123456789 gh auth token); echo "exit=$? laenge=${#O} sha256-praefix=$(printf '%s' "$O" | sha256sum | cut -c1-16)"
+exit-status: 0
+--- stdout
+exit=0 laenge=31 sha256-praefix=a9af27215f492646
+--- stderr
+
+### Zelle M3-E, Wiederholung 2: GH_TOKEN in der Umgebung gesetzt (Vorgangsweise: Vorrang der Umgebungsvariable)
+befehl: O=$(GH_TOKEN=platzhalter-gh-token-0123456789 gh auth token); echo "exit=$? laenge=${#O} sha256-praefix=$(printf '%s' "$O" | sha256sum | cut -c1-16)"
+exit-status: 0
+--- stdout
+exit=0 laenge=31 sha256-praefix=a9af27215f492646
+--- stderr
+
+
+## M4: git credential fill ohne und mit Helper (Beleg für den Verzicht auf Quelle 3)
+## (GIT_TERMINAL_PROMPT=0, Zeitlimit im Zellen-Aufruf; kein Netz nötig, host.example ist ein
+##  Beispiel-Host)
+### Zelle M4-A, Wiederholung 1: ohne konfigurierten Helper, mit GIT_TERMINAL_PROMPT=0
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; export GIT_TERMINAL_PROMPT=0; unset DISPLAY GIT_ASKPASS SSH_ASKPASS; printf 'protocol=https\nhost=host.example\n\n' | git credential fill; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=128
+--- stderr
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+
+### Zelle M4-A, Wiederholung 2: ohne konfigurierten Helper, mit GIT_TERMINAL_PROMPT=0
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; export GIT_TERMINAL_PROMPT=0; unset DISPLAY GIT_ASKPASS SSH_ASKPASS; printf 'protocol=https\nhost=host.example\n\n' | git credential fill; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=128
+--- stderr
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+
+### Zelle M4-A2, Wiederholung 1: mit Zeitmessung (Sekunden, date +%sN)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; export GIT_TERMINAL_PROMPT=0; unset DISPLAY GIT_ASKPASS SSH_ASKPASS; S=$(date +%s%N); printf 'protocol=https\nhost=host.example\n\n' | git credential fill >/dev/null 2>"$TMP/fillerr"; RC=$?; E=$(date +%s%N); echo "exit=$RC dauer=$(( (E-S)/1000000 )) ms"; cat "$TMP/fillerr"
+exit-status: 0
+--- stdout
+exit=128 dauer=12 ms
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+--- stderr
+
+### Zelle M4-A2, Wiederholung 2: mit Zeitmessung (Sekunden, date +%sN)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; export GIT_TERMINAL_PROMPT=0; unset DISPLAY GIT_ASKPASS SSH_ASKPASS; S=$(date +%s%N); printf 'protocol=https\nhost=host.example\n\n' | git credential fill >/dev/null 2>"$TMP/fillerr"; RC=$?; E=$(date +%s%N); echo "exit=$RC dauer=$(( (E-S)/1000000 )) ms"; cat "$TMP/fillerr"
+exit-status: 0
+--- stdout
+exit=128 dauer=10 ms
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+--- stderr
+
+### Zelle M4-B, Wiederholung 1: mit Helper (store, Wegwerf-Datei, Platzhalter-Token)
+befehl: T=$(mktemp -d "$TMP/helperXXXX"); printf 'https://x-access-token:platzhalter-cred-fill-0123456789@host.example\n' > "$T/store"; printf 'protocol=https\nhost=host.example\n\n' | git -c credential.helper="store --file=$T/store" credential fill; echo "exit=$?"
+exit-status: 0
+--- stdout
+protocol=https
+host=host.example
+username=x-access-token
+password=platzhalter-cred-fill-0123456789
+exit=0
+--- stderr
+
+### Zelle M4-B, Wiederholung 2: mit Helper (store, Wegwerf-Datei, Platzhalter-Token)
+befehl: T=$(mktemp -d "$TMP/helperXXXX"); printf 'https://x-access-token:platzhalter-cred-fill-0123456789@host.example\n' > "$T/store"; printf 'protocol=https\nhost=host.example\n\n' | git -c credential.helper="store --file=$T/store" credential fill; echo "exit=$?"
+exit-status: 0
+--- stdout
+protocol=https
+host=host.example
+username=x-access-token
+password=platzhalter-cred-fill-0123456789
+exit=0
+--- stderr
+
+### Zelle M4-C, Wiederholung 1: Helper liefert nichts (leere Store-Datei)
+befehl: export GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/helperXXXX"); : > "$T/creds"; printf 'protocol=https\nhost=host.example\n\n' | git -c credential.helper="store --file=$T/creds" credential fill; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=128
+--- stderr
+fatal: could not read Username for 'https://host.example': No such device or address
+
+### Zelle M4-C, Wiederholung 2: Helper liefert nichts (leere Store-Datei)
+befehl: export GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/helperXXXX"); : > "$T/creds"; printf 'protocol=https\nhost=host.example\n\n' | git -c credential.helper="store --file=$T/creds" credential fill; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=128
+--- stderr
+fatal: could not read Username for 'https://host.example': No such device or address
+
+
+## M5: git -C <Ordner> config user.name / user.email (wirksamer Wert)
+## (GIT_CONFIG_SYSTEM=/tmp/tmp.JCTrFi5XvO/syscfg, GIT_CONFIG_GLOBAL=/tmp/tmp.JCTrFi5XvO/globcfg, Wegwerf-Repository; Werte Platzhalter)
+### Zelle M5-A, Wiederholung 1: Wert nur in global (kein local): der wirksame Wert ist der globale
+befehl: printf '[user]\n\tname = glob-name\n\temail = glob-email\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; : > '/tmp/tmp.JCTrFi5XvO/syscfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.email; echo "exit=$?"
+exit-status: 0
+--- stdout
+glob-name
+exit=0
+glob-email
+exit=0
+--- stderr
+
+### Zelle M5-A, Wiederholung 2: Wert nur in global (kein local): der wirksame Wert ist der globale
+befehl: printf '[user]\n\tname = glob-name\n\temail = glob-email\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; : > '/tmp/tmp.JCTrFi5XvO/syscfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.email; echo "exit=$?"
+exit-status: 0
+--- stdout
+glob-name
+exit=0
+glob-email
+exit=0
+--- stderr
+
+### Zelle M5-B, Wiederholung 1: Wert in local und global: local gewinnt
+befehl: printf '[user]\n\tname = glob-name\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; : > '/tmp/tmp.JCTrFi5XvO/syscfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; git -C "$T" config user.name local-name; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+local-name
+exit=0
+--- stderr
+
+### Zelle M5-B, Wiederholung 2: Wert in local und global: local gewinnt
+befehl: printf '[user]\n\tname = glob-name\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; : > '/tmp/tmp.JCTrFi5XvO/syscfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; git -C "$T" config user.name local-name; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+local-name
+exit=0
+--- stderr
+
+### Zelle M5-C, Wiederholung 1: Wert in system und global: global vor system
+befehl: printf '[user]\n\tname = sys-name\n' > '/tmp/tmp.JCTrFi5XvO/syscfg'; printf '[user]\n\tname = glob-name\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+glob-name
+exit=0
+--- stderr
+
+### Zelle M5-C, Wiederholung 2: Wert in system und global: global vor system
+befehl: printf '[user]\n\tname = sys-name\n' > '/tmp/tmp.JCTrFi5XvO/syscfg'; printf '[user]\n\tname = glob-name\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+glob-name
+exit=0
+--- stderr
+
+### Zelle M5-D, Wiederholung 1: Schlüssel fehlt überall: Exit-Code und leere Ausgabe
+befehl: : > '/tmp/tmp.JCTrFi5XvO/syscfg'; : > '/tmp/tmp.JCTrFi5XvO/globcfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+
+### Zelle M5-D, Wiederholung 2: Schlüssel fehlt überall: Exit-Code und leere Ausgabe
+befehl: : > '/tmp/tmp.JCTrFi5XvO/syscfg'; : > '/tmp/tmp.JCTrFi5XvO/globcfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+
+### Zelle M5-E, Wiederholung 1: Ordner ohne Repository (kein .git)
+befehl: : > '/tmp/tmp.JCTrFi5XvO/syscfg'; : > '/tmp/tmp.JCTrFi5XvO/globcfg'; T=$(mktemp -d "$TMP/plainXXXX"); GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+
+### Zelle M5-E, Wiederholung 2: Ordner ohne Repository (kein .git)
+befehl: : > '/tmp/tmp.JCTrFi5XvO/syscfg'; : > '/tmp/tmp.JCTrFi5XvO/globcfg'; T=$(mktemp -d "$TMP/plainXXXX"); GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+
+### Zelle M5-F, Wiederholung 1: leerer Wert (user.name als Leerezeichenkette gesetzt)
+befehl: printf '[user]\n\tname =\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; : > '/tmp/tmp.JCTrFi5XvO/syscfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; O=$(GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name); echo "exit=$? ausgabe-laenge=${#O}"
+exit-status: 0
+--- stdout
+exit=0 ausgabe-laenge=0
+--- stderr
+
+### Zelle M5-F, Wiederholung 2: leerer Wert (user.name als Leerezeichenkette gesetzt)
+befehl: printf '[user]\n\tname =\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; : > '/tmp/tmp.JCTrFi5XvO/syscfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; O=$(GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name); echo "exit=$? ausgabe-laenge=${#O}"
+exit-status: 0
+--- stdout
+exit=0 ausgabe-laenge=0
+--- stderr
+
+### Zelle M5-G, Wiederholung 1: includeIf: global-Datei mit includeIf auf das Wegwerf-Verzeichnis
+befehl: : > '/tmp/tmp.JCTrFi5XvO/syscfg'; printf '[user]\n\tname = glob-name\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; printf '[includeIf "gitdir:%s/"]\n\tpath = inc-cfg\n' "/tmp/tmp.JCTrFi5XvO" >> '/tmp/tmp.JCTrFi5XvO/globcfg'; printf '[user]\n\tname = inc-name\n' > '/tmp/tmp.JCTrFi5XvO/inc-cfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+inc-name
+exit=0
+--- stderr
+
+### Zelle M5-G, Wiederholung 2: includeIf: global-Datei mit includeIf auf das Wegwerf-Verzeichnis
+befehl: : > '/tmp/tmp.JCTrFi5XvO/syscfg'; printf '[user]\n\tname = glob-name\n' > '/tmp/tmp.JCTrFi5XvO/globcfg'; printf '[includeIf "gitdir:%s/"]\n\tpath = inc-cfg\n' "/tmp/tmp.JCTrFi5XvO" >> '/tmp/tmp.JCTrFi5XvO/globcfg'; printf '[user]\n\tname = inc-name\n' > '/tmp/tmp.JCTrFi5XvO/inc-cfg'; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; GIT_CONFIG_GLOBAL='/tmp/tmp.JCTrFi5XvO/globcfg' GIT_CONFIG_SYSTEM='/tmp/tmp.JCTrFi5XvO/syscfg' git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+inc-name
+exit=0
+--- stderr
+
+### Zelle M5-H, Wiederholung 1: keine Konfigurationsdatei überhaupt (negativer Referenzfall; Ordner mit Repository)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+
+### Zelle M5-H, Wiederholung 2: keine Konfigurationsdatei überhaupt (negativer Referenzfall; Ordner mit Repository)
+befehl: export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null; T=$(mktemp -d "$TMP/repoXXXX"); git -C "$T" init -q .; git -C "$T" config user.name; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+
+
+## M7-Probe: Fake-Quelle für den Docker-Test (Skript als gh im PATH, Wegwerf-Git-Konfiguration)
+### Zelle M7-A, Wiederholung 1: Fake-gh (Skript) im PATH liefert den Platzhalter
+befehl: T=$(mktemp -d "$TMP/fakeXXXX"); mkdir "$T/bin"; printf '#!/bin/sh\necho platzhalter-fake-gh-token-0123456789\n' > "$T/bin/gh"; chmod +x "$T/bin/gh"; PATH="$T/bin:$PATH" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+platzhalter-fake-gh-token-0123456789
+exit=0
+--- stderr
+
+### Zelle M7-A, Wiederholung 2: Fake-gh (Skript) im PATH liefert den Platzhalter
+befehl: T=$(mktemp -d "$TMP/fakeXXXX"); mkdir "$T/bin"; printf '#!/bin/sh\necho platzhalter-fake-gh-token-0123456789\n' > "$T/bin/gh"; chmod +x "$T/bin/gh"; PATH="$T/bin:$PATH" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+platzhalter-fake-gh-token-0123456789
+exit=0
+--- stderr
+
+### Zelle M7-B, Wiederholung 1: Fake-gh, der nichts liefert (leere Ausgabe)
+befehl: T=$(mktemp -d "$TMP/fakeXXXX"); mkdir "$T/bin"; printf '#!/bin/sh\n' > "$T/bin/gh"; chmod +x "$T/bin/gh"; PATH="$T/bin:$PATH" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=0
+--- stderr
+
+### Zelle M7-B, Wiederholung 2: Fake-gh, der nichts liefert (leere Ausgabe)
+befehl: T=$(mktemp -d "$TMP/fakeXXXX"); mkdir "$T/bin"; printf '#!/bin/sh\n' > "$T/bin/gh"; chmod +x "$T/bin/gh"; PATH="$T/bin:$PATH" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=0
+--- stderr
+
+### Zelle M7-C, Wiederholung 1: Fake-gh mit Fehlerausgabe und Exit 1
+befehl: T=$(mktemp -d "$TMP/fakeXXXX"); mkdir "$T/bin"; printf '#!/bin/sh\necho fake-gh-error 1>&2\nexit 1\n' > "$T/bin/gh"; chmod +x "$T/bin/gh"; PATH="$T/bin:$PATH" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+fake-gh-error
+
+### Zelle M7-C, Wiederholung 2: Fake-gh mit Fehlerausgabe und Exit 1
+befehl: T=$(mktemp -d "$TMP/fakeXXXX"); mkdir "$T/bin"; printf '#!/bin/sh\necho fake-gh-error 1>&2\nexit 1\n' > "$T/bin/gh"; chmod +x "$T/bin/gh"; PATH="$T/bin:$PATH" gh auth token; echo "exit=$?"
+exit-status: 0
+--- stdout
+exit=1
+--- stderr
+fake-gh-error
+
+
+## Kamera: Werte, die die Zellen nicht zeigen (Kontrolle)
+## (Prüfung nach dem Lauf: keine der Rohdaten-Ausgaben enthält den echten Token; die
+##  Skriptlogik erlaubt das nicht — der Token wird nur in einer Shell-Variable des Laufrags
+##  gehalten und nur als Länge und SHA-256-Präfix belegt)
+# Ende 2026-11-01T14:18:35Z
