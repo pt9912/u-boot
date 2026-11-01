@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit. Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
+[`slice-v1-devcontainer-container-name`](slice-v1-devcontainer-container-name.md) liegt in `in-progress/` (ohne Welle, Release-Zuordnung nächstes Minor nach `v0.17.0`, *Changed*; Messung und Entscheidungen: §6 des Slices und [`docs/messungen/slice-v1-devcontainer-container-name`](../../../messungen/slice-v1-devcontainer-container-name/README.md)). Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
 ## Nächste Wellen
 
