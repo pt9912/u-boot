@@ -97,7 +97,7 @@ Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis `BEO-<KUERZEL>/<slug>/` oder eine weitere Datei in dessen `evidence/`; **kein Zaehler wird gesetzt**, er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7 notiert.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo **ohne** Wellen-Betrieb hier geprüft, im Repo **mit** Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo **ohne** Wellen-Betrieb hier geprüft, im Repo **mit** Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
 
 ## 3. Plan (vor Code)
 
@@ -230,7 +230,7 @@ Geschlossen am 2026-11-01 mit **eingeschränktem Gegenstand**: Der Projektinhabe
 - **Beobachtungs-Register (`../observations/`):** `evidence/slice-v1-devcontainer-ressourcenlimits.md` in `BEO-DOK/zusage-weiter-als-messung/` und in `BEO-DOK/spec-bedingung-ohne-code-entsprechung/` ergänzt; der Zähler folgt aus den Dateien und ist nicht gesetzt. Keine neue Beobachtung angelegt.
 - **Folge-Slices:** [`slice-v1-devcontainer-ressourcenlimits-messung`](../open/slice-v1-devcontainer-ressourcenlimits-messung.md) (die offenen Messungen und die drei Entscheidungen des Projektinhabers) — ist eine Datei in `open/`.
 - **Risiken aus §6:** je ein Ausgang in §6: weiter offen 1, 2, 5, 6, 7 (alle mit Zeiger auf den Folge-Slice); eingetreten 8, 9; entfallen 3, 4, 10.
-- **Drei Paarungen:** wird nach dem `git mv` nach `done/` geprüft.
+- **Drei Paarungen:** nach dem `git mv` geprüft. Anker: nichts verkörpert, kein Feld `liegt in`, nichts zu paaren. Folge-Slice: `../open/slice-v1-devcontainer-ressourcenlimits-messung.md` liegt in `open/` und ist in `open/README.md` geführt. Register: `evidence/slice-v1-devcontainer-ressourcenlimits.md` liegt in `BEO-DOK/zusage-weiter-als-messung/` und in `BEO-DOK/spec-bedingung-ohne-code-entsprechung/`.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
