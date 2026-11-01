@@ -356,6 +356,7 @@ func TestDoctor_SandboxFallback_OnlyConfiguredCapabilities(t *testing.T) {
 				if len(insp.findFolders) != 1 || insp.findFolders[0] != doctorBaseDir {
 					t.Errorf("FindContainer calls = %v, want exactly one for %s", insp.findFolders, doctorBaseDir)
 				}
+				requireNoInstanceAsked(t, insp)
 			}
 		})
 	}
@@ -564,6 +565,7 @@ func TestGenerateDevcontainer_ExistingContainerFallbackWarning(t *testing.T) {
 			if len(insp.findFolders) != 1 || insp.findFolders[0] != generateTestBaseDir {
 				t.Errorf("FindContainer calls = %v", insp.findFolders)
 			}
+			requireNoInstanceAsked(t, insp)
 		})
 	}
 }
@@ -771,6 +773,7 @@ func TestInit_ExistingContainerFallbackWarning(t *testing.T) {
 	if len(insp.findFolders) != 1 || insp.findFolders[0] != testBaseDir {
 		t.Errorf("FindContainer calls = %v", insp.findFolders)
 	}
+	requireNoInstanceAsked(t, insp)
 }
 
 func TestInit_ExistingContainerOtherOutcomesAreSilent(t *testing.T) {

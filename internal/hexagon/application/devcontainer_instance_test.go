@@ -149,10 +149,9 @@ func TestDevcontainerInstance_OnlyInstancesEndsBeforeTheLauncher(t *testing.T) {
 	}
 }
 
-// ADR-0038 decision 5 (SPEC-049, paragraph *Instanzen*): the check for
-// "only instances" of `up` and `shell` follows the disclosure of the socket,
-// which the call raises before it asks the engine; the invalid name does not
-// reach the disclosure.
+// SPEC-049 (paragraph *Instanzen*): the check for "only instances" of `up`
+// and `shell` follows the disclosure of the socket, which the call raises
+// before it asks the engine; the invalid name does not reach the disclosure.
 func TestDevcontainerInstance_DisclosureComesBeforeTheOnlyInstancesCheck(t *testing.T) {
 	t.Parallel()
 	insp := &instanceInspector{containers: []instanceContainer{{id: idOfInstance, running: true, instance: "i1"}}}
@@ -350,5 +349,21 @@ func TestDevcontainerInstance_OnlyInstancesIsNotDeterminableForTheStatusReading(
 	}
 	if len(insp.readPaths) != 0 {
 		t.Errorf("status files read: %v", insp.readPaths)
+	}
+}
+
+// requireNoInstanceAsked fails unless the inspector was asked at least once
+// and every question named the container without an instance. `doctor`,
+// `generate devcontainer` and `init` look at that container only (SPEC-049,
+// paragraph *Instanzen*); the tests of the three callers call it.
+func requireNoInstanceAsked(t *testing.T, insp *fakeInspector) {
+	t.Helper()
+	if len(insp.findInstances) == 0 {
+		t.Fatal("the inspector was not asked, the instance of the question cannot be checked")
+	}
+	for _, instance := range insp.findInstances {
+		if instance != "" {
+			t.Errorf("the inspector was asked for the instance %q, want the container without an instance", instance)
+		}
 	}
 }
