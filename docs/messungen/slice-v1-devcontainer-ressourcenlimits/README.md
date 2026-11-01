@@ -54,6 +54,17 @@ Aus Meldungen, die vor dem Start fallen (Messung 6, jeweils ein Lauf):
 
 Daraus folgt: Die Untergrenze für `--memory` (6 MB) und die Obergrenze für `--cpus` (Zahl der CPUs des Hosts) sind Eigenschaften der Engine und des Hosts; eine Prüfung in `u-boot` kann sie nicht festlegen.
 
+## CI-Lauf des Jobs `integration-docker`, 2026-11-01 (Docker-Tests des Slice)
+
+Lauf [41307229027](https://github.com/pt9912/u-boot/actions/runs/41307229027) (Job `integration-docker`, `runs-on: ubuntu-latest` laut `.github/workflows/integration.yml`, Dauer 13 min 7 s, grün; die Angaben stammen aus der Übergabe an den Planner, das Lauf-Protokoll ist hier nicht selbst gelesen). Beide Tests aus `internal/e2e/resources_docker_test.go` bestanden, je **ein Lauf**:
+
+| Test | Dauer | Geprüft (laut Testtext: `HostConfig.Memory` und `HostConfig.NanoCpus` des gestarteten Containers) |
+|---|---|---|
+| `TestE2E_Resources_DefaultProfileLimitsReachTheContainer` | 2,43 s | Standardprofil mit `512m` und `1.5`; Gegenprobe ohne Schlüssel |
+| `TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer` | 11,90 s | Sandbox-Profil mit `nestedRuntime: docker` |
+
+Das belegt das Ankommen der Grenze in der Konfiguration des **äußeren** Containers auf der Engine des Runners. Nicht belegt: ob die Grenze im Container durchgesetzt wird (cgroup-Dateien, Verhalten über dem Limit), die Wirkung auf den verschachtelten Docker, die Architektur des Runners (nicht ausgelesen), ein zweiter Lauf je Zelle.
+
 ## Lesehilfe
 
 - Der Managed Block umschließt in beiden gemessenen Dateien das gesamte JSON-Objekt (siehe die beiden `roh-devcontainer-json-*.txt`). Daraus folgt, dass außerhalb des Blocks kein Schlüssel des Objekts stehen kann; das folgt aus der Form des Blocks und ist **nicht** mit der Dev-Container-CLI oder VS Code gemessen (ob sie eine Datei mit Text hinter dem Objekt lesen).
@@ -61,8 +72,8 @@ Daraus folgt: Die Untergrenze für `--memory` (6 MB) und die Obergrenze für `--
 
 ## Nicht gemessen
 
-- Ob `--memory` und `--cpus` im Container ankommen (die Engine-Messung oben scheitert an der verschachtelten Umgebung), auch nach `u-boot devcontainer up` (Hilfs-Container mit Dev-Container-CLI): kein Container gestartet.
+- Ob `--memory` und `--cpus` im Container **durchgesetzt** werden (die Engine-Messung oben scheitert an der verschachtelten Umgebung); das Ankommen in der Konfiguration des Containers nach `u-boot devcontainer up` belegt nur der CI-Lauf oben, einmal je Profil.
 - Das Sandbox-Profil (`--privileged`, `nestedRuntime: docker`) mit Begrenzung; die Wirkung auf den verschachtelten Docker und dessen Container.
 - Docker-Engines außer Linux `amd64` mit lokaler Engine; ein zu kleines Limit (OOM-Kill von Startscripten); zwei Instanzen mit Begrenzung.
 - Das Überleben einer Ergänzung im Sandbox-Profil **mit** einer `runArgs`-Zeile (etwa mit `nestedRuntime: docker`, das `--privileged` rendert); gemessen ist nur das Profil ohne weitere Features.
-- Mehr als ein Lauf je Variante; andere Versionen von `u-boot` als 0.16.1.
+- Mehr als ein Lauf je Variante und Zelle; die Messungen 1, 2, 4 und 5 des Slice insgesamt (Folge: [`slice-v1-devcontainer-ressourcenlimits-messung`](../../plan/planning/open/slice-v1-devcontainer-ressourcenlimits-messung.md)); andere Versionen von `u-boot` als 0.16.1.
