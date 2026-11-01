@@ -69,8 +69,6 @@ exec)
   esac
   n=$#; i=0
   for a in "$@"; do i=$((i+1)); [ "$i" -eq $((n-2)) ] && shell=$a; done
-  [ -e "$D/user-gone-late" ] && grep -q -x -e '-i' "$D/argv.log" && { printf 'unable to find user %s: no matching entries in passwd file\r\n' "$(cat "$D/user-gone-late")"; exit 126; }
-  [ -e "$D/probe-late-not-running" ] && grep -q -x -e '-i' "$D/argv.log" && { echo 'Error response from daemon: container is not running' >&2; exit 1; }
   [ -e "$D/user-missing" ] && { echo 'Error response from daemon: unable to find user nosuchuser: no matching entries in passwd file' >&2; exit 1; }
   [ -e "$D/workspace-missing" ] && { echo 'OCI runtime exec failed: exec failed: unable to start container process: chdir to cwd ("/nonexistent") set in config.json failed: no such file or directory'; exit 127; }
   [ -e "$D/$shell-missing" ] && { echo "OCI runtime exec failed: exec failed: unable to start container process: exec: \"$shell\": executable file not found in \$PATH"; exit 127; }
