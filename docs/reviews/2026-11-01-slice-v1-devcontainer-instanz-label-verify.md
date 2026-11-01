@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-v1-devcontainer-instanz-label`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-label.md) — 2026-11-01
+# Verification-Report: [`slice-v1-devcontainer-instanz-label`](../plan/planning/done/slice-v1-devcontainer-instanz-label.md) — 2026-11-01
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD, [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md) und den ausgeführten Sensoren? Form nach [`harness/verification.md`](../../harness/verification.md). Außer dieser Datei ist nichts geändert, nichts committet. Die Datei entstand per `cp` aus `.harness/baseline/v6.18.1/templates/docs/reviews/review-report.template.md` (`diff -q` direkt nach dem `cp`: identisch; es gibt keine eigene Verifikations-Vorlage, Vorbild ist der Report [`2026-10-31-slice-v1-devcontainer-instanz-messung-verify`](2026-10-31-slice-v1-devcontainer-instanz-messung-verify.md)) und wurde mit dem Write-Werkzeug gefüllt.
 
@@ -9,7 +9,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-instanz-label`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-label.md)
+- Slice: [`slice-v1-devcontainer-instanz-label`](../plan/planning/done/slice-v1-devcontainer-instanz-label.md)
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md), [`ADR-0015`](../plan/adr/0015-sandbox-volumes-pro-instanz.md), [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)
 - Artefakte: 34 Dateien des Diffs (+1795/−121), siehe Abschnitt 3
 
