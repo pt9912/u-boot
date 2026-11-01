@@ -495,34 +495,52 @@ func (s *DevcontainerStartService) resolveHostGit(
 	if s.hostSource == nil {
 		return envValues, gitIdentity, nil, ""
 	}
-	sandboxProfile, resolveToken := s.hostGitSwitch(r.baseDir)
-	// Token: only the sandbox profile with the switch on; the port applies
-	// the order of the sources (host variable first): its GIT_TOKEN source
-	// is the present transport, its gh source one the launcher resolves.
-	if sandboxProfile && resolveToken {
-		if !containsString(names, gitTokenEnvName) {
-			warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSwitchWithoutRefWarning))
-		} else {
-			value, source, terr := s.hostSource.GitToken(ctx)
-			switch {
-			case terr != nil:
-				warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", fmt.Sprintf(tokenResolutionFailedWarningT, terr.Error())))
-			case value == "":
-				warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenMissingSourceWarning))
-			case source == driven.TokenSourceEnvironment:
-				// The host passes its variable as before (LH-FA-DEV-009).
-				tokenSource = source
-				warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSourceHostEnvWarning))
-			default:
-				envValues[gitTokenEnvName] = value
-				tokenSource = source
-				warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSourceGhWarning))
-			}
-		}
+	sandboxProfile, switchOn := s.hostGitSwitch(r.baseDir)
+	resolveToken := sandboxProfile && switchOn
+	envValues, tokenSource, warnings = s.resolveTokenSource(ctx, names, resolveToken, envValues)
+	gitIdentity, warnings = s.resolveIdentity(ctx, r, warnings)
+	return envValues, gitIdentity, warnings, tokenSource
+}
+
+// resolveTokenSource applies the token resolution of the opt-in switch to
+// the environment values (LH-FA-DEV-009); with no switch, no sandbox profile
+// or no reference it changes nothing. The host variable keeps the transport
+// of the present: the port answers its source first; the launcher passes it
+// as before.
+func (s *DevcontainerStartService) resolveTokenSource(
+	ctx context.Context, names []string, resolveToken bool, envValues map[string]string,
+) (map[string]string, string, []driving.WarningEntry) {
+	var warnings []driving.WarningEntry
+	if !resolveToken {
+		return envValues, "", warnings
 	}
-	// Identity: the effective values of the project folder on the host;
-	// a missing key or an empty value sets nothing (the launcher keeps a
-	// value the container already carries).
+	if !containsString(names, gitTokenEnvName) {
+		return envValues, "", append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSwitchWithoutRefWarning))
+	}
+	value, source, terr := s.hostSource.GitToken(ctx)
+	switch {
+	case terr != nil:
+		warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", fmt.Sprintf(tokenResolutionFailedWarningT, terr.Error())))
+	case value == "":
+		warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenMissingSourceWarning))
+	case source == driven.TokenSourceEnvironment:
+		// The host passes its variable as before (LH-FA-DEV-009).
+		warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSourceHostEnvWarning))
+	default:
+		envValues[gitTokenEnvName] = value
+		warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSourceGhWarning))
+	}
+	return envValues, source, warnings
+}
+
+// resolveIdentity reads the effective values of the project folder on the
+// host (LH-FA-DEV-010); a missing key or an empty value sets nothing (the
+// launcher keeps a value the container already carries); a failed reading
+// and missing values warn without abort.
+func (s *DevcontainerStartService) resolveIdentity(
+	ctx context.Context, r startRequest, warnings []driving.WarningEntry,
+) (driven.DevcontainerGitIdentity, []driving.WarningEntry) {
+	var gitIdentity driven.DevcontainerGitIdentity
 	name, nerr := s.hostSource.ConfigValue(ctx, r.baseDir, "user.name")
 	email, eerr := s.hostSource.ConfigValue(ctx, r.baseDir, "user.email")
 	switch {
@@ -544,7 +562,7 @@ func (s *DevcontainerStartService) resolveHostGit(
 			warnings = append(warnings, warningNoAbort("LH-FA-DEV-010", fmt.Sprintf(gitIdentityMissingKeyWarningT, "user.email")))
 		}
 	}
-	return envValues, gitIdentity, warnings, tokenSource
+	return gitIdentity, warnings
 }
 
 // hostGitSwitch reads the opt-in switch and the profile of the project
