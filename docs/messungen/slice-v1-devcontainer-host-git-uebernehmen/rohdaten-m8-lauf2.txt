@@ -1,0 +1,296 @@
+# Messung schwer (m8) — 2026-11-01T14:38:26Z
+# Host: Linux 7.0.0-42-generic x86_64
+# Docker: 29.9.2 / Server 29.9.2 (linux/amd64)
+# u-boot: u-boot version 0.17.0-dev
+# Hilfs-Image: ubmess-devcontainer-cli:0.89.0
+# Token-Platzhalter (Länge): 36
+# Wiederholungen je Zelle: 2
+
+## M8: Wo steht der Wert nach dem Start (Platzhalter): Prozesslisten während up, Container-Metadaten
+## (ein up-Lauf im Sandbox-Profil; Suche nach dem Platzhalter in Prozesslisten, Config.Env und
+##  Labels; Zeilen ohne Fund sind der Beleg des Ortes 'nicht dort')
+### Zelle M8-A, Wiederholung 1: Probe während und nach up (Sandbox, Platzhalter)
+befehl: m8_run
+exit-status: 0
+--- stdout
+Projektordner: /tmp/tmp.4HYNVIczCJ/proj-sandbox-24077
+--- Prozesslisten während des Starts (10 Proben à 4 s)
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the call); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+== Probe 1 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+docker run --rm --name u-boot-devcontainer-up-fe866a23 --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --mount type=bind,source=/tmp/tmp.4HYNVIczCJ/proj-sandbox-24077,target=/tmp/tmp.4HYNVIczCJ/proj-sandbox-24077 -e GIT_TOKEN u-boot-devcontainer-cli:0.89.0-f1a94cce795e devcontainer up --workspace-folder /tmp/tmp.4HYNVIczCJ/proj-sandbox-24077
+== Probe 1 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 1 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+TOKEN_PLACEH=platzh-m8-git-token-0123456789abcdef
+GIT_TOKEN=platzh-m8-git-token-0123456789abcdef
+(Ende der environ-Suche)
+== Probe 1 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+FailedPrecondition: container 47407066957a59b6e2874c669524e9f5d811ac87a84967b3a30f285d2f4b4685 init process is not running: failed precondition
+Devcontainer started: container 9c51268c9e6c, remote user vscode, workspace /workspaces/mubmess1585
+== Probe 2 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 2 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 2 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 2 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 3 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 3 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 3 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 3 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 4 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 4 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 4 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 4 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 5 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 5 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 5 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 5 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 6 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 6 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 6 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 6 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 7 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 7 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 7 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 7 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 8 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 8 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 8 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 8 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 9 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 9 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 9 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 9 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 10 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 10 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 10 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 10 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+up-exit=0
+--- nach dem Start: docker inspect des Devcontainers
+container=9c51268c9e6c
+== Config.Env:
+["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","LANG=C.UTF-8"]
+== Platzhalter in Config.Env: nein
+== Label devcontainer.metadata (erste 4000 Zeichen):
+[ {"id":"ghcr.io/devcontainers/features/common-utils:2"}, {"id":"ghcr.io/devcontainers/features/git:1","customizations":{"vscode":{"settings":{"github.copilot.chat.codeGeneration.instructions":[{"text":"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`."}]}}}}, {"remoteUser":"vscode"}, {"mounts":["source=mubmess1585-workspace-${devcontainerId},target=/workspaces/mubmess1585,type=volume"],"remoteUser":"vscode","remoteEnv":{"GIT_TOKEN":"${localEnv:GIT_TOKEN}"}} ]
+
+== Platzhalter in devcontainer.metadata: nein
+== localEnv in devcontainer.metadata: [ {"id":"ghcr.io/devcontainers/features/common-utils:2"}, {"id":"ghcr.io/devcontainers/features/git:1","customizations":{"vscode":{"settings":{"github.copilot.chat.codeGeneration.instructions":[{"text
+== alle Labels:
+{"dev.containers.id":"base-debian","dev.containers.release":"v0.4.37","dev.containers.source":"https://github.com/devcontainers/images","dev.containers.timestamp":"Wed, 28 Oct 2026 18:32:17 GMT","dev.containers.variant":"trixie","devcontainer.config_file":"/tmp/tmp.4HYNVIczCJ/proj-sandbox-24077/.devcontainer/devcontainer.json","devcontainer.local_folder":"/tmp/tmp.4HYNVIczCJ/proj-sandbox-24077","devcontainer.metadata":"[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"mounts\":[\"source=mubmess1585-workspace-${devcontainerId},target=/workspaces/mubmess1585,type=volume\"],\"remoteUser\":\"vscode\",\"remoteEnv\":{\"GIT_TOKEN\":\"${localEnv:GIT_TOKEN}\"}} ]","version":"2.2.5"}
+--- stderr
+[2026-11-01T14:38:26.750Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+[2026-11-01T14:38:27.633Z] Start: Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 -f /tmp/devcontainercli-root/container-features/0.89.0-1793543907631/Dockerfile-with-features -t vsc-proj-sandbox-24077-e79bc3319c0a29abcfb4d7ad3f7e033b88def496dd3338e913d60dd9a2a9be73 --target dev_containers_target_stage --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label /tmp/tmp.4HYNVIczCJ/proj-sandbox-24077/.devcontainer
+[2026-11-01T14:38:27.903Z] #0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile-with-features
+#1 transferring dockerfile: 1.49kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.1s
+
+[2026-11-01T14:38:28.094Z] 
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [dev_container_auto_added_stage_label 1/3] FROM mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6
+#4 resolve mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6 0.0s done
+#4 CACHED
+
+#5 [dev_container_auto_added_stage_label 2/3] RUN mkdir -p "/workspaces/mubmess1585" && chown vscode:vscode "/workspaces/mubmess1585"
+
+[2026-11-01T14:38:28.151Z] #5 DONE 0.2s
+
+[2026-11-01T14:38:28.303Z] 
+#6 [dev_container_auto_added_stage_label 3/3] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+
+[2026-11-01T14:38:28.386Z] #6 DONE 0.2s
+
+[2026-11-01T14:38:28.549Z] 
+#7 exporting to image
+#7 exporting layers 0.1s done
+#7 preparing layers for inline cache 0.1s done
+
+[2026-11-01T14:38:28.650Z] #7 exporting manifest sha256:bf824431f22ae6fc13f57c05f520d355f3810adf40b09af8419bdae2902d7950 0.0s done
+#7 exporting config sha256:c3d6f319eefc8fffe21afc7cff8b2b7864fae6ec1322b0b547e54c0a7026fe2d 0.0s done
+#7 exporting attestation manifest sha256:c86389337acf8df41fec8e116fd121349c613d31d34d67ea36bad19ff271f24c 0.0s done
+#7 exporting manifest list sha256:14199e0c5330f9e270558e0147487da93fbd707b95a2cb3eb21b3d44312d0543 0.0s done
+#7 naming to docker.io/library/vsc-proj-sandbox-24077-e79bc3319c0a29abcfb4d7ad3f7e033b88def496dd3338e913d60dd9a2a9be73:latest done
+#7 unpacking to docker.io/library/vsc-proj-sandbox-24077-e79bc3319c0a29abcfb4d7ad3f7e033b88def496dd3338e913d60dd9a2a9be73:latest 0.0s done
+
+[2026-11-01T14:38:28.762Z] #7 DONE 0.3s
+
+[2026-11-01T14:38:29.714Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=mubmess1585-workspace-1okfaeimg6vpgrisnghdl33do9i2frqfqs57jphkgqk0m2apd7et,target=/workspaces/mubmess1585,type=volume -l devcontainer.local_folder=/tmp/tmp.4HYNVIczCJ/proj-sandbox-24077 -l devcontainer.config_file=/tmp/tmp.4HYNVIczCJ/proj-sandbox-24077/.devcontainer/devcontainer.json --entrypoint /bin/sh vsc-proj-sandbox-24077-e79bc3319c0a29abcfb4d7ad3f7e033b88def496dd3338e913d60dd9a2a9be73-uid -c echo Container started
+[2026-11-0environment: line 16: /proc/84192/environ: Permission denied
+1T14:38:29.967Z] Container started
+
+### Zelle M8-A, Wiederholung 2: Probe während und nach up (Sandbox, Platzhalter)
+befehl: m8_run
+exit-status: 0
+--- stdout
+Projektordner: /tmp/tmp.4HYNVIczCJ/proj-sandbox-6571
+--- Prozesslisten während des Starts (10 Proben à 4 s)
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the call); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+== Probe 1 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+docker run --rm --name u-boot-devcontainer-up-16a9f386 --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock --mount type=bind,source=/tmp/tmp.4HYNVIczCJ/proj-sandbox-6571,target=/tmp/tmp.4HYNVIczCJ/proj-sandbox-6571 -e GIT_TOKEN u-boot-devcontainer-cli:0.89.0-f1a94cce795e devcontainer up --workspace-folder /tmp/tmp.4HYNVIczCJ/proj-sandbox-6571
+== Probe 1 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 1 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+TOKEN_PLACEH=platzh-m8-git-token-0123456789abcdef
+GIT_TOKEN=platzh-m8-git-token-0123456789abcdef
+(Ende der environ-Suche)
+== Probe 1 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+Devcontainer started: container e15fdc284801, remote user vscode, workspace /workspaces/mubmess5541
+== Probe 2 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 2 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 2 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 2 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 3 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 3 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 3 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 3 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 4 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 4 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 4 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 4 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 5 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 5 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 5 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 5 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 6 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 6 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 6 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 6 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 7 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 7 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 7 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 7 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 8 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 8 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 8 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 8 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 9 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 9 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 9 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 9 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+== Probe 10 (Host, Prozess-Argumentlisten mit Wort GIT_TOKEN):
+(keine)
+== Probe 10 (Host, Platzhalter in Prozess-Argumentlisten):
+(keine)
+== Probe 10 (Host, Platzhalter in /proc/<pid>/environ der Hilfs-Client-Prozesse):
+(Ende der environ-Suche)
+== Probe 10 (Hilfs-Container, Platzhalter in Prozesslisten der Container):
+up-exit=0
+--- nach dem Start: docker inspect des Devcontainers
+container=e15fdc284801
+== Config.Env:
+["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","LANG=C.UTF-8"]
+== Platzhalter in Config.Env: nein
+== Label devcontainer.metadata (erste 4000 Zeichen):
+[ {"id":"ghcr.io/devcontainers/features/common-utils:2"}, {"id":"ghcr.io/devcontainers/features/git:1","customizations":{"vscode":{"settings":{"github.copilot.chat.codeGeneration.instructions":[{"text":"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`."}]}}}}, {"remoteUser":"vscode"}, {"mounts":["source=mubmess5541-workspace-${devcontainerId},target=/workspaces/mubmess5541,type=volume"],"remoteUser":"vscode","remoteEnv":{"GIT_TOKEN":"${localEnv:GIT_TOKEN}"}} ]
+
+== Platzhalter in devcontainer.metadata: nein
+== localEnv in devcontainer.metadata: [ {"id":"ghcr.io/devcontainers/features/common-utils:2"}, {"id":"ghcr.io/devcontainers/features/git:1","customizations":{"vscode":{"settings":{"github.copilot.chat.codeGeneration.instructions":[{"text
+== alle Labels:
+{"dev.containers.id":"base-debian","dev.containers.release":"v0.4.37","dev.containers.source":"https://github.com/devcontainers/images","dev.containers.timestamp":"Wed, 28 Oct 2026 18:32:17 GMT","dev.containers.variant":"trixie","devcontainer.config_file":"/tmp/tmp.4HYNVIczCJ/proj-sandbox-6571/.devcontainer/devcontainer.json","devcontainer.local_folder":"/tmp/tmp.4HYNVIczCJ/proj-sandbox-6571","devcontainer.metadata":"[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"mounts\":[\"source=mubmess5541-workspace-${devcontainerId},target=/workspaces/mubmess5541,type=volume\"],\"remoteUser\":\"vscode\",\"remoteEnv\":{\"GIT_TOKEN\":\"${localEnv:GIT_TOKEN}\"}} ]","version":"2.2.5"}
+--- stderr
+[2026-11-01T14:39:08.502Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+[2026-11-01T14:39:09.269Z] Start: Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 -f /tmp/devcontainercli-root/container-features/0.89.0-1793543949265/Dockerfile-with-features -t vsc-proj-sandbox-6571-88922909dde0753f560cc8f78d74ab1816c1d914929134f0c77b1fc93d202d64 --target dev_containers_target_stage --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label /tmp/tmp.4HYNVIczCJ/proj-sandbox-6571/.devcontainer
+[2026-11-01T14:39:09.535Z] #0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile-with-features
+#1 transferring dockerfile: 1.49kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.1s
+
+[2026-11-01T14:39:09.732Z] 
+#3 [internal] load .dockerignore
+
+[2026-11-01T14:39:09.733Z] #3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [dev_container_auto_added_stage_label 1/3] FROM mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6
+#4 resolve mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6 0.0s done
+#4 CACHED
+
+#5 [dev_container_auto_added_stage_label 2/3] RUN mkdir -p "/workspaces/mubmess5541" && chown vscode:vscode "/workspaces/mubmess5541"
+
+[2026-11-01T14:39:09.804Z] #5 DONE 0.2s
+
+[2026-11-01T14:39:09.957Z] 
+#6 [dev_container_auto_added_stage_label 3/3] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+
+[2026-11-01T14:39:10.044Z] #6 DONE 0.2s
+
+[2026-11-01T14:39:10.202Z] 
+#7 exporting to image
+#7 exporting layers 0.1s done
+#7 preparing layers for inline cache 0.1s done
+
+[2026-11-01T14:39:10.316Z] #7 exporting manifest sha256:cec7f0c4226bf45adf57cf1cd3bb9ac3b8bea786344dbd33243bc82092d14d14 done
+#7 exporting config sha256:7b43ab342aa83363184c59be574b608512ca4f6d2b30e8f7f2472642de53e0ad done
+#7 exporting attestation manifest sha256:baeb405ceef82a4b1d4bf301323619bda6d473c146a240d1e9f4fb6422ff471c 0.0s done
+#7 exporting manifest list sha256:bd1a030ba631fcbe05f9c66821b52d1348a28615df725a15697a2766bc77305c 0.0s done
+#7 naming to docker.io/library/vsc-proj-sandbox-6571-88922909dde0753f560cc8f78d74ab1816c1d914929134f0c77b1fc93d202d64:latest done
+#7 unpacking to docker.io/library/vsc-proj-sandbox-6571-88922909dde0753f560cc8f78d74ab1816c1d914929134f0c77b1fc93d202d64:latest 0.0s done
+#7 DONE 0.3s
+
+[2026-11-01T14:39:11.267Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=mubmess5541-workspace-18l1psht615kjc4mqls9djb2ilt15bln9p0o4i8a7m56hkqspq3s,target=/workspaces/mubmess5541,type=volume -l devcontainer.local_folder=/tmp/tmp.4HYNVIczCJ/proj-sandbox-6571 -l devcontainer.config_file=/tmp/tmp.4HYNVIczCJ/proj-sandbox-6571/.devcontainer/devcontainer.json --entrypoint /bin/sh vsc-proj-sandbox-6571-88922909dde0753f560cc8f78d74ab1816c1d914929134f0c77b1fc93d202d64-uid -c echo Container started
+[2026-11-0Error response from daemon: container 1caa1f09625d873db26d1693c21563d40ff8e0949370311549e3feae9270e8f1 is not running
+1T14:39:11.536Z] Container started
+
+
+# Ende 2026-11-01T14:39:49Z

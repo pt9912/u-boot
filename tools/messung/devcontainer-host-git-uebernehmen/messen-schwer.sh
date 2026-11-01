@@ -184,12 +184,12 @@ m8_run() {
   c="$(cont_of "$dir")"; echo "container=$c"
   echo "== Config.Env:"
   docker inspect --format '{{json .Config.Env}}' "$c"
-  echo "== Platzhalter in Config.Env: $(docker inspect --format '{{json .Config.Env}}' "$c" | grep -F "$TOKEN_PLACEH" | head -1 || echo nein)"
+  echo "== Platzhalter in Config.Env: $(docker inspect --format '{{json .Config.Env}}' "$c" | grep -F "$TOKEN_PLACEH" || echo nein)"
   echo "== Label devcontainer.metadata (erste 4000 Zeichen):"
-  docker inspect --format '{{index .Labels "devcontainer.metadata"}}' "$c" | head -c 4000
+  docker inspect --format '{{index .Config.Labels "devcontainer.metadata"}}' "$c" | head -c 4000
   echo
-  echo "== Platzhalter in devcontainer.metadata: $(docker inspect --format '{{index .Labels "devcontainer.metadata"}}' "$c" | grep -F "$TOKEN_PLACEH" | head -1 || echo nein)"
-  echo "== localEnv in devcontainer.metadata: $(docker inspect --format '{{index .Labels "devcontainer.metadata"}}' "$c" | grep -F localEnv | head -c 400 || echo nein)"
+  echo "== Platzhalter in devcontainer.metadata: $(docker inspect --format '{{index .Config.Labels "devcontainer.metadata"}}' "$c" | grep -F "$TOKEN_PLACEH" || echo nein)"
+  echo "== localEnv in devcontainer.metadata: $(docker inspect --format '{{index .Config.Labels "devcontainer.metadata"}}' "$c" | grep -F localEnv | head -c 200 || echo nein)"
   echo "== alle Labels:"
   docker inspect --format '{{json .Config.Labels}}' "$c"
 }
