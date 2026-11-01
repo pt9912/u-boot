@@ -16,7 +16,7 @@ Anlass: Entscheidung des Projektinhabers, 2026-11-01: Der Docker-Test mit vier I
 
 **Berührte Spec-Stellen:** `lastenheft.md` Absatz zu den Instanzen in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), §16 (Historie), Versionsfeld (Zeile 9). [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes): gelesen Zeile 837 (Absatz „Instanzen“); Suche nach `3 GiB`, `vier gleichzeitig`, `bis zu vier` in `spec/spezifikation.md` ohne Treffer, die Spec trägt Zahl und Grenze nicht. Weitere Zeilen von [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (838 bis 844, 892, 900) vom Implementer zu lesen, bevor sie als „unverändert“ geführt werden (`AGENTS.md` §3.10).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-11-01.
 
@@ -156,6 +156,15 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-06-roadmap.md`
 formulieren) · `grundlagen-traceability.md` §Herkunfts-Anker für Steering-Loop-Regeln.
 
 *Wird bei der Closure gefüllt.* Hier steht vor dem Lastenheft-Commit der Vermerk der Freigabe (Datum, Variante, Wortlaut) und der Entscheidungen zu den Fragen 1 bis 4 aus §1.
+
+**Freigabe und Entscheidung des Projektinhabers (2026-11-01): Variante 1**, Satz 2 im Wortlaut von „Variante 1“ in §1: „Zugesagt ist die Isolation der Workspace-Volumes für zwei gleichzeitig laufende Instanzen im Sandbox-Profil, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine. Nicht zugesagt sind drei und mehr Instanzen, die Isolation des Docker-Speichers (`nestedRuntime: docker`) und der Modelle (`ollama`), der Speicher von Podman (`nestedRuntime: podman`), Instanzen mit oder ohne Begrenzung von CPU und Arbeitsspeicher, das Verhalten unter Last (…), mit kaltem Cache oder bei kaltem Bau des Images, Dauer und Platzbedarf des Starts, andere Hosts und Engines und die Isolation im Standardprofil: Dort teilen alle Instanzen den Projektordner (Bind-Mount).“ Die Fragen aus §1 sind entschieden:
+
+1. Variante 1.
+2. „zwei“ auch in Satz 1 (statt „bis zu vier“).
+3. Die Auskunft über Docker-Speicher, Modelle und die Grenze bleibt als „nicht zugesagt“ im Lastenheft.
+4. Version `0.26.0` (Zeile 9 und Historie bei Start gelesen: `0.25.0`, keine höhere vergeben).
+
+Beleg für „zwei“ in der Suite: der Lauf `integration-docker` auf `main` (Lauf 41285105546, Kopf `a6264402`) war erfolgreich; sein Kopf enthält den Commit `73b42e21` mit `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated` (`git merge-base --is-ancestor`, gelesen). Das Protokoll des Laufs war über `gh run view --log` nicht lesbar; der Beleg ist der Status des Laufs.
 
 - **Was hat funktioniert:**
 - **Was ging anders als geplant:**
