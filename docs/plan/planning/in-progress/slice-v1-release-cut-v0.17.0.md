@@ -85,7 +85,46 @@ Jede Aussage ist an der genannten Stelle gelesen (Stand 2026-11-01, `HEAD` = `f5
 
 ### Sensoren (Implementer, Docker-Modus, Host `linux/amd64`)
 
-AUSSTEHEND-SENSOREN
+**M0:** `date +%F` = `2026-11-01` (Systemuhr UTC, NTP-synchron); CHANGELOG-Überschrift `[0.17.0]` und Handbuch-`Stand` tragen dasselbe Datum. Der Hauptagent wiederholt M0 vor M1 und vor M5.
+
+Lauf auf dem Stand nach dem Move nach `in-progress/` (Docker-Modus, Exit-Codes der `make`-Prozesse):
+
+| Sensor | Ergebnis |
+|---|---|
+| `make gates` | Exit 0 (zweimal gelaufen: vor `ci` und nach dem Füllen dieser Tabelle); `coverage-gate` 92,20 % gegen 90 %; `ablage-pruefung-test` 26 Fälle, 0 Fehlschläge; `docs-check` und `baseline-verify` Teil des Ziels, grün |
+| `make ci` | Exit 0: `govulncheck` und `image-scan`: `u-boot:latest (debian 12.15)` 0 Schwachstellen, `usr/local/bin/u-boot` 0 |
+| `make fullbuild` | Exit 0 (`ci` + Runtime-Image-Build) |
+| `make build VERSION=0.17.0` | Exit 0; `docker run --rm u-boot:latest --version` = `u-boot version 0.17.0`; OCI-Label `org.opencontainers.image.version` = `0.17.0` (lokal, nicht gepusht). Der Standardbau von `make fullbuild` meldete `u-boot version 0.17.0-dev` |
+| `make doc-immutable RANGE="v0.16.1..HEAD"` | Exit 0, 980 Dateien, 0 Befunde |
+| `make doc-trace` | Exit 0, 84 Anforderungen, 0 Waisen |
+| `make doc-commits RANGE="origin/main..HEAD"` | Exit 0, 980 Dateien, 0 Befunde |
+| `make doc-planning` | Exit 0, 980 Dateien, 0 Befunde |
+| `make test-docker` | **nicht gelaufen**, Entscheidung des Projektinhabers (2026-11-01): der CI-Lauf `integration-docker` auf `main` ist der Nachweis (M2). Das Zählen der `--- SKIP` und `--- PASS` des Tips gehört dem Hauptagenten |
+| `make verify-depguard` | **nicht gelaufen**: der Cut berührt keine Importregel |
+| `gh workflow run tap-check` | **nicht gelaufen**: startet der Auftraggeber mit dem PAT (M4) |
+
+**M-T ausgeführt (Trockenlauf des Tap-Pfads).** Befehl: `docker run -i --rm --network none -v /Development/u-boot:/src:ro u-boot:test bash < <Skript>` (Image aus `make gates`, Arbeitsbaum schreibgeschützt; Skript im Scratchpad, nicht im Repo; Fixture nach `sumsFull` in `cmd/uboot/homebrew_scripts_test.go`; Stellvertreter für `curl` und `git` im `PATH`; kein echtes Token, `TAP_TOKEN=dummy`). Exit-Code des `docker run`: 0. Ausgabe (gekürzt auf die Aussagezeilen):
+
+```text
+(1)  homebrew-formula-fill.sh v0.17.0 <sums> scripts/homebrew-formula.rb.tmpl <Ausgabe>   exit=0   (vier url-Zeilen mit v0.17.0)
+(2a) tap-formula-check.sh v0.17.0 <Ausgabe>   exit=0
+(2b) tap-formula-check.sh v0.16.1 <Ausgabe>   exit=1
+     tap-nachzug: the u-boot.rb asset of v0.16.1 does not carry four download URLs of v0.16.1 (found 4 url lines, 0 of v0.16.1).
+(3)  tap-nachzug.sh, TAP_TOKEN=dummy, TAG=v0.17.0:   exit=0
+     Protokoll: git clone --depth 1 … · git diff --quiet -- Formula/u-boot.rb · git … add Formula/u-boot.rb · git … commit -m u-boot 0.17.0 · git push origin HEAD
+     tap-nachzug: pt9912/homebrew-u-boot updated to v0.17.0.
+(3b) tap-nachzug.sh mit TAG=v0.16.1 gegen dieselbe Formel: exit=1, 0 clone-Aufrufe, 0 push-Aufrufe
+```
+
+Rot gesehen: (2b) und (3b) sind die rote Gegenprobe der Prüfung auf den Tag. **Grenze, wie in [`releasing.md`](../../../maintainer/releasing.md) §4 benannt:** `is_stable == 'true'` und der Workflow-Schritt, der echte `curl` gegen das Release-Asset, der echte `git push` und das Token sind nicht geprobt; der Stellvertreter von `git` meldet immer eine Änderung. Befund: keiner; kein Skript geändert.
+
+**Binary-Unterschied:** `git diff v0.16.1..HEAD --stat -- . ':!docs' ':!spec' ':!*.md'` nach dem Cut: 70 Dateien (3438 Einfügungen, 213 Löschungen). Die Aussage „Code unverändert“ steht deshalb nicht im Lead.
+
+**Kommentar-Selbstcheck** ([`AGENTS.md`](../../../../AGENTS.md) §3.9): (a) die Kommentare in `repo.mk` und `Dockerfile` nennen den geltenden Wert `0.17.0-dev`; (b) der alte Wert `0.16.1-dev` steht im Baum nicht mehr außerhalb von Planung, Reviews und Messprotokollen (`grep -rIn '0\.16\.1-dev'`); (c) keine neue Funktion.
+
+**Rot gesehen — Grenze:** Kein Test pinnt die Nummer; eine falsche Versionszeile färbt kein Gate. Die Wächter sind die Prüfung `--version` = Tag im Workflow `publish` (nach dem Push) und die lokale Gegenprobe: `make build VERSION=0.17.0` meldet `0.17.0`, der Standardbau `0.17.0-dev`. Für die Lead-Sätze gibt es keinen Wächter im Repo.
+
+**Abgleich der Plan-Tabelle** (`git diff --stat f58dc581..HEAD`): `CHANGELOG.md`, `Dockerfile`, `README.md`, `README.de.md`, `cmd/uboot/main.go`, `repo.mk`, `docs/user/benutzerhandbuch.md`, `roadmap.md`, `open/README.md` und dieser Slice haben je einen Plan-Eintrag und einen Diff; kein Diff, gelesen: `docs/maintainer/releasing.md:56`–`:57` (Zeiger „zuletzt“ nennt `v0.16.1`), `.github/workflows/`, `scripts/`, `packaging/`, `Makefile`, `go.mod`, `spec/lastenheft.md` Zeile 9 (`0.26.0`), `docs/plan/adr/` (`make doc-immutable` Exit 0).
 
 ### Nacharbeit nach dem Tag ([`releasing.md`](../../../maintainer/releasing.md) §7)
 
