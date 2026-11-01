@@ -843,8 +843,8 @@ u-boot devcontainer shell
 ```
 
 - **Umgebung.** Die Variablen, die das erzeugte `devcontainer.json` als Einträge
-  `"NAME": "${localEnv:NAME}"` weitergibt (im Sandbox-Profil `GIT_TOKEN`, der Schlüssel eines
-  Agenten und die Token-Variablen von `gh` und `glab`), sind in der Shell gesetzt, soweit sie auf dem Host gesetzt sind; eine auf dem Host nicht
+  `"NAME": "${localEnv:NAME}"` weitergibt (im Sandbox-Profil `GIT_TOKEN`, die Variablen eines Agenten
+  (`ANTHROPIC_API_KEY`, `CLAUDE_CODE_OAUTH_TOKEN`) und die Token-Variablen von `gh` und `glab`), sind in der Shell gesetzt, soweit sie auf dem Host gesetzt sind; eine auf dem Host nicht
   gesetzte Variable fehlt in der Shell. Verweise in anderer Form (etwa ein Pfad in `mounts`, ein
   anderer Name, ein Standardwert) gibt `shell` nicht weiter und sagt dafür nichts zu.
 - **Ausgabe.** Alles, was `u-boot` selbst ausgibt (die Ausweisung des Sockets, der Fortschritt des
@@ -1834,9 +1834,10 @@ keinen Berechtigungsmodus.
   Vorrang vor dem Login mit einem Abonnement). Ist eine
   Variable auf dem Host nicht gesetzt, ist sie im Container nicht gesetzt; eine leer
   gesetzte kommt leer an. Ohne
-  Schlüssel und Token meldet die CLI „Not logged in“. Das Token steht in der Umgebung
-  jedes Prozesses im Container, auch wenn der Container mit verschachteltem Docker
-  privilegiert läuft; nutzen Sie nur ein Token, das Sie widerrufen können, und
+  Schlüssel und Token meldet die CLI „Not logged in“. Das Token steht in der
+  Umgebung der Sitzung von `u-boot devcontainer shell`, nicht in der
+  Container-Konfiguration; in einer Shell, die Sie mit `docker exec` öffnen, gilt
+  `remoteEnv` nicht. Nutzen Sie nur ein Token, das Sie widerrufen können, und
   widerrufen Sie es bei Anthropic, sobald Sie Missbrauch vermuten. Für
   Cloud-Modelle von Ollama muss `ANTHROPIC_API_KEY` im Aufruf nicht gesetzt sein
   (siehe [Ollama](#ollama-optional)); setzen Sie dort auch `CLAUDE_CODE_OAUTH_TOKEN` nicht.
@@ -2211,7 +2212,7 @@ erzeugten Datei:
   Shell, die Sie ohne Editor mit `docker exec` öffnen, gilt `remoteEnv` nicht, und `GIT_TOKEN`
   ist dort nicht gesetzt; geben Sie die Variable mit `docker exec -e GIT_TOKEN` mit (Abschnitt
   4.9, „Im Container arbeiten“). Im Sandbox-Profil öffnet `u-boot devcontainer shell` die
-  Shell mit `GIT_TOKEN`, dem Schlüssel des Agenten und den Token-Variablen von `gh` und
+  Shell mit `GIT_TOKEN`, den Variablen des Agenten (Schlüssel und Token) und den Token-Variablen von `gh` und
   `glab`, soweit sie auf dem Host gesetzt sind; im Standardprofil gibt `shell` nur die
   Variablen weiter, auf die die `devcontainer.json` verweist (siehe
   [Forge-CLIs](#forge-clis-optional)).
