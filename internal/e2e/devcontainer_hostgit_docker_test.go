@@ -36,7 +36,7 @@ const (
 	hostGitTokenPlaceholder  = "platzh-hostgit-token-0123456789ab"
 	hostGitNamePlaceholder   = "platzh-hostgit-name"
 	hostGitEmailPlaceholder  = "platzh-hostgit-email"
-	hostGitSessionLen        = "37"
+	hostGitSessionLen        = "34"
 	hostGitIdentityNameKey   = "user.name"
 	hostGitIdentityEmailKey  = "user.email"
 )
@@ -182,20 +182,17 @@ func TestE2E_HostGitToken_OptInReachesTheSession(t *testing.T) {
 	probe := "printenv GIT_TOKEN | wc -c\n" +
 		`printf "protocol=https\nhost=host.example\n\n" | git credential fill | grep -F "password=platzh" && echo fill-ok` + "\n" +
 		"exit\n"
-	out, errOut, code := runBinary(ctx, t, bin, dir, probe, "devcontainer", "shell")
+	// The shell of the session resolves its own start phase with the fake
+	// source: the shell run carries the same PATH as the up run.
+	out, errOut, code := hostGitRun(ctx, t, bin, dir, probe, envPath, "devcontainer", "shell")
 	if code != 0 {
 		t.Fatalf("shell: exit %d\nstdout %.600s\nstderr %.600s", code, out, errOut)
 	}
-	_ = out
-	if !strings.Contains(errOut, hostGitTokenPlaceholder) {
-		// The fill probe prints the placeholder into the session output;
-		// without a terminal the session output is stdout.
-		if !strings.Contains(out, hostGitTokenPlaceholder) {
-			t.Errorf("the session carries no placeholder; stdout %.600q stderr %.600q", out, errOut)
-		}
-	}
-	if !strings.Contains(out, hostGitSessionLen) && !strings.Contains(errOut, hostGitSessionLen) {
+	if !strings.Contains(out, hostGitSessionLen) {
 		t.Errorf("the session carries no length line %s; stdout %.600q stderr %.600q", hostGitSessionLen, out, errOut)
+	}
+	if !strings.Contains(out, "fill-ok") || !strings.Contains(out, hostGitTokenPlaceholder) {
+		t.Errorf("the session or the credential helper carries no value; stdout %.600q stderr %.600q", out, errOut)
 	}
 }
 
