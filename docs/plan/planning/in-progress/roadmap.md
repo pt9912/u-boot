@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 **Erkennung eines fehlenden Benutzers bei `devcontainer shell` enger fassen (ohne Welle-Datei: Folge-Punkt der Welle `welle-devcontainer-shell-und-zweites-up`; Weg A, Messung des Erzeugers gefahren)** — Slice: [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](slice-v1-shell-erkennung-fehlender-benutzer-eng.md) (in Arbeit).
 
-**Leichter Isolationstest für Instanzen statt des Vier-Instanzen-Tests (ohne Welle-Datei; Entscheidung des Projektinhabers, 2026-11-01)** — Slice: [`slice-v1-devcontainer-instanz-test-leicht`](slice-v1-devcontainer-instanz-test-leicht.md) (in Arbeit, anderer Lauf als der vorige).
+**Leichter Isolationstest für Instanzen statt des Vier-Instanzen-Tests (ohne Welle-Datei; Entscheidung des Projektinhabers, 2026-11-01)** — Slice: [`slice-v1-devcontainer-instanz-test-leicht`](slice-v1-devcontainer-instanz-test-leicht.md) (in Arbeit).
 
 ## Nächste Wellen
 

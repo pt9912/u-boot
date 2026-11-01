@@ -81,10 +81,6 @@ type dcInspectDoc struct {
 	HostConfig struct {
 		Binds  []string
 		Mounts []struct{ Source string }
-		// Memory, MemorySwap (bytes) and NanoCpus are the limits of the container.
-		Memory     int64
-		MemorySwap int64
-		NanoCpus   int64
 	}
 	Config struct {
 		Image  string

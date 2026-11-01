@@ -9,10 +9,10 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Entwurf; Priorisierung und Einordnung beim Projektinhaber. Zweiter von zwei Entwürfen: ihm geht [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md) voraus (was die Suite danach belegt, steht erst nach dessen Wahl der Wege fest). Vorbild des Ablaufs: [`slice-cr-devcontainer-instanz`](../done/slice-cr-devcontainer-instanz.md).
+**Welle:** ohne Welle. Entwurf; Priorisierung und Einordnung beim Projektinhaber. Zweiter von zwei Entwürfen: ihm geht [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md) voraus (Wege entschieden, Entscheidung Projektinhaber 2026-11-01: zwei Instanzen, Workspace-Isolation, kein Messskript). Vorbild des Ablaufs: [`slice-cr-devcontainer-instanz`](../done/slice-cr-devcontainer-instanz.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Änderung des Absatzes zu den Instanzen, Zeile 504).
-Anlass: Entscheidung des Projektinhabers, 2026-11-01: Der Docker-Test mit vier Instanzen ist nicht praxistauglich und wird ein manuelles Messskript; die Suite belegt danach weniger, als der Absatz zusagt.
+Anlass: Entscheidung des Projektinhabers, 2026-11-01: Der Docker-Test mit vier Instanzen ist nicht praxistauglich und entfällt ersatzlos (kein Messskript); „Workspace-Isolation bei zwei Instanzen reicht“. Die Suite belegt danach weniger, als der Absatz zusagt.
 
 **Berührte Spec-Stellen:** `lastenheft.md` Absatz zu den Instanzen in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), §16 (Historie), Versionsfeld (Zeile 9). [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes): gelesen Zeile 837 (Absatz „Instanzen“); Suche nach `3 GiB`, `vier gleichzeitig`, `bis zu vier` in `spec/spezifikation.md` ohne Treffer, die Spec trägt Zahl und Grenze nicht. Weitere Zeilen von [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (838 bis 844, 892, 900) vom Implementer zu lesen, bevor sie als „unverändert“ geführt werden (`AGENTS.md` §3.10).
 
@@ -24,7 +24,7 @@ Anlass: Entscheidung des Projektinhabers, 2026-11-01: Der Docker-Test mit vier I
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Der Absatz zu den Instanzen in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) sagt nur zu, was die Suite (`integration-docker`) belegt; was ein manuelles Messskript belegt, steht nicht mehr als Zusage im Lastenheft. Der Wortlaut ist vom Projektinhaber freigegeben, bevor er geschrieben wird.
+**Ziel:** Der Absatz zu den Instanzen in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) sagt nur zu, was die Suite (`integration-docker`) belegt; was nur die Messung vom 2026-10-31 belegt, steht nicht mehr als Zusage im Lastenheft. Der Wortlaut ist vom Projektinhaber freigegeben, bevor er geschrieben wird.
 
 ### Gelesener Stand (2026-11-01)
 
@@ -33,28 +33,28 @@ Der Absatz steht in `spec/lastenheft.md` Zeile 504 (Lastenheft `0.25.0`, Zeile 9
 1. Struktur: „Bis zu vier gleichzeitig laufende Instanzen desselben Projekts teilen im Sandbox-Profil kein Volume: Jede Instanz hat ein eigenes Workspace-Volume und, soweit aktiviert, ein eigenes Volume für den Docker-Speicher (`nestedRuntime: docker`) und für die Modelle des Features `ollama`; eine Datei im Workspace-Volume einer Instanz ist in keiner anderen Instanz sichtbar.“
 2. Zusage: „Zugesagt ist das für zwei, drei und vier gleichzeitig laufende Instanzen, jede mit höchstens einer CPU und 3 GiB Arbeitsspeicher (Grenze samt Swap), im Sandbox-Profil mit `nestedRuntime: docker` und dem Feature `ollama`, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine. Nicht zugesagt sind mehr als vier Instanzen, der Speicher von Podman (`nestedRuntime: podman`), Instanzen mit mehr oder ohne Begrenzung von CPU und Arbeitsspeicher, das Verhalten unter Last (…), mit kaltem Cache oder bei kaltem Bau des Images, Dauer und Platzbedarf des Starts, andere Hosts und Engines und die Isolation im Standardprofil: Dort teilen alle Instanzen den Projektordner (Bind-Mount).“
 
-Belegt war die Zusage bisher durch die Messung vom 2026-10-31 (`docs/messungen/slice-v1-devcontainer-instanz-messung/`: zwei, drei und vier Instanzen, Stufen 2 bis 4) und den Docker-Test `TestDevcontainerInstance_Docker_FourInstancesAreIsolated` (nur vier Instanzen; gelesen in `internal/e2e/devcontainer_instance_docker_test.go`: `dcInstanceCount = 4`). **Zwei und drei Instanzen** belegt der schwere Test nie; sie stehen nur im Messprotokoll.
+Belegt war die Zusage bisher durch die Messung vom 2026-10-31 (`docs/messungen/slice-v1-devcontainer-instanz-messung/`: zwei, drei und vier Instanzen, Stufen 2 bis 4) und den Docker-Test mit vier Instanzen, der ersatzlos entfernt ist (Entscheidung Projektinhaber 2026-11-01).
 
-Nach [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md) belegt die Suite (Vorschlag dort, Weg A): Sandbox-Profil mit Standard-Einstellungen, Container ohne Instanz plus drei Instanzen, ein Workspace-Volume je Instanz, Marker-Isolation; **nicht** belegt sind Docker-Speicher- und Modell-Volumes (nur Text-Pins der Mounts), die Grenze von einer CPU und 3 GiB und vier Instanzen. Der Absatz geht also in drei Merkmalen (`nestedRuntime: docker` und `ollama`, Grenze, vier Instanzen) über die Suite hinaus.
+Seit [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md) belegt die Suite (Weg A, gelesen in `internal/e2e/devcontainer_instance_docker_test.go`, `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated`): Sandbox-Profil mit Standard-Einstellungen, Container ohne Instanz plus **zwei** Instanzen, ein Workspace-Volume je Container, Marker-Isolation; der Test ist noch nicht in der CI gelaufen. **Nicht** belegt sind Docker-Speicher- und Modell-Volumes (nur Text-Pins der Mounts), die Grenze von einer CPU und 3 GiB sowie drei und vier Instanzen. Der Absatz geht also in vier Merkmalen (`nestedRuntime: docker` und `ollama`, Grenze, drei und vier Instanzen) über die Suite hinaus.
 
 ### Wortlaut-Vorschläge (zur Freigabe; NICHT im Lastenheft geschrieben)
 
-Der Wortlaut hängt an der Wahl der Wege in `slice-v1-devcontainer-instanz-test-leicht` (Frage 1 und 2). Für den Fall Weg A mit drei Instanzen neben dem Container ohne Instanz:
+Die Wege des Test-Slice sind entschieden: Weg A mit zwei Instanzen neben dem Container ohne Instanz.
 
-**Variante 1 (Eingrenzen auf die Suite; Vorschlag).** Satz 1 bleibt (er beschreibt die Bauart, die Mounts sind als Text gepinnt). Satz 2 lautet:
+**Variante 1 (Eingrenzen auf die Suite; Vorschlag).** Satz 1 bleibt (er beschreibt die Bauart, die Mounts sind als Text gepinnt; die Zahl „bis zu vier“ im Satz 1 ist vom Projektinhaber mit zu entscheiden, siehe Frage 2). Satz 2 lautet:
 
-> Zugesagt ist die Isolation der Workspace-Volumes für zwei und drei gleichzeitig laufende Instanzen im Sandbox-Profil, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine. Nicht zugesagt sind vier und mehr Instanzen, die Isolation des Docker-Speichers (`nestedRuntime: docker`) und der Modelle (`ollama`), der Speicher von Podman (`nestedRuntime: podman`), Instanzen mit oder ohne Begrenzung von CPU und Arbeitsspeicher, das Verhalten unter Last (…), mit kaltem Cache oder bei kaltem Bau des Images, Dauer und Platzbedarf des Starts, andere Hosts und Engines und die Isolation im Standardprofil: Dort teilen alle Instanzen den Projektordner (Bind-Mount).
+> Zugesagt ist die Isolation der Workspace-Volumes für zwei gleichzeitig laufende Instanzen im Sandbox-Profil, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine. Nicht zugesagt sind drei und mehr Instanzen, die Isolation des Docker-Speichers (`nestedRuntime: docker`) und der Modelle (`ollama`), der Speicher von Podman (`nestedRuntime: podman`), Instanzen mit oder ohne Begrenzung von CPU und Arbeitsspeicher, das Verhalten unter Last (…), mit kaltem Cache oder bei kaltem Bau des Images, Dauer und Platzbedarf des Starts, andere Hosts und Engines und die Isolation im Standardprofil: Dort teilen alle Instanzen den Projektordner (Bind-Mount).
 
-Gegen die Messung gelesen: „zwei und drei“ ist gemessen (Stufen 2 und 3, je zwei Läufe) und, bei Weg A der Frage 2 des Test-Slice, nur „drei“ von der Suite belegt; „zwei“ belegt dann nichts außer der Messung (vom Implementer zu klären, §6). Das Wort „Isolation der Workspace-Volumes“ ist Satz 1 entnommen; die Messung belegt für Workspace-Volumes paarweise verschiedene Namen und die Inhaltsprobe (`BEO-DOK/zusage-weiter-als-messung`: jedes Wort an der Messung gegengelesen, vom Implementer in §7 zu belegen).
+Gegen die Messung gelesen: „zwei“ ist gemessen (Stufe 2, zwei Läufe) und von der Suite belegt (zwei Instanzen plus Container ohne Instanz; „zwei“ zählt die Instanzen, nicht den Container ohne Instanz). Das Wort „Isolation der Workspace-Volumes“ ist Satz 1 entnommen; die Messung belegt für Workspace-Volumes paarweise verschiedene Namen und die Inhaltsprobe (`BEO-DOK/zusage-weiter-als-messung`: jedes Wort an der Messung gegengelesen, vom Implementer in §7 zu belegen).
 
-**Variante 2 (Zusage wie bisher, Beleg ausdrücklich außerhalb der Suite).** Der Wortlaut bleibt; es entsteht kein CR, der Slice entfällt (Gegenstand: entfallen, Grund: manuelles Skript belegt). Das Lastenheft sagt dann weiter zu, was kein Gate der CI belegt; `docs/maintainer/zusagen-und-messstaende.md` nennt das Skript als Beleg. Risiko: eine Zusage ohne Gate widerspricht dem Muster der übrigen Zusagen mit Test.
+**Variante 2 (Zusage wie bisher, Beleg ausdrücklich außerhalb der Suite).** Der Wortlaut bleibt; es entsteht kein CR, der Slice entfällt (Gegenstand: entfallen, Grund: die Messung vom 2026-10-31 ist der Beleg). Das Lastenheft sagt dann weiter zu, was kein Gate der CI belegt (es gibt kein Messskript); `docs/maintainer/zusagen-und-messstaende.md` nennt die Messung als Beleg. Risiko: eine Zusage ohne Gate widerspricht dem Muster der übrigen Zusagen mit Test.
 
 **Variante 3 (Zahl und Grenze aus der Zusage, Bauart bleibt).** Satz 2 nennt weder Zahl noch Grenze: „Zugesagt ist die Isolation für gleichzeitig laufende Instanzen im Sandbox-Profil … Zahl und Grenze je Instanz sind nicht zugesagt.“ Der Wortlaut ist knapper, trägt aber weniger als die Messung hergibt und nimmt dem Nutzer die Auskunft „vier mit 1 CPU und 3 GiB sind gemessen“; diese Auskunft stünde nur noch in `docs/maintainer/zusagen-und-messstaende.md`.
 
 ### Fragen für den Projektinhaber
 
 1. **Welche Variante** (1, 2, 3) oder ein eigener Wortlaut? Variante 1 ist ohne Wortlaut-Freigabe nicht zu schreiben.
-2. **Welche Zahl von Instanzen** nennt der Satz (hängt an `slice-v1-devcontainer-instanz-test-leicht` Frage 2: „zwei und drei“, nur „drei“, „bis zu drei“).
+2. **Welche Zahl von Instanzen** nennt der Satz: „zwei“ (Variante 1, wie die Suite sie belegt), „bis zu zwei“, oder bleibt „bis zu vier“ in Satz 1 stehen, wenn Satz 2 nur zwei zusagt? Als Alternativen für den Wortlaut bleiben ferner: zwei Instanzen mit der Messung als genannter Beleg (Satz „gemessen sind zwei, drei und vier“ als Auskunft, nicht als Zusage), und der Wegfall von Zahl und Grenze (Variante 3).
 3. **Steht die Auskunft über Docker-Speicher/Modelle und die Grenze weiter im Lastenheft** (als „nicht zugesagt“, wie Variante 1) **oder gar nicht?**
 4. **Version:** `0.26.0` (nächste Minor nach dem Muster `0.25.0`), falls nicht inzwischen von einem anderen Entwurf mit Lastenheft-CR vergeben; die Version ist beim Start aus Zeile 9 und der Historie zu lesen und nicht vorab zu reservieren.
 
@@ -62,15 +62,15 @@ Gegen die Messung gelesen: „zwei und drei“ ist gemessen (Stufen 2 und 3, je 
 
 | Stelle | Aussage | Folge |
 |---|---|---|
-| `docs/maintainer/zusagen-und-messstaende.md` Zeilen 168 bis 181 | wiederholt die Zusage mit „vier gleichzeitig … 3 GiB … nestedRuntime: docker und dem Feature ollama“ und nennt den schweren Test als Fundstelle (Zeile 178) | folgt dem freigegebenen Wortlaut; nennt Test und Messskript getrennt; **dieser Absatz ist bereits Gegenstand von `slice-v1-devcontainer-instanz-test-leicht`** (Fundstelle), der CR zieht den Zusage-Teil nach |
+| `docs/maintainer/zusagen-und-messstaende.md` Zeilen 168 bis 181 | wiederholt die Zusage mit „vier gleichzeitig … 3 GiB … nestedRuntime: docker und dem Feature ollama“ und nennt den schweren Test als Fundstelle (Zeile 178) | folgt dem freigegebenen Wortlaut; die Fundstelle (Test) hat `slice-v1-devcontainer-instanz-test-leicht` bereits auf den leichten Test gesetzt, der CR zieht den Zusage-Teil nach |
 | `spec/spezifikation.md` [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), Zeile 837 und folgende | Instanzen, Namensregel, Suche, Exit-Code `10`; keine Zahl, keine Grenze (Suche ohne Treffer) | voraussichtlich unverändert; der Implementer liest 837 bis 844, 892 und 900 und trägt die Fundstelle ein |
 | `docs/user/benutzerhandbuch.md` Zeilen 888 bis 922 | Zeilen 903 bis 906: „Im Sandbox-Profil hat sie außerdem eigene Volumes: den Workspace und, soweit aktiviert, den Docker-Speicher (`nestedRuntime: docker`) und die Modelle des Features `ollama`. Eine Datei im Workspace einer Instanz sehen die anderen Instanzen nicht.“ | Bedingung über das Verhalten des Codes („soweit aktiviert“): braucht einen Test, der sie pinnt, oder wird gestrichen (`AGENTS.md` §3.10, letzter Punkt); Pin: Text-Pins der drei Mounts (`generate_ollama_test.go` Zeilen 27 bis 30) und der leichte Test für den Workspace; ob das reicht, entscheidet der Implementer mit Fundstelle. Das Handbuch trägt keine Kennung (`AGENTS.md` §5 Regel 6) |
-| `CHANGELOG.md` Zeile 16 (`[Unreleased]`) | „Pinned by unit tests and by a Docker test with four instances … one CPU and 3 GiB each …“ | Gegenstand von `slice-v1-devcontainer-instanz-test-leicht`; der CR berührt sie nur, wenn der Wortlaut sie ändert |
+| `CHANGELOG.md` Zeile 16 (`[Unreleased]`) | „Pinned by unit tests and by Docker tests with two instances and the container without an instance in the sandbox profile …“ (von `slice-v1-devcontainer-instanz-test-leicht` gesetzt) | der CR berührt sie nur, wenn der Wortlaut sie ändert |
 | `spec/lastenheft.md` §16 | Historie-Zeile `0.25.0` nennt die Zusage („Isolation der Volumes für bis zu vier gleichzeitige Instanzen … jede mit höchstens einer CPU und 3 GiB …“) | wird nicht umgeschrieben; eine neue Zeile `0.26.0` nennt die Eingrenzung (Muster: Historie-Zeilen sind additiv) |
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Der Umbau der Tests und des Messskripts** — [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md); der CR beschreibt das, was die Suite danach belegt, und kann erst nach dessen Wahl der Wege geschrieben werden.
+- **Der Umbau der Tests** — [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md); der CR beschreibt das, was die Suite danach belegt.
 - **Eine neue Messung** — der CR sagt nur zu, was gemessen oder von der Suite belegt ist; neue Messungen sind eigene Vorgänge.
 - **Änderung von Produktcode oder von [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)** — der CR ändert keine Verhaltenszusage, er nimmt eine zurück; kein Verhalten ändert sich.
 - **Eine Änderung der Bauart-Aussage (Satz 1)**, solange Variante 1 gilt — sie bleibt, weil die Mounts als Text gepinnt sind.
@@ -143,7 +143,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 dasteht.
 
 - **Der neue Wortlaut sagt mehr zu, als Messung und Suite belegen** ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)): etwa „zwei Instanzen“, die nur die Messung belegt, oder „Isolation“ als Oberbegriff, wo nur Workspace-Volumes getestet sind. — **Ausgang:** offen bis zur Freigabe; vor ihr wird jedes Wort des Vorschlags gegen Messprotokoll und Test gelesen, die Beleg-Tabelle (DoD 4) ist dieser Abgleich.
-- **Die Suite belegt „zwei“ nicht**, wenn der Test-Slice drei Instanzen wählt. — **Ausgang:** offen bis zur Wahl; entweder nennt der Satz „drei“/„bis zu drei“ oder der Test-Slice belegt auch zwei (Rückfall dort, Frage 2).
+- **Die Suite belegt „zwei“ erst nach einem grünen Lauf** von `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated` auf dem Runner (der Test ist nicht gelaufen). — **Ausgang:** offen bis zum Lauf `integration-docker` auf `main`; der Wortlaut wird vorher nicht geschrieben.
 - **Ein Satz im Handbuch behauptet Isolation von Docker-Speicher und Modellen** (`docs/user/benutzerhandbuch.md` Zeilen 903 bis 906) und ist von der Suite nicht pinnbar. — **Ausgang:** offen bis zur Lesung; gepinnt (Text-Pin der Mounts) oder gestrichen.
 - **Die Version `0.26.0` ist vergeben**, wenn der Slice startet: andere Entwürfe in `open/` mit Lastenheft-CR können sie früher nehmen. — **Ausgang:** offen bis zum Start; Version wird dann aus Zeile 9 und der Historie gelesen.
 - **Das Lastenheft ist Vertrag und wird enger, nicht weiter:** eine Rücknahme einer Zusage ist eine Vertragsänderung, auch ohne neues Verhalten. — **Ausgang:** entfallen: der Slice ist als CR mit Freigabe des Projektinhabers geschnitten.
@@ -159,7 +159,7 @@ formulieren) · `grundlagen-traceability.md` §Herkunfts-Anker für Steering-Loo
 
 - **Was hat funktioniert:**
 - **Was ging anders als geplant:**
-- **Gegenstand:** *(nur falls Variante 2 gewählt wird: entfallen: Der Wortlaut bleibt, das manuelle Skript ist der Beleg; sonst Zeile löschen)*
+- **Gegenstand:** *(nur falls Variante 2 gewählt wird: entfallen: Der Wortlaut bleibt, die Messung ist der Beleg; sonst Zeile löschen)*
 - **Steering-Loop-Eintrag:**
 - **Beobachtungs-Register (`../observations/`):**
 - **Folge-Slices:**
