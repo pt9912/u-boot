@@ -167,6 +167,20 @@ rootless Docker, Podman als Host-Engine, eine entfernte Engine, Linux auf `arm64
 Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der Messweg
 (die Dev-Container-CLI in einem Wegwerf-Container) gelaufen. `u-boot up` startet den Devcontainer nicht mit.
 
+**Mehrere Devcontainer je Projekt (Instanzen)** (Handbuch, Abschnitt 4.9)
+
+- **Zusage:** [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Absatz zu den Instanzen): bis zu
+  vier gleichzeitig laufende Instanzen, jede mit höchstens einer CPU und 3 GiB (Grenze samt Swap), im Sandbox-Profil mit
+  `nestedRuntime: docker` und dem Feature `ollama`, im Zustand direkt nach dem Start, Linux `amd64`, lokale Engine. Nicht zugesagt:
+  mehr als vier, `nestedRuntime: podman`, Instanzen ohne Grenze, das Verhalten unter Last, andere Hosts, die Isolation im Standardprofil.
+- **Fundstelle:** Messwerte (Container, Labels, Volume-Namen, Inhaltsprobe, `up` ohne Flag):
+  [`slice-v1-devcontainer-instanz-messung`](../messungen/slice-v1-devcontainer-instanz-messung/README.md) (Docker 29.9.2,
+  Dev-Container-CLI 0.89.0). Das Verhalten von `u-boot` selbst prüft der Docker-Test `TestDevcontainerInstance_Docker_FourInstancesAreIsolated`
+  (vier Instanzen, Sandbox-Profil, `nestedRuntime: docker`, `ollama`, Grenze je Instanz zurückgelesen), im Standardprofil
+  `TestDevcontainerInstance_Docker_StandardProfileSharesTheProjectFolder` (drei Container).
+- **Wortlaut:** „Getestet ist das mit bis zu vier gleichzeitig laufenden Instanzen im Sandbox-Profil mit `nestedRuntime: docker` und
+  `ollama`.“ Der Satz nennt weder die Grenze je Instanz noch den Zeitpunkt (direkt nach dem Start); beide stehen nur im Lastenheft
+  und in diesem Abschnitt.
 
 ### 3.3 Katalog-Features und ihre Lieferkette (Handbuch, Abschnitt 4.10, Feature-Tabelle)
 

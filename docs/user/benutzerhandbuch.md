@@ -758,6 +758,7 @@ u-boot devcontainer up              # startet den Devcontainer des Projekts
 u-boot devcontainer up --recreate   # entfernt den Container und legt ihn neu an
 u-boot devcontainer down            # stoppt den Container
 u-boot devcontainer shell           # startet den Container wie `up` und öffnet eine Shell darin
+u-boot devcontainer up --instance agent-1   # startet einen weiteren Container desselben Projekts
 ```
 
 Auf dem Host genügen Docker (Client und lokale Engine). Ein Editor, Node.js und
@@ -883,6 +884,44 @@ aus Ihrer Umgebung, und ist die Variable dort nicht gesetzt, fehlt sie auch im C
 docker exec -it -e GIT_TOKEN -u <Benutzer> -w <Workspace> <Container> bash
 ```
 
+**Mehrere Devcontainer je Projekt (Instanzen).** Mit `--instance <Name>` starten Sie neben dem
+Container des Projekts weitere Devcontainer desselben Projektordners, zum Beispiel einen je Agent.
+Die Befehle `up`, `down` und `shell` nehmen das Flag:
+
+```bash
+u-boot devcontainer up --instance agent-1              # startet die Instanz agent-1
+u-boot devcontainer shell --instance agent-1           # öffnet eine Shell in agent-1
+u-boot devcontainer down --instance agent-1            # stoppt nur agent-1
+u-boot devcontainer up --instance agent-1 --recreate   # ersetzt nur den Container von agent-1
+```
+
+- **Name.** Der Name besteht aus Kleinbuchstaben, Ziffern und Bindestrichen, beginnt und endet
+  mit einem Buchstaben oder einer Ziffer und ist 1 bis 32 Zeichen lang. Alles andere
+  (Großbuchstaben, Unterstrich, Punkt, ein `=` im Namen, ein leerer Name) endet mit Exit-Code 10,
+  bevor `u-boot` Docker anspricht.
+- **Eigene Container und Volumes.** Jede Instanz hat einen eigenen Container. Im Sandbox-Profil hat
+  sie außerdem eigene Volumes: den Workspace und, soweit aktiviert, den Docker-Speicher
+  (`nestedRuntime: docker`) und die Modelle des Features `ollama`. Eine Datei im Workspace einer
+  Instanz sehen die anderen Instanzen nicht. Getestet ist das mit bis zu vier gleichzeitig laufenden
+  Instanzen im Sandbox-Profil mit `nestedRuntime: docker` und `ollama`. Im Standardprofil
+  teilen alle Instanzen den Projektordner, denn er ist in jeden Container eingehängt.
+- **Ohne `--instance`.** Ohne das Flag wirken `up`, `down` und `shell` nur auf den Container ohne
+  Instanz, den `up` ohne Flag anlegt, auch wenn eine Instanz jünger ist. Gibt es im Projekt nur
+  Container von Instanzen und keinen ohne Instanz, enden die drei Befehle ohne `--instance` mit
+  Exit-Code 10 und einem Hinweis auf `--instance`; sie starten und stoppen dann nichts. Gibt es gar
+  keinen Container, legen `up` und `shell` den Container ohne Instanz an, und `down` endet mit
+  Exit-Code 0.
+- **Wiederholen, ersetzen, stoppen.** Ein zweites `up --instance agent-1` ohne `--recreate` trifft
+  denselben Container (`Devcontainer already running`). `up --instance agent-1 --recreate` ersetzt nur
+  diesen Container; seine Volumes bleiben. `down --instance agent-1` stoppt nur diese Instanz; gibt es
+  keine Instanz dieses Namens, endet es mit Exit-Code 0.
+- **Was `u-boot` nicht tut.** Es führt keine Liste der Instanzen und räumt keine auf; entfernen Sie
+  nicht mehr benötigte Container und Volumes mit `docker rm` und `docker volume rm`. Es wählt keinen
+  Zweig je Instanz und startet keinen Agenten.
+- **Andere Befehle.** `doctor`, `generate devcontainer` und `init` betrachten nur den Container ohne
+  Instanz. Hat ein Projekt nur Container von Instanzen, ist der Zustand der Fallbacks für sie nicht
+  ermittelbar.
+
 **Fallbacks nach dem Start.** Wie `doctor` und `generate devcontainer` weist `up` (und, vor
 dem Beginn der Sitzung, `shell`) die
 Degradations-Fallbacks des Sandbox-Containers aus (Container ohne Daemon, `vfs`-Storage,
@@ -907,7 +946,7 @@ die Shell begonnen hat):
 | Code | Fall |
 |---|---|
 | `2` | `u-boot devcontainer` ohne Unterbefehl; `--dry-run` oder `--diff`; bei `shell` auch `--json` und Argumente |
-| `10` | keine `.devcontainer/devcontainer.json` im aktuellen Verzeichnis; Pfad mit Komma, Anführungszeichen oder Zeilenumbruch; ein `${localEnv:NAME}` mit einem Namen, der kein einfacher Variablenname ist |
+| `10` | keine `.devcontainer/devcontainer.json` im aktuellen Verzeichnis; Pfad mit Komma, Anführungszeichen oder Zeilenumbruch; ein `${localEnv:NAME}` mit einem Namen, der kein einfacher Variablenname ist; ein ungültiger Instanzname; `up`, `down` oder `shell` ohne `--instance`, wenn es im Projekt nur Container von Instanzen gibt; bei `devcontainer down` gelten nur die beiden Fälle zur Instanz |
 | `11` | kein `docker` im `PATH` (so auch im Container-Image von `u-boot`), der Daemon antwortet nicht, die Engine ist nicht lokal (zum Beispiel `DOCKER_HOST=tcp://…`), oder ein Startscript des Containers bricht ab und meldet `failed` in seiner Statusdatei (unter `onUnavailable: fail`; das Startscript der Egress-Beschränkung auch unter `warn`, wenn der Benutzer `nobody` im Image fehlt, die nftables-Regeln sich nicht anwenden lassen oder der lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; siehe [Fallbacks sehen](#fallbacks-sehen)), auch wenn die Statusdatei den Abbruch aus einem früheren Start desselben Containers meldet und die Dev-Container-CLI selbst gelingt (siehe „Erneutes `up` nach einem Fehler oder Abbruch“); der letzte Fall braucht die `u-boot.yaml` des Projekts, sonst lautet der Exit-Code `12`, und ein erneutes `up` meldet einen früheren Abbruch nicht; bei `devcontainer down` gelten die ersten drei Fälle |
 | `12` | jeder andere Fehler beim Bau oder Start: der Bau des Images scheitert, ein Lebenszyklus-Befehl wie `postStartCommand` endet mit einem Fehler, die Engine sieht den Projektordner nicht; bei `down` ein Fehler von `docker stop`; bei `shell` auch: die Prüfung vor der Shell scheitert (Benutzer, Workspace oder Shell fehlen im Container) |
 | `14` | Lesefehler im Dateisystem |

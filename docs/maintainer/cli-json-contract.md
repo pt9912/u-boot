@@ -1287,17 +1287,22 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   dieselbe Kennung meldet; sonst `false` (auch mit `--recreate`, bei einem gestoppten oder fehlenden Container,
   einer anderen Kennung und wenn die Abfrage vor dem Aufruf fehlschlägt). Das Feld ändert weder `status` noch
   `exitCode` noch die Einträge von `diagnostics[]`; `up` fragt dafür einmal den Inspector vor dem Start des
-  Hilfs-Containers (`DevcontainerInspector.FindContainer`), und ein Fehler der Abfrage ist kein Fehler des Befehls
-  (`TestDevcontainerUp_AlreadyRunning`, `TestExecute_DevcontainerUp_AlreadyRunning`).
+  Hilfs-Containers (`DevcontainerInspector.FindContainer`, mit `--instance` für den Container der Instanz), und ein
+  Fehler der Abfrage ist kein Fehler des Befehls
+  (`TestDevcontainerUp_AlreadyRunning`, `TestExecute_DevcontainerUp_AlreadyRunning`,
+  `TestDevcontainerInstance_ExistingContainerAndNewerInstance`). Ohne `--instance` fragt `up` den Inspector auch mit
+  `--recreate` einmal, für die Prüfung auf „nur Container von Instanzen“; das Feld bleibt dann `false`.
 - **Weitere Einträge von `up`:** je ein `warn` mit `file: ".devcontainer/devcontainer.json"` für einen
   Degradations-Fallback, den der Container nach dem Start meldet
   ([LH-FA-DEV-007](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
   [LH-FA-DEV-008](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)); sie setzen eine `u-boot.yaml` voraus.
 - **Fehler-Envelope von `up`:** die Ausweisung bleibt `diagnostics[0]`, wenn der Aufruf bis zum Start des Hilfs-Containers
   gekommen ist (auch bei Exit 11 aus der Vorab-Prüfung: der Text beschreibt den Befehl, nicht den Zustand); der Fehler ist der
-  letzte Eintrag. Ein Fehler davor (Exit 10) trägt keine Ausweisung. `data` fehlt im Fehlerfall.
-- **`data.containerId` von `down`** ist der leere String, wenn es für das Projekt keinen Container gibt;
-  `stopped` ist `false`, wenn nichts zu stoppen war (Exit 0).
+  letzte Eintrag. Ein Fehler davor (Exit 10 der Voraussetzungen, ein ungültiger Instanzname) trägt keine Ausweisung; der
+  Exit 10 „ohne `--instance` nur Container von Instanzen“ steht nach der Ausweisung (`TestDevcontainerInstance_OnlyInstancesEndsBeforeTheLauncher`).
+  `data` fehlt im Fehlerfall.
+- **`data.containerId` von `down`** ist der leere String, wenn es für das Projekt (mit `--instance`: für die Instanz)
+  keinen Container gibt; `stopped` ist `false`, wenn nichts zu stoppen war (Exit 0).
 - **Codes:** die Klassen 10, 11 und 12 von `devcontainer` tragen [LH-FA-DEV-010](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
   ein Lesefehler [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (Exit 14),
   Aufrufformfehler [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes). Die Abbildung steht je Unterbefehl in `mapDevcontainerUpErrorToDiagnostic` und
@@ -1309,6 +1314,7 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   | `driving.ErrDevcontainerStartScriptFailed` (Statusdatei `result=failed`, auch nach einem gelungenen Lauf der Dev-Container-CLI) | 11 | ✓ | — |
   | `driven.ErrDevcontainerRuntime` | 12 | ✓ | ✓ (`docker stop`) |
   | `driving.ErrDevcontainerConfigMissing`, `…ProjectFolderInvalid`, `…EnvNameInvalid` | 10 | ✓ | — |
+  | `driving.ErrDevcontainerInstanceInvalid` (Name der Instanz ungültig, auch `--instance` leer), `…OnlyInstances` (ohne `--instance` nur Container von Instanzen) | 10 | ✓ | ✓ (`isDevcontainerInstanceError`) |
   | `driving.ErrDevcontainerFileSystem` | 14 | ✓ | — |
   | `ErrDevcontainerSubcommandRequired`, `ErrDevcontainerPreviewNotApplicable` | 2 | ✓ | ✓ |
   | `ErrDevcontainerShellJSONNotApplicable` | 2 | — | — (nur `shell`) |

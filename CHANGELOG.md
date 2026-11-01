@@ -11,6 +11,10 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- `--instance <name>` for `u-boot devcontainer up`, `down` and `shell` ([`LH-FA-DEV-010`](spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [ADR-0038](docs/plan/adr/0038-devcontainer-instanz-zweites-id-label.md)): several devcontainers of one project folder run side by side. `u-boot` hands the Dev Container CLI two id labels, `devcontainer.local_folder=<folder>` and `u-boot.instance=<name>`, so each instance has its own container and, in the sandbox profile, its own volumes. A name has 1 to 32 characters of `a-z`, `0-9` and `-`, beginning and ending with a letter or digit; every other name, the empty one and one with `=` included, ends with exit code `10` before Docker is asked. Without `--instance` the three commands act only on the container without an instance, which stays without a label and keeps its volumes; if the project has only containers of instances, they end with exit code `10` and a hint at `--instance` and start or stop nothing. `down --instance <name>` without such a container ends with exit code `0`. `doctor`, `generate devcontainer` and `init` look at the container without an instance only. Pinned by unit tests and by a Docker test with four instances in the sandbox profile (`nestedRuntime: docker`, feature `ollama`, one CPU and 3 GiB each) and with three containers in the standard profile.
+
 ### Changed
 
 - Documentation: the README files and the user manual state that the Homebrew tap serves Linux (`arm64` and `amd64`) as well as macOS; the formula already carried the Linux binaries, and the manual no longer says that Linux-Brew is not promised. The READMEs no longer carry the release table and the long status block; promises, conditions and limits are in the user manual and this changelog.
