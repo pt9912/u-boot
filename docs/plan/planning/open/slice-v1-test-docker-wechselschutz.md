@@ -90,5 +90,5 @@ Noch nicht geschlossen; der Slice liegt in `open/` (Entwurf).
 ## 8. Sub-Area-Prüfungen
 
 Berührt werden `tools/` und `scripts/` (WZG, Greenfield laut
-[`harness/conventions.md`](../../harness/conventions.md#modus-deklaration-pro-sub-area)),
+[`harness/conventions.md`](../../../../harness/conventions.md#modus-deklaration-pro-sub-area)),
 `harness/` (DOK, Greenfield) und `.github/workflows/` (lesend). Evidenz-/Diskrepanz-Risiko: niedrig (Skript-Läufe gegen den eigenen Stempel).
