@@ -2,14 +2,14 @@
 
 **Review-Art:** Code (Release-Cut: Diff gegen Plan, Hard Rules und `releasing.md`; Lead gegen Lastenheft und Handbuch)
 
-**Gegenstand:** [`slice-v1-release-cut-v0.17.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.17.0.md), Diff `f58dc581..v0.17.0` (= `HEAD` `f89424e1`, Baum sauber): Cut `c5ed86dc`, Slice-Anlage `f54b3345`, vier Move-Commits des Lifecycle-Werkzeugs, Sensoren `f89424e1`.
+**Gegenstand:** [`slice-v1-release-cut-v0.17.0`](../plan/planning/done/slice-v1-release-cut-v0.17.0.md), Diff `f58dc581..v0.17.0` (= `HEAD` `f89424e1`, Baum sauber): Cut `c5ed86dc`, Slice-Anlage `f54b3345`, vier Move-Commits des Lifecycle-Werkzeugs, Sensoren `f89424e1`.
 
 **Skill:** `.harness/skills/reviewer.md` @ `f89424e1`
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-11-01
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- Slice-Plan [`slice-v1-release-cut-v0.17.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.17.0.md) und das Muster [`slice-v1-release-cut-v0.16.1`](../plan/planning/done/slice-v1-release-cut-v0.16.1.md)
+- Slice-Plan [`slice-v1-release-cut-v0.17.0`](../plan/planning/done/slice-v1-release-cut-v0.17.0.md) und das Muster [`slice-v1-release-cut-v0.16.1`](../plan/planning/done/slice-v1-release-cut-v0.16.1.md)
 - [`docs/maintainer/releasing.md`](../maintainer/releasing.md) §3 bis §7, `harness/review.md`
 - Lastenheft 0.26.0, [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zeile 504), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)
 - [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md) (nur Versionsaussage), [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md), [`ADR-0039`](../plan/adr/0039-devcontainer-shell-dritter-aufruf-bei-fehlendem-benutzer.md) (Deprecated, nicht Inhalt des Release)

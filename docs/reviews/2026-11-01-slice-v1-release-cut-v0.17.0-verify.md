@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-release-cut-v0.17.0
 
 * Rolle: Verifier (frischer Kontext), Datum 2026-11-01
-* Gegenstand: Release-Cut `v0.17.0` im Hauptbaum, `HEAD` = Tag `v0.17.0` = `f89424e1` (veröffentlicht 2026-11-01), Slice [`slice-v1-release-cut-v0.17.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.17.0.md), Muster [`slice-v1-release-cut-v0.16.1`](../plan/planning/done/slice-v1-release-cut-v0.16.1.md), Ablauf [`docs/maintainer/releasing.md`](../maintainer/releasing.md) §3 bis §7
+* Gegenstand: Release-Cut `v0.17.0` im Hauptbaum, `HEAD` = Tag `v0.17.0` = `f89424e1` (veröffentlicht 2026-11-01), Slice [`slice-v1-release-cut-v0.17.0`](../plan/planning/done/slice-v1-release-cut-v0.17.0.md), Muster [`slice-v1-release-cut-v0.16.1`](../plan/planning/done/slice-v1-release-cut-v0.16.1.md), Ablauf [`docs/maintainer/releasing.md`](../maintainer/releasing.md) §3 bis §7
 * Frage: Wurde der Cut richtig gebaut und das Veröffentlichte richtig kontrolliert, gemessen an Plan, DoD, [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`ADR-0004`](../plan/adr/0004-ci-system.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`ADR-0017`](../plan/adr/0017-linux-pakete-nfpm.md) und eigenen Sensoren? Maßstab: [`harness/verification.md`](../../harness/verification.md).
 * Nur lesende Befehle gegen GitHub, GHCR und das Tap; nichts geschrieben, nichts getaggt, nichts gepusht. Einzige Änderung: dieser Report.
 
@@ -77,7 +77,7 @@ Keine Findings der Klassen HIGH oder MEDIUM.
 ## 7. Verification Evidence (Block nach `harness/verification.md`)
 
 Scope:
-- Slice: [`slice-v1-release-cut-v0.17.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.17.0.md)
+- Slice: [`slice-v1-release-cut-v0.17.0`](../plan/planning/done/slice-v1-release-cut-v0.17.0.md)
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`ADR-0004`](../plan/adr/0004-ci-system.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`ADR-0017`](../plan/adr/0017-linux-pakete-nfpm.md)
 - Artefakte: Tag `v0.17.0` (`f89424e1`), GitHub-Release mit 12 Assets, `ghcr.io/pt9912/u-boot:0.17.0` und `:latest` (`sha256:a18ffc55…`), Tap-Commit `cb47bc3`
 
