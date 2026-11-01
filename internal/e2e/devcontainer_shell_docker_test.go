@@ -394,8 +394,8 @@ func TestDevcontainerShell_Docker_Session(t *testing.T) {
 		if id != dcRunningContainer(t, dir) {
 			t.Errorf("the result line names container %s, the project runs %s", id, dcRunningContainer(t, dir))
 		}
-		if wantUser != "vscode" || wantWorkspace != "/workspaces/dcstart" {
-			t.Errorf("result line user %q workspace %q, want vscode and /workspaces/dcstart", wantUser, wantWorkspace)
+		if wantUser != "vscode" || wantWorkspace != dcWorkspacePath(dir) {
+			t.Errorf("result line user %q workspace %q, want vscode and %s", wantUser, wantWorkspace, dcWorkspacePath(dir))
 		}
 	})
 

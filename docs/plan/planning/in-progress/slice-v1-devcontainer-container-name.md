@@ -93,7 +93,7 @@ Gelesen am 2026-11-01 ([`AGENTS.md`](../../../../AGENTS.md) §3.10); der Impleme
 | `spec/lastenheft.md` | **CR vor dem Code** (Wortlaut-Freigabe) | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten); Alt/Neu in §6 Frage 7; nicht in diesem Entwurf geschrieben |
 | `spec/spezifikation.md` | update (nach dem Code) | [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), Block „Hilfs-Container“ ab Zeile 850 (gelesen: Aufrufform ohne Containernamen) |
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Abschnitt zu mehreren Instanzen; ohne Kennungen |
-| `docs/plan/adr/` | **unverändert** | Frage 9 entschieden (2026-11-01): kein Folge-ADR — ADR-0038 bleibt unberührt, der Name ist Produktzusage im CR |
+| `docs/plan/adr/` | **unverändert** | Frage 9 entschieden (2026-11-01): kein Folge-ADR — [ADR-0038](../../adr/0038-devcontainer-instanz-zweites-id-label.md) bleibt unberührt, der Name ist Produktzusage im CR |
 | diese Datei, `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | neu / update | Bestand-Zeile; Moves per `make slice-mv`; die Roadmap trägt die Arbeitszeile zum Start und den Ruhe-Marker bei Closure (Commit `95b5c864`) |
 
 **Wächter und rot färbende Mutationen** (Implementer führt sie aus):

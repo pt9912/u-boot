@@ -147,6 +147,13 @@ func (d dcInspectDoc) volumeAt(destination string) string {
 
 func dcSuffix() string { return strconv.FormatInt(time.Now().UnixNano(), 36) }
 
+// dcWorkspacePath is the workspace folder of the project inside the
+// container: it derives from the project name, and the project name is the
+// base name of the project folder (dcGenerateProject).
+func dcWorkspacePath(dir string) string {
+	return "/workspaces/" + filepath.Base(dir)
+}
+
 // dcProjectDir returns a fresh project folder below the test's temp dir; its
 // base name is unique, so the images `vsc-<name>-…` of the devcontainer CLI
 // belong to this test, and registers the cleanup of everything the start
@@ -198,7 +205,10 @@ func dcGenerateProject(ctx context.Context, t *testing.T, sandbox bool, settings
 	initSvc := application.NewInitProjectService(fsys, yaml, gitadapter.New(),
 		progressadapter.NewText(os.Stderr), confirmadapter.New(strings.NewReader(""), os.Stderr), logger)
 	if _, err := initSvc.Init(ctx, driving.InitProjectRequest{
-		BaseDir: dir, Name: "dcstart", SkipGit: true, Devcontainer: true, Sandbox: sandbox, SilenceProgress: true,
+		// Der Projektname ist der Basisname des Test-Ordners: mehrere Projekte
+		// desselben Tests tragen verschiedene Namen, und der Containername
+		// (`u-boot-<project>`) kollidiert nur dort, wo der Vertrag ihn will.
+		BaseDir: dir, Name: filepath.Base(dir), SkipGit: true, Devcontainer: true, Sandbox: sandbox, SilenceProgress: true,
 	}); err != nil {
 		t.Fatalf("init --devcontainer (sandbox=%v): %v", sandbox, err)
 	}
@@ -514,7 +524,7 @@ func TestDevcontainerUp_Docker_S1_S4_SandboxProfileVolumes(t *testing.T) {
 		"devcontainer.sandbox.onUnavailable":  "warn",
 	})
 	svc := dcService()
-	workspace := "/workspaces/dcstart"
+	workspace := dcWorkspacePath(dir)
 
 	first := dcMustUp(ctx, t, svc, dir, false)
 	if first.resp.RemoteUser != "vscode" || first.resp.RemoteWorkspaceFolder != workspace || len(first.resp.Warnings) != 0 {

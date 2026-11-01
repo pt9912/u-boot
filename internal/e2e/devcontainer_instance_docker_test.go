@@ -27,9 +27,6 @@ import (
 const (
 	// dcInstanceLabel is the id label of the container of an instance.
 	dcInstanceLabel = "u-boot.instance"
-	// dcWorkspaceDest is the mount point of the workspace volume of the
-	// sandbox profile.
-	dcWorkspaceDest = "/workspaces/dcstart"
 )
 
 // dcUpInstance starts the container of the instance (empty: without an
@@ -78,8 +75,8 @@ func dcRunning(t *testing.T, id string) bool {
 
 // dcMarkerPath is the file a marker of an instance lands in, in the workspace
 // volume.
-func dcMarkerPath(instance string) string {
-	return dcWorkspaceDest + "/marker-" + instance
+func dcMarkerPath(dir, instance string) string {
+	return dcWorkspacePath(dir) + "/marker-" + instance
 }
 
 // dcWatchNoHelper runs the function and fails when a helper container of the
@@ -158,20 +155,20 @@ func TestDevcontainerInstance_Docker_TwoInstancesAreIsolated(t *testing.T) {
 				t.Errorf("instance %s carries the label %s, the measurement found none", names[n-1], dcConfigLbl)
 			}
 		}
-		workspaces = append(workspaces, doc.volumeAt(dcWorkspaceDest))
+		workspaces = append(workspaces, doc.volumeAt(dcWorkspacePath(dir)))
 	}
 	dcRequireDistinct(t, "workspace volume", workspaces)
 
 	// Content probe over all ordered pairs.
 	markers := []string{"base", names[0], names[1]}
 	for n, id := range ids {
-		if out, code := dcExec(ctx, t, id, "root", "echo "+markers[n]+" > "+dcMarkerPath(markers[n])); code != 0 {
+		if out, code := dcExec(ctx, t, id, "root", "echo "+markers[n]+" > "+dcMarkerPath(dir, markers[n])); code != 0 {
 			t.Fatalf("write the marker of %s: %s", markers[n], out)
 		}
 	}
 	for i := range ids {
 		for j, idJ := range ids {
-			_, code := dcExec(ctx, t, idJ, "root", "test -e "+dcMarkerPath(markers[i]))
+			_, code := dcExec(ctx, t, idJ, "root", "test -e "+dcMarkerPath(dir, markers[i]))
 			if (code == 0) != (i == j) {
 				t.Errorf("file of %s: visible in container %d = %v, want %v", markers[i], j, code == 0, i == j)
 			}
@@ -234,10 +231,10 @@ func TestDevcontainerInstance_Docker_TwoInstancesAreIsolated(t *testing.T) {
 		t.Errorf("recreate of %s: new ID %s, old container still there = %v", names[0], recreated.ContainerID, dcExists(ids[1]))
 	}
 	doc := dcInspect(t, recreated.ContainerID)
-	if doc.volumeAt(dcWorkspaceDest) != workspaces[1] {
+	if doc.volumeAt(dcWorkspacePath(dir)) != workspaces[1] {
 		t.Errorf("recreate of %s changed the workspace volume: %+v", names[0], doc.Mounts)
 	}
-	if out, code := dcExec(ctx, t, recreated.ContainerID, "root", "test -e "+dcMarkerPath(names[0])); code != 0 {
+	if out, code := dcExec(ctx, t, recreated.ContainerID, "root", "test -e "+dcMarkerPath(dir, names[0])); code != 0 {
 		t.Errorf("recreate of %s: the file is gone: %s", names[0], out)
 	}
 	if !dcExists(ids[2]) || !dcRunning(t, ids[2]) {

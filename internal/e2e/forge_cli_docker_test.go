@@ -290,7 +290,7 @@ func TestE2E_ForgeCLI_TokenReferencesCarryNoValue(t *testing.T) {
 		}
 	}
 
-	workspace := "/workspaces/dcstart"
+	workspace := dcWorkspacePath(dir)
 	var volumes []string
 	for _, m := range doc.Mounts {
 		if m.Type == "volume" {
