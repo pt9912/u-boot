@@ -2,14 +2,14 @@
 
 **Review-Art:** Code (Diff gegen Plan, Entscheidung Weg A, Spec, ADR und Hard Rules)
 
-**Gegenstand:** [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/in-progress/slice-v1-devcontainer-claude-oauth-token.md), Commits `fbf310dc` und `c08a9216` gegenüber ihrer Basis `b7afa8ae` (18 Dateien, `git diff --stat fbf310dc~1 c08a9216`), Branch `worktree-agent-aa69746b53d530dc4`.
+**Gegenstand:** [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/done/slice-v1-devcontainer-claude-oauth-token.md), Commits `fbf310dc` und `c08a9216` gegenüber ihrer Basis `b7afa8ae` (18 Dateien, `git diff --stat fbf310dc~1 c08a9216`), Branch `worktree-agent-aa69746b53d530dc4`.
 
 **Skill:** `.harness/skills/reviewer.md` (Stand des Arbeitsbaums) · Kopie der Vorlage per `cp`, dann mit Write gefüllt.
 **Modell:** Sonnet 5.5 · **Datum:** 2026-11-01. `make gates` im Arbeitsbaum gefahren (Exit 0, Coverage 92,20 % bei Schwelle 90 %, `baseline-verify` und `ablage-pruefung` grün). `make test-docker` nicht gefahren (Anweisung des Projektinhabers: 26 Minuten, geteilte Engine); der Docker-Test dieses Slice ist deshalb nur über das Messprotokoll des Implementers belegt, nicht von mir wiederholt.
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/in-progress/slice-v1-devcontainer-claude-oauth-token.md) (Entscheidung Weg A, Plan §3, DoD, Risiken §6)
+- [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/done/slice-v1-devcontainer-claude-oauth-token.md) (Entscheidung Weg A, Plan §3, DoD, Risiken §6)
 - [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) (Ollama-Ablauf nur bei ungesetztem `ANTHROPIC_API_KEY`)
 - [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
 - [`SPEC-044`](../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten), [`SPEC-051`](../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten)
@@ -83,7 +83,7 @@
 | ID | Kategorie | Befund | Quelle | Pfad | Verifizierbar | Klasse |
 |---|---|---|---|---|---|---|
 | N-1 | LOW | Der Satz „nicht in der Container-Konfiguration“ stützt sich auf [`SPEC-051`](../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten) („nicht in der Umgebung des Containers (`Config.Env`)“). Gepinnt ist `Config.Env` für `GIT_TOKEN`, den Agenten-Wert und die Forge-Token (`devcontainer_shell_docker_test.go`, `forge_cli_docker_test.go`: Kanarienwerte mit Wächter), nicht für `CLAUDE_CODE_OAUTH_TOKEN`; `claude_oauth_token_docker_test.go` prüft nur `devcontainer.json` und `stderr` auf den Platzhalter. Der Mechanismus (`remoteEnv` mit `${localEnv:…}`) ist derselbe, die Variable steht aber in keiner Messung für `Config.Env`. „Container-Konfiguration“ ist zudem weiter als `Config.Env` (die `devcontainer.json` gehört dazu und trägt die Referenz). Szenario: Der nächste Änderer liest „Konfiguration“ als „keine Spur im Container“ und baut darauf. | `AGENTS.md` §3.10 (Aussage über Verhalten; Bedingung in Spec/Handbuch braucht Test) | `docs/user/benutzerhandbuch.md` · „nicht in der Container-Konfiguration“ | `make test-docker` (nicht gefahren); sonst Review-only | Handbuch-Aussage über die Reichweite stützt sich auf Pins anderer Variablen |
-| N-2 | LOW | Die Plan-Tabelle in §3 führt weiter die Zeile „`tools/messung/<name>/`, `docs/messungen/<kennung>/` · neu · Skript und Protokoll der Messung“ (Datei [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/in-progress/slice-v1-devcontainer-claude-oauth-token.md)); die DoD-Zeile und die Abgleichtabelle sagen, das Skript entfällt. Die Runde hat die DoD-Zeile berichtigt, nicht diese Zeile (Abgleich nach der Fix-Runde, `AGENTS.md` §3.10). | `AGENTS.md` §3.10 (Abgleich nach der letzten Fix-Runde) | Slice-Datei · „Skript und Protokoll der Messung (Platzhalter“ | Review-only | Plan-Zeile ohne Diff-Entsprechung |
+| N-2 | LOW | Die Plan-Tabelle in §3 führt weiter die Zeile „`tools/messung/<name>/`, `docs/messungen/<kennung>/` · neu · Skript und Protokoll der Messung“ (Datei [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/done/slice-v1-devcontainer-claude-oauth-token.md)); die DoD-Zeile und die Abgleichtabelle sagen, das Skript entfällt. Die Runde hat die DoD-Zeile berichtigt, nicht diese Zeile (Abgleich nach der Fix-Runde, `AGENTS.md` §3.10). | `AGENTS.md` §3.10 (Abgleich nach der letzten Fix-Runde) | Slice-Datei · „Skript und Protokoll der Messung (Platzhalter“ | Review-only | Plan-Zeile ohne Diff-Entsprechung |
 
 ### Zu den gestellten Fragen
 
