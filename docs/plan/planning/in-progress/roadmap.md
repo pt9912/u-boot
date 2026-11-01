@@ -17,13 +17,12 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+**v0.17.0 (Minor-Release ohne Welle-Datei: mehrere Devcontainer je Projektordner mit `--instance` und `CLAUDE_CODE_OAUTH_TOKEN` als Referenz für `claude-code`; Lastenheft [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) in `0.26.0`)** — Slice: [`slice-v1-release-cut-v0.17.0`](slice-v1-release-cut-v0.17.0.md) (Push und Tag stehen aus). Inhalt: [`slice-v1-devcontainer-claude-oauth-token`](../done/slice-v1-devcontainer-claude-oauth-token.md), [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md), [`slice-cr-devcontainer-instanz`](../done/slice-cr-devcontainer-instanz.md), [`slice-v1-devcontainer-instanz-label`](../done/slice-v1-devcontainer-instanz-label.md), [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../done/slice-v1-shell-erkennung-fehlender-benutzer-eng.md), [`slice-v1-devcontainer-instanz-test-leicht`](../done/slice-v1-devcontainer-instanz-test-leicht.md), [`slice-cr-devcontainer-instanz-zusage-getestet`](../done/slice-cr-devcontainer-instanz-zusage-getestet.md).
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| `v0.17.0` — Devcontainer ohne Editor: Anmeldung und mehrere Instanzen (geplant) | Lastenheft-CR zu `--instance` ([`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)) mit Wortlaut-Freigabe des Projektinhabers | [`slice-v1-devcontainer-claude-oauth-token`](../done/slice-v1-devcontainer-claude-oauth-token.md); [`slice-v1-devcontainer-instanz-label`](../done/slice-v1-devcontainer-instanz-label.md); [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../done/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) | M |
 | `v0.18.0` — Feature-Katalog: Quellen, Optionen und Basis-Image (geplant) | `v0.17.0` geschlossen; der Projektinhaber hat den Weg (A, B oder C) zu `slice-v1-docker-cli-bau-auf-standard-basis-image` entschieden | [`slice-v1-docker-cli-bau-auf-standard-basis-image`](../open/slice-v1-docker-cli-bau-auf-standard-basis-image.md); [`slice-v1-katalog-features-quellen-und-freigabe`](../open/slice-v1-katalog-features-quellen-und-freigabe.md) | M |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |

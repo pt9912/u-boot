@@ -11,6 +11,13 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-01
+
+Seventeenth release. **Several devcontainers per project folder with `--instance`, and a subscription token for Claude Code in the sandbox devcontainer.**
+`u-boot devcontainer up`, `down` and `shell` take `--instance <name>`: each instance is its own container and, in the sandbox profile, has its own workspace volume. Without `--instance` the three commands act only on the container without an instance, as before; a project that has only containers of instances ends with exit code `10` and a hint at `--instance`. With the sandbox profile and an active `claude-code`, `devcontainer.json` carries a reference to the host variable `CLAUDE_CODE_OAUTH_TOKEN`, never a value; regenerate an existing file with `u-boot generate devcontainer` to get it.
+**Promised:** the isolation of the workspace volumes for two instances that run at the same time in the sandbox profile, in the state directly after the start, on a Linux host (`amd64`) with a local Docker engine. **Not promised:** three or more instances, the isolation of the Docker storage (`nestedRuntime: docker`) and of the models (`ollama`), the storage of Podman, instances with or without a limit of CPU and memory, the behaviour under load, other hosts and engines, and the isolation in the standard profile, where all instances share the project folder. `u-boot` sets up no login inside the container and keeps no list of instances.
+Lastenheft 0.26.0.
+
 ### Added
 
 - `--instance <name>` for `u-boot devcontainer up`, `down` and `shell` ([`LH-FA-DEV-010`](spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [ADR-0038](docs/plan/adr/0038-devcontainer-instanz-zweites-id-label.md)): several devcontainers of one project folder run side by side. `u-boot` hands the Dev Container CLI two id labels, `devcontainer.local_folder=<folder>` and `u-boot.instance=<name>`, so each instance has its own container and, in the sandbox profile, its own volumes. A name has 1 to 32 characters of `a-z`, `0-9` and `-`, beginning and ending with a letter or digit; every other name, the empty one and one with `=` included, ends with exit code `10` before Docker is asked. Without `--instance` the three commands act only on the container without an instance, which stays without a label and keeps its volumes; if the project has only containers of instances, they end with exit code `10` and a hint at `--instance` and start or stop nothing. `down --instance <name>` without such a container ends with exit code `0`. `doctor`, `generate devcontainer` and `init` look at the container without an instance only. Pinned by unit tests and by Docker tests with two instances and the container without an instance in the sandbox profile (default settings: no nested runtime, no feature `ollama`, no resource limit) and with three containers in the standard profile.
@@ -1563,7 +1570,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.16.1...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/pt9912/u-boot/compare/v0.16.1...v0.17.0
 [0.16.1]: https://github.com/pt9912/u-boot/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/pt9912/u-boot/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/pt9912/u-boot/compare/v0.15.0...v0.15.1
