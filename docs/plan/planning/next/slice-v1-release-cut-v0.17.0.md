@@ -35,7 +35,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 - **`gh workflow run tap-check`.** Der Maintainer startet es mit dem PAT ([`releasing.md`](../../../maintainer/releasing.md) §2, §4); der Implementer hat kein Token.
 - **`make test-docker` lokal.** Entscheidung des Projektinhabers (2026-11-01): der CI-Lauf `integration-docker` auf `main` ist der Nachweis (Vorbild: M2 im Cut `v0.16.1`).
 - **Produktcode, Spezifikation, Lastenheft, ADRs.** Die Aufträge sind Text in Release-Dokumenten und drei Versionszeilen.
-- **Der Slice [`slice-v1-devcontainer-ressourcenlimits`](slice-v1-devcontainer-ressourcenlimits.md)** (Entwurf mit „Vorschlag `v0.17.0`“): er liegt in `open/` und ist nicht Inhalt des Release.
+- **Der Slice [`slice-v1-devcontainer-ressourcenlimits`](../open/slice-v1-devcontainer-ressourcenlimits.md)** (Entwurf mit „Vorschlag `v0.17.0`“): er liegt in `open/` und ist nicht Inhalt des Release.
 
 ## 2. Definition of Done
 
