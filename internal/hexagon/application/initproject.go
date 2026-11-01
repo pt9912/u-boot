@@ -76,6 +76,16 @@ type ubootYAMLDevcontainer struct {
 	User    *ubootYAMLDevcontainerUser    `yaml:"user,omitempty"`
 	Profile string                        `yaml:"profile,omitempty"`
 	Sandbox *ubootYAMLDevcontainerSandbox `yaml:"sandbox,omitempty"`
+	// Resources carries the container limits (LH-FA-CONF-002); absent =
+	// no `--memory` / `--cpus` in `runArgs`.
+	Resources *ubootYAMLDevcontainerResources `yaml:"resources,omitempty"`
+}
+
+// ubootYAMLDevcontainerResources is the `devcontainer.resources:` sub-tree.
+// An empty string means unset.
+type ubootYAMLDevcontainerResources struct {
+	Memory string `yaml:"memory,omitempty"`
+	CPUs   string `yaml:"cpus,omitempty"`
 }
 
 // ubootYAMLDevcontainerUser is the `devcontainer.user:` sub-tree
