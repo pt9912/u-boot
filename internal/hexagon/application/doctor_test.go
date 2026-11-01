@@ -265,7 +265,7 @@ func TestDoctor_Docker_ErrorBelowMinimum(t *testing.T) {
 			if d.Severity != domain.SeverityError {
 				t.Errorf("Severity = %v, want Error (version %s)", d.Severity, v)
 			}
-			if !strings.Contains(d.Message, "below the LH-FA-DIAG-002 minimum") {
+			if !strings.Contains(d.Message, "below the minimum") {
 				t.Errorf("Message missing minimum hint: %q", d.Message)
 			}
 		})

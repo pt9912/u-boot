@@ -165,28 +165,29 @@ Three forms:
   u-boot config get <path>            # print a single value
   u-boot config set <path> <value>    # write a single value
 
-Writable paths (LH-FA-CONF-001 / §D1 of slice-m8-config.md):
+Writable paths:
 
-  project.name                 # the project identifier (LH-FA-INIT-006 rules)
+  project.name                 # the project identifier (lowercase letters,
+                               # digits and "-", starting with a letter,
+                               # at most 63 characters)
   devcontainer.enabled         # bool
 
 Readable paths additionally include:
 
   services.<svc>.enabled       # bool; write goes through u-boot add/remove
 
-set runs a two-stage schema validation before touching the file
-(slice §D3): the patched bytes round-trip through the
-ubootYAMLConfig struct AND each path's domain validator. On
-validation failure the file stays byte-identical. set is
+set validates in two stages before touching the file: the patched
+content must still read as a valid u-boot.yaml AND pass the validator of
+its path. On validation failure the file stays byte-identical. set is
 idempotent. --dry-run/--diff preview without writing (only valid
 for set; rejected on the read-only forms). --json emits the
-LH-FA-CLI-007/008 envelope.
+JSON envelope.
 
-Exit codes (LH-FA-CLI-006):
+Exit codes:
   0   success
   2   CLI validation (unknown subcommand, missing args, --dry-run/
       --diff on a read-only form)
-  10  fachlich (no u-boot.yaml; unknown path; invalid value;
+  10  validation (no u-boot.yaml; unknown path; invalid value;
       write-rejected path; post-patch sanity; value not set on Get)
   14  filesystem error
 
@@ -271,11 +272,11 @@ an earlier one).`,
 		},
 	}
 	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
-		"additional URLs to append to devcontainer.featureSources.allow (LH-FA-DEV-003; only valid when <path> is devcontainer.featureSources.allow; cumulative with the positional value).")
+		"additional URLs to append to devcontainer.featureSources.allow (only valid when <path> is devcontainer.featureSources.allow; cumulative with the positional value).")
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
-		"preview the planned change without writing the file (LH-FA-CLI-007)")
+		"preview the planned change without writing the file")
 	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
-		"render a unified diff of the planned change (LH-FA-CLI-008)")
+		"render a unified diff of the planned change")
 	return cmd
 }
 
@@ -298,9 +299,9 @@ func configSetPairsArgs(_ *cobra.Command, args []string) error {
 // previews.
 func registerConfigPreviewRejectFlags(cmd *cobra.Command, form string, dryRun, diff *bool) {
 	cmd.Flags().BoolVar(dryRun, "dry-run", false,
-		fmt.Sprintf("not applicable to `%s` (read-only); only valid for `config set` — rejected with exit 2", form))
+		fmt.Sprintf("not applicable to '%s' (read-only); only valid for 'config set' — rejected with exit 2", form))
 	cmd.Flags().BoolVar(diff, "diff", false,
-		fmt.Sprintf("not applicable to `%s` (read-only); only valid for `config set` — rejected with exit 2", form))
+		fmt.Sprintf("not applicable to '%s' (read-only); only valid for 'config set' — rejected with exit 2", form))
 }
 
 // configArgsValidator is the shared custom [cobra.PositionalArgs]
@@ -442,7 +443,7 @@ func runConfigSet(
 	if len(flags.AllowExternalFeatureSources) > 0 &&
 		path.Kind != domain.ConfigDevcontainerFeatureSourcesAllow {
 		err := fmt.Errorf(
-			"%w: --allow-external-feature-sources is only valid for `config set devcontainer.featureSources.allow` (LH-FA-DEV-003); got path %s",
+			"%w: --allow-external-feature-sources is only valid for `config set devcontainer.featureSources.allow`; got path %s",
 			driving.ErrConfigPathUnknown, path)
 		return reportErrorSub(out, err, nil, flags.DryRun, flags.Diff, flags.JSON, "config", "set", mapErr, nil)
 	}
@@ -656,7 +657,7 @@ func runConfigSetMany(
 	}
 	if len(flags.AllowExternalFeatureSources) > 0 && !hasSources {
 		return fail(fmt.Errorf(
-			"%w: --allow-external-feature-sources is only valid together with the path devcontainer.featureSources.allow (LH-FA-DEV-003)",
+			"%w: --allow-external-feature-sources is only valid together with the path devcontainer.featureSources.allow",
 			driving.ErrConfigPathUnknown), nil)
 	}
 	cwd, err := getwd()

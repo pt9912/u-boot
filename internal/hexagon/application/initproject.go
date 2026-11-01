@@ -592,7 +592,7 @@ func (s *InitProjectService) initFromTemplate(ctx context.Context, req driving.I
 			driving.ErrTemplateConflictsWithFlag)
 	}
 	if req.Force || req.Backup {
-		return driving.InitProjectResponse{}, fmt.Errorf("%w: --template does not support --force / --backup (fresh-init only in v1)",
+		return driving.InitProjectResponse{}, fmt.Errorf("%w: --template does not support --force / --backup (only for a fresh project)",
 			driving.ErrTemplateConflictsWithFlag)
 	}
 	// Defense-in-Depth (Review-Round-9 #2): die CLI lehnt
@@ -1278,11 +1278,11 @@ func (s *InitProjectService) validateInitPreconditions(req driving.InitProjectRe
 		// either direction, so mentioning it confuses the
 		// diagnosis.
 		return fmt.Errorf(
-			"%w: --allow-external-feature-sources requires --devcontainer (LH-FA-DEV-003)",
+			"%w: --allow-external-feature-sources requires --devcontainer",
 			ErrInvalidFeatureSource)
 	}
 	if req.Sandbox && !req.Devcontainer {
-		return fmt.Errorf("%w: --sandbox requires --devcontainer (LH-FA-DEV-006)",
+		return fmt.Errorf("%w: --sandbox requires --devcontainer",
 			domain.ErrInvalidSandboxSetting)
 	}
 	// BaseDir-exists check intentionally NOT here; the template

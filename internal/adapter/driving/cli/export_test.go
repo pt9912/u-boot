@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 )
@@ -138,5 +139,43 @@ func walkCommandPaths(cmd *cobra.Command, out *[]string) {
 		}
 		*out = append(*out, child.CommandPath())
 		walkCommandPaths(child, out)
+	}
+}
+
+// HelpTextForTest is one help text of the command tree: the command
+// path, the field it comes from (`Short`, `Long`, `Example`, or
+// `--<flag>` for an option's usage) and the text.
+type HelpTextForTest struct {
+	Path  string
+	Field string
+	Text  string
+}
+
+// HelpTextsForTest returns every help text of the root command and all
+// its subcommands, including hidden ones. The commands Cobra adds on
+// its own (`help`, `completion`) carry Cobra's text and are skipped.
+func (a *App) HelpTextsForTest() []HelpTextForTest {
+	var out []HelpTextForTest
+	collectHelpTexts(buildRootCommand(a), &out)
+	return out
+}
+
+func collectHelpTexts(cmd *cobra.Command, out *[]HelpTextForTest) {
+	path := cmd.CommandPath()
+	for _, f := range []struct{ field, text string }{
+		{"Short", cmd.Short}, {"Long", cmd.Long}, {"Example", cmd.Example},
+	} {
+		if f.text != "" {
+			*out = append(*out, HelpTextForTest{Path: path, Field: f.field, Text: f.text})
+		}
+	}
+	cmd.LocalFlags().VisitAll(func(fl *pflag.Flag) {
+		*out = append(*out, HelpTextForTest{Path: path, Field: "--" + fl.Name, Text: fl.Usage})
+	})
+	for _, child := range cmd.Commands() {
+		if child.Name() == "help" || child.Name() == "completion" {
+			continue
+		}
+		collectHelpTexts(child, out)
 	}
 }

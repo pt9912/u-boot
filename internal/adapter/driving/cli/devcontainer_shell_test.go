@@ -194,9 +194,9 @@ func TestExecute_DevcontainerShell_HumanOutput(t *testing.T) {
 	}
 	lines := nonEmptyLines(e.String())
 	if len(lines) != 4 ||
-		!strings.HasPrefix(lines[0], "Warning (LH-FA-DEV-010): this command mounts the host container-engine socket") ||
+		!strings.HasPrefix(lines[0], "Warning: this command mounts the host container-engine socket") ||
 		lines[1] != "Step 1/2 : FROM base" ||
-		!strings.HasPrefix(lines[2], "Warning (LH-FA-DEV-007): state of the devcontainer container at its last start") ||
+		!strings.HasPrefix(lines[2], "Warning: state of the devcontainer container at its last start") ||
 		lines[3] != "line of the session on stderr" {
 		t.Errorf("stderr lines (disclosure, progress, fallback, session):\n%s", e.String())
 	}
@@ -232,8 +232,8 @@ func TestExecute_DevcontainerShell_Quiet(t *testing.T) {
 		t.Errorf("session stdout: quiet %q, default %q, want the same line", quietOut, loudOut)
 	}
 	if len(quietErr) != 3 ||
-		!strings.HasPrefix(quietErr[0], "Warning (LH-FA-DEV-010):") ||
-		!strings.HasPrefix(quietErr[1], "Warning (LH-FA-DEV-007):") ||
+		!strings.HasPrefix(quietErr[0], "Warning:") ||
+		!strings.HasPrefix(quietErr[1], "Warning:") ||
 		quietErr[2] != "line of the session on stderr" {
 		t.Errorf("--quiet stderr = %q, want the disclosure, the fallback warning and the session line", quietErr)
 	}
@@ -258,7 +258,7 @@ func TestExecute_DevcontainerShell_Quiet(t *testing.T) {
 		uc := startedUseCase()
 		uc.shellErr = fmt.Errorf("devcontainer up failed (exit status 1: boom): %w", driven.ErrDevcontainerRuntime)
 		out, errOut, err := shellRun(t, uc, "--quiet", "devcontainer", "shell")
-		if cli.ExitCode(err) != 12 || out != "" || !strings.Contains(errOut, "Step 1/2 : FROM base\n") || !strings.Contains(errOut, "Warning (LH-FA-DEV-010):") {
+		if cli.ExitCode(err) != 12 || out != "" || !strings.Contains(errOut, "Step 1/2 : FROM base\n") || !strings.Contains(errOut, "Warning:") {
 			t.Errorf("exit=%d stdout=%q stderr=%q: want exit 12, the held progress and the disclosure", cli.ExitCode(err), out, errOut)
 		}
 	})

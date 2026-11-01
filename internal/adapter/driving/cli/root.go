@@ -82,7 +82,7 @@ func buildRootCommand(a *App) *cobra.Command {
 	// PersistentPreRunE below.
 	a.verbosity = verbosityDefault
 	addVerbosityFlag(root, a, "quiet", verbosityQuiet,
-		"show errors only; security relaxations, degradation fallbacks of the sandbox profile, `up` progress and the `--force` path summary stay reported; the last of --quiet, --verbose and --debug wins")
+		"show errors only; security relaxations, degradation fallbacks of the sandbox profile, up progress and the --force path summary stay reported; the last of --quiet, --verbose and --debug wins")
 	addVerbosityFlag(root, a, "verbose", verbosityVerbose,
 		"show additional detail; the last of --quiet, --verbose and --debug wins")
 	addVerbosityFlag(root, a, "debug", verbosityDebug,

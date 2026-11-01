@@ -98,41 +98,38 @@ func newRemoveCommand(a *App) *cobra.Command {
 		Use:   "remove <service>",
 		Short: "Remove a service add-on from the u-boot project",
 		Long: `Remove an integrated service add-on from the current u-boot project
-(LH-FA-ADD-007 — mirror of "u-boot add"). The positional <service>
-argument names the catalogue entry; today MVP supports only
-postgres. Keycloak / OpenTelemetry will follow in their own V1
-slices.
+(the mirror of "u-boot add"). The positional <service> argument names
+the catalogue entry: postgres, keycloak or otel.
 
-The command runs in an initialized project (u-boot.yaml present per
-LH-FA-ADD-001) and is idempotent: removing an already-disabled
+The command runs in an initialized project (u-boot.yaml present) and
+is idempotent: removing an already-disabled
 service is a no-op with a clear message. The state-machine handles
 the inverse of add — strip the service.<name> managed block from
 compose.yaml and .env.example, then set services.<name>.enabled to
 false in u-boot.yaml.
 
---purge is the explicit destructive opt-in for volume removal
-(LH-FA-ADD-007). The same LH-FA-CLI-005A confirmation gate as
-"u-boot down --volumes" applies: --no-interactive without --yes
-exits 10 (ErrConfirmationRequired); interactive mode prompts with a
-safe default-No. In v0.3.0 the gate's "approved" outcome does NOT
-auto-remove volumes yet — the CLI surfaces the deferred work so the
-user can clean up manually with "docker volume rm <name>".
+--purge is the explicit destructive opt-in for volume removal. The same
+confirmation gate as "u-boot down --volumes" applies: --no-interactive
+without --yes exits 10; interactive mode prompts with a safe default-No.
+After approval, --purge removes the named volume of the service. A
+volume that cannot be removed (for example one that is still in use)
+is reported as a warning; remove it afterwards with
+"docker volume rm <name>". --dry-run removes nothing.
 
-Flag combinations (LH-FA-CLI-007/008):
+Flag combinations:
   --dry-run            preview without writing files
   --diff               show unified diff of planned changes
   --dry-run --diff     unified diff preview, no write
   --json               JSON output; pairs with --dry-run / --diff
-                       for the LH-FA-CLI-007 voll-schema
+                       for the full preview schema
 
-Exit codes (LH-FA-CLI-006):
+Exit codes:
   0   success (state transition OR idempotent no-op)
   2   CLI / flag errors (unknown subcommand, missing positional,
       conflicting mode flags)
-  10  fachlich: ErrServiceUnsupported (not in catalogue),
-      ErrServiceUnregistered (never added), ErrServiceInconsistent
-      (orphan block or missing entry), ErrProjectNotInitialized,
-      ErrConfirmationRequired (purge gate refused)
+  10  validation: service not in the catalogue, service never added,
+      inconsistent project state (orphan block or missing entry),
+      project not initialized, purge confirmation refused
   14  filesystem error (permission, disk full, race)
 
 Examples:
@@ -152,11 +149,11 @@ Examples:
 	}
 
 	cmd.Flags().BoolVar(&flags.Purge, "purge", false,
-		"also request volume removal for the service (LH-FA-ADD-007). Destructive: triggers the LH-FA-CLI-005A confirmation gate (refuses in --no-interactive without --yes). v0.3.0 does NOT auto-remove volumes after approval — the summary points at `docker volume rm` for manual cleanup.")
+		"also remove the named volume of the service. Destructive: asks for confirmation (refuses in --no-interactive without --yes). A volume that cannot be removed is reported as a warning.")
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
-		"preview the planned changes without writing files (LH-FA-CLI-007)")
+		"preview the planned changes without writing files")
 	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
-		"render a unified diff of the planned changes (LH-FA-CLI-008)")
+		"render a unified diff of the planned changes")
 	return cmd
 }
 
@@ -496,7 +493,7 @@ func printRemoveSummary(out, errOut io.Writer, resp driving.RemoveServiceRespons
 	}
 	if purge && !resp.VolumesPurged && previewMode != driving.PreviewDryRun {
 		fmt.Fprintf(errOut,
-			"\nWARNING: --purge was requested but volume removal is NOT yet automated in v0.3.0.\n"+
+			"\nWARNING: --purge was requested but removed no volume.\n"+
 				"         The %s service's named volumes are still on disk and untouched.\n"+
 				"         Remove them manually after confirming the data is no longer needed:\n"+
 				"           docker volume ls --filter label=com.docker.compose.project=<your-project>\n"+

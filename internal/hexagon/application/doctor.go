@@ -272,8 +272,7 @@ func (s *DoctorService) checkWritePermissions(_ context.Context, baseDir string)
 // is shared so the four affected checks read consistently.
 const hostHintSkippedInContainer = "host check skipped: u-boot is running inside a container, " +
 	"so PATH probes here cannot see the host's tooling. " +
-	"Run doctor from a host install instead — see " +
-	"slice-v0.1.1-doctor-container-awareness for the full rationale."
+	"Run doctor from a host install instead."
 
 // inContainer is the runtime gate the four host-prerequisite
 // checks and checkSandboxRuntime (its `/dev/fuse` branch) use to
@@ -419,7 +418,7 @@ func classifyVersionAtLeast(id, label, version string, minMajor, minMinor int) d
 			Severity: domain.SeverityWarn,
 			Message: fmt.Sprintf("%s reports unrecognized version %q (expected `<major>.<minor>.<patch>`).",
 				label, version),
-			Hint: fmt.Sprintf("Cannot validate against the LH-FA-DIAG-002 minimum %d.%d — verify manually.",
+			Hint: fmt.Sprintf("Cannot validate against the minimum %d.%d — verify manually.",
 				minMajor, minMinor),
 		}
 	}
@@ -427,7 +426,7 @@ func classifyVersionAtLeast(id, label, version string, minMajor, minMinor int) d
 		return domain.Diagnostic{
 			ID:       id,
 			Severity: domain.SeverityError,
-			Message: fmt.Sprintf("%s %s is below the LH-FA-DIAG-002 minimum %d.%d.",
+			Message: fmt.Sprintf("%s %s is below the minimum %d.%d.",
 				label, version, minMajor, minMinor),
 			Hint: fmt.Sprintf("Upgrade %s to %d.%d or newer.", label, minMajor, minMinor),
 		}
@@ -578,7 +577,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 		RelPath:     domain.ConfigFileName,
 		Label:       domain.ConfigFileName,
 		MissingMsg:  "u-boot.yaml not present — directory is not a u-boot project.",
-		MissingHint: "Run `u-boot init` to create one (LH-FA-INIT-001).",
+		MissingHint: "Run `u-boot init` to create one.",
 	}, &cfg)
 	if !ok {
 		return *diag
@@ -597,7 +596,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 			ID:       checkIDUbootYaml,
 			Severity: domain.SeverityError,
 			Message:  "u-boot.yaml is missing required `project.name`.",
-			Hint:     "Add `project: { name: <valid-name> }` per LH-FA-INIT-006.",
+			Hint:     "Add `project: { name: <valid-name> }`.",
 		}
 	}
 	if _, err := domain.NewProjectName(cfg.Project.Name); err != nil {
@@ -605,7 +604,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 			ID:       checkIDUbootYaml,
 			Severity: domain.SeverityError,
 			Message:  fmt.Sprintf("u-boot.yaml project.name %q is invalid: %s.", cfg.Project.Name, err.Error()),
-			Hint:     "Use a lowercase name like `my-service` (LH-FA-INIT-006 regex).",
+			Hint:     "Use a lowercase name like `my-service`: lowercase letters, digits and `-`, starting with a letter.",
 		}
 	}
 	// Audit-Followup A1: LH-FA-DEV-003 schema validation of the
@@ -619,7 +618,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 			ID:       checkIDUbootYaml,
 			Severity: domain.SeverityError,
 			Message:  fmt.Sprintf("u-boot.yaml devcontainer schema invalid: %s.", err.Error()),
-			Hint:     "Fix the offending entry (URL scheme, host, or feature name); see LH-FA-DEV-003 / spec/lastenheft.md LH-FA-CONF-002.",
+			Hint:     "Fix the offending entry (URL scheme, host, or feature name).",
 		}
 	}
 	return domain.Diagnostic{
@@ -673,7 +672,7 @@ func (s *DoctorService) checkComposeYaml(_ context.Context, baseDir string) doma
 		RelPath:     "compose.yaml",
 		Label:       "compose.yaml",
 		MissingMsg:  "compose.yaml not present — directory has no Docker Compose configuration.",
-		MissingHint: "Run `u-boot init` (LH-FA-INIT-003 ships a compose.yaml).",
+		MissingHint: "Run `u-boot init` to create a compose.yaml.",
 	}, &shape)
 	if !ok {
 		return *diag
@@ -939,7 +938,7 @@ func (s *DoctorService) checkServicesEnabledKey(_ context.Context, baseDir strin
 		Severity: domain.SeverityWarn,
 		Message: fmt.Sprintf(
 			"services without an explicit enabled: key: %s. "+
-				"Add `enabled: true` or `enabled: false` per LH-FA-ADD-005.",
+				"Add `enabled: true` or `enabled: false`.",
 			strings.Join(missing, ", ")),
 	}
 }
@@ -1265,7 +1264,7 @@ func (s *DoctorService) checkDevcontainerFeaturesAllowlist(_ context.Context, ba
 		if len(enabledKeyMissing) > 0 {
 			parts = append(parts, fmt.Sprintf(
 				"feature(s) without explicit enabled: key: %s. "+
-					"Add `enabled: true` or `enabled: false` per LH-FA-ADD-005 (same convention applies to devcontainer.features.<name>)",
+					"Add `enabled: true` or `enabled: false` (same convention applies to devcontainer.features.<name>)",
 				strings.Join(enabledKeyMissing, ", ")))
 		}
 		return domain.Diagnostic{
@@ -1291,7 +1290,7 @@ func featureErrorMessage(allowlistViolations []string, socketRejection string) s
 		parts = append(parts, fmt.Sprintf(
 			"feature(s) with `source:` override not in devcontainer.featureSources.allow: %s. "+
 				"Add the URL via `u-boot config set devcontainer.featureSources.allow <url>` or "+
-				"`--allow-external-feature-sources <url>` (LH-FA-DEV-003; `--yes` is not sufficient, LH-NFA-SEC-004).",
+				"`--allow-external-feature-sources <url>` (`--yes` is not sufficient).",
 			strings.Join(allowlistViolations, ", ")))
 	}
 	if socketRejection != "" {

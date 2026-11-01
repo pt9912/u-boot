@@ -109,19 +109,17 @@ func newInitCommand(a *App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init [name]",
 		Short: "Initialize a new u-boot project in the current directory",
-		Long: `Create the mandatory project structure (LH-FA-INIT-003) plus a
-u-boot.yaml (LH-FA-CONF-002) and optionally a git repository
-(LH-FA-INIT-007). The current working directory is used as BaseDir;
-the project name is derived from its basename (LH-FA-INIT-002) unless
-a [name] argument is given.
+		Long: `Create the mandatory project structure plus a
+u-boot.yaml and optionally a git repository. The current working
+directory is used as the project directory; the project name is derived
+from its basename unless a [name] argument is given.
 
 Re-running init on an existing project requires --force (managed-block
-only edit) or --backup (full overwrite with safety copy), per
-LH-FA-INIT-005.
+only edit) or --backup (full overwrite with safety copy).
 
-Soft-existing-detection (LH-FA-INIT-004): when BaseDir lacks the
+Existing-project detection: when the directory lacks the
 hard markers (u-boot.yaml / compose.yaml / .env.example) but already
-contains ≥3 LH-FA-INIT-003 structure elements (README.md, CHANGELOG.md,
+contains at least three structure elements (README.md, CHANGELOG.md,
 docs/, scripts/, docker/, .devcontainer/devcontainer.json), the
 init refuses to proceed without confirmation:
 
@@ -143,7 +141,7 @@ Examples:
   u-boot init --force --backup           # block edit + safety backup
   u-boot init --no-interactive --force   # CI-safe re-init
   u-boot init --assume-existing --backup # re-init a partial layout
-  u-boot init --devcontainer             # LH-AK-005 devcontainer flow
+  u-boot init --devcontainer             # also create the devcontainer
   u-boot init --devcontainer --force --backup  # re-splice over generate output`,
 		// slice-v1-cli-json-envelope-consolidation T2/SD-C: base
 		// stays MaximumNArgs(1) → 0 args is a valid success (default
@@ -162,25 +160,25 @@ Examples:
 		},
 	}
 
-	cmd.Flags().BoolVar(&flags.SkipGit, "no-git", false, "skip `git init` (LH-FA-INIT-007)")
+	cmd.Flags().BoolVar(&flags.SkipGit, "no-git", false, "do not run git init")
 	cmd.Flags().BoolVar(&flags.Force, "force", false,
-		"replace U-BOOT MANAGED BLOCK content in existing files (LH-FA-INIT-005)")
+		"replace U-BOOT MANAGED BLOCK content in existing files")
 	cmd.Flags().BoolVar(&flags.Backup, "backup", false,
-		"back up existing files to <name>.bak[.N] before overwriting (LH-FA-INIT-005)")
+		"back up existing files to <name>.bak[.N] before overwriting")
 	cmd.Flags().BoolVar(&flags.AssumeExisting, "assume-existing", false,
-		"assert existing project in non-interactive runs; aborts unless --backup/--force (LH-FA-INIT-004, LH-FA-CLI-005A)")
+		"assert existing project in non-interactive runs; aborts unless --backup/--force")
 	cmd.Flags().BoolVar(&flags.Devcontainer, "devcontainer", false,
-		"also generate `.devcontainer/devcontainer.json` + `Dockerfile` and set devcontainer.enabled=true in u-boot.yaml (LH-AK-005)")
+		"also generate .devcontainer/devcontainer.json and .devcontainer/Dockerfile and set devcontainer.enabled=true in u-boot.yaml")
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
-		"preview the planned changes without writing files (LH-FA-CLI-007)")
+		"preview the planned changes without writing files")
 	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
-		"render a unified diff of the planned changes (LH-FA-CLI-008)")
+		"render a unified diff of the planned changes")
 	cmd.Flags().StringVar(&flags.Template, "template", "",
-		"render the project from an external template instead of the default flow (`u-boot template list` for the catalog; LH-FA-TPL-001 / slice-v1-template-init T4 — fresh-init only, mutex with --devcontainer/--force/--backup/--dry-run/--diff)")
+		"render the project from an external template instead of the default flow ('u-boot template list' shows the catalog; only for a fresh project, cannot be combined with --devcontainer, --force, --backup, --dry-run or --diff)")
 	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
-		"seed devcontainer.featureSources.allow with the given URLs (LH-FA-DEV-003; comma-separated, repeatable). Requires --devcontainer; `--yes` does not substitute (LH-NFA-SEC-004).")
+		"seed devcontainer.featureSources.allow with the given URLs (comma-separated, repeatable). Requires --devcontainer; --yes does not substitute.")
 	cmd.Flags().BoolVar(&flags.Sandbox, "sandbox", false,
-		"render the devcontainer with the sandbox profile (LH-FA-DEV-006: named-volume workspace, no host bind mount, no socket mount) and set devcontainer.profile=sandbox. Requires --devcontainer.")
+		"render the devcontainer with the sandbox profile (named-volume workspace, no host bind mount, no socket mount) and set devcontainer.profile=sandbox. Requires --devcontainer.")
 	return cmd
 }
 
@@ -432,7 +430,7 @@ func printInitSummary(out io.Writer, resp driving.InitProjectResponse, dryRun bo
 	return printInitWarnings(out, resp.Warnings, true)
 }
 
-// printInitWarnings writes one `Warning (<code>): <message>` line per
+// printInitWarnings writes one `Warning: <message>` line per
 // entry; `blankBefore` separates each line from the summary above it.
 func printInitWarnings(out io.Writer, ws []driving.WarningEntry, blankBefore bool) error {
 	lead := ""
@@ -440,7 +438,7 @@ func printInitWarnings(out io.Writer, ws []driving.WarningEntry, blankBefore boo
 		lead = "\n"
 	}
 	for _, w := range ws {
-		if _, err := fmt.Fprintf(out, "%sWarning (%s): %s\n", lead, w.Code, w.Message); err != nil {
+		if _, err := fmt.Fprintf(out, "%sWarning: %s\n", lead, w.Message); err != nil {
 			return err
 		}
 	}

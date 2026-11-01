@@ -52,7 +52,7 @@ func TestExecute_Init_SandboxWarnings(t *testing.T) {
 		[]string{"init", "--devcontainer", "--sandbox"}, &stdout, &stderr); err != nil {
 		t.Fatalf("human: %v", err)
 	}
-	if !strings.Contains(stdout.String(), "Warning (LH-FA-DEV-006): no git remote") {
+	if !strings.Contains(stdout.String(), "Warning: no git remote") {
 		t.Errorf("human output lacks warning:\n%s", stdout.String())
 	}
 
@@ -86,8 +86,11 @@ func TestExecute_Generate_SandboxFlagForwardedAndWarns(t *testing.T) {
 	if !uc.lastReq.Sandbox {
 		t.Errorf("Sandbox not forwarded: %+v", uc.lastReq)
 	}
-	if !strings.Contains(stdout.String(), "Warning (LH-FA-DEV-006)") {
+	if !strings.Contains(stdout.String(), "Warning:") {
 		t.Errorf("output lacks warning:\n%s", stdout.String())
+	}
+	if strings.Contains(stdout.String(), "Warning (") {
+		t.Errorf("the warning line carries the code in front of the text:\n%s", stdout.String())
 	}
 
 	stdout.Reset()

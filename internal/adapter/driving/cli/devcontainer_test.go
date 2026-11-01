@@ -229,9 +229,9 @@ func TestExecute_DevcontainerUp_HumanOutput(t *testing.T) {
 	}
 	lines := strings.Split(strings.TrimSpace(out), "\n")
 	if len(lines) != 3 ||
-		!strings.HasPrefix(lines[0], "Warning (LH-FA-DEV-010): this command mounts the host container-engine socket") ||
+		!strings.HasPrefix(lines[0], "Warning: this command mounts the host container-engine socket") ||
 		lines[1] != "Devcontainer started: container 0123456789ab, remote user vscode, workspace /workspaces/demo" ||
-		!strings.HasPrefix(lines[2], "Warning (LH-FA-DEV-007): state of the devcontainer container at its last start") {
+		!strings.HasPrefix(lines[2], "Warning: state of the devcontainer container at its last start") {
 		t.Errorf("stdout lines (disclosure, result, fallback):\n%s", out)
 	}
 	if errOut != "Step 1/2 : FROM base\n" {
@@ -255,7 +255,7 @@ func TestExecute_DevcontainerUp_Quiet(t *testing.T) {
 			t.Fatal(err)
 		}
 		if errOut != "" || strings.Contains(out, "Devcontainer started") ||
-			!strings.Contains(out, "Warning (LH-FA-DEV-010):") || !strings.Contains(out, "Warning (LH-FA-DEV-007):") {
+			!strings.Contains(out, "Warning:") || !strings.Contains(out, "Warning:") {
 			t.Errorf("stdout=%q stderr=%q: want both warnings, no result line, no progress", out, errOut)
 		}
 	})
@@ -273,7 +273,7 @@ func TestExecute_DevcontainerUp_Quiet(t *testing.T) {
 		uc := startedUseCase()
 		uc.upErr = fmt.Errorf("devcontainer up failed (exit status 1: boom): %w", driven.ErrDevcontainerRuntime)
 		out, errOut, err := quietRun(t, newAppWithDevcontainer(uc), "--quiet", "devcontainer", "up")
-		if cli.ExitCode(err) != 12 || errOut != "Step 1/2 : FROM base\n" || !strings.Contains(out, "Warning (LH-FA-DEV-010):") {
+		if cli.ExitCode(err) != 12 || errOut != "Step 1/2 : FROM base\n" || !strings.Contains(out, "Warning:") {
 			t.Errorf("err=%v exit=%d stdout=%q stderr=%q: want exit 12, the held progress and the disclosure", err, cli.ExitCode(err), out, errOut)
 		}
 	})
@@ -331,7 +331,7 @@ func TestExecute_DevcontainerUp_JSON(t *testing.T) {
 	}
 	// Console and JSON carry the same text.
 	console, _, _ := quietRun(t, newAppWithDevcontainer(startedUseCase()), "devcontainer", "up")
-	if !strings.Contains(console, "Warning (LH-FA-DEV-010): "+d.Message+"\n") {
+	if !strings.Contains(console, "Warning: "+d.Message+"\n") {
 		t.Errorf("the console text differs from the JSON message %q:\n%s", d.Message, console)
 	}
 }
@@ -355,9 +355,9 @@ func TestExecute_DevcontainerUp_AlreadyRunning(t *testing.T) {
 		}
 		lines := strings.Split(strings.TrimSpace(out), "\n")
 		if len(lines) != 3 ||
-			!strings.HasPrefix(lines[0], "Warning (LH-FA-DEV-010):") ||
+			!strings.HasPrefix(lines[0], "Warning:") ||
 			lines[1] != "Devcontainer already running: container 0123456789ab, remote user vscode, workspace /workspaces/demo" ||
-			!strings.HasPrefix(lines[2], "Warning (LH-FA-DEV-007):") {
+			!strings.HasPrefix(lines[2], "Warning:") {
 			t.Errorf("stdout lines (disclosure, result, fallback):\n%s", out)
 		}
 		if strings.Contains(out, "Devcontainer started") {

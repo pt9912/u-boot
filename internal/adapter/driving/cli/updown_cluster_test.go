@@ -61,7 +61,7 @@ func TestUp_RecreateWarningsRendered(t *testing.T) {
 	if err := newAppWithUp(uc, cli.WithGetwd(clusterGetwd)).Execute(context.Background(), []string{"up"}, &stdout, &stderr); err != nil {
 		t.Fatalf("human: %v", err)
 	}
-	if !strings.Contains(stdout.String(), "Warning (LH-FA-UP-003)") {
+	if !strings.Contains(stdout.String(), "Warning:") {
 		t.Errorf("human output lacks the recreate warning:\n%s", stdout.String())
 	}
 	stdout.Reset()
@@ -125,7 +125,7 @@ func TestDown_RemovedVolumeNamesRendered(t *testing.T) {
 }
 
 // slice-v1-volume-auto-removal: the purge result is rendered (human +
-// JSON); the legacy "not yet automated" prose disappears once the real
+// JSON); the warning that no volume was removed disappears once the real
 // removal ran, failures show as warnings.
 func TestRemove_PurgeResultRendered(t *testing.T) {
 	pg, _ := domain.NewServiceName("postgres")

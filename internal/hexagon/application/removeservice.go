@@ -316,7 +316,7 @@ func (s *RemoveServiceService) volumesPurgedWarnings(req driving.RemoveServiceRe
 		{
 			Code:    "LH-FA-ADD-007",
 			Level:   "warn",
-			Message: fmt.Sprintf("--purge requested for service %q but volume removal is deferred (v0.3.0); the named volumes are still on disk and untouched", req.ServiceName.String()),
+			Message: fmt.Sprintf("--purge requested for service %q but no volume is removed in this run; the named volumes are still on disk and untouched", req.ServiceName.String()),
 		},
 	}
 }

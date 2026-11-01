@@ -63,11 +63,10 @@ func newDoctorCommand(a *App) *cobra.Command {
 		Use:   "doctor",
 		Short: "Diagnose the local environment for u-boot prerequisites",
 		Long: `Run a battery of checks against the current directory and the local
-environment, classify each finding as ok / warn / error per
-LH-FA-DIAG-003, and exit with code 11 when any error is present
+environment, classify each finding as ok / warn / error, and exit with code 11 when any error is present
 (or any warn, when --strict is set).
 
-Default checks (LH-FA-DIAG-002):
+Default checks:
   - write-permissions in the current directory
   - git binary availability
   - docker binary + version (≥ 24.0) + daemon reachability
@@ -89,7 +88,7 @@ Examples:
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Strict, "strict", false,
-		"treat any warning as fail-grade (LH-FA-DIAG-003)")
+		"treat any warning as fail-grade")
 	return cmd
 }
 

@@ -171,7 +171,7 @@ with a letter or digit. Without --instance the command acts on the container
 without an instance only; if the project has only containers of instances, it
 ends with exit 10 and starts nothing.
 
-Exit codes (LH-FA-CLI-006):
+Exit codes:
   0   success
   2   CLI validation (unknown flag, arguments, --dry-run/--diff)
   10  no .devcontainer/devcontainer.json in the current directory; a directory
@@ -227,7 +227,7 @@ container of that instance the command ends with exit 0. Without --instance the
 command acts on the container without an instance only; if the project has
 only containers of instances, it ends with exit 10 and stops nothing.
 
-Exit codes (LH-FA-CLI-006):
+Exit codes:
   0   success, also when there is nothing to stop
   2   CLI validation (unknown flag, arguments, --dry-run/--diff)
   10  an instance name that is not admissible; no --instance although the
@@ -552,7 +552,7 @@ func runDevcontainerShell(
 // writeWarnings renders warnings in the human form of the other commands.
 func writeWarnings(out io.Writer, ws []driving.WarningEntry) {
 	for _, w := range ws {
-		fmt.Fprintf(out, "Warning (%s): %s\n", w.Code, w.Message)
+		fmt.Fprintf(out, "Warning: %s\n", w.Message)
 	}
 }
 

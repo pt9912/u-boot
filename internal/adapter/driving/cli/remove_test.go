@@ -90,13 +90,12 @@ func TestRemove_PurgeSurfacesManualCleanupHint(t *testing.T) {
 	}
 	// Review-followup F4 + F5: the WARNING block lives on STDERR (not
 	// stdout) and starts with "WARNING:" (not "NOTE:") to reflect
-	// that --purge promised something the v0.3.0 code does not yet
-	// perform.
+	// that --purge removed no volume.
 	if strings.Contains(stdout.String(), "WARNING:") {
 		t.Errorf("WARNING ended up on stdout; F4 expects stderr; got:\n%s", stdout.String())
 	}
 	errs := stderr.String()
-	if !strings.Contains(errs, "WARNING: --purge was requested but volume removal is NOT yet automated") {
+	if !strings.Contains(errs, "WARNING: --purge was requested but removed no volume") {
 		t.Errorf("stderr missing WARNING-prefixed cleanup notice; got:\n%s", errs)
 	}
 	if !strings.Contains(errs, "docker volume rm") {

@@ -270,8 +270,8 @@ func TestRun_Generate_OllamaNotices(t *testing.T) {
 		wantCode int
 		wantText string
 	}{
-		"sandbox":         {head + "  profile: sandbox\n" + feature, 0, "Warning (LH-NFA-SEC-004): devcontainer feature ollama"},
-		"default profile": {head + feature, 0, "Warning (LH-FA-DEV-003): devcontainer feature ollama has no effect without devcontainer.profile=sandbox"},
+		"sandbox":         {head + "  profile: sandbox\n" + feature, 0, "Warning: devcontainer feature ollama"},
+		"default profile": {head + feature, 0, "Warning: devcontainer feature ollama has no effect without devcontainer.profile=sandbox"},
 		"version without source": {head + "  profile: sandbox\n  features:\n    ollama:\n      enabled: true\n      version: \"0.40.7\"\n",
 			10, ""},
 	} {
@@ -341,9 +341,9 @@ func TestRun_Generate_SandboxFeatureWarnings(t *testing.T) {
 	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - oci://registry.example.test/acme\n"
 	const features = "  features:\n    go:\n      enabled: true\n    acme:\n      enabled: true\n      source: oci://registry.example.test/acme\n"
 	want := []string{
-		"Warning (LH-FA-DEV-006): security relaxation for the devcontainer feature go: --cap-add=SYS_PTRACE",
-		"Warning (LH-FA-DEV-006): security relaxation for the devcontainer feature go: --security-opt=seccomp=unconfined",
-		"Warning (LH-FA-DEV-006): devcontainer feature acme comes from the external source oci://registry.example.test/acme",
+		"Warning: security relaxation for the devcontainer feature go: --cap-add=SYS_PTRACE",
+		"Warning: security relaxation for the devcontainer feature go: --security-opt=seccomp=unconfined",
+		"Warning: devcontainer feature acme comes from the external source oci://registry.example.test/acme",
 	}
 	for _, tc := range []struct {
 		name  string
@@ -651,7 +651,7 @@ func TestRun_DevcontainerShell_NoDockerBinaryExits11(t *testing.T) {
 	if code != 11 || out.Len() != 0 {
 		t.Fatalf("exit %d, stdout=%q stderr=%q, want exit 11 and no stdout", code, out.String(), errOut.String())
 	}
-	if !strings.Contains(errOut.String(), "Warning (LH-FA-DEV-010): this command mounts the host container-engine socket") ||
+	if !strings.Contains(errOut.String(), "Warning: this command mounts the host container-engine socket") ||
 		!strings.Contains(errOut.String(), "for the duration of the start)") ||
 		!strings.Contains(errOut.String(), "docker binary not on PATH") {
 		t.Errorf("stderr lacks the disclosure of the start or the error:\n%s", errOut.String())
@@ -731,8 +731,8 @@ func TestRun_Generate_ForgeCLINotices(t *testing.T) {
 				t.Fatalf("generate devcontainer: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
 			}
 			for _, want := range []string{
-				"Warning (LH-NFA-SEC-004): devcontainer feature gh installs the release archive",
-				"Warning (LH-NFA-SEC-004): devcontainer feature glab installs the release archive",
+				"Warning: devcontainer feature gh installs the release archive",
+				"Warning: devcontainer feature glab installs the release archive",
 			} {
 				if n := strings.Count(out.String(), want); n != 1 {
 					t.Errorf("stdout contains %q %d times, want 1:\n%s", want, n, out.String())
@@ -845,7 +845,7 @@ func TestRun_Generate_OllamaHostNotices(t *testing.T) {
 			if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != 0 {
 				t.Fatalf("generate devcontainer: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
 			}
-			want := "Warning (" + tc.wantCode + "): devcontainer feature ollama-host adds the container option --add-host=host.docker.internal:host-gateway"
+			want := "Warning: devcontainer feature ollama-host adds the container option --add-host=host.docker.internal:host-gateway"
 			if n := strings.Count(out.String(), want); n != 1 {
 				t.Errorf("stdout contains %q %d times, want 1:\n%s", want, n, out.String())
 			}
