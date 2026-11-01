@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+Slices in `in-progress/`: [`slice-v1-devcontainer-host-git-uebernehmen`](slice-v1-devcontainer-host-git-uebernehmen.md) (ohne Welle, Einzel-Slice, [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)); kein Slice an einer Welle.
 
 ## Nächste Wellen
 

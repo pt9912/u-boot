@@ -1,0 +1,283 @@
+# Messung schwer (m6) — 2026-11-01T14:28:05Z
+# Host: Linux 7.0.0-42-generic x86_64
+# Docker: 29.9.2 / Server 29.9.2 (linux/amd64)
+# u-boot: u-boot version 0.17.0-dev
+# Hilfs-Image: ubmess-devcontainer-cli:0.89.0
+# Token-Platzhalter (Länge): 36
+# Wiederholungen je Zelle: 2
+
+## M6: Transport der Host-Variable über u-boot up/shell (Platzhalter), beide Profile, mit Instanz
+## (Sitzungsumgebung über Eingaben der Sitzung gelesen; Container-Umgebung über docker exec)
+### Zelle M6-A, Wiederholung 1: Sandbox, GIT_TOKEN gesetzt, ohne Instanz, up; exec-Umgebung und fill-Probe im Container
+befehl: dir=$(prepare_project sandbox); export dir; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer up' >/dev/null 2>&1; echo "up-exit=$?"; c=$(cont_of "$dir"); echo "container=$c"; docker exec "$c" sh -c 'printenv GIT_TOKEN | wc -c' 2>&1; docker exec "$c" sh -c 'printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo exit=$?' 2>&1
+exit-status: 0
+--- stdout
+up-exit=0
+container=1f48fe9cfbd8
+0
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+exit=128
+--- stderr
+
+### Zelle M6-A, Wiederholung 2: Sandbox, GIT_TOKEN gesetzt, ohne Instanz, up; exec-Umgebung und fill-Probe im Container
+befehl: dir=$(prepare_project sandbox); export dir; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer up' >/dev/null 2>&1; echo "up-exit=$?"; c=$(cont_of "$dir"); echo "container=$c"; docker exec "$c" sh -c 'printenv GIT_TOKEN | wc -c' 2>&1; docker exec "$c" sh -c 'printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo exit=$?' 2>&1
+exit-status: 0
+--- stdout
+up-exit=0
+container=4272520c8269
+0
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+exit=128
+--- stderr
+
+### Zelle M6-B, Wiederholung 1: Sandbox, GIT_TOKEN gesetzt, ohne Instanz, shell mit Eingaben; Sitzungsumgebung und fill-Probe
+befehl: dir=/tmp/tmp.W6aS53aLZT/proj-sandbox-4006; export dir; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer shell' <<'EOF'
+printenv GIT_TOKEN | wc -c; printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo fill-exit=$?; exit
+EOF
+
+exit-status: 0
+--- stdout
+37
+protocol=https
+host=host.example
+username=x-access-token
+password=platzh-m8-git-token-0123456789abcdef
+fill-exit=0
+--- stderr
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the start); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+[2026-11-01T14:28:34.814Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+[2026-11-01T14:28:35.624Z] Start: Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 -f /tmp/devcontainercli-root/container-features/0.89.0-1793543315620/Dockerfile-with-features -t vsc-proj-sandbox-4006-8a74cb1b74550701771db7f8f9b0a7df8b5bba1e57d0f2ac3c3fd80dbeee1ca0 --target dev_containers_target_stage --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label /tmp/tmp.W6aS53aLZT/proj-sandbox-4006/.devcontainer
+[2026-11-01T14:28:35.888Z] #0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile-with-features
+#1 transferring dockerfile: 1.49kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+[2026-11-01T14:28:36.061Z] 
+#4 [dev_container_auto_added_stage_label 1/3] FROM mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6
+#4 resolve mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6 0.0s done
+#4 CACHED
+
+#5 [dev_container_auto_added_stage_label 2/3] RUN mkdir -p "/workspaces/mubmess188" && chown vscode:vscode "/workspaces/mubmess188"
+
+[2026-11-01T14:28:36.105Z] #5 DONE 0.2s
+
+[2026-11-01T14:28:36.257Z] 
+#6 [dev_container_auto_added_stage_label 3/3] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+
+[2026-11-01T14:28:36.295Z] #6 DONE 0.2s
+
+[2026-11-01T14:28:36.442Z] 
+#7 exporting to image
+#7 exporting layers 0.1s done
+#7 preparing layers for inline cache 0.1s done
+
+[2026-11-01T14:28:36.561Z] #7 exporting manifest sha256:280783a4e15f687759ffc9ccc926a0e55f34918cb7792eb9efb9a28f460f027e 0.0s done
+#7 exporting config sha256:5da1d1b6ccb85e775b709134c90d52f9c76af89f0431e948a0e7ce704e197718 done
+#7 exporting attestation manifest sha256:6e461f6f52e03dc78693838879633ea3393e1a9d20cef7f97cb5596cbde41a17 0.0s done
+#7 exporting manifest list sha256:16f2c15159812aa1499abb52c63392dd7e746341d3e8605249db89e238df3e81 0.0s done
+#7 naming to docker.io/library/vsc-proj-sandbox-4006-8a74cb1b74550701771db7f8f9b0a7df8b5bba1e57d0f2ac3c3fd80dbeee1ca0:latest done
+#7 unpacking to docker.io/library/vsc-proj-sandbox-4006-8a74cb1b74550701771db7f8f9b0a7df8b5bba1e57d0f2ac3c3fd80dbeee1ca0:latest 0.0s done
+#7 DONE 0.3s
+
+[2026-11-01T14:28:37.572Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=mubmess188-workspace-05fpuij8bf0n8f814r6qp12trhqfml615bbv6nh81pqvmp8eu5jm,target=/workspaces/mubmess188,type=volume -l devcontainer.local_folder=/tmp/tmp.W6aS53aLZT/proj-sandbox-4006 -l devcontainer.config_file=/tmp/tmp.W6aS53aLZT/proj-sandbox-4006/.devcontainer/devcontainer.json --entrypoint /bin/sh vsc-proj-sandbox-4006-8a74cb1b74550701771db7f8f9b0a7df8b5bba1e57d0f2ac3c3fd80dbeee1ca0-uid -c echo Container started
+[2026-11-01T14:28:37.845Z] Container started
+
+### Zelle M6-B, Wiederholung 2: Sandbox, GIT_TOKEN gesetzt, ohne Instanz, shell mit Eingaben; Sitzungsumgebung und fill-Probe
+befehl: dir=/tmp/tmp.W6aS53aLZT/proj-sandbox-4006; export dir; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer shell' <<'EOF'
+printenv GIT_TOKEN | wc -c; printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo fill-exit=$?; exit
+EOF
+
+exit-status: 0
+--- stdout
+37
+protocol=https
+host=host.example
+username=x-access-token
+password=platzh-m8-git-token-0123456789abcdef
+fill-exit=0
+--- stderr
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the start); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+[2026-11-01T14:28:39.293Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+
+### Zelle M6-C, Wiederholung 1: Sandbox, GIT_TOKEN ungesetzt, shell mit Eingaben (Sitzungsumgebung ohne Variable)
+befehl: dir=/tmp/tmp.W6aS53aLZT/proj-sandbox-11232; export dir; env -u GIT_TOKEN timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer shell' <<'EOF'
+printenv GIT_TOKEN | wc -c; printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo fill-exit=$?; exit
+EOF
+
+exit-status: 0
+--- stdout
+0
+fill-exit=128
+--- stderr
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the start); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+[2026-11-01T14:28:41.091Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+[2026-11-01T14:28:41.875Z] Start: Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 -f /tmp/devcontainercli-root/container-features/0.89.0-1793543321872/Dockerfile-with-features -t vsc-proj-sandbox-11232-21ee6d30da0a4016d722164d24253d80c116ca40a7f8370c70b573978ddab746 --target dev_containers_target_stage --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label /tmp/tmp.W6aS53aLZT/proj-sandbox-11232/.devcontainer
+[2026-11-01T14:28:42.148Z] #0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile-with-features
+#1 transferring dockerfile: 1.50kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+[2026-11-01T14:28:42.322Z] 
+#4 [dev_container_auto_added_stage_label 1/3] FROM mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6
+#4 resolve mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6 0.0s done
+#4 CACHED
+
+#5 [dev_container_auto_added_stage_label 2/3] RUN mkdir -p "/workspaces/mubmess23274" && chown vscode:vscode "/workspaces/mubmess23274"
+
+[2026-11-01T14:28:42.407Z] #5 DONE 0.2s
+
+[2026-11-01T14:28:42.560Z] 
+#6 [dev_container_auto_added_stage_label 3/3] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+
+[2026-11-01T14:28:42.685Z] #6 DONE 0.3s
+
+[2026-11-01T14:28:42.834Z] 
+#7 exporting to image
+#7 exporting layers 0.1s done
+#7 preparing layers for inline cache 0.1s done
+
+[2026-11-01T14:28:42.948Z] #7 exporting manifest sha256:fd395c86a45fda87e9dd4731c8cfb7c768012e20423295358e6c7b9c90726db8 done
+#7 exporting config sha256:0c051bb919c47641fab4604cf6ace23a908ceb9246fd003eb677406c1ee22f22 done
+#7 exporting attestation manifest sha256:d459ae62a3efdb3dccd4f5966d8d29d6b4fd9e2b5d54133b3f28ad56e003ee6f 0.0s done
+#7 exporting manifest list sha256:4af4ae53a2a4992ab5c23cf5fd88a4684e380b4785d2c0c5b56d9d07b908c669 0.0s done
+#7 naming to docker.io/library/vsc-proj-sandbox-11232-21ee6d30da0a4016d722164d24253d80c116ca40a7f8370c70b573978ddab746:latest done
+#7 unpacking to docker.io/library/vsc-proj-sandbox-11232-21ee6d30da0a4016d722164d24253d80c116ca40a7f8370c70b573978ddab746:latest 0.0s done
+#7 DONE 0.3s
+
+[2026-11-01T14:28:43.895Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=mubmess23274-workspace-07hti297uf8l583lvvpa7icdj086trcou2i2qo0d28fn93vsrusm,target=/workspaces/mubmess23274,type=volume -l devcontainer.local_folder=/tmp/tmp.W6aS53aLZT/proj-sandbox-11232 -l devcontainer.config_file=/tmp/tmp.W6aS53aLZT/proj-sandbox-11232/.devcontainer/devcontainer.json --entrypoint /bin/sh vsc-proj-sandbox-11232-21ee6d30da0a4016d722164d24253d80c116ca40a7f8370c70b573978ddab746-uid -c echo Container started
+[2026-11-01T14:28:44.181Z] Container started
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+
+### Zelle M6-C, Wiederholung 2: Sandbox, GIT_TOKEN ungesetzt, shell mit Eingaben (Sitzungsumgebung ohne Variable)
+befehl: dir=/tmp/tmp.W6aS53aLZT/proj-sandbox-11232; export dir; env -u GIT_TOKEN timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer shell' <<'EOF'
+printenv GIT_TOKEN | wc -c; printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo fill-exit=$?; exit
+EOF
+
+exit-status: 0
+--- stdout
+0
+fill-exit=128
+--- stderr
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the start); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+[2026-11-01T14:28:45.511Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+
+### Zelle M6-D, Wiederholung 1: Standardprofil, GIT_TOKEN gesetzt, shell mit Eingaben (kein remoteEnv im Standardprofil)
+befehl: dir=/tmp/tmp.W6aS53aLZT/proj-default-2608; export dir; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer shell' <<'EOF'
+printenv GIT_TOKEN | wc -c; printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo fill-exit=$?; exit
+EOF
+
+exit-status: 0
+--- stdout
+0
+fill-exit=128
+--- stderr
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the start); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+[2026-11-01T14:28:47.354Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+[2026-11-01T14:28:48.173Z] Start: Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 -f /tmp/devcontainercli-root/container-features/0.89.0-1793543328170/Dockerfile-with-features -t vsc-proj-default-2608-b35b3de86b41c444d9007d7a18b284ec947d6b984ffe6024ec9d118375bc5af0 --target dev_containers_target_stage --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label /tmp/tmp.W6aS53aLZT/proj-default-2608/.devcontainer
+[2026-11-01T14:28:48.480Z] #0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile-with-features
+#1 transferring dockerfile: 905B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+
+[2026-11-01T14:28:48.480Z] #2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [dev_container_auto_added_stage_label 1/1] FROM mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6
+#4 resolve mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6 0.0s done
+
+[2026-11-01T14:28:48.587Z] #4 CACHED
+
+#5 exporting to image
+#5 exporting layers done
+#5 preparing layers for inline cache done
+#5 exporting manifest sha256:1990eae62f27b15b3b8678d6a913a03c8c40fedbc3a6619829b5e8b9d028557c 0.0s done
+#5 exporting config sha256:d8361bed351cd47d1455962b95d7d36f74fc1245cd856a99a2a85f7c80e3cdcc 0.0s done
+#5 exporting attestation manifest sha256:17d5b487b04db3d68e470650c3de112378259d655194debf75123e385f511ec4 0.0s done
+#5 exporting manifest list sha256:022a417bbb0769640df9d27de23a9dc9fba20fc0668de3a01703ffb534f5e24c done
+#5 naming to docker.io/library/vsc-proj-default-2608-b35b3de86b41c444d9007d7a18b284ec947d6b984ffe6024ec9d118375bc5af0:latest done
+#5 unpacking to docker.io/library/vsc-proj-default-2608-b35b3de86b41c444d9007d7a18b284ec947d6b984ffe6024ec9d118375bc5af0:latest done
+#5 DONE 0.1s
+
+[2026-11-01T14:28:49.498Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.W6aS53aLZT/proj-default-2608,target=/workspaces/proj-default-2608 -l devcontainer.local_folder=/tmp/tmp.W6aS53aLZT/proj-default-2608 -l devcontainer.config_file=/tmp/tmp.W6aS53aLZT/proj-default-2608/.devcontainer/devcontainer.json --entrypoint /bin/sh vsc-proj-default-2608-b35b3de86b41c444d9007d7a18b284ec947d6b984ffe6024ec9d118375bc5af0-uid -c echo Container started
+[2026-11-01T14:28:49.753Z] Container started
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+
+### Zelle M6-D, Wiederholung 2: Standardprofil, GIT_TOKEN gesetzt, shell mit Eingaben (kein remoteEnv im Standardprofil)
+befehl: dir=/tmp/tmp.W6aS53aLZT/proj-default-2608; export dir; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer shell' <<'EOF'
+printenv GIT_TOKEN | wc -c; printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo fill-exit=$?; exit
+EOF
+
+exit-status: 0
+--- stdout
+0
+fill-exit=128
+--- stderr
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the start); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+[2026-11-01T14:28:51.126Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+fatal: could not read Username for 'https://host.example': terminal prompts disabled
+
+### Zelle M6-E, Wiederholung 1: Sandbox, GIT_TOKEN gesetzt, --instance ubmess-i1, up und shell mit Eingaben
+befehl: dir=$(prepare_project sandbox); export dir; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer up --instance ubmess-i1' >/dev/null 2>&1; echo "up-exit=$?"; c=$(cont_of "$dir"); echo "container=$c"; docker inspect --format '{{.Config.Labels}}' "$c" 2>&1 | head -c 400; echo; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer shell --instance ubmess-i1' <<'EOF'
+printenv GIT_TOKEN | wc -c; printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo fill-exit=$?; exit
+EOF
+
+exit-status: 0
+--- stdout
+up-exit=0
+container=e7b9b6cdaff0
+map[dev.containers.id:base-debian dev.containers.release:v0.4.37 dev.containers.source:https://github.com/devcontainers/images dev.containers.timestamp:Wed, 28 Oct 2026 18:32:17 GMT dev.containers.variant:trixie devcontainer.local_folder:/tmp/tmp.W6aS53aLZT/proj-sandbox-2592 devcontainer.metadata:[ {"id":"ghcr.io/devcontainers/features/common-utils:2"}, {"id":"ghcr.io/devcontainers/features/git:1"
+37
+protocol=https
+host=host.example
+username=x-access-token
+password=platzh-m8-git-token-0123456789abcdef
+fill-exit=0
+--- stderr
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the start); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+[2026-11-01T14:28:57.178Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+
+### Zelle M6-E, Wiederholung 2: Sandbox, GIT_TOKEN gesetzt, --instance ubmess-i1, up und shell mit Eingaben
+befehl: dir=$(prepare_project sandbox); export dir; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer up --instance ubmess-i1' >/dev/null 2>&1; echo "up-exit=$?"; c=$(cont_of "$dir"); echo "container=$c"; docker inspect --format '{{.Config.Labels}}' "$c" 2>&1 | head -c 400; echo; GIT_TOKEN=platzh-m8-git-token-0123456789abcdef timeout -k 10 600 bash -c 'cd "$dir" && '/Development/u-boot/bin/u-boot-linux-amd64' devcontainer shell --instance ubmess-i1' <<'EOF'
+printenv GIT_TOKEN | wc -c; printf "protocol=https\nhost=host.example\n\n" | GIT_TERMINAL_PROMPT=0 git credential fill; echo fill-exit=$?; exit
+EOF
+
+exit-status: 0
+--- stdout
+up-exit=0
+container=441a72f0e2f0
+map[dev.containers.id:base-debian dev.containers.release:v0.4.37 dev.containers.source:https://github.com/devcontainers/images dev.containers.timestamp:Wed, 28 Oct 2026 18:32:17 GMT dev.containers.variant:trixie devcontainer.local_folder:/tmp/tmp.W6aS53aLZT/proj-sandbox-12388 devcontainer.metadata:[ {"id":"ghcr.io/devcontainers/features/common-utils:2"}, {"id":"ghcr.io/devcontainers/features/git:1
+37
+protocol=https
+host=host.example
+username=x-access-token
+password=platzh-m8-git-token-0123456789abcdef
+fill-exit=0
+--- stderr
+Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the start); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature); a hand-written .devcontainer/devcontainer.json can mount it, and an initializeCommand declared there runs with this access
+[2026-11-01T14:29:02.721Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+
+
+# Ende 2026-11-01T14:29:03Z
