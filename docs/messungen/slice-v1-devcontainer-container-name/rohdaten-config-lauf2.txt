@@ -1,0 +1,80 @@
+
+######## M0: Messstand
+Zeit (UTC): 2026-11-01T17:32:31Z
+Modus: config
+Host: Linux 7.0.0-42-generic x86_64; uname -m: x86_64
+u-boot: u-boot version 0.17.0-dev (/Development/u-boot/bin/u-boot-linux-amd64)
+Docker Client 29.9.2 (linux/amd64), Server 29.9.2 (linux/amd64)
+Engine: Ubuntu 26.04.1 LTS; Treiber overlayfs; Cgroup 2 (systemd); CPUs 8; MemTotal 16361078784; Kernel 7.0.0-42-generic; Architektur x86_64
+               total        used        free      shared  buff/cache   available
+Mem:           15603        2588        3026         157       10496       13014
+Swap:          16383          15       16368
+Plattenplatz /: /dev/sda1       301G   45G  244G  16% /
+
+######## Vorpruefung
+(a) docker info antwortet: ja
+(d) freier Platz der Docker-Wurzel: 244 GB (benoetigt 12 GB)
+(d) Platz: erfuellt
+
+######## Hilfs-Image bauen (ubmess-devcontainer-cli)
+Bau: 1 s; Image ubmess-devcontainer-cli:0.89.0: f6ae839b29c7
+Dev-Container-CLI: 0.89.0
+(b) Inventur vorher (Rohdaten):
+(c) kein Objekt mit Praefix ubmess-/vsc-ubmess- vorhanden: ja
+Zeitlimits: je devcontainer up 300 s, je Lauf 1200 s (Werte der Instanz-Messung: ein up dauert bis 7 s warm)
+
+######## M6: Name je Aufruf über --override-config (Referenz, dann Name je Zelle)
+Projekt ubmess-1 (sandbox) in /tmp/tmp.5ad9se5TpL/ubmess-1; devcontainer.json:
+  json: // BEGIN U-BOOT MANAGED BLOCK: init
+  json: {
+  json:   "name": "ubmess-1",
+  json:   "build": {
+  json:     "dockerfile": "./Dockerfile",
+  json:     "context": "."
+-- Referenz (erzeugte Datei, ohne Namen)
+up [--id-label devcontainer.local_folder=/tmp/tmp.5ad9se5TpL/ubmess-1 --id-label u-boot.instance=i1] -> exit=0 dauer=4 s containerId=f41c76b5873f
+  Ergebnis: {"outcome":"success","containerId":"f41c76b5873fee31e4938c6203673f92262407f58ca3a3d873f8a99b4a70cc74","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[cfgref] containerId=f41c76b5873f name=distracted_euclid
+[cfgref] devcontainerId=0ufuo2knqseuqfv7oc89mp91keoqpirsbmnbvjt3l0e75f83b8ph
+[cfgref] Volumes:
+    ubmess-1-workspace-0ufuo2knqseuqfv7oc89mp91keoqpirsbmnbvjt3l0e75f83b8ph -> /workspaces/ubmess-1
+    ubmess-1-docker-0ufuo2knqseuqfv7oc89mp91keoqpirsbmnbvjt3l0e75f83b8ph -> /var/lib/docker
+
+[cfgref]   devcontainer.local_folder=/tmp/tmp.5ad9se5TpL/ubmess-1
+[cfgref]   u-boot.instance=i1
+[cfgref]   Zahl der Labels insgesamt: 9
+[cfgref]   Image=sha256:823d4317fadf186b61cfe2c265c85fd2812a7dfbc3a289ccdcdeb7fc9c1c6891 Config.Image=vsc-ubmess-1-10215be595063fb8d282bdb9a9cf04967c3ad1c1e52f824136bca9e6e3c39169-uid
+-- Lauf mit --override-config und Name in runArgs
+  override runArgs: "runArgs": ["--name=ubmess-name-cfg-i1", "--privileged"]
+up [--override-config /tmp/tmp.5ad9se5TpL/ubmess-1/devcontainer-ubmess-override.json --id-label devcontainer.local_folder=/tmp/tmp.5ad9se5TpL/ubmess-1 --id-label u-boot.instance=i1] -> exit=0 dauer=4 s containerId=c28dcb5849ae
+  Ergebnis: {"outcome":"success","containerId":"c28dcb5849ae4f407c4884f11ddb51bc4aae338597c2d67ed313290d590b98c6","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[cfgnamed] containerId=c28dcb5849ae name=ubmess-name-cfg-i1
+[cfgnamed] devcontainerId=0ufuo2knqseuqfv7oc89mp91keoqpirsbmnbvjt3l0e75f83b8ph
+[cfgnamed] Volumes:
+    ubmess-1-workspace-0ufuo2knqseuqfv7oc89mp91keoqpirsbmnbvjt3l0e75f83b8ph -> /workspaces/ubmess-1
+    ubmess-1-docker-0ufuo2knqseuqfv7oc89mp91keoqpirsbmnbvjt3l0e75f83b8ph -> /var/lib/docker
+
+[cfgnamed]   devcontainer.local_folder=/tmp/tmp.5ad9se5TpL/ubmess-1
+[cfgnamed]   u-boot.instance=i1
+[cfgnamed]   Zahl der Labels insgesamt: 9
+[cfgnamed]   Image=sha256:879c00ae3045c223c857b698bf2cc5f09fa2241931e7244ef03df2c83dbcac3f Config.Image=vsc-ubmess-1-10215be595063fb8d282bdb9a9cf04967c3ad1c1e52f824136bca9e6e3c39169-uid
+  Vergleich devcontainerId: gleich (0ufuo2knqseuqfv7oc89mp91keoqpirsbmnbvjt3l0e75f83b8ph <-> 0ufuo2knqseuqfv7oc89mp91keoqpirsbmnbvjt3l0e75f83b8ph)
+  Vergleich Volume-Namen:   gleich
+  Vergleich Label-Wert:     gleich (i1 <-> i1)
+  Name am Container: ubmess-name-cfg-i1 (gewuenscht: ubmess-name-cfg-i1)
+  Erzeugte Datei enthaelt den Namen fern: 0 (0 erwartet)
+
+######## Aufraeumen (trap)
+Arbeitsordner entfernt
+
+######## Inventur nachher und Differenz
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Differenz img (vorher -> nachher; leer = keine)
+11d10
+< ubmess-devcontainer-cli:0.89.0	f6ae839b29c7
+--- Reste mit Praefix ubmess-/vsc-ubmess-:
+keine
+
+######## Ende
+Stand des Modus: vollstaendig

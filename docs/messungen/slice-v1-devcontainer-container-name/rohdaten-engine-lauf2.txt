@@ -1,0 +1,143 @@
+
+######## M0: Messstand
+Zeit (UTC): 2026-11-01T17:32:08Z
+Modus: engine
+Host: Linux 7.0.0-42-generic x86_64; uname -m: x86_64
+u-boot: u-boot version 0.17.0-dev (/Development/u-boot/bin/u-boot-linux-amd64)
+Docker Client 29.9.2 (linux/amd64), Server 29.9.2 (linux/amd64)
+Engine: Ubuntu 26.04.1 LTS; Treiber overlayfs; Cgroup 2 (systemd); CPUs 8; MemTotal 16361078784; Kernel 7.0.0-42-generic; Architektur x86_64
+               total        used        free      shared  buff/cache   available
+Mem:           15603        2631        2983         157       10495       12971
+Swap:          16383          15       16368
+Plattenplatz /: /dev/sda1       301G   45G  244G  16% /
+
+######## Vorpruefung
+(a) docker info antwortet: ja
+(d) freier Platz der Docker-Wurzel: 244 GB (benoetigt 12 GB)
+(d) Platz: erfuellt
+
+######## Hilfs-Image bauen (ubmess-devcontainer-cli)
+Bau: 1 s; Image ubmess-devcontainer-cli:0.89.0: 84ea2fa16b8c
+Dev-Container-CLI: 0.89.0
+(b) Inventur vorher (Rohdaten):
+(c) kein Objekt mit Praefix ubmess-/vsc-ubmess- vorhanden: ja
+Zeitlimits: je devcontainer up 300 s, je Lauf 1200 s (Werte der Instanz-Messung: ein up dauert bis 7 s warm)
+
+######## M4: Namensregeln der Engine (docker run --name, kein Hilfs-Container)
+-- Name: ubmess-name-proj-inst (Laenge 21)
+   exit=0 
+
+-- Name: 9ubmess (Laenge 7)
+   exit=0 
+
+-- Name: Uubmess (Laenge 7)
+   exit=0 
+
+-- Name: ubmess.1 (Laenge 8)
+   exit=0 
+
+-- Name: ubmess_1 (Laenge 8)
+   exit=0 
+
+-- Name: ax (Laenge 2)
+   exit=0 
+
+-- Name: ax63x63x63x63x63x63x63x63x63x63x63x63x63x63x63x63x63x63x63x63x63 (Laenge 64)
+   exit=0 
+
+-- Name: ax64x64x64x64x64x64x64x64x64x64x64x64x64x64x64x64x64x64x64x64x64x (Laenge 65)
+   exit=0 
+
+-- Name: ax127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x127x12 (Laenge 128)
+   exit=0 
+
+-- Name: ax128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128x128 (Laenge 129)
+   exit=0 
+
+-- Name: ax255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x255x25 (Laenge 256)
+   exit=0 
+
+-- Name: ax256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256x256 (Laenge 257)
+   exit=0 
+
+
+######## M4: Zurückgewiesene Formen (Eingabewerte)
+-- Name: ubmess-led (Laenge 10)
+   exit=0 
+
+-- Name: -ubmess (Laenge 7)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (-ubmess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+-- Name: .ubmess (Laenge 7)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (.ubmess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+
+-- Name: _ubmess (Laenge 7)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (_ubmess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+
+-- Name: ub\ mess (Laenge 7)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (ub mess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+
+-- Name: ub\"mess (Laenge 7)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (ub"mess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+
+-- Name: ub/mess (Laenge 7)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (ub/mess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+
+-- Name: ub:mess (Laenge 7)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (ub:mess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+
+-- Name: ub@mess (Laenge 7)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (ub@mess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+
+-- Name: übmess (Laenge 6)
+   exit=125 Ausgabe: docker: Error response from daemon: invalid container name (übmess): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed
+
+Run 'docker run --help' for more information
+
+
+######## M4: Konflikt — laufender Container gleiches Namens
+  Vorhanden: ubmess-name-konf
+-- docker run --rm gleicher Name, laufend:
+-- Name: ubmess-name-konf (Laenge 16)
+   exit=125 Ausgabe: docker: Error response from daemon: Conflict. The container name "/ubmess-name-konf" is already in use by container "83292c7fce84b68691e376531ecdf2e760429f9fb52f7a58d880a96a1fe7cb76". You have to remove (or rename) that container to be able to reuse that name.
+
+Run 'docker run --help' for more information
+   Nachher am Container: /ubmess-name-konf
+  Vorhandener Container noch da: 1 Treffer
+-- docker run --rm gleicher Name, gestoppt:
+-- Name: ubmess-name-konf (Laenge 16)
+   exit=125 Ausgabe: docker: Error response from daemon: Conflict. The container name "/ubmess-name-konf" is already in use by container "83292c7fce84b68691e376531ecdf2e760429f9fb52f7a58d880a96a1fe7cb76". You have to remove (or rename) that container to be able to reuse that name.
+
+Run 'docker run --help' for more information
+   Nachher am Container: /ubmess-name-konf
+  Gestoppter Container noch da: 1 Treffer
+
+######## Aufraeumen (trap)
+Arbeitsordner entfernt
+
+######## Inventur nachher und Differenz
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Differenz img (vorher -> nachher; leer = keine)
+11d10
+< ubmess-devcontainer-cli:0.89.0	84ea2fa16b8c
+--- Reste mit Praefix ubmess-/vsc-ubmess-:
+keine
+
+######## Ende
+Stand des Modus: vollstaendig

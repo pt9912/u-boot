@@ -1,0 +1,195 @@
+
+######## M0: Messstand
+Zeit (UTC): 2026-11-01T17:30:45Z
+Modus: identitaet
+Host: Linux 7.0.0-42-generic x86_64; uname -m: x86_64
+u-boot: u-boot version 0.17.0-dev (/Development/u-boot/bin/u-boot-linux-amd64)
+Docker Client 29.9.2 (linux/amd64), Server 29.9.2 (linux/amd64)
+Engine: Ubuntu 26.04.1 LTS; Treiber overlayfs; Cgroup 2 (systemd); CPUs 8; MemTotal 16361078784; Kernel 7.0.0-42-generic; Architektur x86_64
+               total        used        free      shared  buff/cache   available
+Mem:           15603        2577        3044         157       10488       13025
+Swap:          16383          15       16368
+Plattenplatz /: /dev/sda1       301G   45G  244G  16% /
+
+######## Vorpruefung
+(a) docker info antwortet: ja
+(d) freier Platz der Docker-Wurzel: 244 GB (benoetigt 12 GB)
+(d) Platz: erfuellt
+
+######## Hilfs-Image bauen (ubmess-devcontainer-cli)
+Bau: 1 s; Image ubmess-devcontainer-cli:0.89.0: 1f2d4aa19cde
+Dev-Container-CLI: 0.89.0
+(b) Inventur vorher (Rohdaten):
+(c) kein Objekt mit Praefix ubmess-/vsc-ubmess- vorhanden: ja
+Zeitlimits: je devcontainer up 300 s, je Lauf 1200 s (Werte der Instanz-Messung: ein up dauert bis 7 s warm)
+
+######## M3: Zelle Profil=sandbox Instanz=mit
+Projekt ubmess-1 (sandbox) in /tmp/tmp.2VdO1xhMuJ/ubmess-1; devcontainer.json:
+  json: // BEGIN U-BOOT MANAGED BLOCK: init
+  json: {
+  json:   "name": "ubmess-1",
+  json:   "build": {
+  json:     "dockerfile": "./Dockerfile",
+  json:     "context": "."
+-- Referenz (ohne Namen)
+up [--id-label devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-1 --id-label u-boot.instance=i1] -> exit=0 dauer=4 s containerId=895f3106e0f4
+  Ergebnis: {"outcome":"success","containerId":"895f3106e0f47bc5a35bfae5a1e6d05b91efb8bbfe098f6a52a25fc974402027","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[ref] containerId=895f3106e0f4 name=elated_burnell
+[ref] devcontainerId=14skmu80i93q6hg43suefdssolulqg30hqeo8e1mq0aqe3tastol
+[ref] Volumes:
+    ubmess-1-workspace-14skmu80i93q6hg43suefdssolulqg30hqeo8e1mq0aqe3tastol -> /workspaces/ubmess-1
+    ubmess-1-docker-14skmu80i93q6hg43suefdssolulqg30hqeo8e1mq0aqe3tastol -> /var/lib/docker
+
+[ref]   devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-1
+[ref]   u-boot.instance=i1
+[ref]   Zahl der Labels insgesamt: 9
+[ref]   Image=sha256:0548608930fcc17a1ae297b235bed31e222a07d967fb76cf4317a92daf0f2985 Config.Image=vsc-ubmess-1-5de31d9d4d18138409876a03607fac35b4f464a042f954c2e3d4e701da549163-uid
+-- Lauf mit Namen
+    json: 3:  "name": "ubmess-1",
+    json: 10:  "runArgs": ["--name=ubmess-name-sandbox-mit", "--privileged"],
+up [--id-label devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-1 --id-label u-boot.instance=i1] -> exit=0 dauer=5 s containerId=75037199d968
+  Ergebnis: {"outcome":"success","containerId":"75037199d968a8780f426e14173981ed31a627786656bd9c00eff5d06138c577","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[named] containerId=75037199d968 name=ubmess-name-sandbox-mit
+[named] devcontainerId=14skmu80i93q6hg43suefdssolulqg30hqeo8e1mq0aqe3tastol
+[named] Volumes:
+    ubmess-1-workspace-14skmu80i93q6hg43suefdssolulqg30hqeo8e1mq0aqe3tastol -> /workspaces/ubmess-1
+    ubmess-1-docker-14skmu80i93q6hg43suefdssolulqg30hqeo8e1mq0aqe3tastol -> /var/lib/docker
+
+[named]   devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-1
+[named]   u-boot.instance=i1
+[named]   Zahl der Labels insgesamt: 9
+[named]   Image=sha256:0975e50a0bea6552e8941efa1500508f69a22a1a48ebd74b9ab861d4b44e83f7 Config.Image=vsc-ubmess-1-5de31d9d4d18138409876a03607fac35b4f464a042f954c2e3d4e701da549163-uid
+  Vergleich devcontainerId: gleich (14skmu80i93q6hg43suefdssolulqg30hqeo8e1mq0aqe3tastol <-> 14skmu80i93q6hg43suefdssolulqg30hqeo8e1mq0aqe3tastol)
+  Vergleich Volume-Namen:   gleich
+  Vergleich Label-Wert:     gleich (i1 <-> i1)
+  Name am Container (named-Lauf): ubmess-name-sandbox-mit (gewuenscht: ubmess-name-sandbox-mit)
+
+######## M3: Zelle Profil=sandbox Instanz=ohne
+Projekt ubmess-2 (sandbox) in /tmp/tmp.2VdO1xhMuJ/ubmess-2; devcontainer.json:
+  json: // BEGIN U-BOOT MANAGED BLOCK: init
+  json: {
+  json:   "name": "ubmess-2",
+  json:   "build": {
+  json:     "dockerfile": "./Dockerfile",
+  json:     "context": "."
+-- Referenz (ohne Namen)
+up [--id-label devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-2] -> exit=0 dauer=4 s containerId=9e06c56473b2
+  Ergebnis: {"outcome":"success","containerId":"9e06c56473b2ba82e08206018516309a1d8c5d060ea859ee49d546b7f5f76c09","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-2","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[ref] containerId=9e06c56473b2 name=gallant_moore
+[ref] devcontainerId=0980r676uvhndrhodvt15iulo87g5jn804kukjsp0bmeku42o7ci
+[ref] Volumes:
+    ubmess-2-workspace-0980r676uvhndrhodvt15iulo87g5jn804kukjsp0bmeku42o7ci -> /workspaces/ubmess-2
+    ubmess-2-docker-0980r676uvhndrhodvt15iulo87g5jn804kukjsp0bmeku42o7ci -> /var/lib/docker
+
+[ref]   devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-2
+[ref]   u-boot.instance=
+[ref]   Zahl der Labels insgesamt: 8
+[ref]   Image=sha256:dc35a25021016afa10d5eb4caeae17b507170fdfe8201b1232cd2a5f8d5e27f4 Config.Image=vsc-ubmess-2-21014c437ab697784888e609c371d206a0acfaa3432c90dc8984841e23f46553-uid
+-- Lauf mit Namen
+    json: 3:  "name": "ubmess-2",
+    json: 10:  "runArgs": ["--name=ubmess-name-sandbox-ohne", "--privileged"],
+up [--id-label devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-2] -> exit=0 dauer=4 s containerId=b345a9dce833
+  Ergebnis: {"outcome":"success","containerId":"b345a9dce83385582ccabc1f6a513359a5f4a6ba26a6c1717e9c9a2cae3bcc46","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-2","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[named] containerId=b345a9dce833 name=ubmess-name-sandbox-ohne
+[named] devcontainerId=0980r676uvhndrhodvt15iulo87g5jn804kukjsp0bmeku42o7ci
+[named] Volumes:
+    ubmess-2-workspace-0980r676uvhndrhodvt15iulo87g5jn804kukjsp0bmeku42o7ci -> /workspaces/ubmess-2
+    ubmess-2-docker-0980r676uvhndrhodvt15iulo87g5jn804kukjsp0bmeku42o7ci -> /var/lib/docker
+
+[named]   devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-2
+[named]   u-boot.instance=
+[named]   Zahl der Labels insgesamt: 8
+[named]   Image=sha256:fe23b5bd03302aa08e383705299b4a509714a79a285c4f366be43efe164ff4ef Config.Image=vsc-ubmess-2-21014c437ab697784888e609c371d206a0acfaa3432c90dc8984841e23f46553-uid
+  Vergleich devcontainerId: gleich (0980r676uvhndrhodvt15iulo87g5jn804kukjsp0bmeku42o7ci <-> 0980r676uvhndrhodvt15iulo87g5jn804kukjsp0bmeku42o7ci)
+  Vergleich Volume-Namen:   gleich
+  Vergleich Label-Wert:     gleich ( <-> )
+  Name am Container (named-Lauf): ubmess-name-sandbox-ohne (gewuenscht: ubmess-name-sandbox-ohne)
+
+######## M3: Zelle Profil=standard Instanz=mit
+Projekt ubmess-3 (standard) in /tmp/tmp.2VdO1xhMuJ/ubmess-3; devcontainer.json:
+  json: // BEGIN U-BOOT MANAGED BLOCK: init
+  json: {
+  json:   "name": "ubmess-3",
+  json:   "build": {
+  json:     "dockerfile": "./Dockerfile",
+  json:     "context": "."
+-- Referenz (ohne Namen)
+up [--id-label devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-3 --id-label u-boot.instance=i1] -> exit=0 dauer=3 s containerId=03c2fc4ea17a
+  Ergebnis: {"outcome":"success","containerId":"03c2fc4ea17aea8b1abaf40fe4ddffa5a29b3d6ad43b325960c2933fb0644001","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-3","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[ref] containerId=03c2fc4ea17a name=romantic_hamilton
+[ref] devcontainerId=
+[ref] Volumes:
+
+[ref]   devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-3
+[ref]   u-boot.instance=i1
+[ref]   Zahl der Labels insgesamt: 9
+[ref]   Image=sha256:caef87bc0b33a491c3e8b03ab33fb8b46221a4563b01088043a78054442b8642 Config.Image=vsc-ubmess-3-dcaaae1cabe9a5e19bfc684589e0f2a08f082e73e15ee36992c3825e108b80d7-uid
+-- Lauf mit Namen
+    json: 3:  "runArgs": ["--name=ubmess-name-standard-mit"],
+    json: 4:  "name": "ubmess-3",
+up [--id-label devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-3 --id-label u-boot.instance=i1] -> exit=0 dauer=3 s containerId=e41cc5dee1f9
+  Ergebnis: {"outcome":"success","containerId":"e41cc5dee1f963219c29827e8df47ce612aee6b975c50bb6fad95b9193c531b5","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-3","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[named] containerId=e41cc5dee1f9 name=ubmess-name-standard-mit
+[named] devcontainerId=
+[named] Volumes:
+
+[named]   devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-3
+[named]   u-boot.instance=i1
+[named]   Zahl der Labels insgesamt: 9
+[named]   Image=sha256:da6c5355d744090cce3ff12c31385bb2e1e57b9a82f051784cd499dd85738ac3 Config.Image=vsc-ubmess-3-dcaaae1cabe9a5e19bfc684589e0f2a08f082e73e15ee36992c3825e108b80d7-uid
+  Vergleich devcontainerId: gleich ( <-> )
+  Vergleich Volume-Namen:   gleich
+  Vergleich Label-Wert:     gleich (i1 <-> i1)
+  Name am Container (named-Lauf): ubmess-name-standard-mit (gewuenscht: ubmess-name-standard-mit)
+
+######## M3: Zelle Profil=standard Instanz=ohne
+Projekt ubmess-4 (standard) in /tmp/tmp.2VdO1xhMuJ/ubmess-4; devcontainer.json:
+  json: // BEGIN U-BOOT MANAGED BLOCK: init
+  json: {
+  json:   "name": "ubmess-4",
+  json:   "build": {
+  json:     "dockerfile": "./Dockerfile",
+  json:     "context": "."
+-- Referenz (ohne Namen)
+up [--id-label devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-4] -> exit=0 dauer=4 s containerId=071c8b666d37
+  Ergebnis: {"outcome":"success","containerId":"071c8b666d370753b0cf3c0a254738c506a7df5c54a483d46990b5b8835c80dd","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-4","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[ref] containerId=071c8b666d37 name=gracious_hellman
+[ref] devcontainerId=
+[ref] Volumes:
+
+[ref]   devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-4
+[ref]   u-boot.instance=
+[ref]   Zahl der Labels insgesamt: 8
+[ref]   Image=sha256:a79dfdc9f0bf57e4c2a7c5e92c64115506cfe7c2c3314bc950ed4e249ba756b6 Config.Image=vsc-ubmess-4-49292e8bb29be8d4e8bc2b580fa4bc0d8e5f3196c19825314b658d497a01437f-uid
+-- Lauf mit Namen
+    json: 3:  "runArgs": ["--name=ubmess-name-standard-ohne"],
+    json: 4:  "name": "ubmess-4",
+up [--id-label devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-4] -> exit=0 dauer=3 s containerId=26dbb271e855
+  Ergebnis: {"outcome":"success","containerId":"26dbb271e85569c6b48a1e928b20019af3ea3cbce95bca27a2385bff1558f213","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-4","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+[named] containerId=26dbb271e855 name=ubmess-name-standard-ohne
+[named] devcontainerId=
+[named] Volumes:
+
+[named]   devcontainer.local_folder=/tmp/tmp.2VdO1xhMuJ/ubmess-4
+[named]   u-boot.instance=
+[named]   Zahl der Labels insgesamt: 8
+[named]   Image=sha256:8e07c7adece6b716d5732d146e567eb0d496d2ed51166a372969967aa319eac1 Config.Image=vsc-ubmess-4-49292e8bb29be8d4e8bc2b580fa4bc0d8e5f3196c19825314b658d497a01437f-uid
+  Vergleich devcontainerId: gleich ( <-> )
+  Vergleich Volume-Namen:   gleich
+  Vergleich Label-Wert:     gleich ( <-> )
+  Name am Container (named-Lauf): ubmess-name-standard-ohne (gewuenscht: ubmess-name-standard-ohne)
+
+######## Aufraeumen (trap)
+Arbeitsordner entfernt
+
+######## Inventur nachher und Differenz
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Differenz img (vorher -> nachher; leer = keine)
+11d10
+< ubmess-devcontainer-cli:0.89.0	1f2d4aa19cde
+--- Reste mit Praefix ubmess-/vsc-ubmess-:
+keine
+
+######## Ende
+Stand des Modus: vollstaendig

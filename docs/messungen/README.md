@@ -19,6 +19,7 @@ Die Regel steht in [`harness/conventions.md`](../../harness/conventions.md#ablag
 
 | Verzeichnis | Skripte |
 |---|---|
+| [`slice-v1-devcontainer-container-name`](slice-v1-devcontainer-container-name/README.md) | `tools/messung/devcontainer-container-name/` |
 | [`slice-v1-devcontainer-host-git-uebernehmen`](slice-v1-devcontainer-host-git-uebernehmen/README.md) | `tools/messung/devcontainer-host-git-uebernehmen/` |
 | [`slice-v1-devcontainer-ollama-messung`](slice-v1-devcontainer-ollama-messung/README.md) | `tools/messung/devcontainer-ollama/` |
 | [`slice-v1-sandbox-egress-neuladen-entwurf`](slice-v1-sandbox-egress-neuladen-entwurf/README.md) | `tools/messung/sandbox-egress-neuladen-entwurf/` |

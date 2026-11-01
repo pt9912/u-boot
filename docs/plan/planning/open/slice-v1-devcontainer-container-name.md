@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Aufruf von `up`, Hilfs-Container und Ablauf; nur bei Weg über den Aufruf der CLI), je nach Weg [`SPEC-005`](../../../../spec/spezifikation.md#spec-005--schema-der-projektkonfiguration-u-bootyaml) und die Beschreibung der erzeugten `runArgs` (nicht gelesen, prüfen).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Implementer)
 
 **Autor:** pt9912 (Rolle Implementer, Entwurf im Auftrag des Projektinhabers). **Datum:** 2026-11-01.
 
@@ -75,15 +75,15 @@ Gelesen am 2026-11-01 ([`AGENTS.md`](../../../../AGENTS.md) §3.10); der Impleme
 | Datei / Komponente | Änderungs-Art | Begründung / Fundstelle |
 |---|---|---|
 | `tools/messung/devcontainer-container-name/messen.sh`, `docs/messungen/slice-v1-devcontainer-container-name/`, `docs/messungen/README.md` | neu / update | Messungen 1 bis 5; Ablage nach [`harness/conventions.md`](../../../../harness/conventions.md#ablage-von-messprotokollen-und-skripten) |
-| `internal/adapter/driven/docker/devcontainer_launcher.go`, `devcontainer_launcher_test.go` | update (bei S1/S3) | `runArgs` (Zeile 292): zusätzliche Option für den Namen im Aufruf der CLI; der Hilfs-Container-Name (Zeile 299) bleibt; Unit-Test der Argumentliste (Datei vorhanden, nicht gelesen) |
-| `internal/hexagon/port/driven/devcontainer_launcher.go` | update | `DevcontainerUpOptions` (Zeile 139) bekommt den Namen oder die Bestandteile (Projektname) als Feld; Doc-Kommentar zur Instanz (Zeilen 145 bis 152) bleibt gültig |
-| `internal/hexagon/application/devcontainer_start.go` | update | bildet den Namen aus Projektname und Instanz und reicht ihn an den Launcher (Datei in [ADR-0038](../../adr/0038-devcontainer-instanz-zweites-id-label.md) als Schicht-Schnitt genannt; Projektname-Quelle ist zu lesen: `u-boot.yaml` `project.name` oder Ordnername, nicht gelesen) |
-| `internal/hexagon/domain/` (neue Datei, Name beim Bau) | neu | Wertobjekt `ContainerName` mit der Bildungsregel und der Prüfung der Namensregeln der Engine (nach Messung 4) |
-| `internal/hexagon/application/devcontainer_sandbox.go`, `templates/devcontainer/devcontainer.json.tmpl`, `generate_*_test.go` | update (nur bei S2/S3) | `devcontainerTemplateData` (Zeile 89) hängt `--name=…` an `RunArgs`; Vorlage ändert sich nicht (`runArgs`-Zeilen 15 und 40 gelesen); Bestand ohne Namen byte-identisch oder Golden-Update |
+| `internal/adapter/driven/docker/devcontainer_launcher.go`, `devcontainer_launcher_test.go` | update (S1') | `runArgs` (Zeile 292): wenn ein Name gesetzt ist, rendert der Adapter die je Aufruf gültige Konfigurationskopie (Inhalt der erzeugten `devcontainer.json` plus `--name=<Name>` in `runArgs`), reicht sie per zusätzlicher Bind-Mount in den Hilfs-Container und hängt `--override-config <Pfad im Hilfs-Container>` an; ohne Name unverändert; Unit-Test der Argumentliste mit und ohne Namen |
+| `internal/hexagon/port/driven/devcontainer_launcher.go` | update | `DevcontainerUpOptions` (Zeile 139) bekommt den Namen (oder seine Bestandteile) als Feld |
+| `internal/hexagon/application/devcontainer_start.go` | update | bildet den Namen aus Projektname und Instanz und reicht ihn an den Launcher (Projektname-Quelle zu lesen: `u-boot.yaml` `project.name` oder Ordnername, nicht gelesen) |
+| `internal/hexagon/domain/` (neue Datei, Name beim Bau) | neu | Wertobjekt `ContainerName` mit der Bildungsregel und der Prüfung nach den Engine-Regeln (Messung 4) |
+| `internal/hexagon/application/devcontainer_sandbox.go`, `templates/devcontainer/devcontainer.json.tmpl`, `generate_*_test.go`, `harness/replay.md` | **unverändert** (S1') | erzeugte Datei bleibt byte-identisch; der Name wird nicht in die Vorlage gerendert (Messung 6 belegt den Weg am Overlay, Golden Cases laufen unverändert) |
 | `internal/adapter/driven/docker/inspector.go` | **unverändert** | gelesen: `FindContainer` (Zeile 85) sucht über Labels; ein Name berührt die Suche nicht |
 | `internal/hexagon/port/driven/devcontainer_launcher.go` (`ValidateDevcontainerInstance`) | **unverändert** | gelesen: Regel des Label-Werts; der Containername ist eine andere Regel |
 | `internal/e2e/` (Datei mit Build-Tag `docker`, Name beim Bau) | neu | Name des gestarteten Containers, `devcontainerId` und Volumes unverändert; Vorbild `devcontainer_start_docker_test.go` (nicht gelesen) |
-| `internal/adapter/driving/cli/devcontainer.go` | prüfen | Ausgabe von `up`/`shell` („Devcontainer started: container <zwölf Zeichen> …“, Spezifikation Zeile 887): ob der Name mit ausgegeben wird, Frage 6 |
+| `internal/adapter/driving/cli/devcontainer.go` | update | Ausgabe von `up`/`shell` („Devcontainer started: container <zwölf Zeichen> …“, Spezifikation Zeile 887): Name neben der ID ausgeben (Frage 6 entschieden, 2026-11-01) |
 | `internal/hexagon/application/doctor*.go` | prüfen | ob `doctor` Container sucht (nach Name oder Label); nicht gelesen |
 | `harness/replay.md` | update (S2/S3) | Golden Case zu `generate devcontainer` mit `runArgs` |
 | `spec/lastenheft.md` | **CR vor dem Code** (Wortlaut-Freigabe) | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten); Alt/Neu in §6 Frage 7; nicht in diesem Entwurf geschrieben |
@@ -96,7 +96,7 @@ Gelesen am 2026-11-01 ([`AGENTS.md`](../../../../AGENTS.md) §3.10); der Impleme
 
 | Wächter | Mutation, die ihn rot färbt |
 |---|---|
-| Unit-Test der Argumentliste: Name steht im Aufruf der CLI (S1) | die Option beim Zusammenbau von `runArgs` weglassen |
+| Unit-Test der Argumentliste: Name steckt in der je Aufruf gültigen Konfiguration und `--override-config` steht im Aufruf (S1') | das Overlay-Datei-Rendern oder die Option beim Zusammenbau von `runArgs` weglassen |
 | Test „Bildungsregel des Namens“ (mit/ohne Instanz, Länge, Zeichen) | Präfix oder Trenner ändern; Instanz nicht anhängen |
 | Test „Name verändert `devcontainerId` und Volume-Namen nicht“ (Docker-Test oder Messskript) | den Namen als `--id-label` an die CLI geben |
 | Test „`down`/`shell` finden den Container weiter über Labels“ | `FindContainer` auf den Namen umstellen |
@@ -109,8 +109,7 @@ Gelesen am 2026-11-01 ([`AGENTS.md`](../../../../AGENTS.md) §3.10); der Impleme
 
 **Rückführungen — vorab benannt:**
 
-- `in-progress` → `next` (zu groß): Messung 1 zeigt, dass die gepinnte CLI keinen Namen annimmt und kein Weg über `runArgs` für Instanzen trägt; dann eigener Slice für das Setzen (etwa `docker rename` nach dem Start) oder Rückführung zur Entscheidung.
-- `in-progress` → `open` (blockiert): Der Projektinhaber entscheidet Namensform oder Weg nicht.
+- `in-progress` → `open` (blockiert): Der Projektinhaber entscheidet eine neue Frage nicht (etwa ein Wortlaut-Nachtrag des CR nach dem Code). Die ursprüngliche Rückführung „zu groß“ entfällt: Messung 1 und die Zusatzprobe 6 zeigen, dass S1' trägt und die Zusage je Instanz ohne neues Konstrukt gesetzt werden kann.
 
 ## 5. Closure-Trigger
 
@@ -118,25 +117,26 @@ DoD vollständig; `make gates` grün; Docker-Test im CI-Lauf grün; Review- und 
 
 ## 6. Risiken und offene Punkte
 
-**Fragen an den Projektinhaber** (Entwurf; keine ist entschieden):
+**Fragen an den Projektinhaber** (Entwurf; entschieden am 2026-11-01: Fragen 1 bis 5, 7 bis 9 — 1 durch Nicht-Widerspruch zur Deutung des Entwurfs, 3 und 7 nach den Messungen; Frage 6 auf „Name mit ausgeben“):
 
 1. **Deutung:** Containername (Docker `--name`), wie der Entwurf annimmt — oder der Label-Wert der Instanz mit Präfix ([ADR-0038](../../adr/0038-devcontainer-instanz-zweites-id-label.md) schließt das aus, Volumes wechseln).
-2. **Namensform:** A, B oder C aus §1, jeweils auch für den Container ohne Instanz (`u-boot-<projekt>`). Empfehlung: A, mit der Kollisionsregel (D).
-3. **Weg zum Setzen:** S1, S2 oder S3 (S1 setzt Messung 1 voraus; S2 allein trägt Instanzen nicht).
-4. **Eindeutigkeit über Projekte:** zwei Projekte mit derselben Instanz (`slice-a`) tragen mit A verschiedene Namen, solange die Projektnamen verschieden sind; gleichnamige Klone kollidieren (B löst das). Zu entscheiden: A mit Abbruch bei Kollision, oder B.
-5. **Kollision und Bestand:** Verhalten, wenn ein Container gleichen Namens existiert (gestoppt oder laufend; Docker meldet „name already in use“, nicht gemessen), bei `--recreate`, und für bestehende Container (Zufallsname bleibt bis zum Neuanlegen; kein `docker rename`).
-6. **Ausgabe:** ob `up` und `shell` den Namen neben der Container-ID ausgeben (Spezifikation Zeile 887).
-7. **Lastenheft-CR: Wortlaut und Gefäß** (nur Alt/Neu, nicht ins Lastenheft geschrieben; Ort: Absatz zu `up` in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) oder eigener Absatz; eigener CR-Slice nach dem Muster [`slice-cr-devcontainer-instanz-zusage-getestet`](../done/slice-cr-devcontainer-instanz-zusage-getestet.md) oder im selben Slice). *Neu (Entwurf):* „Der Container, den `u-boot devcontainer up` startet, trägt den Namen `u-boot-<Projekt>` beziehungsweise, mit `--instance <name>`, `u-boot-<Projekt>-<name>`. Die Suche nach dem Container, die Labels und die Namen der Volumes bleiben unverändert. Zugesagt ist der Name nur auf einem Linux-Host `amd64` mit lokaler Engine und nur, soweit ein Test mit Build-Tag `docker` ihn belegt; ein Container, der vor dieser Fassung angelegt wurde, behält seinen Namen bis zum Neuanlegen.“ *Alt:* keine Aussage zum Namen des Containers. (Form und Präfix vorbehaltlich Fragen 2 und 3 und der Messungen; „vor dieser Fassung“ ist Chronik und wird beim Schreiben des CR in den Ist-Zustand übertragen.)
-8. **Release-Zuordnung** (Patch oder Minor; *Added* oder *Changed* im `CHANGELOG.md`).
-9. **ADR-Bedarf:** Folge-ADR zu [ADR-0038](../../adr/0038-devcontainer-instanz-zweites-id-label.md) (der Name ist eine Entscheidung neben der Instanz-Mechanik) oder Festhalten im CR.
+2. **Namensform:** A, B oder C aus §1, jeweils auch für den Container ohne Instanz (`u-boot-<projekt>`). **Entschieden (Projektinhaber, 2026-11-01): A**, `u-boot-<projekt>-<instanz>` beziehungsweise `u-boot-<projekt>` ohne Instanz.
+3. **Weg zum Setzen:** **S1'** (Projektinhaber, 2026-11-01, nach der Zusatzprobe 6): der Hilfs-Aufruf übergibt `--override-config` mit einer je Aufruf gerenderten Kopie der erzeugten Konfiguration samt Namen in `runArgs`; die erzeugte `devcontainer.json` bleibt unberührt. S1 entfällt (CLI kennt keine Namens-Option), S2 verworfen (erzeugte Datei, Golden Cases, ein Name für alle Instanzen).
+4. **Eindeutigkeit über Projekte:** **A mit Abbruch bei Kollision** (Projektinhaber, 2026-11-01) — gleichnamige Klone kollidieren mit klarer Meldung, statt eines Hash-Teils (B).
+5. **Kollision und Bestand:** **Abbruch mit klarer Meldung** (Projektinhaber, 2026-11-01) bei einem Container gleichen Namens mit anderem `devcontainer.local_folder`; die Messungen 4 und 5 belegen: die Engine weist laufende und gestoppte Container mit exit=125 zurück, die CLI endet exit=1 und `--remove-existing-container` berührt den fremden Container nicht; bestehende Container behalten ihren Namen bis zum Neuanlegen.
+6. **Ausgabe:** **Name mit ausgeben** (Projektinhaber, 2026-11-01) — `up` und `shell` nennen den Containernamen neben der Container-ID (Spezifikation Zeile 887 wird erweitert).
+7. **Lastenheft-CR: Wortlaut und Gefäß** — Ort: Absatz zu `up` in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), im selben Slice. *Neu (Entwurf):* „Der Container, den `u-boot devcontainer up` startet, trägt den Namen `u-boot-<Projekt>` beziehungsweise, mit `--instance <name>`, `u-boot-<Projekt>-<name>`. Die Suche nach dem Container, die Labels und die Namen der Volumes bleiben unverändert. Zugesagt ist der Name nur auf einem Linux-Host `amd64` mit lokaler Engine und nur, soweit ein Test mit Build-Tag `docker` ihn belegt; ein Container, der vor dieser Fassung angelegt wurde, behält seinen Namen bis zum Neuanlegen.“ **Freigegeben (Projektinhaber, 2026-11-01)** wie in §6 Frage 7 vorgelegt; „vor dieser Fassung“ ist Chronik und wird beim Schreiben des CR in den Ist-Zustand übertragen.
+8. **Release-Zuordnung:** **Minor, *Changed*** (Projektinhaber, 2026-11-01) — nächstes Minor nach `v0.17.0`; das Verhalten von `up` ändert sich für bestehende Aufrufe.
+9. **ADR-Bedarf:** **kein Folge-ADR** (Projektinhaber hat der Empfehlung nicht widersprochen, 2026-11-01): [ADR-0038](../../adr/0038-devcontainer-instanz-zweites-id-label.md) bleibt unberührt; der Name ist eine Produktzusage im CR, der Weg S1' ist Umsetzungsdetail des Hilfs-Aufrufs.
 
-**Messungen vor dem Code** (nicht gemessen, nicht behauptet):
+**Messungen vor dem Code** (gemessen am 2026-11-01, Protokoll [`docs/messungen/slice-v1-devcontainer-container-name`](../../../messungen/slice-v1-devcontainer-container-name/README.md), je Messung zwei Läufe vollständig, Skript `tools/messung/devcontainer-container-name/messen.sh`):
 
-1. Nimmt die gepinnte Dev-Container-CLI einen Containernamen an (Option an `devcontainer up`), und wie lautet der Name am Container danach?
-2. Löst die Dev-Container-CLI `${devcontainerId}` oder eine andere Variable in `runArgs` auf (relevant für S2 mit Instanzen)?
-3. Bleiben `devcontainerId`, Labels und Volume-Namen mit gesetztem Namen gleich zum Lauf ohne Namen (beide Profile, mit und ohne Instanz)?
-4. Namensregeln der Engine: erlaubte Zeichen, Länge (nicht gemessen), Verhalten bei Konflikt; was die Engine für `--name` zurückweist.
-5. Verhalten bei `up --recreate` und bei einem gestoppten Container gleichen Namens (Konflikt; Entfernen durch `--remove-existing-container`).
+1. **Nimmt die CLI einen Namen an?** Die gepinnte CLI 0.89.0 kennt **keine** Option für den Containernamen an `devcontainer up`; die Eigenschaft `containerName` der `devcontainer.json` wird **nicht angewendet**; **`runArgs` mit `--name=<Name>` wird angewendet**.
+2. **Variablen in `runArgs`:** `${devcontainerId}` wird **aufgelöst** (Name am Container enthielt die 52-stellige ID) — eindeutig je Instanz, aber nicht sprechend.
+3. **Identität mit gesetztem Namen:** In allen vier Zellen (beide Profile, mit und ohne Instanz) bleiben `devcontainerId`, Volume-Namen und Label-Wert **gleich** zum Lauf ohne Namen (Risiko 2 gemessen widerlegt).
+4. **Namensregeln der Engine (29.9.2):** erlaubt sind die Zeichen nach `[a-zA-Z0-9][a-zA-Z0-9_.-]` mit Erstzeichen Buchstabe/Ziffer; Länge wurde bis 257 Zeichen ohne Zurückweisung gemessen (Grenze oberhalb gesucht nicht); exit=125 mit Wortlaut `invalid container name (<Name>): only [a-zA-Z0-9][a-zA-Z0-9_.-] are allowed` für führende `-`/`.`/`_`, Leer- und Sonderzeichen; **Kollision**: laufender *und* gestoppter Container gleichen Namens → exit=125 `Conflict. The container name … is already in use`, der haltende Container bleibt.
+5. **Kollision und Bestand über die CLI:** gleicher Ordner + gleicher Name → Übernahme desselben Containers (exit=0); **fremder Container gleichen Namens** (anderes `devcontainer.local_folder`, laufend oder gestoppt) → CLI endet exit=1, `--remove-existing-container` endet ebenfalls exit=1 und berührt den fremden Container nicht; der Docker-Wortlaut steht hinter der 260-Zeichen-Kürzung der Rohdaten (Exit-Weg gemessen, Wortlaut von Messung 4).
+6. **Zusatzprobe (für Frage 3):** `--override-config` mit einer je Aufruf gerenderten Kopie der erzeugten `devcontainer.json`, Name in `runArgs` — Name wird gesetzt (die sprechende Form ist damit **je Instanz** über den Hilfs-Aufruf erreichbar), `devcontainerId`/Volumes/Labels gleich, erzeugte Datei unberührt.
 
 **Risiken:**
 

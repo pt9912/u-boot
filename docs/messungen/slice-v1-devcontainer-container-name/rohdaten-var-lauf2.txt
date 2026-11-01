@@ -1,0 +1,60 @@
+
+######## M0: Messstand
+Zeit (UTC): 2026-11-01T17:28:33Z
+Modus: var
+Host: Linux 7.0.0-42-generic x86_64; uname -m: x86_64
+u-boot: u-boot version 0.17.0-dev (/Development/u-boot/bin/u-boot-linux-amd64)
+Docker Client 29.9.2 (linux/amd64), Server 29.9.2 (linux/amd64)
+Engine: Ubuntu 26.04.1 LTS; Treiber overlayfs; Cgroup 2 (systemd); CPUs 8; MemTotal 16361078784; Kernel 7.0.0-42-generic; Architektur x86_64
+               total        used        free      shared  buff/cache   available
+Mem:           15603        2659        2978         157       10473       12944
+Swap:          16383          15       16368
+Plattenplatz /: /dev/sda1       301G   45G  244G  16% /
+
+######## Vorpruefung
+(a) docker info antwortet: ja
+(d) freier Platz der Docker-Wurzel: 244 GB (benoetigt 12 GB)
+(d) Platz: erfuellt
+
+######## Hilfs-Image bauen (ubmess-devcontainer-cli)
+Bau: 1 s; Image ubmess-devcontainer-cli:0.89.0: a6d67da73180
+Dev-Container-CLI: 0.89.0
+(b) Inventur vorher (Rohdaten):
+(c) kein Objekt mit Praefix ubmess-/vsc-ubmess- vorhanden: ja
+Zeitlimits: je devcontainer up 300 s, je Lauf 1200 s (Werte der Instanz-Messung: ein up dauert bis 7 s warm)
+
+######## M2: ${devcontainerId} in runArgs
+Projekt ubmess-1 (sandbox) in /tmp/tmp.UasobnHO2e/ubmess-1; devcontainer.json:
+  json: // BEGIN U-BOOT MANAGED BLOCK: init
+  json: {
+  json:   "name": "ubmess-1",
+  json:   "build": {
+  json:     "dockerfile": "./Dockerfile",
+  json:     "context": "."
+  devcontainer.json (Kopf):
+    json: // BEGIN U-BOOT MANAGED BLOCK: init
+    json: {
+    json:   "name": "ubmess-1",
+    json:   "build": {
+    json:     "dockerfile": "./Dockerfile",
+    json:     "context": "."
+up [] -> exit=0 dauer=3 s containerId=0857ec33131a
+  Ergebnis: {"outcome":"success","containerId":"0857ec33131a2b2cb01b1dbb9002fd5a48a2664a46161eaa27c2a1ef9491199f","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  Name am Container: ubmess-name-var-086bn9odpofoiqfot0vghlvqetnnjsdbkb0u96av6lhu8a1vuir8
+  devcontainerId des Containers: 086bn9odpofoiqfot0vghlvqetnnjsdbkb0u96av6lhu8a1vuir8
+  BEFUND M2: aufgeloest (Name enthaelt die devcontainerId)
+
+######## Aufraeumen (trap)
+Arbeitsordner entfernt
+
+######## Inventur nachher und Differenz
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Differenz img (vorher -> nachher; leer = keine)
+11d10
+< ubmess-devcontainer-cli:0.89.0	a6d67da73180
+--- Reste mit Praefix ubmess-/vsc-ubmess-:
+keine
+
+######## Ende
+Stand des Modus: vollstaendig

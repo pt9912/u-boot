@@ -1,0 +1,120 @@
+
+######## M0: Messstand
+Zeit (UTC): 2026-11-01T17:29:07Z
+Modus: bestand
+Host: Linux 7.0.0-42-generic x86_64; uname -m: x86_64
+u-boot: u-boot version 0.17.0-dev (/Development/u-boot/bin/u-boot-linux-amd64)
+Docker Client 29.9.2 (linux/amd64), Server 29.9.2 (linux/amd64)
+Engine: Ubuntu 26.04.1 LTS; Treiber overlayfs; Cgroup 2 (systemd); CPUs 8; MemTotal 16361078784; Kernel 7.0.0-42-generic; Architektur x86_64
+               total        used        free      shared  buff/cache   available
+Mem:           15603        2588        3045         157       10475       13014
+Swap:          16383          15       16368
+Plattenplatz /: /dev/sda1       301G   45G  244G  16% /
+
+######## Vorpruefung
+(a) docker info antwortet: ja
+(d) freier Platz der Docker-Wurzel: 244 GB (benoetigt 12 GB)
+(d) Platz: erfuellt
+
+######## Hilfs-Image bauen (ubmess-devcontainer-cli)
+Bau: 1 s; Image ubmess-devcontainer-cli:0.89.0: e02c482dcd9e
+Dev-Container-CLI: 0.89.0
+(b) Inventur vorher (Rohdaten):
+(c) kein Objekt mit Praefix ubmess-/vsc-ubmess- vorhanden: ja
+Zeitlimits: je devcontainer up 300 s, je Lauf 1200 s (Werte der Instanz-Messung: ein up dauert bis 7 s warm)
+Projekt ubmess-1 (standard) in /tmp/tmp.cyY3nSn62g/ubmess-1; devcontainer.json:
+  json: // BEGIN U-BOOT MANAGED BLOCK: init
+  json: {
+  json:   "name": "ubmess-1",
+  json:   "build": {
+  json:     "dockerfile": "./Dockerfile",
+  json:     "context": "."
+
+######## M5: Bestandscontainer gleicher Namen, gleicher Ordner (erwartet: uebernommen)
+up [] -> exit=0 dauer=3 s containerId=f813d5ab3617
+  Ergebnis: {"outcome":"success","containerId":"f813d5ab3617b06299490db32a8acd47d6e1389a353ce1b859db173672d288c4","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  erster Lauf: ubmess-name-konflikt (f813d5ab3617)
+-- zweiter Lauf, gleiches Projekt, gleicher Name
+up [] -> exit=0 dauer=1 s containerId=f813d5ab3617
+  Ergebnis: {"outcome":"success","containerId":"f813d5ab3617b06299490db32a8acd47d6e1389a353ce1b859db173672d288c4","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ubmess-1","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCrede
+  zweiter Lauf: exit=0; Container ubmess-name-konflikt (f813d5ab3617)
+
+######## M5: Fremder Container gleicher Namen (andere local_folder, laufend)
+  Fremder Container: 053f4fc26df9 laeuft=true
+-- CLI-Lauf daneben
+up [] -> exit=1 dauer=3 s containerId=
+  Ergebnis: {"outcome":"error","message":"Command failed: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.cyY3nSn62g/ubmess-1,target=/workspaces/ubmess-1 -l devcontainer.local_folder=/tmp/tmp.cyY3nSn62g/ubmess-1 -l devcontainer.config_fi
+  stderr (letzte 10 Zeilen):
+    exec "$@"
+    while sleep 1 & wait $!; do :; done -
+        at sW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1277)
+        at LG (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1021)
+        at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at async kW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:4689)
+        at async hI (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:5808)
+        at async C9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:669:206)
+        at async I9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:668:16607)
+        at async /opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+  BEFUND M5: CLI endet exit=1; Fremdwortlaut oben; fremder Container noch da: 1 Treffer
+
+######## M5: --remove-existing-container neben fremdem Container gleichen Namens
+up [--remove-existing-container] -> exit=1 dauer=2 s containerId=
+  Ergebnis: {"outcome":"error","message":"Command failed: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.cyY3nSn62g/ubmess-1,target=/workspaces/ubmess-1 -l devcontainer.local_folder=/tmp/tmp.cyY3nSn62g/ubmess-1 -l devcontainer.config_fi
+  stderr (letzte 10 Zeilen):
+    exec "$@"
+    while sleep 1 & wait $!; do :; done -
+        at sW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1277)
+        at LG (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1021)
+        at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at async kW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:4689)
+        at async hI (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:5808)
+        at async C9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:669:206)
+        at async I9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:668:16607)
+        at async /opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+  BEFUND M5: --remove-existing-container exit=1; fremder Container noch da: 1 Treffer
+
+######## M5: Gestoppter Container gleichen Namens, dann up und up --remove-existing-container
+  Gestoppter Container: ubmess-name-konflikt Running=false
+up [] -> exit=1 dauer=3 s containerId=
+  Ergebnis: {"outcome":"error","message":"Command failed: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.cyY3nSn62g/ubmess-1,target=/workspaces/ubmess-1 -l devcontainer.local_folder=/tmp/tmp.cyY3nSn62g/ubmess-1 -l devcontainer.config_fi
+  stderr (letzte 10 Zeilen):
+    exec "$@"
+    while sleep 1 & wait $!; do :; done -
+        at sW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1277)
+        at LG (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1021)
+        at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at async kW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:4689)
+        at async hI (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:5808)
+        at async C9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:669:206)
+        at async I9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:668:16607)
+        at async /opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+  BEFUND M5: up exit=1
+up [--remove-existing-container] -> exit=1 dauer=2 s containerId=
+  Ergebnis: {"outcome":"error","message":"Command failed: docker run --sig-proxy=false -a STDOUT -a STDERR --mount type=bind,source=/tmp/tmp.cyY3nSn62g/ubmess-1,target=/workspaces/ubmess-1 -l devcontainer.local_folder=/tmp/tmp.cyY3nSn62g/ubmess-1 -l devcontainer.config_fi
+  stderr (letzte 10 Zeilen):
+    exec "$@"
+    while sleep 1 & wait $!; do :; done -
+        at sW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1277)
+        at LG (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1021)
+        at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at async kW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:4689)
+        at async hI (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:5808)
+        at async C9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:669:206)
+        at async I9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:668:16607)
+        at async /opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+  BEFUND M5: --remove-existing-container exit=1; gestoppter Container noch da: 1 Treffer
+
+######## Aufraeumen (trap)
+Arbeitsordner entfernt
+
+######## Inventur nachher und Differenz
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Differenz img (vorher -> nachher; leer = keine)
+11d10
+< ubmess-devcontainer-cli:0.89.0	e02c482dcd9e
+--- Reste mit Praefix ubmess-/vsc-ubmess-:
+keine
+
+######## Ende
+Stand des Modus: vollstaendig
