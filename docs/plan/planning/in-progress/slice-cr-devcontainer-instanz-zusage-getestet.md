@@ -110,6 +110,8 @@ Aussagen-Berührung steht hier gar nicht.
 | `docs/user/benutzerhandbuch.md` | update, falls die Lesung es verlangt | Zeilen 903 bis 906 (Bedingung „soweit aktiviert“), nur mit Fundstelle der Lesung |
 | `spec/spezifikation.md` | unverändert | [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) Zeilen 837 bis 844, 892 und 900 gelesen: keine Zahl, keine Grenze |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Zeiger auf diesen Slice unter *Offene Wellen* |
+| `docs/plan/planning/done/slice-v1-devcontainer-instanz-test-leicht.md`, `docs/reviews/2026-11-01-slice-v1-devcontainer-instanz-test-leicht.md`, `docs/reviews/2026-11-01-slice-v1-devcontainer-instanz-test-leicht-verify.md` | update (Werkzeug) | Verweis-Nachzug der `slice-mv`-Commits (`git show --stat` von `a8f0ece1`, `c077a6a0`, `8296197c`, `44d14987` gelesen); kein Inhalt des CR |
+| `docs/reviews/2026-11-01-slice-cr-devcontainer-instanz-zusage-getestet.md` | neu | Review-Report dieses Slice |
 | `docs/plan/planning/in-progress/slice-cr-devcontainer-instanz-zusage-getestet.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
 | `docs/plan/planning/open/README.md` | update | Zeile dieses Slice; beim Move Verweis-Nachzug (`make slice-mv`) |
 | `docs/reviews/` | neu | Review und Verification nach `harness/review.md` und `harness/verification.md` |
@@ -147,6 +149,7 @@ dasteht.
 - **Die Suite belegt „zwei“ erst nach einem grünen Lauf** von `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated` auf dem Runner (der Test ist nicht gelaufen). — **Ausgang:** offen bis zum Lauf `integration-docker` auf `main`; der Wortlaut wird vorher nicht geschrieben.
 - **Ein Satz im Handbuch behauptet Isolation von Docker-Speicher und Modellen** (`docs/user/benutzerhandbuch.md` Zeilen 903 bis 906) und ist von der Suite nicht pinnbar. — **Ausgang:** offen bis zur Lesung; gepinnt (Text-Pin der Mounts) oder gestrichen.
 - **Die Version `0.26.0` ist vergeben**, wenn der Slice startet: andere Entwürfe in `open/` mit Lastenheft-CR können sie früher nehmen. — **Ausgang:** offen bis zum Start; Version wird dann aus Zeile 9 und der Historie gelesen.
+- **Test-Lücken der Eingrenzung von `shell` auf die Engine 29.9.2** (Review F-7): (a) der Fall „die Sitzung schreibt die Zeile selbst“ ist von keinem Test gepinnt (Lesung des Codes); (b) die Form der Engine 28.0.4 pinnen nur Einheitstests mit Fake, kein Lauf gegen eine solche Engine; (c) ob der GitHub-Runner die Engine 29.9.2 stellt, ist nicht geprüft. — **Ausgang:** weiter offen (Anker: Review-Report F-7 und `docs/maintainer/zusagen-und-messstaende.md` Abschnitt 3.15).
 - **Das Lastenheft ist Vertrag und wird enger, nicht weiter:** eine Rücknahme einer Zusage ist eine Vertragsänderung, auch ohne neues Verhalten. — **Ausgang:** entfallen: der Slice ist als CR mit Freigabe des Projektinhabers geschnitten.
 - **Eine Accepted-ADR trägt den Satz:** [`ADR-0038`](../../adr/0038-devcontainer-instanz-zweites-id-label.md) wurde nicht auf Zahl und Grenze der Zusage gelesen. — **Ausgang:** offen; der Implementer liest ihre Konsequenzen; ein Satz, der überholt wird, löst eine Folge-ADR aus (`AGENTS.md` §3.5), die ADR wird nicht umgeschrieben.
 
@@ -165,7 +168,7 @@ formulieren) · `grundlagen-traceability.md` §Herkunfts-Anker für Steering-Loo
 3. Die Auskunft über Docker-Speicher, Modelle und die Grenze bleibt als „nicht zugesagt“ im Lastenheft.
 4. Version `0.26.0` (Zeile 9 und Historie bei Start gelesen: `0.25.0`, keine höhere vergeben).
 
-Beleg für „zwei“ in der Suite: der Lauf `integration-docker` auf `main` (Lauf 41285105546, Kopf `a6264402`) war erfolgreich; sein Kopf enthält den Commit `73b42e21` mit `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated` (`git merge-base --is-ancestor`, gelesen). Das Protokoll des Laufs war über `gh run view --log` nicht lesbar; der Beleg ist der Status des Laufs.
+Beleg für „zwei“ in der Suite: der Lauf `integration-docker` auf `main` (Lauf 41285105546, Kopf `a6264402`) war erfolgreich; sein Kopf enthält den Commit `73b42e21` mit `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated` (`git merge-base --is-ancestor`, gelesen). Das Job-Log ist über `gh api repos/pt9912/u-boot/actions/jobs/124784712075/logs` lesbar und zeigt `--- PASS: TestDevcontainerInstance_Docker_TwoInstancesAreIsolated (16.32s)` (Lauf 41285105546, Kopf `a6264402`; vom Reviewer gelesen, `docs/reviews/2026-11-01-slice-cr-devcontainer-instanz-zusage-getestet.md`).
 
 **Vorab-Suche** (`grep -i` in `spec/lastenheft.md` nach `bis zu vier`, `vier`, `1 CPU`, `einer CPU`, `3 GiB`, `Swap`, `Instanz`, am 2026-11-01): Treffer mit Zahl oder Grenze nur in Zeile 504 (Absatz, geändert) und Zeile 1609 (Historie `0.25.0`, unberührt, additiv ergänzt durch Zeile `0.26.0`). Die übrigen `Instanz`-Treffer (501 bis 503, 507, 509) tragen weder Zahl noch Grenze. [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) und Zeile 416 tragen keine Zusage zu Instanzen und sind nicht berührt.
 

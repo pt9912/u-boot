@@ -213,10 +213,11 @@ func ociFailureOnStdout(opts driven.DevcontainerShellOptions, exit int, stdout, 
 	return line, found
 }
 
-// userMissingOnStdout recognises the form in which Docker 28.0.4 reports a
-// user that does not exist in the container: the line `unable to find user
-// <user>: …` on the stream of the session with status 126 and no prefix of
-// the daemon; Docker 29.9.2 prints it with the prefix on standard error
+// userMissingOnStdout recognises the form the launcher accepts for Docker
+// 28.0.4 (not confirmed, not part of the contract) for a user that does not
+// exist in the container: the line `unable to find user <user>: …` on the
+// stream of the session with status 126 and no prefix of the daemon; Docker
+// 29.9.2 prints it with the prefix on standard error
 // ([Launcher.clientMessageOnStderr]). Without a terminal the line is the
 // whole output of the client; with a terminal the client owns standard output
 // and the launcher does not see it.
