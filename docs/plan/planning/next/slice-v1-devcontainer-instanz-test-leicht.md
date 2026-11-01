@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Entwurf; Priorisierung und Einordnung beim Projektinhaber. Erster von zwei Entwürfen: Der zweite, [`slice-cr-devcontainer-instanz-zusage-getestet`](slice-cr-devcontainer-instanz-zusage-getestet.md), passt die Zusage im Lastenheft an das an, was die Suite danach belegt; er folgt diesem Slice.
+**Welle:** ohne Welle. Entwurf; Priorisierung und Einordnung beim Projektinhaber. Erster von zwei Entwürfen: Der zweite, [`slice-cr-devcontainer-instanz-zusage-getestet`](../open/slice-cr-devcontainer-instanz-zusage-getestet.md), passt die Zusage im Lastenheft an das an, was die Suite danach belegt; er folgt diesem Slice.
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Isolation je Instanz; Scope: wie die Zusage belegt wird, nicht ihr Wortlaut), [`ADR-0038`](../../adr/0038-devcontainer-instanz-zweites-id-label.md) (zweites Id-Label).
 Anlass: Entscheidung des Projektinhabers, 2026-11-01. `TestDevcontainerInstance_Docker_FourInstancesAreIsolated` ist nicht praxistauglich: Er scheiterte im CI-Lauf `integration-docker` auf dem GitHub-Runner an der Vorprüfung (`SwapFree` 3071 MiB, „FINDING“ nach 0,03 s) und braucht einen großen Host.
@@ -53,9 +53,9 @@ Ohne die schweren Bestandteile belegt ein Sandbox-Test mit Standard-Einstellunge
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Wortlaut der Zusage in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)** — das ist eine Vertragsänderung mit Freigabe des Projektinhabers: [`slice-cr-devcontainer-instanz-zusage-getestet`](slice-cr-devcontainer-instanz-zusage-getestet.md). Bis dahin bleibt das Lastenheft weiter als der Test; Risiko in §6.
+- **Wortlaut der Zusage in [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)** — das ist eine Vertragsänderung mit Freigabe des Projektinhabers: [`slice-cr-devcontainer-instanz-zusage-getestet`](../open/slice-cr-devcontainer-instanz-zusage-getestet.md). Bis dahin bleibt das Lastenheft weiter als der Test; Risiko in §6.
 - **Änderung von Produktcode** — der Slice belegt Bestandsverhalten, er ändert keines; ein Fund geht als Fehler an einen eigenen Vorgang.
-- **Die Entscheidung, `make test-docker` nur in der CI zu fahren** — [`slice-v1-test-docker-in-ci`](slice-v1-test-docker-in-ci.md).
+- **Die Entscheidung, `make test-docker` nur in der CI zu fahren** — [`slice-v1-test-docker-in-ci`](../open/slice-v1-test-docker-in-ci.md).
 - **Eine Lockerung des Gates** — kein Gate wird gesenkt; der Test wird aus der Suite genommen und durch einen leichteren ersetzt, die Mutationsprobe in der DoD belegt, dass der leichte Test noch rot werden kann (`AGENTS.md` §3.6).
 - **Neue Messungen der Instanz-Zusage auf anderen Hosts** — die Messung bleibt die vom 2026-10-31.
 
@@ -127,7 +127,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 **einen** Ausgang, und kein Slice geht nach `done/`, während eines ohne Ausgang
 dasteht.
 
-- **Das Lastenheft sagt mehr, als die Suite belegt:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) sagt vier Instanzen mit `nestedRuntime: docker`, `ollama` und Grenze zu; nach diesem Slice belegt die Suite dafür nur Teile (siehe §1), die Zusage selbst belegt dann ein manuelles Skript (`BEO-DOK/zusage-weiter-als-messung`). — **Ausgang:** weiter offen → [`slice-cr-devcontainer-instanz-zusage-getestet`](slice-cr-devcontainer-instanz-zusage-getestet.md).
+- **Das Lastenheft sagt mehr, als die Suite belegt:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) sagt vier Instanzen mit `nestedRuntime: docker`, `ollama` und Grenze zu; nach diesem Slice belegt die Suite dafür nur Teile (siehe §1), die Zusage selbst belegt dann ein manuelles Skript (`BEO-DOK/zusage-weiter-als-messung`). — **Ausgang:** weiter offen → [`slice-cr-devcontainer-instanz-zusage-getestet`](../open/slice-cr-devcontainer-instanz-zusage-getestet.md).
 - **Der leichte Test belegt die Docker-Speicher- und Modell-Volumes nicht** (nur Text-Pins der Mounts, `generate_ollama_test.go` Zeilen 27 bis 30). — **Ausgang:** weiter offen → `BEO-E2E/kombination-ollama-nested-runtime-ohne-lauf` (Evidence beim Closure); Weg C der Frage 1 würde es mindern.
 - **Der Runner trägt vier Sandbox-Container gleichzeitig nicht** (Speicher, Zeit gegen `dcTestBudget` von 20 Minuten in `devcontainer_start_docker_test.go` Zeile 49 und `timeout-minutes: 30` des Jobs). — **Ausgang:** offen bis zum ersten Lauf der CI; eingetreten → Rückfall nach Frage 2.
 - **Der Messweg bleibt ohne Lauf:** das Skript ist nach dem Umbau nur durch einen Lauf auf einem großen Host belegt; ohne Lauf ist es nicht gemessen. — **Ausgang:** zur Wahl des Projektinhabers (Frage 4): entfallen (Lauf mitgeliefert, Rohdaten in `docs/messungen/…`) oder weiter offen → `BEO-E2E/…` im Register.
@@ -146,7 +146,7 @@ formulieren) · `grundlagen-traceability.md` §Herkunfts-Anker für Steering-Loo
 - **Was ging anders als geplant:**
 - **Steering-Loop-Eintrag:**
 - **Beobachtungs-Register (`../observations/`):**
-- **Folge-Slices:** [`slice-cr-devcontainer-instanz-zusage-getestet`](slice-cr-devcontainer-instanz-zusage-getestet.md) — ist eine Datei in `open/`
+- **Folge-Slices:** [`slice-cr-devcontainer-instanz-zusage-getestet`](../open/slice-cr-devcontainer-instanz-zusage-getestet.md) — ist eine Datei in `open/`
 - **Risiken aus §6:**
 - **Drei Paarungen:**
 
