@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle, Release-Zuordnung offen (Frage 10 in §6). Der Slice hat keine Closure-Bedingung, die von seiner DoD verschieden wäre. Der Entwurf hieß zuerst `slice-v1-devcontainer-git-identitaet` (nur Identität) und ist am 2026-11-01 um den Token erweitert und umbenannt.
+**Welle:** ohne Welle, Release-Zuordnung Minor/`Added` (Frage 10, entschieden am 2026-11-01). Der Slice hat keine Closure-Bedingung, die von seiner DoD verschieden wäre. Der Entwurf hieß zuerst `slice-v1-devcontainer-git-identitaet` (nur Identität) und ist am 2026-11-01 um den Token erweitert und umbenannt.
 
 **Anlass (Projektinhaber, 2026-11-01, im Gespräch):**
 1. `git commit` im Devcontainer scheitert mit „Please tell me who you are“, weil die erzeugte Konfiguration keine Git-Identität setzt („für git braucht es user.name und user.email“; „man kann doch über git config das anfragen“).
@@ -21,7 +21,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Aufruf, Umgebung und Sitzung von `up` und `shell`; im Wortlaut nicht gelesen, prüfen), die Beschreibung der erzeugten `remoteEnv` (nicht gelesen, prüfen).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Projektinhaber)
 
 **Autor:** pt9912 (Rolle Implementer, Entwurf im Auftrag des Projektinhabers). **Datum:** 2026-11-01.
 
@@ -147,7 +147,9 @@ DoD vollständig; `make gates` grün; Docker-Test im CI-Lauf grün; Review- und 
 
 ## 6. Risiken und offene Punkte
 
-**Fragen an den Projektinhaber** (Entwurf; keine ist entschieden):
+**Fragen an den Projektinhaber** (Entwurf; entschieden am 2026-11-01, Abfrage des Implementers im Start-Lauf):
+
+**Entschieden am 2026-11-01:** Frage 2 — Opt-in (Schalter in der Projektkonfiguration, kein Wert) · Frage 4a — Quellen 1 und 2 in dieser Reihenfolge; Quelle 3 entfällt, der Rangvorschlag in §1 gilt ohne `git credential fill` (Messung 4 bleibt als Beleg für den Verzicht) · Frage 4b — D2 · Fragen 7 und 8 — ein Slice, CR im selben Slice; der Wortlaut in Frage 8 ist freigegeben, die Klammer `[freigegeben: eingeschaltet]` aufgelöst zu „und hat der Benutzer die Auflösung in der Projektkonfiguration eingeschaltet“ · vorab benannt und bestätigt: Frage 1 — Grenze der Host-Abfragen steht ausdrücklich im CR und im Handbuch, nur bei `up`/`shell`, nie in `doctor` · Frage 5 — `doctor` bleibt bei der Referenz-Prüfung und nennt die neue Quelle nicht · Frage 6 — Token nur im Sandbox-Profil, Identität in beiden Profilen · Frage 9 — Folge-ADR · Frage 10 — Minor/`Added` bei Closure. Die Identitäts-Auflösung ist ohne Schaltet gesetzt (D2 wie entworfen); die Grenze ihrer Host-Abfrage steht im CR und im Handbuch.
 
 1. **Neue Grenze dessen, was `u-boot` vom Host abfragt:** `up`/`shell` rufen `gh` und `git` des Hosts auf und lesen zwei Konfigurationswerte sowie den Token. Zu bestätigen: nur diese Quellen, nur bei `up`/`shell`, nie in `doctor`, und die Grenze steht ausdrücklich im Handbuch und im CR.
 2. **Token-Quelle: Standard oder Opt-in?** Standard: wer `gh` angemeldet hat, bekommt den Token im Container, ohne etwas zu tun. Opt-in: ein Feld in `u-boot.yaml` (kein Wert, nur der Schalter) oder ein Flag schaltet die Auflösung ein. Risikoabwägung: der Token von `gh` trägt dann auch Git; jeder Prozess der Sitzung sieht ihn (Umgebungsvariable des Containers); der Credential-Helper des Images gibt ihn an **jeden** Host aus, der Zugangsdaten verlangt ([ADR-0035](../../adr/0035-forge-clis-gh-und-glab-im-devcontainer.md)); ein fine-grained Token ist begrenzt, aber **nicht kurzlebig**, und [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) verlangt in der Dokumentation kurzlebige, auf das Repository begrenzte Tokens; ein Agent im Container (Sandbox-Zweck) erhält damit Schreibrecht, das der Benutzer vielleicht nicht für ihn gedacht hat. Empfehlung des Entwurfs: Opt-in, solange die Sandbox-Linie „nur Referenz auf den Host, nie ohne den Willen des Benutzers“ gilt; Standard nur mit ausdrücklicher Entscheidung des Projektinhabers.
