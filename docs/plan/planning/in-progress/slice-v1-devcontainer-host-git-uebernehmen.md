@@ -118,6 +118,12 @@ Gelesen am 2026-11-01 ([`AGENTS.md`](../../../../AGENTS.md) §3.10); der Impleme
 | `docs/plan/adr/` und `docs/plan/adr/README.md` | neu, nur wenn Frage 9 „ja“ | Folge-ADR zu [ADR-0028](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), [ADR-0031](../../adr/0031-devcontainer-shell-ohne-editor.md) und [ADR-0035](../../adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (`Schärft:`), mit Index-Eintrag |
 | diese Datei, `docs/plan/planning/open/README.md` | update | Zeile im Bestand; Umbenennung per `git mv` (reiner Move-Commit, danach der Inhalt) |
 
+**Abgleich der Tabelle gegen `git diff --stat` (Stand der Umsetzung, 2026-11-01; wiederholt nach jeder Fix-Runde):**
+
+Berührt und in der Tabelle: Messskripte (als `messen-leicht.sh` und `messen-schwer.sh`, nicht als ein `messen.sh`), `docs/messungen/slice-v1-devcontainer-host-git-uebernehmen/` samt `README.md` von `docs/messungen/`, Port und Adapter (`internal/hexagon/port/driven/hostgitsource.go` neu; `git.go` des Ports **unverändert** — die Lesung des Konfigurationswerts trägt der neue Port; Adapter `internal/adapter/driven/git/hostsource.go` im Paket `git` statt in einem eigenen `gh`-Verzeichnis; `git_test.go` unverändert), `devcontainer_start.go`, Launcher-Port (gelesene Zeilen im Doc-Kommentar gefolgt), Launcher- und Shell-Adapter samt Tests, `cmd/uboot/main.go` (Verdrahtung über `WithHostGitSource`), `internal/adapter/driving/cli/devcontainer.go` (nur das JSON-Feld `gitTokenSource`). Vorlagen unverändert (kein Golden-Case-Änderung). `doctor_sandbox.go` unverändert (Frage 5: `doctor` bleibt bei der Referenz). Lastenheft CR 0.28.0, Spezifikation (nach dem Code), Handbuch, `CHANGELOG.md`, [`ADR-0040`](../../adr/0040-host-git-quellen-fuer-token-und-identitaet.md) plus Index: wie geplant.
+
+**Berührt und nicht in der Tabelle (nachgetragen):** `internal/hexagon/domain/configpath.go` + `configpath_test.go` (der Pfad `devcontainer.sandbox.hostGitToken`, Liste gepinnten Pfaden), `internal/hexagon/application/initproject.go` (das YAML-Feld `HostGitToken *bool`), `internal/hexagon/application/devcontainer_sandbox_config.go` (Coercer, YAML-Pfad, Wert des Schalters), `internal/hexagon/port/driving/devcontainer.go` (Antwort-Feld `GitTokenSource`), `docs/plan/planning/in-progress/roadmap.md` (Aktiv-Eintrag statt Ruhe-Marker; Befund des `docs-check`), `internal/e2e/devcontainer_hostgit_docker_test.go` (in der Tabelle), `open/README.md` (nur der Verweis-Nachzug des `slice-mv`).
+
 **Wächter und rot färbende Mutationen:**
 
 | Wächter | Mutation, die ihn rot färbt |
