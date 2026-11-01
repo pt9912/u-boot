@@ -38,8 +38,9 @@ type fakeInspector struct {
 	files       map[string][]byte
 	readErrs    map[string]error
 
-	findFolders []string
-	readPaths   []string
+	findFolders   []string
+	findInstances []string
+	readPaths     []string
 }
 
 // findAnswer is one canned answer of FindContainer.
@@ -68,10 +69,11 @@ func (f *fakeInspector) calls() int {
 	return len(f.findFolders) + len(f.readPaths)
 }
 
-func (f *fakeInspector) FindContainer(_ context.Context, localFolder string) (driven.DevcontainerContainer, bool, error) {
+func (f *fakeInspector) FindContainer(_ context.Context, localFolder, instance string) (driven.DevcontainerContainer, bool, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.findFolders = append(f.findFolders, localFolder)
+	f.findInstances = append(f.findInstances, instance)
 	if len(f.findAnswers) > 0 {
 		a := f.findAnswers[0]
 		f.findAnswers = f.findAnswers[1:]

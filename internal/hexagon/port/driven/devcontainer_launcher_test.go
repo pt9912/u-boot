@@ -22,6 +22,40 @@ func TestValidateDevcontainerProjectFolder(t *testing.T) {
 	}
 }
 
+// ADR-0038 decision 6 (LH-FA-DEV-010): the rule for an instance name has one
+// definition; each edge of the rule has a case.
+func TestValidateDevcontainerInstance(t *testing.T) {
+	for _, ok := range []string{"a", "0", "a-b", "agent-1", "a--b", "1-2", strings.Repeat("a", 32), "a" + strings.Repeat("-", 30) + "a", "0" + strings.Repeat("9", 31)} {
+		if err := driven.ValidateDevcontainerInstance(ok); err != nil {
+			t.Errorf("instance %q rejected: %v", ok, err)
+		}
+	}
+	bad := map[string]string{
+		"empty":             "",
+		"upper case":        "Abc",
+		"upper case inside": "aBc",
+		"leading hyphen":    "-a",
+		"trailing hyphen":   "a-",
+		"only a hyphen":     "-",
+		"equals sign":       "a=b",
+		"only equals sign":  "=",
+		"underscore":        "a_b",
+		"dot":               "a.b",
+		"space":             "a b",
+		"non-ASCII":         "ä",
+		"slash":             "a/b",
+		"line break":        "a\nb",
+		"NUL":               "a\x00b",
+		"33 characters":     strings.Repeat("a", 33),
+		"128 characters":    strings.Repeat("a", 128),
+	}
+	for name, value := range bad {
+		if err := driven.ValidateDevcontainerInstance(value); err == nil {
+			t.Errorf("%s: instance %q accepted", name, value)
+		}
+	}
+}
+
 // LH-FA-DEV-009: a variable name never carries a value into `docker run -e`.
 func TestValidateDevcontainerEnvName(t *testing.T) {
 	for _, ok := range []string{"A", "_", "git_token", "GIT_TOKEN_2", "a1"} {

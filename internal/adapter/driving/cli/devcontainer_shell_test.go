@@ -427,6 +427,8 @@ func TestExecute_DevcontainerShell_SentinelsAndExitCodes(t *testing.T) {
 		{"no configuration", fmt.Errorf("%w (looked for x)", driving.ErrDevcontainerConfigMissing), 10},
 		{"folder", driving.ErrDevcontainerProjectFolderInvalid, 10},
 		{"variable name", driving.ErrDevcontainerEnvNameInvalid, 10},
+		{"instance name", fmt.Errorf("%w: Abc", driving.ErrDevcontainerInstanceInvalid), 10},
+		{"only instances", fmt.Errorf("%w; pass --instance <name>", driving.ErrDevcontainerOnlyInstances), 10},
 		{"file system", fmt.Errorf("read /tmp/x/demo/.devcontainer/devcontainer.json: %w", driving.ErrDevcontainerFileSystem), 14},
 		{"other", errors.New("boom"), 1},
 		{"start script and runtime", fmt.Errorf("%w: %w", driving.ErrDevcontainerStartScriptFailed, driven.ErrDevcontainerRuntime), 11},

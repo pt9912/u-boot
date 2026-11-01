@@ -96,7 +96,7 @@ func TestInspector_FindContainer(t *testing.T) {
 				"context": textProcess("unix:///var/run/docker.sock\n"),
 				"ps":      tc.ps,
 			}}
-			got, found, err := newTestInspector(r, "").FindContainer(context.Background(), "/home/dev/proj")
+			got, found, err := newTestInspector(r, "").FindContainer(context.Background(), "/home/dev/proj", "")
 			if (err != nil) != tc.wantErr {
 				t.Fatalf("err = %v, wantErr %v", err, tc.wantErr)
 			}
@@ -119,7 +119,7 @@ func TestInspector_FindContainer_Argv(t *testing.T) {
 		"ps":      textProcess(""),
 	}}
 	folder := "/home/dev/my proj; rm -rf /"
-	if _, _, err := newTestInspector(r, "").FindContainer(context.Background(), folder); err != nil {
+	if _, _, err := newTestInspector(r, "").FindContainer(context.Background(), folder, ""); err != nil {
 		t.Fatal(err)
 	}
 	var ps []string
@@ -143,11 +143,130 @@ func TestInspector_FindContainer_Argv(t *testing.T) {
 	}
 }
 
+// psCall returns the argv of the `docker ps` call the runner recorded.
+func psCall(t *testing.T, r *fakeRunner) []string {
+	t.Helper()
+	for _, c := range r.calls {
+		if c[0] == "ps" {
+			return c
+		}
+	}
+	t.Fatalf("no docker ps call in %v", r.calls)
+	return nil
+}
+
+// countArg counts the entries of argv that equal want.
+func countArg(argv []string, want string) int {
+	n := 0
+	for _, a := range argv {
+		if a == want {
+			n++
+		}
+	}
+	return n
+}
+
+// ADR-0038 decisions 2 and 4: with an instance `docker ps` filters on both
+// labels; without one it filters on the folder label alone (a filter on a
+// missing label is not used) and reads the instance label of each line.
+func TestInspector_FindContainer_InstanceArgv(t *testing.T) {
+	t.Parallel()
+	newRunner := func() *fakeRunner {
+		return &fakeRunner{byCommand: map[string]func([]string) (docker.Process, error){
+			"context": textProcess("unix:///var/run/docker.sock\n"),
+			"ps":      textProcess(""),
+		}}
+	}
+	const folder = "/home/dev/proj"
+	const folderFilter = "label=devcontainer.local_folder=" + folder
+
+	r := newRunner()
+	if _, _, err := newTestInspector(r, "").FindContainer(context.Background(), folder, "agent-1"); err != nil {
+		t.Fatal(err)
+	}
+	ps := psCall(t, r)
+	if countArg(ps, folderFilter) != 1 || countArg(ps, "label=u-boot.instance=agent-1") != 1 {
+		t.Errorf("ps argv %q lacks the filters on both labels", ps)
+	}
+
+	r = newRunner()
+	if _, _, err := newTestInspector(r, "").FindContainer(context.Background(), folder, ""); err != nil {
+		t.Fatal(err)
+	}
+	ps = psCall(t, r)
+	for _, a := range ps {
+		if strings.HasPrefix(a, "label=u-boot.instance") {
+			t.Errorf("ps argv %q filters on the instance label without an instance", ps)
+		}
+	}
+	if countArg(ps, folderFilter) != 1 {
+		t.Errorf("ps argv %q lacks the filter on the folder label", ps)
+	}
+	if countArg(ps, `{{.ID}} {{.State}} {{.Label "u-boot.instance"}}`) != 1 {
+		t.Errorf("ps argv %q does not print the instance label of each line", ps)
+	}
+}
+
+// ADR-0038 decisions 4 and 5: the answer of `docker ps` for an empty and a
+// non-empty instance. The container without an instance is the first line
+// without the label (the lines come newest first); a folder whose containers
+// all carry the label is "only instances", not "none".
+func TestInspector_FindContainer_Instances(t *testing.T) {
+	t.Parallel()
+	other := strings.Repeat("b", 64)
+	cases := []struct {
+		name      string
+		instance  string
+		ps        string
+		wantID    string
+		wantFound bool
+		wantOnly  bool
+	}{
+		{"no instance: label-free line", "", testContainerID + " running \n", testContainerID, true, false},
+		{"no instance: older label-free line after a newer instance", "", other + " running i1\n" + testContainerID + " exited \n", testContainerID, true, false},
+		{"no instance: only instances", "", other + " running i1\n" + testContainerID + " exited i2\n", "", false, true},
+		{"no instance: none at all", "", "", "", false, false},
+		{"instance: first line", "i1", other + " running i1\n", other, true, false},
+		{"instance: none", "i1", "", "", false, false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			r := &fakeRunner{byCommand: map[string]func([]string) (docker.Process, error){
+				"context": textProcess("unix:///var/run/docker.sock\n"),
+				"ps":      textProcess(tc.ps),
+			}}
+			got, found, err := newTestInspector(r, "").FindContainer(context.Background(), "/home/dev/proj", tc.instance)
+			if errors.Is(err, driven.ErrOnlyInstanceContainers) != tc.wantOnly || (err != nil && !tc.wantOnly) {
+				t.Fatalf("err = %v, wantOnly %v", err, tc.wantOnly)
+			}
+			if found != tc.wantFound || got.ID != tc.wantID {
+				t.Errorf("found=%v id=%q, want found=%v id=%q", found, got.ID, tc.wantFound, tc.wantID)
+			}
+		})
+	}
+}
+
+// ADR-0038 decision 6: an instance name the rule rejects (`a=b` makes the
+// devcontainer CLI hang) ends the call before the engine is asked.
+func TestInspector_FindContainer_RejectsBadInstance(t *testing.T) {
+	t.Parallel()
+	for _, instance := range []string{"a=b", "Abc", "-a", "a-", strings.Repeat("a", 33)} {
+		r := &fakeRunner{byCommand: map[string]func([]string) (docker.Process, error){}}
+		if _, _, err := newTestInspector(r, "").FindContainer(context.Background(), "/home/dev/proj", instance); err == nil {
+			t.Errorf("instance %q: expected an error", instance)
+		}
+		if len(r.calls) != 0 {
+			t.Errorf("instance %q: engine called: %v", instance, r.calls)
+		}
+	}
+}
+
 func TestInspector_FindContainer_RejectsBadFolder(t *testing.T) {
 	t.Parallel()
 	for _, folder := range []string{"", "relative/path", "/a\nb", "/a\x00b"} {
 		r := &fakeRunner{byCommand: map[string]func([]string) (docker.Process, error){}}
-		if _, _, err := newTestInspector(r, "").FindContainer(context.Background(), folder); err == nil {
+		if _, _, err := newTestInspector(r, "").FindContainer(context.Background(), folder, ""); err == nil {
 			t.Errorf("folder %q: expected an error", folder)
 		}
 		if len(r.calls) != 0 {
@@ -181,7 +300,7 @@ func TestInspector_FindContainer_RemoteEngine(t *testing.T) {
 				"context": textProcess(tc.ctxHost),
 				"ps":      textProcess(testContainerID + " running\n"),
 			}}
-			_, found, err := newTestInspector(r, tc.dockerHost).FindContainer(context.Background(), "/home/dev/proj")
+			_, found, err := newTestInspector(r, tc.dockerHost).FindContainer(context.Background(), "/home/dev/proj", "")
 			if tc.wantRemote {
 				if !errors.Is(err, driven.ErrContainerEngineNotLocal) || found {
 					t.Errorf("err = %v found = %v, want ErrContainerEngineNotLocal", err, found)
@@ -206,7 +325,7 @@ func TestInspector_FindContainer_ContextInspectFails(t *testing.T) {
 		"context": failingProcess("context store broken"),
 		"ps":      textProcess(testContainerID + " running\n"),
 	}}
-	_, found, err := newTestInspector(r, "").FindContainer(context.Background(), "/home/dev/proj")
+	_, found, err := newTestInspector(r, "").FindContainer(context.Background(), "/home/dev/proj", "")
 	if err == nil || found || errors.Is(err, driven.ErrContainerEngineNotLocal) {
 		t.Errorf("err = %v found = %v, want a plain error and no hit", err, found)
 	}
@@ -217,7 +336,7 @@ func TestInspector_FindContainer_StartFails(t *testing.T) {
 	r := &fakeRunner{byCommand: map[string]func([]string) (docker.Process, error){
 		"context": func([]string) (docker.Process, error) { return nil, errors.New("docker: executable file not found") },
 	}}
-	if _, found, err := newTestInspector(r, "").FindContainer(context.Background(), "/home/dev/proj"); err == nil || found {
+	if _, found, err := newTestInspector(r, "").FindContainer(context.Background(), "/home/dev/proj", ""); err == nil || found {
 		t.Errorf("err = %v found = %v", err, found)
 	}
 }
@@ -394,7 +513,7 @@ func TestInspector_EngineSurface(t *testing.T) {
 		},
 	}}
 	insp := newTestInspector(r, "")
-	if _, _, err := insp.FindContainer(context.Background(), "/home/dev/proj"); err != nil {
+	if _, _, err := insp.FindContainer(context.Background(), "/home/dev/proj", ""); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := insp.ReadFile(context.Background(), testContainerID, statusPath, 512); err != nil {

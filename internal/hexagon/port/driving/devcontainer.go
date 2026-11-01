@@ -17,6 +17,12 @@ type DevcontainerUpRequest struct {
 	// created anew; named volumes stay.
 	Recreate bool
 
+	// Instance mirrors `--instance`: the name of an instance of the project
+	// folder. The empty string selects the container without an instance.
+	// The CLI adapter checks a flag that was given empty itself
+	// ([ErrDevcontainerInstanceInvalid]), so "" here always means none.
+	Instance string
+
 	// ProgressSink receives the build output of the helper image and the
 	// output of the devcontainer CLI; nil discards it.
 	ProgressSink io.Writer
@@ -25,7 +31,10 @@ type DevcontainerUpRequest struct {
 	// (LH-FA-DEV-010) synchronously, before the helper container is
 	// started, so the adapter can show it ahead of a long start. It is not
 	// called when the request fails before that point (no devcontainer
-	// configuration, a folder or variable name the helper cannot carry). nil
+	// configuration, a folder or variable name the helper cannot carry, an
+	// instance name that is not admissible). A call without an instance for a
+	// project with only containers of instances ends after it, without a
+	// helper container. nil
 	// discards it.
 	OnWarning func(WarningEntry)
 }
@@ -58,6 +67,9 @@ type DevcontainerShellRequest struct {
 	// working directory. Mandatory.
 	BaseDir string
 
+	// Instance mirrors `--instance`, see [DevcontainerUpRequest.Instance].
+	Instance string
+
 	// ProgressSink receives the build output of the helper image and the
 	// output of the devcontainer CLI during the start; nil discards it.
 	ProgressSink io.Writer
@@ -89,6 +101,9 @@ type DevcontainerShellRequest struct {
 type DevcontainerDownRequest struct {
 	// BaseDir is the absolute project folder. Mandatory.
 	BaseDir string
+
+	// Instance mirrors `--instance`, see [DevcontainerUpRequest.Instance].
+	Instance string
 }
 
 // DevcontainerDownResponse is the output of [DevcontainerUseCase.Down] on
@@ -112,6 +127,17 @@ var ErrDevcontainerConfigMissing = errors.New("devcontainer: .devcontainer/devco
 // holds a character a `--mount` value cannot carry (comma, double quote,
 // line break) or that is not absolute. Maps to exit code 10.
 var ErrDevcontainerProjectFolderInvalid = errors.New("devcontainer: project folder path is not usable")
+
+// ErrDevcontainerInstanceInvalid signals an instance name that
+// `driven.ValidateDevcontainerInstance` rejects, or a `--instance` flag given
+// empty. Maps to exit code 10; it is returned before the engine is asked.
+var ErrDevcontainerInstanceInvalid = errors.New("devcontainer: instance name is not usable")
+
+// ErrDevcontainerOnlyInstances signals a call without an instance for a
+// project whose containers are all of instances. Maps to exit code 10; it is
+// returned before the devcontainer CLI or `docker stop` runs, and its text
+// points at `--instance`.
+var ErrDevcontainerOnlyInstances = errors.New("devcontainer: the project has only containers of instances")
 
 // ErrDevcontainerEnvNameInvalid signals a `${localEnv:<NAME>}` reference in
 // `devcontainer.json` whose name is not a plain variable name. Maps to exit
@@ -141,6 +167,13 @@ var ErrDevcontainerStartScriptFailed = errors.New("devcontainer: a container sta
 //     can mount ([ErrDevcontainerProjectFolderInvalid]); it names no
 //     variable but those the configuration references through
 //     `${localEnv:<NAME>}` ([ErrDevcontainerEnvNameInvalid]).
+//   - Up, Down and Shell act on the container of the instance the request
+//     names; without an instance only on the container without one. An
+//     instance name that is not admissible ends the call with
+//     [ErrDevcontainerInstanceInvalid], a call without an instance for a
+//     project that has only containers of instances with
+//     [ErrDevcontainerOnlyInstances]; both are returned before the launcher
+//     runs.
 //   - Up hands every failure of the engine through with its sentinel
 //     identity (`driven.ErrDockerUnavailable`,
 //     `driven.ErrContainerEngineNotLocal`, `driven.ErrDevcontainerRuntime`).

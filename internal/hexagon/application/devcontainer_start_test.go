@@ -478,9 +478,10 @@ func TestDevcontainerUp_FailedStatusAfterSuccess(t *testing.T) {
 // container was already running when the inspector found it running before
 // the launcher and the CLI reports the same ID. The query comes after the
 // disclosure of the socket (which is not held back by a slow engine) and before
-// the launcher, names the project folder and is skipped with Recreate; a
-// stopped or absent container, another ID and a failed query give false, and
-// the failed query is no error.
+// the launcher and names the project folder; with Recreate it asks once for the
+// check of ADR-0038 decision 5 and reports no running state. A stopped or absent
+// container, another ID and a failed query give false, and the failed query is
+// no error.
 func TestDevcontainerUp_AlreadyRunning(t *testing.T) {
 	t.Parallel()
 	running := driven.DevcontainerContainer{ID: fallbackContainerID, Running: true}
@@ -497,7 +498,7 @@ func TestDevcontainerUp_AlreadyRunning(t *testing.T) {
 		{"another ID before", false, []findAnswer{{container: driven.DevcontainerContainer{ID: strings.Repeat("f", 64), Running: true}, found: true}}, false, 1},
 		{"the query fails", false, []findAnswer{{container: running, found: true, err: errors.New("engine hiccup")}}, false, 1},
 		{"the engine is not local", false, []findAnswer{{err: driven.ErrContainerEngineNotLocal}}, false, 1},
-		{"recreate skips the query", true, nil, false, 0},
+		{"recreate reports no running state", true, nil, false, 1},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -517,6 +518,11 @@ func TestDevcontainerUp_AlreadyRunning(t *testing.T) {
 			}
 			if queriesAtDisclosure != 0 {
 				t.Errorf("queries when the disclosure was raised = %d, want 0: the disclosure comes first", queriesAtDisclosure)
+			}
+			for _, instance := range insp.findInstances {
+				if instance != "" {
+					t.Errorf("the query names the instance %q, want none", instance)
+				}
 			}
 			if resp.AlreadyRunning != tc.want || resp.ContainerID != fallbackContainerID {
 				t.Errorf("resp = %+v, want AlreadyRunning %v", resp, tc.want)

@@ -236,7 +236,7 @@ func TestLauncher_Docker_S2_LabelCarriesHostPath(t *testing.T) {
 	if got := doc.Config.Labels[folderLabel]; got != folder {
 		t.Errorf("label %s = %q, want the host path %q", folderLabel, got, folder)
 	}
-	found, ok, err := docker.NewInspector().FindContainer(context.Background(), folder)
+	found, ok, err := docker.NewInspector().FindContainer(context.Background(), folder, "")
 	if err != nil || !ok || found.ID != res.ContainerID || !found.Running {
 		t.Errorf("FindContainer(%s) = %+v ok=%v err=%v, want the started container %s", folder, found, ok, err, res.ContainerID)
 	}
@@ -280,7 +280,7 @@ func TestLauncher_Docker_S2_GuardMeasurementPathDeviates(t *testing.T) {
 	if got := doc.Config.Labels[folderLabel]; got == folder {
 		t.Errorf("label = %q equals the host path: the guard cannot tell the measurement path from the mirror path", got)
 	}
-	if _, ok, err := docker.NewInspector().FindContainer(context.Background(), folder); ok || err != nil {
+	if _, ok, err := docker.NewInspector().FindContainer(context.Background(), folder, ""); ok || err != nil {
 		t.Errorf("FindContainer(%s) = ok %v err %v, want not found for the measurement path", folder, ok, err)
 	}
 }
@@ -853,7 +853,7 @@ func TestLauncher_Docker_StopStopsButKeepsTheContainer(t *testing.T) {
 	if err := docker.NewLauncher().Stop(context.Background(), res.ContainerID); err != nil {
 		t.Fatalf("Stop: %v", err)
 	}
-	found, ok, err := docker.NewInspector().FindContainer(context.Background(), folder)
+	found, ok, err := docker.NewInspector().FindContainer(context.Background(), folder, "")
 	if err != nil || !ok || found.ID != res.ContainerID || found.Running {
 		t.Errorf("after Stop: %+v ok=%v err=%v, want the stopped container", found, ok, err)
 	}

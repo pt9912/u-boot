@@ -20,6 +20,11 @@ import (
 // container it creates, with the absolute project folder as its value.
 const devcontainerFolderLabel = "devcontainer.local_folder"
 
+// devcontainerInstanceLabel is the id label u-boot sets on the container of an
+// instance, with the instance name as its value; the container without an
+// instance carries no such label.
+const devcontainerInstanceLabel = "u-boot.instance"
+
 const (
 	// inspectorTimeout bounds every engine call of the inspector: the
 	// callers (doctor, generate, init) must not hang on a stale socket.
@@ -72,31 +77,63 @@ type process interface {
 // startFunc starts the docker command with args.
 type startFunc func(ctx context.Context, args ...string) (process, error)
 
-// FindContainer implements [driven.DevcontainerInspector.FindContainer].
-func (i *Inspector) FindContainer(ctx context.Context, localFolder string) (driven.DevcontainerContainer, bool, error) {
+// FindContainer implements [driven.DevcontainerInspector.FindContainer]. With
+// an instance, `docker ps` filters on both labels. Without one, the filter
+// takes every container of the folder and the adapter reads the instance label
+// of each line (`{{.Label "u-boot.instance"}}`), because a filter on a missing
+// label is not used; the first line without the label is the container.
+func (i *Inspector) FindContainer(ctx context.Context, localFolder, instance string) (driven.DevcontainerContainer, bool, error) {
 	if !strings.HasPrefix(localFolder, "/") || strings.ContainsAny(localFolder, "\x00\n\r") {
 		return driven.DevcontainerContainer{}, false, fmt.Errorf("docker ps: project folder %q is not an absolute path", localFolder)
+	}
+	if instance != "" {
+		if err := driven.ValidateDevcontainerInstance(instance); err != nil {
+			return driven.DevcontainerContainer{}, false, fmt.Errorf("docker ps: %w", err)
+		}
 	}
 	ctx, cancel := context.WithTimeout(ctx, inspectorTimeout)
 	defer cancel()
 	if err := i.requireLocalEngine(ctx); err != nil {
 		return driven.DevcontainerContainer{}, false, err
 	}
-	out, err := i.output(ctx, "ps", "-a", "--no-trunc",
-		"--filter", "label="+devcontainerFolderLabel+"="+localFolder,
-		"--format", "{{.ID}} {{.State}}")
+	args := []string{"ps", "-a", "--no-trunc", "--filter", "label=" + devcontainerFolderLabel + "=" + localFolder}
+	if instance != "" {
+		args = append(args, "--filter", "label="+devcontainerInstanceLabel+"="+instance)
+	}
+	args = append(args, "--format", `{{.ID}} {{.State}} {{.Label "`+devcontainerInstanceLabel+`"}}`)
+	out, err := i.output(ctx, args...)
 	if err != nil {
 		return driven.DevcontainerContainer{}, false, fmt.Errorf("docker ps: %w", err)
 	}
-	first, _, _ := strings.Cut(strings.TrimSpace(out), "\n")
-	if first == "" {
+	lines := strings.Split(strings.TrimSpace(out), "\n")
+	if lines[0] == "" {
 		return driven.DevcontainerContainer{}, false, nil
 	}
-	fields := strings.Fields(first)
-	if len(fields) != 2 || !containerIDPattern.MatchString(fields[0]) {
-		return driven.DevcontainerContainer{}, false, errors.New("docker ps: unexpected output")
+	for _, line := range lines {
+		id, state, label, ok := splitPsLine(line)
+		if !ok || !containerIDPattern.MatchString(id) {
+			return driven.DevcontainerContainer{}, false, errors.New("docker ps: unexpected output")
+		}
+		if instance != "" || label == "" {
+			return driven.DevcontainerContainer{ID: id, Running: state == "running"}, true, nil
+		}
 	}
-	return driven.DevcontainerContainer{ID: fields[0], Running: fields[1] == "running"}, true, nil
+	return driven.DevcontainerContainer{}, false, driven.ErrOnlyInstanceContainers
+}
+
+// splitPsLine splits a line of `docker ps` in the format of
+// [Inspector.FindContainer] into the ID, the state and the value of the
+// instance label (empty when the container has none). ok is false when the
+// line lacks the state.
+func splitPsLine(line string) (id, state, label string, ok bool) {
+	parts := strings.SplitN(strings.TrimRight(line, " \r"), " ", 3)
+	if len(parts) < 2 || parts[1] == "" {
+		return "", "", "", false
+	}
+	if len(parts) == 3 {
+		label = parts[2]
+	}
+	return parts[0], parts[1], label, true
 }
 
 // ReadFile implements [driven.DevcontainerInspector.ReadFile]: `docker cp

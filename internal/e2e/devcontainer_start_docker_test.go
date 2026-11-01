@@ -81,6 +81,10 @@ type dcInspectDoc struct {
 	HostConfig struct {
 		Binds  []string
 		Mounts []struct{ Source string }
+		// Memory, MemorySwap (bytes) and NanoCpus are the limits of the container.
+		Memory     int64
+		MemorySwap int64
+		NanoCpus   int64
 	}
 	Config struct {
 		Image  string
@@ -425,10 +429,10 @@ func TestDevcontainerUp_Docker_S1_S9_StandardProfile(t *testing.T) {
 	}
 	// Guard: FindContainer finds the container by the label value only.
 	insp := dockeradapter.NewInspector()
-	if c, ok, err := insp.FindContainer(ctx, dir); err != nil || !ok || c.ID != s.resp.ContainerID {
+	if c, ok, err := insp.FindContainer(ctx, dir, ""); err != nil || !ok || c.ID != s.resp.ContainerID {
 		t.Errorf("FindContainer(project) = %+v ok=%v err=%v", c, ok, err)
 	}
-	if _, ok, err := insp.FindContainer(ctx, "/w/"+filepath.Base(dir)); err != nil || ok {
+	if _, ok, err := insp.FindContainer(ctx, "/w/"+filepath.Base(dir), ""); err != nil || ok {
 		t.Errorf("FindContainer finds the container for another label value (ok=%v err=%v)", ok, err)
 	}
 

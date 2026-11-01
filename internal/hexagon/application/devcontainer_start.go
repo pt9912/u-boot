@@ -192,7 +192,7 @@ func (s *DevcontainerStartService) wired(command, baseDir string) error {
 // Up implements [driving.DevcontainerUseCase.Up].
 func (s *DevcontainerStartService) Up(ctx context.Context, req driving.DevcontainerUpRequest) (driving.DevcontainerUpResponse, error) {
 	resp, _, err := s.start(ctx, startRequest{
-		command: "up", baseDir: req.BaseDir, recreate: req.Recreate, reportRunning: true,
+		command: "up", baseDir: req.BaseDir, instance: req.Instance, recreate: req.Recreate, reportRunning: true,
 		duration: "call", progress: req.ProgressSink, onWarning: req.OnWarning,
 	})
 	return resp, err
@@ -205,7 +205,8 @@ func (s *DevcontainerStartService) Up(ctx context.Context, req driving.Devcontai
 // come from the entries of the configuration that the start has just read.
 func (s *DevcontainerStartService) Shell(ctx context.Context, req driving.DevcontainerShellRequest) error {
 	resp, config, err := s.start(ctx, startRequest{
-		command: "shell", baseDir: req.BaseDir, duration: "start", progress: req.ProgressSink, onWarning: req.OnWarning,
+		command: "shell", baseDir: req.BaseDir, instance: req.Instance, duration: "start",
+		progress: req.ProgressSink, onWarning: req.OnWarning,
 	})
 	if err != nil {
 		return err
@@ -232,8 +233,10 @@ func (s *DevcontainerStartService) Shell(ctx context.Context, req driving.Devcon
 // startRequest is what `up` and `shell` hand to [DevcontainerStartService.start].
 type startRequest struct {
 	// command names the command in error texts: "up" or "shell".
-	command  string
-	baseDir  string
+	command string
+	baseDir string
+	// instance is the instance name; empty selects the container without one.
+	instance string
 	recreate bool
 	// reportRunning asks the inspector, before the launcher, whether the
 	// container already runs (ADR-0030 decision 2); only `up` reports it.
@@ -256,6 +259,9 @@ func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (d
 		return driving.DevcontainerUpResponse{}, "", fmt.Errorf("devcontainer %s: %w: the path must be absolute and hold no comma, double quote or line break",
 			r.command, driving.ErrDevcontainerProjectFolderInvalid)
 	}
+	if err := validInstance(r.command, r.instance); err != nil {
+		return driving.DevcontainerUpResponse{}, "", err
+	}
 	config, err := s.readConfig(r.command, r.baseDir)
 	if err != nil {
 		return driving.DevcontainerUpResponse{}, "", err
@@ -269,36 +275,65 @@ func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (d
 			Code: socketRelaxationCode, Level: "warn", Message: socketRelaxationText(r.duration), SecurityRelaxation: true,
 		})
 	}
-	s.logger.Debug("devcontainer "+r.command, "recreate", r.recreate, "envNames", len(names))
-	runningBefore := ""
-	if r.reportRunning {
-		runningBefore = s.runningContainerID(ctx, r.baseDir, r.recreate)
+	runningBefore, err := s.containerBeforeStart(ctx, r)
+	if err != nil {
+		return driving.DevcontainerUpResponse{}, "", err
 	}
+	s.logger.Debug("devcontainer "+r.command, "recreate", r.recreate, "instance", r.instance, "envNames", len(names))
 	res, err := s.launcher.Up(ctx, driven.DevcontainerUpOptions{
 		ProjectFolder: r.baseDir,
+		Instance:      r.instance,
 		EnvNames:      names,
 		Recreate:      r.recreate,
 		Progress:      r.progress,
 	})
-	resp, err := s.startOutcome(ctx, r.command, r.baseDir, runningBefore, res, err)
+	resp, err := s.startOutcome(ctx, r, runningBefore, res, err)
 	return resp, config, err
 }
 
-// runningContainerID returns the ID of the project's container if it runs
-// before the launcher is called (ADR-0030 decision 2), else the empty string:
-// with `--recreate` (the container is removed, so the query is skipped), with
-// no container, a stopped one, and when the engine cannot be asked. A failed
-// query is no failure of the command; the launcher reports an engine problem
-// itself.
-func (s *DevcontainerStartService) runningContainerID(ctx context.Context, baseDir string, recreate bool) string {
-	if recreate {
-		return ""
+// validInstance rejects an instance name that
+// [driven.ValidateDevcontainerInstance] does not admit; the empty name (no
+// instance) passes. command names the command in the error text.
+func validInstance(command, instance string) error {
+	if instance == "" {
+		return nil
 	}
-	container, found, err := s.inspector.FindContainer(ctx, baseDir)
-	if err != nil || !found || !container.Running {
-		return ""
+	if err := driven.ValidateDevcontainerInstance(instance); err != nil {
+		return fmt.Errorf("devcontainer %s: %w: %v", command, driving.ErrDevcontainerInstanceInvalid, err)
 	}
-	return container.ID
+	return nil
+}
+
+// onlyInstancesError is the error of a call without an instance for a project
+// that has only containers of instances; it names the way out.
+func onlyInstancesError(command string) error {
+	return fmt.Errorf("devcontainer %s: %w; pass --instance <name> to act on one of them",
+		command, driving.ErrDevcontainerOnlyInstances)
+}
+
+// containerBeforeStart asks the inspector for the container of the request
+// before the launcher is called, for two purposes. Without an instance it
+// ends the call with [driving.ErrDevcontainerOnlyInstances] when the project
+// has only containers of instances, because the devcontainer CLI takes the
+// newest instance container for a call without id labels. For `up` it returns
+// the ID of the container if it runs (ADR-0030 decision 2), else the empty
+// string: with `--recreate` (the container is removed, so none is reported as
+// running), with no container, a stopped one, and when the engine cannot be
+// asked. A failed query is no failure of the command; the launcher reports an
+// engine problem itself.
+func (s *DevcontainerStartService) containerBeforeStart(ctx context.Context, r startRequest) (string, error) {
+	wantRunning := r.reportRunning && !r.recreate
+	if r.instance != "" && !wantRunning {
+		return "", nil
+	}
+	container, found, err := s.inspector.FindContainer(ctx, r.baseDir, r.instance)
+	if errors.Is(err, driven.ErrOnlyInstanceContainers) {
+		return "", onlyInstancesError(r.command)
+	}
+	if !wantRunning || err != nil || !found || !container.Running {
+		return "", nil
+	}
+	return container.ID, nil
 }
 
 // startOutcome judges the result of the launcher by the state of the container
@@ -309,16 +344,18 @@ func (s *DevcontainerStartService) runningContainerID(ctx context.Context, baseD
 // [driving.ErrDevcontainerStartScriptFailed], whether the CLI failed (the
 // message keeps its output) or succeeded (the file stems from an earlier start
 // of the container). Otherwise the response carries the fallback warnings and
-// whether the container ran before the call. command names the command in the
-// error texts.
+// whether the container ran before the call. The request names the command in
+// the error texts and the instance whose container the status files are read
+// from.
 func (s *DevcontainerStartService) startOutcome(
-	ctx context.Context, command, baseDir, runningBefore string, res driven.DevcontainerUpResult, launchErr error,
+	ctx context.Context, r startRequest, runningBefore string, res driven.DevcontainerUpResult, launchErr error,
 ) (driving.DevcontainerUpResponse, error) {
+	command := r.command
 	if launchErr != nil && !errors.Is(launchErr, driven.ErrDevcontainerRuntime) {
 		return driving.DevcontainerUpResponse{}, launchErr
 	}
-	probes := s.fallbackProbes(baseDir)
-	reader := &fallbackReader{inspector: s.inspector, baseDir: baseDir}
+	probes := s.fallbackProbes(r.baseDir)
+	reader := &fallbackReader{inspector: s.inspector, baseDir: r.baseDir, instance: r.instance}
 	failedProbe, failedReading, failed := firstFailedScript(ctx, reader, probes)
 	switch {
 	case launchErr != nil && failed:
@@ -426,10 +463,16 @@ func (s *DevcontainerStartService) Down(ctx context.Context, req driving.Devcont
 	if err := s.wired("down", req.BaseDir); err != nil {
 		return driving.DevcontainerDownResponse{}, err
 	}
-	container, found, err := s.inspector.FindContainer(ctx, req.BaseDir)
+	if err := validInstance("down", req.Instance); err != nil {
+		return driving.DevcontainerDownResponse{}, err
+	}
+	container, found, err := s.inspector.FindContainer(ctx, req.BaseDir, req.Instance)
 	if err != nil {
 		if ctxErr := ctx.Err(); ctxErr != nil {
 			return driving.DevcontainerDownResponse{}, ctxErr
+		}
+		if errors.Is(err, driven.ErrOnlyInstanceContainers) {
+			return driving.DevcontainerDownResponse{}, onlyInstancesError("down")
 		}
 		if errors.Is(err, driven.ErrContainerEngineNotLocal) {
 			return driving.DevcontainerDownResponse{}, fmt.Errorf("devcontainer down: %w", err)

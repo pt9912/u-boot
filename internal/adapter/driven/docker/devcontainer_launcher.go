@@ -131,6 +131,11 @@ func (l *Launcher) Up(ctx context.Context, opts driven.DevcontainerUpOptions) (d
 	if err := driven.ValidateDevcontainerProjectFolder(opts.ProjectFolder); err != nil {
 		return driven.DevcontainerUpResult{}, rejectedInput(err)
 	}
+	if opts.Instance != "" {
+		if err := driven.ValidateDevcontainerInstance(opts.Instance); err != nil {
+			return driven.DevcontainerUpResult{}, rejectedInput(err)
+		}
+	}
 	envNames, err := l.passedEnvNames(opts.EnvNames)
 	if err != nil {
 		return driven.DevcontainerUpResult{}, err
@@ -280,7 +285,10 @@ func (l *Launcher) passedEnvNames(names []string) ([]string, error) {
 
 // runArgs is the argument list of the helper container: removed at the end
 // of the run, the engine socket and the project folder (same path as on
-// the host) as `--mount`, variables by name only, no privileges.
+// the host) as `--mount`, variables by name only, no privileges. With an
+// instance the CLI receives two `--id-label` values, the folder label and the
+// instance label; without one it receives none and derives its labels from the
+// folder.
 func runArgs(name, image string, envNames []string, opts driven.DevcontainerUpOptions) []string {
 	folder := opts.ProjectFolder
 	folderMount := "type=bind,source=" + folder + ",target=" + folder
@@ -298,6 +306,11 @@ func runArgs(name, image string, envNames []string, opts driven.DevcontainerUpOp
 	args = append(args, image, "devcontainer", "up", "--workspace-folder", folder)
 	if opts.Recreate {
 		args = append(args, "--remove-existing-container")
+	}
+	if opts.Instance != "" {
+		args = append(args,
+			"--id-label", devcontainerFolderLabel+"="+folder,
+			"--id-label", devcontainerInstanceLabel+"="+opts.Instance)
 	}
 	return args
 }

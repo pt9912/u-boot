@@ -101,7 +101,7 @@ func lifecycle(ctx context.Context, t *testing.T, container, command string) (st
 func hostStatus(ctx context.Context, t *testing.T, folder, file string) (domain.SandboxStatus, driven.DevcontainerContainer) {
 	t.Helper()
 	insp := dockeradapter.NewInspector()
-	c, found, err := insp.FindContainer(ctx, folder)
+	c, found, err := insp.FindContainer(ctx, folder, "")
 	if err != nil || !found {
 		t.Fatalf("FindContainer(%s): found=%v err=%v", folder, found, err)
 	}
@@ -352,7 +352,7 @@ func TestE2E_SandboxDevcontainer_StatusFiles_InspectorAgainstEngine(t *testing.T
 	folder := t.TempDir()
 	insp := dockeradapter.NewInspector()
 
-	if _, found, err := insp.FindContainer(ctx, folder); err != nil || found {
+	if _, found, err := insp.FindContainer(ctx, folder, ""); err != nil || found {
 		t.Fatalf("no container yet: found=%v err=%v", found, err)
 	}
 
@@ -372,7 +372,7 @@ printf 'u-boot-status 1\nresult=fallback\nat=2026-10-17T18:52:54Z\nnote=free tex
 	if out, code := dockerOutput(ctx, t, "exec", first, "sh", "-c", script); code != 0 {
 		t.Fatalf("seed files: %s", out)
 	}
-	c, found, err := insp.FindContainer(ctx, folder)
+	c, found, err := insp.FindContainer(ctx, folder, "")
 	if err != nil || !found || !c.Running {
 		t.Fatalf("FindContainer: %+v found=%v err=%v", c, found, err)
 	}
@@ -403,7 +403,7 @@ printf 'u-boot-status 1\nresult=fallback\nat=2026-10-17T18:52:54Z\nnote=free tex
 	if out, code := dockerOutput(ctx, t, "stop", "-t", "1", first); code != 0 {
 		t.Fatalf("docker stop: %s", out)
 	}
-	c, found, err = insp.FindContainer(ctx, folder)
+	c, found, err = insp.FindContainer(ctx, folder, "")
 	if err != nil || !found || c.Running {
 		t.Fatalf("stopped container: %+v found=%v err=%v", c, found, err)
 	}
@@ -414,7 +414,7 @@ printf 'u-boot-status 1\nresult=fallback\nat=2026-10-17T18:52:54Z\nnote=free tex
 	// Several containers of one folder: the most recently created wins, running or not.
 	time.Sleep(1500 * time.Millisecond)
 	second := startLabeled(ctx, t, folder, "docker.io/library/alpine:3")
-	c2, found, err := insp.FindContainer(ctx, folder)
+	c2, found, err := insp.FindContainer(ctx, folder, "")
 	if err != nil || !found || !c2.Running || c2.ID == c.ID {
 		t.Fatalf("newest container: %+v (old %s) found=%v err=%v", c2, c.ID, found, err)
 	}
@@ -427,7 +427,7 @@ printf 'u-boot-status 1\nresult=fallback\nat=2026-10-17T18:52:54Z\nnote=free tex
 
 	// A remote engine is not queried.
 	t.Setenv("DOCKER_HOST", "tcp://127.0.0.1:1")
-	if _, found, err := dockeradapter.NewInspector().FindContainer(ctx, folder); !errors.Is(err, driven.ErrContainerEngineNotLocal) || found {
+	if _, found, err := dockeradapter.NewInspector().FindContainer(ctx, folder, ""); !errors.Is(err, driven.ErrContainerEngineNotLocal) || found {
 		t.Errorf("remote DOCKER_HOST: found=%v err=%v, want ErrContainerEngineNotLocal", found, err)
 	}
 }

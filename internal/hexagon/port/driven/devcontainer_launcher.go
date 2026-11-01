@@ -14,7 +14,8 @@ import (
 // or the start of a session ([DevcontainerLauncher]); also a request the
 // launcher rejects before any docker call: the launcher applies
 // [ValidateDevcontainerProjectFolder], [ValidateDevcontainerEnvName],
-// [ValidateDevcontainerShellUser] and [ValidateDevcontainerWorkspace]
+// [ValidateDevcontainerShellUser], [ValidateDevcontainerWorkspace] and, for a
+// non-empty [DevcontainerUpOptions.Instance], [ValidateDevcontainerInstance]
 // itself, so a caller that did not run them first gets this error. The CLI
 // maps it to exit code 12 (LH-FA-CLI-006); a
 // missing Docker binary, an unreachable daemon and a remote engine stay
@@ -28,6 +29,31 @@ var ErrDevcontainerRuntime = errors.New("devcontainer runtime failed")
 func ValidateDevcontainerProjectFolder(folder string) error {
 	if !strings.HasPrefix(folder, "/") || strings.ContainsAny(folder, ",\"\n\r\x00") {
 		return fmt.Errorf("project folder %q is not an absolute path a --mount value can carry", folder)
+	}
+	return nil
+}
+
+// DevcontainerInstanceMaxLength is the longest admissible instance name.
+const DevcontainerInstanceMaxLength = 32
+
+// ValidateDevcontainerInstance rejects a name that is not an admissible
+// instance name: 1 to [DevcontainerInstanceMaxLength] characters of lower-case
+// letters, digits and hyphens, beginning and ending with a letter or a digit.
+// The empty string and a name with `=` are rejected (the devcontainer CLI
+// refuses the first and does not return for the second). It is the one
+// definition of the rule; the value "no instance" is the empty string of the
+// requests and is not passed to it. The launcher and the inspector apply it
+// again.
+func ValidateDevcontainerInstance(name string) error {
+	alnum := func(b byte) bool { return (b >= 'a' && b <= 'z') || (b >= '0' && b <= '9') }
+	ok := name != "" && len(name) <= DevcontainerInstanceMaxLength &&
+		alnum(name[0]) && alnum(name[len(name)-1])
+	for i := 0; ok && i < len(name); i++ {
+		ok = alnum(name[i]) || name[i] == '-'
+	}
+	if !ok {
+		return fmt.Errorf("instance name %q is not 1 to %d characters of a-z, 0-9 and '-', beginning and ending with a letter or digit",
+			name, DevcontainerInstanceMaxLength)
 	}
 	return nil
 }
@@ -116,6 +142,14 @@ type DevcontainerUpOptions struct {
 	// the devcontainer CLI, so the label `devcontainer.local_folder` of the
 	// started container carries the path of the host.
 	ProjectFolder string
+	// Instance names the instance (`--instance`); the empty string means the
+	// container without an instance. With an instance the launcher hands the
+	// devcontainer CLI two `--id-label` values, `devcontainer.local_folder=<ProjectFolder>`
+	// and `u-boot.instance=<Instance>`, so the container and its volumes
+	// (`${devcontainerId}`) are those of the instance; without one it hands no
+	// `--id-label`. A name that [ValidateDevcontainerInstance] rejects ends the
+	// call as [ErrDevcontainerRuntime] before any docker call.
+	Instance string
 	// EnvNames lists the host environment variables handed to the helper
 	// container by name; the launcher's own `docker run` carries no value.
 	// The devcontainer CLI itself writes the value of a variable that

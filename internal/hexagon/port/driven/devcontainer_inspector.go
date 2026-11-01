@@ -20,6 +20,13 @@ var ErrContainerFileInvalid = errors.New("container file invalid")
 // folder ([DevcontainerInspector.FindContainer]).
 var ErrContainerEngineNotLocal = errors.New("container engine is not local")
 
+// ErrOnlyInstanceContainers signals that the project folder has containers,
+// all of them of instances, and none without an instance
+// ([DevcontainerInspector.FindContainer] with an empty instance). It is not a
+// failure of the engine: "there is no container" is the false bool without an
+// error.
+var ErrOnlyInstanceContainers = errors.New("the project has only containers of instances")
+
 // DevcontainerContainer identifies the container a devcontainer tool
 // created for a project folder.
 type DevcontainerContainer struct {
@@ -42,11 +49,16 @@ type DevcontainerContainer struct {
 type DevcontainerInspector interface {
 	// FindContainer returns the container that carries the label
 	// `devcontainer.local_folder=<localFolder>` (absolute project
-	// folder); with several, the most recently created. The bool is
-	// false when there is none. A non-nil error means the engine could
-	// not be asked ([ErrContainerEngineNotLocal] for a remote engine);
-	// callers treat it as "not determinable", never as a finding.
-	FindContainer(ctx context.Context, localFolder string) (DevcontainerContainer, bool, error)
+	// folder); with several, the most recently created. With a non-empty
+	// instance the container must also carry `u-boot.instance=<instance>`; an
+	// instance that [ValidateDevcontainerInstance] rejects is an error. With
+	// an empty instance the container must carry no `u-boot.instance` label:
+	// when the folder has containers and all of them carry it, the call fails
+	// with [ErrOnlyInstanceContainers]. The bool is false when there is none.
+	// Any other non-nil error means the engine could not be asked
+	// ([ErrContainerEngineNotLocal] for a remote engine); callers treat it as
+	// "not determinable", never as a finding.
+	FindContainer(ctx context.Context, localFolder, instance string) (DevcontainerContainer, bool, error)
 
 	// ReadFile returns the content of the regular file `path` (absolute)
 	// in the container, at most maxBytes bytes. It fails with

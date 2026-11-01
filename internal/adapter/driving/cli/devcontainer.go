@@ -45,10 +45,34 @@ func isDevcontainerUsageError(err error) bool {
 // only so Cobra parses them and the RunE can reject them with an envelope.
 type devcontainerFlags struct {
 	Recreate bool
-	DryRun   bool
-	Diff     bool
-	Quiet    bool
-	JSON     bool
+	// Instance is the value of `--instance`; InstanceGiven is true when the
+	// flag was on the command line, so an empty value is told from no flag.
+	Instance      string
+	InstanceGiven bool
+	DryRun        bool
+	Diff          bool
+	Quiet         bool
+	JSON          bool
+}
+
+// instanceFlagUsage is the help text of `--instance`.
+const instanceFlagUsage = "act on the container of this instance of the project (a-z, 0-9 and '-', 1 to 32 characters, " +
+	"beginning and ending with a letter or digit); without it, on the container without an instance"
+
+// registerDevcontainerInstanceFlag adds `--instance` to a subcommand.
+func registerDevcontainerInstanceFlag(cmd *cobra.Command, flags *devcontainerFlags) {
+	cmd.Flags().StringVar(&flags.Instance, "instance", "", instanceFlagUsage)
+}
+
+// emptyInstanceError is the error of a `--instance` given with the empty
+// string. The requests carry "" for no instance, so the adapter rejects the
+// empty value itself; nil for every other flag state. command names the
+// subcommand in the error text.
+func emptyInstanceError(flags devcontainerFlags, command string) error {
+	if flags.InstanceGiven && flags.Instance == "" {
+		return fmt.Errorf("devcontainer %s: %w: --instance needs a name", command, driving.ErrDevcontainerInstanceInvalid)
+	}
+	return nil
 }
 
 // devcontainerUpData is the typed `data` carrier of `devcontainer up
@@ -83,7 +107,10 @@ Subcommands:
 
   u-boot devcontainer up [--recreate]   start the devcontainer
   u-boot devcontainer down              stop the devcontainer
-  u-boot devcontainer shell             start the devcontainer and open a shell in it`,
+  u-boot devcontainer shell             start the devcontainer and open a shell in it
+
+Each subcommand takes --instance NAME to act on one of several devcontainers of
+the same project folder; see the help of the subcommands.`,
 		Args: cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return ErrDevcontainerSubcommandRequired
@@ -137,12 +164,21 @@ without --recreate, the result line says "already running" and the JSON data
 carry alreadyRunning: true; with --recreate the line says "started" and
 alreadyRunning is false.
 
+--instance NAME starts a further devcontainer of the same project folder, next
+to the one without an instance; each instance has its own container and its own
+volumes. NAME has 1 to 32 characters of a-z, 0-9 and '-' and begins and ends
+with a letter or digit. Without --instance the command acts on the container
+without an instance only; if the project has only containers of instances, it
+ends with exit 10 and starts nothing.
+
 Exit codes (LH-FA-CLI-006):
   0   success
   2   CLI validation (unknown flag, arguments, --dry-run/--diff)
   10  no .devcontainer/devcontainer.json in the current directory; a directory
       path with a comma, double quote or line break; a ${localEnv:NAME}
-      reference whose name is not a plain variable name
+      reference whose name is not a plain variable name; an instance name that
+      is not admissible; no --instance although the project has only
+      containers of instances
   11  no docker binary on the PATH (for example in the released container
       image), the daemon does not answer, the engine is not local, or a start
       script of the container aborted for an environment reason (also in an
@@ -153,16 +189,19 @@ Exit codes (LH-FA-CLI-006):
 
 Examples:
   u-boot devcontainer up
+  u-boot devcontainer up --instance agent-1
   u-boot devcontainer up --recreate --json`,
 		Args: jsonArgsValidator(a, "devcontainer", "up", cobra.NoArgs, mapDevcontainerUpErrorToDiagnostic, false),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			flags.Quiet = a.quiet()
 			flags.JSON = a.json
+			flags.InstanceGiven = cmd.Flags().Changed("instance")
 			return runDevcontainerUp(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), *flags, a.devcontainerUseCase, a.getwd)
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Recreate, "recreate", false,
 		"remove an existing container and create it anew; named volumes stay")
+	registerDevcontainerInstanceFlag(cmd, flags)
 	registerDevcontainerPreviewFlags(cmd, flags)
 	return cmd
 }
@@ -182,23 +221,34 @@ up" starts the same container again.
 With no container for the project, or with one that is already stopped, the
 command ends with exit 0.
 
+--instance NAME stops the container of that instance (1 to 32 characters of
+a-z, 0-9 and '-', beginning and ending with a letter or digit); with no
+container of that instance the command ends with exit 0. Without --instance the
+command acts on the container without an instance only; if the project has
+only containers of instances, it ends with exit 10 and stops nothing.
+
 Exit codes (LH-FA-CLI-006):
   0   success, also when there is nothing to stop
   2   CLI validation (unknown flag, arguments, --dry-run/--diff)
+  10  an instance name that is not admissible; no --instance although the
+      project has only containers of instances
   11  no docker binary on the PATH, the daemon does not answer, or the engine
       is not local
   12  docker stop failed
 
 Examples:
   u-boot devcontainer down
+  u-boot devcontainer down --instance agent-1
   u-boot devcontainer down --json`,
 		Args: jsonArgsValidator(a, "devcontainer", "down", cobra.NoArgs, mapDevcontainerDownErrorToDiagnostic, false),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			flags.Quiet = a.quiet()
 			flags.JSON = a.json
+			flags.InstanceGiven = cmd.Flags().Changed("instance")
 			return runDevcontainerDown(cmd.Context(), cmd.OutOrStdout(), *flags, a.devcontainerUseCase, a.getwd)
 		},
 	}
+	registerDevcontainerInstanceFlag(cmd, flags)
 	registerDevcontainerPreviewFlags(cmd, flags)
 	return cmd
 }
@@ -236,6 +286,12 @@ has begun, the command ends with exit 0 whatever the exit status of the shell
 was; to run one command in the container and get its exit code, use "docker
 exec".
 
+--instance NAME opens the shell in the container of that instance, and starts
+it as "u-boot devcontainer up --instance NAME" does (1 to 32 characters of a-z,
+0-9 and '-', beginning and ending with a letter or digit). Without --instance
+the command acts on the container without an instance only; if the project has
+only containers of instances, it ends with exit 10 and starts nothing.
+
 --json, --dry-run, --diff and arguments are rejected with exit 2. --yes and
 --no-interactive have no effect: the command asks for no confirmation.
 
@@ -244,7 +300,9 @@ Exit codes:
   2   CLI validation (unknown flag, arguments, --json, --dry-run/--diff)
   10  no .devcontainer/devcontainer.json in the current directory; a directory
       path with a comma, double quote or line break; a ${localEnv:NAME}
-      reference whose name is not a plain variable name
+      reference whose name is not a plain variable name; an instance name that
+      is not admissible; no --instance although the project has only
+      containers of instances
   11  no docker binary on the PATH (for example in the released container
       image), the daemon does not answer, the engine is not local, or a start
       script of the container aborted for an environment reason (also in an
@@ -256,16 +314,19 @@ Exit codes:
 
 Examples:
   u-boot devcontainer shell
+  u-boot devcontainer shell --instance agent-1
   u-boot --quiet devcontainer shell`,
 		Args: jsonArgsValidator(a, "devcontainer", "shell", cobra.NoArgs, mapDevcontainerShellErrorToDiagnostic, false),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			flags.Quiet = a.quiet()
 			flags.JSON = a.json
+			flags.InstanceGiven = cmd.Flags().Changed("instance")
 			return runDevcontainerShell(cmd.Context(),
 				devcontainerStreams{in: cmd.InOrStdin(), stdout: cmd.OutOrStdout(), stderr: cmd.ErrOrStderr()},
 				*flags, a.devcontainerUseCase, a.getwd, a.terminalProbe)
 		},
 	}
+	registerDevcontainerInstanceFlag(cmd, flags)
 	registerDevcontainerPreviewFlags(cmd, flags)
 	return cmd
 }
@@ -317,6 +378,9 @@ func runDevcontainerUp(
 	if uc == nil {
 		return fail(errors.New("devcontainer up: use case not wired"))
 	}
+	if err := emptyInstanceError(flags, "up"); err != nil {
+		return fail(err)
+	}
 	cwd, err := getwd()
 	if err != nil {
 		return fail(fmt.Errorf("determine working directory: %w", err))
@@ -335,6 +399,7 @@ func runDevcontainerUp(
 	resp, err := uc.Up(ctx, driving.DevcontainerUpRequest{
 		BaseDir:      cwd,
 		Recreate:     flags.Recreate,
+		Instance:     flags.Instance,
 		ProgressSink: sink,
 		OnWarning: func(w driving.WarningEntry) {
 			raised = append(raised, w)
@@ -385,11 +450,14 @@ func runDevcontainerDown(
 	if uc == nil {
 		return fail(errors.New("devcontainer down: use case not wired"))
 	}
+	if err := emptyInstanceError(flags, "down"); err != nil {
+		return fail(err)
+	}
 	cwd, err := getwd()
 	if err != nil {
 		return fail(fmt.Errorf("determine working directory: %w", err))
 	}
-	resp, err := uc.Down(ctx, driving.DevcontainerDownRequest{BaseDir: cwd})
+	resp, err := uc.Down(ctx, driving.DevcontainerDownRequest{BaseDir: cwd, Instance: flags.Instance})
 	if err != nil {
 		return fail(sanitizeBaseDir(err, cwd))
 	}
@@ -447,6 +515,9 @@ func runDevcontainerShell(
 	case uc == nil:
 		return fail(errors.New("devcontainer shell: use case not wired"))
 	}
+	if err := emptyInstanceError(flags, "shell"); err != nil {
+		return fail(err)
+	}
 	cwd, err := getwd()
 	if err != nil {
 		return fail(fmt.Errorf("determine working directory: %w", err))
@@ -459,6 +530,7 @@ func runDevcontainerShell(
 	}
 	err = uc.Shell(ctx, driving.DevcontainerShellRequest{
 		BaseDir:      cwd,
+		Instance:     flags.Instance,
 		ProgressSink: sink,
 		OnWarning: func(w driving.WarningEntry) {
 			writeWarnings(streams.stderr, visibleWarnings([]driving.WarningEntry{w}, flags.Quiet))
@@ -525,11 +597,15 @@ func mapDevcontainerUpErrorToDiagnostic(err error) diagnosticItem {
 }
 
 // mapDevcontainerDownErrorToDiagnostic maps a `devcontainer down` error to
-// its diagnostic: the engine sentinels, then the rest. `down` reads no
-// project file and returns none of the validation sentinels.
+// its diagnostic: the engine sentinels, then the two instance sentinels (exit
+// 10), then the rest. `down` reads no project file, so the sentinels about the
+// configuration, the folder and the variable names do not occur.
 func mapDevcontainerDownErrorToDiagnostic(err error) diagnosticItem {
 	if code, matched := mapDevcontainerEngineSentinel(err); matched {
 		return diagnosticItem{Level: "error", Code: code, Message: err.Error()}
+	}
+	if isDevcontainerInstanceError(err) {
+		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-010", Message: err.Error()}
 	}
 	return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 }
@@ -544,9 +620,17 @@ func mapDevcontainerShellErrorToDiagnostic(err error) diagnosticItem {
 }
 
 // isDevcontainerValidationError reports the exit-10 sentinels of `devcontainer
-// up`; [isValidationError] takes them as one condition.
+// up`, `down` and `shell`; [isValidationError] takes them as one condition.
 func isDevcontainerValidationError(err error) bool {
 	return errors.Is(err, driving.ErrDevcontainerConfigMissing) ||
 		errors.Is(err, driving.ErrDevcontainerProjectFolderInvalid) ||
-		errors.Is(err, driving.ErrDevcontainerEnvNameInvalid)
+		errors.Is(err, driving.ErrDevcontainerEnvNameInvalid) ||
+		isDevcontainerInstanceError(err)
+}
+
+// isDevcontainerInstanceError reports the two exit-10 sentinels about the
+// instance, which `up`, `down` and `shell` share.
+func isDevcontainerInstanceError(err error) bool {
+	return errors.Is(err, driving.ErrDevcontainerInstanceInvalid) ||
+		errors.Is(err, driving.ErrDevcontainerOnlyInstances)
 }

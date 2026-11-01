@@ -165,7 +165,7 @@ func TestExecute_DevcontainerUp_HelpSaysWhatTheGeneratedConfigurationMounts(t *t
 // and the JSON field of an already running container together with the
 // exception of `--recreate` (the line says "started", the field is false). The
 // behaviour behind each sentence has its test (the application tests of `Up`,
-// among them recreate_skips_the_query, and
+// among them recreate_reports_no_running_state, and
 // TestExecute_DevcontainerUp_AlreadyRunning).
 func TestExecute_DevcontainerUp_HelpSaysWhenExit11AndAlreadyRunning(t *testing.T) {
 	t.Parallel()
@@ -438,6 +438,10 @@ func TestExecute_Devcontainer_SentinelsPerSubcommand(t *testing.T) {
 		{"no configuration", fmt.Errorf("%w (looked for x)", driving.ErrDevcontainerConfigMissing), 10, "LH-FA-DEV-010", []string{"up"}},
 		{"folder", driving.ErrDevcontainerProjectFolderInvalid, 10, "LH-FA-DEV-010", []string{"up"}},
 		{"variable name", driving.ErrDevcontainerEnvNameInvalid, 10, "LH-FA-DEV-010", []string{"up"}},
+		// ADR-0038 decision 8: the two sentinels about the instance are in the
+		// central classification and in the diagnostic mapping of `up` and `down`.
+		{"instance name", fmt.Errorf("%w: Abc", driving.ErrDevcontainerInstanceInvalid), 10, "LH-FA-DEV-010", []string{"up", "down"}},
+		{"only instances", fmt.Errorf("%w; pass --instance <name>", driving.ErrDevcontainerOnlyInstances), 10, "LH-FA-DEV-010", []string{"up", "down"}},
 		{"file system", fmt.Errorf("read /tmp/x/demo/.devcontainer/devcontainer.json: %w", driving.ErrDevcontainerFileSystem), 14, "LH-NFA-REL-003", []string{"up"}},
 		{"other", errors.New("boom"), 1, "LH-FA-CLI-006", []string{"up", "down"}},
 		// The classes do not overlap: the abort of a start script wins over

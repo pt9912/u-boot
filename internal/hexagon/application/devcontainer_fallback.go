@@ -139,6 +139,9 @@ type fallbackReader struct {
 	fs          driven.FileSystem
 	inContainer bool
 	baseDir     string
+	// instance selects the container of an instance; empty selects the
+	// container without one.
+	instance string
 
 	looked    bool
 	container driven.DevcontainerContainer
@@ -152,10 +155,12 @@ func (r *fallbackReader) read(ctx context.Context, p fallbackProbe) statusReadin
 		return r.readLocal(file)
 	}
 	if !r.looked {
-		r.container, r.found, r.findErr = r.inspector.FindContainer(ctx, r.baseDir)
+		r.container, r.found, r.findErr = r.inspector.FindContainer(ctx, r.baseDir, r.instance)
 		r.looked = true
 	}
 	switch {
+	case errors.Is(r.findErr, driven.ErrOnlyInstanceContainers):
+		return undetermined("the project has only containers of instances, and none without an instance")
 	case errors.Is(r.findErr, driven.ErrContainerEngineNotLocal):
 		return undetermined("the container engine is remote, so a container there cannot be tied to this project folder")
 	case r.findErr != nil:

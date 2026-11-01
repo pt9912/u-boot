@@ -177,6 +177,21 @@ func TestRunArgs(t *testing.T) {
 				"-e", "GIT_TOKEN", "-e", "OTHER",
 				launcherTestImage, "devcontainer", "up", "--workspace-folder", launcherTestFolder, "--remove-existing-container"},
 		},
+		{
+			// ADR-0038 decisions 2 and 3: two id labels with an instance, none without.
+			name: "instance",
+			opts: driven.DevcontainerUpOptions{ProjectFolder: launcherTestFolder, Instance: "agent-1"},
+			want: []string{"run", "--rm", "--name", "helper", "--mount", sock, "--mount", folder,
+				launcherTestImage, "devcontainer", "up", "--workspace-folder", launcherTestFolder,
+				"--id-label", "devcontainer.local_folder=" + launcherTestFolder, "--id-label", "u-boot.instance=agent-1"},
+		},
+		{
+			name: "instance with recreate",
+			opts: driven.DevcontainerUpOptions{ProjectFolder: launcherTestFolder, Instance: "a", Recreate: true},
+			want: []string{"run", "--rm", "--name", "helper", "--mount", sock, "--mount", folder,
+				launcherTestImage, "devcontainer", "up", "--workspace-folder", launcherTestFolder, "--remove-existing-container",
+				"--id-label", "devcontainer.local_folder=" + launcherTestFolder, "--id-label", "u-boot.instance=a"},
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -673,6 +688,16 @@ func TestLauncher_Up_RejectsUnsafeInput(t *testing.T) {
 		_, err := l.Up(context.Background(), opts)
 		if !errors.Is(err, driven.ErrDevcontainerRuntime) {
 			t.Errorf("variable name %q: error = %v, want ErrDevcontainerRuntime", name, err)
+		}
+	}
+	// ADR-0038 decision 6: the value `a=b` makes the devcontainer CLI hang, so
+	// the launcher rejects an instance name before any docker call.
+	for _, instance := range []string{"a=b", "Abc", "-a", "a-", "a_b", "a b", strings.Repeat("a", 33)} {
+		opts := upOptions()
+		opts.Instance = instance
+		_, err := l.Up(context.Background(), opts)
+		if !errors.Is(err, driven.ErrDevcontainerRuntime) {
+			t.Errorf("instance %q: error = %v, want ErrDevcontainerRuntime", instance, err)
 		}
 	}
 	if len(f.calls(t)) != 0 {

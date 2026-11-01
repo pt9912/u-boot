@@ -48,7 +48,7 @@ func (noopLogger) Error(_ string, _ ...any) {}
 // stays silent in `generate` and `init`.
 type noopDevcontainerInspector struct{}
 
-func (noopDevcontainerInspector) FindContainer(_ context.Context, _ string) (driven.DevcontainerContainer, bool, error) {
+func (noopDevcontainerInspector) FindContainer(_ context.Context, _, _ string) (driven.DevcontainerContainer, bool, error) {
 	return driven.DevcontainerContainer{}, false, nil
 }
 

@@ -159,8 +159,8 @@ func TestDevcontainerShell_PassesTheTerminalFlagBothWays(t *testing.T) {
 
 // ADR-0031 decision 1 (Startphase): the start is the one of `up` without
 // `--recreate`: the project folder, the progress sink and no recreate. `shell`
-// does not ask the inspector whether the container already ran, because it
-// reports nothing about it.
+// asks the inspector once, for the check of ADR-0038 decision 5 and without an
+// instance, because it reports nothing about the container having run.
 func TestDevcontainerShell_StartIsUpWithoutRecreate(t *testing.T) {
 	t.Parallel()
 	svc, l, insp := shellFixture(t, plainConfig, "")
@@ -176,8 +176,8 @@ func TestDevcontainerShell_StartIsUpWithoutRecreate(t *testing.T) {
 	if got := l.upOpts[0]; got.ProjectFolder != devcontainerTestBaseDir || got.Recreate || got.ReadOnlyProject || got.Progress != io.Writer(progress) {
 		t.Errorf("start options = %+v", got)
 	}
-	if len(insp.findFolders) != 0 {
-		t.Errorf("the inspector was asked %d times, want none: `shell` reports no \"already running\"", len(insp.findFolders))
+	if len(insp.findFolders) != 1 || insp.findInstances[0] != "" {
+		t.Errorf("the inspector was asked %v for the instances %q, want once without an instance", insp.findFolders, insp.findInstances)
 	}
 }
 
