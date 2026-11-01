@@ -147,6 +147,8 @@ Gelesen am 2026-10-31, die Stellen von Weg A am 2026-11-01 am Stand `HEAD` nachg
 | Test „Grenzen sind keine Sicherheitslockerung“ (Entscheidung zu Punkt 3 in §6) | die Grenze als `SecurityRelaxation`-Eintrag melden |
 | Docker-Test „Limit im Container“ | die Option beim Rendern auslassen; der Container läuft dann ohne Grenze, die Abfrage der Grenzen am gestarteten Container (Feldnamen beim Bau der Probe messen) schlägt fehl |
 
+**Abgleich mit `git diff --stat` (Stand nach dem Commit der Doku, Implementer):** Abweichungen von der Tabelle: `internal/hexagon/application/doctor_features_test.go` kommt hinzu (ein Test pinnt den Befund zu `devcontainer.resources.memory`, `doctor.go` und `doctor_sandbox.go` sind unverändert); `internal/adapter/driving/cli/generate.go`, `init.go` und `egress.go` sind unverändert, weil die Fehler dort als `%v` in `ErrGenerateManualConflict` oder `ErrConfigSchemaInvalid` eingewickelt sind und Exit-Code `10` schon über diese Sentinels entsteht (nur `cli.go` nimmt `ErrInvalidResourceLimit` in `isConfigValidationError` auf); `README.md` und `README.de.md` sind unverändert (sie nennen keine Schlüssel von `u-boot.yaml`; gesucht, nicht Zeile für Zeile gelesen); keine ADR (Entscheidung des Projektinhabers); `spec/architecture.md` ist unverändert und nicht gelesen. Die Messskripte `messen-engine.sh` und das Protokoll `roh-engine.txt` sind neu.
+
 Die Wege B und C sind nicht gewählt; ihre Plan-Zeilen (Liste `[]string` mit Einordnung je Option, Handbuch-Absatz) entfallen. Käme es zu einem Wechsel, ist der Plan neu zu schreiben (§4).
 
 ## 4. Trigger
