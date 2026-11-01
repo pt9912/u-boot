@@ -278,11 +278,11 @@ func TestLHFADEV003_AllowlistEnforcement(t *testing.T) {
 	if !errors.Is(err, driving.ErrConfigValueInvalid) {
 		t.Errorf("err = %v, want wrap of ErrConfigValueInvalid (LH-FA-CLI-006 exit-10)", err)
 	}
-	if !strings.Contains(err.Error(), "LH-FA-DEV-003") {
-		t.Errorf("err message %q does not name LH-FA-DEV-003", err.Error())
+	if !strings.Contains(err.Error(), "devcontainer.featureSources.allow") {
+		t.Errorf("err message %q does not name devcontainer.featureSources.allow", err.Error())
 	}
-	if !strings.Contains(err.Error(), "LH-NFA-SEC-004") {
-		t.Errorf("err message %q does not name LH-NFA-SEC-004", err.Error())
+	if !strings.Contains(err.Error(), "--yes is not sufficient") {
+		t.Errorf("err message %q does not say that --yes is not sufficient", err.Error())
 	}
 
 	// Positive path after seeding the Allowlist via the LH-FA-DEV-003-

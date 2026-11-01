@@ -53,7 +53,7 @@ func quietAllWarnings() []driving.WarningEntry {
 
 func assertOnlyRelaxationVisible(t *testing.T, out string) {
 	t.Helper()
-	if !strings.Contains(out, "Warning (LH-FA-DEV-007): security relaxation for nested Podman") {
+	if !strings.Contains(out, "Warning: security relaxation for nested Podman") {
 		t.Errorf("--quiet hid the security-relaxation warning:\n%s", out)
 	}
 	for _, gone := range []string{"has no effect", "no git remote", "recreate the container"} {
@@ -99,7 +99,7 @@ func TestExecute_Init_Quiet_WithoutRelaxationNoWarningLines(t *testing.T) {
 		[]string{"--quiet", "init", "--devcontainer", "--sandbox"}, &stdout, &stderr); err != nil {
 		t.Fatalf("Execute: %v", err)
 	}
-	if strings.Contains(stdout.String(), "Warning (") {
+	if strings.Contains(stdout.String(), "Warning:") {
 		t.Errorf("--quiet printed a non-relaxation warning:\n%s", stdout.String())
 	}
 }
@@ -130,7 +130,7 @@ func TestExecute_Generate_Quiet_WithoutRelaxationNoWarningLines(t *testing.T) {
 		[]string{"--quiet", "generate", "devcontainer"}, &stdout, &stderr); err != nil {
 		t.Fatalf("Execute: %v", err)
 	}
-	if strings.Contains(stdout.String(), "Warning (") {
+	if strings.Contains(stdout.String(), "Warning:") {
 		t.Errorf("--quiet printed a non-relaxation warning:\n%s", stdout.String())
 	}
 }
@@ -350,7 +350,7 @@ func TestExecute_Quiet_KeepsEachDegradationFallback(t *testing.T) {
 					t.Fatalf("Execute: %v", err)
 				}
 				out := stdout.String()
-				if !strings.Contains(out, "Warning ("+fb.Code+"): "+fb.Message) {
+				if !strings.Contains(out, "Warning: "+fb.Message) {
 					t.Errorf("--quiet hid the %s fallback:\n%s", fbName, out)
 				}
 				if strings.Contains(out, "has no effect") {
@@ -402,7 +402,7 @@ func TestExecute_Quiet_KeepsSshdLoginWarningDropsThirdParty(t *testing.T) {
 				t.Fatalf("Execute: %v", err)
 			}
 			out := stdout.String()
-			if !strings.Contains(out, "Warning (LH-FA-DEV-006): login service sshd is active") {
+			if !strings.Contains(out, "Warning: login service sshd is active") {
 				t.Errorf("--quiet hid the sshd login-service warning:\n%s", out)
 			}
 			if strings.Contains(out, "third-party publisher") {
@@ -441,7 +441,7 @@ func TestExecute_Generate_Quiet_KeepsEgressNoEffectDropsNestedRuntimeNoEffect(t 
 	}
 
 	text := run("--quiet", "generate", "devcontainer")
-	if !strings.Contains(text, "Warning (LH-FA-DEV-008): devcontainer.sandbox.egress.enabled has no effect") {
+	if !strings.Contains(text, "Warning: devcontainer.sandbox.egress.enabled has no effect") {
 		t.Errorf("--quiet hid the egress no-effect warning:\n%s", text)
 	}
 	if strings.Contains(text, "nestedRuntime") {
@@ -487,10 +487,10 @@ func TestExecute_Generate_EgressRebuildNotice_QuietAndJSON(t *testing.T) {
 		}
 		return stdout.String()
 	}
-	if out := run("generate", "devcontainer"); !strings.Contains(out, "Warning (LH-FA-DEV-008): .devcontainer/egress-init.sh changed") {
+	if out := run("generate", "devcontainer"); !strings.Contains(out, "Warning: .devcontainer/egress-init.sh changed") {
 		t.Errorf("default output lacks the rebuild notice:\n%s", out)
 	}
-	if out := run("--quiet", "generate", "devcontainer"); strings.Contains(out, "Warning (") || strings.Contains(out, "rebuild the container") {
+	if out := run("--quiet", "generate", "devcontainer"); strings.Contains(out, "Warning:") || strings.Contains(out, "rebuild the container") {
 		t.Errorf("--quiet kept the rebuild notice:\n%s", out)
 	}
 	for _, args := range [][]string{{"--json", "generate", "devcontainer"}, {"--quiet", "--json", "generate", "devcontainer"}} {

@@ -52,8 +52,8 @@ devcontainer:
 	if !strings.Contains(d.Message, "devcontainer schema invalid") {
 		t.Errorf("Message lacks devcontainer-schema indicator: %q", d.Message)
 	}
-	if !strings.Contains(d.Hint, "LH-FA-DEV-003") {
-		t.Errorf("Hint lacks LH-FA-DEV-003 reference: %q", d.Hint)
+	if !strings.Contains(d.Hint, "Fix the offending entry") {
+		t.Errorf("Hint lacks the repair instruction: %q", d.Hint)
 	}
 }
 
@@ -214,8 +214,7 @@ devcontainer:
 	for _, want := range []string{
 		"rogue",
 		"https://uninvited.test/feature",
-		"LH-FA-DEV-003",
-		"LH-NFA-SEC-004",
+		"`--yes` is not sufficient",
 	} {
 		if !strings.Contains(d.Message, want) {
 			t.Errorf("Message missing %q\n  full: %s", want, d.Message)

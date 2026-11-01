@@ -50,14 +50,12 @@ func newTemplateCommand(a *App) *cobra.Command {
 
 Subcommands:
 
-  u-boot template list [--json]   list available templates (LH-FA-TPL-004)
+  u-boot template list [--json]   list available templates
 
-Coming in later slices:
+To render a template into a new project, use u-boot init:
 
-  u-boot init --template <name>   render a template into a new project
-                                  (slice-v1-template-init)
-  u-boot init --template ./path   use a local template directory
-                                  (slice-later-local-templates)`,
+  u-boot init --template <name>   render a template from the catalog
+  u-boot init --template ./path   render a local template directory`,
 		Args: cobra.NoArgs,
 		// Help-Parent: prints help via cmd.Help() in human mode.
 		// In --json mode bare `template` is rejected (Cluster-T_close):
@@ -89,21 +87,18 @@ Coming in later slices:
 func newTemplateListCommand(a *App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List available project templates (LH-FA-TPL-004)",
+		Short: "List available project templates",
 		Long: `Print every built-in template with its name, description, and version.
 
 The default render is a tabwriter-aligned table for humans; the
-root --json flag (LH-NFA-USE-004) switches to a structured array
-(one object per template, all LH-FA-TPL-002 fields) suitable for
+root --json flag switches to a structured array
+(one object per template, with all template fields) suitable for
 downstream tooling.
 
-Exit codes (LH-FA-CLI-006):
+Exit codes:
   0   success
   2   pure CLI / flag errors (unknown subcommand, unknown flag)
-  14  catalog adapter failure (filesystem IO, malformed
-      template.yaml in a fixture-backed adapter — the production
-      embed.FS adapter validates at load time and never reaches
-      this path in a passing CI build)
+  14  catalog failure (the template catalog cannot be read)
 
 Examples:
   u-boot template list           # tabular layout

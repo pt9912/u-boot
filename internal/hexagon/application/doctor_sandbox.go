@@ -89,12 +89,12 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 	dc := cfg.Devcontainer
 	if nestedRuntimeSet(dc) && !profileIsSandbox(dc) {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityWarn,
-			Message: fmt.Sprintf("devcontainer.sandbox.nestedRuntime is `%s` but devcontainer.profile is not `sandbox`; the setting has no effect (LH-FA-DEV-007).", dc.Sandbox.NestedRuntime),
+			Message: fmt.Sprintf("devcontainer.sandbox.nestedRuntime is `%s` but devcontainer.profile is not `sandbox`; the setting has no effect.", dc.Sandbox.NestedRuntime),
 			Hint:    "Run `u-boot config set devcontainer.profile sandbox` and `u-boot generate devcontainer`, or set nestedRuntime to `none`."}
 	}
 	if nestedDocker(dc) {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
-			Message: "Nested Docker daemon configured; it needs `--privileged`, which removes the isolation from the container host; whether the daemon became ready at the container start is reported by devcontainer.sandbox.fallback.daemon (LH-FA-DEV-007)."}
+			Message: "Nested Docker daemon configured; it needs `--privileged`, which removes the isolation from the container host; whether the daemon became ready at the container start is reported by devcontainer.sandbox.fallback.daemon."}
 	}
 	if !nestedPodman(dc) {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
@@ -106,12 +106,12 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 	}
 	if restricted, _ := s.fs.ReadFile(apparmorUsernsSysctl); strings.TrimSpace(string(restricted)) == "1" {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityError,
-			Message: "kernel.apparmor_restrict_unprivileged_userns=1 on this host blocks nested user namespaces; rootless Podman in the sandbox cannot start (LH-FA-DEV-007, exit 11 at container start).",
+			Message: "kernel.apparmor_restrict_unprivileged_userns=1 on this host blocks nested user namespaces; rootless Podman in the sandbox cannot start (exit 11 at container start).",
 			Hint:    "Set `sysctl kernel.apparmor_restrict_unprivileged_userns=0` on the container host, or set `devcontainer.sandbox.nestedRuntime` to `none`."}
 	}
 	if s.inContainer() {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityInfo,
-			Message: "/dev/fuse not checked: u-boot is running inside a container, and its /dev/fuse is the device of this container, not of the container host; whether a sandbox container was started without the device is reported by devcontainer.sandbox.fallback.vfs as far as its status file is readable (LH-FA-DEV-007).",
+			Message: "/dev/fuse not checked: u-boot is running inside a container, and its /dev/fuse is the device of this container, not of the container host; whether a sandbox container was started without the device is reported by devcontainer.sandbox.fallback.vfs as far as its status file is readable.",
 			Hint:    "Run `u-boot doctor` on the container host to check /dev/fuse."}
 	}
 	if fuse, _ := s.fs.Exists("/dev/fuse"); fuse {
@@ -122,7 +122,7 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 	// step: the engine refuses to start the container, whatever
 	// `onUnavailable` says. The item is an error and no fallback.
 	return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityError,
-		Message: "/dev/fuse is not available on this host; the container engine refuses to start the sandbox container with `--device=/dev/fuse` (LH-FA-DEV-007, exit 11).",
+		Message: "/dev/fuse is not available on this host; the container engine refuses to start the sandbox container with `--device=/dev/fuse` (exit 11).",
 		Hint:    "Load the fuse module (`modprobe fuse`) on the container host, or set `devcontainer.sandbox.nestedRuntime` to `none`."}
 }
 
@@ -139,7 +139,7 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 	}
 	if found := s.plaintextCredentialFiles(baseDir); len(found) > 0 {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
-			Message: fmt.Sprintf("possible plaintext credential in: %s (LH-FA-DEV-009).", strings.Join(found, ", ")),
+			Message: fmt.Sprintf("possible plaintext credential in: %s.", strings.Join(found, ", ")),
 			Hint: "Remove it from the file, revoke the credential, and pass it at runtime: a short-lived repository-scoped token via $GIT_TOKEN, " +
 				"an agent key or forge-CLI token via its host environment variable (for example $ANTHROPIC_API_KEY, $CLAUDE_CODE_OAUTH_TOKEN, $GH_TOKEN, $GITLAB_TOKEN).",
 			SecurityRelaxation: true}
@@ -149,13 +149,13 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 	httpsClone := strings.HasPrefix(origin, "https://") || strings.HasPrefix(origin, "http://")
 	if httpsClone && !s.hasTokenSource(baseDir) {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
-			Message:            "sandbox profile clones over https but devcontainer.json has no runtime token source (remoteEnv GIT_TOKEN or a read-only secret mount) (LH-FA-DEV-009).",
+			Message:            "sandbox profile clones over https but devcontainer.json has no runtime token source (remoteEnv GIT_TOKEN or a read-only secret mount).",
 			Hint:               "Run `u-boot generate devcontainer` to restore the GIT_TOKEN pass-through; never store tokens in project files.",
 			SecurityRelaxation: true}
 	}
 	if missing := s.missingAgentSources(baseDir, agentVars); len(missing) > 0 {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
-			Message: fmt.Sprintf("an active agent or forge-CLI feature needs its credential at runtime but devcontainer.json has no reference for: %s (LH-FA-DEV-009).",
+			Message: fmt.Sprintf("an active agent or forge-CLI feature needs its credential at runtime but devcontainer.json has no reference for: %s.",
 				strings.Join(missing, ", ")),
 			Hint:               "Run `u-boot generate devcontainer` to restore the `${localEnv:<NAME>}` pass-through and export the variable on the host; never store the key in project files.",
 			SecurityRelaxation: true}
@@ -234,13 +234,13 @@ func (s *DoctorService) checkSandboxEgress(_ context.Context, baseDir string) do
 	}
 	if !profileIsSandbox(cfg.Devcontainer) {
 		return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityWarn,
-			Message:            "devcontainer.sandbox.egress.enabled is set but devcontainer.profile is not `sandbox`; the setting has no effect (LH-FA-DEV-008).",
+			Message:            "devcontainer.sandbox.egress.enabled is set but devcontainer.profile is not `sandbox`; the setting has no effect.",
 			Hint:               "Run `u-boot config set devcontainer.profile sandbox` and `u-boot generate devcontainer`, or disable the egress restriction.",
 			SecurityRelaxation: true}
 	}
 	if nestedDocker(cfg.Devcontainer) {
 		return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityWarn,
-			Message:            "Egress restriction together with nestedRuntime `docker`: the traffic of nested containers and the iptables rules of the nested daemon bypass the restriction, and `--privileged` lets any process lift it (LH-FA-DEV-008).",
+			Message:            "Egress restriction together with nestedRuntime `docker`: the traffic of nested containers and the iptables rules of the nested daemon bypass the restriction, and `--privileged` lets any process lift it.",
 			Hint:               "Treat the restriction as a guardrail only, or set `devcontainer.sandbox.nestedRuntime` to `none` or `podman`.",
 			SecurityRelaxation: true}
 	}

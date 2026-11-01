@@ -119,21 +119,20 @@ func newUpCommand(a *App) *cobra.Command {
 		Long: `Bring the Compose environment defined in compose.yaml up via
 docker compose up -d, then poll docker compose ps every 500ms until
 every declared service reaches healthy (when a healthcheck is defined)
-or running (when no healthcheck). LH-FA-UP-001 stabilization.
+or running (when no healthcheck).
 
-Stabilization semantics per LH-FA-UP-001:
+Stabilization:
   - --timeout <sec>      maximum wait (default 60). Negative ⇒ exit 2.
   - --timeout=0          fire-and-forget. No polling, no probes;
-                         status table omitted, info diagnostic shown
-                         (LH-FA-UP-001).
+                         status table omitted, info diagnostic shown.
 
-LH-FA-CLI-006 exit codes:
+Exit codes:
   - 10  no u-boot.yaml or compose.yaml in the current directory
   - 11  Docker daemon unreachable / compose plugin missing
   - 12  Compose runtime failure or stabilization timeout
   - 14  filesystem read failure (u-boot.yaml / compose.yaml)
 
-LH-NFA-PERF-002 progress: pull/create/start/healthcheck phases stream
+Progress: pull/create/start/healthcheck phases stream
 to stderr live (unaffected by --quiet; silenced in --json mode).`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -143,7 +142,7 @@ to stderr live (unaffected by --quiet; silenced in --json mode).`,
 		},
 	}
 	cmd.Flags().IntVar(&flags.TimeoutSec, "timeout", 60,
-		"maximum seconds to wait for stabilization; 0 = fire-and-forget (LH-FA-UP-001/LH-FA-UP-001)")
+		"maximum seconds to wait for stabilization; 0 = fire-and-forget")
 	return cmd
 }
 
@@ -212,7 +211,7 @@ func runUp(ctx context.Context, stdout, stderr io.Writer, flags upFlags, useCase
 	// warnings remain (LH-FA-CLI-005); the recreate warning
 	// (LH-FA-UP-003) is dropped.
 	for _, w := range visibleWarnings(resp.Warnings, flags.Quiet) {
-		fmt.Fprintf(stdout, "Warning (%s): %s\n", w.Code, w.Message)
+		fmt.Fprintf(stdout, "Warning: %s\n", w.Message)
 	}
 	return nil
 }

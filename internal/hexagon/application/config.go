@@ -361,7 +361,7 @@ func writeRejectedError(path domain.ConfigPath) error {
 	switch path.Kind {
 	case domain.ConfigServiceEnabled:
 		return driving.NewConfigHintError(fmt.Errorf(
-			"%w: %s is not writable via `u-boot config set` because the LH-FA-ADD-005 state machine owns the lifecycle; use `u-boot add %s` to register the service",
+			"%w: %s is not writable via `u-boot config set` because the add and remove commands own the lifecycle of a service; use `u-boot add %s` to register the service",
 			driving.ErrConfigWriteRejected, path, path.Service.String()),
 			addServiceHint(path.Service.String()))
 	}
@@ -574,7 +574,7 @@ func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 		}
 		if !featureSourceInAllow(cfg, entry.Source) {
 			return fmt.Errorf(
-				"%w: %s: external source %q is not in devcontainer.featureSources.allow; add it via `u-boot config set devcontainer.featureSources.allow %s` (LH-FA-DEV-003 / LH-NFA-SEC-004 — --yes is not sufficient). Comparison is byte-equal; trailing slashes and host case must match",
+				"%w: %s: external source %q is not in devcontainer.featureSources.allow; add it via `u-boot config set devcontainer.featureSources.allow %s` (--yes is not sufficient). Comparison is byte-equal; trailing slashes and host case must match",
 				driving.ErrConfigValueInvalid, path, entry.Source, entry.Source)
 		}
 		return nil
@@ -810,7 +810,7 @@ func extractConfigValueRaw(cfg ubootYAMLConfig, path domain.ConfigPath) (string,
 	case domain.ConfigProjectName:
 		if cfg.Project.Name == "" {
 			return "", fmt.Errorf(
-				"%w: u-boot.yaml has no `project.name` value; this is a corrupt config (LH-FA-CONF-002 requires it)",
+				"%w: u-boot.yaml has no `project.name` value; this is a corrupt config (the value is required)",
 				driving.ErrConfigSchemaInvalid)
 		}
 		return cfg.Project.Name, nil

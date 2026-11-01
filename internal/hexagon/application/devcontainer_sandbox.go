@@ -227,7 +227,7 @@ func validateCloneURL(raw string) error {
 		return nil
 	}
 	if scheme == "http" || scheme == "https" || strings.Contains(userinfo, ":") {
-		return fmt.Errorf("%w: git remote 'origin' URL embeds credentials; remove them from the remote (LH-FA-DEV-009) and pass tokens at runtime",
+		return fmt.Errorf("%w: git remote 'origin' URL embeds credentials; remove them from the remote and pass tokens at runtime",
 			domain.ErrInvalidSandboxSetting)
 	}
 	return nil

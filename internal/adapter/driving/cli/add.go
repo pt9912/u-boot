@@ -55,29 +55,28 @@ func newAddCommand(a *App) *cobra.Command {
 		Use:   "add <service>",
 		Short: "Add a service add-on to the u-boot project",
 		Long: `Add an integrated service add-on to the current u-boot project. The
-positional <service> argument names the catalogue entry; today MVP
-supports only postgres (LH-FA-ADD-002). Keycloak (LH-FA-ADD-003) and
-OpenTelemetry (LH-FA-ADD-004) join in V1.
+positional <service> argument names the catalogue entry: postgres,
+keycloak or otel.
 
-The command runs in an initialized project (u-boot.yaml present per
-LH-FA-ADD-001) and is idempotent: calling it twice on the same active
-service is a no-op. The state-machine (LH-FA-ADD-005) handles
-re-activation, block rebuild after a partial cleanup, and abort with
-a repair hint when the project state is inconsistent (orphan compose
+The command runs in an initialized project (u-boot.yaml present) and is
+idempotent: calling it twice on the same active service is a no-op. A
+service that was deactivated is re-activated, a block that a partial
+cleanup left incomplete is rebuilt, and the command aborts with a
+repair hint when the project state is inconsistent (orphan compose
 block or user-managed entry without u-boot marker).
 
-Flag combinations (LH-FA-CLI-007/008):
+Flag combinations:
   --dry-run            preview without writing files
   --diff               show unified diff of planned changes
   --dry-run --diff     unified diff preview, no write
   --json               JSON output; pairs with --dry-run / --diff
-                       for the LH-FA-CLI-007 voll-schema
+                       for the full preview schema
 
 Examples:
   u-boot add postgres                 # first add: register + write
   u-boot add postgres                 # idempotent re-run: no-op
   u-boot add postgres --dry-run       # preview, no write
-  u-boot add postgres --diff --json   # voll-schema with hunks
+  u-boot add postgres --diff --json   # full preview schema with hunks
   u-boot add redis                    # exit 10 — not in catalogue
   u-boot add keycloak --with-deps     # auto-install missing deps`,
 		// slice-v1-cli-json-envelope-consolidation T2: Args-Fehler
@@ -95,11 +94,11 @@ Examples:
 	}
 
 	cmd.Flags().BoolVar(&flags.WithDeps, "with-deps", false,
-		"auto-install missing add-on dependencies (LH-FA-ADD-006) without prompting")
+		"auto-install missing add-on dependencies without prompting")
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
-		"preview the planned changes without writing files (LH-FA-CLI-007)")
+		"preview the planned changes without writing files")
 	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
-		"render a unified diff of the planned changes (LH-FA-CLI-008)")
+		"render a unified diff of the planned changes")
 
 	return cmd
 }
