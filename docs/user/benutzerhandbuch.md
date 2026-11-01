@@ -820,7 +820,31 @@ ein Ordner, den die Engine nicht sieht, ergibt Exit-Code 12.
 
 **Zugangsdaten.** Der Befehl reicht nur Variablen durch, auf die `devcontainer.json`
 mit `${localEnv:NAME}` verweist und die auf dem Host gesetzt sind, und zwar als Name,
-nie als Wert auf der Kommandozeile von `u-boot`. Bei der Form `remoteEnv` steht der Wert
+nie als Wert auf der Kommandozeile von `u-boot`.
+
+**Auflösung der Token-Quelle (Opt-in).** Mit dem Sandbox-Profil und dem Schalter
+`devcontainer.sandbox.hostGitToken: true` (setzen Sie ihn mit `u-boot config set devcontainer.sandbox.hostGitToken true`)
+ermittelt der Befehl den Git-Token auf Ihrem Rechner, wenn die Variable `GIT_TOKEN` dort
+nicht gesetzt ist: Er ruft `gh auth token` auf (Ihr `gh` muss installiert und angemeldet
+sein; ein Fehler wie „nicht angemeldet“ gilt wie fehlend). Der Wert geht wie eine
+Host-Variable in den Container: unter dem Namen auf die Kommandozeile, der Wert in die
+Umgebung des `docker`-Client-Prozesses; er steht in keiner Datei, keinem Image, keinem
+Volume und in keiner Ausgabe von `u-boot`. Der Befehl sagt Ihnen in einer Meldung, welche
+Quelle er benutzt hat („the environment variable GIT_TOKEN of the host“ oder „the gh
+session of the host (gh auth token)“), nie den Wert; findet er keine Quelle, weist er
+ohne Abbruch darauf hin. Ohne Sandbox-Profil, ohne den Schalter oder ohne Verweis löst
+der Befehl nichts auf. Nur die Befehle `devcontainer up` und `devcontainer shell` befragen
+`gh` und `git` auf Ihrem Rechner; `u-boot doctor` liest nur Projektdateien und sieht die
+Quellen nicht. Mehr dazu: der Wert, den `u-boot` einmal ermittelt hat, gilt für den
+Start und für die Sitzung desselben Aufrufs.
+
+**Identität.** Nach dem Start setzt der Befehl `user.name` und `user.email` im Container
+aus Ihrer Git-Konfiguration des Projektordners (`git config` auf dem Host liest den
+wirksamen Wert, local vor global vor system), sofern der Host Werte liefert; ein
+bereits im Container gesetzter Wert bleibt; ein leerer Wert zählt wie fehlend. Bei
+fehlenden Werten oder ohne `git` auf dem Host weist der Befehl ohne Abbruch darauf hin.
+Der Schritt ist best effort: Ein Container ohne `git` warnt, der Start gelingt
+trotzdem. Bei der Form `remoteEnv` steht der Wert
 weder in einem Image noch in den Labels des Devcontainers, in einer Datei im Projektordner
 oder in den Volumes des Sandbox-Profils. Zwei Grenzen gehören dazu: `remoteEnv` ist
 die für Zugangsdaten vorgesehene Form. Bei `containerEnv` steht der aufgelöste Wert in den
@@ -2257,7 +2281,14 @@ erzeugten Datei:
 
 - `devcontainer.json` enthält nur die Referenz
   `"GIT_TOKEN": "${localEnv:GIT_TOKEN}"`. Setzen Sie `GIT_TOKEN` in der
-  Host-Umgebung, bevor Sie den Container starten. Mit dem Feature `claude-code`
+  Host-Umgebung, bevor Sie den Container starten — oder lassen Sie das dem
+  Opt-in-Schalter über: Mit `devcontainer.sandbox.hostGitToken: true` im
+  Sandbox-Profil ermittelt `u-boot` den Token auf dem Host (erst die Variable,
+  dann `gh auth token`, wenn `gh` installiert und angemeldet ist), nennt die
+  benutzte Quelle und nie den Wert, und weist ohne Abbruch darauf hin, wenn
+  keine Quelle gefunden wird. Die Befragung Ihres `gh` und `git` ist auf
+  `devcontainer up` und `devcontainer shell` begrenzt; `u-boot doctor` sieht
+  sie nicht. Mit dem Feature `claude-code`
   kommen `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` und
   `"CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}"` hinzu, mit `gh` und `glab`
   `"GH_TOKEN": "${localEnv:GH_TOKEN}"` und `"GITLAB_TOKEN": "${localEnv:GITLAB_TOKEN}"`
@@ -2265,6 +2296,10 @@ erzeugten Datei:
   unverändert. Die Features `ollama` und `ollama-host` ergänzen keine Variable.
 - Ein Credential-Helper im Image liefert `$GIT_TOKEN` an `git` (nur für
   `https`-Remotes; bei `ssh` gibt es keinen Schlüssel im Container).
+- Die Git-Identität im Container: Nach dem Start setzt `u-boot` `user.name`
+  und `user.email` im Container aus Ihrer `git config` des Projektordners (beide
+  Profile); ein im Container bereits gesetzter Wert bleibt. Fehlen die Werte
+  oder `git` auf dem Host, weist der Befehl ohne Abbruch darauf hin.
 - Starten Sie den Container mit `u-boot devcontainer up`, reicht der Befehl nur den Namen
   der Variable durch; die Grenzen dieses Wegs (Metadaten bei `containerEnv`, Kommandozeile
   im Hilfs-Container während eines Lebenszyklus-Befehls) stehen in Abschnitt 4.9. In einer
@@ -2272,7 +2307,8 @@ erzeugten Datei:
   ist dort nicht gesetzt; geben Sie die Variable mit `docker exec -e GIT_TOKEN` mit (Abschnitt
   4.9, „Im Container arbeiten“). Im Sandbox-Profil öffnet `u-boot devcontainer shell` die
   Shell mit `GIT_TOKEN`, den Variablen des Agenten (Schlüssel und Token) und den Token-Variablen von `gh` und
-  `glab`, soweit sie auf dem Host gesetzt sind; im Standardprofil gibt `shell` nur die
+  `glab`, soweit sie auf dem Host gesetzt sind oder der Befehl sie mit der
+  Auflösung ermittelt hat (siehe oben, Opt-in-Schalter); im Standardprofil gibt `shell` nur die
   Variablen weiter, auf die die `devcontainer.json` verweist (siehe
   [Forge-CLIs](#forge-clis-optional)).
 - Empfohlen: **kurzlebige, auf das Repository begrenzte Tokens**, nie ein
