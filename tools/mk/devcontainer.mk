@@ -17,14 +17,14 @@ endef
 
 .PHONY: dev-up dev-down dev-shell
 
-dev-up: ## Devcontainer starten (RECREATE=1 legt ihn neu an)
+dev-up: ## Devcontainer starten (RECREATE=1 legt ihn neu an, INSTANCE=<name> waehlt eine Instanz)
 	$(call dev_require,dev-up)
-	$(U_BOOT) devcontainer up $(if $(RECREATE),--recreate)
+	$(U_BOOT) devcontainer up $(if $(RECREATE),--recreate) $(if $(INSTANCE),--instance $(INSTANCE))
 
-dev-down: ## Devcontainer stoppen (er bleibt bestehen)
+dev-down: ## Devcontainer stoppen (er bleibt bestehen; INSTANCE=<name> waehlt eine Instanz)
 	$(call dev_require,dev-down)
-	$(U_BOOT) devcontainer down
+	$(U_BOOT) devcontainer down $(if $(INSTANCE),--instance $(INSTANCE))
 
-dev-shell: ## Devcontainer starten und eine Shell darin oeffnen
+dev-shell: ## Devcontainer starten und eine Shell darin oeffnen (INSTANCE=<name> waehlt eine Instanz)
 	$(call dev_require,dev-shell)
-	$(U_BOOT) devcontainer shell
+	$(U_BOOT) devcontainer shell $(if $(INSTANCE),--instance $(INSTANCE))
