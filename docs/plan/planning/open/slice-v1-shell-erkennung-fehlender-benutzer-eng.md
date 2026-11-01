@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Unterabschnitt `shell`, Liste der erkannten Meldungen mit Grenze (e), Zeilen 842 bis 844 am 2026-10-22 gelesen; Spalte `0` der Tabelle der Exit-Codes, Zeile 815), je nach Weg das Lastenheft ([`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)). Der Verweis zeigt aufwärts: Lastenheft und Spezifikation nennen diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-22.
 
@@ -88,7 +88,10 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt, mit der St
 | `internal/adapter/driven/docker/devcontainer_shell_docker_test.go` | update (Weg A, prüfen) | `TestShell_Docker_B18_SessionDoesNotBegin` pinnt den Fall des Clients auf zwei Engines; ob er die Trennung braucht, ist nicht gelesen |
 | `spec/spezifikation.md` | update (Wege A und B) | [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes): Zeilen 842 bis 844 und Zeile 815 (Spalte `0`); nach dem Code, mit Beleg-Tabelle |
 | `spec/lastenheft.md` | update (Weg B), sonst **unverändert** | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) Zeile 494; Wortlaut-Freigabe des Projektinhabers vor dem Start |
-| diese Datei, `docs/plan/planning/open/README.md` | update | Zeile dieses Slice; Moves per `make slice-mv` |
+| `internal/adapter/driven/docker/devcontainer_launcher_test.go` | update (Weg A) | Skript `fakeDockerScript`: die Flags `user-gone-late` und `probe-late-not-running` antworten der Probe nach der Sitzung |
+| `CHANGELOG.md`, `docs/maintainer/zusagen-und-messstaende.md` | update (Weg A) | Eintrag unter `[Unreleased]`; Stand der unbelegten Beobachtung zur Zeile der Sitzung |
+| `docs/user/benutzerhandbuch.md` | **unverändert** | Zeile 863 (*Ende*: „endet der Befehl mit Exit-Code 0, was immer der Exit-Status der Shell war“) sagt `0` ohne Ausnahme, gelesen; die Datei heißt `benutzerhandbuch.md`, nicht `-standard` |
+| diese Datei (`Verantwortlich:`) | update | Verantwortlicher gesetzt; der Move und `open/README.md` folgen beim Zusammenführen |
 | `docs/reviews/`, `docs/plan/planning/observations/` | neu / update | Reports und Evidence |
 
 ## 4. Trigger
