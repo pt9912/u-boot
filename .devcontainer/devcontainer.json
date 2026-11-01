@@ -18,6 +18,7 @@
   "remoteEnv": {
     "GIT_TOKEN": "${localEnv:GIT_TOKEN}",
     "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+    "CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}",
     "GH_TOKEN": "${localEnv:GH_TOKEN}"
   },
   "features": {

@@ -141,7 +141,7 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
 			Message: fmt.Sprintf("possible plaintext credential in: %s (LH-FA-DEV-009).", strings.Join(found, ", ")),
 			Hint: "Remove it from the file, revoke the credential, and pass it at runtime: a short-lived repository-scoped token via $GIT_TOKEN, " +
-				"an agent key or forge-CLI token via its host environment variable (for example $ANTHROPIC_API_KEY, $GH_TOKEN, $GITLAB_TOKEN).",
+				"an agent key or forge-CLI token via its host environment variable (for example $ANTHROPIC_API_KEY, $CLAUDE_CODE_OAUTH_TOKEN, $GH_TOKEN, $GITLAB_TOKEN).",
 			SecurityRelaxation: true}
 	}
 	agentVars := agentCredentialEnv(cfg.Devcontainer)

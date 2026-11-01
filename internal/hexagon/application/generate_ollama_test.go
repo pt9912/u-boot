@@ -448,6 +448,9 @@ func TestGenerateDevcontainer_Ollama_EgressHostsAndTogetherWithClaudeCode(t *tes
 				if n := strings.Count(body, `"ANTHROPIC_API_KEY"`); n != 1 {
 					t.Errorf("credential reference appears %d times, want 1", n)
 				}
+				if n := strings.Count(body, `"CLAUDE_CODE_OAUTH_TOKEN"`); n != 1 {
+					t.Errorf("OAuth token reference appears %d times, want 1", n)
+				}
 			}
 			// Egress adds only the egress script to the start chain; ollama starts nothing.
 			if !strings.Contains(body, `"postStartCommand": "sudo sh /usr/local/bin/u-boot-egress-init"`) || strings.Contains(body, "ollama serve") {
