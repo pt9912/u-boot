@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-hilfetexte-ohne-kennungen`](../../../done/slice-v1-hilfetexte-ohne-kennungen.md)
+**Vorgang:** [`slice-v1-hilfetexte-ohne-kennungen`](../../../../done/slice-v1-hilfetexte-ohne-kennungen.md)
 **Fund:** Der Slice setzt die Entscheidung des Projektinhabers vom 2026-11-01 um („damit kann kein Benutzer etwas anfangen“): Hilfetexte, Meldungen, Warnzeile und die Kommentare der erzeugten Dateien tragen keine Anforderungs-, Spezifikations- und Slice-Kennungen mehr; dazu keine deutschen Wörter, keine Ankündigung, keine Chronik. Das Feld `code` der Diagnostics bleibt.
 
 **Beleg-Qualität:** gemessen. Zwei Wächter-Tests (`internal/adapter/driving/cli/help_identifiers_test.go` über den Befehlsbaum, `internal/hexagon/application/message_identifiers_test.go` über die Meldungs-Literale) färben bei vier Mutationen rot; `make gates` und die CI von Pull Request 4 (einschließlich `integration-docker`) sind grün. Grenze: Der Meldungs-Wächter sieht keine `:=`-Zuweisungen, keine über `%s` eingesetzten Kennungen und weder `cmd/uboot` noch `.tmpl`-Dateien.
