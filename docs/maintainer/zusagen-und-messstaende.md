@@ -1053,13 +1053,13 @@ Zusage bleiben in der Spezifikation.
     beides nicht, der Befehl endete dann mit `12` statt `0` (aus der Form abgeleitet, nicht gefahren).“ ist aus der Spec
     gestrichen. Er bleibt hier als **unbelegte Beobachtung**: Kein Test pinnt ihn (ein Einheitstest in
     `devcontainer_shell_test.go` prüft die Zeile eines anderen Benutzers, nicht den Fall innerhalb der Sitzung).
-    Stand nach `slice-v1-shell-erkennung-fehlender-benutzer-eng`: Die Zeile gilt nur dann als Fehler des Clients, wenn eine
-    erneute Probe den Benutzer als fehlend meldet; der Fall „die Sitzung schreibt die Zeile“ ist durch
-    `TestLauncher_Shell_SessionEndIsNoError` und `TestShell_Docker_B18_SessionDoesNotBegin` (Fall der Sitzung, die die Zeile
-    selbst schreibt) gepinnt. Ein `docker exec -u <Benutzer> <anderer Container>` gegen eine Engine 28.0.4 ist weiter nicht
-    gefahren. Auf der Engine 29.9.2 ist er gefahren
+    Stand nach `slice-v1-shell-erkennung-fehlender-benutzer-eng`: Ein `docker exec -u <Benutzer> <anderer Container>` gegen eine
+    Engine 28.0.4 ist nicht gefahren. Auf der Engine 29.9.2 ist er gefahren
     ([Messprotokoll](../messungen/slice-v1-shell-erkennung-fehlender-benutzer-eng/README.md)): Die Zeile hat dort das Präfix
-    `Error response from daemon: `, steht auf der Fehlerausgabe und endet mit Status 1.
+    `Error response from daemon: `, steht auf der Fehlerausgabe und endet mit Status 1. Die Spec führt den Fall jetzt als Grenze
+    der Erkennung (Lesung des Codes, kein gefahrener Lauf des Launchers); die Einstufung dieser Zeile pinnt der Fall „the user
+    does not exist after the probe“ in `TestLauncher_Shell_ClientErrorBeforeSessionIsRuntimeFailure`, der Fall der Sitzung, die
+    die Zeile selbst schreibt, ist durch keinen Test gepinnt.
 
 **Historie von `spec/spezifikation.md`: gestrichene Messaussagen im Wortlaut vor der Änderung** (Fundstelle: `git show
 HEAD:spec/spezifikation.md`, Tabellenzeilen 1474 bis 1477, alle vom 2026-10-19):
