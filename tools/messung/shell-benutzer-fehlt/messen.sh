@@ -178,7 +178,7 @@ echo "##    keine Beobachtung des Clients, nur das Muster für die Erkennung)"
 zelle F1 "Sitzung schreibt die Zeile auf die Standardausgabe und endet mit 126" \
   "docker exec -i -u root $C_SESSION bash -c 'echo \"unable to find user $USERNAME: no matching entries in passwd file\"; exit 126'"
 
-echo "## G. Die erneute Probe nach der Sitzung (userMissingNow): dieselbe Probe-Form wie A1/D1, einzeln"
+echo "## G. Die erneute Probe nach der Sitzung: dieselbe Probe-Form wie A1/D1, einzeln"
 zelle G1 "Probe des Benutzers der Sitzung (root, vorhanden) nach einer Sitzung" \
   "docker exec -u root -w / $C_SESSION bash -c true 2>&1; echo \"gemeinsamer Strom oben\""
 zelle G2 "Probe des fehlenden Benutzers, beide Ströme zusammen (CombinedOutput)" \

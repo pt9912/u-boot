@@ -78,7 +78,7 @@ Die Messung des Erzeugers findet die Zeile in der Sitzung auf keiner Engine: Gre
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-11-01 | Proposed durch den Architect; Weg A vom Projektinhaber gewählt, Umsetzung in den Commits `000ae5ca` und `2f09b5dd`; `Accepted` setzt der Projektinhaber |
-| 2026-11-01 | Deprecated: Messung auf Engine 29.9.2 (Zeile auf der Fehlerausgabe, Status 1), Projektinhaber nimmt den dritten Aufruf und diese ADR zurück | Messprotokoll, Slice zur Erkennung eines fehlenden Benutzers bei `shell` | Slice zur Erkennung eines fehlenden Benutzers bei `shell` |
+| 2026-11-01 | Deprecated: Messung auf Engine 29.9.2 (Zeile auf der Fehlerausgabe, Status 1), Projektinhaber nimmt den dritten Aufruf und diese ADR zurück | Messprotokoll, Slice zur Erkennung eines fehlenden Benutzers bei `shell` |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit
 `Supersedes ADR-0039`.
