@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+**Erkennung eines fehlenden Benutzers bei `devcontainer shell` enger fassen (ohne Welle-Datei: Folge-Punkt der Welle `welle-devcontainer-shell-und-zweites-up`; Weg A, Messung des Erzeugers gefahren)** — Slice: [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](slice-v1-shell-erkennung-fehlender-benutzer-eng.md) (in Arbeit).
 
 ## Nächste Wellen
 
