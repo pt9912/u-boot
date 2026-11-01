@@ -4,14 +4,14 @@
 
 **Review-Art:** Design (ADR im Status `Proposed` gegen Spec, Entscheidungslage, Messprotokoll und Code-Ist-Zustand)
 
-**Gegenstand:** uncommittete Änderung auf `78c5404a`: [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md) (neu), `docs/plan/adr/README.md` (Indexzeile), Plan-Tabelle von [`slice-v1-devcontainer-instanz-label`](../plan/planning/next/slice-v1-devcontainer-instanz-label.md) (`git diff HEAD`)
+**Gegenstand:** uncommittete Änderung auf `78c5404a`: [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md) (neu), `docs/plan/adr/README.md` (Indexzeile), Plan-Tabelle von [`slice-v1-devcontainer-instanz-label`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-label.md) (`git diff HEAD`)
 
 **Skill:** `.harness/skills/reviewer.md` @ `78c5404a`
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-31
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-devcontainer-instanz-label`](../plan/planning/next/slice-v1-devcontainer-instanz-label.md) (Plan-Tabelle, §3)
+- [`slice-v1-devcontainer-instanz-label`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-label.md) (Plan-Tabelle, §3)
 - [`ADR-0015`](../plan/adr/0015-sandbox-volumes-pro-instanz.md), [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md), [`ADR-0037`](../plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md) (Formvergleich), [`ADR-0013`](../plan/adr/0013-dokumentationsreferenzmodell.md)
 - [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Lastenheft 0.25.0), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 - Messprotokoll [`README.md`](../messungen/slice-v1-devcontainer-instanz-messung/README.md) samt Rohdaten, Closure-Notiz [`slice-v1-devcontainer-instanz-messung`](../plan/planning/done/slice-v1-devcontainer-instanz-messung.md) §7
