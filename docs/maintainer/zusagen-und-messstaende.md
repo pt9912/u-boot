@@ -1013,9 +1013,17 @@ Spezifikation umgesetzt (Wortlaut vorher und nachher am Ende des Abschnitts). Di
 Zusage bleiben in der Spezifikation.
 
 - **Zusage:** [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten).
-- **Fundstelle:** Die Aussagen zu Sitzungsende, Signalen, Art der Shell und den Engines 29.9.2 und 28.0.4 stammen aus dem
+- **Zusage-Menge der Engines (Entscheidung des Projektinhabers, 2026-11-01):** Zugesagt ist nur die Engine 29.9.2 mit dem
+  Client 29.9.2. Die Engine 28.0.4 ist nicht zugesagt; die Form „Zeile ohne Präfix auf der Standardausgabe, Status 126“
+  stammt aus einer früheren Messung ohne Protokoll unter `docs/messungen/`, die
+  [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../messungen/slice-v1-shell-erkennung-fehlender-benutzer-eng/README.md)
+  nicht bestätigen konnte (keine Engine 28.0.4 verfügbar). Die Erkennung dieser Form steht als Bestandscode im Launcher
+  (`userMissingOnStdout`), von Einheitstests mit Fake gepinnt. Liefert der GitHub-Runner weiter die Engine 28.0.4
+  (`slice-v1-devcontainer-shell-fundament`, V-16: im README zweier Runner-Images gelesen), wäre eine Nachmessung dort
+  möglich; sie ist nicht beschlossen und die Engine bleibt bis dahin nicht zugesagt.
+- **Fundstelle:** Die Aussagen zu Sitzungsende, Signalen und Art der Shell stammen aus dem
   Planungsdokument [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md)
-  (Docker 29.9.2, Basis-Image `devcontainers/base:debian`, Test unter `script`, Runner-Engine 28.0.4). Die Lebenszyklus-Aussage
+  (Docker 29.9.2, Basis-Image `devcontainers/base:debian`, Test unter `script`; die Runner-Engine 28.0.4 steht dort ebenfalls und gilt nicht als Zusage). Die Lebenszyklus-Aussage
   stammt aus dem Test `TestDevcontainerUp_Docker_AlreadyRunningLifecycleCounters`
   (`internal/e2e/devcontainer_start_docker_test.go`). **Für die Shell-Aussagen gibt es kein Messprotokoll unter
   `docs/messungen/`.** Das Protokoll [`slice-v1-devcontainer-instanz-messung`](../messungen/slice-v1-devcontainer-instanz-messung/README.md)
@@ -1030,7 +1038,10 @@ Zusage bleiben in der Spezifikation.
   `amd64` mit lokaler Engine (Docker 29.9.2), ein Lauf je Aufruf.“
 - **Wortlaut, Aufzählungspunkt „Grenzen der Erkennung“ (Ende des Punkts „Engine-Abhängigkeit“):**
   „Messbedingungen: zwei Engines (29.9.2 und 28.0.4), Client 29.9.2, Linux `amd64`, ein Lauf je Fall; andere Engine-Versionen
-  sind nicht zugesagt, und die Meldungen sind für den Client 29.9.2 gemessen.“
+  sind nicht zugesagt, und die Meldungen sind für den Client 29.9.2 gemessen.“ Stand seit 2026-11-01: In der Spezifikation
+  steht „Zugesagt ist die Engine 29.9.2 mit dem Client 29.9.2 unter Linux `amd64`“; die Engine 28.0.4 steht unter „nicht zugesagt“.
+  Ungepinnt bleibt der Fall „die Sitzung schreibt die Zeile selbst“ (Lesung des Codes, kein Test), er ist in der Spezifikation als
+  solche gekennzeichnet.
 - **Wortlaut, Aufzählungspunkt „Grenzen der Erkennung“ (Zeile zum fehlenden Benutzer auf der Engine 28.0.4):**
   „(aus der Form abgeleitet, nicht gefahren)“ — nach der Aussage, der Befehl endete dann mit `12` statt `0`.
 - **Umgesetzt nach Entscheidung des Projektinhabers (2026-10-31).** Die drei Stellen stehen so in der Spec; der Wortlaut
