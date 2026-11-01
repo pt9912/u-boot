@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Verifikation gegen Plan, DoD, Entscheidungen und Sensors (Modul 11: „Bauen wir es richtig?“). Kein Review des Diffs und keine Validierung.
 
-**Gegenstand:** Slice [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-test-leicht.md) im Hauptbaum (Weg A, Entscheidungen des Projektinhabers 2026-11-01), HEAD `172387b5` (Fix-Runde Review `32cecdf6` enthalten). Der Slice liegt in `in-progress/`. Diff für diesen Slice: `73b42e21`, `54c001db`, `32cecdf6` samt den Move-Commits seit Basis `c370280c`; der Diff dieser Spanne trägt auch Dateien des geschlossenen Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../plan/planning/done/slice-v1-shell-erkennung-fehlender-benutzer-eng.md), die hier nicht bewertet werden.
+**Gegenstand:** Slice [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/done/slice-v1-devcontainer-instanz-test-leicht.md) im Hauptbaum (Weg A, Entscheidungen des Projektinhabers 2026-11-01), HEAD `172387b5` (Fix-Runde Review `32cecdf6` enthalten). Der Slice liegt in `in-progress/`. Diff für diesen Slice: `73b42e21`, `54c001db`, `32cecdf6` samt den Move-Commits seit Basis `c370280c`; der Diff dieser Spanne trägt auch Dateien des geschlossenen Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../plan/planning/done/slice-v1-shell-erkennung-fehlender-benutzer-eng.md), die hier nicht bewertet werden.
 
 **Skill:** `.harness/skills/verifier.md` existiert nicht; die Rolle folgt `harness/roles.md` und `harness/verification.md`.
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-11-01
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-test-leicht.md) (§1 entschiedene Fragen, §2 DoD, §3 Plan, §4 Trigger, §5 Closure-Trigger, §6 Risiken); Entwurf [`slice-cr-devcontainer-instanz-zusage-getestet`](../plan/planning/open/slice-cr-devcontainer-instanz-zusage-getestet.md)
+- [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/done/slice-v1-devcontainer-instanz-test-leicht.md) (§1 entschiedene Fragen, §2 DoD, §3 Plan, §4 Trigger, §5 Closure-Trigger, §6 Risiken); Entwurf [`slice-cr-devcontainer-instanz-zusage-getestet`](../plan/planning/open/slice-cr-devcontainer-instanz-zusage-getestet.md)
 - [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md)
 - [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Absatz Instanzen)
 - [Review-Report](2026-11-01-slice-v1-devcontainer-instanz-test-leicht.md) (F-1 bis F-8)
@@ -98,7 +98,7 @@ Diff für diesen Slice (ohne die Dateien des anderen Slice):
 | `docs/plan/planning/open/README.md` | update | deckt sich (Zeile des Slice entfernt) |
 | `docs/plan/planning/in-progress/roadmap.md` | update | deckt sich (Zeiger „Leichter Isolationstest … (in Arbeit)“; F-3 des Reviews: „anderer Lauf als der vorige“ ist entfernt) |
 | [`slice-cr-devcontainer-instanz-zusage-getestet`](../plan/planning/open/slice-cr-devcontainer-instanz-zusage-getestet.md) | update | deckt sich (Plan-Zeile ergänzt, F-2) |
-| [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-test-leicht.md) | (der Slice selbst) | Änderungen der Fix-Runde |
+| [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/done/slice-v1-devcontainer-instanz-test-leicht.md) | (der Slice selbst) | Änderungen der Fix-Runde |
 | `docs/plan/planning/observations/BEO-DOK/{plan-aussage-ueber-code,spec-bedingung-ohne-code-entsprechung,zusage-weiter-als-messung}/state.md` | nicht geführt | Commits `1fe883f7` und `172387b5` tragen den Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../plan/planning/done/slice-v1-shell-erkennung-fehlender-benutzer-eng.md), nicht diesen Slice; kein Befund |
 | [`slice-v1-devcontainer-instanz-messung`](../messungen/slice-v1-devcontainer-instanz-messung/README.md) | unverändert | im Diff nicht enthalten, deckt sich |
 | `spec/lastenheft.md`, `docs/user/` (Instanz-Abschnitt), `README*.md`, `.github/workflows/integration.yml`, `Makefile` | unverändert | im Diff nicht enthalten (für `docs/user/` siehe DoD 6), deckt sich |
@@ -165,7 +165,7 @@ Gerade (4) und die Hostname-Annahme von (3) sind erst durch einen Lauf belegt.
 ## Verification Evidence (Schema `harness/verification.md`)
 
 Scope:
-- Slice: [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-test-leicht.md)
+- Slice: [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/done/slice-v1-devcontainer-instanz-test-leicht.md)
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md)
 - Artefakte: `internal/e2e/devcontainer_instance_docker_test.go`, `internal/e2e/devcontainer_start_docker_test.go`, `docs/maintainer/zusagen-und-messstaende.md`, `CHANGELOG.md`, Entwurf zur Zusage, Roadmap-Zeiger, `open/README.md`
 

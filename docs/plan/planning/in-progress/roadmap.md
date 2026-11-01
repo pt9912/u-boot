@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**Leichter Isolationstest für Instanzen statt des Vier-Instanzen-Tests (ohne Welle-Datei; Entscheidung des Projektinhabers, 2026-11-01)** — Slice: [`slice-v1-devcontainer-instanz-test-leicht`](slice-v1-devcontainer-instanz-test-leicht.md) (in Arbeit).
+**Leichter Isolationstest für Instanzen statt des Vier-Instanzen-Tests (ohne Welle-Datei; Entscheidung des Projektinhabers, 2026-11-01)** — Slice: [`slice-v1-devcontainer-instanz-test-leicht`](../done/slice-v1-devcontainer-instanz-test-leicht.md) (in Arbeit).
 
 ## Nächste Wellen
 

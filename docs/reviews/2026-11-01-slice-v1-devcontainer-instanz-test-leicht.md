@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Code-Review gegen Plan, Entscheidungen und Konventionen (Weg A).
 
-**Gegenstand:** Commits `73b42e21` und `54c001db` samt den vier Move- und Nachzug-Commits davor (`622a626b`, `218b68ee`, `cf3e2ad1`, `456ce5fd`), Basis `c370280c`. Slice [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-test-leicht.md). Sieben Dateien, 91 Einfügungen, 225 Löschungen (`git diff --stat c370280c..HEAD`).
+**Gegenstand:** Commits `73b42e21` und `54c001db` samt den vier Move- und Nachzug-Commits davor (`622a626b`, `218b68ee`, `cf3e2ad1`, `456ce5fd`), Basis `c370280c`. Slice [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/done/slice-v1-devcontainer-instanz-test-leicht.md). Sieben Dateien, 91 Einfügungen, 225 Löschungen (`git diff --stat c370280c..HEAD`).
 
 **Skill:** `.harness/skills/reviewer.md` @ `54c001db`
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-11-01
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- Slice-Plan [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/in-progress/slice-v1-devcontainer-instanz-test-leicht.md) (§1 entschiedene Fragen, §2 DoD, §3 Plan, §6 Risiken); Entwurf [`slice-cr-devcontainer-instanz-zusage-getestet`](../plan/planning/open/slice-cr-devcontainer-instanz-zusage-getestet.md)
+- Slice-Plan [`slice-v1-devcontainer-instanz-test-leicht`](../plan/planning/done/slice-v1-devcontainer-instanz-test-leicht.md) (§1 entschiedene Fragen, §2 DoD, §3 Plan, §6 Risiken); Entwurf [`slice-cr-devcontainer-instanz-zusage-getestet`](../plan/planning/open/slice-cr-devcontainer-instanz-zusage-getestet.md)
 - [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md)
 - [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Absatz Instanzen)
 - Messung [`slice-v1-devcontainer-instanz-messung`](../messungen/slice-v1-devcontainer-instanz-messung/README.md)

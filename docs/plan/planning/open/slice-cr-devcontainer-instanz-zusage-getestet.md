@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Entwurf; Priorisierung und Einordnung beim Projektinhaber. Zweiter von zwei Entwürfen: ihm geht [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md) voraus (Wege entschieden, Entscheidung Projektinhaber 2026-11-01: zwei Instanzen, Workspace-Isolation, kein Messskript). Vorbild des Ablaufs: [`slice-cr-devcontainer-instanz`](../done/slice-cr-devcontainer-instanz.md).
+**Welle:** ohne Welle. Entwurf; Priorisierung und Einordnung beim Projektinhaber. Zweiter von zwei Entwürfen: ihm geht [`slice-v1-devcontainer-instanz-test-leicht`](../done/slice-v1-devcontainer-instanz-test-leicht.md) voraus (Wege entschieden, Entscheidung Projektinhaber 2026-11-01: zwei Instanzen, Workspace-Isolation, kein Messskript). Vorbild des Ablaufs: [`slice-cr-devcontainer-instanz`](../done/slice-cr-devcontainer-instanz.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Änderung des Absatzes zu den Instanzen, Zeile 504).
 Anlass: Entscheidung des Projektinhabers, 2026-11-01: Der Docker-Test mit vier Instanzen ist nicht praxistauglich und entfällt ersatzlos (kein Messskript); „Workspace-Isolation bei zwei Instanzen reicht“. Die Suite belegt danach weniger, als der Absatz zusagt.
@@ -35,7 +35,7 @@ Der Absatz steht in `spec/lastenheft.md` Zeile 504 (Lastenheft `0.25.0`, Zeile 9
 
 Belegt war die Zusage bisher durch die Messung vom 2026-10-31 (`docs/messungen/slice-v1-devcontainer-instanz-messung/`: zwei, drei und vier Instanzen, Stufen 2 bis 4) und den Docker-Test mit vier Instanzen, der ersatzlos entfernt ist (Entscheidung Projektinhaber 2026-11-01).
 
-Seit [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md) belegt die Suite (Weg A, gelesen in `internal/e2e/devcontainer_instance_docker_test.go`, `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated`): Sandbox-Profil mit Standard-Einstellungen, Container ohne Instanz plus **zwei** Instanzen, ein Workspace-Volume je Container, Marker-Isolation; der Test ist noch nicht in der CI gelaufen. **Nicht** belegt sind Docker-Speicher- und Modell-Volumes (nur Text-Pins der Mounts), die Grenze von einer CPU und 3 GiB sowie drei und vier Instanzen. Der Absatz geht also in vier Merkmalen (`nestedRuntime: docker` und `ollama`, Grenze, drei und vier Instanzen) über die Suite hinaus.
+Seit [`slice-v1-devcontainer-instanz-test-leicht`](../done/slice-v1-devcontainer-instanz-test-leicht.md) belegt die Suite (Weg A, gelesen in `internal/e2e/devcontainer_instance_docker_test.go`, `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated`): Sandbox-Profil mit Standard-Einstellungen, Container ohne Instanz plus **zwei** Instanzen, ein Workspace-Volume je Container, Marker-Isolation; der Test ist noch nicht in der CI gelaufen. **Nicht** belegt sind Docker-Speicher- und Modell-Volumes (nur Text-Pins der Mounts), die Grenze von einer CPU und 3 GiB sowie drei und vier Instanzen. Der Absatz geht also in vier Merkmalen (`nestedRuntime: docker` und `ollama`, Grenze, drei und vier Instanzen) über die Suite hinaus.
 
 ### Wortlaut-Vorschläge (zur Freigabe; NICHT im Lastenheft geschrieben)
 
@@ -70,7 +70,7 @@ Gegen die Messung gelesen: „zwei“ ist gemessen (Stufe 2, zwei Läufe) und vo
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Der Umbau der Tests** — [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md); der CR beschreibt das, was die Suite danach belegt.
+- **Der Umbau der Tests** — [`slice-v1-devcontainer-instanz-test-leicht`](../done/slice-v1-devcontainer-instanz-test-leicht.md); der CR beschreibt das, was die Suite danach belegt.
 - **Eine neue Messung** — der CR sagt nur zu, was gemessen oder von der Suite belegt ist; neue Messungen sind eigene Vorgänge.
 - **Änderung von Produktcode oder von [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)** — der CR ändert keine Verhaltenszusage, er nimmt eine zurück; kein Verhalten ändert sich.
 - **Eine Änderung der Bauart-Aussage (Satz 1)**, solange Variante 1 gilt — sie bleibt, weil die Mounts als Text gepinnt sind.
@@ -120,7 +120,7 @@ Aussagen-Berührung steht hier gar nicht.
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-instanz-test-leicht`](../in-progress/slice-v1-devcontainer-instanz-test-leicht.md) liegt in `done/` (die Wege 1 bis 3 stehen fest und der Lauf der CI belegt, was die Suite belegt); der Projektinhaber hat Variante und Wortlaut freigegeben (Vermerk in §7); WIP-Limit 1.
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-instanz-test-leicht`](../done/slice-v1-devcontainer-instanz-test-leicht.md) liegt in `done/` (die Wege 1 bis 3 stehen fest und der Lauf der CI belegt, was die Suite belegt); der Projektinhaber hat Variante und Wortlaut freigegeben (Vermerk in §7); WIP-Limit 1.
 
 **Rückführungen — vorab benannt:**
 
