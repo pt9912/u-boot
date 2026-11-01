@@ -36,6 +36,14 @@ func sandboxCoercers() map[domain.ConfigPathKind]func(string) (any, string, erro
 			repo := strings.TrimSpace(raw)
 			return str(repo, validateCloneURL(repo))
 		},
+		domain.ConfigDevcontainerResourcesMemory: func(raw string) (any, string, error) {
+			v, err := domain.NewMemoryLimit(raw)
+			return str(string(v), err)
+		},
+		domain.ConfigDevcontainerResourcesCPUs: func(raw string) (any, string, error) {
+			v, err := domain.NewCPULimit(raw)
+			return str(string(v), err)
+		},
 		domain.ConfigDevcontainerSandboxEgressEnabled: func(raw string) (any, string, error) {
 			b, err := strconv.ParseBool(raw)
 			if err != nil {
@@ -70,6 +78,8 @@ func sandboxYAMLPaths() map[domain.ConfigPathKind][]string {
 		domain.ConfigDevcontainerSandboxOnUnavailable: {"devcontainer", "sandbox", "onUnavailable"},
 		domain.ConfigDevcontainerSandboxRepository:    {"devcontainer", "sandbox", "repository"},
 		domain.ConfigDevcontainerSandboxEgressEnabled: {"devcontainer", "sandbox", "egress", "enabled"},
+		domain.ConfigDevcontainerResourcesMemory:      {"devcontainer", "resources", "memory"},
+		domain.ConfigDevcontainerResourcesCPUs:        {"devcontainer", "resources", "cpus"},
 	}
 }
 
@@ -95,6 +105,10 @@ func sandboxConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, bo
 	if sb.Egress != nil {
 		eg = *sb.Egress
 	}
+	var res ubootYAMLDevcontainerResources
+	if dc.Resources != nil {
+		res = *dc.Resources
+	}
 	uid, enabled := "", ""
 	if dc.User != nil && dc.User.UID != nil {
 		uid = strconv.Itoa(*dc.User.UID)
@@ -110,6 +124,8 @@ func sandboxConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, bo
 		domain.ConfigDevcontainerSandboxRepository:    sb.Repository,
 		domain.ConfigDevcontainerSandboxEgressEnabled: enabled,
 		domain.ConfigDevcontainerSandboxEgressAllow:   strings.Join(eg.Allow, ","),
+		domain.ConfigDevcontainerResourcesMemory:      res.Memory,
+		domain.ConfigDevcontainerResourcesCPUs:        res.CPUs,
 	}
 	v, ok := values[path.Kind]
 	return v, ok

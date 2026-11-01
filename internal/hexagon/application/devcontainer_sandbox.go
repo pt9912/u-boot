@@ -43,6 +43,9 @@ func validateDevcontainerSandbox(dc *ubootYAMLDevcontainer) error {
 			return err
 		}
 	}
+	if err := validateDevcontainerResources(dc.Resources); err != nil {
+		return err
+	}
 	if dc.Sandbox == nil {
 		return nil
 	}
@@ -64,6 +67,43 @@ func validateDevcontainerSandbox(dc *ubootYAMLDevcontainer) error {
 	return validateEgressHosts(dc.Sandbox.Egress)
 }
 
+// validateDevcontainerResources checks `devcontainer.resources.*`
+// (LH-FA-CONF-002). Empty values are valid (unset). Errors wrap
+// [domain.ErrInvalidResourceLimit]; the load paths wrap them in their own
+// sentinel, which carries exit 10.
+func validateDevcontainerResources(res *ubootYAMLDevcontainerResources) error {
+	if res == nil {
+		return nil
+	}
+	if res.Memory != "" {
+		if _, err := domain.NewMemoryLimit(res.Memory); err != nil {
+			return err
+		}
+	}
+	if res.CPUs != "" {
+		if _, err := domain.NewCPULimit(res.CPUs); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// resourceRunArgs is the `runArgs` part of `devcontainer.resources.*`:
+// `--memory=<v>` before `--cpus=<v>`, nothing for an unset value.
+func resourceRunArgs(dc *ubootYAMLDevcontainer) []string {
+	if dc == nil || dc.Resources == nil {
+		return nil
+	}
+	var args []string
+	if dc.Resources.Memory != "" {
+		args = append(args, "--memory="+dc.Resources.Memory)
+	}
+	if dc.Resources.CPUs != "" {
+		args = append(args, "--cpus="+dc.Resources.CPUs)
+	}
+	return args
+}
+
 // sandboxWorkspaceRoot is the parent directory of the sandbox
 // workspace mount inside the container (LH-FA-DEV-006).
 const sandboxWorkspaceRoot = "/workspaces"
@@ -83,9 +123,10 @@ func profileIsSandbox(dc *ubootYAMLDevcontainer) bool {
 // `devcontainer:` sub-tree (may be nil) and the resolved sandbox
 // state. UID stays 0 (= emit nothing) for the default 1000 so the
 // pre-0.3.0 output remains byte-identical (LH-FA-DEV-004). `RunArgs` is empty
-// in the default profile unless the `ollama-host` feature is active; in the
-// sandbox profile the container option of that feature follows the options
-// of `nestedRuntime` and of the egress restriction.
+// in the default profile unless `devcontainer.resources.*` is set or the
+// `ollama-host` feature is active; in both profiles the resource options
+// precede the container option of that feature, and in the sandbox profile
+// they follow the options of `nestedRuntime` and of the egress restriction.
 func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bool, cloneURL string) templateData {
 	data := templateData{Name: name}
 	if dc != nil && dc.User != nil && dc.User.UID != nil && *dc.User.UID != domain.DefaultContainerUID {
@@ -94,7 +135,7 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	data.Gh = dockerfileBlockFeatureActive(dc, featureGh)
 	data.Glab = dockerfileBlockFeatureActive(dc, featureGlab)
 	if !sandbox {
-		data.RunArgs = hostGatewayRunArgs(dc)
+		data.RunArgs = append(resourceRunArgs(dc), hostGatewayRunArgs(dc)...)
 		return data
 	}
 	data.Sandbox = true
@@ -129,6 +170,7 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 		data.RunArgs = append(data.RunArgs, egressRelaxation())
 		postStart = append([]string{"sudo sh /usr/local/bin/u-boot-egress-init"}, postStart...)
 	}
+	data.RunArgs = append(data.RunArgs, resourceRunArgs(dc)...)
 	data.RunArgs = append(data.RunArgs, hostGatewayRunArgs(dc)...)
 	data.PostStart = strings.Join(postStart, " && ")
 	data.PostCreate = composePostCreate(postCreate, cloneURL)

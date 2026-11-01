@@ -476,7 +476,10 @@ func isConfigValidationError(err error) bool {
 		// Lastenheft 0.3.0 (LH-FA-DEV-004/-006/-007): a business error of
 		// the sandbox/UID settings (a value outside its set, or a request
 		// the sandbox profile rejects) → exit 10.
-		errors.Is(err, domain.ErrInvalidSandboxSetting)
+		errors.Is(err, domain.ErrInvalidSandboxSetting) ||
+		// LH-FA-CONF-002: a value of devcontainer.resources.* outside its
+		// character set → exit 10.
+		errors.Is(err, domain.ErrInvalidResourceLimit)
 }
 
 // isFilesystemError returns true for the LH-FA-CLI-006 code-14

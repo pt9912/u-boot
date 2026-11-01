@@ -1,0 +1,152 @@
+# Datum: 2026-11-01T10:37:49Z
+# Host: Linux x86_64
+# Engine: 29.9.2
+=== 6 Grammatik --memory
+memory=[3g] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[512m] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[512M] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[4G] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[64k] exit=125 msg: docker: Error response from daemon: Minimum memory limit allowed is 6MB
+
+Run 'docker run --help' for more information
+memory=[1024b] exit=125 msg: docker: Error response from daemon: Minimum memory limit allowed is 6MB
+
+Run 'docker run --help' for more information
+memory=[1048576] exit=125 msg: docker: Error response from daemon: Minimum memory limit allowed is 6MB
+
+Run 'docker run --help' for more information
+memory=[0] exit=0 
+memory=[-1g] exit=125 msg: invalid argument "-1g" for "-m, --memory" flag: invalid size: '-1g'
+
+Usage:  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run 'docker run --help' for more information
+memory=[1.5g] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[4t] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[3gb] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[3 g] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[6m] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+memory=[5m] exit=125 msg: docker: Error response from daemon: Minimum memory limit allowed is 6MB
+
+Run 'docker run --help' for more information
+memory=[4m] exit=125 msg: docker: Error response from daemon: Minimum memory limit allowed is 6MB
+
+Run 'docker run --help' for more information
+memory=[1g1] exit=125 msg: invalid argument "1g1" for "-m, --memory" flag: strconv.ParseFloat: parsing "1g1": invalid syntax
+
+Usage:  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run 'docker run --help' for more information
+=== 6 Grammatik --cpus
+cpus=[2] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+cpus=[1.5] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+cpus=[0.5] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+cpus=[0.01] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+cpus=[0.001] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+cpus=[0] exit=0 
+cpus=[-1] exit=125 msg: docker: Error response from daemon: range of CPUs is from 0.01 to 8.00, as there are only 8 CPUs available
+
+Run 'docker run --help' for more information
+cpus=[.5] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+cpus=[2.] exit=125 msg: docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+cpus=[1e1] exit=125 msg: docker: Error response from daemon: range of CPUs is from 0.01 to 8.00, as there are only 8 CPUs available
+
+Run 'docker run --help' for more information
+cpus=[2x] exit=125 msg: invalid argument "2x" for "--cpus" flag: failed to parse 2x as a rational number
+
+Usage:  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run 'docker run --help' for more information
+cpus=[ 2] exit=125 msg: invalid argument " 2" for "--cpus" flag: failed to parse  2 as a rational number
+
+Usage:  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run 'docker run --help' for more information
+cpus=[1,5] exit=125 msg: invalid argument "1,5" for "--cpus" flag: failed to parse 1,5 as a rational number
+
+Usage:  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run 'docker run --help' for more information
+cpus=[9999] exit=125 msg: docker: Error response from daemon: range of CPUs is from 0.01 to 8.00, as there are only 8 CPUs available
+
+Run 'docker run --help' for more information
+=== 1 Lauf 1 priv=[]
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+=== 1 Lauf 1 priv=[--privileged]
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+=== 1 Lauf 2 priv=[]
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+=== 1 Lauf 2 priv=[--privileged]
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+=== 2 Lauf 1 verschachtelter Docker (dind, --privileged, --memory=1g --cpus=1)
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+Error response from daemon: container 358711a4c075500f3f5325f407e4013058774c48dc0dfe8bc96c7d986c962afa is not running
+pull im inneren fehlgeschlagen
+innen ohne eigene Grenze:
+Error response from daemon: container 358711a4c075500f3f5325f407e4013058774c48dc0dfe8bc96c7d986c962afa is not running
+innen mit --memory=2g (größer als aussen):
+Error response from daemon: container 358711a4c075500f3f5325f407e4013058774c48dc0dfe8bc96c7d986c962afa is not running
+=== 2 Lauf 2 verschachtelter Docker (dind, --privileged, --memory=1g --cpus=1)
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+Error response from daemon: container 952848e6fd04e24a3f3bdc590bd1a69fd9ebfffee82206ca2ec5f27b2db81932 is not running
+pull im inneren fehlgeschlagen
+innen ohne eigene Grenze:
+Error response from daemon: container 952848e6fd04e24a3f3bdc590bd1a69fd9ebfffee82206ca2ec5f27b2db81932 is not running
+innen mit --memory=2g (größer als aussen):
+Error response from daemon: container 952848e6fd04e24a3f3bdc590bd1a69fd9ebfffee82206ca2ec5f27b2db81932 is not running
+=== 4 Lauf 1 Prozess über dem Limit (--memory=32m)
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+128
+exit=128 oomkilled=false
+=== 4 Lauf 2 Prozess über dem Limit (--memory=32m)
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode
+
+Run 'docker run --help' for more information
+128
+exit=128 oomkilled=false

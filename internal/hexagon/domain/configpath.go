@@ -105,6 +105,16 @@ const (
 	// writes append host names (comma-separated) through the
 	// list-path route in [application.ConfigService].
 	ConfigDevcontainerSandboxEgressAllow
+
+	// ConfigDevcontainerResourcesMemory addresses
+	// `devcontainer.resources.memory` (LH-FA-CONF-002). Read + write;
+	// see [NewMemoryLimit].
+	ConfigDevcontainerResourcesMemory
+
+	// ConfigDevcontainerResourcesCPUs addresses
+	// `devcontainer.resources.cpus` (LH-FA-CONF-002). Read + write;
+	// see [NewCPULimit].
+	ConfigDevcontainerResourcesCPUs
 )
 
 // ConfigPath is a typed, whitelisted reference to a leaf in
@@ -166,6 +176,8 @@ var ErrInvalidConfigPath = errors.New("invalid config path")
 //   - `devcontainer.sandbox.nestedRuntime`          → ConfigDevcontainerSandboxNestedRuntime, write-OK
 //   - `devcontainer.sandbox.onUnavailable`          → ConfigDevcontainerSandboxOnUnavailable, write-OK
 //   - `devcontainer.sandbox.repository`             → ConfigDevcontainerSandboxRepository, write-OK
+//   - `devcontainer.resources.memory`               → ConfigDevcontainerResourcesMemory, write-OK
+//   - `devcontainer.resources.cpus`                 → ConfigDevcontainerResourcesCPUs, write-OK
 //
 // Wildcard segments (`<svc>`, `<feature>`) are parsed through their
 // respective domain validators; format failures wrap into
@@ -255,6 +267,8 @@ func scalarConfigPaths() map[string]ConfigPathKind {
 		"devcontainer.sandbox.repository":     ConfigDevcontainerSandboxRepository,
 		"devcontainer.sandbox.egress.enabled": ConfigDevcontainerSandboxEgressEnabled,
 		"devcontainer.sandbox.egress.allow":   ConfigDevcontainerSandboxEgressAllow,
+		"devcontainer.resources.memory":       ConfigDevcontainerResourcesMemory,
+		"devcontainer.resources.cpus":         ConfigDevcontainerResourcesCPUs,
 	}
 }
 

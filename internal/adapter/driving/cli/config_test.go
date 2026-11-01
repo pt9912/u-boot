@@ -62,6 +62,8 @@ func TestExitCode_ConfigValidationSentinels(t *testing.T) {
 		{"ErrConfigValueNotSet", driving.ErrConfigValueNotSet},
 		// Lastenheft 0.3.0 (LH-FA-DEV-004/-006/-007).
 		{"ErrInvalidSandboxSetting", domain.ErrInvalidSandboxSetting},
+		// LH-FA-CONF-002: devcontainer.resources.*.
+		{"ErrInvalidResourceLimit", domain.ErrInvalidResourceLimit},
 	}
 	for _, c := range cases {
 		wrapped := fmt.Errorf("config service: %w: detail", c.err)

@@ -29,6 +29,8 @@ func TestConfigSetGet_SandboxKeys(t *testing.T) {
 		{"devcontainer.sandbox.repository", "git@github.com:other/fork.git"},
 		{"devcontainer.sandbox.egress.enabled", "true"},
 		{"devcontainer.sandbox.egress.allow", "api.anthropic.com,registry.npmjs.org"},
+		{"devcontainer.resources.memory", "3g"},
+		{"devcontainer.resources.cpus", "1.5"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.path, func(t *testing.T) {
@@ -82,6 +84,12 @@ func TestConfigSet_SandboxKeys_InvalidValue(t *testing.T) {
 		{"devcontainer.sandbox.egress.allow", "*.github.com"},
 		{"devcontainer.sandbox.egress.allow", "Example.COM"},
 		{"devcontainer.sandbox.egress.allow", "localhost"},
+		{"devcontainer.resources.memory", "0"},
+		{"devcontainer.resources.memory", "3G"},
+		{"devcontainer.resources.memory", `3g"`},
+		{"devcontainer.resources.cpus", "0"},
+		{"devcontainer.resources.cpus", "1,5"},
+		{"devcontainer.resources.cpus", `2\`},
 	}
 	for _, tc := range cases {
 		t.Run(tc.path+"="+tc.value, func(t *testing.T) {
@@ -110,6 +118,8 @@ func TestConfigGet_SandboxKeys_InvalidOnLoad(t *testing.T) {
 		"profile":   "devcontainer:\n  enabled: true\n  profile: paranoid\n",
 		"nested":    "devcontainer:\n  enabled: true\n  sandbox:\n    nestedRuntime: lxc\n",
 		"onUnavail": "devcontainer:\n  enabled: true\n  sandbox:\n    onUnavailable: maybe\n",
+		"memory":    "devcontainer:\n  enabled: true\n  resources:\n    memory: 3G\n",
+		"cpus":      "devcontainer:\n  enabled: true\n  resources:\n    cpus: \"0\"\n",
 	}
 	for name, dc := range bodies {
 		t.Run(name, func(t *testing.T) {

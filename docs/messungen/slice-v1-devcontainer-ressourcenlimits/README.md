@@ -1,6 +1,6 @@
 # Messprotokoll: überlebt eine Hand-Ergänzung von `--memory` und `--cpus` ein erneutes `generate devcontainer`?
 
-Messung zum Entwurf [`slice-v1-devcontainer-ressourcenlimits`](../../plan/planning/open/slice-v1-devcontainer-ressourcenlimits.md) (Anlass: Frage des Projektinhabers vom 2026-10-31, ob man Devcontainern schon eine Höchstmenge an CPU und Arbeitsspeicher mitgeben kann). Gemessen ist nur, was `u-boot generate devcontainer` mit der Datei `.devcontainer/devcontainer.json` tut. Es lief **kein Container**; ob eine Engine `--memory` und `--cpus` aus `runArgs` anwendet, ist nicht Gegenstand.
+Messung zum Entwurf [`slice-v1-devcontainer-ressourcenlimits`](../../plan/planning/done/slice-v1-devcontainer-ressourcenlimits.md) (Anlass: Frage des Projektinhabers vom 2026-10-31, ob man Devcontainern schon eine Höchstmenge an CPU und Arbeitsspeicher mitgeben kann). Gemessen ist nur, was `u-boot generate devcontainer` mit der Datei `.devcontainer/devcontainer.json` tut. Es lief **kein Container**; ob eine Engine `--memory` und `--cpus` aus `runArgs` anwendet, ist nicht Gegenstand.
 
 ## Messstand
 
@@ -34,6 +34,37 @@ bash tools/messung/devcontainer-ressourcenlimits/messen.sh > docs/messungen/slic
 
 **Verworfene Variante.** Die erste Fassung der Variante A im Erstlauf (`messen-limits.sh`) ersetzte per `awk` eine vorhandene `runArgs`-Zeile; im Standardprofil gibt es keine, die Datei blieb unverändert, das zweite `generate` meldete „already up to date“. Die Variante war wirkungslos, ihr Ergebnis wird nicht benutzt und ihr Skriptteil ist nicht übernommen. Gültig ist A1 (`messen-limits2.sh`), die Einfügung hinter der Zeile `"name"`.
 
+## Messung an der Engine, 2026-11-01 (Messungen 1, 2, 4 und 6 des Slice)
+
+Skript [`messen-engine.sh`](../../../tools/messung/devcontainer-ressourcenlimits/messen-engine.sh), Rohdaten [`roh-engine.txt`](roh-engine.txt). Umgebung: Linux `x86_64`, Docker Engine 29.9.2, Cgroup v2, **die verschachtelte Engine des Devcontainers dieses Repos** (die Wurzel-cgroup des Containers hat den Typ `domain threaded`).
+
+**Ergebnis: Jeder Start mit `--memory` oder `--cpus` bricht in dieser Umgebung ab** (Exit `125`, `unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode`), auch für `docker:27-dind`. Messungen 1, 2 und 4 haben dadurch **keinen Wert**; ein Lauf in einer Umgebung, deren Engine Grenzen anwenden kann (Linux-Host `amd64`, lokale Engine, nicht verschachtelt), steht aus.
+
+Aus Meldungen, die vor dem Start fallen (Messung 6, jeweils ein Lauf):
+
+| Eingabe | Beobachtung |
+|---|---|
+| `--memory=64k`, `1024b`, `1048576`, `4m`, `5m` | abgewiesen: „Minimum memory limit allowed is 6MB“ |
+| `--memory=-1g` | abgewiesen: `invalid size` |
+| `--memory=1g1` | abgewiesen: `strconv.ParseFloat: parsing "1g1": invalid syntax` |
+| `--memory=0`, `--cpus=0` | angenommen (Exit `0`): bedeutet „keine Grenze“ |
+| `--cpus=2x`, `" 2"`, `1,5` | abgewiesen: `failed to parse … as a rational number` |
+| `--cpus=1e1`, `9999`, `-1` | abgewiesen: „range of CPUs is from 0.01 to 8.00, as there are only 8 CPUs available“ — die Obergrenze hängt vom Host ab |
+| `--memory=3g`, `512m`, `512M`, `4G`, `1.5g`, `4t`, `3gb`, `3 g`, `6m`; `--cpus=2`, `1.5`, `0.5`, `0.01`, `.5`, `2.` | die Auswertung des Werts besteht, der Start scheitert danach an der cgroup; **Annahme oder Abweisung durch die Engine ist damit nicht belegt** |
+
+Daraus folgt: Die Untergrenze für `--memory` (6 MB) und die Obergrenze für `--cpus` (Zahl der CPUs des Hosts) sind Eigenschaften der Engine und des Hosts; eine Prüfung in `u-boot` kann sie nicht festlegen.
+
+## CI-Lauf des Jobs `integration-docker`, 2026-11-01 (Docker-Tests des Slice)
+
+Lauf [41307229027](https://github.com/pt9912/u-boot/actions/runs/41307229027) (Job `integration-docker`, `runs-on: ubuntu-latest` laut `.github/workflows/integration.yml`, Dauer 13 min 7 s, grün; die Angaben stammen aus der Übergabe an den Planner, das Lauf-Protokoll ist hier nicht selbst gelesen). Beide Tests aus `internal/e2e/resources_docker_test.go` bestanden, je **ein Lauf**:
+
+| Test | Dauer | Geprüft (laut Testtext: `HostConfig.Memory` und `HostConfig.NanoCpus` des gestarteten Containers) |
+|---|---|---|
+| `TestE2E_Resources_DefaultProfileLimitsReachTheContainer` | 2,43 s | Standardprofil mit `512m` und `1.5`; Gegenprobe ohne Schlüssel |
+| `TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer` | 11,90 s | Sandbox-Profil mit `nestedRuntime: docker` |
+
+Das belegt das Ankommen der Grenze in der Konfiguration des **äußeren** Containers auf der Engine des Runners. Nicht belegt: ob die Grenze im Container durchgesetzt wird (cgroup-Dateien, Verhalten über dem Limit), die Wirkung auf den verschachtelten Docker, die Architektur des Runners (nicht ausgelesen), ein zweiter Lauf je Zelle.
+
 ## Lesehilfe
 
 - Der Managed Block umschließt in beiden gemessenen Dateien das gesamte JSON-Objekt (siehe die beiden `roh-devcontainer-json-*.txt`). Daraus folgt, dass außerhalb des Blocks kein Schlüssel des Objekts stehen kann; das folgt aus der Form des Blocks und ist **nicht** mit der Dev-Container-CLI oder VS Code gemessen (ob sie eine Datei mit Text hinter dem Objekt lesen).
@@ -41,8 +72,8 @@ bash tools/messung/devcontainer-ressourcenlimits/messen.sh > docs/messungen/slic
 
 ## Nicht gemessen
 
-- Ob `--memory` und `--cpus` im Container ankommen, auch nach `u-boot devcontainer up` (Hilfs-Container mit Dev-Container-CLI): kein Container gestartet.
+- Ob `--memory` und `--cpus` im Container **durchgesetzt** werden (die Engine-Messung oben scheitert an der verschachtelten Umgebung); das Ankommen in der Konfiguration des Containers nach `u-boot devcontainer up` belegt nur der CI-Lauf oben, einmal je Profil.
 - Das Sandbox-Profil (`--privileged`, `nestedRuntime: docker`) mit Begrenzung; die Wirkung auf den verschachtelten Docker und dessen Container.
 - Docker-Engines außer Linux `amd64` mit lokaler Engine; ein zu kleines Limit (OOM-Kill von Startscripten); zwei Instanzen mit Begrenzung.
 - Das Überleben einer Ergänzung im Sandbox-Profil **mit** einer `runArgs`-Zeile (etwa mit `nestedRuntime: docker`, das `--privileged` rendert); gemessen ist nur das Profil ohne weitere Features.
-- Mehr als ein Lauf je Variante; andere Versionen von `u-boot` als 0.16.1.
+- Mehr als ein Lauf je Variante und Zelle; die Messungen 1, 2, 4 und 5 des Slice insgesamt (Folge: [`slice-v1-devcontainer-ressourcenlimits-messung`](../../plan/planning/open/slice-v1-devcontainer-ressourcenlimits-messung.md)); andere Versionen von `u-boot` als 0.16.1.

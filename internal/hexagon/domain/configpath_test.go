@@ -34,6 +34,8 @@ func TestNewConfigPath_KnownPaths(t *testing.T) {
 		{"devcontainer.sandbox.repository", domain.ConfigDevcontainerSandboxRepository, true, "", ""},
 		{"devcontainer.sandbox.egress.enabled", domain.ConfigDevcontainerSandboxEgressEnabled, true, "", ""},
 		{"devcontainer.sandbox.egress.allow", domain.ConfigDevcontainerSandboxEgressAllow, true, "", ""},
+		{"devcontainer.resources.memory", domain.ConfigDevcontainerResourcesMemory, true, "", ""},
+		{"devcontainer.resources.cpus", domain.ConfigDevcontainerResourcesCPUs, true, "", ""},
 	}
 	for _, tc := range cases {
 		got, err := domain.NewConfigPath(tc.raw)
@@ -195,6 +197,8 @@ func TestFixedConfigPaths_SetIsPinned(t *testing.T) {
 		"devcontainer.enabled",
 		"devcontainer.featureSources.allow",
 		"devcontainer.profile",
+		"devcontainer.resources.cpus",
+		"devcontainer.resources.memory",
 		"devcontainer.sandbox.egress.allow",
 		"devcontainer.sandbox.egress.enabled",
 		"devcontainer.sandbox.nestedRuntime",

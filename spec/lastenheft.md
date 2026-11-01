@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.26.0                                                             |
+| Version          | 0.27.0                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -379,6 +379,8 @@ Verhalten:
 *Priorität: MVP.* Das Produkt muss eine Devcontainer-Konfiguration erzeugen können.
 
 Die Erzeugung muss sowohl bei `u-boot init` über eine Option als auch nachträglich auslösbar sein (`u-boot init --devcontainer` bzw. `u-boot generate devcontainer`).
+
+Sind `devcontainer.resources.memory` oder `devcontainer.resources.cpus` gesetzt, trägt die erzeugte `.devcontainer/devcontainer.json` in `runArgs` `--memory=<Wert>` beziehungsweise `--cpus=<Wert>`, in beiden Profilen; ohne Angabe bleibt die erzeugte Datei unverändert. Die Grenzen gelten je Container und gelten nicht als Sicherheitslockerung. Zugesagt ist die Erzeugung dieser Optionen. Dass die Grenze im gestarteten Container ankommt, ist nur auf einem Linux-Host (`amd64`) mit lokaler, nicht verschachtelter Docker-Engine und nur für die Profile und Kombinationen zugesagt, die ein Test mit Build-Tag `docker` belegt; für andere Hosts und Engines, für die Wirkung auf den verschachtelten Docker und auf die Summe mehrerer Instanzen wird nichts zugesagt.
 
 Mindestdateien:
 
@@ -829,7 +831,7 @@ Die Migrationsfunktion ist in [LH-FA-CONF-006](#lh-fa-conf-006--konfiguration-mi
 
 ### LH-FA-CONF-002 – Inhalt der Konfiguration
 
-*Priorität: MVP.* Die Konfigurationsdatei muss mindestens `schemaVersion`, `project.name`, je Dienst `services.<name>.enabled` und `devcontainer.enabled` enthalten. Optionale V1-Felder sind `services.keycloak.persistence` (`embedded` | `external-postgres`), `services.otel.enabled`, `devcontainer.featureSources.allow`, `devcontainer.user.uid` (1 bis 65535), `devcontainer.profile` (`default` | `sandbox`) sowie `devcontainer.sandbox.nestedRuntime` (`none` | `podman`), `devcontainer.sandbox.onUnavailable` (`warn` | `fail`), `devcontainer.sandbox.repository` und `devcontainer.sandbox.egress.enabled` / `.allow`.
+*Priorität: MVP.* Die Konfigurationsdatei muss mindestens `schemaVersion`, `project.name`, je Dienst `services.<name>.enabled` und `devcontainer.enabled` enthalten. Optionale V1-Felder sind `services.keycloak.persistence` (`embedded` | `external-postgres`), `services.otel.enabled`, `devcontainer.featureSources.allow`, `devcontainer.user.uid` (1 bis 65535), `devcontainer.profile` (`default` | `sandbox`) sowie `devcontainer.sandbox.nestedRuntime` (`none` | `podman`), `devcontainer.sandbox.onUnavailable` (`warn` | `fail`), `devcontainer.sandbox.repository`, `devcontainer.sandbox.egress.enabled` / `.allow` sowie `devcontainer.resources.memory` (positive ganze Zahl mit optionaler Einheit `b`, `k`, `m` oder `g`, kleingeschrieben) und `devcontainer.resources.cpus` (positive Dezimalzahl mit Punkt). Ein ungültiger Wert endet mit Exit-Code `10`.
 
 Hinweise:
 
@@ -1608,6 +1610,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.24.0 | 2026-10-25 | [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Die Anforderungstexte nennen keine Messumgebung und keinen Prüfzustand mehr, sondern die Zusage-Menge im Wortlaut. Das Feature `ollama` ist auf einem Linux-Host mit lokaler Docker-Engine (`amd64`) und unter Colima (`arm64`) zugesagt, bisher auf die Umgebung der Messung; die Zusage für Colima unter `arm64` bleibt. `podman build` und der Start von `podman` unter Docker sind auf einem Linux-Host mit lokaler Engine (`amd64`) und unter Colima (`arm64`) zugesagt, bisher auf „die gemessenen Hosts“; `podman build` ist für Images von Docker Hub zugesagt. Die Zusage der Cloud-Modelle und des Anschlusses an einen Ollama-Dienst des Hosts ändert sich nicht. Die älteren Historie-Zeilen bleiben als Chronik. | Vereinbarung mit dem Projektinhaber |
 | 0.25.0 | 2026-10-31 | [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten): benannte Instanz an `u-boot devcontainer up`, `down` und `shell` (`--instance <name>`; mehrere Devcontainer desselben Projekts gleichzeitig; ohne `--instance` wirkt der Befehl nur auf den Container ohne Instanz); Namensregel (Kleinbuchstaben, Ziffern, Bindestriche, 1 bis 32 Zeichen), Exit-Code `10` bei ungültigem Namen und bei `up`, `down` und `shell` ohne `--instance`, wenn es nur Container von Instanzen gibt; Isolation der Volumes für bis zu vier gleichzeitige Instanzen im Sandbox-Profil mit `nestedRuntime: docker` und `ollama`, jede mit höchstens einer CPU und 3 GiB, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Engine; nicht zugesagt: mehr als vier Instanzen, Podman-Speicher, andere Grenzen, Last, Dauer und Platz, andere Hosts, Isolation im Standardprofil, Zweig je Instanz. | Vereinbarung mit dem Projektinhaber |
 | 0.26.0 | 2026-11-01 | [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten): Zusage zu gleichzeitigen Instanzen auf das eingegrenzt, was die Testsuite belegt: Isolation der Workspace-Volumes für zwei gleichzeitig laufende Instanzen im Sandbox-Profil, im Zustand direkt nach dem Start, auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine; nicht mehr zugesagt: drei und vier Instanzen, die Grenze von einer CPU und 3 GiB, die Isolation des Docker-Speichers (`nestedRuntime: docker`) und der Modelle (`ollama`); weiter nicht zugesagt: Podman-Speicher, Instanzen mit oder ohne Begrenzung von CPU und Arbeitsspeicher, Last, kalter Cache, Dauer und Platz, andere Hosts und Engines, Isolation im Standardprofil. | Vereinbarung mit dem Projektinhaber |
+| 0.27.0 | 2026-11-01 | [`LH-FA-CONF-002`](#lh-fa-conf-002--inhalt-der-konfiguration), [`LH-FA-DEV-001`](#lh-fa-dev-001--devcontainer-erzeugen): neue optionale Schlüssel `devcontainer.resources.memory` und `devcontainer.resources.cpus`, gerendert als `--memory` und `--cpus` in `runArgs` beider Profile; Ankommen im Container nur zugesagt, soweit ein Docker-Test auf einem Linux-Host (`amd64`) mit lokaler, nicht verschachtelter Engine es belegt. | Entscheidung des Projektinhabers 2026-11-01 |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
