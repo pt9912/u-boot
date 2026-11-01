@@ -441,6 +441,11 @@ func TestExecute_Devcontainer_SentinelsPerSubcommand(t *testing.T) {
 		{"no configuration", fmt.Errorf("%w (looked for x)", driving.ErrDevcontainerConfigMissing), 10, "LH-FA-DEV-010", []string{"up"}},
 		{"folder", driving.ErrDevcontainerProjectFolderInvalid, 10, "LH-FA-DEV-010", []string{"up"}},
 		{"variable name", driving.ErrDevcontainerEnvNameInvalid, 10, "LH-FA-DEV-010", []string{"up"}},
+		// LH-FA-DEV-010: the two sentinels about the container name are in the
+		// central classification and in the diagnostic mapping of `up` and
+		// `shell` start phase like the instance ones.
+		{"container name", fmt.Errorf("%w: u-boot-Demo", driving.ErrDevcontainerContainerNameInvalid), 10, "LH-FA-DEV-010", []string{"up"}},
+		{"container name conflict", fmt.Errorf("%w: u-boot-demo", driving.ErrDevcontainerContainerNameConflict), 10, "LH-FA-DEV-010", []string{"up"}},
 		// ADR-0038 decision 8: the two sentinels about the instance are in the
 		// central classification and in the diagnostic mapping of `up` and `down`.
 		{"instance name", fmt.Errorf("%w: Abc", driving.ErrDevcontainerInstanceInvalid), 10, "LH-FA-DEV-010", []string{"up", "down"}},

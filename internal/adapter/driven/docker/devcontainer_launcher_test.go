@@ -1137,6 +1137,21 @@ func TestLauncher_Up_ConflictingContainerName(t *testing.T) {
 			t.Errorf("the start did not run despite the same-folder holder")
 		}
 	})
+	t.Run("holder without a local_folder label is foreign", func(t *testing.T) {
+		f := newFakeDocker(t)
+		f.write(t, "ps-output", "abc123def456789012345678\t\n")
+		l := f.launcher(nil)
+		opts := upOptions()
+		opts.Name = "u-boot-demo"
+		opts.OverrideConfig = []byte(`{"image":"debian"}`)
+		_, err := l.Up(context.Background(), opts)
+		if !errors.Is(err, driven.ErrDevcontainerContainerNameConflict) {
+			t.Fatalf("error = %v, want ErrDevcontainerContainerNameConflict for a holder with no devcontainer.local_folder", err)
+		}
+		if f.saw(t, "run") {
+			t.Errorf("the helper container started despite the conflict")
+		}
+	})
 	t.Run("failed query is no finding", func(t *testing.T) {
 		f := newFakeDocker(t)
 		f.flag(t, "ps-fail")

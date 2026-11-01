@@ -89,12 +89,12 @@ Gelesen am 2026-11-01 ([`AGENTS.md`](../../../../AGENTS.md) §3.10); der Impleme
 | `internal/e2e/devcontainer_name_docker_test.go`, `devcontainer_start_docker_test.go` | neu, update | `devcontainer_name_docker_test.go` (Build-Tag `docker`): Name am Container (Name neben ID, übernehmen bei gleichem Ordner, `--recreate` nennt ihn neu), Kollision mit Exit-Code `10`, erzeugte Datei byte-identisch; die Hilfsdatei bekommt nur das Feld `Name` an `dcInspectDoc`; Nachweis Docker-Tests: CI-Lauf; Vorbild-Datei gelesen beim Bau |
 | `internal/adapter/driving/cli/devcontainer.go`, `devcontainer_test.go`, `devcontainer_shell_test.go`, `devcontainer_instance_test.go` | update | Ausgabezeilen um `, name <Name>` (Helfer `devcontainerStartLine`, `up` und `shell`), Help-Texte nennen Namen und die zwei neuen `10`-Fälle; JSON unverändert (Test); `shell` startet auf der Standardfehlerausgabe, unter `--quiet` zurückgehalten; Instanz-Help-Pin folgt dem Text |
 | `internal/hexagon/application/doctor*.go` | **unverändert** | gelesen: `doctor` sucht den Container über den Inspector nur über Labels (`doctor.go` Zeilen 34 bis 36, `FindContainer` in `devcontainer_fallback.go` Zeile 158); ein Name berührt es nicht |
-| `harness/replay.md` | update (S2/S3) | Golden Case zu `generate devcontainer` mit `runArgs` |
+| `harness/replay.md` | **unverändert** (S2 verworfen, S1') | keine Generator-Änderung: die erzeugte Datei bleibt byte-identisch; belegt durch den e2e-Vergleich (Devcontainer-Datei vor und nach den Aufrufen) |
 | `spec/lastenheft.md` | **CR vor dem Code** (Wortlaut-Freigabe) | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten); Alt/Neu in §6 Frage 7; nicht in diesem Entwurf geschrieben |
 | `spec/spezifikation.md` | update (nach dem Code) | [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), Block „Hilfs-Container“ ab Zeile 850 (gelesen: Aufrufform ohne Containernamen) |
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Abschnitt zu mehreren Instanzen; ohne Kennungen |
-| `docs/plan/adr/` und `docs/plan/adr/README.md` | neu, nur wenn Frage 9 „ja“ | Folge-ADR zu [ADR-0038](../../adr/0038-devcontainer-instanz-zweites-id-label.md) (`Supersedes` entfällt, die ADR bleibt gültig; `Schärft:`) mit Index-Eintrag |
-| diese Datei, `docs/plan/planning/open/README.md` | neu / update | Zeile im Bestand; Moves per `make slice-mv` |
+| `docs/plan/adr/` | **unverändert** | Frage 9 entschieden (2026-11-01): kein Folge-ADR — ADR-0038 bleibt unberührt, der Name ist Produktzusage im CR |
+| diese Datei, `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | neu / update | Bestand-Zeile; Moves per `make slice-mv`; die Roadmap trägt die Arbeitszeile zum Start und den Ruhe-Marker bei Closure (Commit `95b5c864`) |
 
 **Wächter und rot färbende Mutationen** (Implementer führt sie aus):
 
