@@ -946,7 +946,7 @@ func TestDevcontainerUp_HostGitToken_WarningsCarryNoValue(t *testing.T) {
 }
 
 func TestDevcontainerUp_HostGitToken_SwitchWithoutReferenceWarns(t *testing.T) {
-	t.Setenv("NEUTRAL", "x") // t.Setenv verbietet t.Parallel in dieser Datei: deterministisch ohne Umgebungslesung des Ports
+	t.Setenv("NEUTRAL", "x") // t.Setenv verlangt: kein t.Parallel in diesem Test
 	l := newLauncher()
 	hs := &fakeHostSource{tokenValue: "gh-token-placeh", tokenSource: driven.TokenSourceGh}
 	// Konfiguration ohne Verweis auf GIT_TOKEN: der Schalter resolves nichts.
