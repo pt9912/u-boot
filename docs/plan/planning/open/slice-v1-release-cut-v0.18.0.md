@@ -81,6 +81,8 @@ DoD vollständig; Tag `v0.18.0` gesetzt und gepusht (M5, nur mit Freigabe); `pub
 
 ## 6. Risiken und offene Punkte
 
+**Frage an den Projektinhaber (2026-11-01 offen geblieben):** Die Release-Cuts laufen seit `v0.13.1` ohne Welle-Datei (`v0.13.1`, `v0.15.1`, `v0.16.1`, `v0.17.0`; `v0.18.0` soll ebenso laufen), aber [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md) sagt „Release-Versionen sind die Wellen; eine Welle bekommt bei der Eroeffnung eine Welle-Datei" — die Praxis trägt keinen MR-Anker. Zu entscheiden: ein MR (dokumentierte Praxis, sieben Cuts als Grundlage als Grundlage — die Closure lebt im `done/`-Cut-Slice und der Roadmap) oder eine Welle-Datei ab `v0.18.0`. Bis zur Entscheidung steht dieser Punkt als Drift-Audit-Kandidat offen.
+
 1. **Der Lead sagt mehr als das Lastenheft** ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)). Vorsorge: der Lead trägt je Eintrag die Bedingungen des Lastenheft-Stands und die Liste des Nicht-Zugesagten im Wortlaut des CHANGELOG-Eintrags; der Reviewer liest ihn gegen die drei Stände (`0.27.0`, `0.28.0`, `0.29.0`). — **Ausgang:** bei Closure.
 2. **Ein Unreleased-Eintrag ohne Träger** (etwa der Hygiene-Eintrag der Hilfetexte). Vorsorge: §1-Abgleich mit `git diff v0.17.0..HEAD`. — **Ausgang:** bei Closure.
 3. **Das Datum weicht vom Tag-Datum ab** (Mitternacht). Vorsorge: M0 vor M1 und M5. — **Ausgang:** bei Closure.
