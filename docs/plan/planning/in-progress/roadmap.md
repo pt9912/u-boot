@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**v0.17.0 (Minor-Release ohne Welle-Datei: mehrere Devcontainer je Projektordner mit `--instance` und `CLAUDE_CODE_OAUTH_TOKEN` als Referenz für `claude-code`; Lastenheft [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) in `0.26.0`)** — Slice: [`slice-v1-release-cut-v0.17.0`](../done/slice-v1-release-cut-v0.17.0.md) (Tag `v0.17.0` auf `f89424e1` gesetzt, Release veröffentlicht 2026-11-01, `publish`-Lauf 41292635297; Nacharbeit §7 des Slice offen, der Slice liegt noch in `in-progress/`). Inhalt: [`slice-v1-devcontainer-bau-lokal`](../done/slice-v1-devcontainer-bau-lokal.md), [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md), [`slice-v1-devcontainer-claude-oauth-token`](../done/slice-v1-devcontainer-claude-oauth-token.md), [`slice-v1-devcontainer-instanz-messung`](../done/slice-v1-devcontainer-instanz-messung.md), [`slice-cr-devcontainer-instanz`](../done/slice-cr-devcontainer-instanz.md), [`slice-v1-devcontainer-instanz-label`](../done/slice-v1-devcontainer-instanz-label.md), [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../done/slice-v1-shell-erkennung-fehlender-benutzer-eng.md), [`slice-v1-devcontainer-instanz-test-leicht`](../done/slice-v1-devcontainer-instanz-test-leicht.md), [`slice-cr-devcontainer-instanz-zusage-getestet`](../done/slice-cr-devcontainer-instanz-zusage-getestet.md).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
