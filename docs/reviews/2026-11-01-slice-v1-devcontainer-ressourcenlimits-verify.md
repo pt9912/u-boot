@@ -41,7 +41,7 @@ Scope:
 | Zu 3: Lastenheft-CR als erster Commit vor dem Code; Werteformat folgt nach Messung 6 | CR (`ec9300f4`) liegt vor dem Code (`a4872226`); davor nur die Entscheidungs- und Messungs-Doku (`f432477b`). Werteformat: Messung 6 hat nur Meldungen vor dem Start geliefert (V-4). |
 | Zu 4 und 5: keine Ausweisung als Lockerung (ein Test pinnt das), kein Hinweis bei bestehendem Container | umgesetzt: `…_Resources_NoRelaxationWarning`; kein Hinweis-Code im Diff; das Handbuch sagt „vermutlich … nicht gemessen“. |
 | Zu 7 und 8: keine ADR; nächster Minor, `CHANGELOG.md` *Added* | umgesetzt: keine ADR im Diff, Eintrag unter `[Unreleased]` / *Added*. |
-| Zu 2 und 6: offen | unverändert offen; `doctor.go` Zeile 622 (Hinweistext) nicht angefasst, kein Widerspruch zu [`slice-v1-hilfetexte-ohne-kennungen`](../plan/planning/open/slice-v1-hilfetexte-ohne-kennungen.md). |
+| Zu 2 und 6: offen | unverändert offen; `doctor.go` Zeile 622 (Hinweistext) nicht angefasst, kein Widerspruch zu [`slice-v1-hilfetexte-ohne-kennungen`](../plan/planning/done/slice-v1-hilfetexte-ohne-kennungen.md). |
 
 ### 3. Plan gegen Code (§3 Tabelle gegen `git diff --stat origin/main..HEAD`)
 
