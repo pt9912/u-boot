@@ -67,7 +67,7 @@ Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8). Ändert eine Fix-Runde Vertragstext, liest ein Nachlauf-Review im frischen Kontext genau diesen Diff, bevor der Verifier startet.
-- [ ] Doku-Update: Spezifikation (bei A und B), Lastenheft (bei B), Handbuch 4.9 (*Ende*: „Hat die Shell begonnen, endet der Befehl mit Exit-Code 0, was immer der Exit-Status …“, `docs/user/benutzerhandbuch.md` Zeile 863 am 2026-11-01 gelesen) sagt `0` ohne Ausnahme und bleibt unverändert; `CHANGELOG.md` trägt den Eintrag unter `[Unreleased]`.
+- [ ] Doku-Update: Spezifikation (bei A und B), Lastenheft (bei B), Handbuch 4.9 (*Ende*: „Hat die Shell begonnen, endet der Befehl mit Exit-Code 0, was immer der Exit-Status …“, `docs/user/benutzerhandbuch.md` Zeile 863 am 2026-11-01 gelesen) nennt jetzt den Restfall (Benutzer verschwindet nach dem Beginn, Exit-Code 12); `CHANGELOG.md` trägt den Eintrag unter `[Unreleased]`.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis `BEO-<KUERZEL>/<slug>/` oder eine weitere Datei in dessen `evidence/`; **kein Zaehler wird gesetzt**, er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7 notiert.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
@@ -92,12 +92,12 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt, mit der St
 | `spec/lastenheft.md` | update (Weg B), sonst **unverändert** (Weg A gewählt) | [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) Zeile 503 gelesen; Wortlaut-Freigabe des Projektinhabers vor dem Start |
 | `internal/adapter/driven/docker/devcontainer_launcher_test.go` | update (Weg A) | Skript `fakeDockerScript`: die Flags `user-gone-late` und `probe-late-not-running` antworten der Probe nach der Sitzung |
 | `CHANGELOG.md`, `docs/maintainer/zusagen-und-messstaende.md` | update (Weg A) | Eintrag unter `[Unreleased]`; Stand der unbelegten Beobachtung zur Zeile der Sitzung |
-| `docs/user/benutzerhandbuch.md` | **unverändert** | Zeile 863 (*Ende*: „endet der Befehl mit Exit-Code 0, was immer der Exit-Status der Shell war“) sagt `0` ohne Ausnahme, gelesen; die Datei heißt `benutzerhandbuch.md`, nicht `-standard` |
+| `docs/user/benutzerhandbuch.md` | update | Zeile 863 (*Ende*: „endet der Befehl mit Exit-Code 0, was immer der Exit-Status der Shell war“) bekommt den Restfall in Worten, ohne Kennungen; die Datei heißt `benutzerhandbuch.md`, nicht `-standard` |
 | `docs/plan/adr/0039-devcontainer-shell-dritter-aufruf-bei-fehlendem-benutzer.md`, `docs/plan/adr/README.md` | neu / update | Folge-ADR (Proposed) zur Zusage „nur die Probe und die Sitzung“ von [`ADR-0034`](../../adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md); Index-Zeile |
 | `spec/architecture.md` | update | Adapter-Absatz zu `docker/` (Zeile 325, gelesen): „Im Container ruft der Adapter nur die Probe und die Sitzung auf“ nennt den dritten Aufruf; Code: `userMissingNow` in `devcontainer_shell.go` |
 | `docs/reviews/2026-11-01-slice-v1-shell-erkennung-fehlender-benutzer-eng.md` | neu | Review-Report |
 | diese Datei (`Verantwortlich:`) | update | Verantwortlicher gesetzt; der Move und `open/README.md` folgen beim Zusammenführen |
-| `docs/reviews/`, `docs/plan/planning/observations/` | neu / update | Reports und Evidence |
+| `docs/plan/planning/observations/` | update, **offen** (kein Diff; folgt mit der Closure) | Evidence im Beobachtungs-Register |
 
 ## 4. Trigger
 
@@ -132,7 +132,6 @@ Die Ausgänge stehen bei der Closure; bis dahin nennt jede Zeile die Vorsorge.
 2. **Eine engere Erkennung verliert einen Fall des Clients** (die Probe liegt vor der Sitzung; ein Container, der zwischen Probe und Sitzung den Benutzer verliert, ist nur mit `TestShell_Docker_B18_SessionDoesNotBegin` gepinnt). — **Ausgang:** offen bis zur Closure. Vorsorge: Der Test läuft auf beiden Engines (29.9.2 und 28.0.4), bevor der Weg gilt.
 3. **Eine Rückfrage im Container ändert die Zusage „nur die Probe und die Sitzung“.** — **Ausgang:** offen bis zur Closure. Vorsorge: `TestLauncher_Shell_ProbesThenOpensTheSession` und die Sätze der Spezifikation dazu werden mit dem Code nachgezogen. Die Zusage steht in [`ADR-0034`](../../adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md) (Accepted, unverändert); die Folgeentscheidung ist [`ADR-0039`](../../adr/0039-devcontainer-shell-dritter-aufruf-bei-fehlendem-benutzer.md) (Proposed).
 4. **Die Spezifikation reicht weiter als der Test** (Engines, Clients, Hosts). — **Ausgang:** offen bis zur Closure ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)); Vorsorge: Messbedingungen im Satz.
-
 5. **Restfall der erneuten Probe:** Schreibt die Sitzung die Zeile selbst und verschwindet der Benutzer danach, meldet die erneute Probe ihn als fehlend, und der Befehl endet mit `12` trotz begonnener Shell; das widerspricht [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) in diesem einen Fall. [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) nennt ihn als Grenze (Grenzen der Erkennung, Spalte `0`). — **Ausgang:** weiter offen. Die Entscheidung, die Grenze zu belassen oder eine Lastenheft-CR zu stellen (Weg B), liegt beim Projektinhaber.
 
 ## 7. Closure-Notiz
