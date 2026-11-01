@@ -900,9 +900,10 @@ u-boot devcontainer up --instance agent-1 --recreate   # ersetzt nur den Contain
   (Großbuchstaben, Unterstrich, Punkt, ein `=` im Namen, ein leerer Name) endet mit Exit-Code 10,
   bevor `u-boot` Docker anspricht.
 - **Eigene Container und Volumes.** Jede Instanz hat einen eigenen Container. Im Sandbox-Profil hat
-  sie außerdem eigene Volumes: den Workspace und, soweit aktiviert, den Docker-Speicher
-  (`nestedRuntime: docker`) und die Modelle des Features `ollama`. Eine Datei im Workspace einer
-  Instanz sehen die anderen Instanzen nicht. Im Standardprofil teilen alle Instanzen den
+  sie außerdem ein eigenes Volume für den Workspace. Eine Datei im Workspace einer Instanz sehen
+  die anderen Instanzen nicht. Der Docker-Speicher (`nestedRuntime: docker`) und die Modelle des
+  Features `ollama` liegen, wenn aktiviert, ebenfalls in Volumes, deren Name von der Kennung des
+  Devcontainers abhängt. Im Standardprofil teilen alle Instanzen den
   Projektordner, denn er ist in jeden Container eingehängt.
 - **Ohne `--instance`.** Ohne das Flag wirken `up`, `down` und `shell` nur auf den Container ohne
   Instanz, den `up` ohne Flag anlegt, auch wenn eine Instanz jünger ist. Gibt es im Projekt nur

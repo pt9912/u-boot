@@ -169,10 +169,12 @@ Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der M
 
 **Mehrere Devcontainer je Projekt (Instanzen)** (Handbuch, Abschnitt 4.9)
 
-- **Zusage:** [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Absatz zu den Instanzen): bis zu
-  vier gleichzeitig laufende Instanzen, jede mit höchstens einer CPU und 3 GiB (Grenze samt Swap), im Sandbox-Profil mit
-  `nestedRuntime: docker` und dem Feature `ollama`, im Zustand direkt nach dem Start, Linux `amd64`, lokale Engine. Nicht zugesagt:
-  mehr als vier, `nestedRuntime: podman`, Instanzen ohne Grenze, das Verhalten unter Last, andere Hosts, die Isolation im Standardprofil.
+- **Zusage:** [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Absatz zu den Instanzen, Lastenheft 0.26.0, Entscheidung des Projektinhabers 2026-11-01): die Isolation der
+  Workspace-Volumes für zwei gleichzeitig laufende Instanzen im Sandbox-Profil, im Zustand direkt nach dem Start, Linux `amd64`,
+  lokale Docker-Engine. Nicht zugesagt: drei und mehr Instanzen, die Isolation des Docker-Speichers (`nestedRuntime: docker`) und
+  der Modelle (`ollama`), `nestedRuntime: podman`, Instanzen mit oder ohne Grenze für CPU und Arbeitsspeicher, das Verhalten unter
+  Last, andere Hosts und Engines, die Isolation im Standardprofil. Bis Lastenheft 0.25.0 stand hier die Zusage für bis zu vier
+  Instanzen mit höchstens einer CPU und 3 GiB; die Messung vom 2026-10-31 (unten) belegt sie weiter, sie ist nicht mehr zugesagt.
 - **Fundstelle:** Messwerte (Container, Labels, Volume-Namen, Inhaltsprobe, `up` ohne Flag):
   [`slice-v1-devcontainer-instanz-messung`](../messungen/slice-v1-devcontainer-instanz-messung/README.md) (Docker 29.9.2,
   Dev-Container-CLI 0.89.0). Das Verhalten von `u-boot` selbst prüft der Docker-Test `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated`
@@ -181,7 +183,7 @@ Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der M
   die Grenze von einer CPU und 3 GiB und vier Instanzen läuft die Suite nicht; sie stehen nur in der Messung, die Mount-Texte
   der Volumes in Unit-Tests. Im Standardprofil
   `TestDevcontainerInstance_Docker_StandardProfileSharesTheProjectFolder` (drei Container).
-- **Handbuch:** Abschnitt 4.9 nennt keine Zahl gleichzeitiger Instanzen und keine Grenze je Instanz; beides steht nur im Lastenheft und in diesem Abschnitt.
+- **Handbuch:** Abschnitt 4.9 nennt keine Zahl gleichzeitiger Instanzen und keine Grenze je Instanz; beides steht nur im Lastenheft und in diesem Abschnitt. Die Aussage zu den Volumes für Docker-Speicher und Modelle („wenn aktiviert“) pinnen die Text-Pins der Mounts in `internal/hexagon/application/generate_ollama_test.go` (`dockerMount`, `ollamaMount`: je ein Mount mit `${devcontainerId}` nur bei aktivierter Option); ein Lauf mit zwei Instanzen belegt sie nicht.
 
 ### 3.3 Katalog-Features und ihre Lieferkette (Handbuch, Abschnitt 4.10, Feature-Tabelle)
 
