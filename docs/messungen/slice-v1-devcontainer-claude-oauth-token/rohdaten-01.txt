@@ -1,0 +1,10 @@
+# TestE2E_ClaudeOAuthToken_ReachesTheSession, make test-docker, 2026-11-01
+# Auszug aus dem Lauf des Pakets internal/e2e (Zeilen des Tests); Platzhalter-Wert, kein gueltiges Token.
+=== RUN   TestE2E_ClaudeOAuthToken_ReachesTheSession
+time=2026-11-01T04:38:14.784Z level=INFO msg="config set: updated" path=devcontainer.features.node.enabled old="" new=true
+time=2026-11-01T04:38:14.785Z level=INFO msg="config set: updated" path=devcontainer.features.claude-code.enabled old="" new=true
+time=2026-11-01T04:38:14.786Z level=INFO msg="generate devcontainer: updated-block" project=dcstart forwardPorts=[] features=2 changed=[.devcontainer/devcontainer.json]
+    claude_oauth_token_docker_test.go:81: claude -p with the placeholder (exit 0):
+        Failed to authenticate. API Error: 401 OAuth access token is invalid.
+        CLAUDE-EXIT:1
+--- PASS: TestE2E_ClaudeOAuthToken_ReachesTheSession (68.34s)

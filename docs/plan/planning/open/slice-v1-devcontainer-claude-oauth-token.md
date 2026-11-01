@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) (Absatz *Zugangsdaten des Agenten und der Forge-Werkzeuge*, Zeile 608; Prüfung `devcontainer.sandbox.credentials`, Punkt 3, Zeile 624), je nach Weg [`SPEC-051`](../../../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten) (Absatz *Zugangsdaten*, Zeile 769; nicht gelesen — prüfen).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-31.
 
@@ -46,6 +46,15 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 - **B, eine allgemeine Liste durchgereichter Variablen in `u-boot.yaml`** (Arbeitsname `passEnv`): neuer Schlüssel in Schema, `config set`, Rendern und Drift-Prüfung. Deckt auch andere Fälle, ist aber vermutlich ein Lastenheft-CR ([`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) nennt Umgebungsvariablen des Agenten nicht einzeln; auf Optionen und Listen nicht durchgesehen — prüfen).
 - **C, nichts im Produkt:** Das Handbuch beschreibt den Weg `read -rs CLAUDE_CODE_OAUTH_TOKEN && export CLAUDE_CODE_OAUTH_TOKEN` in der geöffneten Shell, mit Datum und Messstand. Das Problem bleibt für jeden, der das Token beim Start mitgeben will.
 
+### Entscheidung (Weg A, Projektinhaber 2026-11-01; Teilfragen: Implementer)
+
+Weg A ist vom Projektinhaber entschieden. Die Teilfragen entscheidet der Implementer mit der kleinsten Lösung, die [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) und [ADR-0036](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) trägt; kein Konflikt mit Lastenheft oder ADR (Lastenheft nennt „die Umgebungsvariable des Agenten“ ohne Zahl, [ADR-0036](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) setzt nur die Bedingung „ohne gesetzten `ANTHROPIC_API_KEY` im Aufruf“ und bleibt unberührt).
+
+- **`doctor` verlangt beide Referenzen.** `checkSandboxCredentials` prüft, ob `devcontainer.json` die Referenz enthält (`missingAgentSources`), nicht die Umgebung des Hosts. Die Regel „mindestens eine“ hätte eine neue Verzweigung gebraucht und eine ältere Datei (nur `ANTHROPIC_API_KEY`) stillschweigend durchgelassen, obwohl das Token dann nie im Container ankommt. Mit „beide“ ist die heutige Regel unverändert (Meldung nennt alle fehlenden); die Warnung bei einer älteren Datei nennt nur die fehlende Variable, der Hinweis führt zu `u-boot generate devcontainer`. Eine Host-Umgebung mit nur einem Weg erzeugt keine Warnung, weil die Prüfung keine Host-Variable liest. Pin: `TestDoctor_SandboxCredentials_Agent` (Fälle „only the API key reference“, „only the OAuth token reference“).
+- **Ollama-Ablauf unverändert.** [ADR-0036](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) bleibt wörtlich gültig (Bedingung nur für `ANTHROPIC_API_KEY`). Das Verhalten mit gesetztem `CLAUDE_CODE_OAUTH_TOKEN` im Ollama-Ablauf ist nicht gemessen; das Handbuch rät, die Variable dort nicht zu setzen, und sagt dazu nichts Weiteres (Risiko 3).
+- **Keine ADR, kein Lastenheft-CR.** Der Weg erweitert eine Liste in einer vorhandenen Funktion; Zusage und Rendern sind in [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) geregelt.
+- **Reihenfolge der Referenzen:** `ANTHROPIC_API_KEY`, `CLAUDE_CODE_OAUTH_TOKEN`, `GH_TOKEN`, `GITLAB_TOKEN` (feste Renderfolge, in [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) und [`SPEC-051`](../../../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten) nachgezogen).
+
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **`ANTHROPIC_AUTH_TOKEN`.** Das Handbuch setzt ihn im Aufruf selbst (`ANTHROPIC_AUTH_TOKEN=<Platzhalter> claude …` im Ollama-Ablauf); eine Referenz in `remoteEnv` würde diesen Ablauf stören. Kein Bedarf des Projektinhabers.
@@ -65,8 +74,8 @@ gehört zurück zur Zerlegung. Gezählt wird nur, was mit dem Umfang wächst —
 Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 
 - [ ] **Messung** ([`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)): mit einem Platzhalter-Wert kommt die Variable über `u-boot devcontainer shell` im Container an; ungesetzt auf dem Host kommt sie ungesetzt an, leer gesetzt als leere; `claude -p` mit dem Platzhalter endet mit einer Antwort des Dienstes (kein gültiges Token). Ein Lauf mit einem **gültigen** Token ist nur zugesagt, wenn der Projektinhaber ihn gefahren hat und das Protokoll ihn nennt. Mindestens zwei Läufe je Zelle, datiert, mit Umgebung. *Beleg:* Messprotokoll unter `docs/messungen/<kennung>/` mit Rohdaten, Skript unter `tools/messung/<name>/` ([`harness/conventions.md`](../../../../harness/conventions.md#ablage-von-messprotokollen-und-skripten)); keine Zugangsdaten in den Rohdaten.
-- [ ] **Der gewählte Weg** (A, B oder C): bei A oder B reicht `u-boot generate devcontainer` die Variable als Referenz durch, `u-boot doctor` prüft sie nach der festgelegten Regel, Tests je Bedingung und je Mutation; bei C steht der Ablauf mit Datum und Messstand im Handbuch.
-- [ ] **Spezifikation, Handbuch, `CHANGELOG.md` nach dem Code** mit Beleg-Tabelle (Bedingung → Test oder Streichung); Handbuch und READMEs ohne Kennungen ([`AGENTS.md`](../../../../AGENTS.md) §5 Regel 6); der Satz „wird weder eingerichtet noch geprüft“ in [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) entfällt oder bleibt, je nach Weg.
+- [x] **Der gewählte Weg** (A, B oder C): bei A oder B reicht `u-boot generate devcontainer` die Variable als Referenz durch, `u-boot doctor` prüft sie nach der festgelegten Regel, Tests je Bedingung und je Mutation; bei C steht der Ablauf mit Datum und Messstand im Handbuch.
+- [x] **Spezifikation, Handbuch, `CHANGELOG.md` nach dem Code** mit Beleg-Tabelle (Bedingung → Test oder Streichung); Handbuch und READMEs ohne Kennungen ([`AGENTS.md`](../../../../AGENTS.md) §5 Regel 6); der Satz „wird weder eingerichtet noch geprüft“ in [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) entfällt oder bleibt, je nach Weg.
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
@@ -100,6 +109,27 @@ Gelesen am 2026-10-31; Zeilennummern verschieben sich, der Implementer liest sie
 | `README.md`, `README.de.md`, `CHANGELOG.md`, `harness/replay.md` | update (prüfen) | je nach Weg; `harness/replay.md` Zeile 57 führt einen Golden Case mit `claude-code` (nur die Treffer-Zeile gelesen) |
 | `docs/plan/adr/` | neu, wenn ein Weg das verlangt | eine ADR hält die Wahl und die Zusage-Menge (Vorbild: [ADR-0036](../../adr/0036-cloud-modelle-von-ollama-im-devcontainer.md)) |
 | diese Datei, `docs/plan/planning/open/README.md` | update | Zeile dieses Slice; Moves per `make slice-mv` |
+
+**Abgleich mit `git diff --stat` (Weg A, nach der Umsetzung):**
+
+| Datei | Art | Beleg |
+|---|---|---|
+| `internal/hexagon/application/devcontainer_sandbox.go` | update | `agentCredentialEnv` liefert `ANTHROPIC_API_KEY`, `CLAUDE_CODE_OAUTH_TOKEN`; Doc-Kommentar nennt die Folge |
+| `internal/hexagon/application/doctor_sandbox.go` | update | nur der Hinweistext in `checkSandboxCredentials` (Beispiel-Variablen); `missingAgentSources` und die Regel unverändert gelesen |
+| `internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl` | unverändert | `range .AgentEnv` (Zeilen 33 bis 35) rendert jede Variable der Liste |
+| `internal/hexagon/application/devcontainer_shell_test.go` | unverändert | `sessionConfig` ist eine Handkonfiguration, `TestSessionEnvNames` liest die Namen aus dem Text der Datei (Zeilen 20 bis 60 gelesen); der e2e-Test misst die Weitergabe mit dem echten Namen |
+| `generate_features_test.go`, `generate_forge_cli_test.go`, `generate_ollama_host_test.go`, `generate_ollama_test.go`, `doctor_sandbox_test.go` | update | Erwartungswerte von `remoteEnv` mit `claude-code`; Doctor-Fälle „only the API key reference“, „only the OAuth token reference“ |
+| `internal/e2e/claude_oauth_token_docker_test.go` | neu | Messung (Variable gesetzt, ungesetzt, leer; `claude -p` mit Platzhalter) |
+| `docs/messungen/slice-v1-devcontainer-claude-oauth-token/`, `docs/messungen/README.md` | neu / update | Protokoll und Rohdaten; ein Skript unter `tools/messung/` entfällt, die Messung ist der Test |
+| `.devcontainer/devcontainer.json` | update | die vom Generator erzeugte Datei dieses Repos trägt die neue Referenz |
+| `spec/spezifikation.md` | update | [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) (Absatz Zugangsdaten, Prüfung Punkt 3), [`SPEC-051`](../../../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten) (Reihenfolge) |
+| `spec/lastenheft.md` | unverändert | [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) nennt die Variable des Agenten ohne Namen, gelesen |
+| `docs/user/benutzerhandbuch.md` | update | Abschnitt Claude Code, Zugangsdaten, Schritt der Sandbox-Anleitung, Variablentabelle |
+| `docs/maintainer/zusagen-und-messstaende.md` | update | Messstand und Grenze des Tokens |
+| `README.md`, `README.de.md` | unverändert | Zeile 153 bzw. 156 nennt `claude-code` ohne Zugangsdaten, gelesen |
+| `CHANGELOG.md`, `harness/replay.md` | update | Eintrag `[Unreleased]`; Golden-Case-Zeile `claude-code` |
+| `docs/plan/adr/` | unverändert | keine ADR nötig (Entscheidung oben) |
+| diese Datei | update | `Verantwortlich`, Entscheidung, Abgleich; `roadmap.md` und `open/README.md` macht der Auftraggeber |
 
 ## 4. Trigger
 

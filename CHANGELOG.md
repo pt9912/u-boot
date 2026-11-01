@@ -11,6 +11,10 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- With the sandbox profile and an active `claude-code`, `devcontainer.json` carries the reference `"CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}"` next to `ANTHROPIC_API_KEY` ([`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)): a subscription token set on the host reaches the container at runtime, never as a value in a generated file. An unset host variable stays unset, an empty one arrives empty. `u-boot doctor` (`devcontainer.sandbox.credentials`) looks for both references while `claude-code` is active and names only the missing one; regenerate an existing `devcontainer.json` with `u-boot generate devcontainer` to get the new reference. `u-boot` still sets up no login inside the container.
+
 ### Changed
 
 - Documentation: the README files and the user manual state that the Homebrew tap serves Linux (`arm64` and `amd64`) as well as macOS; the formula already carried the Linux binaries, and the manual no longer says that Linux-Brew is not promised. The READMEs no longer carry the release table and the long status block; promises, conditions and limits are in the user manual and this changelog.
