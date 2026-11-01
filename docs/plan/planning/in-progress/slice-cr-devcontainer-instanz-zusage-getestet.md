@@ -109,7 +109,7 @@ Aussagen-Berührung steht hier gar nicht.
 | `docs/maintainer/zusagen-und-messstaende.md` | update | Zusage-Teil des Abschnitts „Mehrere Devcontainer je Projekt“ (Zeilen 168 bis 181) |
 | `docs/user/benutzerhandbuch.md` | update, falls die Lesung es verlangt | Zeilen 903 bis 906 (Bedingung „soweit aktiviert“), nur mit Fundstelle der Lesung |
 | `spec/spezifikation.md` | unverändert | [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) Zeile 837 gelesen: keine Zahl, keine Grenze; Zeilen 838 bis 844 vom Implementer zu lesen |
-| `docs/plan/planning/next/slice-cr-devcontainer-instanz-zusage-getestet.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
+| `docs/plan/planning/in-progress/slice-cr-devcontainer-instanz-zusage-getestet.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
 | `docs/plan/planning/open/README.md` | update | Zeile dieses Slice; beim Move Verweis-Nachzug (`make slice-mv`) |
 | `docs/reviews/` | neu | Review und Verification nach `harness/review.md` und `harness/verification.md` |
 | `docs/plan/planning/observations/BEO-DOK/zusage-weiter-als-messung/` | update | Closure (§7): Evidence-Datei dieses Slice und `state.md` |
