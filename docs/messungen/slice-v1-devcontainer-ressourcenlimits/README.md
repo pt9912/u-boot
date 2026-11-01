@@ -1,6 +1,6 @@
 # Messprotokoll: überlebt eine Hand-Ergänzung von `--memory` und `--cpus` ein erneutes `generate devcontainer`?
 
-Messung zum Entwurf [`slice-v1-devcontainer-ressourcenlimits`](../../plan/planning/open/slice-v1-devcontainer-ressourcenlimits.md) (Anlass: Frage des Projektinhabers vom 2026-10-31, ob man Devcontainern schon eine Höchstmenge an CPU und Arbeitsspeicher mitgeben kann). Gemessen ist nur, was `u-boot generate devcontainer` mit der Datei `.devcontainer/devcontainer.json` tut. Es lief **kein Container**; ob eine Engine `--memory` und `--cpus` aus `runArgs` anwendet, ist nicht Gegenstand.
+Messung zum Entwurf [`slice-v1-devcontainer-ressourcenlimits`](../../plan/planning/in-progress/slice-v1-devcontainer-ressourcenlimits.md) (Anlass: Frage des Projektinhabers vom 2026-10-31, ob man Devcontainern schon eine Höchstmenge an CPU und Arbeitsspeicher mitgeben kann). Gemessen ist nur, was `u-boot generate devcontainer` mit der Datei `.devcontainer/devcontainer.json` tut. Es lief **kein Container**; ob eine Engine `--memory` und `--cpus` aus `runArgs` anwendet, ist nicht Gegenstand.
 
 ## Messstand
 
