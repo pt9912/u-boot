@@ -72,3 +72,47 @@ Nicht ausgeführt: `make test-docker` (Auftrag), `make verify-depguard` (keine I
 **Merge-blockierend:** nein — der Tag ist gesetzt und veröffentlicht; er ist nicht zurückzunehmen ([`releasing.md`](../maintainer/releasing.md) *Zweck*), und kein Finding betrifft Binary, Versionsstrings oder Compare-Links. F-1 (MEDIUM) betrifft das Handbuch im Repo und lässt sich nach dem Tag per Folgecommit beheben; der Slice geht nicht nach `done/`, bevor der Hauptagent F-1 entschieden hat. F-3 und F-4 fallen in die offene Nacharbeit. Die Findings werden nicht herabgestuft, wenn der Implementer widerspricht; HIGH gibt es nicht, ein Konfliktpfad über den Architect entfällt.
 
 **Übergabe:** Findings gehen an den Implementer; die Finding-Klassen gehen in die Closure-Notiz §7 des Slice und von dort in den Zähler. Dieser Report ist ein Lauf-Beleg und ersetzt keine Verifikation (Verifier, anderer Kontext). Transiente Befunde: keine, die `docs-check` betreffen; der parallele Verifier-Report dieses Slice lag zum Zeitpunkt des Laufs ungetrackt im Baum und wurde nicht gelesen.
+
+## Nachlauf Fix-Runde
+
+Enger Nachlauf gegen `git diff f89424e1..HEAD` (Handbuch *Mehrere Instanzen*, CHANGELOG-Lead, `tools/mk/devcontainer.mk`, `harness/README.md`). Maßstab: Plan und Entscheidung [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`AGENTS.md`](../../AGENTS.md) §3.10.
+
+### Findings
+
+- `kategorie`: LOW
+  `quelle`: [`AGENTS.md`](../../AGENTS.md) §3.10, [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)
+  `pfad`: `docs/user/benutzerhandbuch.md` · „Jede Instanz hat damit eigene Volumes, der Container"
+  `klasse`: Handbuch-Aussage stärker als Zusage und Test
+  `befund`: Der Satz nennt alle Volumes der Namensliste davor (Workspace, Podman, Docker, `ollama`) je Instanz eigen. Gemessen und im Docker-Test `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated` gepinnt sind nur die Workspace-Volumes (`dcRequireDistinct(t, "workspace volume", …)`); die Zusage in der Spec nimmt Docker-Speicher und Modelle ausdrücklich aus, und der Abschnitt *Mehrere Devcontainer je Projekt (Instanzen)* formuliert dort vorsichtiger („Volumes, deren Name von der Kennung des Devcontainers abhängt“).
+  `risiko`: Der Absatz liest sich für Docker-Speicher und Modelle wie eine Zusage; ein Änderer des Handbuchs oder ein Nutzer mit `nestedRuntime: docker` verlässt sich auf eine Isolation, die kein Test belegt. Der Satz ist als Ist-Zustand aus [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md) (Volume-Namen tragen `${devcontainerId}`, die Id wechselt mit dem Id-Label) herleitbar, daher kein MEDIUM.
+  `verifizierbar`: Review-only (Gegenlesen mit `internal/e2e/devcontainer_instance_docker_test.go`)
+
+- `kategorie`: INFO
+  `quelle`: Maintainability
+  `pfad`: `tools/mk/devcontainer.mk` · `$(if $(INSTANCE),--instance $(INSTANCE))`
+  `klasse`: Make-Variable unquotiert ins Shell-Rezept
+  `befund`: `INSTANCE` wird ungequotet eingesetzt; ein Wert mit Shell-Metazeichen wirkt als Shell-Syntax. Der Name wird erst von `u-boot` geprüft (Exit-Code `10`), das Rezept läuft vorher durch die Shell. Der Aufrufer ist der Nutzer selbst, keine Vertragsverletzung.
+  `risiko`: gering; nur lokaler Komfort-Pfad, kein Gate.
+  `verifizierbar`: Review-only
+
+### Geprüfte Fragen
+
+1. Handbuch-Absatz. Fundstellen gelesen: `runArgs` in `internal/adapter/driven/docker/devcontainer_launcher.go` (mit Instanz zwei `--id-label`, ohne keines; Test in `devcontainer_launcher_test.go` pinnt beide Listen), `volumeMount` in `internal/hexagon/application/devcontainer_sandbox.go` (`<volume>-${devcontainerId}`), `generate_ollama_test.go` (`dockerMount`, `ollamaMount`, `workspaceMountLine`), Docker-Test (Container ohne Instanz trägt kein Instanz-Label, Instanzen eigene Workspace-Volumes und Container). „Container ohne Instanz behält seine“ ist durch den Argumente-Test und [`ADR-0038`](../plan/adr/0038-devcontainer-instanz-zweites-id-label.md) Entscheidung 3 getragen. „Das Werkzeug bildet `devcontainerId` aus dem Projektordner“ und „fließt zusätzlich der Name ein“ ist das Verhalten der externen CLI; Beleg ist die Messung der ADR (Punkt 1), kein Test im Repo außer dem Docker-Test über das Ergebnis. Keine Zusage-/Mess-Sprache im Absatz. Widerspruch zum Abschnitt *Mehrere Devcontainer je Projekt (Instanzen)* (Zeile 887 ff.): kein Widerspruch in der Sache, nur der Stärkeunterschied des Findings oben. Widerspruch zu [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) und Lastenheft: keiner über das Finding hinaus.
+2. Reste im Baum zu „getrennte Ordner“, „Derselbe Ordner bleibt eine Instanz“, „pro Projektordner“, „je Projektordner“ in `docs/user`, `README*`, `docs/maintainer`, `CHANGELOG.md`: keine Treffer. Die Treffer zu „Worktree“ (Zeile 1339) betreffen die Git-Remote-Erkennung und gehören nicht zum Thema.
+3. CHANGELOG-Lead *Not promised*: deckungsgleich mit der Nicht-Zusage-Liste in [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (drei und mehr Instanzen, Docker-Speicher, Modelle, Podman-Speicher, CPU-/Speicherbegrenzung, Last, kalter Cache oder kalter Bau, Dauer und Platzbedarf des Starts, andere Hosts und Engines, Standardprofil); die Lead-Kurzform lässt die Beispiele (Go-Build, Modell-Pull) weg, ohne Inhalt zu ändern. Ohne Befund.
+4. `tools/mk/devcontainer.mk` und `harness/README.md`: `make -n dev-up INSTANCE=slice-a RECREATE=1` ergibt `u-boot devcontainer up --recreate --instance slice-a`; ohne `INSTANCE` bleibt das Rezept das alte (nur ein Leerzeichen am Ende). `make help` und die drei Tabellenzeilen nennen `INSTANCE=<name>` einheitlich. Ohne Befund.
+
+### Nicht geprüft
+
+`make test-docker` (laut Auftrag nicht ausgeführt; das Verhalten der externen CLI zur `devcontainerId` ist hier nur über Messprotokoll und ADR belegt). Verifikation der DoD: Verifier.
+
+### Summary Nachlauf
+
+| Kategorie | Anzahl |
+|---|---|
+| HIGH | 0 |
+| MEDIUM | 0 |
+| LOW | 1 |
+| INFO | 1 |
+
+**Verdikt Nachlauf:** nicht blockierend; das LOW geht an den Implementer (Klasse: Handbuch-Aussage stärker als Zusage und Test). Transiente Befunde: keine.
