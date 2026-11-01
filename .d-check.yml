@@ -15,9 +15,11 @@
 # (GOCACHE und GOMODCACHE, .devcontainer/Dockerfile): fremde Abhaengigkeiten mit
 # eigenen Markdown-Dateien, kein Repo-Inhalt; .gitignore und .dockerignore
 # schliessen ihn ebenso aus.
+# .claude/worktrees/** sind die Arbeitsbaeume paralleler Agenten-Laeufe: vollstaendige
+# Kopien des Repos, kein eigener Inhalt; .gitignore und .dockerignore schliessen sie ebenso aus.
 scan:
   roots: ["."]
-  ignore: [".harness/baseline/**", ".cache/**"]
+  ignore: [".harness/baseline/**", ".cache/**", ".claude/worktrees/**"]
 modules: [links, anchors, ids, matrix, planning, targets]
 
 # Linkpflicht für Kennungen — Muster aus tools/check_refs.py übersetzt
