@@ -96,7 +96,7 @@ Gelesen am 2026-10-31; Zeilennummern verschieben sich, der Implementer liest sie
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `tools/messung/<name>/`, `docs/messungen/<kennung>/` | neu | Skript und Protokoll der Messung (Platzhalter; ein gültiges Token nur durch den Projektinhaber) |
+| `docs/messungen/<kennung>/` (`tools/messung/<name>/` entfällt) | neu | Protokoll der Messung (Platzhalter; ein gültiges Token nur durch den Projektinhaber); die Messung ist der Docker-Test `internal/e2e/claude_oauth_token_docker_test.go`, kein Skript |
 | `internal/hexagon/application/devcontainer_sandbox.go` | update (Weg A) | `agentCredentialEnv` (Zeilen 446 bis 458) liefert für `claude-code` zusätzlich `CLAUDE_CODE_OAUTH_TOKEN`; der Doc-Kommentar nennt die feste Reihenfolge (Zeilen 438 bis 445) |
 | `internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl` | unverändert (Weg A) | Zeilen 33 bis 35 rendern `.AgentEnv` per `range`; eine weitere Variable braucht keine Vorlagenänderung |
 | `internal/hexagon/application/doctor_sandbox.go` | update (Weg A, Regel offen) | `checkSandboxCredentials` (ab Zeile 134) nutzt `agentCredentialEnv` (Zeile 147) und `missingAgentSources`; der Hinweistext (Zeile 144) nennt die Variablen; `credentialPatterns` (Zeile 54) deckt das Token als Klartext schon ab |

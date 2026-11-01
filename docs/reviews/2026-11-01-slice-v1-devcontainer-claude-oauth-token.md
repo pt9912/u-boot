@@ -62,3 +62,45 @@
 **Merge-blockierend:** ja — wegen F-1 (MEDIUM, Handbuch-Aussage über Verhalten ohne Beleg und im Widerspruch zu Handbuch und Spec). F-2 bis F-4 sind nicht blockierend. F-5 und F-6 ohne Änderungspflicht am Code; F-6 ist Sache von Verifier und Planner und hält die DoD-Zeile „Messung“ offen.
 
 **Übergabe:** Findings gehen an den Implementer; F-6 zusätzlich an den Verifier. Die Finding-Klassen gehen in die Slice-Closure §7. Dieser Report ersetzt keine Verifikation.
+
+---
+
+## Nachlauf
+
+**Gegenstand:** Fix-Runde `c2e68d7b` (5 Dateien: Slice, Handbuch, `devcontainer_shell_test.go`, Spezifikation, dieser Report) gegen F-1 bis F-4. Geprüft sind nur die Fix-Runde und ihre neuen Vertragstexte. **Sensoren:** `make docs-check` im Arbeitsbaum: 952 Dateien, 0 Befunde. `make gates` nicht gefahren (der Code-Diff der Runde ist ein Kommentar und ein Testfall-Name); `make test-docker` nicht gefahren (Anweisung).
+
+### Stand der Findings
+
+| Finding | Stand | Beleg |
+|---|---|---|
+| F-1 (MEDIUM) | behoben bis auf N-1 (LOW) | Handbuch, Abschnitt Claude Code, Punkt Zugangsdaten: „Das Token steht in der Umgebung der Sitzung von `u-boot devcontainer shell`“; Sitzung gemessen durch `TestE2E_ClaudeOAuthToken_ReachesTheSession`; „in einer Shell, die Sie mit `docker exec` öffnen, gilt `remoteEnv` nicht“ steht im Handbuch (Abschnitt devcontainer shell, „In dieser Shell gilt `remoteEnv` aus `devcontainer.json` nicht“) und ist für `GIT_TOKEN` durch den Wächter „The same exec without `-e` does not carry the token“ in `internal/e2e/devcontainer_shell_docker_test.go` gepinnt |
+| F-2 (LOW) | behoben | beide Handbuchstellen nennen die Variablen des Agenten; [`SPEC-051`](../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten): „jede Variable, auf die `remoteEnv` verweist (bis zu vier: …)“ stimmt mit der Liste in [`SPEC-044`](../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) und `agentCredentialEnv` überein; Wortsuche nach „beide Variablen“, „Schlüssel des/eines Agenten“, „jedes Prozesses“ außerhalb von Reports und archivierten Slices: keine Treffer (Archivtexte unter `done/` sind Chronik, kein Nachzug) |
+| F-3 (LOW) | behoben | Kommentar von `sessionConfig` sagt „hand-written … form of the `remoteEnv` entries“, Fallname „the entry form the generator writes“; der Wortlaut des Falls steht in `done/`-Slices als Zitat (Chronik, unberührt) |
+| F-4 (LOW) | teilweise behoben, N-2 (LOW) | DoD-Zeile „Messung“ benennt: Skript entfällt, Test ist die Messung, `claude -p` einmal, gültiges Token fehlt, Risiko 4 |
+
+### Neue Findings
+
+| ID | Kategorie | Befund | Quelle | Pfad | Verifizierbar | Klasse |
+|---|---|---|---|---|---|---|
+| N-1 | LOW | Der Satz „nicht in der Container-Konfiguration“ stützt sich auf [`SPEC-051`](../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten) („nicht in der Umgebung des Containers (`Config.Env`)“). Gepinnt ist `Config.Env` für `GIT_TOKEN`, den Agenten-Wert und die Forge-Token (`devcontainer_shell_docker_test.go`, `forge_cli_docker_test.go`: Kanarienwerte mit Wächter), nicht für `CLAUDE_CODE_OAUTH_TOKEN`; `claude_oauth_token_docker_test.go` prüft nur `devcontainer.json` und `stderr` auf den Platzhalter. Der Mechanismus (`remoteEnv` mit `${localEnv:…}`) ist derselbe, die Variable steht aber in keiner Messung für `Config.Env`. „Container-Konfiguration“ ist zudem weiter als `Config.Env` (die `devcontainer.json` gehört dazu und trägt die Referenz). Szenario: Der nächste Änderer liest „Konfiguration“ als „keine Spur im Container“ und baut darauf. | `AGENTS.md` §3.10 (Aussage über Verhalten; Bedingung in Spec/Handbuch braucht Test) | `docs/user/benutzerhandbuch.md` · „nicht in der Container-Konfiguration“ | `make test-docker` (nicht gefahren); sonst Review-only | Handbuch-Aussage über die Reichweite stützt sich auf Pins anderer Variablen |
+| N-2 | LOW | Die Plan-Tabelle in §3 führt weiter die Zeile „`tools/messung/<name>/`, `docs/messungen/<kennung>/` · neu · Skript und Protokoll der Messung“ (Datei [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/open/slice-v1-devcontainer-claude-oauth-token.md)); die DoD-Zeile und die Abgleichtabelle sagen, das Skript entfällt. Die Runde hat die DoD-Zeile berichtigt, nicht diese Zeile (Abgleich nach der Fix-Runde, `AGENTS.md` §3.10). | `AGENTS.md` §3.10 (Abgleich nach der letzten Fix-Runde) | Slice-Datei · „Skript und Protokoll der Messung (Platzhalter“ | Review-only | Plan-Zeile ohne Diff-Entsprechung |
+
+### Zu den gestellten Fragen
+
+- **Tragbarkeit von „nicht in der Container-Konfiguration“ ohne neue Messung:** tragbar als Aussage über `Config.Env`, nicht in dieser Wortwahl. Entweder den Satz auf „nicht in der Umgebung des Containers (`docker inspect`)“ schärfen und einen `Config.Env`-Wächter mit dem Platzhalter in den Docker-Test dieses Slice aufnehmen, oder auf die Sitzung beschränken (der erste Halbsatz trägt allein, er ist gemessen). Gestrichen werden muss er nicht; Bedingung ist N-1. Nicht blockierend, solange der Slice offen bleibt (`make test-docker` wird ohnehin für den zweiten `claude -p`-Lauf gebraucht).
+- **Handbuch-Ton:** keine Kennung, keine Zusage- oder Mess-Sprache im Diff des Handbuchs; die Variablennamen stehen als Namen, nicht als Anforderungs-IDs. Geprüft, ohne Befund.
+- **DoD-Zeile „Messung“ und Risiko 4 „weiter offen“:** ehrlich. Die Zeile bleibt `[ ]`, nennt Test statt Skript, `claude -p` einmal, ein gültiges Token fehlt; Risiko 4 trägt Ausgang „weiter offen“ mit Beleg-Zeiger (Messprotokoll, Abschnitt Grenzen). Deckt sich mit dem Messprotokoll (Zelle `claude -p`: 1 Lauf). Der Halbsatz „(Entscheidung des Projektinhabers)“ ist ein Verweis auf die Anweisung, `make test-docker` nicht lokal zu fahren; im Slice selbst nicht auflösbar belegt (INFO, kein Änderungszwang).
+- **Reste nach altem Wortlaut (§3.9 b):** außer N-2 keine; `dcAddRemoteEnv` in `devcontainer_shell_docker_test.go` („two entries of the shape the generator writes for an agent“) bleibt zutreffend (Form des Eintrags, nicht Zahl).
+
+### Negativbefunde Nachlauf
+
+| Bereich | Ergebnis |
+|---|---|
+| `spec/spezifikation.md` (Absatz Zugangsdaten von [`SPEC-051`](../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten)) | geprüft, ohne Befund: Zahl und Namen stimmen mit [`SPEC-044`](../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) und Reihenfolge-Tests; kein Abwärtsverweis |
+| `internal/hexagon/application/devcontainer_shell_test.go` | geprüft, ohne Befund: Kommentar im Indikativ; Fallname ändert keinen Erwartungswert |
+| Handbuch, Abschnitt Zugangsdaten (Punkt zu `shell`, Standardprofil) | geprüft, ohne Befund: Aussage entspricht dem Wächter und `TestSessionEnvNames` |
+| Slice §6 Risiko 4, DoD | geprüft: ehrlich, siehe oben; N-2 bleibt |
+
+### Verdikt Nachlauf
+
+0 HIGH, 0 MEDIUM, 2 LOW, F-6 weiter beim Verifier. Das MEDIUM F-1 ist aufgelöst; die Merge-Blockade aus dem ersten Lauf entfällt. N-1 und N-2 sind nicht blockierend, der Implementer entscheidet über Schärfen oder Streichen.

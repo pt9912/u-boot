@@ -1835,8 +1835,7 @@ keinen Berechtigungsmodus.
   Variable auf dem Host nicht gesetzt, ist sie im Container nicht gesetzt; eine leer
   gesetzte kommt leer an. Ohne
   Schlüssel und Token meldet die CLI „Not logged in“. Das Token steht in der
-  Umgebung der Sitzung von `u-boot devcontainer shell`, nicht in der
-  Container-Konfiguration; in einer Shell, die Sie mit `docker exec` öffnen, gilt
+  Umgebung der Sitzung von `u-boot devcontainer shell`; in einer Shell, die Sie mit `docker exec` öffnen, gilt
   `remoteEnv` nicht. Nutzen Sie nur ein Token, das Sie widerrufen können, und
   widerrufen Sie es bei Anthropic, sobald Sie Missbrauch vermuten. Für
   Cloud-Modelle von Ollama muss `ANTHROPIC_API_KEY` im Aufruf nicht gesetzt sein
