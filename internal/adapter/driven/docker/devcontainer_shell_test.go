@@ -234,7 +234,11 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		stdout string
 		stderr string
 		flags  []string
-		edit   func(*driven.DevcontainerShellOptions)
+		// goneLate names the user whom the probe after the session reports
+		// as missing; reprobes is true where that probe is expected to run.
+		goneLate string
+		reprobes bool
+		edit     func(*driven.DevcontainerShellOptions)
 	}{
 		{name: "status 0", exit: "0"},
 		{name: "status 0, the message names this container", exit: "0", stderr: msgNotRunning + "\n"},
@@ -260,9 +264,11 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		{name: "status 126, other output before the missing-user line", exit: "126", stdout: "output\n" + msgUserGoneOnStdout + "\n"},
 		{name: "status 126, other output after the missing-user line", exit: "126", stdout: msgUserGoneOnStdout + "\nmore output\n"},
 		{name: "terminal, status 126, the missing-user line", exit: "126", stdout: msgUserGoneOnStdout + "\r\n", edit: terminal},
-		{name: "status 126, the missing-user line of the session user while the user exists", exit: "126", stdout: msgUserGoneOnStdout + "\r\n"},
+		{name: "status 126, the missing-user line of the session user while the user exists", exit: "126", stdout: msgUserGoneOnStdout + "\r\n", reprobes: true},
 		{name: "status 126, the missing-user line of the session user and a probe that fails for another reason", exit: "126", stdout: msgUserGoneOnStdout + "\r\n",
-			flags: []string{"probe-late-not-running"}},
+			flags: []string{"probe-late-not-running"}, reprobes: true},
+		{name: "status 126, the missing-user line of the session user and a probe that reports another user", exit: "126", stdout: msgUserGoneOnStdout + "\r\n",
+			goneLate: "vscode2", reprobes: true},
 		{name: "status 126, the missing-user line of a user whose name begins with the session user", exit: "126", stdout: "unable to find user vscode2: no matching entries in passwd file\r\n"},
 		{name: "status 126, the missing-user line of the session user for a session as vscode2", exit: "126", stdout: msgUserGoneOnStdout + "\r\n",
 			edit: func(o *driven.DevcontainerShellOptions) { o.User = "vscode2" }},
@@ -284,6 +290,9 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 				f.write(t, "session-stderr", tc.stderr)
 			}
 			f.flag(t, tc.flags...)
+			if tc.goneLate != "" {
+				f.write(t, "user-gone-late", tc.goneLate)
+			}
 			var stdout, stderr bytes.Buffer
 			err := f.launcher(nil).Shell(context.Background(), shellOptions(func(o *driven.DevcontainerShellOptions) {
 				if tc.edit != nil {
@@ -296,6 +305,13 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 			}
 			if stdout.String() != tc.stdout || stderr.String() != tc.stderr {
 				t.Errorf("stdout = %q, stderr = %q; want the session output unchanged", stdout.String(), stderr.String())
+			}
+			want := 2
+			if tc.reprobes {
+				want = 3
+			}
+			if got := len(f.execCalls(t)); got != want {
+				t.Errorf("docker exec ran %d times, want %d (the probe and the session, plus the repeated probe only for the missing-user line)", got, want)
 			}
 		})
 	}
