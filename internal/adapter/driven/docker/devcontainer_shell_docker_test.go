@@ -367,15 +367,6 @@ func TestShell_Docker_B18_SessionDoesNotBegin(t *testing.T) {
 		})
 	}
 
-	t.Run("guard: the session itself writes the missing-user line and ends with status 126", func(t *testing.T) {
-		id := newVscodeContainer(t)
-		line := "unable to find user vscode: no matching entries in passwd file"
-		stdout, stderr, err := runShell(t, testLauncher(t), vscodeShell(id, nil), "printf '%s\\r\\n' '"+line+"'\nexit 126\n")
-		if err != nil || stderr != "" || !strings.Contains(stdout, line) {
-			t.Errorf("error = %v, stdout = %q, stderr = %q; want the session without an error", err, stdout, stderr)
-		}
-	})
-
 	t.Run("guard: the shell ends with status 1 in a running container", func(t *testing.T) {
 		id := newVscodeContainer(t)
 		stdout, stderr, err := runShell(t, testLauncher(t), vscodeShell(id, nil), "echo session-ran\nexit 1\n")

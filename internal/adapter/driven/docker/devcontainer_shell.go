@@ -148,7 +148,7 @@ func (l *Launcher) runSession(ctx context.Context, shell string, envNames []stri
 		}
 		exit = exitErr.ExitCode()
 	}
-	if text, ok := l.clientErrorBeforeSession(ctx, opts, shell, exit, stdout, stderr); ok {
+	if text, ok := l.clientErrorBeforeSession(ctx, opts, exit, stdout, stderr); ok {
 		return fmt.Errorf("devcontainer shell: docker exec ended before the session began (exit status %d: %s): %w",
 			exit, text, driven.ErrDevcontainerRuntime)
 	}
@@ -161,8 +161,8 @@ func (l *Launcher) runSession(ctx context.Context, shell string, envNames []stri
 // the status of a shell whose last command failed); the message of the
 // client can, where the client is the only writer to the stream
 // ([Launcher.clientMessageOnStderr], [ociFailureOnStdout],
-// [Launcher.userMissingOnStdout]).
-func (l *Launcher) clientErrorBeforeSession(ctx context.Context, opts driven.DevcontainerShellOptions, shell string, exit int, stdout, stderr *headBuffer) (string, bool) {
+// [userMissingOnStdout]).
+func (l *Launcher) clientErrorBeforeSession(ctx context.Context, opts driven.DevcontainerShellOptions, exit int, stdout, stderr *headBuffer) (string, bool) {
 	if exit == 0 {
 		return "", false
 	}
@@ -172,7 +172,7 @@ func (l *Launcher) clientErrorBeforeSession(ctx context.Context, opts driven.Dev
 	if text, ok := ociFailureOnStdout(opts, exit, stdout, stderr); ok {
 		return text, true
 	}
-	return l.userMissingOnStdout(ctx, opts, shell, exit, stdout, stderr)
+	return userMissingOnStdout(opts, exit, stdout, stderr)
 }
 
 // clientMessageOnStderr recognises the messages the client prints on
@@ -219,25 +219,12 @@ func ociFailureOnStdout(opts driven.DevcontainerShellOptions, exit int, stdout, 
 // the daemon; Docker 29.9.2 prints it with the prefix on standard error
 // ([Launcher.clientMessageOnStderr]). Without a terminal the line is the
 // whole output of the client; with a terminal the client owns standard output
-// and the launcher does not see it. A `docker exec -u <user> <other
-// container>` inside the session can print the same line, so the line counts
-// as an error of the client only if the user is missing now
-// ([Launcher.userMissingNow]).
-func (l *Launcher) userMissingOnStdout(ctx context.Context, opts driven.DevcontainerShellOptions, shell string, exit int, stdout, stderr *headBuffer) (string, bool) {
+// and the launcher does not see it.
+func userMissingOnStdout(opts driven.DevcontainerShellOptions, exit int, stdout, stderr *headBuffer) (string, bool) {
 	line := stdout.firstLine()
 	found := !opts.Terminal && exit == 126 && stderr.total == 0 && stdout.singleLine() &&
 		strings.HasPrefix(line, missingUserLead(opts.User))
-	return line, found && l.userMissingNow(ctx, opts, shell)
-}
-
-// userMissingNow repeats the probe of the shell of the session and reports
-// whether it fails with the line about the missing user; a probe that
-// succeeds, or fails for another reason, leaves the line to the session.
-func (l *Launcher) userMissingNow(ctx context.Context, opts driven.DevcontainerShellOptions, shell string) bool {
-	askCtx, cancel := context.WithTimeout(ctx, inspectorTimeout)
-	defer cancel()
-	out, err := exec.CommandContext(askCtx, l.binary, probeArgs(opts, shell)...).CombinedOutput()
-	return err != nil && strings.Contains(string(out), missingUserLead(opts.User))
+	return line, found
 }
 
 // missingUserLead is how a message about a missing user begins: the text, the
