@@ -902,9 +902,8 @@ u-boot devcontainer up --instance agent-1 --recreate   # ersetzt nur den Contain
 - **Eigene Container und Volumes.** Jede Instanz hat einen eigenen Container. Im Sandbox-Profil hat
   sie außerdem eigene Volumes: den Workspace und, soweit aktiviert, den Docker-Speicher
   (`nestedRuntime: docker`) und die Modelle des Features `ollama`. Eine Datei im Workspace einer
-  Instanz sehen die anderen Instanzen nicht. Getestet ist das mit bis zu vier gleichzeitig laufenden
-  Instanzen im Sandbox-Profil mit `nestedRuntime: docker` und `ollama`. Im Standardprofil
-  teilen alle Instanzen den Projektordner, denn er ist in jeden Container eingehängt.
+  Instanz sehen die anderen Instanzen nicht. Im Standardprofil teilen alle Instanzen den
+  Projektordner, denn er ist in jeden Container eingehängt.
 - **Ohne `--instance`.** Ohne das Flag wirken `up`, `down` und `shell` nur auf den Container ohne
   Instanz, den `up` ohne Flag anlegt, auch wenn eine Instanz jünger ist. Gibt es im Projekt nur
   Container von Instanzen und keinen ohne Instanz, enden die drei Befehle ohne `--instance` mit

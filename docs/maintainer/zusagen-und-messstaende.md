@@ -178,9 +178,7 @@ Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der M
   Dev-Container-CLI 0.89.0). Das Verhalten von `u-boot` selbst prüft der Docker-Test `TestDevcontainerInstance_Docker_FourInstancesAreIsolated`
   (vier Instanzen, Sandbox-Profil, `nestedRuntime: docker`, `ollama`, Grenze je Instanz zurückgelesen), im Standardprofil
   `TestDevcontainerInstance_Docker_StandardProfileSharesTheProjectFolder` (drei Container).
-- **Wortlaut:** „Getestet ist das mit bis zu vier gleichzeitig laufenden Instanzen im Sandbox-Profil mit `nestedRuntime: docker` und
-  `ollama`.“ Der Satz nennt weder die Grenze je Instanz noch den Zeitpunkt (direkt nach dem Start); beide stehen nur im Lastenheft
-  und in diesem Abschnitt.
+- **Handbuch:** Abschnitt 4.9 nennt keine Zahl gleichzeitiger Instanzen und keine Grenze je Instanz; beides steht nur im Lastenheft und in diesem Abschnitt.
 
 ### 3.3 Katalog-Features und ihre Lieferkette (Handbuch, Abschnitt 4.10, Feature-Tabelle)
 
