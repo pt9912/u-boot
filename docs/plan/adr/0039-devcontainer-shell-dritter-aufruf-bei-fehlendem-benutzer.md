@@ -1,6 +1,8 @@
 # ADR 0039: `u-boot devcontainer shell` — ein dritter `docker exec` im Container, nur wenn die einzige Ausgabe einer Sitzung ohne Terminal die Zeile `unable to find user <Benutzer>` bei Status 126 ist; die Zusage „im Container nur die Probe und die Sitzung“ aus ADR-0034 gilt für alle anderen Fälle
 
-**Status:** Proposed
+**Status:** Deprecated
+
+**Grund:** Der Projektinhaber hat diese ADR am 2026-11-01 vor `Accepted` verworfen; der dritte Aufruf ist aus dem Code genommen. Die Messung ([Messprotokoll](../../messungen/slice-v1-shell-erkennung-fehlender-benutzer-eng/README.md), Engine und Client 29.9.2) zeigt: Die Zeile `unable to find user …` entsteht dort auf der Fehlerausgabe mit Status 1, nicht auf der Standardausgabe mit Status 126; der dritte Aufruf greift auf 29.9.2 nie. Die Form der Engine 28.0.4 ist weder bestätigt noch widerlegt (keine Engine 28.0.4 verfügbar). Die Zusage „im Container nur die Probe und die Sitzung“ aus ADR-0034 gilt unverändert; die Teil-Ablösung unten ist nie in Kraft getreten. Der folgende Text ist der Stand beim Verwerfen.
 
 **Datum:** 2026-11-01
 
@@ -75,7 +77,8 @@ Die Messung des Erzeugers findet die Zeile in der Sitzung auf keiner Engine: Gre
 
 | Datum | Ereignis | Verweis |
 |---|---|---|
-| 2026-11-01 | Proposed durch den Architect; Weg A vom Projektinhaber gewählt, Umsetzung in den Commits `000ae5ca` und `2f09b5dd`; `Accepted` setzt der Projektinhaber | Slice zur Erkennung eines fehlenden Benutzers bei `shell` |
+| 2026-11-01 | Proposed durch den Architect; Weg A vom Projektinhaber gewählt, Umsetzung in den Commits `000ae5ca` und `2f09b5dd`; `Accepted` setzt der Projektinhaber |
+| 2026-11-01 | Deprecated: Messung auf Engine 29.9.2 (Zeile auf der Fehlerausgabe, Status 1), Projektinhaber nimmt den dritten Aufruf und diese ADR zurück | Messprotokoll, Slice zur Erkennung eines fehlenden Benutzers bei `shell` | Slice zur Erkennung eines fehlenden Benutzers bei `shell` |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit
 `Supersedes ADR-0039`.
