@@ -2299,8 +2299,10 @@ erzeugten Datei:
   `https`-Remotes; bei `ssh` gibt es keinen Schlüssel im Container).
 - Die Git-Identität im Container: Nach dem Start setzt `u-boot` `user.name`
   und `user.email` im Container aus Ihrer `git config` des Projektordners (beide
-  Profile); ein im Container bereits gesetzter Wert bleibt. Fehlen die Werte
-  oder `git` auf dem Host, weist der Befehl ohne Abbruch darauf hin.
+  Profile); ein im Container bereits gesetzter Wert bleibt — ein Wechsel der
+  Identität auf dem Host greift im Container mit dem Neubau
+  (`u-boot devcontainer up --recreate`). Fehlen die Werte oder `git` auf dem
+  Host, weist der Befehl ohne Abbruch darauf hin.
 - Starten Sie den Container mit `u-boot devcontainer up`, reicht der Befehl nur den Namen
   der Variable durch; die Grenzen dieses Wegs (Metadaten bei `containerEnv`, Kommandozeile
   im Hilfs-Container während eines Lebenszyklus-Befehls) stehen in Abschnitt 4.9. In einer
