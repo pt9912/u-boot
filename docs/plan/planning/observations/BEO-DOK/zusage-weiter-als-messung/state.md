@@ -54,3 +54,5 @@
 
 
 **Slice-Closure** ([`slice-v1-devcontainer-instanz-messung`](../../../done/slice-v1-devcontainer-instanz-messung.md) §7, 2026-10-31): weiterer Beleg (`evidence/slice-v1-devcontainer-instanz-messung.md`: Messbedingung „zurückgelesen an jeder Instanz“ nur für einen Teil der Container belegt, Review F-1; Schluss ohne Rohdaten, F-2; M6 ohne Profil-Grenze und Mechanismus als Tatsache, F-3; Deutung des Image-Baus als Messung, Verification V-2; Annahme im CR-Entwurf von der Messung widerlegt, V-4; alle berichtigt). Der Ausgang wird **nicht** zugewiesen; die Entscheidung des Projektinhabers steht aus (unverändert).
+
+**Slice-Closure** ([`slice-v1-devcontainer-claude-oauth-token`](../../../done/slice-v1-devcontainer-claude-oauth-token.md) §7, 2026-11-01): weiterer Beleg (`evidence/slice-v1-devcontainer-claude-oauth-token.md`: DoD-Zeile *Messung* weiter als die Messung, Review F-4 und F-6, Verification Abschnitt 4; DoD auf das Gemessene angepasst). Der Ausgang wird **nicht** zugewiesen; die Entscheidung des Projektinhabers steht aus (unverändert).
