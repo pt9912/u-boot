@@ -7,7 +7,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** ohne Welle, Release-Zuordnung offen (Werkzeug-Änderung, kein Produktvertrag).
 
-**Anlass (Projektinhaber, 2026-11-01, im Verifikationslauf zu [`slice-v1-devcontainer-host-git-uebernehmen`](../in-progress/slice-v1-devcontainer-host-git-uebernehmen.md)):** Der Verifier fuhr den `test-docker`-Gesamtlauf (~40 min) erneut, obwohl der Stand seit dem letzten grünen Lauf nur von der Fix-Runde berührt war und der DoD-Nachweis ohnehin der CI-Lauf ist. Eine Regel („Gesamt-Suiten nur in CI") reicht nicht: **Der Start selbst muss den Nicht-Bedarf feststellen.** Die Mechanik existiert als Muster: `record-gates` stempelt HEAD (`tools/harness/record-gates.sh`, Kopplung mit dem Stop-Hook) und den Inhalts-Hash (`tools/harness/working-tree-hash.sh`); der Stop-Hook verweigert das Turn-Ende bei nicht gedecktem Inhalt.
+**Anlass (Projektinhaber, 2026-11-01, im Verifikationslauf zu [`slice-v1-devcontainer-host-git-uebernehmen`](../done/slice-v1-devcontainer-host-git-uebernehmen.md)):** Der Verifier fuhr den `test-docker`-Gesamtlauf (~40 min) erneut, obwohl der Stand seit dem letzten grünen Lauf nur von der Fix-Runde berührt war und der DoD-Nachweis ohnehin der CI-Lauf ist. Eine Regel („Gesamt-Suiten nur in CI") reicht nicht: **Der Start selbst muss den Nicht-Bedarf feststellen.** Die Mechanik existiert als Muster: `record-gates` stempelt HEAD (`tools/harness/record-gates.sh`, Kopplung mit dem Stop-Hook) und den Inhalts-Hash (`tools/harness/working-tree-hash.sh`); der Stop-Hook verweigert das Turn-Ende bei nicht gedecktem Inhalt.
 
 **Verantwortlich:** —
 
@@ -68,7 +68,7 @@ Ein Mutationstest je Wächter bei der Closure geführt (Projektinhaber-Praxis).
 
 ## 4. Trigger
 
-**Start:** Projektinhaber gibt den Auftrag nach der Closure von [`slice-v1-devcontainer-host-git-uebernehmen`](../in-progress/slice-v1-devcontainer-host-git-uebernehmen.md); kein anderer Slice in `in-progress/`.
+**Start:** Projektinhaber gibt den Auftrag nach der Closure von [`slice-v1-devcontainer-host-git-uebernehmen`](../done/slice-v1-devcontainer-host-git-uebernehmen.md); kein anderer Slice in `in-progress/`.
 
 **Rückführung:** —
 

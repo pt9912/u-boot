@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-v1-devcontainer-host-git-uebernehmen`](../plan/planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md) — 2026-11-01
+# Verification-Report: [`slice-v1-devcontainer-host-git-uebernehmen`](../plan/planning/done/slice-v1-devcontainer-host-git-uebernehmen.md) — 2026-11-01
 
 **Verification-Art:** DoD-Abgleich im frischen Kontext (Baseline-Regelwerk
 `modul-11-verification.md` — DoD-Konformität gegen Code und Tests je Fundstelle, die
@@ -21,7 +21,7 @@ umgebenden Standard-`make gates`-Umgebung).
 
 ## Scope
 
-- Slice: [slice-v1-devcontainer-host-git-uebernehmen](../plan/planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md) (ohne Welle; Minor/`Added`)
+- Slice: [slice-v1-devcontainer-host-git-uebernehmen](../plan/planning/done/slice-v1-devcontainer-host-git-uebernehmen.md) (ohne Welle; Minor/`Added`)
 - IDs: [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CONF-002`](../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), [`SPEC-040`](../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config), [ADR-0040](../plan/adr/0040-host-git-quellen-fuer-token-und-identitaet.md) (schärft [ADR-0028](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), [ADR-0031](../plan/adr/0031-devcontainer-shell-ohne-editor.md), [ADR-0035](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md))
 - Artefakte: `internal/hexagon/port/driven/hostgitsource.go`, `internal/adapter/driven/git/hostsource.go`, `internal/hexagon/application/devcontainer_start.go`, `internal/adapter/driven/docker/devcontainer_launcher.go` + `devcontainer_shell.go`, `internal/adapter/driving/cli/devcontainer.go`, `cmd/uboot/main.go`, `internal/hexagon/domain/configpath.go`, `internal/e2e/devcontainer_hostgit_docker_test.go`, Tests der benannten Dateien, `spec/lastenheft.md`, `spec/spezifikation.md`, `spec/architecture.md`, `docs/user/benutzerhandbuch.md`, `CHANGELOG.md`, `docs/plan/adr/0040-…` + ADR-Index, Messprotokoll und Rohdaten, `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/open/README.md`, `docs/reviews/` (zwei Berichte)
 

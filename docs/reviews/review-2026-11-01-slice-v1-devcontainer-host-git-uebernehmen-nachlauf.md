@@ -1,4 +1,4 @@
-# Review-Report (Nachlauf): [`slice-v1-devcontainer-host-git-uebernehmen`](../plan/planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md) — 2026-11-01
+# Review-Report (Nachlauf): [`slice-v1-devcontainer-host-git-uebernehmen`](../plan/planning/done/slice-v1-devcontainer-host-git-uebernehmen.md) — 2026-11-01
 
 **Review-Art:** Nachlauf der Review-Fix-Runde (2. Lauf, frischer Kontext) gegen den Erst-Report [`review-2026-11-01-slice-v1-devcontainer-host-git-uebernehmen.md`](review-2026-11-01-slice-v1-devcontainer-host-git-uebernehmen.md).
 
@@ -28,7 +28,7 @@
 
 | ID | Kategorie | Befund | Quelle | Pfad | Verifizierbar | Klasse |
 |---|---|---|---|---|---|---|
-| F-N1 | LOW | Der Abgleich der Plan-Tabelle (Slice §3) wurde nach der Fix-Runde nicht wiederholt, obwohl §3.10 ihn nach „jeder späteren Änderung“ verlangt; die Fix-Runde berührt zwei Dateien ohne Plan-Eintrag: `spec/architecture.md` (F-7-Fix) und `docs/reviews/…` (Review-Berichte). Die Test-, CLI-, Handbuch- und ADR-Dateien sind in der Tabelle geführt. | `AGENTS.md` §3.10 (Abgleich nach jeder späteren Änderung); Klasse [`BEO-DOK/plan-aussage-ueber-code`](../plan/planning/observations/BEO-DOK/plan-aussage-ueber-code/observation.md) | [`slice-v1-devcontainer-host-git-uebernehmen.md`](../plan/planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md) · „wiederholt nach jeder Fix-Runde“ | Review-only | Abgleich nach der Fix-Runde stehen geblieben |
+| F-N1 | LOW | Der Abgleich der Plan-Tabelle (Slice §3) wurde nach der Fix-Runde nicht wiederholt, obwohl §3.10 ihn nach „jeder späteren Änderung“ verlangt; die Fix-Runde berührt zwei Dateien ohne Plan-Eintrag: `spec/architecture.md` (F-7-Fix) und `docs/reviews/…` (Review-Berichte). Die Test-, CLI-, Handbuch- und ADR-Dateien sind in der Tabelle geführt. | `AGENTS.md` §3.10 (Abgleich nach jeder späteren Änderung); Klasse [`BEO-DOK/plan-aussage-ueber-code`](../plan/planning/observations/BEO-DOK/plan-aussage-ueber-code/observation.md) | [`slice-v1-devcontainer-host-git-uebernehmen.md`](../plan/planning/done/slice-v1-devcontainer-host-git-uebernehmen.md) · „wiederholt nach jeder Fix-Runde“ | Review-only | Abgleich nach der Fix-Runde stehen geblieben |
 | F-N2 | INFO | Der Inline-Kommentar im neuen Test „t.Setenv verbietet t.Parallel in dieser Datei: deterministisch ohne Umgebungslesung des Ports“ begründet das Setzen von `NEUTRAL=x` mit einer Umwelt-Unabhängigkeit, die das `Setenv` selbst nicht herstellt — die Unabhängigkeit trägt die Fake-Quelle, die `Setenv` wirkt nur über das Parallel-Verbot. Harmlos, aber der nächste Änderer kopiert die Begründung mit. | `AGENTS.md` §3.7 (Kommentar nennt die geltende Zusage) | `internal/hexagon/application/devcontainer_start_test.go` · „deterministisch ohne Umgebungslesung des Ports“ | Review-only | Kommentar begründet mehr, als die Zeile wirkt |
 
 ## Negativbefunde
