@@ -101,3 +101,20 @@ func TestValidateDevcontainerWorkspace(t *testing.T) {
 		}
 	}
 }
+
+// LH-FA-DEV-010: the character set the engine accepts for a container name
+// has one definition, measured with Docker Engine 29.9.2 (measurement 4 of the
+// container-name measurement). Each edge has a case; a length limit was not
+// measured down to 257 characters, so the rule carries none.
+func TestValidateDockerContainerName(t *testing.T) {
+	for _, ok := range []string{"u", "u-boot-demo", "u-boot-demo-agent-1", "9ubmess", "Uubmess", "a.b_c-d", "u-boot-9"} {
+		if err := driven.ValidateDockerContainerName(ok); err != nil {
+			t.Errorf("container name %q rejected: %v", ok, err)
+		}
+	}
+	for _, bad := range []string{"", "-x", ".x", "_x", "a b", `a"b`, "a/b", "a:b", "a@b", "ä", "a\nb", "a\x00b"} {
+		if err := driven.ValidateDockerContainerName(bad); err == nil {
+			t.Errorf("container name %q accepted", bad)
+		}
+	}
+}

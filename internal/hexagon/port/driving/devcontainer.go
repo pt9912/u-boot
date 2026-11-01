@@ -68,6 +68,12 @@ type DevcontainerUpResponse struct {
 	// was stopped or absent before the call, for another ID, and when the
 	// engine could not be asked before the call.
 	AlreadyRunning bool
+	// ContainerName is the name the launcher handed to the CLI for the
+	// started container (`u-boot-<project>` or, with an instance,
+	// `u-boot-<project>-<instance>`); it is empty when no name was handed.
+	// The caller prints it beside the container ID; the --json output of
+	// `up` carries no field for it.
+	ContainerName string
 }
 
 // DevcontainerShellRequest is the input for [DevcontainerUseCase.Shell]
@@ -90,6 +96,13 @@ type DevcontainerShellRequest struct {
 	// fallback the container reports after the start, before the session
 	// begins. nil discards them.
 	OnWarning func(WarningEntry)
+
+	// OnStart receives the response of the start phase once the container is
+	// up and before the session begins, after the fallback warnings — the
+	// caller prints the container of the session beside its ID there (the
+	// output reaches the standard error stream; the session then owns the
+	// standard output). nil discards it.
+	OnStart func(DevcontainerUpResponse)
 
 	// Stdin, Stdout and Stderr are the streams of the session. The use case
 	// writes nothing of its own to them. Stdout and Stderr must not be one
@@ -153,6 +166,19 @@ var ErrDevcontainerOnlyInstances = errors.New("devcontainer: the project has onl
 // `devcontainer.json` whose name is not a plain variable name. Maps to exit
 // code 10.
 var ErrDevcontainerEnvNameInvalid = errors.New("devcontainer: localEnv reference with an invalid variable name")
+
+// ErrDevcontainerContainerNameInvalid signals a composed container name
+// (`u-boot-<project>[-<instance>]`) that `driven.ValidateDockerContainerName`
+// rejects — a part the engine would refuse for `--name`. Maps to exit code 10;
+// it is returned before the engine is asked.
+var ErrDevcontainerContainerNameInvalid = errors.New("devcontainer: container name is not usable")
+
+// ErrDevcontainerContainerNameConflict signals that a container of another
+// project folder already holds the container name of the start (a running and
+// a stopped holder refuse the name alike; the engine's error words the
+// conflict). Maps to exit code 10; it is returned before the helper container
+// starts, and the holder is neither removed nor renamed.
+var ErrDevcontainerContainerNameConflict = errors.New("devcontainer: container name is held by a container of another project folder")
 
 // ErrDevcontainerFileSystem wraps a read failure of the devcontainer
 // configuration. Maps to exit code 14 (LH-NFA-REL-003).

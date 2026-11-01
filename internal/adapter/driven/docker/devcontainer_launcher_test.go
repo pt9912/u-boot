@@ -42,6 +42,7 @@ version)
   echo 29.0.0; exit 0 ;;
 context) [ -e "$D/context-fail" ] && exit 1; cat "$D/context-host"; exit 0 ;;
 image) [ -e "$D/image-missing" ] && exit 1; exit 0 ;;
+ps) [ -e "$D/ps-fail" ] && exit 1; [ -f "$D/ps-output" ] && cat "$D/ps-output"; exit 0 ;;
 build) cat > "$D/context.tar"; [ -e "$D/build-fail" ] && { echo 'build-boom' >&2; exit 1; }; exit 0 ;;
 run)
   [ -e "$D/run-hang" ] && exec sleep 30
@@ -143,6 +144,12 @@ func (f *fakeDocker) call(t *testing.T, verb string) []string {
 	return nil
 }
 
+// saw reports whether the fake ran the verb.
+func (f *fakeDocker) saw(t *testing.T, verb string) bool {
+	t.Helper()
+	return len(f.call(t, verb)) > 0
+}
+
 func (f *fakeDocker) launcher(env map[string]string) *docker.Launcher {
 	return docker.NewLauncherForTest(f.bin, func(key string) (string, bool) {
 		v, ok := env[key]
@@ -160,10 +167,11 @@ func TestRunArgs(t *testing.T) {
 	sock := "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock"
 	folder := "type=bind,source=" + launcherTestFolder + ",target=" + launcherTestFolder
 	cases := []struct {
-		name string
-		env  []string
-		opts driven.DevcontainerUpOptions
-		want []string
+		name     string
+		env      []string
+		opts     driven.DevcontainerUpOptions
+		override string
+		want     []string
 	}{
 		{
 			name: "defaults",
@@ -194,16 +202,37 @@ func TestRunArgs(t *testing.T) {
 				launcherTestImage, "devcontainer", "up", "--workspace-folder", launcherTestFolder, "--remove-existing-container",
 				"--id-label", "devcontainer.local_folder=" + launcherTestFolder, "--id-label", "u-boot.instance=a"},
 		},
+		{
+			// LH-FA-DEV-010: the per-call configuration is mounted into the
+			// helper container and handed via --override-config; the container
+			// name travels in that configuration, the command line carries
+			// nothing of it.
+			name: "per-call configuration with the container name",
+			opts: driven.DevcontainerUpOptions{
+				ProjectFolder: launcherTestFolder, Name: "u-boot-demo", OverrideConfig: []byte(`{"image":"debian"}`),
+			},
+			override: "/tmp/ov.json",
+			want: []string{"run", "--rm", "--name", "helper", "--mount", sock, "--mount", folder,
+				"--mount", "type=bind,source=/tmp/ov.json,target=/u-boot/devcontainer-override.json",
+				launcherTestImage, "devcontainer", "up", "--workspace-folder", launcherTestFolder,
+				"--override-config", "/u-boot/devcontainer-override.json"},
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := docker.RunArgsForTest("helper", launcherTestImage, tc.env, tc.opts)
+			got := docker.RunArgsForTest("helper", launcherTestImage, tc.env, tc.opts, tc.override)
 			if strings.Join(got, "\x00") != strings.Join(tc.want, "\x00") {
 				t.Errorf("args =\n%q\nwant\n%q", got, tc.want)
 			}
-			for _, arg := range got {
+			for i, arg := range got {
 				if arg == "-v" || arg == "--volume" || arg == "--privileged" || arg == "--network" || strings.HasPrefix(arg, "--cap-add") {
 					t.Errorf("argument %q is not part of the helper container contract", arg)
+				}
+				// LH-FA-DEV-010: the container name travels in the per-call
+				// configuration, never in a command line of the helper
+				// container.
+				if arg == "--name" && i < len(got)-1 && got[i+1] != "helper" {
+					t.Errorf("the CLI received a --name %q besides the helper container name", got[i+1])
 				}
 			}
 		})
@@ -1037,5 +1066,129 @@ func TestLauncher_Up_MasksResolvedValue(t *testing.T) {
 				t.Errorf("%s %q shows no placeholder", tc.placeholderIn, texts[tc.placeholderIn])
 			}
 		})
+	}
+}
+
+// LH-FA-DEV-010: a name the engine refuses ends the call as a rejected input
+// before any docker call. The empty name is no handed name and passes.
+func TestLauncher_Up_RejectsUnusableContainerName(t *testing.T) {
+	f := newFakeDocker(t)
+	l := f.launcher(nil)
+	for _, name := range []string{"u b", "ü-boot", "-u-boot", "u-boot/x"} {
+		opts := upOptions()
+		opts.Name = name
+		opts.OverrideConfig = []byte(`{}`)
+		_, err := l.Up(context.Background(), opts)
+		if !errors.Is(err, driven.ErrDevcontainerRuntime) {
+			t.Errorf("name %q: error = %v, want ErrDevcontainerRuntime", name, err)
+		}
+	}
+	if len(f.calls(t)) != 0 {
+		t.Errorf("docker ran for a rejected name: %v", f.flatCalls(t))
+	}
+}
+
+// LH-FA-DEV-010: a container of another project folder that already holds the
+// name ends the call as the name-conflict error, before the helper container
+// starts; a holder of the same folder belongs to this start. A failed query
+// is no finding: the call proceeds.
+func TestLauncher_Up_ConflictingContainerName(t *testing.T) {
+	const psFilter = "^u-boot-demo$"
+	t.Run("holder of another folder", func(t *testing.T) {
+		f := newFakeDocker(t)
+		f.write(t, "ps-output", "abc123def456789012345678\t/other/project\n")
+		l := f.launcher(nil)
+		opts := upOptions()
+		opts.Name = "u-boot-demo"
+		opts.OverrideConfig = []byte(`{"image":"debian"}`)
+		_, err := l.Up(context.Background(), opts)
+		if !errors.Is(err, driven.ErrDevcontainerContainerNameConflict) {
+			t.Fatalf("error = %v, want ErrDevcontainerContainerNameConflict", err)
+		}
+		if !strings.Contains(err.Error(), "/other/project") || !strings.Contains(err.Error(), "u-boot-demo") {
+			t.Errorf("error text does not name the holder or the name: %v", err)
+		}
+		if f.saw(t, "run") {
+			t.Errorf("the helper container started despite the conflict")
+		}
+		ps := f.call(t, "ps")
+		filter := "name=" + psFilter
+		found := false
+		for _, arg := range ps {
+			if arg == filter {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("ps argv does not carry the filter %q: %q", filter, ps)
+		}
+	})
+	t.Run("holder of the same folder is no conflict", func(t *testing.T) {
+		f := newFakeDocker(t)
+		f.write(t, "ps-output", "abc123def456789012345678\t"+launcherTestFolder+"\n")
+		l := f.launcher(nil)
+		opts := upOptions()
+		opts.Name = "u-boot-demo"
+		opts.OverrideConfig = []byte(`{"image":"debian"}`)
+		if _, err := l.Up(context.Background(), opts); err != nil {
+			t.Errorf("Up with a same-folder holder: %v", err)
+		}
+		if !f.saw(t, "run") {
+			t.Errorf("the start did not run despite the same-folder holder")
+		}
+	})
+	t.Run("failed query is no finding", func(t *testing.T) {
+		f := newFakeDocker(t)
+		f.flag(t, "ps-fail")
+		l := f.launcher(nil)
+		opts := upOptions()
+		opts.Name = "u-boot-demo"
+		opts.OverrideConfig = []byte(`{"image":"debian"}`)
+		if _, err := l.Up(context.Background(), opts); err != nil {
+			t.Errorf("Up with a failing name query: %v", err)
+		}
+		if !f.saw(t, "run") {
+			t.Errorf("the start did not run after a failed query")
+		}
+	})
+	t.Run("no name asks no engine for names", func(t *testing.T) {
+		f := newFakeDocker(t)
+		l := f.launcher(nil)
+		if _, err := l.Up(context.Background(), upOptions()); err != nil {
+			t.Fatalf("Up: %v", err)
+		}
+		if f.saw(t, "ps") {
+			t.Errorf("the launcher asked the engine for a container name without one")
+		}
+	})
+}
+
+// LH-FA-DEV-010: the per-call configuration lives for the duration of the
+// helper container; the temporary file is gone after the call, including the
+// path it had on the mount of the run.
+func TestLauncher_Up_RemovesTheTemporaryConfiguration(t *testing.T) {
+	f := newFakeDocker(t)
+	l := f.launcher(nil)
+	opts := upOptions()
+	opts.Name = "u-boot-demo"
+	opts.OverrideConfig = []byte(`{"image":"debian"}`)
+	if _, err := l.Up(context.Background(), opts); err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	var source string
+	run := f.call(t, "run")
+	for i, arg := range run {
+		if arg != "--mount" || !strings.Contains(run[i+1], "target=/u-boot/devcontainer-override.json") {
+			continue
+		}
+		if _, mountSource, ok := strings.Cut(run[i+1], "source="); ok {
+			source, _, _ = strings.Cut(mountSource, ",")
+		}
+	}
+	if source == "" {
+		t.Fatalf("the run argv carries no override mount: %q", run)
+	}
+	if _, err := os.Stat(source); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("the temporary configuration %s still exists after the call (err=%v)", source, err)
 	}
 }

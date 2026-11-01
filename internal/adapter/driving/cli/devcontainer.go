@@ -179,13 +179,19 @@ with a letter or digit. Without --instance the command acts on the container
 without an instance only; if the project has only containers of instances, it
 ends with exit 10 and starts nothing.
 
+The started container carries the name u-boot-<project> (with --instance NAME,
+u-boot-<project>-<NAME>); the success line shows it beside the container ID.
+The devcontainer.json of the project is not changed by the name.
+
 Exit codes:
   0   success
   2   CLI validation (unknown flag, arguments, --dry-run/--diff)
   10  no .devcontainer/devcontainer.json in the current directory; a directory
       path with a comma, double quote or line break; a ${localEnv:NAME}
       reference whose name is not a plain variable name; an instance name that
-      is not admissible; no --instance although the project has only
+      is not admissible; a container-name part the engine would refuse for
+      --name, or a container of another project folder that already holds the
+      name; no --instance although the project has only
       containers of instances
   11  no docker binary on the PATH (for example in the released container
       image), the daemon does not answer, the engine is not local, or a start
@@ -274,7 +280,9 @@ local engine), nothing else.
 The shell runs as the remote user in the workspace folder that the start
 reports. Of the host variables that the generated devcontainer.json hands to
 the container as "NAME": "${localEnv:NAME}" entries, those that are set on the
-host are set in the shell; the others are absent.
+host are set in the shell; the others are absent. Before the session begins,
+the command names the container of the session beside its ID on the standard
+error stream.
 
 The helper container of the start holds the engine socket of the host for the
 duration of the start (root-equivalent access to the engine). The command says
@@ -309,7 +317,9 @@ Exit codes:
   10  no .devcontainer/devcontainer.json in the current directory; a directory
       path with a comma, double quote or line break; a ${localEnv:NAME}
       reference whose name is not a plain variable name; an instance name that
-      is not admissible; no --instance although the project has only
+      is not admissible; a container-name part the engine would refuse for
+      --name, or a container of another project folder that already holds the
+      name; no --instance although the project has only
       containers of instances
   11  no docker binary on the PATH (for example in the released container
       image), the daemon does not answer, the engine is not local, or a start
@@ -432,12 +442,8 @@ func runDevcontainerUp(
 		return writeEnvelope(stdout, newDataEnvelope("devcontainer", "up", data, diags, 0))
 	}
 	if !flags.Quiet {
-		outcome := "started"
-		if resp.AlreadyRunning {
-			outcome = "already running"
-		}
-		fmt.Fprintf(stdout, "Devcontainer %s: container %s, remote user %s, workspace %s\n",
-			outcome, shortContainerID(resp.ContainerID), resp.RemoteUser, resp.RemoteWorkspaceFolder)
+		fmt.Fprintf(stdout, "%s, remote user %s, workspace %s\n",
+			devcontainerStartLine(resp), resp.RemoteUser, resp.RemoteWorkspaceFolder)
 	}
 	writeWarnings(stdout, visibleWarnings(resp.Warnings, flags.Quiet))
 	return nil
@@ -544,6 +550,21 @@ func runDevcontainerShell(
 		OnWarning: func(w driving.WarningEntry) {
 			writeWarnings(streams.stderr, visibleWarnings([]driving.WarningEntry{w}, flags.Quiet))
 		},
+		// The start line names the container of the session beside its ID and
+		// goes to the standard error stream: the session then owns the
+		// standard output. Under `--quiet` it is a result of a modifying
+		// command — it waits in the held buffer, only a failed call shows it.
+		OnStart: func(resp driving.DevcontainerUpResponse) {
+			if resp.ContainerName == "" {
+				return
+			}
+			line := devcontainerStartLine(resp) + "\n"
+			if held != nil {
+				held.WriteString(line)
+				return
+			}
+			fmt.Fprint(streams.stderr, line)
+		},
 		Stdin:    streams.in,
 		Stdout:   streams.stdout,
 		Stderr:   streams.stderr,
@@ -563,6 +584,23 @@ func writeWarnings(out io.Writer, ws []driving.WarningEntry) {
 	for _, w := range ws {
 		fmt.Fprintf(out, "Warning: %s\n", w.Message)
 	}
+}
+
+// devcontainerStartLine is the head of the start line: the outcome, the
+// container ID, and, when the launcher handed the CLI a per-call
+// configuration, the name of the container; the caller appends what the
+// command shows besides it. The name stands beside the ID when the container
+// carries one, and is absent when it does not (LH-FA-DEV-010).
+func devcontainerStartLine(resp driving.DevcontainerUpResponse) string {
+	outcome := "started"
+	if resp.AlreadyRunning {
+		outcome = "already running"
+	}
+	line := fmt.Sprintf("Devcontainer %s: container %s", outcome, shortContainerID(resp.ContainerID))
+	if resp.ContainerName != "" {
+		line += ", name " + resp.ContainerName
+	}
+	return line
 }
 
 // shortContainerID is the first 12 characters of a container ID, the form
@@ -634,6 +672,8 @@ func isDevcontainerValidationError(err error) bool {
 	return errors.Is(err, driving.ErrDevcontainerConfigMissing) ||
 		errors.Is(err, driving.ErrDevcontainerProjectFolderInvalid) ||
 		errors.Is(err, driving.ErrDevcontainerEnvNameInvalid) ||
+		errors.Is(err, driving.ErrDevcontainerContainerNameInvalid) ||
+		errors.Is(err, driving.ErrDevcontainerContainerNameConflict) ||
 		isDevcontainerInstanceError(err)
 }
 

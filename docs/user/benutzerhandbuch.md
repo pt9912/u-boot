@@ -818,6 +818,17 @@ Home-Verzeichnis und Geheimnis-Verzeichnisse wie `~/.ssh` sind nicht eingehängt
 Projektpfad mit Komma, Anführungszeichen oder Zeilenumbruch wird abgewiesen (Exit-Code 10);
 ein Ordner, den die Engine nicht sieht, ergibt Exit-Code 12.
 
+**Der Name des Containers.** Statt eines Zufallsnamens der Engine trägt der gestartete
+Container den Namen `u-boot-<Projektname>` und, mit `--instance agent-1`,
+`u-boot-<Projektname>-agent-1`. Der Projektname ist der Wert `project.name` Ihrer
+`u-boot.yaml`; fehlt diese Datei, zählt der Ordnername (kleingeschrieben, vereinheitlicht).
+`up` nennt den Namen in der Erfolgszeile neben der Container-ID, und `devcontainer shell`
+nennt ihn beim Start; `--json` gibt ihn nicht aus. Ist ein Container des Namens für einen
+anderen Projektordner vorhanden, bricht der Start mit einer klaren Meldung ab (Exit-Code 10);
+der bestehende Container wird weder entfernt noch umbenannt. Ein Container, der einen
+Zufallsnamen trägt (etwa von einem älteren Aufruf), behält ihn bis zum Neuanlegen
+(`up --recreate`).
+
 **Zugangsdaten.** Der Befehl reicht nur Variablen durch, auf die `devcontainer.json`
 mit `${localEnv:NAME}` verweist und die auf dem Host gesetzt sind — oder, mit dem
 Opt-in-Schalter des nächsten Abschnitts, die er auf dem Host ermittelt hat —, und

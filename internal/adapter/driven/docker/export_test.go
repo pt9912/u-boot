@@ -87,8 +87,8 @@ func (m *MaskingWriterForTest) Flush() error { return m.w.Flush() }
 const HelperContainerPrefixForTest = helperContainerPrefix
 
 // RunArgsForTest exposes [runArgs].
-func RunArgsForTest(name, image string, envNames []string, opts driven.DevcontainerUpOptions) []string {
-	return runArgs(name, image, envNames, opts)
+func RunArgsForTest(name, image string, envNames []string, opts driven.DevcontainerUpOptions, overridePath string) []string {
+	return runArgs(name, image, envNames, opts, overridePath)
 }
 
 // ShellArgsForTest exposes [shellArgs].

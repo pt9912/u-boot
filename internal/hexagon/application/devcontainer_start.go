@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -213,12 +214,14 @@ func (s *DevcontainerStartService) Up(ctx context.Context, req driving.Devcontai
 // Shell implements [driving.DevcontainerUseCase.Shell]: the start of Up
 // without Recreate, then one session in the started container. The fallback
 // warnings of the start go to OnWarning before the session begins, because the
-// call returns only when the session has ended. The variables of the session
+// call returns only when the session has ended; the response goes to OnStart
+// after them, so the caller prints the container of the session beside its ID
+// before the session owns the standard output. The variables of the session
 // come from the entries of the configuration that the start has just read.
 func (s *DevcontainerStartService) Shell(ctx context.Context, req driving.DevcontainerShellRequest) error {
 	resp, resolution, err := s.start(ctx, startRequest{
 		command: "shell", baseDir: req.BaseDir, instance: req.Instance, duration: "start",
-		progress: req.ProgressSink, onWarning: req.OnWarning,
+		progress: req.ProgressSink, onWarning: req.OnWarning, onStart: req.OnStart,
 	})
 	if err != nil {
 		return err
@@ -227,6 +230,9 @@ func (s *DevcontainerStartService) Shell(ctx context.Context, req driving.Devcon
 		for _, w := range resp.Warnings {
 			req.OnWarning(w)
 		}
+	}
+	if req.OnStart != nil {
+		req.OnStart(resp)
 	}
 	names := sessionEnvNames(resolution.config)
 	s.logger.Debug("devcontainer shell: opening the session", "envNames", len(names), "terminal", req.Terminal)
@@ -271,6 +277,18 @@ type startRequest struct {
 	duration  string
 	progress  io.Writer
 	onWarning func(driving.WarningEntry)
+	// onStart receives the response of the start phase before the session of
+	// `shell` begins; nil in `up`.
+	onStart func(driving.DevcontainerUpResponse)
+	// name is the composed container name of the request
+	// (`u-boot-<project>[-<instance>]`); nameHanded reports whether the
+	// launcher receives it with a per-call configuration. An invalid part has
+	// already ended the call when the name was composed.
+	name       string
+	nameHanded bool
+	// overlay is the per-call configuration the launcher hands to the CLI
+	// when nameHanded holds; nil otherwise.
+	overlay []byte
 }
 
 // start is the start phase that `up` and `shell` share (ADR-0031 decision 1):
@@ -288,6 +306,12 @@ func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (d
 	if err := validInstance(r.command, r.instance); err != nil {
 		return driving.DevcontainerUpResponse{}, startResolution{}, err
 	}
+	name, nameHanded, err := s.containerName(r)
+	if err != nil {
+		return driving.DevcontainerUpResponse{}, startResolution{}, err
+	}
+	r.name = name
+	r.nameHanded = nameHanded
 	config, err := s.readConfig(r.command, r.baseDir)
 	if err != nil {
 		return driving.DevcontainerUpResponse{}, startResolution{}, err
@@ -296,6 +320,7 @@ func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (d
 	if err != nil {
 		return driving.DevcontainerUpResponse{}, startResolution{}, err
 	}
+	r.applyNameOverlay(config)
 	envValues, gitIdentity, hostGitWarnings, tokenSource := s.resolveHostGit(ctx, r, names)
 	if r.onWarning != nil {
 		r.onWarning(driving.WarningEntry{
@@ -306,16 +331,9 @@ func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (d
 	if err != nil {
 		return driving.DevcontainerUpResponse{}, startResolution{}, err
 	}
-	s.logger.Debug("devcontainer "+r.command, "recreate", r.recreate, "instance", r.instance, "envNames", len(names))
-	res, err := s.launcher.Up(ctx, driven.DevcontainerUpOptions{
-		ProjectFolder: r.baseDir,
-		Instance:      r.instance,
-		EnvNames:      names,
-		EnvValues:     envValues,
-		GitIdentity:   gitIdentity,
-		Recreate:      r.recreate,
-		Progress:      r.progress,
-	})
+	s.logger.Debug("devcontainer "+r.command, "recreate", r.recreate, "instance", r.instance, "envNames", len(names), "nameHanded", r.nameHanded)
+	options := r.launcherOptions(names, envValues, gitIdentity)
+	res, err := s.launcher.Up(ctx, options)
 	resp, err := s.startOutcome(ctx, r, runningBefore, res, err)
 	if err != nil {
 		return resp, startResolution{config: config}, err
@@ -350,6 +368,118 @@ func onlyInstancesError(command string) error {
 		command, driving.ErrDevcontainerOnlyInstances)
 }
 
+// handedName is the container name the launcher receives for the request; the
+// empty string means the started container carries no name.
+func handedName(r startRequest) string {
+	if r.nameHanded {
+		return r.name
+	}
+	return ""
+}
+
+// applyNameOverlay merges the name into the configuration text of the call
+// ([containerNameOverlay]); a text that carries no merge hands no name, and
+// the start keeps its behavior without one.
+func (r *startRequest) applyNameOverlay(config string) {
+	if !r.nameHanded {
+		return
+	}
+	if r.overlay = containerNameOverlay(config, r.name); r.overlay == nil {
+		r.nameHanded = false
+	}
+}
+
+// launcherOptions is the launcher request of the start; a name that is not
+// handed travels as the empty name without a per-call configuration.
+func (r startRequest) launcherOptions(
+	names []string, envValues map[string]string, gitIdentity driven.DevcontainerGitIdentity,
+) driven.DevcontainerUpOptions {
+	name := ""
+	overrideConfig := []byte(nil)
+	if r.nameHanded {
+		name = r.name
+		overrideConfig = r.overlay
+	}
+	return driven.DevcontainerUpOptions{
+		ProjectFolder:  r.baseDir,
+		Instance:       r.instance,
+		Name:           name,
+		OverrideConfig: overrideConfig,
+		EnvNames:       names,
+		EnvValues:      envValues,
+		GitIdentity:    gitIdentity,
+		Recreate:       r.recreate,
+		Progress:       r.progress,
+	}
+}
+
+// containerName composes the container name of the start
+// (`u-boot-<project>[-<instance>]`, LH-FA-DEV-010) and hands it, when
+// accepted. The project part is the project name of u-boot.yaml, or, without
+// the file, the normalized basename of the folder; a part the engine would
+// refuse ends the call as a validation error (exit code 10), before the
+// engine is asked and before the disclosure of the socket. A name the engine
+// accepts is still not handed when the configuration text cannot carry it
+// ([containerNameOverlay]); nameHanded reports that case: the start keeps its
+// behavior and the container carries no name.
+func (s *DevcontainerStartService) containerName(r startRequest) (string, bool, error) {
+	project := s.projectName(r.baseDir)
+	name, err := domain.ComposeDevcontainerContainerName(project, r.instance)
+	if err != nil {
+		return "", false, fmt.Errorf("devcontainer %s: %w: %v", r.command, driving.ErrDevcontainerContainerNameInvalid, err)
+	}
+	if err := driven.ValidateDockerContainerName(name); err != nil {
+		return "", false, fmt.Errorf("devcontainer %s: %w: %v", r.command, driving.ErrDevcontainerContainerNameInvalid, err)
+	}
+	return name, true, nil
+}
+
+// projectName is the project part of the container name: the project name of
+// u-boot.yaml, or, without the file, an unparsable one or without a project
+// name, the normalized basename of the folder (LH-FA-INIT-002). A missing or
+// unparsable file is no failure of `up`; the name keeps its sources.
+func (s *DevcontainerStartService) projectName(baseDir string) string {
+	path := filepath.Join(baseDir, domain.ConfigFileName)
+	if exists, err := s.fs.Exists(path); err == nil && exists {
+		if body, rerr := s.fs.ReadFile(path); rerr == nil {
+			var cfg ubootYAMLConfig
+			if serr := s.yaml.Unmarshal(body, &cfg); serr == nil {
+				return cfg.Project.Name
+			}
+		}
+	}
+	return domain.NormalizeProjectName(filepath.Base(baseDir))
+}
+
+// containerNameOverlay merges the name into the configuration text as a
+// `runArgs` value (`--name=<name>`, measured for the pinned CLI 0.89.0):
+// an existing list receives the value, a missing property gains the list.
+// A text that u-boot cannot read merges nothing, nil, and the start starts
+// without a name — the configuration of the project stays the source of truth,
+// the overlay replaces it for this call only, and comments and formatting of
+// the file are not part of the copy.
+func containerNameOverlay(config, name string) []byte {
+	var shape map[string]any
+	if err := json.Unmarshal([]byte(withoutComments(config)), &shape); err != nil {
+		return nil
+	}
+	args := []any{}
+	if raw, ok := shape["runArgs"]; ok {
+		list, ok := raw.([]any)
+		if !ok {
+			return nil
+		}
+		args = list
+	}
+	args = append(args, "--name="+name)
+	shape["runArgs"] = args
+	out, err := json.Marshal(shape)
+	if err != nil {
+		return nil
+	}
+	return out
+}
+
 // containerBeforeStart asks the inspector for the container of the request
 // before the launcher is called, for two purposes. Without an instance it
 // ends the call with [driving.ErrDevcontainerOnlyInstances] when the project
@@ -382,14 +512,19 @@ func (s *DevcontainerStartService) containerBeforeStart(ctx context.Context, r s
 // configured capability ends the call with
 // [driving.ErrDevcontainerStartScriptFailed], whether the CLI failed (the
 // message keeps its output) or succeeded (the file stems from an earlier start
-// of the container). Otherwise the response carries the fallback warnings and
-// whether the container ran before the call. The request names the command in
+// of the container). A conflict of the container name keeps its text and takes
+// its exit class ([driving.ErrDevcontainerContainerNameConflict]). Otherwise
+// the response carries the fallback warnings and whether the container ran
+// before the call. The request names the command in
 // the error texts and the instance whose container the status files are read
 // from.
 func (s *DevcontainerStartService) startOutcome(
 	ctx context.Context, r startRequest, runningBefore string, res driven.DevcontainerUpResult, launchErr error,
 ) (driving.DevcontainerUpResponse, error) {
 	command := r.command
+	if errors.Is(launchErr, driven.ErrDevcontainerContainerNameConflict) {
+		return driving.DevcontainerUpResponse{}, fmt.Errorf("%s: %w", launchErr.Error(), driving.ErrDevcontainerContainerNameConflict)
+	}
 	if launchErr != nil && !errors.Is(launchErr, driven.ErrDevcontainerRuntime) {
 		return driving.DevcontainerUpResponse{}, launchErr
 	}
@@ -409,6 +544,7 @@ func (s *DevcontainerStartService) startOutcome(
 		ContainerID:           res.ContainerID,
 		RemoteUser:            res.RemoteUser,
 		RemoteWorkspaceFolder: res.RemoteWorkspaceFolder,
+		ContainerName:         handedName(r),
 		Warnings:              fallbackWarnings(ctx, reader, probes, startFallbackWording()),
 		AlreadyRunning:        runningBefore != "" && runningBefore == res.ContainerID,
 	}, nil

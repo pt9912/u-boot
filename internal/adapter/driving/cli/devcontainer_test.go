@@ -83,6 +83,9 @@ func (f *fakeDevcontainerUseCase) Shell(ctx context.Context, req driving.Devcont
 			req.OnWarning(w)
 		}
 	}
+	if req.OnStart != nil {
+		req.OnStart(f.upResp)
+	}
 	if f.sessionOut != "" && req.Stdout != nil {
 		_, _ = io.WriteString(req.Stdout, f.sessionOut)
 	}
@@ -535,5 +538,45 @@ func TestExecute_DevcontainerDown(t *testing.T) {
 				t.Errorf("--quiet --json differs from --json:\n%s\n%s", quietJSON, jsonOut)
 			}
 		})
+	}
+}
+
+// LH-FA-DEV-010: the start line names the container beside its ID when the
+// launcher handed the CLI a per-call configuration, and stays without one
+// when it did not.
+func TestExecute_DevcontainerUp_NamesTheContainer(t *testing.T) {
+	t.Parallel()
+	uc := startedUseCase()
+	uc.upResp.ContainerName = "u-boot-demo"
+	out, _, err := quietRun(t, newAppWithDevcontainer(uc), "devcontainer", "up")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, "Devcontainer started: container 0123456789ab, name u-boot-demo, remote user vscode") {
+		t.Errorf("stdout does not name the container:\n%s", out)
+	}
+	uc2 := startedUseCase()
+	uc2.upResp.AlreadyRunning = true
+	out2, _, err := quietRun(t, newAppWithDevcontainer(uc2), "devcontainer", "up")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out2, "Devcontainer already running: container 0123456789ab, remote user vscode") {
+		t.Errorf("the already-running line carries no name:\n%s", out2)
+	}
+}
+
+// LH-FA-DEV-010: the data of `up --json` is unchanged by the name — no field
+// for it, the contract of the envelope stays.
+func TestExecute_DevcontainerUp_JsonCarriesTheNameNot(t *testing.T) {
+	t.Parallel()
+	uc := startedUseCase()
+	uc.upResp.ContainerName = "u-boot-demo"
+	out, _, err := quietRun(t, newAppWithDevcontainer(uc), "devcontainer", "up", "--json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out, "u-boot-demo") {
+		t.Errorf("the --json data carries the container name:\n%s", out)
 	}
 }

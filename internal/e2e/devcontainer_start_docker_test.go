@@ -74,6 +74,7 @@ func dcMustDocker(t *testing.T, args ...string) string {
 // dcInspectDoc is the part of `docker inspect` of a container the tests read.
 type dcInspectDoc struct {
 	ID     string
+	Name   string
 	State  struct{ Running bool }
 	Mounts []struct {
 		Type, Name, Source, Destination string

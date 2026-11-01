@@ -14,6 +14,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -31,6 +32,11 @@ const (
 	// dockerSocketPath is the engine socket on the machine of the daemon;
 	// it is mounted at the same path into the helper container.
 	dockerSocketPath = "/var/run/docker.sock"
+	// overrideConfigPath is the path the per-call configuration copy
+	// ([Launcher.Up] with [driven.DevcontainerUpOptions.OverrideConfig])
+	// takes inside the helper container; the CLI reaches it through
+	// `--override-config`.
+	overrideConfigPath = "/u-boot/devcontainer-override.json"
 	// cliPackageName is the dependency in package.json whose exact version
 	// is the CLI pin.
 	cliPackageName = "@devcontainers/cli"
@@ -148,19 +154,90 @@ func (l *Launcher) Up(ctx context.Context, opts driven.DevcontainerUpOptions) (d
 	if err != nil {
 		return driven.DevcontainerUpResult{}, err
 	}
+	if opts.Name != "" {
+		if err := driven.ValidateDockerContainerName(opts.Name); err != nil {
+			return driven.DevcontainerUpResult{}, rejectedInput(err)
+		}
+	}
 	if err := l.preflight(ctx); err != nil {
 		return driven.DevcontainerUpResult{}, err
+	}
+	if opts.Name != "" {
+		if err := l.nameConflict(ctx, opts.Name, opts.ProjectFolder); err != nil {
+			return driven.DevcontainerUpResult{}, err
+		}
+	}
+	// The per-call configuration copy leaves the project folder untouched: it
+	// is a temporary file of the launcher, mounted into the helper container
+	// and removed when the call ends (driven.DevcontainerUpOptions.OverrideConfig).
+	overridePath := ""
+	if len(opts.OverrideConfig) > 0 {
+		path, err := writeTemporaryConfig(opts.OverrideConfig)
+		if err != nil {
+			return driven.DevcontainerUpResult{}, fmt.Errorf("devcontainer up: %s: %w", err.Error(), driven.ErrDevcontainerRuntime)
+		}
+		defer func(path string) { _ = os.Remove(path) }(path)
+		overridePath = path
 	}
 	image, err := l.EnsureImage(ctx, opts.Progress)
 	if err != nil {
 		return driven.DevcontainerUpResult{}, err
 	}
-	res, err := l.runUp(ctx, image, l.namePrefix+randomSuffix(), envNames, envValues, opts)
+	res, err := l.runUp(ctx, image, l.namePrefix+randomSuffix(), envNames, envValues, opts, overridePath)
 	if err != nil {
 		return res, err
 	}
 	res.GitIdentityApplied = l.applyGitIdentity(ctx, res, opts)
 	return res, nil
+}
+
+// nameConflict refuses the start when a container of another project folder
+// already holds the container name of the request (a running and a stopped
+// holder refuse the name alike, the engine words the conflict, LH-FA-DEV-010).
+// A holder of the same project folder belongs to this start, the CLI takes it
+// over. A container that carries no `devcontainer.local_folder` label belongs
+// to no project folder of u-boot and counts as foreign. A failed query is no
+// finding ("not determinable", like the inspector): the start proceeds, the
+// engine refuses a conflict on its own.
+func (l *Launcher) nameConflict(ctx context.Context, name, folder string) error {
+	pattern := "^" + regexp.QuoteMeta(name) + "$"
+	out, err := l.output(ctx, "ps", "-a", "--filter", "name="+pattern, "--no-trunc",
+		"--format", "{{.ID}}\t{{.Label \"devcontainer.local_folder\"}}")
+	if err != nil {
+		return nil
+	}
+	for _, line := range strings.Split(out, "\n") {
+		holder, label, found := strings.Cut(line, "\t")
+		if !found {
+			continue
+		}
+		if label == folder {
+			continue
+		}
+		return fmt.Errorf("devcontainer up: container name %q is already held by container %s of project folder %s; remove or rename that container: %w",
+			name, strings.TrimSpace(holder), label, driven.ErrDevcontainerContainerNameConflict)
+	}
+	return nil
+}
+
+// writeTemporaryConfig writes the per-call configuration copy: a temporary
+// file that lives for the duration of the call and is removed after it.
+func writeTemporaryConfig(content []byte) (string, error) {
+	f, err := os.CreateTemp("", "u-boot-devcontainer-config-*.json")
+	if err != nil {
+		return "", fmt.Errorf("write temporary configuration: %v", err)
+	}
+	path := f.Name()
+	if _, err := f.Write(content); err != nil {
+		_ = f.Close()
+		_ = os.Remove(path)
+		return "", fmt.Errorf("write temporary configuration: %v", err)
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(path)
+		return "", fmt.Errorf("write temporary configuration: %v", err)
+	}
+	return path, nil
 }
 
 // applyGitIdentity sets user.name and user.email in the container home with
@@ -262,7 +339,7 @@ func (l *Launcher) EnsureImage(ctx context.Context, progress io.Writer) (string,
 // The values travel in the environment of this process: the host values are
 // already there, the resolved ones are appended; the command line carries
 // the names only (runArgs).
-func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []string, envValues map[string]string, opts driven.DevcontainerUpOptions) (driven.DevcontainerUpResult, error) {
+func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []string, envValues map[string]string, opts driven.DevcontainerUpOptions, overridePath string) (driven.DevcontainerUpResult, error) {
 	stdout := &tailBuffer{limit: upStdoutLimit}
 	stderr := &tailBuffer{limit: upStderrTail}
 	values := l.passedValues(envNames)
@@ -270,7 +347,7 @@ func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []str
 		values = append(values, value)
 	}
 	maskedStderr := newMaskingWriter(io.MultiWriter(stderr, progressSinkOrDiscard(opts.Progress)), values)
-	cmd := exec.CommandContext(ctx, l.binary, runArgs(name, image, envNames, opts)...)
+	cmd := exec.CommandContext(ctx, l.binary, runArgs(name, image, envNames, opts, overridePath)...)
 	if len(envValues) > 0 {
 		cmd.Env = append(os.Environ(), sortedEnvPairs(envValues)...)
 	}
@@ -393,11 +470,15 @@ func (l *Launcher) passedEnvNames(names []string) ([]string, error) {
 
 // runArgs is the argument list of the helper container: removed at the end
 // of the run, the engine socket and the project folder (same path as on
-// the host) as `--mount`, variables by name only, no privileges. With an
+// the host) as `--mount`, variables by name only, no privileges. With a
+// per-call configuration the launcher mounts its file into the helper
+// container at a fixed path and hands it to the CLI via `--override-config`;
+// the container name travels in that configuration, not in a command line of
+// the helper container. With an
 // instance the CLI receives two `--id-label` values, the folder label and the
 // instance label; without one it receives none and derives its labels from the
 // folder.
-func runArgs(name, image string, envNames []string, opts driven.DevcontainerUpOptions) []string {
+func runArgs(name, image string, envNames []string, opts driven.DevcontainerUpOptions, overridePath string) []string {
 	folder := opts.ProjectFolder
 	folderMount := "type=bind,source=" + folder + ",target=" + folder
 	if opts.ReadOnlyProject {
@@ -408,10 +489,16 @@ func runArgs(name, image string, envNames []string, opts driven.DevcontainerUpOp
 		"--mount", "type=bind,source=" + dockerSocketPath + ",target=" + dockerSocketPath,
 		"--mount", folderMount,
 	}
+	if overridePath != "" {
+		args = append(args, "--mount", "type=bind,source="+overridePath+",target="+overrideConfigPath)
+	}
 	for _, envName := range envNames {
 		args = append(args, "-e", envName)
 	}
 	args = append(args, image, "devcontainer", "up", "--workspace-folder", folder)
+	if overridePath != "" {
+		args = append(args, "--override-config", overrideConfigPath)
+	}
 	if opts.Recreate {
 		args = append(args, "--remove-existing-container")
 	}

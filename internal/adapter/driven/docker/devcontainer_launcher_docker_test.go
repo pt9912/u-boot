@@ -445,7 +445,7 @@ func TestLauncher_Docker_S6_Lifetime(t *testing.T) {
 			t.Fatalf("EnsureImage: %v", err)
 		}
 		args := docker.RunArgsForTest(helperPrefix(t)+"guard-"+randomHex(t), tag, nil,
-			driven.DevcontainerUpOptions{ProjectFolder: "/tmp"})
+			driven.DevcontainerUpOptions{ProjectFolder: "/tmp"}, "")
 		var noRm []string
 		for _, a := range args {
 			if a == "--rm" {

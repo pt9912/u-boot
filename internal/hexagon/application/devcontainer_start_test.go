@@ -2,6 +2,7 @@ package application_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"path/filepath"
@@ -1004,5 +1005,143 @@ func TestDevcontainerUp_HostGitToken_InstanceStillResolves(t *testing.T) {
 	}
 	if resp.GitTokenSource != driven.TokenSourceGh {
 		t.Fatalf("GitTokenSource = %q, want the gh source", resp.GitTokenSource)
+	}
+}
+
+// LH-FA-DEV-010: the start composes the container name `u-boot-<project>` (or,
+// with an instance, `u-boot-<project>-<instance>`) from the project name of
+// u-boot.yaml, hands it to the launcher with a per-call configuration that
+// carries `runArgs: ["--name=...", ...]` and reports it beside the container
+// ID.
+func TestDevcontainerUp_ComposesContainerName(t *testing.T) {
+	t.Parallel()
+	yaml := "schemaVersion: 1\nproject:\n  name: demo-bench\n"
+	l := newLauncher()
+	svc, _ := devcontainerSvc(t, plainConfig, yaml, l, newFakeInspector(true))
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if len(l.upOpts) != 1 {
+		t.Fatalf("Up ran %d times", len(l.upOpts))
+	}
+	opts := l.upOpts[0]
+	if opts.Name != "u-boot-demo-bench" {
+		t.Errorf("launcher name = %q, want u-boot-demo-bench", opts.Name)
+	}
+	if resp.ContainerName != opts.Name {
+		t.Errorf("response name = %q, want the launcher name %q", resp.ContainerName, opts.Name)
+	}
+	var shape map[string]any
+	if err := json.Unmarshal(opts.OverrideConfig, &shape); err != nil {
+		t.Fatalf("overlay is not JSON: %v", err)
+	}
+	args, ok := shape["runArgs"].([]any)
+	if !ok || len(args) != 1 {
+		t.Fatalf("overlay runArgs = %#v, want the single --name entry", shape["runArgs"])
+	}
+	if args[0] != "--name=u-boot-demo-bench" {
+		t.Errorf("overlay runArgs[0] = %v, want --name=u-boot-demo-bench", args[0])
+	}
+	if shape["name"] != "demo" {
+		t.Errorf("overlay name property = %v, want the one of the configuration", shape["name"])
+	}
+}
+
+// LH-FA-DEV-010: the instance joins the name; the empty instance composes the
+// name of the container without an instance.
+func TestDevcontainerUp_ComposesContainerNameWithInstance(t *testing.T) {
+	t.Parallel()
+	yaml := "schemaVersion: 1\nproject:\n  name: demo-bench\n"
+	l := newLauncher()
+	svc, _ := devcontainerSvc(t, plainConfig, yaml, l, newFakeInspector(true))
+	if _, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir, Instance: "agent-1"}); err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if got := l.upOpts[0].Name; got != "u-boot-demo-bench-agent-1" {
+		t.Errorf("launcher name = %q, want u-boot-demo-bench-agent-1", got)
+	}
+}
+
+// LH-FA-DEV-010: without u-boot.yaml the project part is the normalized
+// basename of the project folder.
+func TestDevcontainerUp_ComposesContainerNameFromFolder(t *testing.T) {
+	t.Parallel()
+	l := newLauncher()
+	svc, _ := devcontainerSvc(t, plainConfig, "", l, newFakeInspector(true))
+	if _, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir}); err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if got := l.upOpts[0].Name; got != "u-boot-demo" {
+		t.Errorf("launcher name = %q, want u-boot-demo (basename of %q)", got, devcontainerTestBaseDir)
+	}
+}
+
+// LH-FA-DEV-010: a name part the engine would refuse ends the call as a
+// validation error (exit code 10), before the engine is asked and before the
+// disclosure of the socket.
+func TestDevcontainerUp_RejectsUnusableContainerName(t *testing.T) {
+	t.Parallel()
+	yaml := "schemaVersion: 1\nproject:\n  name: not a name\n"
+	l := newLauncher()
+	svc, _ := devcontainerSvc(t, plainConfig, yaml, l, newFakeInspector(true))
+	disclosed := false
+	_, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{
+		BaseDir: devcontainerTestBaseDir,
+		OnWarning: func(driving.WarningEntry) {
+			disclosed = true
+		},
+	})
+	if !errors.Is(err, driving.ErrDevcontainerContainerNameInvalid) {
+		t.Fatalf("error = %v, want ErrDevcontainerContainerNameInvalid", err)
+	}
+	if len(l.upOpts) != 0 {
+		t.Errorf("the launcher ran for an invalid name")
+	}
+	if disclosed {
+		t.Errorf("the socket was disclosed for an invalid name")
+	}
+}
+
+// LH-FA-DEV-010: a configuration text u-boot cannot read carries no merge —
+// the call proceeds without a name, the response reports none, and the
+// launcher receives none (the configuration of the project stays the source
+// of truth of the start).
+func TestDevcontainerUp_HandsNoNameForAnUnreadableConfiguration(t *testing.T) {
+	t.Parallel()
+	l := newLauncher()
+	svc, _ := devcontainerSvc(t, "not-json", "schemaVersion: 1\nproject:\n  name: demo-bench\n", l, newFakeInspector(true))
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if got := l.upOpts[0]; got.Name != "" || got.OverrideConfig != nil {
+		t.Errorf("launcher received name %q with a configuration %s, want none", got.Name, got.OverrideConfig)
+	}
+	if resp.ContainerName != "" {
+		t.Errorf("response name = %q, want empty", resp.ContainerName)
+	}
+}
+
+// LH-FA-DEV-010: the start line of the shell session names the container
+// beside its ID ([driving.DevcontainerShellRequest.OnStart], after the
+// fallback warnings and before the session begins).
+func TestDevcontainerShell_ReportsContainerNameOnStart(t *testing.T) {
+	t.Parallel()
+	yaml := "schemaVersion: 1\nproject:\n  name: demo-bench\n"
+	l := newLauncher()
+	svc, _ := devcontainerSvc(t, plainConfig, yaml, l, newFakeInspector(true))
+	var starts []driving.DevcontainerUpResponse
+	err := svc.Shell(context.Background(), driving.DevcontainerShellRequest{
+		BaseDir: devcontainerTestBaseDir,
+		OnStart: func(resp driving.DevcontainerUpResponse) {
+			starts = append(starts, resp)
+		},
+	})
+	if err != nil {
+		t.Fatalf("Shell: %v", err)
+	}
+	if len(starts) != 1 || starts[0].ContainerName != "u-boot-demo-bench" {
+		t.Errorf("OnStart = %+v, want one call with the container name", starts)
 	}
 }

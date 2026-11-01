@@ -77,6 +77,7 @@ Der Hilfs-Aufruf könnte eine je Aufruf gerenderte Kopie der erzeugten `devconta
 - Identität unverändert: `devcontainerId` gleich (Rohwerte je Lauf paarweise identisch, siehe Rohdaten), Volume-Namen gleich, Label-Wert gleich (`i1`).
 - Die erzeugte `devcontainer.json` enthält den Namen nach dem Lauf fern (Gegenprobe: 0 Treffer).
 - Vorlauf verworfen: der erste `config`-Lauf (17:32:08 UTC) brach an einer `set -u`-Zeile des Skripts ab (`dir: unbound variable`, keine Objekte angelegt); der aufbewahrte Lauf ist die Wiederholung mit dem Fix, 17:32:58 UTC.
+- Sonde zur Aufbewahrungsort-Frage (17:49 UTC, nicht als Rohdaten aufbewahrt, Protokoll hier): Overlay-Datei in einem **fremden Verzeichnis** neben dem Projekt (wie der Hilfs-Aufruf sie bei einem `/tmp`-Ablageort hält) — `up` mit `--workspace-folder <Projekt> --override-config <fremde Datei>` endet exit=0, der Container heißt `ubmess-sonde-ov1`, und das Workspace-Volume (`<projekt>-workspace-<devcontainerId>`) ist identisch zum Referenzlauf ohne Namen. Die CLI löst die relativen Pfadangaben der Konfiguration unabhängig vom Aufbewahrungsort der Overlay-Datei auf.
 
 ## Rohdaten
 

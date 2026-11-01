@@ -22,6 +22,14 @@ import (
 // [ErrDockerUnavailable] and [ErrContainerEngineNotLocal] (exit code 11).
 var ErrDevcontainerRuntime = errors.New("devcontainer runtime failed")
 
+// ErrDevcontainerContainerNameConflict signals that the container name of the
+// start is already held by a container that does not belong to the project
+// folder of the request ([DevcontainerUpOptions.Name]; the launcher checks
+// the engine before it starts a helper container, a running and a stopped
+// holder refuse the name alike). The caller reports it as a validation error;
+// the launcher does not remove or rename the holder.
+var ErrDevcontainerContainerNameConflict = errors.New("container name is already held by a container of another project folder")
+
 // ValidateDevcontainerProjectFolder rejects a folder that is not an absolute
 // path or that holds a character a `--mount` value cannot carry (comma,
 // double quote, line break) or a NUL. It is the one definition of the
@@ -95,6 +103,30 @@ func ValidateDevcontainerShellUser(user string) error {
 func ValidateDevcontainerWorkspace(workspace string) error {
 	if !strings.HasPrefix(workspace, "/") || strings.ContainsAny(workspace, "\n\r\x00") {
 		return fmt.Errorf("workspace %q is not an absolute path `docker exec -w` can take as one argument", workspace)
+	}
+	return nil
+}
+
+// ValidateDockerContainerName rejects a name the engine refuses for `--name`.
+// It is the one definition of the admissible character set, measured with
+// Docker Engine 29.9.2 on Linux amd64: the first character is a letter or a
+// digit, the remaining are letters, digits, `.` and `_` and `-`; a name holds
+// at least one character. No length limit was measured down to 257 characters;
+// the longest name the composition builds is far below, so the rule carries no
+// length limit. The launcher applies it again.
+func ValidateDockerContainerName(name string) error {
+	if name == "" {
+		return errors.New("container name is empty")
+	}
+	alnum := func(r byte) bool { return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') }
+	if !alnum(name[0]) {
+		return fmt.Errorf("container name %q begins with neither a letter nor a digit", name)
+	}
+	for i := 1; i < len(name); i++ {
+		b := name[i]
+		if !alnum(b) && b != '.' && b != '_' && b != '-' {
+			return fmt.Errorf("container name %q holds a character the engine refuses for --name", name)
+		}
 	}
 	return nil
 }
@@ -199,6 +231,26 @@ type DevcontainerUpOptions struct {
 	// itself in [DevcontainerUpResult.GitIdentityApplied], it never fails
 	// the start (LH-FA-DEV-010, warning without abort).
 	GitIdentity DevcontainerGitIdentity
+	// Name is the name the started container carries (`u-boot-<project>` or,
+	// with an instance, `u-boot-<project>-<instance>`); the empty string means
+	// no name is handed to the CLI and the engine keeps its random name. The
+	// launcher hands the name through a per-call copy of the devcontainer
+	// configuration ([DevcontainerUpOptions.OverrideConfig]), not through an
+	// option of the CLI's own; it changes neither the id labels, the labels of
+	// the search nor the identity of the container. A name
+	// [ValidateDockerContainerName] rejects ends the call as a rejected input,
+	// and a name the engine already holds for a container of another project
+	// folder ends it as [ErrDevcontainerContainerNameConflict].
+	Name string
+	// OverrideConfig carries the content of the per-call devcontainer
+	// configuration the launcher hands to the CLI via `--override-config`
+	// ([DevcontainerUpOptions.Name]); the empty value starts from the
+	// configuration of the project folder. The launcher writes the content to
+	// a temporary file outside the project, mounts it into the helper
+	// container and removes the file after the call; the CLI resolves the
+	// relative paths of the configuration against the project folder, not
+	// against the location of this file.
+	OverrideConfig []byte
 	// Recreate removes an existing container before the start
 	// (`--remove-existing-container`); volumes stay.
 	Recreate bool

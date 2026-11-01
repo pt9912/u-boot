@@ -451,3 +451,65 @@ func TestExecute_DevcontainerShell_SentinelsAndExitCodes(t *testing.T) {
 		})
 	}
 }
+
+// LH-FA-DEV-010: the shell names the container of the session beside its ID,
+// on the standard error stream, after the fallback warnings and before the
+// session begins. Without a name the shell prints no start line. Under
+// `--quiet` the line is a result of a modifying command: it waits and shows
+// itself only when the call fails.
+func TestExecute_DevcontainerShell_NameOfTheSessionContainer(t *testing.T) {
+	t.Parallel()
+	t.Run("the stderr carries the start line of the session", func(t *testing.T) {
+		t.Parallel()
+		uc := sessionUseCase()
+		uc.upResp.ContainerName = "u-boot-demo"
+		out, errOut, err := shellRun(t, uc, "devcontainer", "shell")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if uc.shellCalls != 1 || uc.shellReq.OnStart == nil {
+			t.Fatalf("the command passed no OnStart: %+v", uc.shellReq)
+		}
+		if !strings.Contains(errOut, "Devcontainer started: container 0123456789ab, name u-boot-demo") {
+			t.Errorf("stderr does not name the session container:\n%s", errOut)
+		}
+		if strings.Contains(out, "Devcontainer ") {
+			t.Errorf("stdout carries the start line although the session owns it:\n%s", out)
+		}
+	})
+	t.Run("a shell without a name prints no start line", func(t *testing.T) {
+		t.Parallel()
+		_, errOut, err := shellRun(t, sessionUseCase(), "devcontainer", "shell")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(errOut, "Devcontainer ") {
+			t.Errorf("the shell printed a start line without a name:\n%s", errOut)
+		}
+	})
+	t.Run("--quiet holds the line of a succeeded call", func(t *testing.T) {
+		t.Parallel()
+		uc := sessionUseCase()
+		uc.upResp.ContainerName = "u-boot-demo"
+		_, errOut, err := shellRun(t, uc, "--quiet", "devcontainer", "shell")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(errOut, "Devcontainer started") {
+			t.Errorf("--quiet printed the start line although the call succeeded:\n%s", errOut)
+		}
+	})
+	t.Run("--quiet shows the line of a failed call after all", func(t *testing.T) {
+		t.Parallel()
+		uc := sessionUseCase()
+		uc.upResp.ContainerName = "u-boot-demo"
+		uc.shellErr = fmt.Errorf("devcontainer up failed (exit status 1: boom): %w", driven.ErrDevcontainerRuntime)
+		_, errOut, err := shellRun(t, uc, "--quiet", "devcontainer", "shell")
+		if cli.ExitCode(err) != 12 {
+			t.Fatalf("exit %d, want 12", cli.ExitCode(err))
+		}
+		if !strings.Contains(errOut, "Devcontainer started: container 0123456789ab, name u-boot-demo") {
+			t.Errorf("a failed quiet call does not show the held start line:\n%s", errOut)
+		}
+	})
+}

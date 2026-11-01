@@ -111,7 +111,7 @@ func TestExecute_Devcontainer_HelpNamesInstance(t *testing.T) {
 		{[]string{"devcontainer", "up", "--help"}, []string{
 			"--instance NAME starts a further devcontainer of the same project folder, next to the one without an instance;",
 			rule, "Without --instance the command acts on the container without an instance only; " + only + "starts nothing.",
-			"an instance name that is not admissible; no --instance although the project has only containers of instances",
+			"an instance name that is not admissible; a container-name part the engine would refuse for --name, or a container of another project folder that already holds the name; no --instance although the project has only containers of instances",
 			"u-boot devcontainer up --instance agent-1",
 		}},
 		{[]string{"devcontainer", "down", "--help"}, []string{
@@ -123,7 +123,8 @@ func TestExecute_Devcontainer_HelpNamesInstance(t *testing.T) {
 		{[]string{"devcontainer", "shell", "--help"}, []string{
 			"--instance NAME opens the shell in the container of that instance", rule,
 			"Without --instance the command acts on the container without an instance only; " + only + "starts nothing.",
-			"an instance name that is not admissible; no --instance although the project has only containers of instances",
+			"Before the session begins, the command names the container of the session beside its ID on the standard error stream.",
+			"an instance name that is not admissible; a container-name part the engine would refuse for --name, or a container of another project folder that already holds the name; no --instance although the project has only containers of instances",
 			"u-boot devcontainer shell --instance agent-1",
 		}},
 	}
