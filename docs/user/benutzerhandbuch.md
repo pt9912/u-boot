@@ -861,7 +861,8 @@ u-boot devcontainer shell
   die Shell. Scheitert vor dem Öffnen die Prüfung, ob Benutzer, Workspace und Shell im Container
   vorhanden sind, endet `shell` mit Exit-Code 12.
 - **Ende.** Hat die Shell begonnen, endet der Befehl mit Exit-Code 0, was immer der Exit-Status der
-  Shell war. Beenden Sie die Sitzung mit `exit`. Beendet sich `u-boot` auf anderem Weg (etwa mit
+  Shell war. Eine Ausnahme: Verschwindet der Benutzer im Container genau nach dem Beginn der Sitzung,
+  kann der Befehl mit Exit-Code 12 enden, obwohl die Shell begonnen hat. Beenden Sie die Sitzung mit `exit`. Beendet sich `u-boot` auf anderem Weg (etwa mit
   `kill -9`), kann die Shell im Container samt ihren Befehlen weiterlaufen.
 - **Abgewiesen** mit Exit-Code 2 werden `--json` (mit `--json` als Umschlag mit `subcommand: shell`),
   `--dry-run`, `--diff` und Argumente. `--yes` und `--no-interactive` haben keine Wirkung: Der Befehl

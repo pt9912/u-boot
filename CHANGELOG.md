@@ -18,6 +18,7 @@ this file is the same format applied to u-boot itself.
 
 ### Changed
 
+- `u-boot devcontainer shell` ([`LH-FA-DEV-010`](spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)) tells a missing user of the session from a line the session wrote itself: on Docker engine 28.0.4, without a terminal, the line `unable to find user <user>: …` with status 126 counts as an error of the client (exit code 12) only if a repeated probe after the end of the client also reports the user as missing; otherwise the command ends with `0` as for any begun session. The repeated probe is one more `docker exec` in that one case. Limit: if the user vanishes from the container after the session began and the session wrote that line itself, the command still ends with exit code 12.
 - Documentation: the README files and the user manual state that the Homebrew tap serves Linux (`arm64` and `amd64`) as well as macOS; the formula already carried the Linux binaries, and the manual no longer says that Linux-Brew is not promised. The READMEs no longer carry the release table and the long status block; promises, conditions and limits are in the user manual and this changelog.
 
 ## [0.16.1] - 2026-10-26

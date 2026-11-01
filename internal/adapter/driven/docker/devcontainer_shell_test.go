@@ -234,7 +234,11 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		stdout string
 		stderr string
 		flags  []string
-		edit   func(*driven.DevcontainerShellOptions)
+		// goneLate names the user whom the probe after the session reports
+		// as missing; reprobes is true where that probe is expected to run.
+		goneLate string
+		reprobes bool
+		edit     func(*driven.DevcontainerShellOptions)
 	}{
 		{name: "status 0", exit: "0"},
 		{name: "status 0, the message names this container", exit: "0", stderr: msgNotRunning + "\n"},
@@ -260,6 +264,11 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		{name: "status 126, other output before the missing-user line", exit: "126", stdout: "output\n" + msgUserGoneOnStdout + "\n"},
 		{name: "status 126, other output after the missing-user line", exit: "126", stdout: msgUserGoneOnStdout + "\nmore output\n"},
 		{name: "terminal, status 126, the missing-user line", exit: "126", stdout: msgUserGoneOnStdout + "\r\n", edit: terminal},
+		{name: "status 126, the missing-user line of the session user while the user exists", exit: "126", stdout: msgUserGoneOnStdout + "\r\n", reprobes: true},
+		{name: "status 126, the missing-user line of the session user and a probe that fails for another reason", exit: "126", stdout: msgUserGoneOnStdout + "\r\n",
+			flags: []string{"probe-late-not-running"}, reprobes: true},
+		{name: "status 126, the missing-user line of the session user and a probe that reports another user", exit: "126", stdout: msgUserGoneOnStdout + "\r\n",
+			goneLate: "vscode2", reprobes: true},
 		{name: "status 126, the missing-user line of a user whose name begins with the session user", exit: "126", stdout: "unable to find user vscode2: no matching entries in passwd file\r\n"},
 		{name: "status 126, the missing-user line of the session user for a session as vscode2", exit: "126", stdout: msgUserGoneOnStdout + "\r\n",
 			edit: func(o *driven.DevcontainerShellOptions) { o.User = "vscode2" }},
@@ -281,6 +290,9 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 				f.write(t, "session-stderr", tc.stderr)
 			}
 			f.flag(t, tc.flags...)
+			if tc.goneLate != "" {
+				f.write(t, "user-gone-late", tc.goneLate)
+			}
 			var stdout, stderr bytes.Buffer
 			err := f.launcher(nil).Shell(context.Background(), shellOptions(func(o *driven.DevcontainerShellOptions) {
 				if tc.edit != nil {
@@ -293,6 +305,13 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 			}
 			if stdout.String() != tc.stdout || stderr.String() != tc.stderr {
 				t.Errorf("stdout = %q, stderr = %q; want the session output unchanged", stdout.String(), stderr.String())
+			}
+			want := 2
+			if tc.reprobes {
+				want = 3
+			}
+			if got := len(f.execCalls(t)); got != want {
+				t.Errorf("docker exec ran %d times, want %d (the probe and the session, plus the repeated probe only for the missing-user line)", got, want)
 			}
 		})
 	}
@@ -309,16 +328,19 @@ func TestLauncher_Shell_ClientErrorBeforeSessionIsRuntimeFailure(t *testing.T) {
 		stdout string
 		stderr string
 		flags  []string
-		edit   func(*driven.DevcontainerShellOptions)
+		// goneLate names the user whom the probe after the session reports
+		// as missing (engine 28.0.4 form).
+		goneLate string
+		edit     func(*driven.DevcontainerShellOptions)
 	}{
 		{name: "the container is not running", exit: "1", stderr: msgNotRunning + "\n"},
 		{name: "the container does not exist", exit: "1", stderr: msgGone + "\n"},
 		{name: "the user does not exist after the probe", exit: "1", stderr: msgUserGone + "\n"},
 		{name: "the engine does not answer after the probe", exit: "1", stderr: msgEngineDown + "\n", flags: []string{"daemon-down-late"}},
 		{name: "the workspace does not exist after the probe", exit: "127", stdout: msgOCI + "\n"},
-		{name: "the user does not exist after the probe (engine 28.0.4: status 126 on standard output)", exit: "126", stdout: msgUserGoneOnStdout + "\r\n"},
+		{name: "the user does not exist after the probe (engine 28.0.4: status 126 on standard output)", exit: "126", stdout: msgUserGoneOnStdout + "\r\n", goneLate: "vscode"},
 		{name: "the user vscode2 does not exist after the probe (engine 28.0.4)", exit: "126", stdout: "unable to find user vscode2: no matching entries in passwd file\r\n",
-			edit: func(o *driven.DevcontainerShellOptions) { o.User = "vscode2" }},
+			goneLate: "vscode2", edit: func(o *driven.DevcontainerShellOptions) { o.User = "vscode2" }},
 		{name: "terminal, the container is not running", exit: "1", stderr: msgNotRunning + "\n", edit: terminal},
 		{name: "terminal, standard input is no terminal", exit: "1", stderr: msgNoTerminal + "\n", edit: terminal},
 	}
@@ -331,6 +353,9 @@ func TestLauncher_Shell_ClientErrorBeforeSessionIsRuntimeFailure(t *testing.T) {
 			}
 			f.write(t, "session-stderr", tc.stderr)
 			f.flag(t, tc.flags...)
+			if tc.goneLate != "" {
+				f.write(t, "user-gone-late", tc.goneLate)
+			}
 			err := f.launcher(nil).Shell(context.Background(), shellOptions(tc.edit))
 			if !errors.Is(err, driven.ErrDevcontainerRuntime) || errors.Is(err, driven.ErrDockerUnavailable) {
 				t.Fatalf("error = %v, want ErrDevcontainerRuntime", err)
@@ -338,6 +363,39 @@ func TestLauncher_Shell_ClientErrorBeforeSessionIsRuntimeFailure(t *testing.T) {
 			message := strings.TrimSpace(tc.stderr + tc.stdout)
 			if !strings.Contains(err.Error(), "before the session began") || !strings.Contains(err.Error(), message) {
 				t.Errorf("error %q lacks the message of the client %q", err, message)
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-010: the line about a missing user on the stream of the session
+// (engine 28.0.4 form) makes the launcher repeat the probe of the shell of
+// the session once, after the session; the repeated probe is the probe. A
+// session without that line runs no third `docker exec`
+// (TestLauncher_Shell_ProbesThenOpensTheSession).
+func TestLauncher_Shell_MissingUserLineRepeatsTheProbeOnce(t *testing.T) {
+	for _, userExists := range []bool{true, false} {
+		name := "the user is missing now"
+		if userExists {
+			name = "the user exists"
+		}
+		t.Run(name, func(t *testing.T) {
+			f := newFakeDocker(t)
+			f.write(t, "session-exit", "126")
+			f.write(t, "session-stdout", msgUserGoneOnStdout+"\r\n")
+			if !userExists {
+				f.write(t, "user-gone-late", shellTestUser)
+			}
+			err := f.launcher(nil).Shell(context.Background(), shellOptions(nil))
+			if gotErr := err != nil; gotErr == userExists {
+				t.Errorf("error = %v, want one exactly if the user is missing now", err)
+			}
+			execs := f.execCalls(t)
+			if len(execs) != 3 {
+				t.Fatalf("docker exec ran %d times, want the probe, the session and the repeated probe: %q", len(execs), execs)
+			}
+			if got, want := strings.Join(execs[2], " "), strings.Join(execs[0], " "); got != want {
+				t.Errorf("repeated probe = %q, want the probe %q", got, want)
 			}
 		})
 	}
