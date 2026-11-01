@@ -127,7 +127,8 @@ func stringLiterals(n ast.Node, fset *token.FileSet, report func(pos token.Pos, 
 	})
 }
 
-// TestMessageLiteralsCarryNoIdentifiersOrHistory walks the non-test Go
+// TestMessageLiteralsCarryNoIdentifiersOrHistory (seit slice-v1-hilfetexte-ohne-kennungen)
+// walks the non-test Go
 // sources of the driving CLI adapter, the application, the ports, the
 // domain and the driven adapters and reports every string literal that
 // forms message text — an argument of errors.New/fmt.Errorf/fmt.Sprintf/

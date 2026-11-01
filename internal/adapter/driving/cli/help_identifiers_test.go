@@ -115,7 +115,8 @@ func TestUserTextFindings_Patterns(t *testing.T) {
 	}
 }
 
-// TestHelpTreeCarriesNoIdentifiersOrHistory walks the whole command
+// TestHelpTreeCarriesNoIdentifiersOrHistory (seit slice-v1-hilfetexte-ohne-kennungen)
+// walks the whole command
 // tree and reports every help text (Short, Long, Example, option
 // usage) with an identifier, a German word, an announcement or a
 // history remark.
