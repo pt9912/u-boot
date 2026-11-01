@@ -107,10 +107,10 @@ so a changed list takes effect after a rebuild of the container.
 The output stays under --quiet (it is the result of the command). --json emits
 the envelope with data.{active,sandboxProfile,egressEnabled,cloneSource,hosts}.
 
-Exit codes (LH-FA-CLI-006):
+Exit codes:
   0   success
   2   CLI validation (unknown flag, arguments, --dry-run/--diff)
-  10  fachlich (no u-boot.yaml; invalid configuration; a git remote URL that
+  10  validation (no u-boot.yaml; invalid configuration; a git remote URL that
       cannot be written into the devcontainer)
   14  filesystem error
 

@@ -56,13 +56,13 @@ func newGenerateCommand(a *App) *cobra.Command {
 		Short: "Generate or update a u-boot-managed artefact (changelog/readme/env-example/devcontainer)",
 		Long: `Generate or update one of the four u-boot-managed project artefacts:
 
-  changelog     CHANGELOG.md (LH-FA-GEN-002 / LH-AK-007)
-  readme        README.md (LH-FA-GEN-003)
-  env-example   .env.example (LH-FA-GEN-004)
-  devcontainer  .devcontainer/devcontainer.json + Dockerfile (LH-FA-DEV-001)
+  changelog     CHANGELOG.md
+  readme        README.md
+  env-example   .env.example
+  devcontainer  .devcontainer/devcontainer.json + Dockerfile
 
 The command runs in an initialised project (u-boot.yaml present) and
-is idempotent (LH-FA-GEN-005): a second invocation against an
+is idempotent: a second invocation against an
 artefact whose managed block already matches the rendered template
 returns a no-op without touching the file. Existing manual content
 outside the managed block is preserved byte-identically.
@@ -73,7 +73,7 @@ not re-render the block; it only inserts a missing ` + "`## [Unreleased]`" + `
 header before the first release section if needed (RepairedManual
 action).
 
-Exit codes (LH-FA-CLI-006):
+Exit codes:
   0   success
   2   unknown artefact name; missing positional argument
   10  no u-boot.yaml (project not initialised);
@@ -104,13 +104,13 @@ Examples:
 		},
 	}
 	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
-		"append the given URLs to devcontainer.featureSources.allow before generating (LH-FA-DEV-003; only valid for `generate devcontainer`; comma-separated, repeatable). `--yes` does not substitute (LH-NFA-SEC-004).")
+		"append the given URLs to devcontainer.featureSources.allow before generating (only valid for 'generate devcontainer'; comma-separated, repeatable). --yes does not substitute.")
 	cmd.Flags().BoolVar(&flags.Sandbox, "sandbox", false,
-		"render the devcontainer with the sandbox profile (LH-FA-DEV-006) and set devcontainer.profile=sandbox (only valid for `generate devcontainer`)")
+		"render the devcontainer with the sandbox profile and set devcontainer.profile=sandbox (only valid for 'generate devcontainer')")
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
-		"preview the planned changes without writing files (LH-FA-CLI-007)")
+		"preview the planned changes without writing files")
 	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
-		"render a unified diff of the planned changes (LH-FA-CLI-008)")
+		"render a unified diff of the planned changes")
 	return cmd
 }
 
@@ -178,14 +178,14 @@ func runGenerate(
 	// rather than a silent no-op.
 	if len(flags.AllowExternalFeatureSources) > 0 && artifact != domain.ArtifactDevcontainer {
 		wrapped := fmt.Errorf(
-			"%w: --allow-external-feature-sources is only valid for `generate devcontainer` (LH-FA-DEV-003); got `generate %s`",
+			"%w: --allow-external-feature-sources is only valid for `generate devcontainer`; got `generate %s`",
 			driving.ErrArtifactUnknown, artifact)
 		return reportError(out, wrapped, nil, flags.DryRun, flags.Diff, flags.JSON, "generate", mapErr, data)
 	}
 
 	if flags.Sandbox && artifact != domain.ArtifactDevcontainer {
 		wrapped := fmt.Errorf(
-			"%w: --sandbox is only valid for `generate devcontainer` (LH-FA-DEV-006); got `generate %s`",
+			"%w: --sandbox is only valid for `generate devcontainer`; got `generate %s`",
 			driving.ErrArtifactUnknown, artifact)
 		return reportError(out, wrapped, nil, flags.DryRun, flags.Diff, flags.JSON, "generate", mapErr, data)
 	}
@@ -229,7 +229,7 @@ func runGenerate(
 		printGenerateSummary(out, resp, flags.DryRun)
 	}
 	for _, w := range visibleWarnings(resp.Warnings, flags.Quiet) {
-		fmt.Fprintf(out, "Warning (%s): %s\n", w.Code, w.Message)
+		fmt.Fprintf(out, "Warning: %s\n", w.Message)
 	}
 	return nil
 }

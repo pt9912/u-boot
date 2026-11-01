@@ -79,9 +79,9 @@ func newDownCommand(a *App) *cobra.Command {
 		Short: "Stop the Compose environment and optionally remove its named volumes",
 		Long: `Tear down the Compose environment via docker compose down.
 With --volumes the named Compose volumes are removed as well (data
-loss; LH-FA-UP-004).
+loss).
 
-Destructive confirmation gate (LH-FA-CLI-005A):
+Destructive confirmation gate:
   - --yes                     auto-confirm
   - --no-interactive          fail-fast with exit 10 (no confirmation
                               possible without user input)
@@ -92,13 +92,13 @@ Destructive confirmation gate (LH-FA-CLI-005A):
 The mode-flag mutual exclusion (--yes + --no-interactive → exit 2)
 is checked before any use-case logic runs.
 
-LH-FA-CLI-006 exit codes:
+Exit codes:
   - 10  no u-boot.yaml / no compose.yaml / destructive confirmation refused
   - 11  Docker daemon unreachable / compose plugin missing
   - 12  Compose runtime failure
   - 14  filesystem read failure (u-boot.yaml / compose.yaml)
 
-LH-NFA-PERF-002 progress: compose down phases stream to stderr live;
+Progress: compose down phases stream to stderr live;
 with --quiet they are held back and printed only if down fails
 (silenced in --json mode).`,
 		Args: cobra.NoArgs,
@@ -117,7 +117,7 @@ with --quiet they are held back and printed only if down fails
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Volumes, "volumes", false,
-		"also remove named Compose volumes (data loss; LH-FA-UP-004)")
+		"also remove named Compose volumes (data loss)")
 	return cmd
 }
 

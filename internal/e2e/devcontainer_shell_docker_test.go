@@ -377,7 +377,7 @@ func TestDevcontainerShell_Docker_Session(t *testing.T) {
 			t.Fatalf("standard output = %q, want the lines of the session only: begin, user, workspace, token, agent value, unset-absent, end", stdout)
 		}
 		sessionUser, sessionWorkspace := lines[1], lines[2]
-		if !strings.Contains(stderr, "Warning (LH-FA-DEV-010): this command mounts the host container-engine socket") ||
+		if !strings.Contains(stderr, "Warning: this command mounts the host container-engine socket") ||
 			!strings.Contains(stderr, "for the duration of the start)") || strings.Contains(stderr, "duration of the call") {
 			t.Errorf("standard error lacks the disclosure of the socket for the duration of the start:\n%.1500s", stderr)
 		}

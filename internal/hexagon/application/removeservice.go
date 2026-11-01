@@ -33,8 +33,8 @@ type RemoveServiceService struct {
 	confirmer driven.Confirmer
 	logger    driven.Logger
 	// engine performs the real `--purge` volume removal
-	// (slice-v1-volume-auto-removal); nil keeps the legacy deferred
-	// warning. Wired via [RemoveServiceService.WithDockerEngine].
+	// (slice-v1-volume-auto-removal); nil keeps the warning that no
+	// volume is removed. Wired via [RemoveServiceService.WithDockerEngine].
 	engine driven.DockerEngine
 	// removeMu serialises Remove() invocations on a single service
 	// instance. The PreviewMode-aware s.fs/s.confirmer-swaps in Remove()
@@ -114,7 +114,7 @@ func NewRemoveServiceServiceWithFactory(
 
 // WithDockerEngine wires the Docker engine used by `--purge` to remove
 // the service's named volumes. Without it `--purge` only runs the
-// confirmation gate and warns that removal is deferred.
+// confirmation gate and warns that no volume is removed.
 func (s *RemoveServiceService) WithDockerEngine(e driven.DockerEngine) *RemoveServiceService {
 	s.engine = e
 	return s
@@ -166,8 +166,9 @@ func (s *RemoveServiceService) selectFS(mode driving.PreviewMode) (driven.FileSy
 // fires only when the call WILL transition state (Active /
 // EnabledUnset / InconsistentBlock) AND PreviewMode != PreviewDryRun
 // (T0-(h)(a) skip-logic: Dry-Run implies null-mutations, no gate).
-// Volume removal itself remains deferred — `VolumesPurged` stays
-// false even on a passed gate.
+// Volume removal runs only with a wired Docker engine (see
+// [RemoveServiceService.WithDockerEngine]); without one `VolumesPurged`
+// stays false even on a passed gate.
 func (s *RemoveServiceService) Remove(ctx context.Context, req driving.RemoveServiceRequest) (driving.RemoveServiceResponse, error) {
 	// Serialise per-request fs/confirmer-swap (slice-v1-cli-json-
 	// dry-run-remove T0-(c) R5-F1, inherited from init T0-(d) /
@@ -294,8 +295,8 @@ func (s *RemoveServiceService) runRemove(ctx context.Context, req driving.Remove
 //     (volumeOptional == false — postgres today; keycloak/otel are
 //     volumeOptional=true and produce no WARN, R3-F1).
 //
-// VolumesPurged is implicitly false in v0.3.0 (deferred auto-removal,
-// Out-of-Scope). The WARN-Diagnostic carries code LH-FA-ADD-007 +
+// The warning applies when no real removal runs (dry-run, or no Docker
+// engine wired). The WARN-Diagnostic carries code LH-FA-ADD-007 +
 // level "warn"; T5 maps it into the JSON envelope's `diagnostics[]`
 // array. T5 also unterdrückt WARN on the error path (R4-F3 variante A).
 //
@@ -310,13 +311,13 @@ func (s *RemoveServiceService) volumesPurgedWarnings(req driving.RemoveServiceRe
 		return nil
 	}
 	if s.engine != nil && req.PreviewMode != driving.PreviewDryRun {
-		return nil // the real removal runs; no "deferred" warning
+		return nil // the real removal runs; no warning that no volume is removed
 	}
 	return []driving.WarningEntry{
 		{
 			Code:    "LH-FA-ADD-007",
 			Level:   "warn",
-			Message: fmt.Sprintf("--purge requested for service %q but volume removal is deferred (v0.3.0); the named volumes are still on disk and untouched", req.ServiceName.String()),
+			Message: fmt.Sprintf("--purge requested for service %q but no volume is removed in this run; the named volumes are still on disk and untouched", req.ServiceName.String()),
 		},
 	}
 }

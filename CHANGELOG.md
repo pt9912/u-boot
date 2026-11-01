@@ -11,6 +11,11 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Changed
+
+- Help texts and messages of all commands no longer carry requirement, specification or slice identifiers, German words, announcements or version history ([`LH-LESE-002`](spec/lastenheft.md#lh-lese-002--sprache)). The help of `add` and `remove` names the catalogue (postgres, keycloak, otel) and says that `remove --purge` removes the named volume; the help of `template` no longer lists announced commands. The warning line reads `Warning: <text>` without the code in front; the code stays in the JSON output. Backticks no longer turn a word of an option text into a value name in the help.
+- Comments in the files that `init` and `generate devcontainer` write no longer carry requirement identifiers.
+
 ## [0.17.0] - 2026-11-01
 
 Seventeenth release. **Several devcontainers per project folder with `--instance`, and a subscription token for Claude Code in the sandbox devcontainer.**

@@ -423,19 +423,19 @@ func TestDoctor_SandboxCredentials_Agent(t *testing.T) {
 	}{
 		{"active, reference present", agentYAML, map[string]string{".devcontainer/devcontainer.json": withRef},
 			domain.SeverityOK, "ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN (reference only)"},
-		{"active, devcontainer.json missing", agentYAML, nil, domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN ("},
+		{"active, devcontainer.json missing", agentYAML, nil, domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN."},
 		{"active, reference absent", agentYAML, map[string]string{".devcontainer/devcontainer.json": `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}"}}`},
-			domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN ("},
+			domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN."},
 		{"active, other variable is no source", agentYAML, map[string]string{".devcontainer/devcontainer.json": `{"remoteEnv": {"ANTHROPIC_API_KEY": "${localEnv:OTHER_KEY}"}}`},
-			domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN ("},
+			domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY, CLAUDE_CODE_OAUTH_TOKEN."},
 		// The two login variables are alternatives for the user but both
 		// references stay required in the file: a file generated before the
 		// token existed must be regenerated, or the token never reaches the
 		// container.
 		{"active, only the API key reference", agentYAML, map[string]string{".devcontainer/devcontainer.json": `{"remoteEnv": {"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"}}`},
-			domain.SeverityWarn, "no reference for: CLAUDE_CODE_OAUTH_TOKEN ("},
+			domain.SeverityWarn, "no reference for: CLAUDE_CODE_OAUTH_TOKEN."},
 		{"active, only the OAuth token reference", agentYAML, map[string]string{".devcontainer/devcontainer.json": `{"remoteEnv": {"CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}"}}`},
-			domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY ("},
+			domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY."},
 		{"active, https clone without git token source is reported first", agentYAML,
 			map[string]string{".git/config": gitCfg("https://github.com/o/r.git"), ".devcontainer/devcontainer.json": "{}"},
 			domain.SeverityWarn, "no runtime token source"},

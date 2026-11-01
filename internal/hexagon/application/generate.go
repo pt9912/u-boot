@@ -343,7 +343,7 @@ func classifyExistingBlock(content []byte, marker managedblock.Marker, relPath s
 	switch {
 	case errors.Is(findErr, managedblock.ErrBlockNotFound):
 		return 0, 0, fmt.Errorf(
-			"%w: %q exists without an `init` managed block; rename the file or insert the format-appropriate BEGIN/END markers from LH-SA-FILE-002 manually",
+			"%w: %q exists without an `init` managed block; rename the file or insert the format-appropriate BEGIN/END markers manually",
 			driving.ErrGenerateManualConflict, relPath)
 	case errors.Is(findErr, managedblock.ErrBlockMalformed):
 		return 0, 0, fmt.Errorf(

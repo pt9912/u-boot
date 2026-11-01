@@ -103,7 +103,7 @@ func TestRemove_Purge_InUseVolumeWarns(t *testing.T) {
 }
 
 // Dry-run and the declined gate remove nothing; without an engine the
-// legacy "deferred" warning stays.
+// warning that no volume is removed stays.
 func TestRemove_Purge_NoRemovalWhenDryRunDeclinedOrNoEngine(t *testing.T) {
 	t.Parallel()
 	req := func(mode driving.PreviewMode, yes bool) driving.RemoveServiceRequest {
@@ -128,8 +128,8 @@ func TestRemove_Purge_NoRemovalWhenDryRunDeclinedOrNoEngine(t *testing.T) {
 	}
 	svc3 := application.NewRemoveServiceService(seedProjectWithActiveService(t), &fakeYAML{}, &fakeConfirmer{}, nil)
 	resp, err := svc3.Remove(context.Background(), req(driving.PreviewNone, true))
-	if err != nil || resp.PurgeAttempted || len(resp.Warnings) != 1 || !strings.Contains(resp.Warnings[0].Message, "deferred") {
-		t.Errorf("no engine: err=%v attempted=%v warnings=%+v, want the legacy deferred warning", err, resp.PurgeAttempted, resp.Warnings)
+	if err != nil || resp.PurgeAttempted || len(resp.Warnings) != 1 || !strings.Contains(resp.Warnings[0].Message, "no volume is removed") {
+		t.Errorf("no engine: err=%v attempted=%v warnings=%+v, want the warning that no volume is removed", err, resp.PurgeAttempted, resp.Warnings)
 	}
 }
 

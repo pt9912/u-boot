@@ -42,7 +42,7 @@ func NewProjectName(raw string) (ProjectName, error) {
 		return "", fmt.Errorf("%w: length %d exceeds maximum %d", ErrInvalidProjectName, len(raw), projectNameMaxLen)
 	}
 	if !projectNamePattern.MatchString(raw) {
-		return "", fmt.Errorf("%w: %q does not match %s (LH-FA-INIT-006)", ErrInvalidProjectName, raw, projectNamePattern)
+		return "", fmt.Errorf("%w: %q does not match %s", ErrInvalidProjectName, raw, projectNamePattern)
 	}
 	return ProjectName(raw), nil
 }

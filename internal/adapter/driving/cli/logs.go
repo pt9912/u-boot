@@ -136,11 +136,11 @@ Without a positional argument, all services declared in compose.yaml
 are streamed (Compose-Default — no u-boot.yaml filter). With a
 positional arguments, only those services stream (one or several, e.g.
 "logs api db"). Unknown
-services at runtime map to LH-FA-CLI-006 exit code 12 via the
+services at runtime map to exit code 12 via the
 Compose runtime error path.
 
 Flags:
-  --follow         stream until Ctrl-C (LH-FA-UP-005); SIGINT exits 0.
+  --follow         stream until Ctrl-C; SIGINT exits 0.
                    NOT supported with --json (use --tail=N --json
                    for bounded snapshots).
   --tail <n>       show only the last n lines per service. Default
@@ -152,12 +152,12 @@ Flags:
                    timestamp (2026-06-07T12:00:00Z). Invalid ⇒ exit 2.
   --until <t>      only logs before t (same formats).
 
-LH-FA-CLI-006 exit codes:
+Exit codes:
   - 0   success (incl. --follow terminated by SIGINT)
   - 2   --tail with invalid value, or malformed CLI usage
         (--follow --json combo also returns exit 2)
   - 10  no u-boot.yaml / compose.yaml; or invalid service name
-        (regex-only, per T0-(b))
+        (the name is checked against the service-name pattern only)
   - 11  Docker daemon unreachable / compose plugin missing
   - 12  Compose runtime failure (unknown service at runtime, etc.)
   - 14  filesystem read failure (u-boot.yaml / compose.yaml)`,
@@ -171,7 +171,7 @@ LH-FA-CLI-006 exit codes:
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Follow, "follow", false,
-		"stream logs continuously until Ctrl-C (LH-FA-UP-005)")
+		"stream logs continuously until Ctrl-C")
 	cmd.Flags().StringVar(&flags.Tail, "tail", "",
 		"show only the last n lines per service (non-negative integer; default = all)")
 	cmd.Flags().BoolVar(&flags.NoLogPrefix, "no-log-prefix", false,
