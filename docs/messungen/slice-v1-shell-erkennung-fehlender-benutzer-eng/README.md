@@ -1,6 +1,6 @@
 # Messprotokoll: wo entsteht die Zeile `unable to find user <Benutzer>: …`, und wie sieht sie aus, wenn die Sitzung sie selbst schreibt?
 
-Messung zum Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../../plan/planning/in-progress/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) ([`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), DoD-Punkt 1). Gemessen ist nur das Verhalten des `docker`-Clients und der Engine bei `docker exec -u <Benutzer> …`; der Launcher von `u-boot` lief nicht.
+Messung zum Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../../plan/planning/done/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) ([`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), DoD-Punkt 1). Gemessen ist nur das Verhalten des `docker`-Clients und der Engine bei `docker exec -u <Benutzer> …`; der Launcher von `u-boot` lief nicht.
 
 ## Messstand
 

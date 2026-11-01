@@ -102,7 +102,7 @@ Der Implementer ergänzt die Tabelle im ersten Lauf und gleicht sie nach der let
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der Projektinhaber hat die Fragen 1 bis 4 aus §1 beantwortet (Vermerk in §7); WIP-Limit 1 pro Lauf (Baseline-Regelwerk `modul-05-planning-harness.md` §Trigger je Lifecycle-Übergang und WIP-Limit): der Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../in-progress/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) liegt in `in-progress/` und gehört einem anderen Lauf; dieser Lauf hält nur diesen Slice (Anweisung des Projektinhabers, 2026-11-01).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der Projektinhaber hat die Fragen 1 bis 4 aus §1 beantwortet (Vermerk in §7); WIP-Limit 1 pro Lauf (Baseline-Regelwerk `modul-05-planning-harness.md` §Trigger je Lifecycle-Übergang und WIP-Limit): der Slice [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](../done/slice-v1-shell-erkennung-fehlender-benutzer-eng.md) liegt in `in-progress/` und gehört einem anderen Lauf; dieser Lauf hält nur diesen Slice (Anweisung des Projektinhabers, 2026-11-01).
 
 **Rückführungen — vorab benannt:**
 
