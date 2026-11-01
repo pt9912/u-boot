@@ -996,3 +996,46 @@ func TestLauncher_Up_GitIdentityFailedExecReportsNotApplied(t *testing.T) {
 		t.Fatalf("GitIdentityApplied = true, want false on failed exec")
 	}
 }
+
+// LH-FA-DEV-009: the masking covers a resolved value like a host value, in
+// the progress forwarding and in the error texts.
+func TestLauncher_Up_MasksResolvedValue(t *testing.T) {
+	const secret = "resolved-token-placeh-0123"
+	runLine := "docker run -e X=" + secret + " --rm image\n"
+	cases := []struct {
+		name          string
+		setup         func(t *testing.T, f *fakeDocker)
+		fails         bool
+		placeholderIn string
+	}{
+		{"stderr, run succeeds", func(t *testing.T, f *fakeDocker) { f.write(t, "run-stderr", runLine) }, false, "progress"},
+		{"stderr, run fails", func(t *testing.T, f *fakeDocker) { f.write(t, "run-stderr", runLine); f.flag(t, "run-fail") }, true, "error"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			f := newFakeDocker(t)
+			tc.setup(t, f)
+			opts := upOptions()
+			opts.EnvNames = []string{"GIT_TOKEN"}
+			opts.EnvValues = map[string]string{"GIT_TOKEN": secret}
+			var progress bytes.Buffer
+			opts.Progress = &progress
+			_, err := f.launcher(nil).Up(context.Background(), opts)
+			if (err != nil) != tc.fails {
+				t.Fatalf("Up error = %v, want failure %v", err, tc.fails)
+			}
+			texts := map[string]string{"progress": progress.String()}
+			if err != nil {
+				texts["error"] = err.Error()
+			}
+			for where, text := range texts {
+				if strings.Contains(text, secret) {
+					t.Errorf("the resolved value is in the %s: %q", where, text)
+				}
+			}
+			if !strings.Contains(texts[tc.placeholderIn], "[masked]") {
+				t.Errorf("%s %q shows no placeholder", tc.placeholderIn, texts[tc.placeholderIn])
+			}
+		})
+	}
+}

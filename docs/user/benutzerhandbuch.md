@@ -819,8 +819,9 @@ Projektpfad mit Komma, Anführungszeichen oder Zeilenumbruch wird abgewiesen (Ex
 ein Ordner, den die Engine nicht sieht, ergibt Exit-Code 12.
 
 **Zugangsdaten.** Der Befehl reicht nur Variablen durch, auf die `devcontainer.json`
-mit `${localEnv:NAME}` verweist und die auf dem Host gesetzt sind, und zwar als Name,
-nie als Wert auf der Kommandozeile von `u-boot`.
+mit `${localEnv:NAME}` verweist und die auf dem Host gesetzt sind — oder, mit dem
+Opt-in-Schalter des nächsten Abschnitts, die er auf dem Host ermittelt hat —, und
+zwar als Name, nie als Wert auf der Kommandozeile von `u-boot`.
 
 **Auflösung der Token-Quelle (Opt-in).** Mit dem Sandbox-Profil und dem Schalter
 `devcontainer.sandbox.hostGitToken: true` (setzen Sie ihn mit `u-boot config set devcontainer.sandbox.hostGitToken true`)

@@ -31,8 +31,7 @@ import (
 
 const (
 	// hostGitPlaceholders are the values of the fake sources; their length
-	// (36 + the newline of printenv = 37) is the expected count in the
-	// session.
+	// (33 + the newline of printenv = 34) is the expected count in the session.
 	hostGitTokenPlaceholder  = "platzh-hostgit-token-0123456789ab"
 	hostGitNamePlaceholder   = "platzh-hostgit-name"
 	hostGitEmailPlaceholder  = "platzh-hostgit-email"

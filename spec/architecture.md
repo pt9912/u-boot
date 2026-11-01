@@ -253,6 +253,17 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
     die Trennung von Exit-Klasse 11 und 12 entsteht hier, nicht im Use-Case.
   - `NetProbe` für Erreichbarkeits-Prüfungen beim Warten auf startende
     Services ([`LH-FA-UP-003`](lastenheft.md#lh-fa-up-003--startstatus-anzeigen)).
+  - `HostGitSource` (`GitToken`/`ConfigValue`) für die Host-Quellen der
+    Git-Zugangsdaten und -Identität der Devcontainer-Befehle
+    ([`LH-FA-DEV-009`](lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer),
+    [`LH-FA-DEV-010`](lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
+    Einzelheiten [`SPEC-049`](spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)).
+    Ein eigener Port statt einer Erweiterung von `Git`, weil er die beiden
+    Befehle `up`/`shell` befragen und die Rangfolge der Token-Quellen tragen
+    darf, die der `Git`-Port der Init-/Doctor-Pfade nicht kennt; er führt
+    `gh auth token` und `git config` des Hosts aus, öffnet aber keine
+    Konfigurationsdatei selbst. Optionale Verdrahtung: ohne den Port lösen
+    die Befehle nichts auf.
   - `TemplateCatalog` und `TemplateFiles` — Auflisten der verfügbaren
     Projektvorlagen und Lesen ihrer Dateien
     ([`LH-FA-TPL-001`](lastenheft.md#lh-fa-tpl-001--projektvorlagen)..[`LH-FA-TPL-004`](lastenheft.md#lh-fa-tpl-004--templates-auflisten)).

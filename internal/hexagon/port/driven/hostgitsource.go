@@ -34,9 +34,10 @@ type HostGitSource interface {
 	// (the explicit choice of the user) first, then the token of the gh
 	// session (`gh auth token`). It returns the value and the name of the
 	// source that provided it ("GIT_TOKEN" or "gh auth token"). With no
-	// source it returns empty values without an error. A failure of the
+	// source it returns empty values without an error; a failure of the
 	// resolution of one source (gh missing, gh not logged in) skips that
-	// source; a failed environment read is an error.
+	// source the same way. The error carries only a failed environment
+	// read; the adapters read the environment of their own process.
 	GitToken(ctx context.Context) (value string, source string, err error)
 
 	// ConfigValue returns the effective value of the git configuration key

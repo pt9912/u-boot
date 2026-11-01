@@ -1,0 +1,100 @@
+# Review-Report: slice-v1-devcontainer-host-git-uebernehmen — 2026-11-01
+
+**Review-Art:** Code- und Plan-Review gegen Plan, Spec, CR und Konventionen (Modul 10).
+
+**Gegenstand:** `git diff 82682508..HEAD` (17 Commits des Slices [`slice-v1-devcontainer-host-git-uebernehmen`](../plan/planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md): Messungen, Implementierung, Lastenheft-CR 0.28.0, Spec/Handbuch/CHANGELOG, ADR-0040, E2E-Berichtigung). 40 Dateien, 4918 Einfügungen, 61 Löschungen.
+
+**Skill:** `.harness/skills/reviewer.md` @ `08633e7f`
+**Modell:** claude (Agentenlauf) · **Datum:** 2026-11-01
+
+**Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
+
+- Slice-Plan [`slice-v1-devcontainer-host-git-uebernehmen`](../plan/planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md) (§1 Ziel und Nicht-Ziele, §2 DoD, §3 Plan samt Abgleich-Notiz und Wächter-Tabelle, §6 Entscheidungen, Risiken, Messungen)
+- [`ADR-0040`](../plan/adr/0040-host-git-quellen-fuer-token-und-identitaet.md), [ADR-0028](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), [ADR-0031](../plan/adr/0031-devcontainer-shell-ohne-editor.md), [ADR-0035](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (alle drei unverändert geprüft), [ADR-0013](../plan/adr/0013-dokumentationsreferenzmodell.md) (Referenz-Richtung)
+- [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CONF-002`](../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), CR 0.28.0 samt Historie
+- [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Absätze *Auflösung der Token-Quelle*, *Wozu `u-boot` das `gh` und `git` des Hosts befragt*, *Identität*, *Wo der Wert nicht steht*, *Ausgabe von `up`*, Sitzung), [`SPEC-040`](../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config) (Pfad-Tabelle), Hist-Zeile
+- Messprotokoll [`docs/messungen/slice-v1-devcontainer-host-git-uebernehmen/README.md`](../../messungen/slice-v1-devcontainer-host-git-uebernehmen/README.md) und Rohdaten (M3-Reduktion geprüft), Skripte unter `tools/messung/devcontainer-host-git-uebernehmen/`
+- `AGENTS.md` §3 (besonders §3.4, §3.7, §3.9, §3.10), [`harness/conventions.md`](../../conventions.md) (Modus-Deklaration, Ablage-Regel)
+
+**Sensors:**
+
+- `make gates` lief laut Handoff auf `08633e7f` und endete grün; der Stempel `.harness/state/gates-passed.head` trägt `08633e7fce8567669a1f418c77c0540214c19a0d` = HEAD — geprüft, nicht neu gefahren.
+- `make test-docker`: laut Handoff Gesamtlauf grün nach Berichtigung des OptIn-E2E-Tests, gefilterte Wiederaufläufe der vier HostGit-E2E-Tests grün; nicht neu gefahren (Review-Rolle).
+- `make verify-depguard`: nicht gefahren — keine Importregel berührt (`.golangci.yml` und bestehende Paketränder unverändert); die neuen Dateien (Port `driven`, Adapter `internal/adapter/driven/git`, Anwendung kennt nur den Port) wurden gegen die Grenzen gelesen, ohne Befund.
+- `make docs-check` lief innerhalb von `make gates` (Stempel, s. o.); die Referenzmodell-Findings unten sind die Form *ohne Kennung*, die kein Sensor sieht.
+
+---
+
+## Findings
+
+| ID | Kategorie | Befund | Quelle | Pfad | Verifizierbar | Klasse |
+|---|---|---|---|---|---|---|
+| F-1 | HIGH | [ADR-0040](../plan/adr/0040-host-git-quellen-fuer-token-und-identitaet.md) verweist abwärts auf den Slice — in Prosa ohne Kennung: „Drei Alternativen standen im Raum, alle im Slice §1 abgewogen“, „Der Projektinhaber hat am 2026-11-01 entschieden (Slice §6, entschieden)“, „(Slice §6, Risiko 2)“, „Risiko 2 des Slice“. Der Commit `a843c301` entfernte den Slice-**Verweis** (Link) wegen der Referenzrichtung, ließ aber die Prosa-Verweise stehen; die Abwägung und die Entscheidungs-Herkunft des ADRs zeigen damit in einen Slice-Abschnitt als Begründungsquelle. | `AGENTS.md` §3.4 (keine Slice-Bezüge in Spec und ADR); [ADR-0013](../plan/adr/0013-dokumentationsreferenzmodell.md) §Referenzmatrix (Zeile ADR → Slice: ❌; „ADRs … dürfen keine konkreten Slices als Umsetzung, Trigger oder Closure-Quelle referenzieren“); Reviewer-Skill HIGH #2 | `docs/plan/adr/0040-host-git-quellen-fuer-token-und-identitaet.md` · „alle im Slice §1 abgewogen“ | Review-only — `make docs-check` sieht nur die Kennungsform, nicht die ID-lose Prosa | ADR-Verweis abwärts ohne Kennung (Sensorlücke genutzt) |
+| F-2 | HIGH | Der Block-Kommentar über `hostGitTokenPlaceholder` trägt „their length (36 + the newline of printenv = 37) is the expected count in the session“, während der Platzhalter 33 Zeichen lang ist („platzh-hostgit-token-0123456789ab“ = 33) und `hostGitSessionLen` `"34"` zählt; der Berichtigungs-Commit `08633e7f` änderte die erwartete Sitzungslänge 37 → 34 und ließ die Zahl im Kommentar stehen. | `AGENTS.md` §3.7 (Kommentar beschreibt einen Zustand, der nicht vorliegt), §3.9 (b) — der Diff ändert den Zahlenwert, den ein Kommentar neben sich trägt; Reviewer-Skill HIGH „Kommentar trägt keine der Kommentar-Klassen“ | `internal/e2e/devcontainer_hostgit_docker_test.go` · “(36 + the newline of printenv = 37) is the expected count” | Review-only (kein Gate liest Kommentarzahlen gegen Konstanten) | Teilberichtigung lässt Kommentarzahl stehen |
+| F-3 | MEDIUM | Der Hilfetext von `up` sagt weiter „Only the variables that devcontainer.json references as ${localEnv:NAME} and that are set on the host reach the helper container, by name.“ — mit eingeschaltetem Schalter erreicht eine **nicht** gesetzte, über `gh` aufgelöste Variable den Hilfs-Container ebenfalls (das ist der Kern des Slices). Die Plan-Tabelle (§3) führte diese Stelle als „Hilfetext von `up` … beschreibt den Ist-Zustand der Umgebung neu“; der Abgleich vermerkt „nur das JSON-Feld `gitTokenSource`“, die Behauptung blieb stehen. | Review-Regel MEDIUM (Doku driftet gegen das implementierte Verhalten); `AGENTS.md` §3.10 (Plan-Zeile ohne Umsetzung); Regel der Hilfetexte ([`slice-v1-hilfetexte-ohne-kennungen`](../plan/planning/done/slice-v1-hilfetexte-ohne-kennungen.md)) | `internal/adapter/driving/cli/devcontainer.go` · “Only the variables that devcontainer.json references as ${localEnv:NAME} and” | Review-only; Berichtigung ist eine Textzeile | Hilfetext-Zusage hinter dem Ist-Zustand |
+| F-4 | MEDIUM | Vier gepinnte Bedingungen/Wächter ohne pinnenden Test: (a) die Warnung „Schalter an, Verweis fehlt“ (`tokenSwitchWithoutRefWarning`; Spec: „mit Schalter und ohne Verweis weist er darauf hin“) — kein Unit- und kein E2E-Fall; (b) die Warnung bei gescheiterter Host-Identitäts-Lesung (`identityHostConfigReadWarningT`; Lastenheft: „oder kein `git`“) — kein Fall ruft sie; (c) die Maskierung des aufgelösten Werts in Fortschritt und Fehlertext (Spec: „Der aufgelöste Wert ist wie ein Host-Wert maskiert“; Plan-Wächter „Maskierung der aufgelösten Werte“, Mutation „die aufgelösten Werte aus `passedValues` weglassen“) — die Tests prüfen das Übergeben, nicht das Maskieren; (d) Plan-Wächter „beide Profile / `--instance` (soweit freigegeben)“ — kein Test löst die Quellen unter `--instance` auf. | `AGENTS.md` §3.10 (Bedingung in Spec ohne pinnenden Test — Beobachtungs-Klasse [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../plan/planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md), Slice §6 Risiko 8); Plan §3 Wächter-Tabelle gegen die Testsuite | `internal/hexagon/application/devcontainer_start.go` · “devcontainer.sandbox.hostGitToken is switched on, but the devcontainer configuration references no ${localEnv:GIT_TOKEN}” | ja — `make test` mit den fehlenden Fällen; `make test-docker` für die Varianten (c), (d) | Spec-Bedingung/Wächter ohne pinnenden Test |
+| F-5 | LOW | Die Closure-Notiz sagt „Noch nicht geschlossen; der Slice liegt in `open/` (Entwurf).“ — die Datei liegt seit `fd29f22c` in `in-progress/` und ist in Umsetzung; der Zustand ist die Verzeichnis-Position, die Zeile widerspricht ihr. | `AGENTS.md` §3.7 (Zustandsfeld nennt den Zustand); [`harness/conventions.md`](../../conventions.md) §MR-000 (Lifecycle, Zustand ist die Position) | [`slice-v1-devcontainer-host-git-uebernehmen.md`](../plan/planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md) · „Noch nicht geschlossen; der Slice liegt in `open/` (Entwurf).“ | Review-only | Zustandsangabe nach dem Move stehen geblieben |
+| F-6 | LOW | Handbuch 4.9 leitet unverändert ein: „Der Befehl reicht nur Variablen durch, auf die `devcontainer.json` mit `${localEnv:NAME}` verweist und die auf dem Host gesetzt sind“ — der darauffolgende Opt-in-Absatz ist die Ausnahme, ohne dass der Leitsatz sie ankündigt; die parallel berührte Zugangsdaten-Liste wurde dagegen nachgezogen („soweit sie auf dem Host gesetzt sind oder der Befehl sie mit der Auflösung ermittelt hat“). Dieselbe Drift-Familie wie F-3, hier abgemildert, weil die Ausnahme im nächsten Absatz steht. | Review-Regel MEDIUM→LOW (einmalige Doku-Praezision ohne Vertragsbruch; der Absatz nebenan trägt den Ist-Zustand) | `docs/user/benutzerhandbuch.md` · “und die auf dem Host gesetzt sind, und zwar als Name,” | Review-only | Leitsatz ohne Ausnahme-Kündigung |
+| F-7 | LOW | Die Architektur-Sicht beschreibt `DevcontainerStartService` mit seinen Ports (`FileSystem`, `YAMLCodec`, `DevcontainerLauncher`, `DevcontainerInspector`) und nennt für die Abfrage „Pflicht-Ports ohne wirkungslosen Standard“ — den neuen, optionalen Port `HostGitSource` mit der Grenze „nur `up`/`shell` befragen `gh` und `git`“ trägt die Sicht nicht; die sicherheitsrelevante Grenze der Host-Befragung steht nur in Lastenheft, Spec, Handbuch und ADR. | `AGENTS.md` §3.4 (Sicht trägt Komponenten und Ports, meilensteinfrei); [`harness/conventions.md`](../../conventions.md) MR-010 | `spec/architecture.md` · „Pflicht-Ports ohne wirkungslosen Standard“ | Review-only | Sicht kennt den neuen Port nicht |
+| F-8 | LOW | Der Port-Doc zu `HostGitSource.GitToken` verspricht „a failed environment read is an error“ — die Produktion-Implementierung kann diesen Fehler nie geben (`os.Getenv` kann nicht fehlschlagen; das Scheitern der gh-Quelle wird als „keine Quelle“ geschluckt): `tokenResolutionFailedWarningT` bleibt mit dem vorhandenen Adapter unerreichbar und ungepinnt. Entweder die Aussage im Port folgt dem Adapter oder der Adapter trägt den Fehlerpfad. | `AGENTS.md` §3.10 (Aussage über Code trägt nur, was gelesen ist) | `internal/hexagon/port/driven/hostgitsource.go` · “a failed environment read is an error” | Review-only | Port-Doc beschreibt unerreichbaren Fehlerpfad |
+| F-9 | INFO | Die Bestand-Zeile in `open/README.md` beschreibt den Slice weiter als Entwurf („Standard oder Opt-in als Frage“, „acht Messungen offen“, Quellen 1 bis 3); Entscheidungen, Messungen und die Rücknahme von Quelle 3 sind eingetreten. Nachzug gehört zur Closure (Zeile beschreibt den Slice an seinem neuen Ort), kein Fehler des Diffs. | Slice §2 DoD (Doku nachziehen); Convention „Zustand ist die Verzeichnis-Position“ | `docs/plan/planning/open/README.md` · „Standard oder Opt-in als Frage“ | Review-only; Zuständig: Implementer bei Closure | Bestand-Zeile hinter dem Stand |
+| F-10 | INFO | Zwei Belege des DoD sind nicht im Repo: der Rot-Beleg des Mutationstests verweist als Rohdaten auf „`/tmp/mk-mut.txt` des Laufs“ (ephemer, bei der Closure weg), und der Nachweis „Token kommt im Container an“ ist laut DoD ausdrücklich der **CI-Lauf** (`make test-docker` in CI, Slice [`slice-v1-test-docker-in-ci`](../plan/planning/open/slice-v1-test-docker-in-ci.md) liegt noch in `open/`); ein echter Push mit dem echten Token ist nicht gefahren (Messprotokoll §Grenzen, ehrlich benannt). Zuständig: Verifier — den Mutationstest wiederholen und die Rohdaten im Beleg-Ablageort festhalten; die CI-Evidenz bei der Closure führen. | Slice §2 DoD, §3 Rot-Beleg; [`harness/verification.md`](../../verification.md) | [`slice-v1-devcontainer-host-git-uebernehmen.md`](../plan/planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md) · „Rohdaten `/tmp/mk-mut.txt` des Laufs“ | Verifier; Review-only hier | Belege außerhalb des Repos |
+| F-11 | INFO | Die Engine trägt ~41 Wegwerf-Container (und Volumes/Images) aus den Messungen; das Messprotokoll §Grenzen weist die Bereinigung der Inventur der Skripte (`aufraeumen`, per trap) und der Prüfung des Verifiers zu. Kein Testbeeinträchtigungs-Befund; kein Wert der Zusage berührt. | Messprotokoll §Grenzen; Slice §6 Risiko 9 | `docs/messungen/slice-v1-devcontainer-host-git-uebernehmen/README.md` · „bis zur Prüfung durch den Verifier“ | Verifier (`make test-docker`, Inventur-Teil der Skripte) | Wegwerf-Bestand auf der Engine |
+
+---
+
+## Zu den Prüflinsen
+
+1. **Spec / Traceability.** Der CR 0.28.0 trägt die freigegebene Form („und hat der Benutzer die Auflösung in der Projektkonfiguration eingeschaltet“), die Versionszeile, die Historie und die `LH-FA-CONF-002`-Erweiterung stehen. Commit-Messages tragen Slice-ID und `LH-*` (alle 17 geprüft, `ca84cd26` zusätzlich `LH-FA-CONF-002`); ADR-Index nachgezogen. F-1 ist der Traceability-Verstoß.
+2. **Exit Codes.** Kein neuer Driving-Sentinel; alle neuen Pfade sind Warnungen ohne Abbruch (je mit Unit-Test gegen `err == nil` gepinnt, außer den Fällen in F-4) oder eine Eingabe-Verwerfung der bereits klassifizierten Klasse (`ErrDevcontainerRuntime`, `TestLauncher_Up_InvalidResolvedNameIsRejected`). Die JSON-Ebene (`gitTokenSource`, Diagnose-Codes) ist gegen `SPEC-049` gelesen, deckungsgleich.
+3. **Architecture.** Neue driven Port/Adapter-Datei, Anwendung kennt nur den Port (`driven.HostGitSource`), Verdrahtung nur in `cmd/uboot/main.go` (`WithHostGitSource`); keine kreuzblinde Grenze verletzt; keine `//nolint`. Rest: F-7.
+4. **Docker-only / Gates.** Kein Host-Toolchain-Befehl als Nachweis, kein Makefile/Dockerfile/`.golangci.yml`-Griff, kein Suppression-Neuzugang. Stempel = HEAD geprüft.
+5. **File Safety.** Die erzeugten Dateien bleiben byte-identisch (Vorlagen und Golden-Cases im Diff nicht berührt — `git diff --stat` gegen `internal/hexagon/application/templates/` leer); kein neuer Schreibpfad auf Nutzerdateien; der Identitäts-Schritt reserviert einen im Container gesetzten Wert (`[ -n "$current" ] || …`, gepinnt in `TestLauncher_Up_GitIdentityExec`).
+6. **Tests.** Die Wächter der Plan-Tabelle sind überwiegend konkret: Rangfolge (Host schlägt gh), Quellenfälle mit Skript-Binarys, „Werte nie in der Argumentliste“ für `runArgs`, `shellArgs` und den Identitäts-`exec` (Mutation „Werte an die Argumentliste anhängen“ im Slice als Rot-Beleg geführt), Werte-nie-in-Ausgabe, Quelle genannt/Wert nicht, Container-Wert bleibt (Unit fake + E2E zweiter Lauf). Lücken: F-4.
+7. **Replay / Golden Sets.** Kein Generator-Griff; `replay.md`-Pflicht nicht berührt (Bestand byte-identisch, im ADR festgehalten).
+8. **Carveouts.** Kein neuer Carveout; der Wegwerf-Bestand auf der Engine ist Messungs-Nebenprodukt, kein Gate-Carveout.
+9. **Docs / Release.** CHANGELOG (`Added`, mit Kennungen, Promised/Not promised scharf), Handbuch 4.9/„Zugangsdaten“ ohne Kennungen (§5 Regel 6 geprüft: kein `LH-*`, kein Spec-/Plan-Verweis im Neutext), ADR-Index, Roadmap-Aktiv-Eintrag, Messungen-Bestandsindex. Rest: F-3, F-6, F-7, F-9.
+10. **Sensibilität.** Rohdaten: M3 führt den echten Token nur als Länge (93) und SHA-256-Präfix; M6/M8 nur Platzhalter; Namen/Adressen nur `h-name`/`h-email`/Platzhalter. Muster-Scan über `docs/messungen/…` und `tools/messung/…` (`ghp_`, `github_pat_`, persönliche Muster): kein Treffer. Keine Stelle im Diff trägt den echten Token oder die echte Identität. Der Handoff-Hinweis zur Tokenlänge („32 Zeichen“) trifft nicht die tatsächliche Länge (93 in den Rohdaten) — die Reduktion selbst ist sauber.
+11. **Sprachvertrag.** Alle neuen Meldungen englisch (Warnungen, `tokenSource*`-Texte, Adapter-Fehler, Feldauftritt `gitTokenSource`); Deutsch nur in Kommentaren und Doku — ohne Befund.
+
+## Negativbefunde
+
+Geprüft, ohne Befund:
+
+- `internal/adapter/driven/git/hostsource.go` + `hostsource_test.go` (Rangfolge, Fehler-Klassen, Exit-1/128-Trennung) — bis auf F-8
+- `internal/adapter/driven/docker/devcontainer_launcher.go`, `devcontainer_shell.go` samt Tests (Wert-Kanal, Host-Vorrang, Namens-Validierung, Maskierung der Host-Werte, Identitäts-`exec`, Reserve-Pin) — bis auf F-4 (c), (d)
+- `internal/hexagon/application/devcontainer_start_test.go` (Fake-Quelle, Schalter-an/aus, Standardprofil, fehlende Quelle, Identität, Schritt-Fehler, Sitzungs-Wert, Werte-nie-in-Warnung)
+- `internal/hexagon/domain/configpath.go`, `devcontainer_sandbox_config.go`, `initproject.go` (Pfad, Coercer, Feld) — konsistent mit `SPEC-040`
+- `cmd/uboot/main.go` (Verdrahtung, Kommentar induktiv, keine Chronik)
+- Exit-Code-Linse (kein neuer Sentinel, Warnungen ohne Abbruch gepinnt)
+- Sprachvertrag (alle neuen Ausgaben englisch)
+- Dual-Classifier-Linse (kein neuer Sentinel, keine Subkommando-Abbildung betroffen)
+- Replay-/Golden-Linse (Vorlagen und Golden-Cases unverändert)
+- Carveout-Linse (kein Eintrag fällig)
+- File-Safety-Linse (kein erzeugter-Datei-Griff, Reserve-Verhalten gepinnt)
+- `docs/messungen/…` Rohdaten gegen Zugangsdaten (M3-Reduktion, Platzhalter) und `tools/messung/…` (Ablage-Regel)
+- `CHANGELOG.md`, `docs/plan/adr/README.md`, `docs/plan/planning/in-progress/roadmap.md`, `docs/messungen/README.md`, ADR-0028/0031/0035 (im Diff unverändert)
+- §3.9 (a)/(c) über den ganzen Diff (kein Chronik-Kommentar, kein Helfer zwischen Doc-Kommentar und Funktion); „früher“-Treffer nur in Bestandstext des Lastenhefts („früheren Start“), nicht neu
+
+Nicht geprüft:
+
+- Ausführung von `make test`, `make test-docker` und der Mutation — Stempel/Evidence des Handoffs gelesen, nicht wiederholt (Rolle Verifier)
+- `make verify-depguard` — keine Importregel berührt; Grenzen gelesen statt gefahren
+- Verhalten eines Host-`gh` mit mehreren Konten und der echte Push — vom CR ausdrücklich nicht zugesagt, vom Verifier/Validator zu halten
+
+## Summary
+
+| Kategorie | Anzahl |
+|---|---|
+| HIGH | 2 |
+| MEDIUM | 2 |
+| LOW | 4 |
+| INFO | 3 |
+
+**Finding-Klassen dieses Laufs:** ADR-Verweis abwärts ohne Kennung (Sensorlücke genutzt) · Teilberichtigung lässt Kommentarzahl stehen · Hilfetext-Zusage hinter dem Ist-Zustand · Spec-Bedingung/Wächter ohne pinnenden Test · Zustandsangabe nach dem Move stehen geblieben · Leitsatz ohne Ausnahme-Kündigung · Sicht kennt den neuen Port nicht · Port-Doc beschreibt unerreichbaren Fehlerpfad · Belege außerhalb des Repos
+
+## Verdikt
+
+**Merge-blockierend:** ja — wegen der beiden HIGH-Findings (F-1, F-2). Keincs betrifft den Wert-Kanal selbst: die Umsetzung hält die Zusagen des CR (Opt-in, Rangfolge, Wert nur im Prozess-Umfeld, Quelle genannt nie der Wert, Warnung ohne Abbruch, Identität best effort mit Reserve) im Gelesenen ein, und die Sensibilitäts-Lage der Rohdaten ist sauber.
+
+**Übergabe:** F-1 und F-2 an den Implementer (ADR-Wortlaut auf die Prosa-Verweise prüfen bzw. die Herkunft in den ADR-eigenen Formen — `Schärft:`/Entscheidungswortlaut — führen; Kommentarzahl berichtigen); F-3 und F-4 gehören in die Fix-Runde vor der Closure (Hilfetext, vier pinnende Fälle). F-10 und F-11 sind Verifier-Eingaben, F-9 ein Closure-Nachzug. Dieser Report ersetzt keine Verifikation — DoD-Closure, Mutationen und die CI-Evidenz prüft der Verifier.

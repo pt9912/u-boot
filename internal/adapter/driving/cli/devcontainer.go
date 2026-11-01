@@ -147,10 +147,15 @@ initializeCommand runs with this access: read the file before the first start
 if somebody else can write to the project folder.
 
 Only the variables that devcontainer.json references as ${localEnv:NAME} and
-that are set on the host reach the helper container, by name. The command
-does not take a value into a file or an image; with containerEnv the resolved
-value stays in the metadata of the started container, remoteEnv is the form
-meant for credentials.
+that are set on the host reach the helper container, by name. With the sandbox
+profile and the switch devcontainer.sandbox.hostGitToken switched on, the
+command also resolves the git token on the host when GIT_TOKEN is not set
+there (the gh session of the host answers; the source is named "gh auth
+token"), names the source it used, never the value, and points out without
+aborting when no source is found. The command does not take a value into a
+file or an image;
+with containerEnv the resolved value stays in the metadata of the started
+container, remoteEnv is the form meant for credentials.
 
 --recreate removes an existing container and creates it anew; named volumes
 stay. It is the editor-neutral form of "devcontainer up

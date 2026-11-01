@@ -944,3 +944,65 @@ func TestDevcontainerUp_HostGitToken_WarningsCarryNoValue(t *testing.T) {
 		}
 	}
 }
+
+func TestDevcontainerUp_HostGitToken_SwitchWithoutReferenceWarns(t *testing.T) {
+	t.Setenv("NEUTRAL", "x") // t.Setenv verbietet t.Parallel in dieser Datei: deterministisch ohne Umgebungslesung des Ports
+	l := newLauncher()
+	hs := &fakeHostSource{tokenValue: "gh-token-placeh", tokenSource: driven.TokenSourceGh}
+	// Konfiguration ohne Verweis auf GIT_TOKEN: der Schalter resolves nichts.
+	svc, _ := hostGitTokenSvc(t, plainConfig, hostGitSandboxYAML, hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if len(l.upOpts[0].EnvValues) != 0 || resp.GitTokenSource != "" {
+		t.Fatalf("resolved without a reference: EnvValues=%v GitTokenSource=%q", l.upOpts[0].EnvValues, resp.GitTokenSource)
+	}
+	found := false
+	for _, w := range resp.Warnings {
+		if strings.Contains(w.Message, "references no ${localEnv:GIT_TOKEN}") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("warnings = %+v, want the switch-without-reference warning", resp.Warnings)
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_IdentityReadFailureWarns(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{configErr: errors.New("git failed in config read")}
+	svc, _ := hostGitTokenSvc(t, tokenRefConfig, hostGitSandboxYAML, hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up (a failed reading is a warning, no abort): %v", err)
+	}
+	found := false
+	for _, w := range resp.Warnings {
+		if strings.Contains(w.Message, "could not be read") && strings.Contains(w.Message, "git failed in config read") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("warnings = %+v, want the read-failure warning with the cause", resp.Warnings)
+	}
+	if l.upOpts[0].GitIdentity.Name != "" || l.upOpts[0].GitIdentity.Email != "" {
+		t.Fatalf("GitIdentity = %+v, want none after a failed reading", l.upOpts[0].GitIdentity)
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_InstanceStillResolves(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{tokenValue: "gh-token-placeh", tokenSource: driven.TokenSourceGh}
+	svc, l := hostGitTokenSvc(t, tokenRefConfig, hostGitSandboxYAML, hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir, Instance: "inst-1"})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if l.upOpts[0].Instance != "inst-1" || l.upOpts[0].EnvValues["GIT_TOKEN"] != "gh-token-placeh" {
+		t.Fatalf("instance options = %+v, want the instance name and the resolved token", l.upOpts[0])
+	}
+	if resp.GitTokenSource != driven.TokenSourceGh {
+		t.Fatalf("GitTokenSource = %q, want the gh source", resp.GitTokenSource)
+	}
+}

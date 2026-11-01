@@ -138,7 +138,7 @@ Berührt und in der Tabelle: Messskripte (als `messen-leicht.sh` und `messen-sch
 | Test „ein im Container gesetzter Wert bleibt“ (D2) | ohne vorheriges `--get` überschreiben |
 | Docker-Test „Token und Identität im Container“ | die Auflösung auslassen; `git credential fill` im Container liefert nichts, `git var GIT_AUTHOR_IDENT` endet mit „Please tell me who you are“ |
 
-**Rot-Beleg (2026-11-01, Entscheidung des Projektinhabers: ein Mutationstest statt je Wächter):** die Mutation „Werte an die Argumentliste anhängen“ (`runUp` führt die Rückgabe von `passedValues` an die `docker run`-Argumentliste an) färbt `TestLauncher_Up_PassesEnvByNameOnly` rot mit der behaupteten Meldung „a value reached a command line“ (Rohdaten `/tmp/mk-mut.txt` des Laufs; die Mutation ist zurückgenommen, die Suite grün). Der reale Vorzustand ist für diesen Wächter nicht anlauffbar (die Wert-Übergabe existiert erst mit dem Slice). Die Rot-Belege der übrigen Wächter trägt der Verifier nach Baseline-Regelwerk `modul-11-verification.md`, soweit er sie für die DoD-Punkte braucht.
+**Rot-Beleg (2026-11-01, Entscheidung des Projektinhabers: ein Mutationstest statt je Wächter):** die Mutation „Werte an die Argumentliste anhängen“ (`runUp` führt die Rückgabe von `passedValues` an die `docker run`-Argumentliste an) färbt `TestLauncher_Up_PassesEnvByNameOnly` rot mit der behaupteten Meldung „a value reached a command line“ (Meldung oben wörtlich; die Mutation ist zurückgenommen, die Suite grün). Der reale Vorzustand ist für diesen Wächter nicht anlauffbar (die Wert-Übergabe existiert erst mit dem Slice). Die Rot-Belege der übrigen Wächter trägt der Verifier nach Baseline-Regelwerk `modul-11-verification.md`, soweit er sie für die DoD-Punkte braucht.
 ## 4. Trigger
 
 **Start** (`open` → `next` → `in-progress`): Start in einer eigenen Devcontainer-Instanz, Projektinhaber 2026-11-01; kein Termin. Dazu: Quellen, Opt-in oder Standard und Weg der Identität entschieden (Fragen 2 bis 4), Schnitt in einen oder zwei Slices entschieden (Frage 7), `Verantwortlich:` gesetzt, Wortlaut des CR freigegeben (Frage 8), kein anderer Slice in `in-progress/` (WIP-Limit 1).
@@ -196,7 +196,7 @@ DoD vollständig; `make gates` grün; Docker-Test im CI-Lauf grün; Review- und 
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `open/` (Entwurf).
+Noch nicht geschlossen; der Slice liegt in `in-progress/` (Review-Fix-Runde).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
