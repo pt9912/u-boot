@@ -4,7 +4,7 @@
 
 **Datum:** 2026-11-01
 
-**Autor:** pt9912 (Rolle Architect; Entscheidungen des Projektinhabers 2026-11-01, festgehalten im Slice [`slice-v1-devcontainer-host-git-uebernehmen`](../planning/in-progress/slice-v1-devcontainer-host-git-uebernehmen.md) §6)
+**Autor:** pt9912 (Rolle Architect; Entscheidungen des Projektinhabers 2026-11-01; die Messung steht unter `docs/messungen/`)
 
 **Bezug:** [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CONF-002`](../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [ADR-0028](0028-devcontainer-start-ohne-editor-hilfs-image.md), [ADR-0031](0031-devcontainer-shell-ohne-editor.md), [ADR-0035](0035-forge-clis-gh-und-glab-im-devcontainer.md), Messprotokoll [`docs/messungen/slice-v1-devcontainer-host-git-uebernehmen/`](../../messungen/slice-v1-devcontainer-host-git-uebernehmen/README.md)
 
