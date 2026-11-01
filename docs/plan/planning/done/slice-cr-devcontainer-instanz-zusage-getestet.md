@@ -112,7 +112,7 @@ Aussagen-Berührung steht hier gar nicht.
 | `docs/plan/planning/in-progress/roadmap.md` | update | Zeiger auf diesen Slice unter *Offene Wellen* |
 | `docs/plan/planning/done/slice-v1-devcontainer-instanz-test-leicht.md`, `docs/reviews/2026-11-01-slice-v1-devcontainer-instanz-test-leicht.md`, `docs/reviews/2026-11-01-slice-v1-devcontainer-instanz-test-leicht-verify.md` | update (Werkzeug) | Verweis-Nachzug der `slice-mv`-Commits (`git show --stat` von `a8f0ece1`, `c077a6a0`, `8296197c`, `44d14987` gelesen); kein Inhalt des CR |
 | `docs/reviews/2026-11-01-slice-cr-devcontainer-instanz-zusage-getestet.md` | neu | Review-Report dieses Slice |
-| `docs/plan/planning/in-progress/slice-cr-devcontainer-instanz-zusage-getestet.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
+| `docs/plan/planning/done/slice-cr-devcontainer-instanz-zusage-getestet.md` (diese Datei) | update | Wortlaut-Entwurf, Freigabe und Vorab-Suche in §7; Zustandsmarker auf Ist-Stand |
 | `docs/plan/planning/open/README.md` | update | Zeile dieses Slice; beim Move Verweis-Nachzug (`make slice-mv`) |
 | `docs/reviews/` | neu | Review und Verification nach `harness/review.md` und `harness/verification.md` |
 | `docs/plan/planning/observations/BEO-DOK/zusage-weiter-als-messung/` | update | Closure (§7): Evidence-Datei dieses Slice und `state.md` |
