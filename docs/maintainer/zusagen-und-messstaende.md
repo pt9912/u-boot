@@ -1057,7 +1057,9 @@ Zusage bleiben in der Spezifikation.
     erneute Probe den Benutzer als fehlend meldet; der Fall „die Sitzung schreibt die Zeile“ ist durch
     `TestLauncher_Shell_SessionEndIsNoError` und `TestShell_Docker_B18_SessionDoesNotBegin` (Fall der Sitzung, die die Zeile
     selbst schreibt) gepinnt. Ein `docker exec -u <Benutzer> <anderer Container>` gegen eine Engine 28.0.4 ist weiter nicht
-    gefahren.
+    gefahren. Auf der Engine 29.9.2 ist er gefahren
+    ([Messprotokoll](../messungen/slice-v1-shell-erkennung-fehlender-benutzer-eng/README.md)): Die Zeile hat dort das Präfix
+    `Error response from daemon: `, steht auf der Fehlerausgabe und endet mit Status 1.
 
 **Historie von `spec/spezifikation.md`: gestrichene Messaussagen im Wortlaut vor der Änderung** (Fundstelle: `git show
 HEAD:spec/spezifikation.md`, Tabellenzeilen 1474 bis 1477, alle vom 2026-10-19):

@@ -1,0 +1,415 @@
+# Messung shell-benutzer-fehlt — 2026-11-01T06:45:55Z
+# Host: Linux 7.0.0-42-generic x86_64
+# Client: 29.9.2 (API 1.56)
+# Engine: 29.9.2 (API 1.56, linux/amd64)
+# Images: mcr.microsoft.com/devcontainers/base:debian ; alpine:3
+# Wiederholungen je Zelle: 2
+
+## Vorbereitung
+Container: ubmess-shell-anderer=Up 2 seconds ubmess-shell-gestoppt=Exited (137) Less than a second ago ubmess-shell-sitzung=Up 1 second 
+Kontrolle: Benutzer vscode: im Sitzungs-Container vorhanden, im anderen Container fehlt; docker-Zugriff von vscode in der Sitzung: 29.9.2/29.9.2
+Kontrolle: Benutzer nouser im Sitzungs-Container:fehlt
+Kontrolle: docker-Client in der Sitzung: 29.9.2
+
+## A. Der Client, Benutzer fehlt, Container läuft (Probe-Form und Sitzungs-Form; kein Terminal)
+### Zelle A1, Wiederholung 1: Probe-Form: -u, -w, ohne -i und -t, bash -c true; Standardeingabe /dev/null
+befehl: docker exec -u nouser -w / ubmess-shell-sitzung bash -c true
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle A1, Wiederholung 2: Probe-Form: -u, -w, ohne -i und -t, bash -c true; Standardeingabe /dev/null
+befehl: docker exec -u nouser -w / ubmess-shell-sitzung bash -c true
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle A2, Wiederholung 1: Sitzungs-Form: -i, ohne -t, bash; Standardeingabe /dev/null
+befehl: docker exec -i -u nouser -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle A2, Wiederholung 2: Sitzungs-Form: -i, ohne -t, bash; Standardeingabe /dev/null
+befehl: docker exec -i -u nouser -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle A3, Wiederholung 1: Sitzungs-Form: -i, ohne -t, bash; Standardeingabe eine Pipe
+befehl: docker exec -i -u nouser -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle A3, Wiederholung 2: Sitzungs-Form: -i, ohne -t, bash; Standardeingabe eine Pipe
+befehl: docker exec -i -u nouser -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle A4, Wiederholung 1: ohne -i und -t, bash; Standardeingabe /dev/null
+befehl: docker exec -u nouser -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle A4, Wiederholung 2: ohne -i und -t, bash; Standardeingabe /dev/null
+befehl: docker exec -u nouser -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+## B. Der Client, Benutzer fehlt, mit Terminal (Pseudo-Terminal über script; ein Strom)
+### Zelle B1, Wiederholung 1: -i -t, bash, Terminal
+befehl: script -qefc 'docker exec -i -t -u nouser -w / ubmess-shell-sitzung bash' /dev/null
+exit-status: 1
+stdout-bytes: 92  stderr-bytes: 0
+--- stdout
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+--- stderr
+
+### Zelle B1, Wiederholung 2: -i -t, bash, Terminal
+befehl: script -qefc 'docker exec -i -t -u nouser -w / ubmess-shell-sitzung bash' /dev/null
+exit-status: 1
+stdout-bytes: 92  stderr-bytes: 0
+--- stdout
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+--- stderr
+
+### Zelle B2, Wiederholung 1: -t ohne -i, bash, Terminal
+befehl: script -qefc 'docker exec -t -u nouser -w / ubmess-shell-sitzung bash' /dev/null
+exit-status: 1
+stdout-bytes: 92  stderr-bytes: 0
+--- stdout
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+--- stderr
+
+### Zelle B2, Wiederholung 2: -t ohne -i, bash, Terminal
+befehl: script -qefc 'docker exec -t -u nouser -w / ubmess-shell-sitzung bash' /dev/null
+exit-status: 1
+stdout-bytes: 92  stderr-bytes: 0
+--- stdout
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+--- stderr
+
+### Zelle B3, Wiederholung 1: -i -t, bash, Terminal; Fehlerausgabe des Clients getrennt (Dateideskriptor 3 = stderr der Zelle)
+befehl: script -qefc 'docker exec -i -t -u nouser -w / ubmess-shell-sitzung bash 2>&3' /dev/null 3>&2
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle B3, Wiederholung 2: -i -t, bash, Terminal; Fehlerausgabe des Clients getrennt (Dateideskriptor 3 = stderr der Zelle)
+befehl: script -qefc 'docker exec -i -t -u nouser -w / ubmess-shell-sitzung bash 2>&3' /dev/null 3>&2
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+## C. Der Client, Benutzer fehlt, Container läuft nicht
+### Zelle C1, Wiederholung 1: Probe-Form, gestoppter Container, Benutzer fehlt
+befehl: docker exec -u nouser -w / ubmess-shell-gestoppt bash -c true
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 118
+--- stdout
+--- stderr
+Error response from daemon: container bc56e4550381367f9700821bc0fcabb9cc421d74c104e11a16a87561ac79cb65 is not running
+
+### Zelle C1, Wiederholung 2: Probe-Form, gestoppter Container, Benutzer fehlt
+befehl: docker exec -u nouser -w / ubmess-shell-gestoppt bash -c true
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 118
+--- stdout
+--- stderr
+Error response from daemon: container bc56e4550381367f9700821bc0fcabb9cc421d74c104e11a16a87561ac79cb65 is not running
+
+### Zelle C2, Wiederholung 1: Sitzungs-Form, gestoppter Container, Benutzer fehlt
+befehl: docker exec -i -u nouser -w / ubmess-shell-gestoppt bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 118
+--- stdout
+--- stderr
+Error response from daemon: container bc56e4550381367f9700821bc0fcabb9cc421d74c104e11a16a87561ac79cb65 is not running
+
+### Zelle C2, Wiederholung 2: Sitzungs-Form, gestoppter Container, Benutzer fehlt
+befehl: docker exec -i -u nouser -w / ubmess-shell-gestoppt bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 118
+--- stdout
+--- stderr
+Error response from daemon: container bc56e4550381367f9700821bc0fcabb9cc421d74c104e11a16a87561ac79cb65 is not running
+
+### Zelle C3, Wiederholung 1: Probe-Form, gestoppter Container, Benutzer root (vorhanden)
+befehl: docker exec -u root -w / ubmess-shell-gestoppt bash -c true
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 118
+--- stdout
+--- stderr
+Error response from daemon: container bc56e4550381367f9700821bc0fcabb9cc421d74c104e11a16a87561ac79cb65 is not running
+
+### Zelle C3, Wiederholung 2: Probe-Form, gestoppter Container, Benutzer root (vorhanden)
+befehl: docker exec -u root -w / ubmess-shell-gestoppt bash -c true
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 118
+--- stdout
+--- stderr
+Error response from daemon: container bc56e4550381367f9700821bc0fcabb9cc421d74c104e11a16a87561ac79cb65 is not running
+
+## D. Kontrolle: Benutzer vorhanden, laufender Container
+### Zelle D1, Wiederholung 1: Probe-Form, Benutzer root
+befehl: docker exec -u root -w / ubmess-shell-sitzung bash -c true
+exit-status: 0
+stdout-bytes: 0  stderr-bytes: 0
+--- stdout
+--- stderr
+
+### Zelle D1, Wiederholung 2: Probe-Form, Benutzer root
+befehl: docker exec -u root -w / ubmess-shell-sitzung bash -c true
+exit-status: 0
+stdout-bytes: 0  stderr-bytes: 0
+--- stdout
+--- stderr
+
+### Zelle D2, Wiederholung 1: Sitzungs-Form, Benutzer root, Shell endet mit Status 3
+befehl: docker exec -i -u root -w / ubmess-shell-sitzung bash
+exit-status: 3
+stdout-bytes: 0  stderr-bytes: 0
+--- stdout
+--- stderr
+
+### Zelle D2, Wiederholung 2: Sitzungs-Form, Benutzer root, Shell endet mit Status 3
+befehl: docker exec -i -u root -w / ubmess-shell-sitzung bash
+exit-status: 3
+stdout-bytes: 0  stderr-bytes: 0
+--- stdout
+--- stderr
+
+## E. Die Sitzung erzeugt die Zeile selbst (Benutzer der Sitzung vorhanden; im Container ein
+##    echter docker exec -u nouser gegen den anderen Container, über den Socket des Hosts)
+### Zelle E1, Wiederholung 1: Sitzung ohne Terminal: Skript auf der Standardeingabe der Shell, innerer Aufruf ohne -i
+befehl: docker exec -i -u root -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle E1, Wiederholung 2: Sitzung ohne Terminal: Skript auf der Standardeingabe der Shell, innerer Aufruf ohne -i
+befehl: docker exec -i -u root -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle E2, Wiederholung 1: Sitzung ohne Terminal: innerer Aufruf mit -i
+befehl: docker exec -i -u root -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle E2, Wiederholung 2: Sitzung ohne Terminal: innerer Aufruf mit -i
+befehl: docker exec -i -u root -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+
+### Zelle E3, Wiederholung 1: Sitzung mit Terminal (script): innerer Aufruf ohne -i
+befehl: script -qefc 'docker exec -i -t -u root -w / ubmess-shell-sitzung bash' /dev/null
+exit-status: 1
+stdout-bytes: 702  stderr-bytes: 0
+--- stdout
+docker exec -u nouser ubmess-shell-anderer sh -c true
+exit
+docker exec -u nouser ubmess-shell-anderer sh -c true
+exit
+]0;root@38d9103e4557: PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; }precmd"]0;root@38d9103e4557: precmd]0;root@38d9103e4557: /bin/bash[?2004h[0;32mroot [0m➜ [1;34m/ [0m$ docker exec -u nouser ubmess-shell-anderer sh -c true
+[?2004l]0;root@38d9103e4557: docker exec -u nouser ubmess-shell-anderer sh -c trueError response from daemon: unable to find user nouser: no matching entries in passwd file
+]0;root@38d9103e4557: precmd]0;root@38d9103e4557: /bin/bash[?2004h[0;32mroot [1;31m➜ [1;34m/ [0m$ exit
+[?2004l]0;root@38d9103e4557: exitexit
+--- stderr
+
+### Zelle E3, Wiederholung 2: Sitzung mit Terminal (script): innerer Aufruf ohne -i
+befehl: script -qefc 'docker exec -i -t -u root -w / ubmess-shell-sitzung bash' /dev/null
+exit-status: 1
+stdout-bytes: 702  stderr-bytes: 0
+--- stdout
+docker exec -u nouser ubmess-shell-anderer sh -c true
+exit
+docker exec -u nouser ubmess-shell-anderer sh -c true
+exit
+]0;root@38d9103e4557: PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; }precmd"]0;root@38d9103e4557: precmd]0;root@38d9103e4557: /bin/bash[?2004h[0;32mroot [0m➜ [1;34m/ [0m$ docker exec -u nouser ubmess-shell-anderer sh -c true
+[?2004l]0;root@38d9103e4557: docker exec -u nouser ubmess-shell-anderer sh -c trueError response from daemon: unable to find user nouser: no matching entries in passwd file
+]0;root@38d9103e4557: precmd]0;root@38d9103e4557: /bin/bash[?2004h[0;32mroot [1;31m➜ [1;34m/ [0m$ exit
+[?2004l]0;root@38d9103e4557: exitexit
+--- stderr
+
+### Zelle E4, Wiederholung 1: Kontrolle: Sitzung ohne Terminal, innerer Aufruf mit vorhandenem Benutzer root
+befehl: docker exec -i -u root -w / ubmess-shell-sitzung bash
+exit-status: 0
+stdout-bytes: 0  stderr-bytes: 0
+--- stdout
+--- stderr
+
+### Zelle E4, Wiederholung 2: Kontrolle: Sitzung ohne Terminal, innerer Aufruf mit vorhandenem Benutzer root
+befehl: docker exec -i -u root -w / ubmess-shell-sitzung bash
+exit-status: 0
+stdout-bytes: 0  stderr-bytes: 0
+--- stdout
+--- stderr
+
+### Zelle E3b, Wiederholung 1: Sitzung mit Terminal (script): wie E3, Fehlerausgabe des äußeren Clients getrennt
+befehl: script -qefc 'docker exec -i -t -u root -w / ubmess-shell-sitzung bash 2>&3' /dev/null 3>&2
+exit-status: 1
+stdout-bytes: 702  stderr-bytes: 0
+--- stdout
+docker exec -u nouser ubmess-shell-anderer sh -c true
+exit
+docker exec -u nouser ubmess-shell-anderer sh -c true
+exit
+]0;root@38d9103e4557: PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; }precmd"]0;root@38d9103e4557: precmd]0;root@38d9103e4557: /bin/bash[?2004h[0;32mroot [0m➜ [1;34m/ [0m$ docker exec -u nouser ubmess-shell-anderer sh -c true
+[?2004l]0;root@38d9103e4557: docker exec -u nouser ubmess-shell-anderer sh -c trueError response from daemon: unable to find user nouser: no matching entries in passwd file
+]0;root@38d9103e4557: precmd]0;root@38d9103e4557: /bin/bash[?2004h[0;32mroot [1;31m➜ [1;34m/ [0m$ exit
+[?2004l]0;root@38d9103e4557: exitexit
+--- stderr
+
+### Zelle E3b, Wiederholung 2: Sitzung mit Terminal (script): wie E3, Fehlerausgabe des äußeren Clients getrennt
+befehl: script -qefc 'docker exec -i -t -u root -w / ubmess-shell-sitzung bash 2>&3' /dev/null 3>&2
+exit-status: 1
+stdout-bytes: 702  stderr-bytes: 0
+--- stdout
+docker exec -u nouser ubmess-shell-anderer sh -c true
+exit
+docker exec -u nouser ubmess-shell-anderer sh -c true
+exit
+]0;root@38d9103e4557: PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND; }precmd"]0;root@38d9103e4557: precmd]0;root@38d9103e4557: /bin/bash[?2004h[0;32mroot [0m➜ [1;34m/ [0m$ docker exec -u nouser ubmess-shell-anderer sh -c true
+[?2004l]0;root@38d9103e4557: docker exec -u nouser ubmess-shell-anderer sh -c trueError response from daemon: unable to find user nouser: no matching entries in passwd file
+]0;root@38d9103e4557: precmd]0;root@38d9103e4557: /bin/bash[?2004h[0;32mroot [1;31m➜ [1;34m/ [0m$ exit
+[?2004l]0;root@38d9103e4557: exitexit
+--- stderr
+
+## E5/E6: derselbe Benutzername in Sitzung und innerem Aufruf (vscode: im Sitzungs-Container
+##    vorhanden, im anderen Container fehlend) — die Sitzung läuft als der Benutzer der Sitzung
+### Zelle E5, Wiederholung 1: Sitzung ohne Terminal als vscode, innerer Aufruf -u vscode gegen den anderen Container
+befehl: docker exec -i -u vscode -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user vscode: no matching entries in passwd file
+
+### Zelle E5, Wiederholung 2: Sitzung ohne Terminal als vscode, innerer Aufruf -u vscode gegen den anderen Container
+befehl: docker exec -i -u vscode -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user vscode: no matching entries in passwd file
+
+### Zelle E6, Wiederholung 1: wie E5, die Shell endet danach ausdrücklich mit exit 0
+befehl: docker exec -i -u vscode -w / ubmess-shell-sitzung bash
+exit-status: 0
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user vscode: no matching entries in passwd file
+
+### Zelle E6, Wiederholung 2: wie E5, die Shell endet danach ausdrücklich mit exit 0
+befehl: docker exec -i -u vscode -w / ubmess-shell-sitzung bash
+exit-status: 0
+stdout-bytes: 0  stderr-bytes: 91
+--- stdout
+--- stderr
+Error response from daemon: unable to find user vscode: no matching entries in passwd file
+
+### Zelle E7, Wiederholung 1: wie E5, der innere Aufruf mit 2>&1 (Zeile auf der Standardausgabe der Sitzung)
+befehl: docker exec -i -u vscode -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 91  stderr-bytes: 0
+--- stdout
+Error response from daemon: unable to find user vscode: no matching entries in passwd file
+--- stderr
+
+### Zelle E7, Wiederholung 2: wie E5, der innere Aufruf mit 2>&1 (Zeile auf der Standardausgabe der Sitzung)
+befehl: docker exec -i -u vscode -w / ubmess-shell-sitzung bash
+exit-status: 1
+stdout-bytes: 91  stderr-bytes: 0
+--- stdout
+Error response from daemon: unable to find user vscode: no matching entries in passwd file
+--- stderr
+
+## F. Nachgestellte Zeile der Sitzung (synthetisch: die Sitzung schreibt den Text von Hand; das ist
+##    keine Beobachtung des Clients, nur das Muster für die Erkennung)
+### Zelle F1, Wiederholung 1: Sitzung schreibt die Zeile auf die Standardausgabe und endet mit 126
+befehl: docker exec -i -u root ubmess-shell-sitzung bash -c 'echo "unable to find user nouser: no matching entries in passwd file"; exit 126'
+exit-status: 126
+stdout-bytes: 63  stderr-bytes: 0
+--- stdout
+unable to find user nouser: no matching entries in passwd file
+--- stderr
+
+### Zelle F1, Wiederholung 2: Sitzung schreibt die Zeile auf die Standardausgabe und endet mit 126
+befehl: docker exec -i -u root ubmess-shell-sitzung bash -c 'echo "unable to find user nouser: no matching entries in passwd file"; exit 126'
+exit-status: 126
+stdout-bytes: 63  stderr-bytes: 0
+--- stdout
+unable to find user nouser: no matching entries in passwd file
+--- stderr
+
+## G. Die erneute Probe nach der Sitzung (userMissingNow): dieselbe Probe-Form wie A1/D1, einzeln
+### Zelle G1, Wiederholung 1: Probe des Benutzers der Sitzung (root, vorhanden) nach einer Sitzung
+befehl: docker exec -u root -w / ubmess-shell-sitzung bash -c true 2>&1; echo "gemeinsamer Strom oben"
+exit-status: 0
+stdout-bytes: 23  stderr-bytes: 0
+--- stdout
+gemeinsamer Strom oben
+--- stderr
+
+### Zelle G1, Wiederholung 2: Probe des Benutzers der Sitzung (root, vorhanden) nach einer Sitzung
+befehl: docker exec -u root -w / ubmess-shell-sitzung bash -c true 2>&1; echo "gemeinsamer Strom oben"
+exit-status: 0
+stdout-bytes: 23  stderr-bytes: 0
+--- stdout
+gemeinsamer Strom oben
+--- stderr
+
+### Zelle G2, Wiederholung 1: Probe des fehlenden Benutzers, beide Ströme zusammen (CombinedOutput)
+befehl: docker exec -u nouser -w / ubmess-shell-sitzung bash -c true 2>&1
+exit-status: 1
+stdout-bytes: 91  stderr-bytes: 0
+--- stdout
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+--- stderr
+
+### Zelle G2, Wiederholung 2: Probe des fehlenden Benutzers, beide Ströme zusammen (CombinedOutput)
+befehl: docker exec -u nouser -w / ubmess-shell-sitzung bash -c true 2>&1
+exit-status: 1
+stdout-bytes: 91  stderr-bytes: 0
+--- stdout
+Error response from daemon: unable to find user nouser: no matching entries in passwd file
+--- stderr
+
+## Ende 2026-11-01T06:46:04Z
