@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/open/slice-v1-devcontainer-claude-oauth-token.md) — 2026-11-01
+# Verification-Report: [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/next/slice-v1-devcontainer-claude-oauth-token.md) — 2026-11-01
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD, Entscheidung Weg A, [`SPEC-044`](../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten), [`SPEC-051`](../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md) und den ausgeführten Sensoren? Form nach [`harness/verification.md`](../../harness/verification.md). Außer dieser Datei ist nichts geändert, nichts committet, nichts gepusht.
 
@@ -9,7 +9,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/open/slice-v1-devcontainer-claude-oauth-token.md) (liegt in `open/`)
+- Slice: [`slice-v1-devcontainer-claude-oauth-token`](../plan/planning/next/slice-v1-devcontainer-claude-oauth-token.md) (liegt in `open/`)
 - IDs: [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`SPEC-044`](../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten), [`SPEC-051`](../../spec/spezifikation.md#spec-051--features-gh-und-glab-im-devcontainer-installation-meldungen-hosts-und-zugangsdaten), [`ADR-0036`](../plan/adr/0036-cloud-modelle-von-ollama-im-devcontainer.md)
 - Artefakte: `internal/hexagon/application/devcontainer_sandbox.go` (`agentCredentialEnv`), `doctor_sandbox.go`, sechs Testdateien der Schicht, `internal/e2e/claude_oauth_token_docker_test.go`, `.devcontainer/devcontainer.json`, `spec/spezifikation.md`, Handbuch, Wartungsdoku, `CHANGELOG.md`, `harness/replay.md`, Messprotokoll
 
@@ -67,7 +67,7 @@ Unabhängig davon verlangen DoD und §6 Ausgänge für Risiko 1 (Entscheidung �
 |---|---|---|---|---|---|---|
 | F-1 | LOW | Slice §6 Risiko 2 verlangt, die Dokumentation nenne „Widerruf und Reichweite des Tokens“. Im Diff des Handbuchs steht der Widerruf („widerrufen Sie es bei Anthropic“), nicht die Reichweite des Tokens und nicht, dass das Sandbox-Profil mit verschachteltem Docker privilegiert läuft. | Slice §6 Risiko 2 | `docs/user/benutzerhandbuch.md` · „Nutzen Sie nur ein Token, das Sie widerrufen können“ | nein — Review-only; der Ausgang von Risiko 2 hängt daran | Risiko-Ausgang ohne Dokumentations-Entsprechung |
 | F-2 | INFO | Die Rohdaten tragen nur die `claude -p`-Zeilen; die Zellen „gesetzt/ungesetzt/leer“ mit je zwei Läufen sind nur durch den grünen Test und die Schleifen im Quelltext belegt, nicht durch ausgegebene Rohzeilen. Zudem schlugen im selben Paketlauf drei fremde Tests fehl (im Protokoll benannt); ein sauberer Lauf nur dieses Tests liegt nicht vor. | `harness/verification.md` (Evidence) | Messprotokoll, README · „Die drei Variablen-Zellen stehen im Test als Zusicherungen“ | nein — `make test-docker` (nicht gefahren) | Messbeleg ohne Rohzeilen je Zelle |
-| F-3 | INFO | Der Slice liegt in `open/`, nicht in `in-progress/`; im Worktree steht dort [`slice-v1-devcontainer-instanz-label`](../plan/planning/done/slice-v1-devcontainer-instanz-label.md). Der Lifecycle-Zustand ist Sache des Planners (Start-Trigger in Slice §4); ich habe nichts bewegt. | Slice §4 (Start-Trigger) | [Slice-Datei in `open/`](../plan/planning/open/slice-v1-devcontainer-claude-oauth-token.md) | nein — `make docs-check` meldet es nicht | — |
+| F-3 | INFO | Der Slice liegt in `open/`, nicht in `in-progress/`; im Worktree steht dort [`slice-v1-devcontainer-instanz-label`](../plan/planning/done/slice-v1-devcontainer-instanz-label.md). Der Lifecycle-Zustand ist Sache des Planners (Start-Trigger in Slice §4); ich habe nichts bewegt. | Slice §4 (Start-Trigger) | [Slice-Datei in `open/`](../plan/planning/next/slice-v1-devcontainer-claude-oauth-token.md) | nein — `make docs-check` meldet es nicht | — |
 | F-4 | INFO | Mutationstests (DoD „Tests je Bedingung und je Mutation“) sind nicht ausgeführt; belegt sind Fälle je Bedingung im Diff, kein Mutationslauf. | Slice DoD Punkt 2 | `internal/hexagon/application/doctor_sandbox_test.go` · „only the OAuth token reference“ | nein | — |
 
 ## Negativbefunde
