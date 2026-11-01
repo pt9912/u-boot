@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-devcontainer-instanz-label`](../../../../done/slice-v1-devcontainer-instanz-label.md)
+**Fund:** Review-Report [`2026-11-01-slice-v1-devcontainer-instanz-label`](../../../../../../reviews/2026-11-01-slice-v1-devcontainer-instanz-label.md) F-2 (veraltete Zustandsmarker: ADR „Proposed“, „Offen ist der Wortlaut des CR“ nach `Accepted` und CR-Closure) und F-3 (Plan-Zeile `cli.go` ohne Diff, im Abgleich weder unter berührt noch unter unverändert), Verification-Report [`2026-11-01-slice-v1-devcontainer-instanz-label-verify`](../../../../../../reviews/2026-11-01-slice-v1-devcontainer-instanz-label-verify.md) V-2 (`.d-check.yml` im Diff, im Plan-Abgleich nicht genannt). F-2 und F-3 behoben in `81a31dff`, V-2 in der Closure.
+
+**Beleg-Qualität:** belegt durch Lesen der beiden Reports und des Diffs. Rückfall nach der Verkörperung in `AGENTS.md` §3.10; V-2 entstand durch einen Commit zwischen Umsetzung und Review, den der Abgleich nicht nachzog.
