@@ -33,7 +33,7 @@ func (l *Launcher) Shell(ctx context.Context, opts driven.DevcontainerShellOptio
 	if err := validateShellOptions(opts); err != nil {
 		return rejectedInput(err)
 	}
-	envNames, err := l.passedEnvNames(opts.EnvNames)
+	envNames, envValues, err := l.passedEnv(opts.EnvNames, opts.EnvValues)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (l *Launcher) Shell(ctx context.Context, opts driven.DevcontainerShellOptio
 	if err != nil {
 		return err
 	}
-	return l.runSession(ctx, shell, envNames, opts)
+	return l.runSession(ctx, shell, envNames, envValues, opts)
 }
 
 // validateShellOptions applies the checks of the port to the container ID
@@ -109,8 +109,11 @@ func (l *Launcher) probeShell(ctx context.Context, opts driven.DevcontainerShell
 // client; with a terminal the context is not observed, because the client
 // owns the terminal. The exit status of the client is the exit status of the
 // shell and is no error, except where the client reports an error before the
-// session began ([Launcher.clientErrorBeforeSession]).
-func (l *Launcher) runSession(ctx context.Context, shell string, envNames []string, opts driven.DevcontainerShellOptions) error {
+// session began ([Launcher.clientErrorBeforeSession]). The resolved values
+// of the variables ([DevcontainerShellOptions.EnvValues]) travel in the
+// environment of the `docker` client process; the command line carries the
+// names only.
+func (l *Launcher) runSession(ctx context.Context, shell string, envNames []string, envValues map[string]string, opts driven.DevcontainerShellOptions) error {
 	if ctxErr := ctx.Err(); ctxErr != nil {
 		return ctxErr
 	}
@@ -121,6 +124,9 @@ func (l *Launcher) runSession(ctx context.Context, shell string, envNames []stri
 	} else {
 		cmd = exec.CommandContext(ctx, l.binary, args...)
 		cmd.Cancel = func() error { return cmd.Process.Signal(os.Interrupt) }
+	}
+	if len(envValues) > 0 {
+		cmd.Env = append(os.Environ(), sortedEnvPairs(envValues)...)
 	}
 	cmd.WaitDelay = l.abortGrace
 	cmd.Stdin = opts.Stdin

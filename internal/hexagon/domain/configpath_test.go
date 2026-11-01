@@ -201,6 +201,7 @@ func TestFixedConfigPaths_SetIsPinned(t *testing.T) {
 		"devcontainer.resources.memory",
 		"devcontainer.sandbox.egress.allow",
 		"devcontainer.sandbox.egress.enabled",
+		"devcontainer.sandbox.hostGitToken",
 		"devcontainer.sandbox.nestedRuntime",
 		"devcontainer.sandbox.onUnavailable",
 		"devcontainer.sandbox.repository",

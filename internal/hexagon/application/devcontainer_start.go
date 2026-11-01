@@ -147,14 +147,17 @@ func stringEnd(text string, start int) int {
 // DevcontainerStartService implements [driving.DevcontainerUseCase]
 // (`u-boot devcontainer up`, `down` and `shell`, LH-FA-DEV-010). It reads the
 // project files through the [driven.FileSystem] port, starts, stops and enters
-// through the [driven.DevcontainerLauncher] and finds the container and its
-// status files through the [driven.DevcontainerInspector].
+// through the [driven.DevcontainerLauncher], finds the container and its
+// status files through the [driven.DevcontainerInspector] and, when wired,
+// resolves the git token and the git identity of the host through the
+// [driven.HostGitSource] port (LH-FA-DEV-009, LH-FA-DEV-010).
 type DevcontainerStartService struct {
-	fs        driven.FileSystem
-	yaml      driven.YAMLCodec
-	launcher  driven.DevcontainerLauncher
-	inspector driven.DevcontainerInspector
-	logger    driven.Logger
+	fs         driven.FileSystem
+	yaml       driven.YAMLCodec
+	launcher   driven.DevcontainerLauncher
+	inspector  driven.DevcontainerInspector
+	hostSource driven.HostGitSource
+	logger     driven.Logger
 }
 
 // Static check: DevcontainerStartService satisfies the driving port.
@@ -163,7 +166,9 @@ var _ driving.DevcontainerUseCase = (*DevcontainerStartService)(nil)
 // NewDevcontainerStartService constructs the service. Launcher and inspector
 // are mandatory ports without a nil-tolerant default: a missing one makes
 // `Up`, `Down` and `Shell` fail instead of reporting "nothing to do". A nil logger
-// is routed to [noopLogger].
+// is routed to [noopLogger]. A nil host source switches the host git
+// resolution off: the caller of the construction decides; the production
+// wiring sets it.
 func NewDevcontainerStartService(
 	fs driven.FileSystem,
 	yaml driven.YAMLCodec,
@@ -175,6 +180,13 @@ func NewDevcontainerStartService(
 		logger = noopLogger{}
 	}
 	return &DevcontainerStartService{fs: fs, yaml: yaml, launcher: launcher, inspector: inspector, logger: logger}
+}
+
+// WithHostGitSource wires the host git resolution
+// ([driven.HostGitSource]); a nil value switches it off.
+func (s *DevcontainerStartService) WithHostGitSource(hostSource driven.HostGitSource) *DevcontainerStartService {
+	s.hostSource = hostSource
+	return s
 }
 
 func (s *DevcontainerStartService) wired(command, baseDir string) error {
@@ -204,7 +216,7 @@ func (s *DevcontainerStartService) Up(ctx context.Context, req driving.Devcontai
 // call returns only when the session has ended. The variables of the session
 // come from the entries of the configuration that the start has just read.
 func (s *DevcontainerStartService) Shell(ctx context.Context, req driving.DevcontainerShellRequest) error {
-	resp, config, err := s.start(ctx, startRequest{
+	resp, resolution, err := s.start(ctx, startRequest{
 		command: "shell", baseDir: req.BaseDir, instance: req.Instance, duration: "start",
 		progress: req.ProgressSink, onWarning: req.OnWarning,
 	})
@@ -216,18 +228,32 @@ func (s *DevcontainerStartService) Shell(ctx context.Context, req driving.Devcon
 			req.OnWarning(w)
 		}
 	}
-	names := sessionEnvNames(config)
+	names := sessionEnvNames(resolution.config)
 	s.logger.Debug("devcontainer shell: opening the session", "envNames", len(names), "terminal", req.Terminal)
 	return s.launcher.Shell(ctx, driven.DevcontainerShellOptions{
 		ContainerID: resp.ContainerID,
 		User:        resp.RemoteUser,
 		Workspace:   resp.RemoteWorkspaceFolder,
 		EnvNames:    names,
-		Stdin:       req.Stdin,
-		Stdout:      req.Stdout,
-		Stderr:      req.Stderr,
-		Terminal:    req.Terminal,
+		// The session receives the resolved values of the start; a token
+		// resolved there reaches the session (LH-FA-DEV-009, LH-FA-DEV-010).
+		EnvValues: resolution.envValues,
+		Stdin:     req.Stdin,
+		Stdout:    req.Stdout,
+		Stderr:    req.Stderr,
+		Terminal:  req.Terminal,
 	})
+}
+
+// startResolution is what the start keeps for the caller: the text of
+// devcontainer.json it started from and the resolved values of the host
+// git sources; the session of `shell` receives the values (LH-FA-DEV-009,
+// LH-FA-DEV-010).
+type startResolution struct {
+	config string
+	// envValues carries the resolved token (the key is the name in the
+	// configuration); nil-free: an empty map resolves nothing.
+	envValues map[string]string
 }
 
 // startRequest is what `up` and `shell` hand to [DevcontainerStartService.start].
@@ -250,26 +276,27 @@ type startRequest struct {
 // start is the start phase that `up` and `shell` share (ADR-0031 decision 1):
 // validation, the disclosure of the socket, the launcher, and the judgement by
 // the state of the container ([DevcontainerStartService.startOutcome]). It
-// returns the response and the text of devcontainer.json it started from.
-func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (driving.DevcontainerUpResponse, string, error) {
+// returns the response and the [startResolution] it started from.
+func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (driving.DevcontainerUpResponse, startResolution, error) {
 	if err := s.wired(r.command, r.baseDir); err != nil {
-		return driving.DevcontainerUpResponse{}, "", err
+		return driving.DevcontainerUpResponse{}, startResolution{}, err
 	}
 	if driven.ValidateDevcontainerProjectFolder(r.baseDir) != nil {
-		return driving.DevcontainerUpResponse{}, "", fmt.Errorf("devcontainer %s: %w: the path must be absolute and hold no comma, double quote or line break",
+		return driving.DevcontainerUpResponse{}, startResolution{}, fmt.Errorf("devcontainer %s: %w: the path must be absolute and hold no comma, double quote or line break",
 			r.command, driving.ErrDevcontainerProjectFolderInvalid)
 	}
 	if err := validInstance(r.command, r.instance); err != nil {
-		return driving.DevcontainerUpResponse{}, "", err
+		return driving.DevcontainerUpResponse{}, startResolution{}, err
 	}
 	config, err := s.readConfig(r.command, r.baseDir)
 	if err != nil {
-		return driving.DevcontainerUpResponse{}, "", err
+		return driving.DevcontainerUpResponse{}, startResolution{}, err
 	}
 	names, err := referencedEnvNames(r.command, config)
 	if err != nil {
-		return driving.DevcontainerUpResponse{}, "", err
+		return driving.DevcontainerUpResponse{}, startResolution{}, err
 	}
+	envValues, gitIdentity, hostGitWarnings, tokenSource := s.resolveHostGit(ctx, r, names)
 	if r.onWarning != nil {
 		r.onWarning(driving.WarningEntry{
 			Code: socketRelaxationCode, Level: "warn", Message: socketRelaxationText(r.duration), SecurityRelaxation: true,
@@ -277,18 +304,30 @@ func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (d
 	}
 	runningBefore, err := s.containerBeforeStart(ctx, r)
 	if err != nil {
-		return driving.DevcontainerUpResponse{}, "", err
+		return driving.DevcontainerUpResponse{}, startResolution{}, err
 	}
 	s.logger.Debug("devcontainer "+r.command, "recreate", r.recreate, "instance", r.instance, "envNames", len(names))
 	res, err := s.launcher.Up(ctx, driven.DevcontainerUpOptions{
 		ProjectFolder: r.baseDir,
 		Instance:      r.instance,
 		EnvNames:      names,
+		EnvValues:     envValues,
+		GitIdentity:   gitIdentity,
 		Recreate:      r.recreate,
 		Progress:      r.progress,
 	})
 	resp, err := s.startOutcome(ctx, r, runningBefore, res, err)
-	return resp, config, err
+	if err != nil {
+		return resp, startResolution{config: config}, err
+	}
+	resp.Warnings = append(resp.Warnings, hostGitWarnings...)
+	resp.GitTokenSource = tokenSource
+	if gitIdentity.Name != "" || gitIdentity.Email != "" {
+		if !res.GitIdentityApplied {
+			resp.Warnings = append(resp.Warnings, warningNoAbort("LH-FA-DEV-010", gitIdentityStepFailedWarning))
+		}
+	}
+	return resp, startResolution{config: config, envValues: envValues}, err
 }
 
 // validInstance rejects an instance name that
@@ -411,6 +450,132 @@ func referencedEnvNames(command, text string) ([]string, error) {
 		}
 	}
 	return names, nil
+}
+
+// gitTokenEnvName is the reference of the git token in the generated
+// configuration (LH-FA-DEV-009): it is also the source name the resolution
+// reports for the environment variable of the host.
+const gitTokenEnvName = driven.TokenSourceEnvironment
+
+// Warning texts of the host git resolution (LH-FA-DEV-009, LH-FA-DEV-010):
+// one line each, no identifier, no value, indicative over the state.
+const (
+	tokenSourceHostEnvWarning = "the git token of this container comes from the environment variable GIT_TOKEN of the host"
+	tokenSourceGhWarning      = "the git token of this container comes from the gh session of the host (gh auth token)"
+	// %s names the error of the resolution; the value never appears in a
+	// warning (LH-FA-DEV-009).
+	tokenResolutionFailedWarningT = "the git token of the host could not be resolved (%s); the container carries no token"
+	tokenMissingSourceWarning     = "no host source carries a git token (GIT_TOKEN is not set on the host and gh does not answer); git operations in the container that need one will fail or ask"
+	tokenSwitchWithoutRefWarning  = "devcontainer.sandbox.hostGitToken is switched on, but the devcontainer configuration references no ${localEnv:GIT_TOKEN}; the switch resolves nothing here"
+	// %s names the key (user.name or user.email).
+	gitIdentityMissingKeyWarningT  = "the git configuration of the project folder carries no %s; the container sets none for it"
+	identityHostConfigReadWarningT = "the git configuration of the host could not be read (%s); the container sets no identity"
+	gitIdentityStepFailedWarning   = "the git identity of the host could not be set in the container; the container keeps the identity it carries"
+	gitIdentityMissingWarning      = "the git configuration of the host carries no user.name and no user.email; git commit in the container asks for an identity"
+)
+
+// warningNoAbort builds one warning entry of the host git resolution:
+// Level warn, code the requirement the text belongs to.
+func warningNoAbort(code, message string) driving.WarningEntry {
+	return driving.WarningEntry{Code: code, Level: "warn", Message: message}
+}
+
+// resolveHostGit resolves the host values the start hands to the launcher:
+// the token of the opt-in sources (reference present, sandbox profile,
+// switch on) and the identity of the host git configuration (both profiles;
+// D2 of the slice: the launcher sets user.name/user.email in the container
+// after the start; LH-FA-DEV-009, LH-FA-DEV-010). Without a wired
+// [driven.HostGitSource] port it resolves nothing: no values, no identity,
+// no warning. Host git missing and missing values warn without abort; the
+// value of the token appears in no warning and in no output.
+func (s *DevcontainerStartService) resolveHostGit(
+	ctx context.Context, r startRequest, names []string,
+) (envValues map[string]string, gitIdentity driven.DevcontainerGitIdentity, warnings []driving.WarningEntry, tokenSource string) {
+	envValues = map[string]string{}
+	if s.hostSource == nil {
+		return envValues, gitIdentity, nil, ""
+	}
+	sandboxProfile, resolveToken := s.hostGitSwitch(r.baseDir)
+	// Token: only the sandbox profile with the switch on; the port applies
+	// the order of the sources (host variable first): its GIT_TOKEN source
+	// is the present transport, its gh source one the launcher resolves.
+	if sandboxProfile && resolveToken {
+		if !containsString(names, gitTokenEnvName) {
+			warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSwitchWithoutRefWarning))
+		} else {
+			value, source, terr := s.hostSource.GitToken(ctx)
+			switch {
+			case terr != nil:
+				warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", fmt.Sprintf(tokenResolutionFailedWarningT, terr.Error())))
+			case value == "":
+				warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenMissingSourceWarning))
+			case source == driven.TokenSourceEnvironment:
+				// The host passes its variable as before (LH-FA-DEV-009).
+				tokenSource = source
+				warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSourceHostEnvWarning))
+			default:
+				envValues[gitTokenEnvName] = value
+				tokenSource = source
+				warnings = append(warnings, warningNoAbort("LH-FA-DEV-009", tokenSourceGhWarning))
+			}
+		}
+	}
+	// Identity: the effective values of the project folder on the host;
+	// a missing key or an empty value sets nothing (the launcher keeps a
+	// value the container already carries).
+	name, nerr := s.hostSource.ConfigValue(ctx, r.baseDir, "user.name")
+	email, eerr := s.hostSource.ConfigValue(ctx, r.baseDir, "user.email")
+	switch {
+	case nerr != nil || eerr != nil:
+		readErr := nerr
+		if readErr == nil {
+			readErr = eerr
+		}
+		warnings = append(warnings, warningNoAbort("LH-FA-DEV-010", fmt.Sprintf(identityHostConfigReadWarningT, readErr.Error())))
+	case name == "" && email == "":
+		warnings = append(warnings, warningNoAbort("LH-FA-DEV-010", gitIdentityMissingWarning))
+	default:
+		gitIdentity.Name = name
+		gitIdentity.Email = email
+		if name == "" {
+			warnings = append(warnings, warningNoAbort("LH-FA-DEV-010", fmt.Sprintf(gitIdentityMissingKeyWarningT, "user.name")))
+		}
+		if email == "" {
+			warnings = append(warnings, warningNoAbort("LH-FA-DEV-010", fmt.Sprintf(gitIdentityMissingKeyWarningT, "user.email")))
+		}
+	}
+	return envValues, gitIdentity, warnings, tokenSource
+}
+
+// hostGitSwitch reads the opt-in switch and the profile of the project
+// (`devcontainer.sandbox.hostGitToken`, LH-FA-DEV-009): a sandbox profile
+// with the switch on resolves; a missing u-boot.yaml, an unparsable one and
+// a missing key resolve nothing (no switch, no resolution).
+func (s *DevcontainerStartService) hostGitSwitch(baseDir string) (sandboxProfile, switchOn bool) {
+	path := filepath.Join(baseDir, domain.ConfigFileName)
+	exists, err := s.fs.Exists(path)
+	if err != nil || !exists {
+		return false, false
+	}
+	body, err := s.fs.ReadFile(path)
+	if err != nil {
+		return false, false
+	}
+	var cfg ubootYAMLConfig
+	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
+		return false, false
+	}
+	dc := cfg.Devcontainer
+	return profileIsSandbox(dc), dc != nil && dc.Sandbox != nil && dc.Sandbox.HostGitToken != nil && *dc.Sandbox.HostGitToken
+}
+
+func containsString(list []string, what string) bool {
+	for _, item := range list {
+		if item == what {
+			return true
+		}
+	}
+	return false
 }
 
 // fallbackProbes returns the status files of the capabilities the

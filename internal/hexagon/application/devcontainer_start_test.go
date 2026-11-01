@@ -94,6 +94,9 @@ const plainConfig = `{"name": "demo", "image": "debian"}`
 func newLauncher() *fakeLauncher {
 	return &fakeLauncher{upResult: driven.DevcontainerUpResult{
 		ContainerID: fallbackContainerID, RemoteUser: "vscode", RemoteWorkspaceFolder: "/workspaces/demo",
+		// The production launcher runs the identity step and reports it;
+		// the failure case sets false explicitly.
+		GitIdentityApplied: true,
 	}}
 }
 
@@ -704,4 +707,240 @@ func TestDevcontainerDown_EngineFailures(t *testing.T) {
 			t.Errorf("err = %v", err)
 		}
 	})
+}
+
+// fakeHostSource is the [driven.HostGitSource] test double of the host git
+// resolution: token with source or an error, config values by key.
+type fakeHostSource struct {
+	mu            sync.Mutex
+	tokenValue    string
+	tokenSource   string
+	tokenErr      error
+	configCalls   []string
+	configValues  map[string]string
+	configErr     error
+	gitTokenCalls int
+}
+
+func (f *fakeHostSource) GitToken(context.Context) (string, string, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.gitTokenCalls++
+	return f.tokenValue, f.tokenSource, f.tokenErr
+}
+
+func (f *fakeHostSource) ConfigValue(_ context.Context, _, key string) (string, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.configCalls = append(f.configCalls, key)
+	if f.configErr != nil {
+		return "", f.configErr
+	}
+	return f.configValues[key], nil
+}
+
+const hostGitSandboxYAML = `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  profile: sandbox
+  sandbox:
+    hostGitToken: true
+`
+
+const tokenRefConfig = `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}"}}`
+
+// hostGitTokenSvc wires the service with the fake host source and the
+// sandbox yaml; the launcher result reports the identity as applied so a
+// test can pin the step-failure warning separately.
+func hostGitTokenSvc(t *testing.T, config, ubootYAML string, hs *fakeHostSource, l *fakeLauncher) (*application.DevcontainerStartService, *fakeLauncher) {
+	t.Helper()
+	svc, _ := devcontainerSvc(t, config, ubootYAML, l, newFakeInspector(true))
+	return svc.WithHostGitSource(hs), l
+}
+
+// Warning texts of the tests: the tokens are placeholders; no warning is
+// allowed to carry a value.
+func TestDevcontainerUp_HostGitToken_ResolvedFromGhReachesLauncher(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{tokenValue: "gh-token-placeh", tokenSource: driven.TokenSourceGh}
+	svc, l := hostGitTokenSvc(t, tokenRefConfig, hostGitSandboxYAML, hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if got := l.upOpts[0].EnvValues; got == nil || got["GIT_TOKEN"] != "gh-token-placeh" {
+		t.Fatalf("EnvValues = %v, want the resolved token", got)
+	}
+	if resp.GitTokenSource != driven.TokenSourceGh {
+		t.Fatalf("GitTokenSource = %q, want the gh source", resp.GitTokenSource)
+	}
+	for _, w := range resp.Warnings {
+		if strings.Contains(w.Message, "gh-token-placeh") {
+			t.Fatalf("warning %q carries the value", w.Message)
+		}
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_HostVariableWins(t *testing.T) {
+	t.Setenv("GIT_TOKEN", "env-token-placeh")
+	l := newLauncher()
+	hs := &fakeHostSource{tokenValue: "env-token-placeh", tokenSource: driven.TokenSourceEnvironment}
+	svc, l := hostGitTokenSvc(t, tokenRefConfig, hostGitSandboxYAML, hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if len(l.upOpts[0].EnvValues) != 0 {
+		t.Fatalf("EnvValues = %v, want none (the host variable is the transport)", l.upOpts[0].EnvValues)
+	}
+	if resp.GitTokenSource != driven.TokenSourceEnvironment {
+		t.Fatalf("GitTokenSource = %q, want the environment source", resp.GitTokenSource)
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_SwitchOffResolvesNothing(t *testing.T) {
+	yamlOff := `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  profile: sandbox
+  sandbox:
+    hostGitToken: false
+`
+	l := newLauncher()
+	hs := &fakeHostSource{tokenValue: "gh-token-placeh", tokenSource: driven.TokenSourceGh}
+	svc, l := hostGitTokenSvc(t, tokenRefConfig, yamlOff, hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if len(l.upOpts[0].EnvValues) != 0 || resp.GitTokenSource != "" {
+		t.Fatalf("switch off resolved something: EnvValues=%v GitTokenSource=%q", l.upOpts[0].EnvValues, resp.GitTokenSource)
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_StandardProfileResolvesNothing(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{tokenValue: "gh-token-placeh", tokenSource: driven.TokenSourceGh}
+	svc, l := hostGitTokenSvc(t, tokenRefConfig, "", hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if len(l.upOpts[0].EnvValues) != 0 || resp.GitTokenSource != "" {
+		t.Fatalf("standard profile resolved: EnvValues=%v GitTokenSource=%q", l.upOpts[0].EnvValues, resp.GitTokenSource)
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_MissingSourceWarnsWithoutAbort(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{}
+	svc, _ := hostGitTokenSvc(t, tokenRefConfig, hostGitSandboxYAML, hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up (a missing source is a warning, no abort): %v", err)
+	}
+	found := false
+	for _, w := range resp.Warnings {
+		if w.Code == "LH-FA-DEV-009" && w.Level == "warn" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("warnings = %+v, want the missing-source warning", resp.Warnings)
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_IdentityFromHostConfig(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{configValues: map[string]string{"user.name": "h-name", "user.email": "h-email"}}
+	svc, l := hostGitTokenSvc(t, tokenRefConfig, "", hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if l.upOpts[0].GitIdentity.Name != "h-name" || l.upOpts[0].GitIdentity.Email != "h-email" {
+		t.Fatalf("GitIdentity = %+v, want the host values", l.upOpts[0].GitIdentity)
+	}
+	for _, w := range resp.Warnings {
+		if w.Code == "LH-FA-DEV-010" {
+			t.Fatalf("identity present, but a warning stands: %+v", w)
+		}
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_IdentityMissingWarnsWithoutAbort(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{configValues: map[string]string{}}
+	svc, _ := hostGitTokenSvc(t, tokenRefConfig, "", hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up (no identity is a warning, no abort): %v", err)
+	}
+	found := false
+	for _, w := range resp.Warnings {
+		if w.Level == "warn" && w.Message != "" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("warnings = %+v, want the identity warning", resp.Warnings)
+	}
+	if l.upOpts[0].GitIdentity.Name != "" || l.upOpts[0].GitIdentity.Email != "" {
+		t.Fatalf("GitIdentity = %+v, want none", l.upOpts[0].GitIdentity)
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_IdentityStepFailureWarns(t *testing.T) {
+	l := newLauncher()
+	l.upResult.GitIdentityApplied = false
+	hs := &fakeHostSource{configValues: map[string]string{"user.name": "h-name", "user.email": "h-email"}}
+	svc, _ := hostGitTokenSvc(t, tokenRefConfig, "", hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up (a failed step is a warning, no abort): %v", err)
+	}
+	found := false
+	for _, w := range resp.Warnings {
+		if strings.Contains(w.Message, "git identity") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("warnings = %+v, want the step-failure warning", resp.Warnings)
+	}
+}
+
+func TestDevcontainerShell_HostGitToken_SessionReceivesResolvedValue(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{tokenValue: "gh-token-placeh", tokenSource: driven.TokenSourceGh,
+		configValues: map[string]string{"user.name": "h-name"}}
+	svc, l := hostGitTokenSvc(t, tokenRefConfig, hostGitSandboxYAML, hs, l)
+	err := svc.Shell(context.Background(), driving.DevcontainerShellRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Shell: %v", err)
+	}
+	shell := l.shellOpts[0]
+	if shell.EnvValues["GIT_TOKEN"] != "gh-token-placeh" {
+		t.Fatalf("session EnvValues = %v, want the resolved token", shell.EnvValues)
+	}
+	if shell.EnvNames == nil {
+		t.Fatalf("session EnvNames = nil, want the set with GIT_TOKEN")
+	}
+}
+
+func TestDevcontainerUp_HostGitToken_WarningsCarryNoValue(t *testing.T) {
+	l := newLauncher()
+	hs := &fakeHostSource{tokenValue: "a-long-placeh", tokenSource: driven.TokenSourceGh}
+	svc, _ := hostGitTokenSvc(t, tokenRefConfig, hostGitSandboxYAML, hs, l)
+	resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	for _, w := range resp.Warnings {
+		if strings.Contains(w.Message, "a-long-placeh") {
+			t.Fatalf("warning carries the value: %+v", w)
+		}
+	}
 }

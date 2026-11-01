@@ -99,6 +99,20 @@ func ValidateDevcontainerWorkspace(workspace string) error {
 	return nil
 }
 
+// DevcontainerGitIdentity is the git identity of the host that a caller
+// hands to [DevcontainerLauncher.Up]: after a successful start the launcher
+// sets `user.name`/`user.email` in the container home with `git config
+// --global`, where the container holds none (LH-FA-DEV-010). Each field
+// that is empty is not set. The values travel in the environment of the
+// `docker` client process, never in a command line, or a file of the
+// project (LH-FA-DEV-009).
+type DevcontainerGitIdentity struct {
+	// Name and Email are the values of `git config` of the host; an empty
+	// field (including the empty `git config` value) is not set.
+	Name  string
+	Email string
+}
+
 // DevcontainerShellOptions parameterises [DevcontainerLauncher.Shell].
 type DevcontainerShellOptions struct {
 	// ContainerID is the ID of the running devcontainer (lower-case hex, the
@@ -115,9 +129,17 @@ type DevcontainerShellOptions struct {
 	// name (`docker exec -e NAME`); the value stays out of every command
 	// line, the `docker` client takes it from the environment of the
 	// process. Names that are not set on the host are skipped, so a variable
-	// the host lacks is absent in the session. The launcher masks nothing in
-	// the session: what the shell prints reaches the caller as it is.
+	// the host lacks is absent in the session — unless [DevcontainerShellOptions.EnvValues]
+	// resolves it. The launcher masks nothing in the
+	// session: what the shell prints reaches the caller as it is.
 	EnvNames []string
+	// EnvValues resolves names of EnvNames that the host
+	// does not set: the launcher hands the entry to the session the same
+	// way, the name in the command line, the value in the environment of
+	// the `docker` client process. A key that equals a name of EnvNames
+	// that the host sets is ignored; the host value wins. Names are
+	// validated like the names of EnvNames.
+	EnvValues map[string]string
 	// Stdin, Stdout and Stderr are the streams of the session. The launcher
 	// writes nothing of its own to Stdout. Without Terminal, Stdout receives
 	// the standard output of the shell, and Stderr its standard error and the
@@ -159,8 +181,24 @@ type DevcontainerUpOptions struct {
 	// with `containerEnv` the resolved value also stays in the metadata
 	// (`Config.Env`) of the started devcontainer for as long as the
 	// container exists. The launcher masks neither. Names that are not
-	// set on the host are skipped.
+	// set on the host are skipped — unless [DevcontainerUpOptions.EnvValues]
+	// resolves one.
 	EnvNames []string
+	// EnvValues resolves names of EnvNames that the host does not set: the
+	// launcher hands the entry to the helper container the same way, the
+	// name in the command line, the value in the environment of the `docker`
+	// client process; the masking ([DevcontainerUpOptions.Progress]) covers
+	// the value as it covers the host values. A key that equals a name of
+	// EnvNames that the host sets is ignored; the host value wins. Names are
+	// validated like the names of EnvNames.
+	EnvValues map[string]string
+	// GitIdentity is the identity of the host git configuration that the
+	// launcher sets in the container after a successful start; the zero
+	// value sets nothing. The step is best effort: a container without
+	// `git`, a failed call or a home directory that takes no write reports
+	// itself in [DevcontainerUpResult.GitIdentityApplied], it never fails
+	// the start (LH-FA-DEV-010, warning without abort).
+	GitIdentity DevcontainerGitIdentity
 	// Recreate removes an existing container before the start
 	// (`--remove-existing-container`); volumes stay.
 	Recreate bool
@@ -195,6 +233,11 @@ type DevcontainerUpResult struct {
 	RemoteUser string
 	// RemoteWorkspaceFolder is the workspace path inside the container.
 	RemoteWorkspaceFolder string
+	// GitIdentityApplied reports whether the launcher ran the identity step
+	// of [DevcontainerUpOptions.GitIdentity] and every `git config` it ran
+	// succeeded; it is false when no identity was requested or the step
+	// failed (the caller warns, the start does not fail).
+	GitIdentityApplied bool
 }
 
 // DevcontainerLauncher starts, stops and enters the devcontainer of a
@@ -204,9 +247,10 @@ type DevcontainerUpResult struct {
 // session in the running container with `docker exec` of the host.
 //
 // Each method first rejects an invalid argument as [ErrDevcontainerRuntime]
-// without a docker call (`Up`: project folder, then variable names; `Stop`:
+// without a docker call (`Up`: project folder, then variable names and
+// resolved values; `Stop`:
 // container ID; `Shell`: container ID, user, workspace, then variable
-// names), then checks the environment (Docker binary on the `PATH`,
+// names and resolved values), then checks the environment (Docker binary on the `PATH`,
 // daemon answers, engine is local) and fails with [ErrDockerUnavailable] or
 // [ErrContainerEngineNotLocal]; every later failure is
 // [ErrDevcontainerRuntime]. A cancelled context ends `Up` with the context

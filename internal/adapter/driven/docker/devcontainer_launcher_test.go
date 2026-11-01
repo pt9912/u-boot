@@ -48,6 +48,7 @@ run)
   [ -e "$D/run-stderr" ] && cat "$D/run-stderr" >&2
   [ -e "$D/run-stderr-b" ] && { cat "$D/run-stderr-a" >&2; sleep 0.3; cat "$D/run-stderr-b" >&2; }
   [ -e "$D/run-fail" ] && { echo 'run-boom' >&2; exit 3; }
+  tr '\0' '\n' < /proc/$$/environ | grep '^GIT_TOKEN=' > "$D/run-env.txt" 2>/dev/null || : > "$D/run-env.txt"
   cat "$D/run-stdout"; exit 0 ;;
 rm)
   [ -e "$D/rm-fail" ] && { echo 'rm-boom' >&2; exit 1; }
@@ -57,6 +58,7 @@ stop) [ -e "$D/stop-fail" ] && { echo 'stop-boom' >&2; exit 1; }; exit 0 ;;
 exec)
   case " $* " in
   *" -i "*)
+    tr '\0' '\n' < /proc/$$/environ | grep '^GIT_TOKEN=' > "$D/session-env.txt" 2>/dev/null || : > "$D/session-env.txt"
     [ -e "$D/session-record-fds" ] && { l0=$(readlink /proc/$$/fd/0); l1=$(readlink /proc/$$/fd/1); echo "$l0" > "$D/fd0.link"; echo "$l1" > "$D/fd1.link"; }
     [ -e "$D/session-copy-stdin" ] && cat > "$D/stdin.copy"
     [ -e "$D/session-stdout" ] && cat "$D/session-stdout"
@@ -861,5 +863,136 @@ func TestHelperContext_TagAndTar(t *testing.T) {
 	}
 	if strings.Join(names, ",") != strings.Join(docker.HelperContextNamesForTest(), ",") {
 		t.Errorf("tar entries = %v", names)
+	}
+}
+
+// LH-FA-DEV-009: a resolved value reaches the helper container in the
+// environment of the `docker` client process, never in a command line.
+func TestLauncher_Up_ResolvedEnvValueTravelsInTheClientEnvironment(t *testing.T) {
+	f := newFakeDocker(t)
+	const resolved = "resolved-token-placeh-0123"
+	opts := upOptions()
+	opts.EnvNames = []string{"GIT_TOKEN"}
+	opts.EnvValues = map[string]string{"GIT_TOKEN": resolved}
+	if _, err := f.launcher(nil).Up(context.Background(), opts); err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	joined := strings.Join(f.flatCalls(t), "\n")
+	if strings.Contains(joined, resolved) {
+		t.Errorf("the resolved value is in a command line:\n%s", joined)
+	}
+	env, err := os.ReadFile(filepath.Join(f.dir, "run-env.txt"))
+	if err != nil {
+		t.Fatalf("run-env.txt: %v", err)
+	}
+	if got := strings.TrimSpace(string(env)); got != "GIT_TOKEN="+resolved {
+		t.Errorf("the environment of the run client = %q, want %q", got, "GIT_TOKEN="+resolved)
+	}
+	run := f.call(t, "run")
+	var passed []string
+	for i, arg := range run {
+		if arg == "-e" {
+			passed = append(passed, run[i+1])
+		}
+	}
+	if strings.Join(passed, ",") != "GIT_TOKEN" {
+		t.Errorf("passed variables = %v, want [GIT_TOKEN]", passed)
+	}
+}
+
+// LH-FA-DEV-009: the host value wins over a resolved entry with the same
+// name.
+func TestLauncher_Up_HostValueWinsOverResolvedEntry(t *testing.T) {
+	f := newFakeDocker(t)
+	const host = "host-token-placeh-0123"
+	opts := upOptions()
+	opts.EnvNames = []string{"GIT_TOKEN"}
+	opts.EnvValues = map[string]string{"GIT_TOKEN": "resolved-token-placeh-0123"}
+	if _, err := f.launcher(map[string]string{"GIT_TOKEN": host}).Up(context.Background(), opts); err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	for _, c := range f.calls(t) {
+		for _, arg := range c {
+			if arg == "resolved-token-placeh-0123" {
+				t.Errorf("the resolved entry reached the call although the host sets the name:\n%q", c)
+			}
+		}
+	}
+}
+
+// LH-FA-DEV-009: a name of EnvValues that the host does not set is still a
+// validated name; an invalid one ends the call before any docker call.
+func TestLauncher_Up_InvalidResolvedNameIsRejected(t *testing.T) {
+	f := newFakeDocker(t)
+	opts := upOptions()
+	opts.EnvNames = []string{"GIT_TOKEN"}
+	opts.EnvValues = map[string]string{"GIT_TOKEN=x": "resolved"}
+	_, err := f.launcher(nil).Up(context.Background(), opts)
+	if !errors.Is(err, driven.ErrDevcontainerRuntime) {
+		t.Fatalf("err = %v, want ErrDevcontainerRuntime", err)
+	}
+	if f.call(t, "run") != nil {
+		t.Fatalf("docker run ran: %q", f.call(t, "run"))
+	}
+}
+
+// LH-FA-DEV-010: the identity step runs after the start with `docker exec`,
+// the value in the environment of the client, and the container keeps a
+// value it already carries.
+func TestLauncher_Up_GitIdentityExec(t *testing.T) {
+	f := newFakeDocker(t)
+	opts := upOptions()
+	opts.GitIdentity = driven.DevcontainerGitIdentity{Name: "h-name"}
+	if res, err := f.launcher(nil).Up(context.Background(), opts); err != nil || !res.GitIdentityApplied {
+		t.Fatalf("Up: (%+v, %v), want applied", res, err)
+	}
+	exec := f.call(t, "exec")
+	if exec == nil {
+		t.Fatalf("no exec call\n%q", f.calls(t))
+	}
+	joined := strings.Join(f.flatCalls(t), "\n")
+	if strings.Contains(joined, "h-name") {
+		t.Errorf("the identity value is in a command line:\n%s", joined)
+	}
+	// The exec command keeps the container value: the command reserves it
+	// (`[ -n "$current" ] || ...`).
+	command := strings.Join(exec, " ")
+	if !strings.Contains(command, `[ -n "$current" ] ||`) {
+		t.Errorf("the exec command does not keep the container value: %s", command)
+	}
+	if !strings.Contains(command, "user.name") {
+		t.Errorf("the exec command does not set user.name: %s", command)
+	}
+}
+
+func TestLauncher_Up_GitIdentityEmptySetsNothing(t *testing.T) {
+	f := newFakeDocker(t)
+	opts := upOptions()
+	res, err := f.launcher(nil).Up(context.Background(), opts)
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if res.GitIdentityApplied {
+		t.Fatalf("GitIdentityApplied = true, want false (no identity requested)")
+	}
+	if f.call(t, "exec") != nil {
+		t.Fatalf("an exec ran without an identity request")
+	}
+}
+
+func TestLauncher_Up_GitIdentityFailedExecReportsNotApplied(t *testing.T) {
+	f := newFakeDocker(t)
+	f.flag(t, "git-missing")
+	// every exec of the identity step fails: the shell missing flag covers
+	// both `sh` calls.
+	f.flag(t, "sh-missing")
+	opts := upOptions()
+	opts.GitIdentity = driven.DevcontainerGitIdentity{Name: "h-name", Email: "h-email"}
+	res, err := f.launcher(nil).Up(context.Background(), opts)
+	if err != nil {
+		t.Fatalf("Up (the step is best effort): %v", err)
+	}
+	if res.GitIdentityApplied {
+		t.Fatalf("GitIdentityApplied = true, want false on failed exec")
 	}
 }

@@ -83,6 +83,9 @@ type devcontainerUpData struct {
 	RemoteUser            string `json:"remoteUser"`
 	RemoteWorkspaceFolder string `json:"remoteWorkspaceFolder"`
 	AlreadyRunning        bool   `json:"alreadyRunning"`
+	// The name of the source of the git token of the resolution (LH-FA-
+	// DEV-009); empty with no token or no resolution.
+	GitTokenSource string `json:"gitTokenSource"`
 }
 
 // devcontainerDownData is the typed `data` carrier of `devcontainer down
@@ -418,6 +421,7 @@ func runDevcontainerUp(
 		data := devcontainerUpData{
 			ContainerID: resp.ContainerID, RemoteUser: resp.RemoteUser,
 			RemoteWorkspaceFolder: resp.RemoteWorkspaceFolder, AlreadyRunning: resp.AlreadyRunning,
+			GitTokenSource: resp.GitTokenSource,
 		}
 		diags := mapWarningsToDiagnostics(append(raised, resp.Warnings...))
 		return writeEnvelope(stdout, newDataEnvelope("devcontainer", "up", data, diags, 0))

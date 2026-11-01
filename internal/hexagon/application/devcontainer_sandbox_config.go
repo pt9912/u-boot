@@ -51,6 +51,13 @@ func sandboxCoercers() map[domain.ConfigPathKind]func(string) (any, string, erro
 			}
 			return b, strconv.FormatBool(b), nil
 		},
+		domain.ConfigDevcontainerSandboxHostGitToken: func(raw string) (any, string, error) {
+			b, err := strconv.ParseBool(raw)
+			if err != nil {
+				return nil, "", fmt.Errorf("%w: expects a bool (true/false/1/0), got %q", domain.ErrInvalidSandboxSetting, raw)
+			}
+			return b, strconv.FormatBool(b), nil
+		},
 	}
 }
 
@@ -78,6 +85,7 @@ func sandboxYAMLPaths() map[domain.ConfigPathKind][]string {
 		domain.ConfigDevcontainerSandboxOnUnavailable: {"devcontainer", "sandbox", "onUnavailable"},
 		domain.ConfigDevcontainerSandboxRepository:    {"devcontainer", "sandbox", "repository"},
 		domain.ConfigDevcontainerSandboxEgressEnabled: {"devcontainer", "sandbox", "egress", "enabled"},
+		domain.ConfigDevcontainerSandboxHostGitToken:  {"devcontainer", "sandbox", "hostGitToken"},
 		domain.ConfigDevcontainerResourcesMemory:      {"devcontainer", "resources", "memory"},
 		domain.ConfigDevcontainerResourcesCPUs:        {"devcontainer", "resources", "cpus"},
 	}
@@ -109,12 +117,15 @@ func sandboxConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, bo
 	if dc.Resources != nil {
 		res = *dc.Resources
 	}
-	uid, enabled := "", ""
+	uid, enabled, hostGitToken := "", "", ""
 	if dc.User != nil && dc.User.UID != nil {
 		uid = strconv.Itoa(*dc.User.UID)
 	}
 	if eg.Enabled != nil {
 		enabled = strconv.FormatBool(*eg.Enabled)
+	}
+	if sb.HostGitToken != nil {
+		hostGitToken = strconv.FormatBool(*sb.HostGitToken)
 	}
 	values := map[domain.ConfigPathKind]string{
 		domain.ConfigDevcontainerUserUID:              uid,
@@ -123,6 +134,7 @@ func sandboxConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, bo
 		domain.ConfigDevcontainerSandboxOnUnavailable: sb.OnUnavailable,
 		domain.ConfigDevcontainerSandboxRepository:    sb.Repository,
 		domain.ConfigDevcontainerSandboxEgressEnabled: enabled,
+		domain.ConfigDevcontainerSandboxHostGitToken:  hostGitToken,
 		domain.ConfigDevcontainerSandboxEgressAllow:   strings.Join(eg.Allow, ","),
 		domain.ConfigDevcontainerResourcesMemory:      res.Memory,
 		domain.ConfigDevcontainerResourcesCPUs:        res.CPUs,

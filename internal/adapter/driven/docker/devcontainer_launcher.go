@@ -14,6 +14,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"time"
 
@@ -45,6 +46,13 @@ const (
 	upStdoutLimit = 1 << 20
 	// upStderrTail is the stderr tail kept for error messages.
 	upStderrTail = 4096
+
+	// gitIdentityNameEnv and gitIdentityEmailEnv are the variables the
+	// identity step of [Launcher.Up] hands to `docker exec -e`; the value
+	// travels in the environment of the `docker` client process, the
+	// command line carries the name only.
+	gitIdentityNameEnv  = "UB_GIT_AUTHOR_NAME"
+	gitIdentityEmailEnv = "UB_GIT_AUTHOR_EMAIL"
 )
 
 // helperContextFS is the build context of the helper image: Dockerfile,
@@ -136,7 +144,7 @@ func (l *Launcher) Up(ctx context.Context, opts driven.DevcontainerUpOptions) (d
 			return driven.DevcontainerUpResult{}, rejectedInput(err)
 		}
 	}
-	envNames, err := l.passedEnvNames(opts.EnvNames)
+	envNames, envValues, err := l.passedEnv(opts.EnvNames, opts.EnvValues)
 	if err != nil {
 		return driven.DevcontainerUpResult{}, err
 	}
@@ -147,7 +155,51 @@ func (l *Launcher) Up(ctx context.Context, opts driven.DevcontainerUpOptions) (d
 	if err != nil {
 		return driven.DevcontainerUpResult{}, err
 	}
-	return l.runUp(ctx, image, l.namePrefix+randomSuffix(), envNames, opts)
+	res, err := l.runUp(ctx, image, l.namePrefix+randomSuffix(), envNames, envValues, opts)
+	if err != nil {
+		return res, err
+	}
+	res.GitIdentityApplied = l.applyGitIdentity(ctx, res, opts)
+	return res, nil
+}
+
+// applyGitIdentity sets user.name and user.email in the container home with
+// `git config --global`, with the value reserved for the container: a value
+// that `git config --global` already reports stays (LH-FA-DEV-010). Best
+// effort: a request with at least one value reports its calls in the return
+// value (every call succeeded); a container without `git`, a failed call or
+// a home that takes no write is a false and never fails the start — the
+// caller warns.
+func (l *Launcher) applyGitIdentity(ctx context.Context, res driven.DevcontainerUpResult, opts driven.DevcontainerUpOptions) bool {
+	id := opts.GitIdentity
+	if id.Name == "" && id.Email == "" {
+		return false
+	}
+	applied := true
+	for _, step := range []struct{ key, envName, value string }{
+		{"user.name", gitIdentityNameEnv, id.Name},
+		{"user.email", gitIdentityEmailEnv, id.Email},
+	} {
+		if step.value == "" {
+			continue
+		}
+		cmd := exec.CommandContext(ctx, l.binary, gitIdentityArgs(res, step.envName, step.key)...)
+		cmd.Env = append(os.Environ(), step.envName+"="+step.value)
+		if err := cmd.Run(); err != nil {
+			applied = false
+		}
+	}
+	return applied
+}
+
+// gitIdentityArgs is the argument list of one identity call: the value
+// travels in the environment of the `docker` client process, the command
+// line carries only the variable name.
+func gitIdentityArgs(res driven.DevcontainerUpResult, envName, key string) []string {
+	return []string{"exec", "-u", res.RemoteUser,
+		"-e", envName,
+		res.ContainerID, "sh", "-c",
+		"current=$(git config --global " + key + " || true); [ -n \"$current\" ] || git config --global " + key + " \"$" + envName + "\""}
 }
 
 // Stop implements [driven.DevcontainerLauncher.Stop].
@@ -207,12 +259,21 @@ func (l *Launcher) EnsureImage(ctx context.Context, progress io.Writer) (string,
 // stdout is kept unmasked and only parsed: the result line is data for the
 // caller, and the error texts that quote it are masked. stderr goes through
 // the masking writer before it reaches the tail buffer and the progress.
-func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []string, opts driven.DevcontainerUpOptions) (driven.DevcontainerUpResult, error) {
+// The values travel in the environment of this process: the host values are
+// already there, the resolved ones are appended; the command line carries
+// the names only (runArgs).
+func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []string, envValues map[string]string, opts driven.DevcontainerUpOptions) (driven.DevcontainerUpResult, error) {
 	stdout := &tailBuffer{limit: upStdoutLimit}
 	stderr := &tailBuffer{limit: upStderrTail}
 	values := l.passedValues(envNames)
+	for _, value := range envValues {
+		values = append(values, value)
+	}
 	maskedStderr := newMaskingWriter(io.MultiWriter(stderr, progressSinkOrDiscard(opts.Progress)), values)
 	cmd := exec.CommandContext(ctx, l.binary, runArgs(name, image, envNames, opts)...)
+	if len(envValues) > 0 {
+		cmd.Env = append(os.Environ(), sortedEnvPairs(envValues)...)
+	}
 	cmd.Cancel = func() error { return cmd.Process.Signal(os.Interrupt) }
 	cmd.WaitDelay = l.abortGrace
 	cmd.Stdout = stdout
@@ -252,14 +313,61 @@ func (l *Launcher) removeHelper(ctx context.Context, name string) error {
 	return nil
 }
 
+// sortedEnvPairs returns the name=value pairs of a map sorted by name, for
+// a deterministic environment of a test and a production run.
+func sortedEnvPairs(m map[string]string) []string {
+	names := make([]string, 0, len(m))
+	for name := range m {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	pairs := make([]string, 0, len(m))
+	for _, name := range names {
+		pairs = append(pairs, name+"="+m[name])
+	}
+	return pairs
+}
+
 // passedValues returns the host values of the passed variables; the
-// launcher masks them in everything it forwards or reports.
+// launcher masks them in everything it forwards or reports. The values of
+// the resolved pairs ([Launcher.passedEnv]) join them in the caller.
 func (l *Launcher) passedValues(names []string) []string {
 	values := make([]string, 0, len(names))
 	for _, name := range names {
 		values = append(values, l.getenv(name))
 	}
 	return values
+}
+
+// passedEnv merges the host-set names with the resolved values: a name the
+// host sets travels as before (the value comes from the environment of this
+// process); one of EnvValues travels with its resolved value in the
+// environment of the `docker` client process. Both stay out of every
+// command line; the return carries the names for the `-e` arguments and the
+// values for [Launcher.runUp] and the masking.
+func (l *Launcher) passedEnv(names []string, resolved map[string]string) ([]string, map[string]string, error) {
+	hostNames, err := l.passedEnvNames(names)
+	if err != nil {
+		return nil, nil, err
+	}
+	hostSet := make(map[string]bool, len(hostNames))
+	for _, name := range hostNames {
+		hostSet[name] = true
+	}
+	values := make(map[string]string, len(resolved))
+	out := hostNames
+	for name, value := range resolved {
+		if err := driven.ValidateDevcontainerEnvName(name); err != nil {
+			return nil, nil, rejectedInput(err)
+		}
+		if hostSet[name] {
+			continue
+		}
+		out = append(out, name)
+		values[name] = value
+	}
+	sort.Strings(out[len(hostNames):])
+	return out, values, nil
 }
 
 // rejectedInput classifies a request the launcher refuses before any docker

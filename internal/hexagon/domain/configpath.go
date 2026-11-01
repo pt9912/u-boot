@@ -106,6 +106,12 @@ const (
 	// list-path route in [application.ConfigService].
 	ConfigDevcontainerSandboxEgressAllow
 
+	// ConfigDevcontainerSandboxHostGitToken addresses
+	// `devcontainer.sandbox.hostGitToken` (LH-FA-DEV-009): the opt-in
+	// switch of the token resolution on the host. Read + write; bool;
+	// without the sandbox profile the switch has no effect.
+	ConfigDevcontainerSandboxHostGitToken
+
 	// ConfigDevcontainerResourcesMemory addresses
 	// `devcontainer.resources.memory` (LH-FA-CONF-002). Read + write;
 	// see [NewMemoryLimit].
@@ -237,7 +243,7 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 		}
 	}
 
-	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository,egress.enabled,egress.allow}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
+	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository,egress.enabled,egress.allow,hostGitToken}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
 		ErrInvalidConfigPath, raw)
 }
 
@@ -267,6 +273,7 @@ func scalarConfigPaths() map[string]ConfigPathKind {
 		"devcontainer.sandbox.repository":     ConfigDevcontainerSandboxRepository,
 		"devcontainer.sandbox.egress.enabled": ConfigDevcontainerSandboxEgressEnabled,
 		"devcontainer.sandbox.egress.allow":   ConfigDevcontainerSandboxEgressAllow,
+		"devcontainer.sandbox.hostGitToken":   ConfigDevcontainerSandboxHostGitToken,
 		"devcontainer.resources.memory":       ConfigDevcontainerResourcesMemory,
 		"devcontainer.resources.cpus":         ConfigDevcontainerResourcesCPUs,
 	}

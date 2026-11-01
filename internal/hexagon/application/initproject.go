@@ -106,6 +106,10 @@ type ubootYAMLDevcontainerSandbox struct {
 	Repository string `yaml:"repository,omitempty"`
 	// Egress is the LH-FA-DEV-008 outbound allowlist (V2).
 	Egress *ubootYAMLSandboxEgress `yaml:"egress,omitempty"`
+	// HostGitToken is the LH-FA-DEV-009 opt-in switch of the token
+	// resolution on the host (nil/false = off; without the sandbox
+	// profile it has no effect).
+	HostGitToken *bool `yaml:"hostGitToken,omitempty"`
 }
 
 // ubootYAMLSandboxEgress is the `devcontainer.sandbox.egress:`

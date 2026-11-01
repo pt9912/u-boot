@@ -172,7 +172,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// configuration and u-boot.yaml through the filesystem port and starts,
 	// stops and enters through the launcher; the inspector finds the container
 	// and its status files.
-	devcontainerSvc := application.NewDevcontainerStartService(fsAdapter, yamlAdapter, launcherAdapter, inspectorAdapter, logAdapter)
+	// The host git source (LH-FA-DEV-009, LH-FA-DEV-010): `git` and `gh` of
+	// the host, read only by `devcontainer up` and `shell` — token sources
+	// and the two identity keys, no other host state.
+	gitHostSource := git.NewHostSource()
+	devcontainerSvc := application.NewDevcontainerStartService(fsAdapter, yamlAdapter, launcherAdapter, inspectorAdapter, logAdapter).WithHostGitSource(gitHostSource)
 
 	// Driving adapter (CLI).
 	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, removeSvc, logsSvc, cli.WithEgressListUseCase(egressListSvc), cli.WithDevcontainerUseCase(devcontainerSvc), cli.WithLogLevel(logLevel))

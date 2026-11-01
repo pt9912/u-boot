@@ -568,3 +568,38 @@ func TestLauncher_Shell_RejectsUnsafeInput(t *testing.T) {
 		})
 	}
 }
+
+// LH-FA-DEV-009 / LH-FA-DEV-010: the session receives a resolved value in
+// the environment of the client; the command line carries the name only.
+func TestLauncher_Shell_ResolvedEnvValueTravelsInTheClientEnvironment(t *testing.T) {
+	f := newFakeDocker(t)
+	const resolved = "resolved-token-placeh-0123"
+	err := f.launcher(nil).Shell(context.Background(), shellOptions(func(o *driven.DevcontainerShellOptions) {
+		o.EnvNames = []string{"GIT_TOKEN"}
+		o.EnvValues = map[string]string{"GIT_TOKEN": resolved}
+	}))
+	if err != nil {
+		t.Fatalf("Shell: %v", err)
+	}
+	joined := strings.Join(f.flatCalls(t), "\n")
+	if strings.Contains(joined, resolved) {
+		t.Errorf("the resolved value is in a command line:\n%s", joined)
+	}
+	env, err := os.ReadFile(filepath.Join(f.dir, "session-env.txt"))
+	if err != nil {
+		t.Fatalf("session-env.txt: %v", err)
+	}
+	if got := strings.TrimSpace(string(env)); got != "GIT_TOKEN="+resolved {
+		t.Errorf("the environment of the exec client = %q, want %q", got, "GIT_TOKEN="+resolved)
+	}
+	session := f.execCalls(t)[len(f.execCalls(t))-1]
+	var passed []string
+	for i, arg := range session {
+		if arg == "-e" {
+			passed = append(passed, session[i+1])
+		}
+	}
+	if strings.Join(passed, ",") != "GIT_TOKEN" {
+		t.Errorf("passed variables of the session = %v, want [GIT_TOKEN]", passed)
+	}
+}

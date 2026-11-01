@@ -49,9 +49,19 @@ type DevcontainerUpResponse struct {
 	// RemoteWorkspaceFolder is the workspace path inside the container.
 	RemoteWorkspaceFolder string
 	// Warnings holds the degradation fallbacks the container reports after
-	// the start (LH-FA-DEV-007); it does not hold the disclosure that
-	// [DevcontainerUpRequest.OnWarning] receives.
+	// the start (LH-FA-DEV-007) and the findings of the host git resolution
+	// (LH-FA-DEV-009, LH-FA-DEV-010: the missing token source, the missing
+	// identity, a failed identity step); it does not hold the disclosure
+	// that [DevcontainerUpRequest.OnWarning] receives.
 	Warnings []WarningEntry
+	// GitTokenSource names the source of the git token this resolution
+	// handed to the container (LH-FA-DEV-009): "GIT_TOKEN" for the
+	// environment variable of the host, "gh auth token" for the gh session.
+	// It is empty when no token flows — no reference in the configuration,
+	// the switch off, or no source found (the response carries a warning
+	// about the latter). The caller prints the name of the source, never a
+	// value (LH-FA-DEV-009).
+	GitTokenSource string
 	// AlreadyRunning is true when the container of the project ran before the
 	// call and the devcontainer CLI reports the same ID (ADR-0030 decision 2).
 	// It is false with [DevcontainerUpRequest.Recreate], for a container that
