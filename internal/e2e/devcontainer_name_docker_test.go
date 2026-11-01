@@ -113,7 +113,7 @@ func dcProjectName(t *testing.T, dir string) string {
 		t.Fatal(err)
 	}
 	for _, line := range strings.Split(string(body), "\n") {
-		if v, ok := strings.Cut(strings.TrimSpace(line), "name: "); ok {
+		if v, ok := strings.CutPrefix(strings.TrimSpace(line), "name: "); ok {
 			return strings.TrimSpace(v)
 		}
 	}
