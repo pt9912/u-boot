@@ -115,7 +115,7 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt ([`AGENTS.md
 | `internal/adapter/driving/cli/export_test.go` | update (`HelpTextsForTest` für Wächter A) | Test-Brücke |
 | `internal/adapter/driving/cli/remove.go`, `internal/hexagon/application/removeservice.go` | update (Hilfe, Meldungen, Kommentare zu `--purge`) | Inventur C und D; Kommentare auf den Ist-Zustand (Review H1) |
 | `.devcontainer/Dockerfile`, `.devcontainer/docker-init.sh` | update (erzeugte Dateien des Repos, Kommentare wie die Vorlagen) | Review L1 |
-| `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/open/slice-v1-devcontainer-ressourcenlimits.md` | update (Zeiger auf den Slice in `in-progress/`; Roadmap „Ohne Welle in Arbeit“) | Lifecycle-Nachzug, `docs-check` |
+| `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/open/slice-v1-devcontainer-ressourcenlimits.md`, `docs/plan/planning/open/slice-v1-devcontainer-git-identitaet.md` | update (Zeiger auf den Slice in `in-progress/`; Roadmap „Ohne Welle in Arbeit“) | Lifecycle-Nachzug, `docs-check` |
 | `spec/spezifikation.md` | update (Weg A) | Zeilen 887, 916 (Warnzeile) |
 | `CHANGELOG.md` | update (`[Unreleased]` `### Changed`) | ein englischer Satz, siehe DoD |
 | `README.md`, `README.de.md`, `docs/user/` | unverändert (belegt) | Suche am 2026-11-01 nach `LH-`, `slice-` und `Warning (LH` in `docs/user`, `README.md`, `README.de.md`: kein Treffer; wörtliche Hilfe-Zitate nicht gefunden |
