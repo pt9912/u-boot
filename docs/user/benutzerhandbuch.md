@@ -2282,8 +2282,8 @@ verschachteltem Podman) `<projekt>-containers-${devcontainerId}` beziehungsweise
 verschachteltem Docker) `<projekt>-docker-${devcontainerId}`, mit dem Feature `ollama` zusätzlich
 `<projekt>-ollama-${devcontainerId}`. Das
 Dev-Containers-Werkzeug bildet `devcontainerId` aus dem Projektordner. Mit `--instance <Name>`
-fließt zusätzlich der Name der Instanz ein: Jede Instanz hat damit eigene Volumes, der Container
-ohne Instanz behält seine. Wie Sie mehrere Instanzen desselben Ordners starten, steht unter
+fließt zusätzlich der Name der Instanz ein: Die Namen der Volumes unterscheiden sich damit
+von Instanz zu Instanz, der Container ohne Instanz behält seine. Wie Sie mehrere Instanzen desselben Ordners starten, steht unter
 „Mehrere Devcontainer je Projekt (Instanzen)“.
 
 - Die Compose-Ports (`u-boot up`) mehrerer Instanzen kollidieren weiterhin.
