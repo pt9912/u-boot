@@ -168,7 +168,8 @@ Three forms:
 Writable paths:
 
   project.name                 # the project identifier (lowercase letters,
-                               # digits and "-", starting with a letter,
+                               # digits and "-", starting with a letter
+                               # and ending with a letter or digit,
                                # at most 63 characters)
   devcontainer.enabled         # bool
 

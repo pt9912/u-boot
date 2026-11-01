@@ -57,7 +57,7 @@ type removeFlags struct {
 //     Symmetrie, plus Defense gegen Default-`""`-Drift in
 //     künftigen [domain.ServiceState]-Erweiterungen.
 //   - VolumesPurged: *bool — `false` ist ein valider Success-Wert
-//     (v0.3.0 deferred Volumes); plain `bool`+omitempty würde den
+//     (ohne entfernte Volumes); plain `bool`+omitempty würde den
 //     Error-Pfad-Zero und Success-Pfad-false identisch droppen
 //     (Pattern analog [cliJSONEnvelope.DryRun]/`Diff` in
 //     jsonenvelope.go:34-37).
@@ -193,7 +193,7 @@ func removeArgsBase(cmd *cobra.Command, args []string) error {
 // Five output paths (slice-v1-cli-json-dry-run-remove T5):
 //
 //   - Human (no --json), no preview-flag → [printRemoveSummary]
-//     plus the today's `--purge`-deferred-volumes WARNING on errOut.
+//     plus, when `--purge` removed no volume, the WARNING on errOut.
 //   - Human (no --json) with --diff → [writeDiff] for the unified
 //     diff string on stdout, then [printRemoveSummary]; --purge
 //     WARNING-prosa stays on errOut (T0-(c) R2-LOW-F6 stderr-
@@ -439,24 +439,15 @@ func mapRemoveErrorToDiagnostic(err error) diagnosticItem {
 //     "Removed service <name>." + list of changed paths; under
 //     `--dry-run` "Would remove service <name>." + "Would change:".
 //
-// When `--purge` was requested AND the response shows VolumesPurged=
-// false (always true in v0.3.0 — actual volume removal is deferred)
-// AND we are NOT in dry-run preview, a WARNING block is appended to
-// errOut (review-followup F4: stderr keeps stdout clean for future
-// --json consumers). The wording (review-followup F5) is explicit
-// about what was NOT done so users don't trust the prior NOTE-as-
-// aside framing.
+// When `--purge` was requested, the response shows VolumesPurged=false
+// and no removal was attempted (PurgeAttempted=false, which is the case
+// without a wired Docker engine), and we are NOT in dry-run preview, a
+// WARNING block is appended to errOut (stderr keeps stdout clean for
+// --json consumers). The wording is explicit about what was NOT done.
 //
-// Dry-Run-Suppression (slice-v1-cli-json-dry-run-remove T7 R14-
-// HIGH-2 Fix): in `PreviewDryRun` läuft die Use-Case ohne Gate-Aufruf
-// und ohne tatsächliche Mutation (Plan T0-(h)(a) Gate-Skip). Ohne
-// Suppression würde die WARNING-Prosa suggerieren "deferred work" —
-// aber im Dry-Run wurde gar nichts versucht. Die Prosa wäre damit
-// semantisch falsch ("würde-deferred" wäre korrekt, "ist-deferred"
-// ist es nicht). Fix: WARN-Block überspringen wenn
-// `previewMode == PreviewDryRun`. PreviewAndApply behält die WARN,
-// weil der Gate dann läuft und die Mutation wirklich stattfindet —
-// hier ist `VolumesPurged: false` der bewusst-deferred Status.
+// In `PreviewDryRun` the use case runs without the confirmation gate and
+// without mutation (Plan T0-(h)(a) gate skip), so nothing was attempted
+// and the block is skipped: `previewMode == PreviewDryRun`.
 //
 // JSON-mode bypasses this helper entirely (runRemove returns
 // directly from `writeRemoveJSON`); the WARNING migrates into the

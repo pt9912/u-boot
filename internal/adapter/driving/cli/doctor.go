@@ -63,8 +63,8 @@ func newDoctorCommand(a *App) *cobra.Command {
 		Use:   "doctor",
 		Short: "Diagnose the local environment for u-boot prerequisites",
 		Long: `Run a battery of checks against the current directory and the local
-environment, classify each finding as ok / warn / error, and exit with code 11 when any error is present
-(or any warn, when --strict is set).
+environment, classify each finding as ok / warn / error, and exit with
+code 11 when any error is present (or any warn, when --strict is set).
 
 Default checks:
   - write-permissions in the current directory

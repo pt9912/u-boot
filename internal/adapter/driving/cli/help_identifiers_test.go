@@ -23,7 +23,7 @@ func identifierPatterns() []*regexp.Regexp {
 	}
 }
 
-// germanWords are German words that have crept into English help text.
+// germanWords are German words that do not belong in English help text.
 var germanWords = regexp.MustCompile(`(?i)\b(voll-schema|fachlich\w*)\b`)
 
 // announcementPatterns match announcements and history. Help text and

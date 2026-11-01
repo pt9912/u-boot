@@ -604,7 +604,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 			ID:       checkIDUbootYaml,
 			Severity: domain.SeverityError,
 			Message:  fmt.Sprintf("u-boot.yaml project.name %q is invalid: %s.", cfg.Project.Name, err.Error()),
-			Hint:     "Use a lowercase name like `my-service`: lowercase letters, digits and `-`, starting with a letter.",
+			Hint:     "Use a lowercase name like `my-service`: lowercase letters, digits and `-`, starting with a letter and ending with a letter or digit.",
 		}
 	}
 	// Audit-Followup A1: LH-FA-DEV-003 schema validation of the

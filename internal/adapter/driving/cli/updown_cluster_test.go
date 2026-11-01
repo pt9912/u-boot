@@ -61,7 +61,7 @@ func TestUp_RecreateWarningsRendered(t *testing.T) {
 	if err := newAppWithUp(uc, cli.WithGetwd(clusterGetwd)).Execute(context.Background(), []string{"up"}, &stdout, &stderr); err != nil {
 		t.Fatalf("human: %v", err)
 	}
-	if !strings.Contains(stdout.String(), "Warning:") {
+	if !strings.Contains(stdout.String(), `Warning: container "x" will be recreated`) {
 		t.Errorf("human output lacks the recreate warning:\n%s", stdout.String())
 	}
 	stdout.Reset()

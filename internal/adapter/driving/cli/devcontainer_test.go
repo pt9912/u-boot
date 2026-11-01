@@ -255,7 +255,7 @@ func TestExecute_DevcontainerUp_Quiet(t *testing.T) {
 			t.Fatal(err)
 		}
 		if errOut != "" || strings.Contains(out, "Devcontainer started") ||
-			!strings.Contains(out, "Warning:") || !strings.Contains(out, "Warning:") {
+			!strings.Contains(out, "Warning: this command mounts the host container-engine socket") || !strings.Contains(out, "Warning: state of the devcontainer container at its last start") {
 			t.Errorf("stdout=%q stderr=%q: want both warnings, no result line, no progress", out, errOut)
 		}
 	})
@@ -273,7 +273,7 @@ func TestExecute_DevcontainerUp_Quiet(t *testing.T) {
 		uc := startedUseCase()
 		uc.upErr = fmt.Errorf("devcontainer up failed (exit status 1: boom): %w", driven.ErrDevcontainerRuntime)
 		out, errOut, err := quietRun(t, newAppWithDevcontainer(uc), "--quiet", "devcontainer", "up")
-		if cli.ExitCode(err) != 12 || errOut != "Step 1/2 : FROM base\n" || !strings.Contains(out, "Warning:") {
+		if cli.ExitCode(err) != 12 || errOut != "Step 1/2 : FROM base\n" || !strings.Contains(out, "Warning: this command mounts the host container-engine socket") {
 			t.Errorf("err=%v exit=%d stdout=%q stderr=%q: want exit 12, the held progress and the disclosure", err, cli.ExitCode(err), out, errOut)
 		}
 	})
@@ -355,9 +355,9 @@ func TestExecute_DevcontainerUp_AlreadyRunning(t *testing.T) {
 		}
 		lines := strings.Split(strings.TrimSpace(out), "\n")
 		if len(lines) != 3 ||
-			!strings.HasPrefix(lines[0], "Warning:") ||
+			!strings.HasPrefix(lines[0], "Warning: this command mounts the host container-engine socket") ||
 			lines[1] != "Devcontainer already running: container 0123456789ab, remote user vscode, workspace /workspaces/demo" ||
-			!strings.HasPrefix(lines[2], "Warning:") {
+			!strings.HasPrefix(lines[2], "Warning: state of the devcontainer container at its last start") {
 			t.Errorf("stdout lines (disclosure, result, fallback):\n%s", out)
 		}
 		if strings.Contains(out, "Devcontainer started") {

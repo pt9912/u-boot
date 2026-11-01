@@ -232,8 +232,8 @@ func TestExecute_DevcontainerShell_Quiet(t *testing.T) {
 		t.Errorf("session stdout: quiet %q, default %q, want the same line", quietOut, loudOut)
 	}
 	if len(quietErr) != 3 ||
-		!strings.HasPrefix(quietErr[0], "Warning:") ||
-		!strings.HasPrefix(quietErr[1], "Warning:") ||
+		!strings.HasPrefix(quietErr[0], "Warning: this command mounts the host container-engine socket") ||
+		!strings.HasPrefix(quietErr[1], "Warning: state of the devcontainer container at its last start") ||
 		quietErr[2] != "line of the session on stderr" {
 		t.Errorf("--quiet stderr = %q, want the disclosure, the fallback warning and the session line", quietErr)
 	}
@@ -258,7 +258,7 @@ func TestExecute_DevcontainerShell_Quiet(t *testing.T) {
 		uc := startedUseCase()
 		uc.shellErr = fmt.Errorf("devcontainer up failed (exit status 1: boom): %w", driven.ErrDevcontainerRuntime)
 		out, errOut, err := shellRun(t, uc, "--quiet", "devcontainer", "shell")
-		if cli.ExitCode(err) != 12 || out != "" || !strings.Contains(errOut, "Step 1/2 : FROM base\n") || !strings.Contains(errOut, "Warning:") {
+		if cli.ExitCode(err) != 12 || out != "" || !strings.Contains(errOut, "Step 1/2 : FROM base\n") || !strings.Contains(errOut, "Warning: this command mounts the host container-engine socket") {
 			t.Errorf("exit=%d stdout=%q stderr=%q: want exit 12, the held progress and the disclosure", cli.ExitCode(err), out, errOut)
 		}
 	})
