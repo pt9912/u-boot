@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-31.
+**Status:** Aktiv. **Letzte Änderung:** 2026-11-01.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**Mehrere Devcontainer je Projekt, Code (ohne Welle-Datei: `--instance` an `up`, `down` und `shell` über ein zweites Id-Label; dritter von drei Slices)** — Slice: [`slice-v1-devcontainer-instanz-label`](../done/slice-v1-devcontainer-instanz-label.md) (in Arbeit).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
