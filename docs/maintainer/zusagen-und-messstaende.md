@@ -175,8 +175,11 @@ Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der M
   mehr als vier, `nestedRuntime: podman`, Instanzen ohne Grenze, das Verhalten unter Last, andere Hosts, die Isolation im Standardprofil.
 - **Fundstelle:** Messwerte (Container, Labels, Volume-Namen, Inhaltsprobe, `up` ohne Flag):
   [`slice-v1-devcontainer-instanz-messung`](../messungen/slice-v1-devcontainer-instanz-messung/README.md) (Docker 29.9.2,
-  Dev-Container-CLI 0.89.0). Das Verhalten von `u-boot` selbst prüft der Docker-Test `TestDevcontainerInstance_Docker_FourInstancesAreIsolated`
-  (vier Instanzen, Sandbox-Profil, `nestedRuntime: docker`, `ollama`, Grenze je Instanz zurückgelesen), im Standardprofil
+  Dev-Container-CLI 0.89.0). Das Verhalten von `u-boot` selbst prüft der Docker-Test `TestDevcontainerInstance_Docker_TwoInstancesAreIsolated`
+  (zwei Instanzen und der Container ohne Instanz, Sandbox-Profil mit Standard-Einstellungen: ein Workspace-Volume je Container;
+  ohne `nestedRuntime`, ohne `ollama`, ohne Grenze, ohne Prüfung der Hostressourcen). Die Volumes für Docker-Speicher und Modelle,
+  die Grenze von einer CPU und 3 GiB und vier Instanzen läuft die Suite nicht; sie stehen nur in der Messung, die Mount-Texte
+  der Volumes in Unit-Tests. Im Standardprofil
   `TestDevcontainerInstance_Docker_StandardProfileSharesTheProjectFolder` (drei Container).
 - **Handbuch:** Abschnitt 4.9 nennt keine Zahl gleichzeitiger Instanzen und keine Grenze je Instanz; beides steht nur im Lastenheft und in diesem Abschnitt.
 
