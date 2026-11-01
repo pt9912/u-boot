@@ -53,8 +53,11 @@ führt die Dateinamen mit `~`. Stabile Tags haben nur eine Schreibweise.
 
 ## 3. Vorbereitung (ein Commit auf `main`)
 
-Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
-[`slice-v1-release-cut-v0.17.0`](../plan/planning/done/slice-v1-release-cut-v0.17.0.md)):
+Der Cut ist ein Release-Cut-Slice als eigenes Arbeitsartefakt, geführt wie jeder
+Slice (`open/` → `next/` → `in-progress/`, nach dem Tag nach `done/`); seine
+**Form** kommt aus der Skelett-Vorlage
+[`.harness/baseline/v6.18.1/templates/docs/plan/planning/slice.template.md`](../../.harness/baseline/v6.18.1/templates/docs/plan/planning/slice.template.md),
+der **Ablauf** steht vollständig in diesem Dokument:
 
 1. **CHANGELOG** (`CHANGELOG.md`): `## [Unreleased]` bleibt als leerer Anker; der bisherige
    Inhalt wandert unter `## [x.y.z] - <Tag-Datum>` mit kurzem Lead-Absatz. Compare-Links am
@@ -83,6 +86,10 @@ make gates            # lint + test + coverage-gate + docs-check + baseline-veri
 make ci               # gates + govulncheck + image-scan (Trivy HIGH/CRITICAL)
 make test-docker      # Integrationstests gegen die echte Docker Engine
 make fullbuild        # ci + Runtime-Image-Build
+make build VERSION=X.Y.Z   # Gegenprobe zu den Versionszeilen (schritt 2): das Image meldet
+                           # X.Y.Z mit `docker run --rm u-boot:latest --version` und im
+                           # OCI-Label org.opencontainers.image.version; der Standardbau
+                           # meldet X.Y.Z-dev. lokal, nicht gepusht
 ```
 
 **Trockenlauf des Tap-Pfads** (vor dem stabilen Tag, ohne Netzzugriff — Stellvertreter für `curl` und `git` im `PATH`, Container mit
