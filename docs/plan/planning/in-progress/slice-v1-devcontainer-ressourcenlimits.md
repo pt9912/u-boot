@@ -17,7 +17,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-005`](../../../../spec/spezifikation.md#spec-005--schema-der-projektkonfiguration-u-bootyaml) (Schema von `u-boot.yaml`) · [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config) (Tabelle der erlaubten Pfade und Schreibpipeline) · je nach Weg [`SPEC-052`](../../../../spec/spezifikation.md#spec-052--feature-ollama-host-im-devcontainer-eintragstyp-container-option-meldung-und-grenzen) (`runArgs`-Eintrag von `ollama-host`; nicht gelesen, prüfen).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-31.
 
@@ -176,7 +176,15 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 **einen** Ausgang, und kein Slice geht nach `done/`, während eines ohne Ausgang
 dasteht.
 
-**Entscheidungen, die beim Projektinhaber liegen** (Weg A ist entschieden; die folgenden nicht):
+**Entscheidungen des Projektinhabers vom 2026-11-01** (Weg A; Punkte 1, 3, 4, 5, 7 und 8 entschieden, 2 und 6 offen):
+
+- **Zu 1:** eigener Sentinel mit eigenem Diagnose-Code, Exit-Code `10`; `ErrInvalidSandboxSetting` bleibt auf Sandbox-Werte beschränkt.
+- **Zu 3:** der Lastenheft-CR entsteht in diesem Slice als erster Commit vor dem Code; der Alt/Neu-Vorschlag unten ist freigegeben, das Werteformat folgt nach Messung 6.
+- **Zu 4 und 5:** keine Ausweisung als Sicherheitslockerung (ein Test pinnt das), kein Hinweis bei bestehendem Container.
+- **Zu 7 und 8:** keine ADR; Release: nächster Minor, `CHANGELOG.md` *Added*.
+- **Zu 6:** steht mit dem Slice [`slice-v1-hilfetexte-ohne-kennungen`](../open/slice-v1-hilfetexte-ohne-kennungen.md) unverändert offen (kein Widerspruch, gleiche Zeilen).
+
+**Verbleibende Fragen und ursprüngliche Fassung:**
 
 1. **Sentinel und Diagnose-Code** der neuen Felder (Risiko 1 unten): `ErrInvalidSandboxSetting` mit Code `LH-FA-DEV-006` mitnutzen (Doc-Kommentar in `internal/hexagon/domain/sandbox.go`, Zeilen 11 bis 21, um die Felder ergänzen) oder eigener Sentinel mit eigenem Code (Exit-Code beide `10`); der Code ist Vertrag (`cli-json-contract.md`). <!-- d-check:ignore (Code-Wert als Zitat) -->
 2. **Werteformat** (Vorschlag im Abschnitt *Werteformat* in §1): Einheiten, Großschreibung, Null, Untergrenze; die Messung 6 liefert die Grundlage, die Freigabe gehört dem Projektinhaber.
