@@ -9,7 +9,8 @@ import (
 
 // ErrInvalidResourceLimit signals a value of `devcontainer.resources.memory`
 // or `devcontainer.resources.cpus` outside its character set
-// (LH-FA-CONF-002). The CLI maps it to exit code 10.
+// (LH-FA-CONF-002). `config set` wraps it in ErrConfigValueInvalid and the
+// CLI lists it in the exit-code-10 class itself.
 var ErrInvalidResourceLimit = errors.New("invalid resource limit")
 
 // The values land verbatim in a JSON string of the generated

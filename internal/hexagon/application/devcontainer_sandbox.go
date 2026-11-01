@@ -69,7 +69,8 @@ func validateDevcontainerSandbox(dc *ubootYAMLDevcontainer) error {
 
 // validateDevcontainerResources checks `devcontainer.resources.*`
 // (LH-FA-CONF-002). Empty values are valid (unset). Errors wrap
-// [domain.ErrInvalidResourceLimit]; callers classify them as exit 10.
+// [domain.ErrInvalidResourceLimit]; the load paths wrap them in their own
+// sentinel, which carries exit 10.
 func validateDevcontainerResources(res *ubootYAMLDevcontainerResources) error {
 	if res == nil {
 		return nil

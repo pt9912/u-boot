@@ -751,10 +751,12 @@ ergeben sich aus den aktivierten Diensten.
   Grenzen Ihrer Docker-Engine nicht (Mindestwert für den Speicher, Obergrenze
   für die CPUs nach der Zahl der CPUs des Hosts); die Engine kann einen Wert
   abweisen, den `u-boot` annimmt. Die Grenze gilt für jeden Container einzeln, nicht
-  für das Projekt, und erst für einen neu erzeugten Container (`u-boot devcontainer
-  up --recreate`). Getestet ist, dass die Grenze im gestarteten Container ankommt,
-  auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine, im Standardprofil und
-  im Sandbox-Profil mit `nestedRuntime: docker`. Nicht zugesagt sind die Wirkung auf
+  für das Projekt. Ein bereits laufender Container behält seine Grenze vermutlich, bis
+  Sie ihn neu erzeugen (`u-boot devcontainer up --recreate`); das ist nicht gemessen.
+  Zugesagt ist die Erzeugung der Optionen. Dass die Grenze im gestarteten Container
+  ankommt, belegen Tests auf einem Linux-Host (`amd64`) mit lokaler, nicht
+  verschachtelter Docker-Engine, im Standardprofil und im Sandbox-Profil mit
+  `nestedRuntime: docker`. Nicht zugesagt sind die Wirkung auf
   das verschachtelte Docker, das Verhalten bei einem zu kleinen Limit, andere Hosts
   und Engines (Docker Desktop, Colima, Podman) und die Summe mehrerer Instanzen.
 - Das Standardprofil bindet den Projektordner ein, aber keine

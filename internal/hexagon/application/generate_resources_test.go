@@ -88,6 +88,10 @@ func TestGenerateDevcontainer_Resources_AbsentIsByteIdentical(t *testing.T) {
 		if base != empty {
 			t.Errorf("empty resources block changes the file for head %q", head)
 		}
+		blank := generatedFile(runHost(t, head+"  resources:\n    memory: \"\"\n    cpus: \"\"\n", false).fs, ".devcontainer/devcontainer.json")
+		if base != blank {
+			t.Errorf("empty-string resources change the file for head %q", head)
+		}
 		if strings.Contains(base, "--memory") || strings.Contains(base, "--cpus") {
 			t.Errorf("limit option without the keys for head %q:\n%s", head, base)
 		}
