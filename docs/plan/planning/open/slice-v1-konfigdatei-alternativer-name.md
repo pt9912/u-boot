@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** Vorschlag Release `v0.17.0` (Roadmap *Nächste Wellen*): Der Slice ändert einen Vertrag des Produkts (Name der Konfigurationsdatei) und gehört damit in ein Release. Die Zuordnung entscheidet der Projektinhaber; bis dahin ist er ohne Welle geführt. Anlass: Wunsch des Projektinhabers vom 2026-10-31, die Datei wie `.d-check.yml` als `.u-boot.yml` schreiben zu können.
+**Welle:** ohne Welle. `v0.17.0` ist veröffentlicht und enthält diesen Slice nicht; die Roadmap führt keine Zeile für ihn. Der Slice ändert einen Vertrag des Produkts (Name der Konfigurationsdatei) und gehört damit in ein Release. Die Zuordnung entscheidet der Projektinhaber. Anlass: Wunsch des Projektinhabers vom 2026-10-31, die Datei wie `.d-check.yml` als `.u-boot.yml` schreiben zu können.
 
 **Bezug:** [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) (Konfigurationsdatei), [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) (Erkennung eines bestehenden Projekts, harte Marker), [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) (Überschreibschutz). Voraussetzung: [`slice-v1-konfigdatei-name-als-konstante`](../done/slice-v1-konfigdatei-name-als-konstante.md) (die eine Stelle für den Namen).
 

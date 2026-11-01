@@ -2281,11 +2281,11 @@ Die Volumes heißen `<projekt>-workspace-${devcontainerId}` und (mit
 verschachteltem Podman) `<projekt>-containers-${devcontainerId}` beziehungsweise (mit
 verschachteltem Docker) `<projekt>-docker-${devcontainerId}`, mit dem Feature `ollama` zusätzlich
 `<projekt>-ollama-${devcontainerId}`. Das
-Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
+Dev-Containers-Werkzeug bildet `devcontainerId` aus dem Projektordner. Mit `--instance <Name>`
+fließt zusätzlich der Name der Instanz ein: Jede Instanz hat damit eigene Volumes, der Container
+ohne Instanz behält seine. Wie Sie mehrere Instanzen desselben Ordners starten, steht unter
+„Mehrere Devcontainer je Projekt (Instanzen)“.
 
-- Parallele Instanzen desselben Projekts starten Sie aus **getrennten Ordnern**
-  (Klone oder `git worktree`); jede Instanz hat eigene Volumes.
-- Derselbe Ordner bleibt eine Instanz.
 - Die Compose-Ports (`u-boot up`) mehrerer Instanzen kollidieren weiterhin.
 - Alte Volumes `<projekt>-workspace` und `<projekt>-containers` aus früheren
   Entwicklungsständen bleiben verwaist; entfernen Sie sie mit `docker volume rm`.
