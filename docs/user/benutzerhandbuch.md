@@ -740,6 +740,23 @@ ergeben sich aus den aktivierten Diensten.
   abgelehnt (Exit-Code 10). Bei einem anderen Wert als 1000 erzeugt `u-boot` ein
   Build-Argument `USER_UID` und einen `usermod`-Schritt im Dockerfile; das gilt
   für beide Profile.
+- Arbeitsspeicher und CPU des Containers begrenzen Sie mit
+  `u-boot config set devcontainer.resources.memory 3g` und
+  `u-boot config set devcontainer.resources.cpus 1.5`. `u-boot generate devcontainer`
+  trägt dann `--memory=3g` und `--cpus=1.5` in `runArgs` der `devcontainer.json`
+  ein, in beiden Profilen; ohne diese Schlüssel bleibt die Datei unverändert.
+  Zulässig sind für `memory` eine positive ganze Zahl mit optionaler Einheit
+  `b`, `k`, `m` oder `g` (klein geschrieben) und für `cpus` eine positive
+  Dezimalzahl mit Punkt; alles andere endet mit Exit-Code 10. `u-boot` kennt die
+  Grenzen Ihrer Docker-Engine nicht (Mindestwert für den Speicher, Obergrenze
+  für die CPUs nach der Zahl der CPUs des Hosts); die Engine kann einen Wert
+  abweisen, den `u-boot` annimmt. Die Grenze gilt für jeden Container einzeln, nicht
+  für das Projekt, und erst für einen neu erzeugten Container (`u-boot devcontainer
+  up --recreate`). Getestet ist, dass die Grenze im gestarteten Container ankommt,
+  auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine, im Standardprofil und
+  im Sandbox-Profil mit `nestedRuntime: docker`. Nicht zugesagt sind die Wirkung auf
+  das verschachtelte Docker, das Verhalten bei einem zu kleinen Limit, andere Hosts
+  und Engines (Docker Desktop, Colima, Podman) und die Summe mehrerer Instanzen.
 - Das Standardprofil bindet den Projektordner ein, aber keine
   Geheimnis-Verzeichnisse wie `~/.ssh` oder `~/.aws`. Das Docker-Socket des
   Hosts bindet es ein, wenn ein Feature es tut, zum Beispiel `docker-cli`
@@ -2452,6 +2469,8 @@ mit `--json` einen strukturierten Hinweis in `data.hint` (`command`, `action`,
 | `devcontainer.enabled` | Devcontainer-Unterstützung | `true` / `false` | ja |
 | `devcontainer.profile` | Devcontainer-Profil | `sandbox` | ja |
 | `devcontainer.user.uid` | Benutzer-ID im Container | 1 bis 65535 (Standard 1000) | ja |
+| `devcontainer.resources.memory` | Arbeitsspeicher-Grenze des Containers (`--memory`) | positive ganze Zahl, optional `b`, `k`, `m` oder `g`, zum Beispiel `512m`, `3g` | ja |
+| `devcontainer.resources.cpus` | CPU-Grenze des Containers (`--cpus`) | positive Dezimalzahl mit Punkt, zum Beispiel `1.5` | ja |
 | `devcontainer.features.<name>.enabled` | Feature aktiv | `true` / `false` | ja |
 | `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `ollama-host`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`) | ja |
 | `devcontainer.features.<name>.source` | externe Feature-Quelle | URL aus der Freigabeliste | ja |
@@ -2912,6 +2931,8 @@ Die Werte `CHANGEME_…` in `.env.example` sind Platzhalter. Ersetzen Sie sie in
 | Projektname | bis 63 Zeichen: `a–z`, `0–9`, `-`; Anfang Buchstabe, Ende Buchstabe oder Ziffer |
 | `up --timeout` | Standard 60 Sekunden; `0` = nicht warten; negativ ist ungültig |
 | `devcontainer.user.uid` | 1 bis 65535, Standard 1000 |
+| `devcontainer.resources.memory` | positive ganze Zahl, optional `b`, `k`, `m`, `g` (klein), nicht `0` |
+| `devcontainer.resources.cpus` | positive Dezimalzahl mit Punkt, nicht `0` |
 | Sicherungsdateien (`--backup`) | `<name>.bak`, `<name>.bak.1`, `<name>.bak.2`, … |
 
 ### JSON-Ausgabe

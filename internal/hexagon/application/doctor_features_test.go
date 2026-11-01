@@ -57,6 +57,29 @@ devcontainer:
 	}
 }
 
+// TestDoctor_UbootYaml_ErrorOnBadResourceLimit pins that an invalid
+// `devcontainer.resources.*` value (LH-FA-CONF-002) surfaces on the
+// existing `uboot.yaml.valid` check, without a check of its own.
+func TestDoctor_UbootYaml_ErrorOnBadResourceLimit(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDoctorUbootYAMLFeatures(t, fs, `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  resources:
+    memory: 3G
+`)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityError || !strings.Contains(d.Message, "devcontainer.resources.memory") {
+		t.Errorf("diagnostic = %v %q, want Error naming devcontainer.resources.memory", d.Severity, d.Message)
+	}
+}
+
 // TestDoctor_FeaturesAllowlist_OKWhenNoUbootYaml pins the
 // skip-on-missing-config branch: without u-boot.yaml the check
 // keeps quiet (primary file-presence diagnostics live in

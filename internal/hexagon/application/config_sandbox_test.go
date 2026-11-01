@@ -118,6 +118,8 @@ func TestConfigGet_SandboxKeys_InvalidOnLoad(t *testing.T) {
 		"profile":   "devcontainer:\n  enabled: true\n  profile: paranoid\n",
 		"nested":    "devcontainer:\n  enabled: true\n  sandbox:\n    nestedRuntime: lxc\n",
 		"onUnavail": "devcontainer:\n  enabled: true\n  sandbox:\n    onUnavailable: maybe\n",
+		"memory":    "devcontainer:\n  enabled: true\n  resources:\n    memory: 3G\n",
+		"cpus":      "devcontainer:\n  enabled: true\n  resources:\n    cpus: \"0\"\n",
 	}
 	for name, dc := range bodies {
 		t.Run(name, func(t *testing.T) {

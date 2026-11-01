@@ -11,6 +11,10 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- `devcontainer.resources.memory` and `devcontainer.resources.cpus` in `u-boot.yaml` (readable and writable with `u-boot config`): `u-boot generate devcontainer` renders `--memory=<value>` and `--cpus=<value>` in `runArgs` of `devcontainer.json`, in both profiles; an invalid value ends with exit code `10`, and without the keys the generated file is unchanged ([`LH-FA-CONF-002`](spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [`LH-FA-DEV-001`](spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)). **Promised:** the generation of the options; that the limit reaches the started container only on a Linux host (`amd64`) with a local engine that is not nested, in the standard profile and in the sandbox profile with `nestedRuntime: docker`, as far as the Docker tests show. **Not promised:** the effect on the nested Docker, a limit that is too small, other hosts and engines, the sum over several instances. Lastenheft 0.27.0.
+
 ## [0.17.0] - 2026-11-01
 
 Seventeenth release. **Several devcontainers per project folder with `--instance`, and a subscription token for Claude Code in the sandbox devcontainer.**

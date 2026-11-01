@@ -527,6 +527,8 @@ Verfeinert [`LH-FA-CONF-005`](lastenheft.md#lh-fa-conf-005--konfiguration-anzeig
 | `devcontainer.sandbox.repository` | ja | ja | Clone-URL aus den Zeichen `A–Z a–z 0–9 . _ ~ : / @ % + = -`, nicht mit `-` beginnend, ohne eingebettete Zugangsdaten ([`LH-FA-DEV-009`](lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) |
 | `devcontainer.sandbox.egress.enabled` | ja | ja | Wahrheitswert |
 | `devcontainer.sandbox.egress.allow` | ja | ja (Liste) | kommagetrennte Hostnamen |
+| `devcontainer.resources.memory` | ja | ja | positive Ganzzahl mit optionaler Einheit `b`, `k`, `m` oder `g` (klein), Zeichenmenge `0-9bkmg`, nicht `0` ([`SPEC-053`](#spec-053--grenzen-für-arbeitsspeicher-und-cpu-des-devcontainers-schlüssel-werte-und-runargs)) |
+| `devcontainer.resources.cpus` | ja | ja | positive Dezimalzahl mit `.`, Zeichenmenge `0-9` und `.`, nicht `0` ([`SPEC-053`](#spec-053--grenzen-für-arbeitsspeicher-und-cpu-des-devcontainers-schlüssel-werte-und-runargs)) |
 | `services.<svc>.enabled` | ja | **nein** | — |
 
 `services.<svc>.enabled` ist nur lesbar: Ein Schreibversuch endet mit Exit-Code `10` und dem Hinweis auf `u-boot add <svc>`, weil das bloße Umschalten die Zustandsregeln aus [`LH-FA-ADD-005.a`](#lh-fa-add-005a--zustandsregeln-für-registrierte-und-aktive-services) umginge. `<svc>` und `<feature>` werden auf Namensformat geprüft. Wahrheitswerte nehmen die Schreibweisen `true`, `false`, `1`, `0`, `T`, `F` u. ä. an und werden kanonisch als `true`/`false` geführt.
@@ -929,6 +931,35 @@ Das Urteil nach dem Zustand setzt eine lesbare Statusdatei einer konfigurierten 
   Alles andere gilt als Sitzung: eine Meldung des Clients nach anderer Ausgabe der Sitzung, auch hinter einer Warnzeile (nur die erste nicht leere Zeile zählt), die Meldung der Engine, solange sie antwortet, und jede Meldung, die nicht zu den genannten gehört. Mit Terminal ist die Erkennung auf die Meldungen der Fehlerausgabe beschränkt, und von ihnen sind „Container läuft nicht“ und „Standardeingabe ist kein Terminal“ zugesagt; die OCI-Zeile und die Zeile des fehlenden Benutzers ohne Präfix stehen im Terminal-Strom des Clients, den der Launcher nicht liest, und der Befehl endet dann mit `0`. **Engine-Abhängigkeit:** Die Meldung kommt je Engine in anderer Form. Zugesagt ist die Engine 29.9.2 mit dem Client 29.9.2 unter Linux `amd64`: Der fehlende Benutzer endet dort mit Status 1 und `Error response from daemon: unable to find user U: …` auf der Fehlerausgabe. Die Engine 28.0.4 und andere Engine-Versionen sind nicht zugesagt. Für die Engine 28.0.4 erkennt der Launcher die Form Status 126 und Zeile `unable to find user U: …` ohne Präfix auf der Standardausgabe (mit `\r\n`, letzter Punkt der Liste oben), ohne dass diese Form zugesagt ist; die Meldungen gelten für den Client 29.9.2.
 - **Ohne `u-boot.yaml`.** Das Urteil nach dem Zustand setzt die `u-boot.yaml` des Projektordners voraus ([`LH-FA-DEV-010`](lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten): Der Exit-Code `11` für den Startscript-Abbruch setzt die Statusdatei des Containers voraus). Ohne diese Datei, ohne Sandbox-Profil oder ohne die Fähigkeit liest `shell` keine Statusdatei und öffnet die Sitzung auch in einem Container, dessen Startscript abgebrochen ist; scheitert der Start selbst, endet der Befehl dann mit `12`.
 
+### SPEC-053 — Grenzen für Arbeitsspeicher und CPU des Devcontainers: Schlüssel, Werte und `runArgs`
+
+Verfeinert [`LH-FA-CONF-002`](lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) (Schlüssel und Exit-Code `10`) und [`LH-FA-DEV-001`](lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) (Erzeugung der `devcontainer.json`).
+
+**Schlüssel.** `devcontainer.resources.memory` und `devcontainer.resources.cpus`, beide als Zeichenkette in `u-boot.yaml`, beide les- und schreibbar über `u-boot config` ([`SPEC-040`](#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)). Leer oder ohne Eintrag heißt nicht gesetzt.
+
+**Werte.** `memory`: Ziffern, danach höchstens ein Buchstabe aus `b`, `k`, `m`, `g` (klein); der Zahlenwert ist nicht null. `cpus`: Ziffern, optional `.` und weitere Ziffern; der Wert ist nicht null. Jede andere Zeichenfolge ist ungültig, darunter Großbuchstaben, `t`, Vorzeichen, Leer- und Anführungszeichen, Rückstrich, Strichpunkt, Zeilenwechsel und ein Komma als Dezimaltrenner. Die Zeichenmenge ist geschlossen, weil der Wert wörtlich in eine JSON-Zeichenkette der `devcontainer.json` gelangt. Die Prüfung kennt die Grenzen der Engine nicht (Mindestwert von `--memory`, Obergrenze von `--cpus` nach der Zahl der CPUs des Hosts); eine Engine kann einen Wert abweisen, den `u-boot` annimmt.
+
+**Fehler.** Ein ungültiger Wert endet bei `config set` mit Exit-Code `10`; `generate devcontainer` bricht bei einem von Hand eingetragenen ungültigen Wert mit Exit-Code `10` ab, schreibt nichts und nennt den Schlüssel; `doctor` meldet ihn im Befund zu `u-boot.yaml` (Schema ungültig), ohne neue Prüfung. Die Fehler führen den Sentinel `ErrInvalidResourceLimit`.
+
+**`runArgs`.** Sind Schlüssel gesetzt, trägt `devcontainer.json` `--memory=<Wert>` vor `--cpus=<Wert>`, in beiden Profilen. Im Sandbox-Profil stehen sie hinter den Optionen von `nestedRuntime` und der Egress-Restriktion, im Standardprofil ist `runArgs` sonst leer; in beiden Profilen stehen sie vor der Zeile des Features `ollama-host`. Ohne Schlüssel (auch mit leerem Block `resources: {}`) ist die erzeugte Datei byte-gleich zum Lauf ohne den Block. Die Grenzen sind keine Sicherheitslockerung: Die Befehlsausgabe führt sie nicht auf, und die Meldungen sind die des Laufs ohne die Schlüssel.
+
+**Belege.**
+
+| Bedingung | Test |
+|---|---|
+| Zeichenmenge von `memory` und `cpus` | `TestNewMemoryLimit`, `TestNewCPULimit` (`internal/hexagon/domain/resources_test.go`) |
+| Pfade les- und schreibbar, ungültig endet mit `ErrConfigValueInvalid` | `TestConfigSetGet_SandboxKeys`, `TestConfigSet_SandboxKeys_InvalidValue` (`config_sandbox_test.go`) |
+| ungültiger Wert in `u-boot.yaml` beim Lesen: `ErrConfigSchemaInvalid` | `TestConfigGet_SandboxKeys_InvalidOnLoad` |
+| `doctor` meldet ihn im Befund `uboot.yaml.valid` | `TestDoctor_UbootYaml_ErrorOnBadResourceLimit` |
+| `runArgs` im Standardprofil, Reihenfolge | `TestGenerateDevcontainer_Resources_DefaultProfile` |
+| `runArgs` im Sandbox-Profil, Reihenfolge zu `nestedRuntime`, Egress, `ollama-host` | `TestGenerateDevcontainer_Resources_SandboxProfile` |
+| ohne Schlüssel byte-gleich | `TestGenerateDevcontainer_Resources_AbsentIsByteIdentical` |
+| keine Sicherheitslockerung | `TestGenerateDevcontainer_Resources_NoRelaxationWarning` |
+| ungültiger Wert bricht `generate` ab, nichts geschrieben | `TestGenerateDevcontainer_Resources_InvalidValue` |
+| Grenze kommt im gestarteten Container an (Linux-Host `amd64`, lokale, nicht verschachtelte Engine; Standardprofil und Sandbox-Profil mit `nestedRuntime: docker`) | `TestE2E_Resources_DefaultProfileLimitsReachTheContainer`, `TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer` (Build-Tag `docker`) |
+
+**Nicht zugesagt:** die Wirkung auf den verschachtelten Docker und seine Container, das Verhalten bei einem zu kleinen Limit (Abbruch eines Startscripts), die Summe mehrerer Instanzen, andere Hosts und Engines, andere Kombinationen als die der beiden Docker-Tests, die Aufnahme neuer Werte in einem laufenden Container (die Grenze gilt für einen neu erzeugten Container).
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt
@@ -1154,6 +1185,9 @@ devcontainer:
 #     egress:
 #       enabled: false
 #       allow: []
+#   resources:
+#     memory: 3g                   # --memory, z. B. 512m, 3g
+#     cpus: '1.5'                  # --cpus, positive Dezimalzahl
 ```
 
 `u-boot init --devcontainer` schreibt `devcontainer.enabled: true` in die neu angelegte `u-boot.yaml` ([`LH-AK-005`](lastenheft.md#lh-ak-005--devcontainer-flow)).
@@ -1504,3 +1538,4 @@ Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontain
 | 2026-10-24 | Feature `ollama-host` festgelegt und Cloud-Modelle abgegrenzt, deckungsgleich mit Lastenheft 0.23.2 und Code (`SPEC-052`): Eintragstyp mit Container-Option, eine Zeile in `runArgs` in beiden Profilen, Meldung samt Einstufung unter `--quiet` und Zusatz hinter der Egress-Restriktion, Hosts und Zugangsdaten, Auflösung des Namens im Container. `SPEC-047` führt den Anschluss nicht mehr unter „Nicht zugesagt“ und grenzt Cloud-Modelle ab, `SPEC-023` den dritten Eintragstyp, `SPEC-019` den Fall des Cloud-Modells und `ollama-host` ohne Host, `SPEC-043` die Einstufung der Meldung, `SPEC-040` die Container-Option bei `version` ohne `source`; `SPEC-044` berichtigt die Sandbox-Regel: Die Aussage, `runArgs` stamme allein aus `nestedRuntime` und Egress-Restriktion, und die Aussage zu `runArgs`, `mounts` und Startbefehl bei `sshd` und `claude-code` entfallen. Nicht durch einen Test belegt und deshalb nicht zugesagt sind unter anderem `runArgs`, `mounts` und Startbefehl mit `sshd` und `claude-code`, der Inhalt von `sandbox-init.sh` und `docker-init.sh` mit dem Eintrag `ollama-host` und der Ablauf mit Cloud-Modellen (Verhalten von Ollama und Claude Code). |
 | 2026-11-01 | `SPEC-049`, Unterabschnitt `shell`, *Grenzen der Erkennung*: der Fall „die Sitzung schreibt die Zeile des fehlenden Benutzers selbst“ steht als Grenze mit der gemessenen Form der Engine 29.9.2 (Fehlerausgabe, Status 1); er ist eine Lesung des Codes, kein gefahrener Lauf des Launchers. Die Form der Engine 28.0.4 ist nicht neu gemessen. |
 | 2026-11-01 | `SPEC-049`, Unterabschnitt `shell`, *Grenzen der Erkennung*: zugesagt ist nur die Engine 29.9.2 (Entscheidung des Projektinhabers); die Engine 28.0.4 ist nicht zugesagt. Die Erkennung der Zeile `unable to find user …` auf der Standardausgabe mit Status 126 bleibt im Code und ist als nicht zugesagte Engine-Form eingeordnet. |
+| 2026-11-01 | Grenzen für Arbeitsspeicher und CPU festgelegt, deckungsgleich mit Lastenheft 0.27.0 und Code (`SPEC-053`): Schlüssel `devcontainer.resources.memory` und `.cpus`, Zeichenmenge der Werte, Exit-Code `10`, `--memory` vor `--cpus` in `runArgs` beider Profile, Beleg-Tabelle je Bedingung; `SPEC-005` (Schema) und `SPEC-040` (erlaubte Pfade) nennen die zwei Schlüssel. Nicht belegt und nicht zugesagt: Wirkung auf den verschachtelten Docker, zu kleines Limit, mehrere Instanzen. |
