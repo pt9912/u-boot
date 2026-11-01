@@ -1,6 +1,6 @@
 # ADR 0038: Mehrere Devcontainer je Projekt — `--instance <name>` an `up`, `down` und `shell` über ein zweites Id-Label; der Container ohne Instanz bleibt unverändert, ohne Angabe wirkt der Befehl nur auf ihn
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-10-31
 
@@ -42,7 +42,7 @@ Im Gespräch am 2026-10-31 entschieden; ein anderer Beleg als diese Zeilen liegt
 - **Namensregel.** Kleinbuchstaben, Ziffern und Bindestriche, Rand nur Buchstabe oder Ziffer, Länge 1 bis 32; die leere Zeichenkette und ein Name mit `=` sind ungültig; ein ungültiger Name endet mit Exit-Code `10`.
 - **Fassung (i) für das Verhalten ohne Flag.** Zur Wahl standen (i), `up`, `down` und `shell` ohne `--instance` wirken nur auf den Container ohne Instanz, und eine Fassung, in der sie einen Container des Projekts übernehmen. Gewählt ist (i); gibt es nur Container von Instanzen, endet jeder der drei mit Exit-Code `10` und einem Hinweis auf `--instance`, geprüft von `u-boot` vor dem Aufruf der CLI.
 - **Kein Label für den Container ohne Instanz** (Entscheidung 3).
-- **Der Labelname `u-boot.instance` — wartet auf Bestätigung bei `Accepted`.** Der Name ist der Arbeitsname aus dem Messprotokoll, keine Entscheidung des Projektinhabers; mit `Accepted` wird er bestätigt oder ersetzt, ein späterer Wechsel ließe bestehende Instanzen verwaisen.
+- **Der Labelname `u-boot.instance`** ist mit `Accepted` bestätigt; ein späterer Wechsel ließe bestehende Instanzen verwaisen.
 
 Die Mechanik der Entscheidungen unten schlägt der Architect vor; der Projektinhaber bestätigt sie mit `Accepted`.
 
@@ -101,3 +101,4 @@ Die Mechanik der Entscheidungen unten schlägt der Architect vor; der Projektinh
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-10-31 | Proposed | — |
+| 2026-11-01 | Accepted | — |
