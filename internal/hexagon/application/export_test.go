@@ -579,3 +579,17 @@ func ToolchainVersionOverrideAcceptedForTest(dockerfileBlock bool, checksumSourc
 	}
 	return !featureVersionNeedsSourceForCat(cat, entry)
 }
+
+// JavaChecksumsForTest exposes the two-file read of the java-toolchain key
+// (SPEC-054, lastenheft 0.31.0): the checksums files of one Temurin release,
+// one per architecture, fetched through the given reader and parsed with the
+// same helper as the golangci key.
+func JavaChecksumsForTest(ctx context.Context, fetcher driven.Fetcher, version string) (ToolchainPinForTest, error) {
+	pin, err := javaChecksumsFor(ctx, fetcher, version)
+	return ToolchainPinForTest{Version: pin.version, SHA256AMD64: pin.sha256AMD64, SHA256ARM64: pin.sha256ARM64}, err
+}
+
+// JavaChecksumsURLForTest exposes the URL form of the Temurin checksums read
+// (one file per architecture; the tag carries the `+` URL-encoded) so the
+// Docker test of the override names the same form the production run fetches.
+func JavaChecksumsURLForTest(version, slug string) string { return javaChecksumsURL(version, slug) }

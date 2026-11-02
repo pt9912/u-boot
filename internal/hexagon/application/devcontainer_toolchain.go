@@ -106,11 +106,11 @@ func golangciChecksumsURL(tag string) string {
 // file name of the archive, not the line order.
 func golangciChecksumsFor(body []byte, tag string) (toolchainPin, error) {
 	base := strings.TrimPrefix(tag, "v")
-	amd64Hash, err := checksumsFileChecksum(body, "golangci-lint-"+base+"-linux-amd64.tar.gz")
+	amd64Hash, err := checksumsFileChecksum(body, checksumSourceGolangci, "golangci-lint-"+base+"-linux-amd64.tar.gz")
 	if err != nil {
 		return toolchainPin{}, err
 	}
-	arm64Hash, err := checksumsFileChecksum(body, "golangci-lint-"+base+"-linux-arm64.tar.gz")
+	arm64Hash, err := checksumsFileChecksum(body, checksumSourceGolangci, "golangci-lint-"+base+"-linux-arm64.tar.gz")
 	if err != nil {
 		return toolchainPin{}, err
 	}
@@ -118,8 +118,9 @@ func golangciChecksumsFor(body []byte, tag string) (toolchainPin, error) {
 }
 
 // checksumsFileChecksum extracts the checksum of one file from a checksums
-// file in the `<sha256>  <filename>` line form.
-func checksumsFileChecksum(body []byte, filename string) (string, error) {
+// file in the `<sha256>  <filename>` line form; the source names the error
+// (each key carries its own file form).
+func checksumsFileChecksum(body []byte, source, filename string) (string, error) {
 	for _, line := range strings.Split(string(body), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) != 2 || fields[1] != filename {
@@ -127,13 +128,56 @@ func checksumsFileChecksum(body []byte, filename string) (string, error) {
 		}
 		return fields[0], nil
 	}
-	return "", fmt.Errorf("the checksum source %s does not cover the file %s", checksumSourceGolangci, filename)
+	return "", fmt.Errorf("the checksum source %s does not cover the file %s", source, filename)
+}
+
+// javaChecksumsURL is the URL of the Temurin checksums file of one
+// architecture for the given version: the release tag carries the leading
+// `jdk-` (the `+` of the version is URL-encoded in the path) and the
+// checksums file is an asset of the same release the archive comes from —
+// same origin (SPEC-054). The asset naming follows the Temurin convention
+// `OpenJDK21U-jdk_<slug>_linux_hotspot_<version with `_` for `+`>.tar.gz`;
+// the slug is `x64` (amd64) or `aarch64` (arm64).
+func javaChecksumsURL(version, slug string) string {
+	v := strings.TrimPrefix(version, "jdk-")
+	tag := "jdk-" + strings.ReplaceAll(v, "+", "%2B")
+	return "https://github.com/adoptium/temurin21-binaries/releases/download/" + tag +
+		"/OpenJDK21U-jdk_" + slug + "_linux_hotspot_" + strings.ReplaceAll(v, "+", "_") + ".tar.gz.sha256.txt"
+}
+
+// javaChecksumsFor reads the checksums of both architectures from the
+// checksums files of the Temurin release; the files pair a SHA-256 and the
+// archive file name in the `<sha256>  <filename>` line form (same helper as
+// the golangci key), matched on the exact archive file name.
+func javaChecksumsFor(ctx context.Context, fetcher driven.Fetcher, version string) (toolchainPin, error) {
+	v := strings.TrimPrefix(version, "jdk-")
+	slug := strings.ReplaceAll(v, "+", "_")
+	x64Hash, err := fetchJdkChecksum(ctx, fetcher, version, "x64", "OpenJDK21U-jdk_x64_linux_hotspot_"+slug+".tar.gz")
+	if err != nil {
+		return toolchainPin{}, err
+	}
+	arm64Hash, err := fetchJdkChecksum(ctx, fetcher, version, "aarch64", "OpenJDK21U-jdk_aarch64_linux_hotspot_"+slug+".tar.gz")
+	if err != nil {
+		return toolchainPin{}, err
+	}
+	return toolchainPin{version: v, sha256AMD64: x64Hash, sha256ARM64: arm64Hash}, nil
+}
+
+// fetchJdkChecksum fetches one checksums file of the release and extracts the
+// checksum of the named archive.
+func fetchJdkChecksum(ctx context.Context, fetcher driven.Fetcher, version, slug, archive string) (string, error) {
+	body, err := fetchChecksums(ctx, fetcher, javaChecksumsURL(version, slug), checksumSourceJava)
+	if err != nil {
+		return "", err
+	}
+	return checksumsFileChecksum(body, checksumSourceJava, archive)
 }
 
 // toolchainPin is the render state of one `version:` override: the version in
 // the ARG convention of its key (the Go key without, the golangci-lint key
-// with the leading `v`), the two checksums read from the official source and
-// that source as the message wording. The zero value means default pin.
+// with the leading `v`, the java-toolchain key as the bare Temurin version
+// with `+`), the two checksums read from the official source and that source
+// as the message wording. The zero value means default pin.
 type toolchainPin struct {
 	version     string
 	sha256AMD64 string
@@ -147,22 +191,24 @@ func (p toolchainPin) Version() string     { return p.version }
 func (p toolchainPin) SHA256AMD64() string { return p.sha256AMD64 }
 func (p toolchainPin) SHA256ARM64() string { return p.sha256ARM64 }
 
-// toolchainState tells the two templates which blocks to render and which of
-// them carries an override instead of the pin of the template.
+// toolchainState tells the three templates which blocks to render and which
+// of them carries an override instead of the pin of the template.
 type toolchainState struct {
-	goToolchain  bool
-	golangciLint bool
-	goPin        toolchainPin
-	lintPin      toolchainPin
+	goToolchain   bool
+	golangciLint  bool
+	javaToolchain bool
+	goPin         toolchainPin
+	lintPin       toolchainPin
+	javaPin       toolchainPin
 }
 
 // toolchainChecksumSourceSupported reports whether the catalogue entry is of
 // the pinned-toolchain kind: a Dockerfile block whose entry carries one of
-// the two official checksum sources. It is the type boundary of the
+// the three official checksum sources. It is the type boundary of the
 // `version:` override (SPEC-054): an entry of the type without a checksum
 // source keeps the plain rejection, and so does every entry outside the type.
 func toolchainChecksumSourceSupported(cat featureCatalogueEntry) bool {
-	return cat.dockerfileBlock && (cat.checksumSource == checksumSourceGo || cat.checksumSource == checksumSourceGolangci)
+	return cat.dockerfileBlock && (cat.checksumSource == checksumSourceGo || cat.checksumSource == checksumSourceGolangci || cat.checksumSource == checksumSourceJava)
 }
 
 // goFeatureActive reports whether the external `go` feature is enabled in dc,
@@ -191,6 +237,32 @@ func goToolchainConflictMessage(dc *ubootYAMLDevcontainer) string {
 		"or the external `go` feature with `u-boot config set devcontainer.features.go.enabled false`"
 }
 
+// javaFeatureActive reports whether the external `java` feature is enabled in
+// dc (= [goFeatureActive] for the java key): any enabled entry at the key
+// installs a JDK, and which of two installations the commands find is a
+// path-order question no test carries — the combination with the active
+// `java-toolchain` key is the exit-10 rejection of SPEC-054 (Muster Go-Fall).
+func javaFeatureActive(dc *ubootYAMLDevcontainer) bool {
+	if dc == nil {
+		return false
+	}
+	f, ok := dc.Features["java"]
+	return ok && f.Enabled != nil && *f.Enabled
+}
+
+// javaToolchainConflictMessage is the exit-10 rejection of an enabled
+// external `java` feature next to the active `java-toolchain` key, wording
+// like the go case (SPEC-054). Empty when the two go separate ways.
+func javaToolchainConflictMessage(dc *ubootYAMLDevcontainer) string {
+	if !javaFeatureActive(dc) || !dockerfileBlockFeatureActive(dc, featureJavaToolchain) {
+		return ""
+	}
+	return "devcontainer.features.java and devcontainer.features.java-toolchain install two JDKs in one image; " +
+		"which one the commands find is an order of PATH and is not supported — " +
+		"switch `java-toolchain` off with `u-boot config set devcontainer.features.java-toolchain.enabled false` " +
+		"or the external `java` feature with `u-boot config set devcontainer.features.java.enabled false`"
+}
+
 // resolveToolchain validates the rejections of SPEC-054 and reads the
 // official checksum source of every active key with a `version:` override.
 // Without an override the fetcher is not asked: the default pin and its
@@ -205,8 +277,12 @@ func resolveToolchain(ctx context.Context, dc *ubootYAMLDevcontainer, fetcher dr
 	if msg := goToolchainConflictMessage(dc); msg != "" {
 		return state, fmt.Errorf("%s", msg)
 	}
+	if msg := javaToolchainConflictMessage(dc); msg != "" {
+		return state, fmt.Errorf("%s", msg)
+	}
 	state.goToolchain = dockerfileBlockFeatureActive(dc, featureGoToolchain)
 	state.golangciLint = dockerfileBlockFeatureActive(dc, featureGolangciLint)
+	state.javaToolchain = dockerfileBlockFeatureActive(dc, featureJavaToolchain)
 	type toolchainKey struct {
 		key     string
 		cat     featureCatalogueEntry
@@ -215,6 +291,7 @@ func resolveToolchain(ctx context.Context, dc *ubootYAMLDevcontainer, fetcher dr
 	for _, tk := range []toolchainKey{
 		{key: featureGoToolchain, cat: featureCatalogue()[featureGoToolchain], pinSlot: &state.goPin},
 		{key: featureGolangciLint, cat: featureCatalogue()[featureGolangciLint], pinSlot: &state.lintPin},
+		{key: featureJavaToolchain, cat: featureCatalogue()[featureJavaToolchain], pinSlot: &state.javaPin},
 	} {
 		version := dc.Features[tk.key].Version
 		if version == "" || !dockerfileBlockFeatureActive(dc, tk.key) {
@@ -247,6 +324,12 @@ func normalizeToolchainVersion(key, value, source string) (string, error) {
 		value = strings.TrimPrefix(value, "go")
 	case featureGolangciLint:
 		value = "v" + strings.TrimPrefix(value, "v")
+	case featureJavaToolchain:
+		// ARG form of the java-toolchain key: the bare Temurin version
+		// with `+` as the build number separator ("21.0.13+9", the Temurin
+		// tag without the prefix `jdk-`); both spellings read the same
+		// checksums files (Docker-Test pin, SPEC-054).
+		value = strings.TrimPrefix(value, "jdk-")
 	}
 	if value == "" {
 		return "", fmt.Errorf("devcontainer.features.%s.version: the value is empty after the version prefix is trimmed", key)
@@ -281,6 +364,12 @@ func readToolchainChecksums(ctx context.Context, fetcher driven.Fetcher, source 
 			return err
 		}
 		*slot = pin
+	case checksumSourceJava:
+		pin, err := javaChecksumsFor(ctx, fetcher, version)
+		if err != nil {
+			return err
+		}
+		*slot = pin
 	default:
 		return fmt.Errorf("devcontainer catalogue: the checksum source %q of the pinned toolchain takes no URL of an official source", source)
 	}
@@ -311,25 +400,36 @@ func fetchChecksums(ctx context.Context, fetcher driven.Fetcher, url, source str
 func toolchainWarnings(state toolchainState) []driving.WarningEntry {
 	var out []driving.WarningEntry
 	if state.goToolchain {
-		out = append(out, toolchainNotice(featureGoToolchain, "GO_VERSION", state.goPin, checksumSourceGo))
+		out = append(out, toolchainNotice(featureGoToolchain, "GO_VERSION", state.goPin, checksumSourceGo, ""))
 	}
 	if state.golangciLint {
-		out = append(out, toolchainNotice(featureGolangciLint, "GOLANGCI_LINT_VERSION", state.lintPin, checksumSourceGolangci))
+		out = append(out, toolchainNotice(featureGolangciLint, "GOLANGCI_LINT_VERSION", state.lintPin, checksumSourceGolangci, ""))
+	}
+	if state.javaToolchain {
+		out = append(out, toolchainNotice(featureJavaToolchain, "JDK_VERSION", state.javaPin, checksumSourceJava,
+			"the JDK of the Eclipse Temurin distribution of the LTS version 21"))
 	}
 	return out
 }
 
-// toolchainNotice is the single notice of one active key.
-func toolchainNotice(key, arg string, pin toolchainPin, source string) driving.WarningEntry {
+// toolchainNotice is the single notice of one active key; the distribution
+// clause (empty for the two Go keys) carries the Vertriebs-Form of the
+// java-toolchain key (SPEC-054, Meldungen: sie konkretisiert die Quelle, sie
+// ersetzt sie nicht).
+func toolchainNotice(key, arg string, pin toolchainPin, source, distribution string) driving.WarningEntry {
 	version := "the version pinned as " + arg + " in .devcontainer/Dockerfile is the default pin of the catalogue"
 	if pin.version != "" {
 		version = "the version " + pin.version + " stands as " + arg + " in .devcontainer/Dockerfile (override of the default pin; " +
 			"the checksums were read from " + source + ")"
 	}
+	what := "devcontainer feature " + key + " installs its release archive from " + source + " when the image is built; "
+	if distribution != "" {
+		what = "devcontainer feature " + key + " installs " + distribution + " from " + source + " when the image is built; "
+	}
 	return driving.WarningEntry{
 		Code:  "LH-NFA-SEC-004",
 		Level: "warn",
-		Message: "devcontainer feature " + key + " installs its release archive from " + source + " when the image is built; " +
+		Message: what +
 			version + "; it is checked by its SHA-256 only: the archive is not signed and u-boot checks no signature, " +
 			"so the check does not protect against a release that was harmful from the start",
 		Subject: ".devcontainer/devcontainer.json",

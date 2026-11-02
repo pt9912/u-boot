@@ -3,7 +3,7 @@
 FROM mcr.microsoft.com/devcontainers/base:debian
 
 # Non-root default user.
-{{- if or .UID .Sandbox .Gh .Glab .GoToolchain .GolangciLint}}
+{{- if or .UID .Sandbox .Gh .Glab .GoToolchain .GolangciLint .JdkToolchain}}
 USER root
 {{- if .UID}}
 ARG USER_UID={{.UID}}
@@ -191,6 +191,39 @@ RUN arch="$(dpkg --print-architecture)" \
  && tar -xzf "golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz" --strip-components=1 -C /usr/local/bin "golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}/golangci-lint" \
  && cd / \
  && rm -rf "$work"
+{{- end}}
+{{- if .JdkToolchain}}
+# JDK 21 (Eclipse Temurin): the release archive of the Temurin binaries, all
+# of it extracted to /opt (JAVA_HOME points at the extracted distribution).
+# Version and checksums stand here as build arguments and in one place; a
+# `version:` override of the project replaces the value and both checksums
+# together, read for the chosen version from the checksums files of the same
+# release (one per architecture; the URL carries the tag with the `+`
+# URL-encoded). The build stops before the extraction unless the SHA-256
+# matches. The archive is not signed and the build verifies no signature:
+# the check catches a file replaced later, not a release that was harmful
+# from the start.
+{{- if .JdkToolchainPin.Version}}
+ARG JDK_VERSION={{.JdkToolchainPin.Version}}
+ARG JDK_SHA256_AMD64={{.JdkToolchainPin.SHA256AMD64}}
+ARG JDK_SHA256_ARM64={{.JdkToolchainPin.SHA256ARM64}}
+{{- else}}
+ARG JDK_VERSION=21.0.13+9
+ARG JDK_SHA256_AMD64=d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c
+ARG JDK_SHA256_ARM64=e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578
+{{- end}}
+RUN arch="$(dpkg --print-architecture)" \
+ && case "$arch" in amd64) slug="x64" sha256="${JDK_SHA256_AMD64}" ;; arm64) slug="aarch64" sha256="${JDK_SHA256_ARM64}" ;; *) echo "the JDK has no archive for $arch" >&2; exit 1 ;; esac \
+ && work="$(mktemp -d)" \
+ && cd "$work" \
+ && asset="OpenJDK21U-jdk_${slug}_linux_hotspot_$(printf '%s' "$JDK_VERSION" | tr '+' '_')" \
+ && curl -fsSLO "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(printf '%s' "$JDK_VERSION" | sed 's/+/%2B/')/${asset}.tar.gz" \
+ && echo "${sha256}  ${asset}.tar.gz" | sha256sum -c - \
+ && tar -xzf "${asset}.tar.gz" -C /opt \
+ && cd / \
+ && rm -rf "$work"
+ENV JAVA_HOME="/opt/jdk-${JDK_VERSION}"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 {{- end}}
 {{- if .Egress}}
 # Egress restriction.

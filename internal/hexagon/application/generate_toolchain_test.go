@@ -42,19 +42,37 @@ const (
 	lintOverrideTag   = "v2.13.2"
 	lintOverrideAMD64 = "2277d43b98ec0054280f2ac26b53268bae97682444678a59a657dd565da021d6"
 	lintOverrideARM64 = "a2a4e0065aa41be71f7c5ac90f271b61751331e5d04314e62afe4027855f0893"
+
+	// The java-toolchain key (lastenheft 0.31.0): recorded values of the
+	// Temurin checksums files of jdk-21.0.13+9 (the default pin) and
+	// jdk-21.0.9+10 (the override fixtures); the Docker tests read the live
+	// sources, these constants pin the parsing offline.
+	jdkDefaultVer  = "21.0.13+9"
+	jdkDefaultX64  = "d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c"
+	jdkDefaultA64  = "e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578"
+	jdkOverrideVer = "21.0.9+10"
+	jdkOverrideX64 = "810d3773df7e0d6c4394e4e244b264c8b30e0b05a0acf542d065fd78a6b65c2f"
+	jdkOverrideA64 = "edf0da4debe7cf475dbe320d174d6eed81479eb363f41e38a2efb740428c603a"
 )
 
 // toolchainSpec describes the Dockerfile block of one pinned-toolchain key.
 type toolchainSpec struct {
 	key, arg, version, shaAMD64, shaARM64, downloadURL string
+	// caseLine is the architecture case line of the block; empty means the
+	// plain `sha256="${ARG_SHA256_*}"` template (the two Go keys; the JDK
+	// block resolves the Temurin slug in the same line).
+	caseLine string
 }
 
 func toolchainSpecs() map[string]toolchainSpec {
 	return map[string]toolchainSpec{
 		"go-toolchain": {"go-toolchain", "GO", goDefaultVersion, goSHAAMD64Default, goSHAARM64Default,
-			"https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz"},
+			"https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz", ""},
 		"golangci-lint": {"golangci-lint", "GOLANGCI_LINT", golangciDefaultVer, golangciSHAAMD64, golangciSHAARM64,
-			"https://github.com/golangci/golangci-lint/releases/download/${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz"},
+			"https://github.com/golangci/golangci-lint/releases/download/${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz", ""},
+		"java-toolchain": {"java-toolchain", "JDK", jdkDefaultVer, jdkDefaultX64, jdkDefaultA64,
+			"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(printf '%s' \"$JDK_VERSION\" | sed 's/+/%2B/')/${asset}.tar.gz",
+			`case "$arch" in amd64) slug="x64" sha256="${JDK_SHA256_AMD64}" ;; arm64) slug="aarch64" sha256="${JDK_SHA256_ARM64}" ;; *) echo "the JDK has no archive for $arch" >&2; exit 1 ;; esac`},
 	}
 }
 
@@ -64,6 +82,9 @@ func toolchainSpecs() map[string]toolchainSpec {
 func toolName(key string) string {
 	if key == "go-toolchain" {
 		return "go"
+	}
+	if key == "java-toolchain" {
+		return "the JDK"
 	}
 	return key
 }
@@ -81,6 +102,21 @@ const toolchainJSONGolden = "// BEGIN U-BOOT MANAGED BLOCK: init\n" +
 	"  \"containerEnv\": {\n" +
 	"    \"GOCACHE\": \"${containerWorkspaceFolder}/.cache/go-build\",\n" +
 	"    \"GOMODCACHE\": \"${containerWorkspaceFolder}/.cache/go-mod\"\n" +
+	"  },\n" +
+	"  \"remoteUser\": \"vscode\"\n" +
+	"}\n" +
+	"// END U-BOOT MANAGED BLOCK: init\n"
+
+// javaJSONGolden is the devcontainer.json of the default profile for a
+// project with `java-toolchain` enabled: no key under `features`, and NO
+// `containerEnv` values — the JDK key carries JAVA_HOME and PATH as ENV
+// lines of its Dockerfile block (SPEC-054, Cache-Werte-Absatz).
+const javaJSONGolden = "// BEGIN U-BOOT MANAGED BLOCK: init\n" +
+	"{\n" +
+	"  \"name\": \"t-uboot-gen\",\n" +
+	"  \"build\": {\n" +
+	"    \"dockerfile\": \"./Dockerfile\",\n" +
+	"    \"context\": \".\"\n" +
 	"  },\n" +
 	"  \"remoteUser\": \"vscode\"\n" +
 	"}\n" +
@@ -119,6 +155,10 @@ func toolchainEntries(keys ...string) []string {
 const goToolchainEntry = "    go-toolchain:\n      enabled: true\n"
 
 const golangciEntry = "    golangci-lint:\n      enabled: true\n"
+
+const javaEntry = "    java-toolchain:\n      enabled: true\n"
+
+const javaFeatureEntry = "    java:\n      enabled: true\n"
 
 const goFeatureEntry = "    go:\n      enabled: true\n"
 
@@ -178,12 +218,16 @@ func checksumsFileFixture(tag, amd64, arm64 string) []byte {
 // one `USER root` of its file.
 func assertToolchainBlock(t *testing.T, df string, s toolchainSpec) {
 	t.Helper()
+	caseLine := s.caseLine
+	if caseLine == "" {
+		caseLine = `case "$arch" in amd64) sha256="${` + s.arg + `_SHA256_AMD64}" ;; arm64) sha256="${` + s.arg + `_SHA256_ARM64}" ;; *) echo "` + toolName(s.key) + ` has no archive for $arch" >&2; exit 1 ;; esac`
+	}
 	for _, want := range []string{
 		"ARG " + s.arg + "_VERSION=" + s.version + "\n",
 		"ARG " + s.arg + "_SHA256_AMD64=" + s.shaAMD64 + "\n",
 		"ARG " + s.arg + "_SHA256_ARM64=" + s.shaARM64 + "\n",
 		s.downloadURL,
-		`case "$arch" in amd64) sha256="${` + s.arg + `_SHA256_AMD64}" ;; arm64) sha256="${` + s.arg + `_SHA256_ARM64}" ;; *) echo "` + toolName(s.key) + ` has no archive for $arch" >&2; exit 1 ;; esac`,
+		caseLine,
 	} {
 		if !strings.Contains(df, want) {
 			t.Errorf("Dockerfile lacks %q:\n%s", want, df)
@@ -222,6 +266,17 @@ func assertToolchainJSON(t *testing.T, body []byte) {
 	}
 	if !reflect.DeepEqual(env, want) {
 		t.Errorf("containerEnv = %v, want %v", env, want)
+	}
+}
+
+// assertNoContainerEnv pins the Cache-Werte-Abgrenzung of the java-toolchain
+// key (SPEC-054): the generated devcontainer.json carries no containerEnv
+// value — JAVA_HOME and PATH are ENV lines of the Docker block.
+func assertNoContainerEnv(t *testing.T, body []byte) {
+	t.Helper()
+	m := strippedJSONMap(t, body)
+	if env, ok := m["containerEnv"]; ok {
+		t.Errorf("devcontainer.json carries containerEnv although no Go key is active: %v\n%s", env, string(body))
 	}
 }
 
@@ -352,6 +407,18 @@ func TestGenerateDevcontainer_Toolchain_JSONGolden(t *testing.T) {
 			}
 		}
 	})
+	t.Run("golden with java-toolchain carries no containerEnv values", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newToolchainService(t, newFakeFetcher())
+		seedToolchainYAML(t, fs, toolchainFixture(javaEntry))
+		if _, err := generateSandbox(svc, false); err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		raw, _ := fs.ReadFile(devcontainerJSONPath())
+		if got := string(raw); got != javaJSONGolden {
+			t.Errorf("devcontainer.json is not the golden:\n--- got ---\n%s\n--- want ---\n%s", got, javaJSONGolden)
+		}
+	})
 	t.Run("both keys carry the values once", func(t *testing.T) {
 		t.Parallel()
 		fetch := newFakeFetcher()
@@ -375,13 +442,23 @@ func TestGenerateDevcontainer_Toolchain_JSONGolden(t *testing.T) {
 
 // newToolchainOverrideFetcher wires the fixture read for the older versions
 // (the go listing with the two released versions, the golangci checksums of
-// the override tag).
+// the override tag, the two Temurin checksums files of the override release).
 func newToolchainOverrideFetcher() *fakeFetcher {
 	fetch := newFakeFetcher()
 	fetch.setBody(application.GoChecksumsSourceURLForTest(), toolchainListing(goDefaultVersion, goOverrideVersion))
 	fetch.setBody(application.GolangciChecksumsURLForTest(lintOverrideTag),
 		checksumsFileFixture(lintOverrideTag, lintOverrideAMD64, lintOverrideARM64))
+	fetch.setBody(application.JavaChecksumsURLForTest(jdkOverrideVer, "x64"),
+		jdkChecksumsFileFixture(jdkOverrideX64, "OpenJDK21U-jdk_x64_linux_hotspot_21.0.9_10.tar.gz"))
+	fetch.setBody(application.JavaChecksumsURLForTest(jdkOverrideVer, "aarch64"),
+		jdkChecksumsFileFixture(jdkOverrideA64, "OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.9_10.tar.gz"))
 	return fetch
+}
+
+// jdkChecksumsFileFixture builds one Temurin checksums file: the single
+// `<sha256>  <archive>` line form (one file per architecture).
+func jdkChecksumsFileFixture(checksum, archive string) []byte {
+	return []byte(checksum + "  " + archive + "\n")
 }
 
 // The override (SPEC-054, S4/S5): the generated Dockerfile carries the read
@@ -393,7 +470,8 @@ func TestGenerateDevcontainer_Toolchain_OverrideRendersReadChecksums(t *testing.
 	svc, fs := newToolchainService(t, newToolchainOverrideFetcher())
 	seedToolchainYAML(t, fs, toolchainFixture(
 		"    go-toolchain:\n      enabled: true\n      version: "+goOverrideVersion+"\n",
-		"    golangci-lint:\n      enabled: true\n      version: "+lintOverrideTag+"\n"))
+		"    golangci-lint:\n      enabled: true\n      version: "+lintOverrideTag+"\n",
+		"    java-toolchain:\n      enabled: true\n      version: "+jdkOverrideVer+"\n"))
 	if _, err := generateSandbox(svc, false); err != nil {
 		t.Fatalf("generate: %v", err)
 	}
@@ -405,6 +483,10 @@ func TestGenerateDevcontainer_Toolchain_OverrideRendersReadChecksums(t *testing.
 	assertToolchainBlock(t, df, toolchainSpec{
 		key: "golangci-lint", arg: "GOLANGCI_LINT", version: lintOverrideTag, shaAMD64: lintOverrideAMD64, shaARM64: lintOverrideARM64,
 		downloadURL: "https://github.com/golangci/golangci-lint/releases/download/${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz"})
+	assertToolchainBlock(t, df, toolchainSpec{
+		key: "java-toolchain", arg: "JDK", version: jdkOverrideVer, shaAMD64: jdkOverrideX64, shaARM64: jdkOverrideA64,
+		downloadURL: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(printf '%s' \"$JDK_VERSION\" | sed 's/+/%2B/')/${asset}.tar.gz",
+		caseLine:    `case "$arch" in amd64) slug="x64" sha256="${JDK_SHA256_AMD64}" ;; arm64) slug="aarch64" sha256="${JDK_SHA256_ARM64}" ;; *) echo "the JDK has no archive for $arch" >&2; exit 1 ;; esac`})
 	assertToolchainJSON(t, mustRead(t, fs, devcontainerJSONPath()))
 	// The second run re-reads the source and stays a NoOp: the same read
 	// yields the same bytes.
@@ -430,6 +512,24 @@ func TestGenerateDevcontainer_Toolchain_VersionNotCoveredExit10(t *testing.T) {
 		t.Errorf("err = %v, want the not-covered wording and the version", err)
 	}
 	assertNothingWritten(t, fs)
+
+	// The java-toolchain key reads one file per architecture; a file without
+	// the archive row is the same not-covered rejection.
+	fetch2 := newFakeFetcher()
+	fetch2.setBody(application.JavaChecksumsURLForTest("21.0.99+99", "x64"),
+		jdkChecksumsFileFixture(jdkDefaultX64, "OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz"))
+	fetch2.setBody(application.JavaChecksumsURLForTest("21.0.99+99", "aarch64"),
+		jdkChecksumsFileFixture(jdkDefaultA64, "OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.13_9.tar.gz"))
+	svc2, fs2 := newToolchainService(t, fetch2)
+	seedToolchainYAML(t, fs2, toolchainFixture("    java-toolchain:\n      enabled: true\n      version: 21.0.99+99\n"))
+	_, err = generateSandbox(svc2, false)
+	if !errors.Is(err, driving.ErrConfigValueInvalid) {
+		t.Fatalf("generate (java-toolchain not covered): err = %v, want a wrap of ErrConfigValueInvalid (exit 10)", err)
+	}
+	if !strings.Contains(err.Error(), "does not cover") || !strings.Contains(err.Error(), "OpenJDK21U-jdk_x64") {
+		t.Errorf("err = %v, want the not-covered wording and the archive name", err)
+	}
+	assertNothingWritten(t, fs2)
 }
 
 // The unreadable-source rejection (SPEC-054, S5): a failing read of the
@@ -458,6 +558,22 @@ func TestGenerateDevcontainer_Toolchain_UnreadableChecksumSourceExit10(t *testin
 	if _, err := generateSandbox(svc2, false); !errors.Is(err, driving.ErrConfigValueInvalid) {
 		t.Errorf("generate without a wired reader: err = %v, want the unreadable-source class (exit 10)", err)
 	}
+
+	// The java-toolchain key reads the checksums files of one release; a
+	// failing read of the configured source is the unreadable-source
+	// rejection with the source and the URL in the message.
+	fetch3 := newFakeFetcher()
+	fetch3.setErr(application.JavaChecksumsURLForTest(jdkOverrideVer, "x64"), errors.New("connection refused"))
+	svc3, fs3 := newToolchainService(t, fetch3)
+	seedToolchainYAML(t, fs3, toolchainFixture("    java-toolchain:\n      enabled: true\n      version: "+jdkOverrideVer+"\n"))
+	_, err = generateSandbox(svc3, false)
+	if !errors.Is(err, driving.ErrConfigValueInvalid) {
+		t.Fatalf("generate (java-toolchain unreadable): err = %v, want a wrap of ErrConfigValueInvalid (exit 10)", err)
+	}
+	if !strings.Contains(err.Error(), "is not readable") || !strings.Contains(err.Error(), "Temurin") {
+		t.Errorf("err = %v, want the unreadable wording and the source name", err)
+	}
+	assertNothingWritten(t, fs3)
 }
 
 // A `version:` value outside the release-version character set is unusable
@@ -532,6 +648,71 @@ func TestGenerateDevcontainer_Toolchain_GoFeatureConflictExit10(t *testing.T) {
 	})
 }
 
+// The java conflict (SPEC-054, Muster Go-Fall): an enabled external `java`
+// feature next to the active `java-toolchain` key ends the run with the
+// exit-10 class and nothing written; the external `java` alone renders as
+// before, and `java` next to the two Go keys is not a conflict.
+func TestGenerateDevcontainer_Toolchain_JavaFeatureConflictExit10(t *testing.T) {
+	t.Parallel()
+	t.Run("java plus java-toolchain is rejected", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newGenerateService(t)
+		seedToolchainYAML(t, fs, toolchainFixture(javaFeatureEntry, javaEntry))
+		_, err := generateSandbox(svc, false)
+		if !errors.Is(err, driving.ErrConfigValueInvalid) {
+			t.Fatalf("generate: err = %v, want a wrap of ErrConfigValueInvalid (exit 10)", err)
+		}
+		if !strings.Contains(err.Error(), "java-toolchain") || !strings.Contains(err.Error(), "two JDKs") {
+			t.Errorf("err = %v, want the message to name both keys and the two JDKs", err)
+		}
+		assertNothingWritten(t, fs)
+	})
+	t.Run("java alone renders", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newToolchainService(t, newFakeFetcher())
+		seedToolchainYAML(t, fs, toolchainFixture(javaFeatureEntry))
+		if _, err := generateSandbox(svc, false); err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		raw, _ := fs.ReadFile(devcontainerJSONPath())
+		if _, ok := strippedJSONMap(t, raw)["containerEnv"]; ok {
+			t.Errorf("devcontainer.json carries containerEnv although no pinned-toolchain key is active:\n%s", raw)
+		}
+	})
+	t.Run("no sdkman rejection case (F7)", func(t *testing.T) {
+		// The F7 pin (cr-vorschlag-java-toolchain, Stelle 5): the external
+		// `java` feature is SDKMAN-based ("Java + SDKMAN" in the catalogue;
+		// the Feature-Metadaten 1.8.3 say "Installs Java, SDKMAN!", gelesen
+		// 2026-11-02), no separate sdkman rejection case exists in the
+		// catalogue or the toolchain machinery, and this pin catches a new
+		// one.
+		t.Parallel()
+		name, errName := domain.NewFeatureName("java")
+		if errName != nil {
+			t.Fatalf("java is not a FeatureName: %v", errName)
+		}
+		entry, ok := application.FeatureForTest(name)
+		if !ok {
+			t.Fatal("the catalogue does not carry the external java feature")
+		}
+		if !strings.Contains(entry.ShortDesc, "SDKMAN") {
+			t.Errorf("the catalogue entry of the external java feature does not name SDKMAN: %q", entry.ShortDesc)
+		}
+	})
+	t.Run("java plus go-toolchain renders", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newToolchainService(t, newFakeFetcher())
+		seedToolchainYAML(t, fs, toolchainFixture(javaFeatureEntry, goToolchainEntry))
+		if _, err := generateSandbox(svc, false); err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		raw, _ := fs.ReadFile(dockerfilePath())
+		if !strings.Contains(string(raw), "ARG GO_VERSION=") {
+			t.Errorf("the go-toolchain block is missing next to the external java feature:\n%s", raw)
+		}
+	})
+}
+
 // The notices (SPEC-054, S7/S9): one `warn` entry per active key with the
 // LH-NFA-SEC-004 code, the default-pin or override wording, the checksum
 // source at an override and the unsigned limit; neither
@@ -543,17 +724,19 @@ func TestGenerateDevcontainer_Toolchain_Notices(t *testing.T) {
 		t.Parallel()
 		fetch := newFakeFetcher()
 		fetch.setBody(application.GoChecksumsSourceURLForTest(), toolchainListing(goDefaultVersion))
+		fetch.setBody(application.GolangciChecksumsURLForTest(golangciDefaultVer),
+			checksumsFileFixture(golangciDefaultVer, golangciSHAAMD64, golangciSHAARM64))
 		svc, fs := newToolchainService(t, fetch)
-		seedToolchainYAML(t, fs, toolchainFixture(goToolchainEntry, golangciEntry))
+		seedToolchainYAML(t, fs, toolchainFixture(goToolchainEntry, golangciEntry, javaEntry))
 		resp, err := generateSandbox(svc, false)
 		if err != nil {
 			t.Fatalf("generate: %v", err)
 		}
 		notices := toolchainNotices(resp.Warnings)
-		if len(notices) != 2 {
+		if len(notices) != 3 {
 			t.Fatalf("%d notices (%v), want one per key", len(notices), notices)
 		}
-		wantKeys := []string{"feature go-toolchain ", "feature golangci-lint "}
+		wantKeys := []string{"feature go-toolchain ", "feature golangci-lint ", "feature java-toolchain "}
 		for _, key := range wantKeys {
 			found := false
 			for _, n := range notices {
@@ -608,12 +791,12 @@ func TestGenerateDevcontainer_Toolchain_Notices(t *testing.T) {
 	})
 }
 
-// toolchainNotices returns the warn entries that name one of the two keys (the
-// supply-chain notices of the pinned toolchain; SPEC-054).
+// toolchainNotices returns the warn entries that name one of the three keys
+// (the supply-chain notices of the pinned toolchain; SPEC-054).
 func toolchainNotices(ws []driving.WarningEntry) []driving.WarningEntry {
 	var out []driving.WarningEntry
 	for _, w := range ws {
-		if strings.Contains(w.Message, "feature go-toolchain ") || strings.Contains(w.Message, "feature golangci-lint ") {
+		if strings.Contains(w.Message, "feature go-toolchain ") || strings.Contains(w.Message, "feature golangci-lint ") || strings.Contains(w.Message, "feature java-toolchain ") {
 			out = append(out, w)
 		}
 	}
@@ -788,11 +971,11 @@ func TestGenerateDevcontainer_Toolchain_EgressAddsNoHost(t *testing.T) {
 
 // SPEC-054 (Eintragstyp): `u-boot doctor` reports no finding of
 // `devcontainer.features.allowlist` and `devcontainer.features.drift` for
-// the two pinned-toolchain keys — the catalogue keys render no key under
+// the three pinned-toolchain keys — the catalogue keys render no key under
 // `features` and are no orphans.
 func TestDoctor_ToolchainKeys_NoFindings(t *testing.T) {
 	t.Parallel()
-	const yaml = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    go-toolchain:\n      enabled: true\n    golangci-lint:\n      enabled: true\n"
+	const yaml = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    go-toolchain:\n      enabled: true\n    golangci-lint:\n      enabled: true\n    java-toolchain:\n      enabled: true\n"
 	for name, jsonBody := range map[string]string{
 		"features empty": `{"features": {}}`,
 		"no features":    `{"name": "demo"}`,
@@ -827,6 +1010,9 @@ func TestFeatureCatalogue_ToolchainChecksumSources(t *testing.T) {
 	if !accepted(true, "the download listing of go.dev/dl", "1.26.10", "") {
 		t.Errorf("an entry of the type with its checksum source must accept the override")
 	}
+	if !accepted(true, "the checksums file of the same release of the Temurin binaries", jdkOverrideVer, "") {
+		t.Errorf("an entry of the type with the Temurin checksum source must accept the override")
+	}
 	for _, tc := range []struct {
 		name            string
 		dockerfileBlock bool
@@ -847,7 +1033,7 @@ func TestFeatureCatalogue_ToolchainChecksumSources(t *testing.T) {
 	// The real catalogue keys carry their source (the S6 rejection stays
 	// synthetic); the load path accepts the overrides of the two keys and
 	// keeps the rejection for a block entry without source.
-	const withOverride = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    go-toolchain:\n      enabled: true\n      version: 1.26.10\n    golangci-lint:\n      enabled: true\n      version: v2.13.2\n"
+	const withOverride = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    go-toolchain:\n      enabled: true\n      version: 1.26.10\n    golangci-lint:\n      enabled: true\n      version: v2.13.2\n    java-toolchain:\n      enabled: true\n      version: 21.0.9+10\n"
 	if err := application.ValidateDevcontainerFeaturesForTest(t, []byte(withOverride)); err != nil {
 		t.Errorf("the load path rejected the overrides of the two keys: %v", err)
 	}
@@ -917,6 +1103,42 @@ func TestToolchainChecksumParsing(t *testing.T) {
 		if got, want := application.GoChecksumsSourceURLForTest(), "https://go.dev/dl/?mode=json&include=all"; got != want {
 			t.Errorf("go listing URL = %q, want %q", got, want)
 		}
+		// The Temurin files: one per architecture, the tag carries the
+		// `+` URL-encoded (jdk-21.0.9%2B10), and the version slug of the
+		// asset name carries `_` for `+`.
+		if got, want := application.JavaChecksumsURLForTest(jdkOverrideVer, "x64"),
+			"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jdk_x64_linux_hotspot_21.0.9_10.tar.gz.sha256.txt"; got != want {
+			t.Errorf("java checksums URL (x64) = %q, want %q", got, want)
+		}
+		if got, want := application.JavaChecksumsURLForTest(jdkOverrideVer, "aarch64"),
+			"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.9%2B10/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.9_10.tar.gz.sha256.txt"; got != want {
+			t.Errorf("java checksums URL (aarch64) = %q, want %q", got, want)
+		}
+		// The jdk- prefix spelling reads the same files.
+		if got, want := application.JavaChecksumsURLForTest("jdk-21.0.9+10", "x64"),
+			application.JavaChecksumsURLForTest(jdkOverrideVer, "x64"); got != want {
+			t.Errorf("java checksums URL with the jdk- prefix = %q, want %q", got, want)
+		}
+	})
+	t.Run("temurin checksums files", func(t *testing.T) {
+		t.Parallel()
+		fetch := newFakeFetcher()
+		fetch.setBody(application.JavaChecksumsURLForTest(jdkOverrideVer, "x64"),
+			jdkChecksumsFileFixture(jdkOverrideX64, "OpenJDK21U-jdk_x64_linux_hotspot_21.0.9_10.tar.gz"))
+		fetch.setBody(application.JavaChecksumsURLForTest(jdkOverrideVer, "aarch64"),
+			jdkChecksumsFileFixture(jdkOverrideA64, "OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.9_10.tar.gz"))
+		pin, err := application.JavaChecksumsForTest(context.Background(), fetch, jdkOverrideVer)
+		if err != nil {
+			t.Fatalf("read: %v", err)
+		}
+		want := application.ToolchainPinForTest{Version: jdkOverrideVer, SHA256AMD64: jdkOverrideX64, SHA256ARM64: jdkOverrideA64}
+		if pin != want {
+			t.Errorf("pin = %+v, want %+v", pin, want)
+		}
+		_, err = application.JavaChecksumsForTest(context.Background(), newFakeFetcher(), jdkOverrideVer)
+		if err == nil || !strings.Contains(err.Error(), "is not readable") {
+			t.Errorf("an unreadable checksums file must be the unreadable-source rejection, got %v", err)
+		}
 	})
 }
 
@@ -949,4 +1171,22 @@ func TestGenerateDevcontainer_Toolchain_OverrideSpellings(t *testing.T) {
 	if !strings.Contains(df, "ARG GOLANGCI_LINT_VERSION="+lintOverrideTag+"\n") {
 		t.Errorf("the golangci-lint ARG carries not the v-form:\n%s", df)
 	}
+	t.Run("java spellings", func(t *testing.T) {
+		// The Temurin tag form "jdk-21.0.9+10" and the bare form read the
+		// same checksums files and normalise to the bare ARG form.
+		t.Parallel()
+		fetch := newToolchainOverrideFetcher()
+		svc, fs := newToolchainService(t, fetch)
+		seedToolchainYAML(t, fs, toolchainFixture(
+			"    java-toolchain:\n      enabled: true\n      version: jdk-"+jdkOverrideVer+"\n"))
+		if _, err := generateSandbox(svc, false); err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		raw, _ := fs.ReadFile(dockerfilePath())
+		assertToolchainBlock(t, string(raw), toolchainSpec{
+			key: "java-toolchain", arg: "JDK", version: jdkOverrideVer, shaAMD64: jdkOverrideX64, shaARM64: jdkOverrideA64,
+			downloadURL: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(printf '%s' \"$JDK_VERSION\" | sed 's/+/%2B/')/${asset}.tar.gz",
+			caseLine:    `case "$arch" in amd64) slug="x64" sha256="${JDK_SHA256_AMD64}" ;; arm64) slug="aarch64" sha256="${JDK_SHA256_ARM64}" ;; *) echo "the JDK has no archive for $arch" >&2; exit 1 ;; esac`})
+		assertNoContainerEnv(t, mustRead(t, fs, devcontainerJSONPath()))
+	})
 }

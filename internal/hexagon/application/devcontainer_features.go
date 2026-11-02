@@ -210,6 +210,7 @@ const (
 	featureOllamaHost   = "ollama-host"
 	featureGoToolchain  = "go-toolchain"
 	featureGolangciLint = "golangci-lint"
+	featureJavaToolchain = "java-toolchain"
 )
 
 // The official checksum sources of the pinned-toolchain keys (SPEC-054).
@@ -218,6 +219,7 @@ const (
 const (
 	checksumSourceGo       = "the download listing of go.dev/dl"
 	checksumSourceGolangci = "the CHECKSUMS file of the release of golangci/golangci-lint"
+	checksumSourceJava     = "the checksums file of the same release of the Temurin binaries"
 )
 
 // hostGatewayOption is the `runArgs` entry of the `ollama-host` feature: it
@@ -344,6 +346,11 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			shortDesc:       "golangci-lint from a pinned release (Dockerfile block)",
 			dockerfileBlock: true,
 			checksumSource:  checksumSourceGolangci,
+		},
+		featureJavaToolchain: {
+			shortDesc:       "JDK 21 (Eclipse Temurin) from a pinned release (Dockerfile block)",
+			dockerfileBlock: true,
+			checksumSource:  checksumSourceJava,
 		},
 		featureOllamaHost: {
 			shortDesc:       "Connection to an Ollama service of the host (container option; no relay)",

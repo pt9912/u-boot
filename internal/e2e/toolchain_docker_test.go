@@ -43,15 +43,19 @@ const (
 	e2eLintOverrideVersion  = "v2.13.2"
 	e2eGoDefaultVersion     = "1.27.3"
 	e2eGolangciDefaultVer   = "v2.14.0"
+	e2eJdkDefaultVer        = "21.0.13+9"
+	e2eJdkOverrideVersion   = "21.0.9+10"
 	goCanaryMarker          = "go-build-marker-toolchain"
 	modCanaryMarker         = "go-mod-marker-toolchain"
 	e2eChecksumsReadTimeout = 60 * time.Second
 )
 
-// toolchainImageScript runs as the image user: the pinned versions of both
+// toolchainImageScript runs as the image user: the pinned versions of the
 // tools and the existence of the binaries under their install paths.
 const toolchainImageScript = `echo "GO:$(go version)"
 echo "LINT:$(golangci-lint version 2>&1 | head -1)"
+echo "JDK:$(java -version 2>&1 | head -1)"
+echo "JAVAHOME:$JAVA_HOME"
 echo "GOMOD:$(go env GOMODCACHE 2>/dev/null || echo unset)"
 echo "BINS:$(test -x /usr/local/go/bin/go && test -x /usr/local/bin/golangci-lint && echo both)"`
 
@@ -63,8 +67,9 @@ func TestE2E_Toolchain_BuildsAndReportsPins(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
 	defer cancel()
 	dir := dcGenerateProject(ctx, t, false, map[string]string{
-		"devcontainer.features.go-toolchain.enabled":  "true",
-		"devcontainer.features.golangci-lint.enabled": "true",
+		"devcontainer.features.go-toolchain.enabled":   "true",
+		"devcontainer.features.golangci-lint.enabled":  "true",
+		"devcontainer.features.java-toolchain.enabled": "true",
 	})
 	image := buildProjectImage(ctx, t, dir, "uboot-e2e-toolchain")
 	out, code := dockerOutput(ctx, t, "run", "--rm", image, "bash", "-c", toolchainImageScript)
@@ -76,6 +81,11 @@ func TestE2E_Toolchain_BuildsAndReportsPins(t *testing.T) {
 		// The version output of golangci-lint carries the release number
 		// without the tag's `v` prefix ("has version 2.14.0 built with ...").
 		"LINT:golangci-lint has version " + strings.TrimPrefix(e2eGolangciDefaultVer, "v"),
+		// The JDK block: java reports the pinned Temurin release and
+		// JAVA_HOME points at the extracted distribution (the ARG form of
+		// the key: the bare version with `+`, Docker-Test pin).
+		"JDK:openjdk version \"21.0.13\"",
+		"JAVAHOME:/opt/jdk-" + e2eJdkDefaultVer,
 		"BINS:both",
 	} {
 		if !strings.Contains(out, want) {
@@ -87,12 +97,15 @@ func TestE2E_Toolchain_BuildsAndReportsPins(t *testing.T) {
 	}
 }
 
-// The ARG prefix of the block pin per key (the `go-toolchain` key installs
-// the `go` archive and carries its pin as GO_*); shared by the probes that
-// address the pin via `--build-arg`.
+// toolchainArgPin returns the ARG prefix of the block pin per key: the
+// `go-toolchain` key installs the `go` archive (GO_*), the other keys carry
+// their own prefix; the probes address the pin via `--build-arg`.
 func toolchainArgPin(key string) string {
 	if key == "go-toolchain" {
 		return "GO"
+	}
+	if key == "java-toolchain" {
+		return "JDK"
 	}
 	return "GOLANGCI_LINT"
 }
@@ -106,7 +119,7 @@ func toolchainArgPin(key string) string {
 // `go` archive); the probes follow the ARG prefix.
 func TestE2E_Toolchain_PinMismatchBreaksBuild(t *testing.T) {
 	requireDocker(t)
-	for probe, key := range map[string]string{"go": "go-toolchain", "golangci-lint": "golangci-lint"} {
+	for probe, key := range map[string]string{"go": "go-toolchain", "golangci-lint": "golangci-lint", "jdk": "java-toolchain"} {
 		arg := toolchainArgPin(key)
 		t.Run(probe, func(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
@@ -188,17 +201,20 @@ func TestE2E_Toolchain_OverrideBuildsAgainstReadChecksums(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
 	defer cancel()
 	dir := dcGenerateToolchainProject(ctx, t, false, map[string]string{
-		"devcontainer.features.go-toolchain.enabled":  "true",
-		"devcontainer.features.golangci-lint.enabled": "true",
-		"devcontainer.features.go-toolchain.version":  e2eGoOverrideVersion,
-		"devcontainer.features.golangci-lint.version": e2eLintOverrideVersion,
+		"devcontainer.features.go-toolchain.enabled":   "true",
+		"devcontainer.features.golangci-lint.enabled":  "true",
+		"devcontainer.features.java-toolchain.enabled": "true",
+		"devcontainer.features.go-toolchain.version":   e2eGoOverrideVersion,
+		"devcontainer.features.golangci-lint.version":  e2eLintOverrideVersion,
+		"devcontainer.features.java-toolchain.version": e2eJdkOverrideVersion,
 	})
 	df, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "Dockerfile"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(df), "ARG GO_VERSION="+e2eGoOverrideVersion) ||
-		!strings.Contains(string(df), "ARG GOLANGCI_LINT_VERSION="+e2eLintOverrideVersion) {
+		!strings.Contains(string(df), "ARG GOLANGCI_LINT_VERSION="+e2eLintOverrideVersion) ||
+		!strings.Contains(string(df), "ARG JDK_VERSION="+e2eJdkOverrideVersion) {
 		t.Errorf("the generated Dockerfile does not carry the override versions:\n%s", df)
 	}
 	image := buildProjectImage(ctx, t, dir, "uboot-e2e-toolchain-override")
@@ -209,6 +225,8 @@ func TestE2E_Toolchain_OverrideBuildsAgainstReadChecksums(t *testing.T) {
 	for _, want := range []string{
 		"GO:go version go" + e2eGoOverrideVersion + " linux/",
 		"LINT:golangci-lint has version " + strings.TrimPrefix(e2eLintOverrideVersion, "v"),
+		"JDK:openjdk version \"21.0.9\"",
+		"JAVAHOME:/opt/jdk-" + e2eJdkOverrideVersion,
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("image checks lack %q:\n%s", want, out)

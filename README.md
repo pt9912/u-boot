@@ -149,8 +149,8 @@ directories — and a healthy Postgres container ready at the declared
 port.
 
 Add a development toolchain via the devcontainer features catalogue
-(19 built-in features: `git`, `docker-cli`, `node`,
-`java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` and `claude-code` (both third-party), `gh` and `glab` (GitHub and GitLab CLI), `go-toolchain` and `golangci-lint` (toolchains from pinned release archives, both profiles), `ollama` (CPU only, sandbox profile only), and `ollama-host` (one `runArgs` line for a service on the host, no relay, both profiles)):
+(20 built-in features: `git`, `docker-cli`, `node`,
+`java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` and `claude-code` (both third-party), `gh` and `glab` (GitHub and GitLab CLI), `go-toolchain`, `golangci-lint` and `java-toolchain` (toolchains and JDK from pinned release archives, both profiles), `ollama` (CPU only, sandbox profile only), and `ollama-host` (one `runArgs` line for a service on the host, no relay, both profiles)):
 
 ```bash
 u-boot init my-service --devcontainer

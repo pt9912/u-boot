@@ -846,8 +846,10 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	data.Features = features
 	data.GoToolchain = toolchain.goToolchain
 	data.GolangciLint = toolchain.golangciLint
+	data.JdkToolchain = toolchain.javaToolchain
 	data.GoToolchainPin = toolchain.goPin
 	data.GolangciLintPin = toolchain.lintPin
+	data.JdkToolchainPin = toolchain.javaPin
 	warnings = append(warnings, sandboxRelaxationWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, thirdPartyFeatureWarnings(cfg)...)
 	warnings = append(warnings, agentNodeWarnings(cfg.Devcontainer)...)

@@ -44,7 +44,7 @@
     "GOCACHE": "${containerWorkspaceFolder}/.cache/go-build",
     "GOMODCACHE": "${containerWorkspaceFolder}/.cache/go-mod"
   },
-{{- end}}
+{{- end}}{{- /* kein containerEnv-Wert für java-toolchain: JAVA_HOME/PATH stehen im Block (SPEC-054) */ -}}
 {{- if .ForwardPorts}}
   "forwardPorts": [{{range $i, $p := .ForwardPorts}}{{if $i}}, {{end}}{{$p}}{{end}}],
 {{- end}}

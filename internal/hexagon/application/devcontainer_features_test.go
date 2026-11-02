@@ -323,6 +323,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"golangci-lint",
 		"homebrew",
 		"java",
+		"java-toolchain",
 		"kubectl-helm",
 		"node",
 		"ollama",
@@ -501,6 +502,7 @@ func blockPinArg() map[string]string {
 		"glab":          "GLAB",
 		"go-toolchain":  "GO",
 		"golangci-lint": "GOLANGCI_LINT",
+		"java-toolchain": "JDK",
 	}
 }
 
@@ -514,5 +516,6 @@ func blockChecksumSource() map[string]string {
 		"glab":          "",
 		"go-toolchain":  "the download listing of go.dev/dl",
 		"golangci-lint": "the CHECKSUMS file of the release of golangci/golangci-lint",
+		"java-toolchain": "the checksums file of the same release of the Temurin binaries",
 	}
 }

@@ -83,16 +83,21 @@ type templateData struct {
 	Gh   bool
 	Glab bool
 
-	// GoToolchain and GolangciLint switch on the installation block of the
-	// pinned toolchain (LH-FA-DEV-003, lastenheft 0.30.0, both profiles);
-	// the pin (version plus both SHA-256 values) stands in the template
-	// when the matching Pin field is its zero value, and a project
-	// `version:` override carries the read checksums of its official
-	// checksum source in the Pin field (SPEC-054).
+	// GoToolchain, GolangciLint and JdkToolchain switch on the installation
+	// block of the pinned toolchain (LH-FA-DEV-003, lastenheft 0.31.0,
+	// both profiles); the pin (version plus both SHA-256 values) stands in
+	// the template when the matching Pin field is its zero value, and a
+	// project `version:` override carries the read checksums of its official
+	// checksum source in the Pin field (SPEC-054). The ARG form of the JDK
+	// key is the bare Temurin version with `+` ("21.0.13+9"); the JDK block
+	// adds no containerEnv values — JAVA_HOME and PATH are ENV lines of its
+	// own block.
 	GoToolchain     bool
 	GolangciLint    bool
+	JdkToolchain    bool
 	GoToolchainPin  toolchainPin
 	GolangciLintPin toolchainPin
+	JdkToolchainPin toolchainPin
 
 	// Egress switches on the LH-FA-DEV-008 outbound restriction;
 	// EgressHosts is the effective allowlist baked into the startup

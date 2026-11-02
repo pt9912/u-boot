@@ -1081,11 +1081,13 @@ Ein Projekt mit Devcontainer (siehe 4.9).
    u-boot config set devcontainer.features.node.enabled true
    ```
 
-2. Optional: eine bestimmte Version festlegen:
+2. Optional: eine bestimmte Version des Features festlegen (die Version heißt
+   hier das OCI-Release des Features, nicht die installierte
+   Software-Version):
 
    ```bash
    u-boot config set devcontainer.features.java.enabled true
-   u-boot config set devcontainer.features.java.version 21
+   u-boot config set devcontainer.features.java.version 1.8.3
    ```
 
 3. `devcontainer.json` neu erzeugen:
@@ -1110,7 +1112,9 @@ Das Feature steht im verwalteten Bereich von `.devcontainer/devcontainer.json`:
 // END U-BOOT MANAGED BLOCK: init
 ```
 
-Mit `version 21` heißt der Eintrag `"ghcr.io/devcontainers/features/java:21": {}`.
+Mit `version 1.8.3` heißt der Eintrag `"ghcr.io/devcontainers/features/java:1.8.3": {}`.
+Die installierte Java-Version wählt das Feature selbst; ein gepinnte JDK-Installation
+steuert der Katalog-Schlüssel `java-toolchain` (siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional)).
 In `u-boot.yaml` steht:
 
 ```yaml
@@ -1119,7 +1123,7 @@ devcontainer:
   features:
     java:
       enabled: true
-      version: "21"
+      version: "1.8.3"
 ```
 
 #### Eingebauter Katalog
@@ -1146,6 +1150,7 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `glab` | GitLab-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `gitlab-org/cli` (SHA-256 geprüft, nur das Programm `glab` entpackt; eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` (siehe [Forge-CLIs](#forge-clis-optional)) |
 | `go-toolchain` | Go-Toolchain. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv von `go.dev/dl` (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Download-Listung von `go.dev/dl`). Setzt die beiden Cache-Pfade unter `containerEnv` — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
 | `golangci-lint` | golangci-lint. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv von `github.com/golangci/golangci-lint` (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Checksums-Datei des Releases). Setzt die beiden Cache-Pfade unter `containerEnv` — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
+| `java-toolchain` | JDK 21 der Eclipse-Temurin-Distribution. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv aus der Veröffentlichung der Temurin-Binaries (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Prüfsummen-Dateien desselben Releases, eines je Architektur). Keine `containerEnv`-Werte: `JAVA_HOME` und `PATH` stehen als `ENV`-Zeilen im Block — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
 | `ollama-host` | Anschluss an einen Dienst des Hosts. Kein OCI-Feature und kein Dockerfile-Block: `u-boot generate devcontainer` schreibt genau eine Zeile in `runArgs` der `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, im Standard- und im Sandbox-Profil, und weist den Anschluss beim Erzeugen aus (im Sandbox-Profil als Sicherheitslockerung, auch unter `--quiet`). `u-boot` startet keinen Relay, setzt keine Variable und trägt keinen Host in die Egress-Liste ein; keine Optionen, `version` nur zusammen mit `source` (siehe [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)) |
 
 #### Externe Feature-Quellen freigeben
@@ -1302,7 +1307,7 @@ u-boot init --devcontainer
 u-boot config set devcontainer.features.git.enabled true
 u-boot config set devcontainer.features.node.enabled true
 u-boot config set devcontainer.features.java.enabled true
-u-boot config set devcontainer.features.java.version 21
+u-boot config set devcontainer.features.java.version 1.8.3
 
 u-boot config set devcontainer.featureSources.allow \
   https://ghcr.io/orgX/features/custom-rust
@@ -2359,6 +2364,56 @@ Version und Prüfsummen stehen an einer Stelle im Dockerfile; im Standardprofil 
 - **Prüfungen durch `u-boot doctor`:** Die Schlüssel erzeugen keinen Eintrag unter
   `features`; `doctor` meldet für sie in den Prüfungen `devcontainer.features.allowlist`
   und `devcontainer.features.drift` keinen Befund.
+
+Der dritte Schlüssel des Eintragstyps installiert das JDK:
+
+```bash
+u-boot config set devcontainer.features.java-toolchain.enabled true
+u-boot generate devcontainer
+```
+
+- **Vertrieb und Installation:** Das erzeugte Dockerfile lädt beim Image-Build das Release-Archiv
+  der Eclipse-Temurin-Distribution der LTS-Version 21 aus der Veröffentlichung der Temurin-Binaries
+  (`github.com/adoptium/temurin21-binaries`, die Assets über einen Redirect unter
+  `release-assets.githubusercontent.com`), prüft die SHA-256-Prüfsumme **vor** dem Entpacken — die
+  Prüfsummen-Datei ist ein Asset desselben Releases und liegt je Architektur vor (`x64` für
+  `amd64`, `aarch64` für `arm64`) — und entpackt die Distribution nach `/opt`. Der Block setzt
+  `JAVA_HOME` und `PATH` als `ENV`-Zeilen auf die entpackte Distribution; `java -version` meldet
+  die installierte Revision. Version und Prüfsummen stehen an einer Stelle im Dockerfile, im
+  Standard- wie im Sandbox-Profil (im Standardprofil steht dafür `USER root` im Dockerfile).
+- **Version und Übersteuerung:** Das Handbuch führt die Revision dieses Standes, gelesen aus
+  der Veröffentlichung am 2026-11-02: `21.0.13+9`; maßgeblich sind die Zahlen im erzeugten
+  Dockerfile. Sie übersteuern die Version je Schlüssel:
+
+  ```bash
+  u-boot config set devcontainer.features.java-toolchain.version 21.0.9+10
+  ```
+
+  Beim `generate devcontainer` liest `u-boot` die Prüfsummen-Dateien **derselben Veröffentlichung**
+  für die gewählte Version (der Abruf trägt die Version URL-codiert, zum Beispiel
+  `jdk-21.0.9%2B10`) und trägt die gelesenen Prüfsummen zusammen mit der Version in den Block.
+  Beide Schreibweisen sind erlaubt (`21.0.9+10` und `jdk-21.0.9+10`); `u-boot` normalisiert auf
+  die Form des Dockerfile-Arguments (die bare Form mit `+`). Ist eine Prüfsummen-Datei nicht
+  lesbar oder nennt sie die gewählte Version nicht, endet `generate devcontainer` mit Exit-Code
+  10 und schreibt nichts (auch unter `--dry-run`); der Lauf braucht für eine Übersteuerung
+  dieselbe Internetverbindung wie der Image-Build, und für andere Umgebungen als die der Messung
+  (Linux `amd64`) ist der Abruf nicht zugesagt. Ohne Übersteuerung liest `u-boot` keine Quelle:
+  Prüfsummen und Version stehen im Katalog-Template.
+- **Abgewiesene Kombination:** Das externe Feature `java` (das OCI-Feature
+  `ghcr.io/devcontainers/features/java`, das laut seinen Metadaten Java über SDKMAN installiert)
+  **zusammen** mit `java-toolchain` legt `u-boot` mit Exit-Code 10 ab: zwei JDKs im selben
+  Image, wo sie gefunden werden, wäre eine Frage der Pfad-Reihenfolge. Beide allein bleiben
+  unverändert wählbar; einen separaten Abweisungsfall für das `sdkman`-Feature gibt es nicht.
+- **Keine Cache-Pfade:** Der Schlüssel trägt keinen Wert unter `containerEnv`; `JAVA_HOME`
+  und `PATH` stehen als `ENV`-Zeilen im erzeugten Block.
+- **Ausweisung:** wie bei den Go-Schlüsseln — `u-boot generate devcontainer` weist den Block
+  mit einer Warnung aus (die Version, bei einer Übersteuerung die Prüfsummen-Quelle, die
+  Vertriebs-Form und die Grenze der Prüfung — die Archive des Typs sind nicht signiert, und
+  `u-boot` prüft keine Signatur); die Warnung ist keine Sicherheitslockerung und entfällt
+  unter `--quiet`. Der Image-Build lädt die Archive, bevor die Egress-Beschränkung wirkt;
+  die Vertriebs-Hosts stehen als Zeile `java-toolchain` in der Default-Allowlist. `doctor`
+  meldet für den Schlüssel keinen Befund in `allowlist` und `drift`, und `u-boot` speichert
+  keinen Zustand der Schlüssel über die Projektdateien hinaus.
 
 #### Zugangsdaten (Git und Agent)
 
