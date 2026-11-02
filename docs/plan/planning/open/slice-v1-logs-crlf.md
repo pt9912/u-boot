@@ -21,7 +21,7 @@ Der Fall ist dokumentiert als Vertrags-Grenze
 ([`docs/maintainer/cli-json-contract.md`](../../../../docs/maintainer/cli-json-contract.md) §6.8,
 Absatz „CRLF-Edge-Case“) und wird auf Projektinhaber-Entscheidung 2026-11-02
 als temporärer Carveout mit diesem Plan als Folge-Slice geführt (Anlage
-im [`slice-harness-carveouts-baseline-form.md`](../next/slice-harness-carveouts-baseline-form.md),
+im [`slice-harness-carveouts-baseline-form.md`](../in-progress/slice-harness-carveouts-baseline-form.md),
 Baseline-Ziel-Form `docs/plan/carveouts/`). Hier entsteht seine Auflösung,
 wenn der Trigger eintritt.
 
