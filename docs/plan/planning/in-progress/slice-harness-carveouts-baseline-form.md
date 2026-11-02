@@ -229,7 +229,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `open/` (Entwurf).
+Der Slice ist umgesetzt, Review- und Verifier-Reports liegen vor und ihre Befunde sind berichtigt; geschlossen wird er mit dem Closure-Block am Datei-Ende (das DoD-Häckchen der Pflichten und der Verifikations-Lauf nach dem Move und dem Verweis-Nachzug).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
