@@ -47,7 +47,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 ## 2. Definition of Done
 
 - [ ] **Messung zur ENV- und Cache-Mechanik** (nicht gemessen, nicht angenommen; Protokoll unter `docs/messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/`, Skripte unter `tools/messung/`, linux-host `amd64`, lokale Engine, je Zelle zwei Läufe): (M1) löst die Dev-Container-CLI `${localWorkspaceFolder}` (oder eine Form des Workspace-Pfads) in `containerEnv` bzw. `remoteEnv` auf, sodass `GOCACHE`/`GOMODCACHE` je Projekt unter dem Workspace-Volume liegen; (M2) greift ein `ENV` des Dockerfile-Blocks im Container, und wie verhalten sich `ENV` aus dem Block und `containerEnv` aus der Konfiguration zu einander; (M3) übersteht der Cache unter dem Workspace-Volume ein `up --recreate`. *Beleg:* Protokoll [`docs/messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md`](../../../messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md) mit Rohdaten je Lauf (f76b7099: M1 bis M3; 5e08fd50: Zusatzlauf `m3z` zur ENV-Form `containerEnv`, Prüfstellen-Tabelle wie M3), Skripte unter `tools/messung/katalog-gepinnte-toolchain/`.
-- [ ] **CR-Wortlaut und Träger** (Alt/Neu je Stelle, nicht geschrieben bis zur Freigabe): neuer Katalog-Eintragstyp (Name) in [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) mit der Pin-Zusage des Musters und der Grenze "nur soweit ein Docker-Test ihn belegt"; die ENV-/Cache-Form nach Messung 1; Freigabe durch den Projektinhaber je Stelle; falls der Eintragstyp die Katalog-Regeln verlässt (etwa `version:` wählbar), ADR-Gegenprüfung gegen [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md). *Beleg:* CR-Vorschlag [`cr-vorschlag-gepinnte-werkzeugkette`](cr-vorschlag-gepinnte-werkzeugkette.md) mit Alt/Neu je Stelle und dem Regelrahmen (Decken-Regel, Grabstein [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik), ADR-Gegenprüfung in Stelle 1 S6), übernommen aus dem ADR [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md) (3cb04e77); **Freigabe je Stelle erteilt 2026-11-02** (alle acht Stellen, wie vorgelegt; F1 bis F3 entschieden, je wie empfohlen — Freigabe-Block oben im CR-Vorschlag). Das Lastenheft schreibt der CR-Slice [`slice-cr-devcontainer-gepinnte-werkzeugkette`](../open/slice-cr-devcontainer-gepinnte-werkzeugkette.md).
+- [ ] **CR-Wortlaut und Träger** (Alt/Neu je Stelle, nicht geschrieben bis zur Freigabe): neuer Katalog-Eintragstyp (Name) in [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) mit der Pin-Zusage des Musters und der Grenze "nur soweit ein Docker-Test ihn belegt"; die ENV-/Cache-Form nach Messung 1; Freigabe durch den Projektinhaber je Stelle; falls der Eintragstyp die Katalog-Regeln verlässt (etwa `version:` wählbar), ADR-Gegenprüfung gegen [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md). *Beleg:* CR-Vorschlag [`cr-vorschlag-gepinnte-werkzeugkette`](cr-vorschlag-gepinnte-werkzeugkette.md) mit Alt/Neu je Stelle und dem Regelrahmen (Decken-Regel, Grabstein [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik), ADR-Gegenprüfung in Stelle 1 S6), übernommen aus dem ADR [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md) (3cb04e77); **Freigabe je Stelle erteilt 2026-11-02** (alle acht Stellen, wie vorgelegt; F1 bis F3 entschieden — F1 und F2 wie empfohlen, **F3 nach Klarstellung mit Exit-Code `10` je Fehlerfall**, entgegen der vorgelegten 13/10-Form; Freigabe-Block oben im CR-Vorschlag, Fix (2d53e63d)). Das Lastenheft schreibt der CR-Slice [`slice-cr-devcontainer-gepinnte-werkzeugkette`](../open/slice-cr-devcontainer-gepinnte-werkzeugkette.md).
 - [ ] **Folge-Slice-Plan** in `docs/plan/planning/open/` mit der vollständigen Plan-Tabelle: Template-Block (Go + `golangci-lint` je Weg), Renderer/Daten, Katalog-Regeln, Golden Cases, Docker-Test (Bau läuft, `go version` und `golangci-lint version` melden die Pins, Cache liegt im Workspace-Volume), Regenerate-Vergleich der eigenen `.devcontainer/` (der Hand-written-Teil entfällt, Blöcke und Konfiguration erzeugt), Hebung-Abgleich über die verbleibenden Stellen. `Verantwortlich:` gesetzt; Start nach den §4-Entscheidungen. *Beleg:* [`slice-cr-devcontainer-gepinnte-werkzeugkette`](../open/slice-cr-devcontainer-gepinnte-werkzeugkette.md) (CR, geschnitten nach der Freigabe 2026-11-02) und [`slice-v1-katalog-gepinnte-toolchain`](../open/slice-v1-katalog-gepinnte-toolchain.md) (Umsetzung mit vollständiger Plan-Tabelle, `Verantwortlich:` gesetzt, Start nach dem CR) liegen in `open/`.
 
 ## 3. Plan (vor Code)
@@ -95,7 +95,51 @@ DoD vollständig; `make gates` grün (`docs-check` 0 Befunde); Messprotokoll mit
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `open/` (Entwurf).
+**Evidence (Berichte und Commits):**
+
+- Review-Report [`2026-11-02-slice-v1-katalog-gepinnte-toolchain-entwurf`](../../../reviews/2026-11-02-slice-v1-katalog-gepinnte-toolchain-entwurf.md): 0 HIGH, 4 MEDIUM (F-1 bis F-4), 1 LOW (F-5), 2 INFO (F-6, F-7); Fix-Runde `2d53e63d` (F-1/F-2 Reststellen des überholten `13`/`10`-Standes auf Exit `10` je Fehlerfall, F-3 Plan-Tabellen-Nachzug, F-4 Fundstellen am Code berichtigt, F-5 Freigabe-Präfix), Report-Berichtigung `bd71715f`.
+- Verification-Report [`2026-11-02-slice-v1-katalog-gepinnte-toolchain-entwurf-verify`](../../../reviews/2026-11-02-slice-v1-katalog-gepinnte-toolchain-entwurf-verify.md): DoD-Konform verifiziert, closure-fähig; F-4 vom Verifier am Code nachgelesen (`.devcontainer/Dockerfile` ARG 87 bis 92, ENV 113 bis 118, Kommentar 109 bis 112, Block 77 bis 118); F-5 durch die Berichtigung der DoD-Zeile 2 vor diesem Commit behoben; F-6 als Rest-Risiko ausgewiesen.
+- Läufe: `make gates` grün (Stempel = HEAD vor der Prosa-Zeile unten), CI der Mess-Tips `f76b7099` und `5e08fd50` je success (`ci` 41410945794/41411456556, `integration-docker` 41410946065/41411456578) vom Verifier per `gh run list` bestätigt.
+
+**DoD je Liefer-Punkt (alle erbracht):**
+
+1. **Messung** — M1 bis M3 samt M3-Zusatzlauf `m3z` (Commits `f76b7099`, `5e08fd50`), Protokoll [`docs/messungen/slice-v1-katalog-gepinnte-toolchain-entwurf`](../../../messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md), je Zelle zwei Läufe, datiert, verworfene Vorläufe vermerkt.
+2. **CR-Wortlaut und Träger** — Alt/Neu je Stelle im [`cr-vorschlag-gepinnte-werkzeugkette`](cr-vorschlag-gepinnte-werkzeugkette.md), Freigabe je Stelle erteilt 2026-11-02 (F1–F3 mit den Klarstellungen, §Freigabe-Block); der ADR [`ADR-0041`](../../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md) trägt die Regeländerung (`Accepted` 2026-11-02, eigener Commit `56ce6c4b`).
+3. **Folge-Slice-Plan** — [`slice-cr-devcontainer-gepinnte-werkzeugkette`](../open/slice-cr-devcontainer-gepinnte-werkzeugkette.md) (CR-Slice, acht Stellen incl. [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) als Kennungs-Entscheidung F1) und [`slice-v1-katalog-gepinnte-toolchain`](../open/slice-v1-katalog-gepinnte-toolchain.md) (Umsetzung nach dem CR, vollständige Plan-Tabelle) mit Bestand und Roadmap-Zeile `v0.19.0`.
+4. `make gates` grün (unten); Review und Verification mit Reports (oben); Closure mit Risiko-Ausgängen, Register und drei Paarungen (hier).
+
+**Risiken aus §6, Ausgang je Punkte:**
+
+1. `${localWorkspaceFolder}` nicht aufgeteilt-tragend — gemessen widerlegt: `containerEnv` mit `${containerWorkspaceFolder}` trägt (m1c); `remoteEnv` scheidet aus (m1d). *Ausgang:* Messung, Wortlaut im CR (Stelle 3).
+2. Zweite Pin-Definition — entschieden (F1): eine Quellen-Regel, die neue Kennung `LH-FA-DEV-011` trägt die Vier-Stellen-Liste samt Test-Abgleich; der Grabstein [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) wird zitiert, nicht belebt. *Ausgang:* CR-Stelle 2.
+3. `go` + `go-toolchain` widersprechen einander — entschieden (F2): Abweisung mit Exit-Code `10` (S8 des CR). *Ausgang:* CR-Stelle 5.
+4. Block-`ENV` gilt je Konfiguration — gemessen real (m2); der CR-Wortlaut begrenzt: `containerEnv` übersteuert den Block (m2c), die Zusage bleibt auf das Gemessene begrenzt. *Ausgang:* Messung und CR-Grenzliste.
+5. Messwert im CR, den der Test nicht belegt — die Stellen tragen je ihre Beleggrenze („nur soweit ein Docker-Test belegt", URL-Form je Version als Implementation-Stelle).
+6. Rechte oder Größe beim Regenerate — gemessen: Marker, Pads und Eigentumsrechte (`vscode:vscode`) überstehen das Recreate in beiden Formen (m3, m3z). *Ausgang:* Messung.
+
+**Was ging anders als geplant:** Die F-3-Entscheidung änderte den vorgelegten CR-Satz S5 (13/10) nach der Klärung; eine Berichtigungsrunde (`6dd2a14d`, `2d53e63d`) wurde nötig, weil der Freigabe-Nachzug nur teilweise lief und die Folge-Slices den Vor-Stand trugen (Review F-1/F-2). Die Fundstellen der Entwurfs-Zeilen lagen daneben und wurden erst vom Review am Code berichtigt (F-4; `AGENTS.md` §3.10-Klasse „Plan-Aussage über Code").
+
+**Steering-Loop-Eintrag** (gezählt, nicht verkörpert; kein Eintrag trägt das Feld `liegt in`):
+
+- *Lehre:* **Fundstellen-Zahlen (Zeilen- und Block-Angaben) im Planungs-Text wurden nicht am Code nachgelesen und lagen daneben** (ARG 83 bis 88 statt 87 bis 92, ENV 97 bis 107 statt 113 bis 118) — Klasse des verkörperten [`AGENTS.md`](../../../../AGENTS.md) §3.10-Rückfalls, Register [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md); dazu F-5 (Zustandsmarker nach Ablauf, derselbe Verkörperungsrahmen, weiterer Beleg). Sensor-Kandidate der früheren Closures bleiben beim Projektinhaber; nichts wird neu verkörpert.
+- *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine. *Folge-Slices:* die zwei oben getragenen (Dateien in `open/`).
+
+**Beobachtungs-Register (`../observations/`):**
+
+- *Evidence neu:* [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) (`evidence/slice-v1-katalog-gepinnte-toolchain-entwurf.md`: F-4 Fundstellen-Drift und F-5 Marker nach Ablauf, behoben).
+- *Nicht gezählt:* [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) — kein Fund (die CR-Stellen tragen je Beleggrenzen, Verifier bestätigt); [`BEO-DOK/messprotokoll-rohdaten-mit-zugangsdaten`](../observations/BEO-DOK/messprotokoll-rohdaten-mit-zugangsdaten/observation.md) — kein Fund (Sweep des Reviews, 41 Dateien); [`BEO-E2E/docker-test-hinterlaesst-zwischencontainer`](../observations/BEO-E2E/docker-test-hinterlaesst-zwischencontainer/observation.md) — kein Fund (Aufräumen mit Inventar).
+
+**Carveouts:** keiner neu, keiner gelöst, keiner verändert.
+
+**Continuation-Bedingung:** der CR-Slice startet, wenn dieser Slice in `done/` liegt (WIP-Limit 1); der Umsetzungs-Slice nach dem CR.
+
+**Weiter offen (nicht abgehakt):** F-6 (Review-INFO): die Aussage „in beiden Profilen" der Stelle 3 ruht auf der Golden-Case-Pflicht des Umsetzungs-Slices — dessen Plan-Zeile nennt das Standardprofil nicht ausdrücklich; beim Start des Umsetzungs-Slices prüfen. F6-ENV-Rest (`BUILD_MODE`, `GOFLAGS`, `GOTOOLCHAIN`) bleibt §7-Entscheidung ohne Straten-Zusage des Umsetzungs-Slices.
+
+**Abgleich der Plan-Tabelle** (Stand nach der Fix-Runde `2d53e63d`, Verifier): jeder berührte Datei-Pfad des Entwurfs hat eine Zeile in §3 oder einen ausgewiesenen Nicht-Eintrag; die Reports sind als Nachzugs-Zeile getragen.
+
+**Drei Paarungen** (geprüft auf den Inhalt dieser Notiz): *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert, nichts zu paaren. *Folge-Slice* — die zwei getragenen Slices liegen als Dateien in `open/` (`ls` bei der Closure). *Register* — jede genannte Kennung ist ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls` bei der Closure).
+
+**Verifikation** (Läufe nach Closure-Inhalt, Move und Verweise-Nachzug; Modus der Umgebung): wird nach dem Nachzug geführt und steht als Zeile danach hier.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
