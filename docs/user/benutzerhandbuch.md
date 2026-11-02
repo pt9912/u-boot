@@ -1144,6 +1144,8 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `ollama` | Ollama (lokale Sprachmodelle, nur CPU); wirkt nur im Sandbox-Profil. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), dazu ein benanntes Volume für die Modelle; keine Optionen, `version` nur zusammen mit `source` (siehe [Ollama](#ollama-optional)) |
 | `gh` | GitHub-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `cli/cli` (SHA-256 geprüft, nur das Programm `gh` entpackt; eine Signatur prüft `u-boot` nicht, die GitHub-Attestierung des Projekts prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` (siehe [Forge-CLIs](#forge-clis-optional)) |
 | `glab` | GitLab-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `gitlab-org/cli` (SHA-256 geprüft, nur das Programm `glab` entpackt; eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` (siehe [Forge-CLIs](#forge-clis-optional)) |
+| `go-toolchain` | Go-Toolchain. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv von `go.dev/dl` (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Download-Listung von `go.dev/dl`). Setzt die beiden Cache-Pfade unter `containerEnv` — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
+| `golangci-lint` | golangci-lint. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv von `github.com/golangci/golangci-lint` (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Checksums-Datei des Releases). Setzt die beiden Cache-Pfade unter `containerEnv` — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
 | `ollama-host` | Anschluss an einen Dienst des Hosts. Kein OCI-Feature und kein Dockerfile-Block: `u-boot generate devcontainer` schreibt genau eine Zeile in `runArgs` der `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, im Standard- und im Sandbox-Profil, und weist den Anschluss beim Erzeugen aus (im Sandbox-Profil als Sicherheitslockerung, auch unter `--quiet`). `u-boot` startet keinen Relay, setzt keine Variable und trägt keinen Host in die Egress-Liste ein; keine Optionen, `version` nur zusammen mit `source` (siehe [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)) |
 
 #### Externe Feature-Quellen freigeben
@@ -2286,6 +2288,78 @@ mit einem ungültigen Token (zum Beispiel einem Platzhalter) antworten die Werkz
   `glab` an der Namensauflösung (`lookup gitlab.com`), und der Client wiederholt
   die Anfragen, sodass der Lauf deutlich länger dauert.
 
+#### Werkzeugketten aus gepinntem Release (optional)
+
+```bash
+u-boot config set devcontainer.features.go-toolchain.enabled true
+u-boot config set devcontainer.features.golangci-lint.enabled true
+u-boot generate devcontainer
+```
+
+Die Features `go-toolchain` und `golangci-lint` installieren die Go-Toolchain und golangci-lint
+im Container. Sie sind keine OCI-Features und erscheinen nicht unter `features` in
+`devcontainer.json`: Das erzeugte Dockerfile lädt beim Image-Build das Release-Archiv des
+Upstream-Werkzeugs (`go` von `go.dev/dl`, `golangci-lint` von
+`github.com/golangci/golangci-lint`), prüft die SHA-256-Prüfsumme **vor** dem Entpacken
+(bei einer Abweichung bricht der Build ab) und entpackt nach `/usr/local` — Go nach
+`/usr/local/go` (mit `PATH`-Eintrag im erzeugten Block), golangci-lint nach `/usr/local/bin`.
+Version und Prüfsummen stehen an einer Stelle im Dockerfile; im Standardprofil steht dafür
+`USER root` im Dockerfile. Das Standard- und das Sandbox-Profil erzeugen dieselbe Installation.
+
+- **Version:** Die Version steht als Build-Argument im erzeugten Dockerfile und stammt aus
+  dem Katalog von `u-boot`; sie ändert sich nur mit einem `u-boot`-Release. Zum Stand dieses
+  Handbuchs: Go `1.27.3` und `golangci-lint` `v2.14.0`; maßgeblich sind die Zahlen im
+  erzeugten Dockerfile.
+- **Eigene Version:** Sie übersteuern sie je Schlüssel:
+
+  ```bash
+  u-boot config set devcontainer.features.go-toolchain.version 1.26.10
+  u-boot config set devcontainer.features.golangci-lint.version v2.13.2
+  ```
+
+  Beim `generate devcontainer` liest `u-boot` die offizielle Prüfsummen-Quelle des Schlüssels
+  für die gewählte Version — für `go` die Download-Listung von `go.dev/dl`, für
+  `golangci-lint` die Checksums-Datei des Releases — und trägt die gelesenen Prüfsummen
+  zusammen mit der Version in den erzeugten Block. Beide Schreibweisen einer Version sind
+  erlaubt (`1.26.10` und `go1.26.10`, `v2.13.2` und `2.13.2`); `u-boot` normalisiert auf die
+  Form des Dockerfile-Arguments. Ist die Quelle nicht lesbar oder nennt sie die gewählte
+  Version keine Linux-Archive für `amd64` und `arm64`, endet `generate devcontainer` mit
+  Exit-Code 10 und schreibt nichts (auch unter `--dry-run`); der Lauf braucht für eine
+  Übersteuerung dieselbe Internetverbindung wie der Image-Build. Ohne Übersteuerung liest
+  `u-boot` keine Quelle: Prüfsummen und Version stehen im Katalog-Template.
+- **Nicht abgewiesene Kombination:** Das externe Feature `go` **zusammen** mit
+  `go-toolchain` legt `u-boot` mit Exit-Code 10 ab: zwei Go-Installationen im selben Image,
+  wo `go` gefunden wird, wäre eine Frage der Pfad-Reihenfolge. Das externe `go` allein bleibt
+  wählbar; `golangci-lint` neben dem Feature `go` ist zulässig. `golangci-lint` allein ohne
+  eine Go-Installation legt nur das Programm ins Image; Lint-Läufe brauchen für viele
+  Prüfungen eine Go-Installation.
+- **Cache-Pfade:** Sind einer der beiden Schlüssel oder beide gesetzt, trägt die erzeugte
+  `devcontainer.json` unter `containerEnv` die Werte
+  `"GOCACHE": "${containerWorkspaceFolder}/.cache/go-build"` und
+  `"GOMODCACHE": "${containerWorkspaceFolder}/.cache/go-mod"` (je einmal, auch bei beiden
+  Schlüsseln), im Standard- und im Sandbox-Profil. Im Sandbox-Profil liegt `${containerWorkspaceFolder}`
+  im Workspace-Volume: Die Caches überstehen das Neuanlegen des Containers
+  (`u-boot devcontainer up --recreate`) so wie der Workspace selbst. Im Standardprofil
+  schreibt `u-boot` keine Aussage zu, wo der Container sein Workspace-Verzeichnis hält.
+- **Ausweisung:** `u-boot generate devcontainer` weist je aktiviertem Schlüssel den Block aus
+  (eine Warnung): die Version (Default-Pin des Katalogs oder Ihre Übersteuerung, mit der
+  Prüfsummen-Quelle) und die Grenze der Prüfung — die Archive des Typs sind nicht signiert,
+  und `u-boot` prüft keine Signatur: Die Prüfsumme schützt vor einem später ausgetauschten
+  Archiv, nicht vor einem von Anfang an schadhaften Release. Die Warnung ist keine
+  Sicherheitslockerung und entfällt unter `--quiet`; die Blöcke im Dockerfile bleiben.
+- **Zustand:** `u-boot` speichert keinen Zustand der beiden Schlüssel über die
+  Projektdateien hinaus und startet nichts davon. Kein `ENV` für `BUILD_MODE`, `GOFLAGS`
+  oder `GOTOOLCHAIN` durch die Schlüssel: Diese Werte Ihres Projekts setzen Sie selbst
+  (im eigenen Devcontainer dieses Projekts als Beispiel: ein `ENV` hinter dem verwalteten
+  Block).
+- **Egress:** `u-boot` trägt keine Hosts der beiden Werkzeugketten in die
+  Egress-Liste ein; der Image-Build lädt die Archive bevor die Beschränkung wirkt. Welche
+  Hosts Ihre Go-Builds und Lint-Läufe im laufenden Container brauchen (Module-Proxy,
+  Lint-Regeln), tragen Sie selbst in `devcontainer.sandbox.egress.allow` ein.
+- **Prüfungen durch `u-boot doctor`:** Die Schlüssel erzeugen keinen Eintrag unter
+  `features`; `doctor` meldet für sie in den Prüfungen `devcontainer.features.allowlist`
+  und `devcontainer.features.drift` keinen Befund.
+
 #### Zugangsdaten (Git und Agent)
 
 Zugangsdaten stehen **nie** im Image, im Volume, in `u-boot.yaml` oder in einer
@@ -2524,7 +2598,7 @@ mit `--json` einen strukturierten Hinweis in `data.hint` (`command`, `action`,
 | `devcontainer.resources.memory` | Arbeitsspeicher-Grenze des Containers (`--memory`) | positive ganze Zahl, optional `b`, `k`, `m` oder `g`, zum Beispiel `512m`, `3g` | ja |
 | `devcontainer.resources.cpus` | CPU-Grenze des Containers (`--cpus`) | positive Dezimalzahl mit Punkt, zum Beispiel `1.5` | ja |
 | `devcontainer.features.<name>.enabled` | Feature aktiv | `true` / `false` | ja |
-| `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `ollama-host`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`) | ja |
+| `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `ollama-host`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`); für `go-toolchain` und `golangci-lint` die Versions-Übersteuerung des Katalog-Pins (siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional)) | ja |
 | `devcontainer.features.<name>.source` | externe Feature-Quelle | URL aus der Freigabeliste | ja |
 | `devcontainer.featureSources.allow` | Freigabeliste externer Quellen | URLs, kommagetrennt | ja |
 | `devcontainer.sandbox.nestedRuntime` | Container-Laufzeit im Sandbox | `none` / `podman` / `docker` | ja |

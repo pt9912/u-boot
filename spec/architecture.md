@@ -253,6 +253,15 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
     die Trennung von Exit-Klasse 11 und 12 entsteht hier, nicht im Use-Case.
   - `NetProbe` für Erreichbarkeits-Prüfungen beim Warten auf startende
     Services ([`LH-FA-UP-003`](lastenheft.md#lh-fa-up-003--startstatus-anzeigen)).
+  - `Fetcher` (`Get(ctx, url)`) für das Lesen der offiziellen Prüfsummen-Quelle
+    eines Schlüssels der gepinnten Werkzeugkette bei einer `version:`-Übersteuerung
+    ([`SPEC-054`](spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)).
+    Ein eigener Port, weil die Application frei von `net/http` bleiben muss
+    (§4, Linter-Regel `application-no-net`); der Adapter führt einen GET mit
+    Zeit- und Antwortgrenze aus und klassifiziert nichts — ein nicht lesbarer
+    Abruf ist die Abweisung der Übersteuerung, die der Use-Case trägt. Der
+    Default-Pin braucht den Port nicht (Prüfsummen stehen im Template); ohne
+    Verdrahtung endet jede Übersteuerung an derselben Abweisung.
   - `HostGitSource` (`GitToken`/`ConfigValue`) für die Host-Quellen der
     Git-Zugangsdaten und -Identität der Devcontainer-Befehle
     ([`LH-FA-DEV-009`](lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer),
@@ -336,6 +345,10 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
   - `docker/` — vier Adapter im selben Paket: `DockerProbe` via `os/exec docker` (read-only diagnostics für [LH-FA-DIAG-002](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)), `DockerEngine` für die Compose-Lifecycle-Operationen, `DevcontainerInspector` für das Lesen der Statusdateien des Devcontainer-Containers und `DevcontainerLauncher` für Start, Stopp und Betreten des Devcontainers. Der Inspector prüft vor dem Lesen den Tar-Kopf (nur reguläre Datei, Größe), begrenzt jeden Aufruf zeitlich und behandelt eine entfernte Engine (`DOCKER_HOST` oder Docker-Kontext ohne lokalen Unix-Socket) als nicht ermittelbar. Der Engine-Adapter prüft die Erreichbarkeit der Runtime vor jedem Kommando und trennt dabei die Fehlerklassen 11 und 12 (§7.1). Der Launcher trägt den Kontext des Hilfs-Images eingebettet (`go:embed`: `Dockerfile`, `package.json`, `package-lock.json`) und baut das Image per `docker build` nur, wenn sein Tag fehlt. Er startet die Dev-Container-CLI in einem kurzlebigen Hilfs-Container (`docker run --rm`, Engine-Socket und Projektordner als `--mount`, Variablen nur als Name), entfernt diesen bei Fehler und Abbruch, maskiert die Werte durchgereichter Variablen in Fortschritt und Fehlertexten, stoppt Container mit `docker stop` und prüft vor `Up`, `Stop` und `Shell` Binary, Daemon und lokale Engine (§7.1); die Prüfung auf eine lokale Engine ist dieselbe Funktion wie beim Inspector. Die Sitzung von `Shell` läuft über `docker exec` des Host-Clients, ohne Hilfs-Container: Im Container ruft der Adapter nur die Probe und die Sitzung auf. Er zeichnet den Kopf der Fehlerausgabe des Clients (ohne Terminal auch den der Standardausgabe) auf und erkennt an der Meldung des Clients, ob `docker exec` vor dem Beginn der Sitzung geendet hat (der Exit-Status des Clients trennt das nicht vom Exit-Status der Shell); mit Terminal gibt er Standardeingabe und Standardausgabe unverändert an den Client weiter, damit der Client das Terminal dort findet.
   - `netprobe/` — `NetProbe`-Adapter für die Erreichbarkeits-Prüfung startender Services.
   - `runtime/` — `RuntimeEnvironment`-Adapter (Container-Self-Detection).
+  - `fetch/` — `Fetcher`-Adapter via `net/http` (ein GET mit Zeit- und
+    Antwortgrenze, [`SPEC-054`](spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv));
+    die einzige Stelle des Projekts, an der `net/http` läuft — wie bei
+    `netprobe/` als eigenes Paket, damit die Depguard-Liste den Weg trägt.
   - `localtemplates/` und `externaltemplates/` — zwei `TemplateCatalog`-/`TemplateFiles`-Quellen: eingebettete Vorlagen und ein lokales Verzeichnis ([`LH-FA-TPL-003`](lastenheft.md#lh-fa-tpl-003--eigene-templates)). Dieselben Ports, austauschbare Herkunft — der Use-Case sieht keinen Unterschied.
   - `templateyaml/` — Codec für die Vorlagen-Metadaten ([`LH-FA-TPL-002`](lastenheft.md#lh-fa-tpl-002--template-metadaten)), getrennt vom Projekt-`YAMLCodec`, weil beide unterschiedliche Schemata tragen.
   - `recordingfs/` — `FileSystem`-Dekorator, der Schreiboperationen aufzeichnet statt ausführt; trägt die Vorschau-Modi `--dry-run`/`--diff`, ohne dass der Use-Case sie kennt.
