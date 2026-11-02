@@ -11,6 +11,13 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-11-02
+
+Eighteenth release. **Named devcontainers, git credentials and identity of the host in the sandbox devcontainer, and resource limits for the devcontainer.**
+`u-boot devcontainer up` starts the container under the name `u-boot-<project-name>` or, with `--instance <name>`, `u-boot-<project-name>-<name>`; the search of the container (by labels), its identity and the volume names stay. The exit changes only where the name is composed: a name part the engine refuses and a name held by a container of another project folder end the call with exit code `10` before the helper container starts; `down`, `shell`, `doctor`, `init` and `generate` work as before. In the sandbox profile, `devcontainer.sandbox.hostGitToken: true` lets the container use the git token of the host, opt-in per project; the value travels by name on the command line and in the environment of the `docker` client process, never in a file, an image or an output of `u-boot`, and the git identity of the container comes from the `user.name`/`user.email` of the project folder on the host (both profiles). The keys `devcontainer.resources.memory` and `devcontainer.resources.cpus` render memory and CPU limits into `runArgs` of `devcontainer.json` in both profiles.
+**Promised:** the three features on a Linux host (`amd64`) with a local engine, as far as the tests of this release show — unit tests, fake sources (`gh`/`git` as scripts) and Docker tests with build tag `docker`; that the resource limit reaches the container only on an engine that is not nested. **Not promised:** a real push with a real token, other hosts and engines, the token of other forge tools and `git credential fill` as a source, a limit that is too small and the sum of the limits over several instances, and the effect of the limits on the nested Docker.
+Lastenheft 0.27.0, 0.28.0 and 0.29.0.
+
 ### Added
 
 - Resolution of the git credentials and identity of the host for the devcontainer commands (opt-in): with the sandbox profile and the switch `devcontainer.sandbox.hostGitToken: true` (readable and writable with `u-boot config`), `u-boot devcontainer up` and `shell` resolve the git token on the host when the variable `GIT_TOKEN` is not set there — first the host variable, then `gh auth token` (for an installed and logged-in `gh`) — and hand the value to the container like a host variable: by name on the command line, the value in the environment of the `docker` client process; never in a file, an image, a volume, a command line or an output of `u-boot`. The command names the source it used (never the value) and, without any source, points that out without aborting ([`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CONF-002`](spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [ADR-0040](docs/plan/adr/0040-host-git-quellen-fuer-token-und-identitaet.md)). After a successful start, both commands also set the git identity of the container with `git config --global` from the effective `user.name`/`user.email` of the project folder on the host (both profiles; a value the container already carries stays; missing values or a missing `git` are a warning without abort). **Promised:** the resolution, the naming of the source, the identity step and the transport of the values on a Linux host (`amd64`) with a local engine, as far as the Docker tests with fake sources (scripts as `gh`/`git`) and the tests of the adapters show; a real push with a real token is not measured. **Not promised:** the token of other forge tools (`GH_TOKEN`, `GITLAB_TOKEN`) from the same resolution, `git credential fill` as a source, other hosts and engines, and the behaviour of a host `gh` with several accounts. Lastenheft 0.28.0.
@@ -1582,7 +1589,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/pt9912/u-boot/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/pt9912/u-boot/compare/v0.16.1...v0.17.0
 [0.16.1]: https://github.com/pt9912/u-boot/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/pt9912/u-boot/compare/v0.15.1...v0.16.0
