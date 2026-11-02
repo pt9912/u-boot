@@ -139,7 +139,7 @@ DoD vollständig; `make gates` grün (`docs-check` 0 Befunde); Messprotokoll mit
 
 **Drei Paarungen** (geprüft auf den Inhalt dieser Notiz): *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert, nichts zu paaren. *Folge-Slice* — die zwei getragenen Slices liegen als Dateien in `open/` (`ls` bei der Closure). *Register* — jede genannte Kennung ist ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls` bei der Closure).
 
-**Verifikation** (Läufe nach Closure-Inhalt, Move und Verweise-Nachzug; Modus der Umgebung): wird nach dem Nachzug geführt und steht als Zeile danach hier.
+**Verifikation** (Läufe nach Closure-Inhalt, Move, d-check-Berichtigung und Verweise-Nachzug; Docker-Modus): `make gates` Exit 0 am 2026-11-02 (`record-gates`-Stempel = HEAD nach dem Nachzug). Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
