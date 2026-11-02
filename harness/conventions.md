@@ -101,7 +101,7 @@ sie gilt für jeden Lauf.
 
 | MR | aufgelöst durch |
 |---|---|
-| [002](conventions/done/MR-002-carveout-inventar.md) <a id="mr-002"></a> | [slice-harness-carveouts-baseline-form](../docs/plan/planning/in-progress/slice-harness-carveouts-baseline-form.md) (Entscheidung des Projektinhabers 2026-11-02: volle Baseline-Form — `docs/plan/carveouts/` trägt README-Index und CO-Dateien, die dauerhaften Ausschlüsse tragen ihre ADR-/Spec-Anker, [ADR-0042](../docs/plan/adr/0042-dauerhafte-lint-ausnahmen.md) für die zwei Kommentar-getragenen) |
+| [002](conventions/done/MR-002-carveout-inventar.md) <a id="mr-002"></a> | [slice-harness-carveouts-baseline-form](../docs/plan/planning/done/slice-harness-carveouts-baseline-form.md) (Entscheidung des Projektinhabers 2026-11-02: volle Baseline-Form — `docs/plan/carveouts/` trägt README-Index und CO-Dateien, die dauerhaften Ausschlüsse tragen ihre ADR-/Spec-Anker, [ADR-0042](../docs/plan/adr/0042-dauerhafte-lint-ausnahmen.md) für die zwei Kommentar-getragenen) |
 | [011](conventions/done/MR-011-werkzeug-fragmente-repo-gefuehrt.md) <a id="mr-011"></a> | [`MR-012`](#mr-012) (Baseline `v6.18.1`: `ai-harness-init` ist eingeführt) |
 
 ## Zusatzklassen-Deklaration für Sensors-Bindung

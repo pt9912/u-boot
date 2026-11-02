@@ -5,7 +5,7 @@
 **Datum angelegt:** 2026-06-07 (Pre-T8-Bestätigungsrunde LOW-2 des Slices
 [`slice-v1-cli-json-dry-run-logs`](../planning/done/slice-v1-cli-json-dry-run-logs.md),
 geschlossen 2026-06-07). **Letzte Prüfung:** 2026-11-02 (Lesung `splitLogLines`
-am Fundort und des Vertrags-Absatzes, Migrationsslice [`slice-harness-carveouts-baseline-form`](../planning/in-progress/slice-harness-carveouts-baseline-form.md)).
+am Fundort und des Vertrags-Absatzes, Migrationsslice [`slice-harness-carveouts-baseline-form`](../planning/done/slice-harness-carveouts-baseline-form.md)).
 
 **Betroffenes Gate:** `make test` — Deckung der CLI-Vertrags-Tests; kein
 Schwellen-Verweis: der Carveout nimmt keine Schwelle aus, er dokumentiert die
@@ -73,4 +73,4 @@ Träger ist die Vertrags-Doku:
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-06-07 | Angelegt (Pre-T8-Bestätigungsrunde LOW-2) | [`slice-v1-cli-json-dry-run-logs`](../planning/done/slice-v1-cli-json-dry-run-logs.md) |
-| 2026-11-02 | Geprüft, weiterhin gültig; aus dem Master-Inventar in die Baseline-Form überführt (Migrationsslice [`slice-harness-carveouts-baseline-form`](../planning/in-progress/slice-harness-carveouts-baseline-form.md), [`MR-002`](../../../harness/conventions/done/MR-002-carveout-inventar.md) resolved) | [`slice-v1-logs-crlf`](../planning/open/slice-v1-logs-crlf.md) (Anlage) |
+| 2026-11-02 | Geprüft, weiterhin gültig; aus dem Master-Inventar in die Baseline-Form überführt (Migrationsslice [`slice-harness-carveouts-baseline-form`](../planning/done/slice-harness-carveouts-baseline-form.md), [`MR-002`](../../../harness/conventions/done/MR-002-carveout-inventar.md) resolved) | [`slice-v1-logs-crlf`](../planning/open/slice-v1-logs-crlf.md) (Anlage) |
