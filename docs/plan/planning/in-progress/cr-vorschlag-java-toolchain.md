@@ -1,11 +1,14 @@
 # CR-Vorschlag: Katalog-Schlüssel `java-toolchain` (Temurin, LTS 21) — Alt/Neu-Wortlaut je Stelle
 
-**Status:** vorgelegt dem Projektinhaber (Freigabe steht aus; 2026-11-02).
+**Status:** freigegeben (2026-11-02); der freigegebene Wortlaut ist ins Lastenheft 0.31.0 und in die TECH-Spec übernommen (Abweichungen unten).
 
-**Freigabe-Kontext (Projektinhaber, 2026-11-02):** die vier Entscheidungen des
-Hauptagenten-Gesprächs (§4 des Plans
+**Freigabe (Projektinhaber, 2026-11-02):** der *Neu*-Wortlaut der zwölf Stellen
+§§2 ist je Stelle freigegeben, wie vorgelegt (wortgleich; Muster
+[`slice-cr-devcontainer-forge-cli`](../done/slice-cr-devcontainer-forge-cli.md)
+§1: Freigabe als eigener Schritt vor der Lastenheft-Änderung); die vier
+Entscheidungen des Hauptagenten-Gesprächs (§4 des Plans
 [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md))
-tragen diesen Entwurf: **Schlüsselname und Konflikt-Regel** — `java-toolchain`,
+tragen ihn weiter: **Schlüsselname und Konflikt-Regel** — `java-toolchain`,
 aktiviertes externes `java` neben dem Schlüssel ist ein fachlicher
 Validierungsfehler (Exit-Code `10`), das externe `java` allein bleibt wählbar;
 **Vertrieb** — Eclipse Temurin, LTS 21, Release-Archive aus der Veröffentlichung
@@ -14,15 +17,22 @@ der Lastenheft-Historie als Chronik; **Prüfsummen-Quelle** — Same-Origin je
 Release, die JSON-Schnittstelle `api.adoptium.net` bleibt aus. Dazu die
 **Brew-Auflage** (2026-11-02): die Messung des Umsetzungs-Slices liest die
 Brew-Form des Vertriebs und trägt nur den Befund — keine zweite
-Installationsform im CR. Diese Setzungen sind der Freigabe-**Kontext**, nicht
-der freigegebene **Wortlaut**; der *Neu*-Wortlaut der Stellen §§2 ist je Stelle
-freizugeben, und `spec/lastenheft.md` wird erst damit geändert, wortgleich
-(Muster [`slice-cr-devcontainer-forge-cli`](../done/slice-cr-devcontainer-forge-cli.md)
-§1: Freigabe als eigener Schritt vor der Lastenheft-Änderung). Der *Neu*-Wortlaut
-ist so formuliert, dass er nach dem Kopieren ohne weitere Bearbeitung
-contract-konform ist; die Belege stehen im Kommentar je Stelle, nicht im
-Vertrag. Die J-Marker (**J1**..**J11**) sind Entwurfs-Kennungen dieses Dokuments,
-keine Vertragskennungen; sie entfallen mit dem Lastenheft-Commit.
+Installationsform im CR. Die Freigabe-Punkte **F6 bis F8** sind entschieden:
+**F6** — erweitern, keine eigene Technik-Stelle (Stelle 7); der Titel von
+[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+nennt die drei Schlüssel. **F7** — `sdkman` ohne Abweisung: der
+CR nennt nur den Konflikt mit dem externen `java` (Stelle 5); die Frage, ob ein
+aktives `sdkman` allein ein JDK installiert, geht als offener Punkt an den
+Umsetzungs-Slice. **F8** — die [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)-Hosts-Zeile
+kommt in den CR-Commit, auf die gelesene Vertriebs-Lage (Stelle 9, Aufstellung
+(a); Fundstelle beim Implementer, siehe §7 des CR-Slices); der Docker-Test des
+Umsetzungs-Slices pinnt die Hosts. Die Abweichungen des Lastenheft-Wortlauts
+vom Block-Wortlaut der Stellen §§2 (im CR-Slice §7 ausgeführt): die J-Marker
+(**J1**..**J11**) sind Beleg-Marker dieses Dokuments, keine Vertragskennungen,
+und sind mit dem Lastenheft-Commit entfallen; der Verweis „(Stelle 4)" am Ende
+von **J11** ist eine interne Stelle dieses Vorschlags (Decken-Regel) und ist
+im Vertrag entfallen; die [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Verweise
+stehen als Anker innerhalb der Zieldatei.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
 [`slice-cr-devcontainer-java-toolchain`](slice-cr-devcontainer-java-toolchain.md)
@@ -340,22 +350,21 @@ die Wirkung der `PATH`-Reihenfolge der zwei JDK-Installationen — der Zustand,
 den kein Test trägt). Das externe `java` allein bleibt unverändert wählbar
 (Satz **J8**, zweiter Halbsatz); seine Zeile
 [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)
-(Zeile 1466) ändert sich nicht.
+(Zeile 1475, Stand nach dem CR-Diff) ändert sich nicht.
 
-**Offen — `sdkman`:** der Katalog führt `sdkman` auf dieselbe Quelle mit
+**Entschieden — `sdkman` ohne Abweisung (F7, 2026-11-02):** der Katalog führt `sdkman` auf dieselbe Quelle mit
 geteiltem Render-Schlüssel („teilt sich den Render-Schlüssel mit `java`",
 [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
 Zeile 1552; Katalog-Eintrag mit der Beschreibung „SDKMAN (installed by the
 official java feature)",
 [`devcontainer_features.go`](../../../../internal/hexagon/application/devcontainer_features.go)
 Zeilen 310 bis 314). Ob ein aktives `sdkman` allein ein JDK installiert (die
-Aktivierung rendert das `java`-Feature) und deshalb unter denselben
-Abweisungsfall wie das externe `java` fällt, liest der Implementer an den
-Feature-Metadaten und pinnt es mit einem Test — Freigabe-Punkt **F7**;
-Empfehlung: derselbe Abweisungsfall, sobald die gelesene Lage ihn trägt; ohne
-sie bleibt der Absatz beim externen `java` und die Frage geht als
-Beobachtung ins Register. In keiner der beiden Stände verspricht der CR, was
-der Docker-Test nicht trägt (Regel 2).
+Aktivierung rendert das `java`-Feature), ist nicht gelesen; die Freigabe fällt
+auf den zweiten Stand der Vorlage: der Absatz bleibt beim externen `java`
+allein (Satz **J8** nennt nur ihn), und die Frage geht als offener Punkt an den
+Umsetzungs-Slice — er liest die Feature-Metadaten und pinnt die Lage mit einem
+Test, ehe die Abweisung erweitert würde; bis dahin verspricht der CR über das
+externe `java` hinaus nichts (Regel 2).
 
 ### Stelle 6 — Default-Pin-Werte: Chronik, keine Vertragszahlen
 
@@ -414,10 +423,13 @@ wären neu — aber die Abweichungen sind Zeilen derselben Tabellen, keine
 eigenen Absätze. **Contra** (der Erweiterung): der Titel verlässt seine
 Zwei-Schlüssel-Fassung, und der Absatz *Cache-Werte* erweitert einen
 ausdrücklich auf die zwei Go-Schlüssel begrenzten Zustand um die Abgrenzung
-des dritten (der CR trägt die Form der Abgrenzung — Stelle 4). Die Wahl wird
+des dritten (der CR trägt die Form der Abgrenzung — Stelle 4). Die Wahl wurde
 beim Implementer als Teil der Freigabe-Vorlage geführt (CR-Slice §1,
 DoD-Zeile 3); der *Neu*-Wortlaut der Spec-Stellen (nicht der Lastenheft-Stellen)
-ist Teil derselben Freigabe wie der Lastenheft-Wortlaut.
+ist Teil derselben Freigabe wie der Lastenheft-Wortlaut. **Entschieden
+(F6, 2026-11-02): erweitern** — [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+steht erweitert; sein Titel nennt die drei Schlüssel, der Anker-Nachzug des
+neuen Slugs läuft mit dem Technik-Commit.
 
 ### Stelle 8 — Meldung des Erzeugens (Warn-Form)
 
@@ -475,7 +487,15 @@ Empfehlung; (b) die Zeile entsteht mit dem Umsetzungs-Slice nach der Messung
 — der DoD-Punkt
 ([`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)-Zeile)
 verschiebt sich dorthin, was eine
-Plan-Berichtigung am CR-Slice (DoD-Zeile 3) voraussetzt. In keinem der beiden
+Plan-Berichtigung am CR-Slice (DoD-Zeile 3) voraussetzt. **Entschieden
+(F8, 2026-11-02): Aufstellung (a)** — die Zeile steht im CR-Commit auf die
+gelesene Vertriebs-Lage: das Release-Verzeichnis von `adoptium/temurin21-binaries`
+auf `github.com` und der Asset-Host `release-assets.githubusercontent.com`
+(Archiv und Prüfsummen-Datei sind Assets desselben Releases; gelesen am
+2026-11-02 über das Release-Listing der Veröffentlichung und einen verfolgten
+Redirect eines Prüfsummen-Assets, Fundstelle im CR-Slice §7); der Docker-Test
+des Umsetzungs-Slices pinnt die Hosts, und eine abweichende Umsetzungs-Messung
+berichtigt die Zeile. In keinem der beiden
 Stände steht ein erfundener Host im Vertrag (Regel 2).
 
 ### Stelle 10 — [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config): die zwei Schlüssel-Namen-Zeilen
@@ -574,8 +594,8 @@ Link-Klammern (wie Zeile 23), nicht der Nutzertext.
 ## 4. Punkte für die Freigabe
 
 Die vier Entscheidungen und die Brew-Auflage vom 2026-11-02 sind **getragen**;
-neu zu entscheiden ist der *Neu*-Wortlaut je Stelle (§§2) und der Punkt F6 bis
-F8:
+der *Neu*-Wortlaut je Stelle (§§2) und die Punkte F6 bis F8 sind freigegeben
+(2026-11-02, Stand je Zeile):
 
 | Punkt | Frage | Empfehlung | Stand (2026-11-02) |
 |---|---|---|---|
@@ -584,6 +604,6 @@ F8:
 | **F3** | Default-Pin-Zahlen im Vertragstext | nein — Chronik im CHANGELOG und in der Lastenheft-Historie; im CR Muster F4 des Vorlaufs | **entschieden** — nein (Stelle 6) |
 | **F4** | Prüfsummen-Quelle | Same-Origin je Release; `api.adoptium.net` aus | **entschieden** — Prüfsummen-Datei derselben Veröffentlichung, je gewählter Version (Stelle 3) |
 | **F5** | Die Brew-Auflage (2026-11-02) — Vertriebs-Befund über Homebrew (Cask `temurin`/`temurin@21`, Formel-Verhältnis zum Feature `homebrew`) | Mess-Punkt des Umsetzungs-Slices; keine zweite Installationsform im CR | **Auflage** — Mess-Pflicht in [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md) §2 (d); der CR trägt sie nicht |
-| **F6** | Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle daneben | erweitern — der Eintragstyp bleibt an einer Stelle (Stelle 7) | **offen** — entscheidet mit der Wortlaut-Freigabe |
-| **F7** | Fall `sdkman` + `java-toolchain`: derselbe Abweisungsfall wie externes `java`? | derselbe Abweisungsfall, sobald die gelesene Feature-Lage ihn trägt; sonst Absatz beim externen `java` allein und Frage ins Beobachtungs-Register (Stelle 5) | **offen** — entscheidet mit der Wortlaut-Freigabe |
-| **F8** | Zeitpunkt der Hosts-Zeile in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) | im CR-Commit auf die gelesene Vertriebs-Lage, gepinnt durch den Docker-Test des Umsetzungs-Slices (Stelle 9) | **offen** — entscheidet mit der Wortlaut-Freigabe |
+| **F6** | Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle daneben | erweitern — der Eintragstyp bleibt an einer Stelle (Stelle 7) | **entschieden** — erweitern (Stelle 7); der Titel nennt die drei Schlüssel, der Anker-Nachzug läuft mit dem Technik-Commit |
+| **F7** | Fall `sdkman` + `java-toolchain`: derselbe Abweisungsfall wie externes `java`? | derselbe Abweisungsfall, sobald die gelesene Feature-Lage ihn trägt; sonst Absatz beim externen `java` allein und Frage ins Beobachtungs-Register (Stelle 5) | **entschieden** — `sdkman` ohne Abweisung: der CR nennt nur den Konflikt mit dem externen `java` (Stelle 5); die Frage geht als offener Punkt an den Umsetzungs-Slice |
+| **F8** | Zeitpunkt der Hosts-Zeile in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) | im CR-Commit auf die gelesene Vertriebs-Lage, gepinnt durch den Docker-Test des Umsetzungs-Slices (Stelle 9) | **entschieden** — die Zeile kommt in den CR-Commit, Aufstellung (a) (Stelle 9); Fundstelle der gelesenen Lage im CR-Slice §7 |
