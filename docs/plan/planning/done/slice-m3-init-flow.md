@@ -207,7 +207,7 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
   [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes).
 - Hängt von: M2d (Carveout-Disziplin etabliert).
 - Löst auf: zwei M3-Carveouts in
-  [`carveouts.md`](../in-progress/carveouts.md).
+  [`carveouts.md`](../../carveouts/README.md).
 - Wird ggf. auslösen: `slice-v1-gomodguard-rules.md` (sobald Cobra
   und yaml.v3 in `go.mod` landen).
 

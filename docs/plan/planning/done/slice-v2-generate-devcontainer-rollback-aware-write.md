@@ -186,7 +186,7 @@ File-1+2-Rollback + Dir-Cleanup + YAML-No-Touch.
 ## Bezug
 
 - Carveouts-Tracking:
-  [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
+  [`docs/plan/carveouts/README.md`](../../carveouts/README.md)
   §Temporäre Carveouts — Eintrag verweist hierher.
 - Generate-Slice T0-(i):
   [`slice-v1-cli-json-dry-run-generate`](../done/slice-v1-cli-json-dry-run-generate.md)

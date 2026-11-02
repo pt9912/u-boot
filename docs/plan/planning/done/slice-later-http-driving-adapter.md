@@ -40,7 +40,7 @@ erweitern — er fällt unter die bestehende `adapter/driving`-Kategorie.
 ## Bezug
 
 - Auslösende Doku: `spec/architecture.md` §7.
-- Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
+- Inventar-Eintrag: [`carveouts.md`](../../carveouts/README.md) →
   HTTP-Driving-Adapter (mit Slice-Closure entfernt).
 - Hängt von: konkretem externen Trigger (heute keiner).
 - Phase: Later — bewusst niedrigste Priorität, keine MVP- oder

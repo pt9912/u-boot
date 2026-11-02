@@ -91,7 +91,7 @@ sind entfernt.
   `ecb8379` für M3-T4a).
 - Spec-Bezug: [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) (Überschreibschutz), implizit
   `LH-NFA-USE-*` (kein Memory-Footgun).
-- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
+- Aufhebung dokumentiert in: [`carveouts.md`](../../carveouts/README.md)
   und [`roadmap.md`](../in-progress/roadmap.md).
 - `interfacebloat`-Exclude-Carveout in der **permanenten**
   Carveout-Tabelle dokumentiert (bewusste Schicht-Auflockerung).

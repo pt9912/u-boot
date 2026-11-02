@@ -37,7 +37,7 @@ ids:
       target: spec/spezifikation.md
       link-policy: always
     - regex: '\bCO(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b'
-      target: spec/lastenheft.md
+      target: docs/plan/carveouts/
       link-policy: always
     - regex: '\b(?:slice|tranche)-[a-z0-9][a-z0-9-]*[a-z0-9](?:\.[0-9]+)*\b'
       target: docs/plan/planning/
@@ -60,7 +60,7 @@ matrix:
     - name: slice
       paths: ["docs/plan/planning/**/slice-*.md", "docs/plan/planning/**/tranche-*.md"]
     - name: carveout
-      paths: ["docs/plan/planning/in-progress/carveouts.md"]
+      paths: ["docs/plan/carveouts/CO-*.md"]
     - name: roadmap
       paths: ["docs/plan/planning/in-progress/roadmap.md"]
   rules:

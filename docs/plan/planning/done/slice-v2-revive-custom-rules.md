@@ -62,7 +62,7 @@ Enumeration zur Pflicht; sie ist in [ADR-0006](../../adr/0006-revive-custom-rule
 
 - Auslösende ADR: `0003-solid-nahes-lint-profil.md` Folgepunkte.
 - Resultierende ADR: [`0006-revive-custom-rules.md`](../../adr/0006-revive-custom-rules.md).
-- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
+- Aufhebung dokumentiert in: [`carveouts.md`](../../carveouts/README.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle).
 - Hängt von: nichts; vorgezogen ohne Trigger nach User-Entscheidung.

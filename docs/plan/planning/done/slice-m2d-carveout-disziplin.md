@@ -25,7 +25,7 @@ Plan-Spur. Risiko: vergessen werden, sobald das Projekt fachlich wächst.
   `carveouts.md`. Permanente Carveouts kommen ins Inventar **ohne** Plan,
   aber mit Begründung. [`LH-MVP-001`](../../../../spec/lastenheft.md#lh-mvp-001--muss-im-mvp-enthalten-sein) ergänzt; Traceability-Matrix-Zeile
   angelegt.
-- **Master-Inventar** `docs/plan/planning/in-progress/carveouts.md`:
+- **Master-Inventar** `docs/plan/carveouts/README.md`:
   zwei Sektionen (temporär = Plan-Pflicht, permanent = nur Begründung).
   Initial 11 Einträge, davon 9 mit Plan-Verweis; weitere kamen
   fortlaufend dazu.

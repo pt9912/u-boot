@@ -87,7 +87,6 @@ sie gilt für jeden Lauf.
 | MR | Titel | Geltungsbereich | Ersetzt-Baseline-Regel |
 |---|---|---|---|
 | [001](conventions/MR-001-source-precedence-drei-straten.md) <a id="mr-001"></a> | Source Precedence mit drei Spec-Straten (Vollform) | `AGENTS.md` §2, `harness/README.md` §Source precedence, `.d-check.yml` (Referenzmatrix) | [`grundlagen-source-precedence.md` §Source Precedence](../.harness/baseline/v6.18.1/regelwerk/grundlagen-source-precedence.md#source-precedence) |
-| [002](conventions/MR-002-carveout-inventar.md) <a id="mr-002"></a> | Carveout-Inventar an fester Stelle statt `docs/plan/carveouts/` | `docs/plan/planning/in-progress/carveouts.md`, Baseline-Regelwerk `modul-07-carveouts.md`, `.d-check.yml` (`matrix`) | [`modul-07-carveouts.md` §Ziel-Form: Carveout](../.harness/baseline/v6.18.1/regelwerk/modul-07-carveouts.md#ziel-form-carveout) |
 | [003](conventions/MR-003-roadmap-wellen.md) <a id="mr-003"></a> | Roadmap folgt Wellen-Template; Release-Cuts wellenlos; Ort `in-progress/` | `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/README.md`, `.claude/commands/plan-welle.md`, `.claude/commands/close-welle.md`, `.claude/agents/planner.md` | [`modul-06-roadmap.md` §Roadmap-Struktur: fünf Abschnitte (Modul 6)](../.harness/baseline/v6.18.1/regelwerk/modul-06-roadmap.md#roadmap-struktur-fünf-abschnitte-modul-6) |
 | [004](conventions/MR-004-regelwerk-vendored.md) <a id="mr-004"></a> | Regelwerk-Lese-Form committet vendored; Baseline-Pin; beide Bäume | `.harness/baseline/`, `tools/harness/fetch-baseline-cache.sh`, `AGENTS.md` §1, `harness/README.md` §Guides, `.d-check.yml` (`scan.ignore`) | [`modul-02-harness-bootstrap.md` §Greenfield-Bootstrap: Schritt-Sequenz (Modul 2)](../.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md#greenfield-bootstrap-schritt-sequenz-modul-2) |
 | [005](conventions/MR-005-gate-haltung-docs-check.md) <a id="mr-005"></a> | Gate-Haltung: `docs-check` via `d-check.mk`-Fragment; `scan.ignore` erweitert | `.d-check.yml`, `d-check.mk` (`docs-check`) | [`modul-02-harness-bootstrap.md` §Gate-Fragment `d-check.mk` (Schritt 2)](../.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md#gate-fragment-d-checkmk-schritt-2) |
@@ -102,6 +101,7 @@ sie gilt für jeden Lauf.
 
 | MR | aufgelöst durch |
 |---|---|
+| [002](conventions/done/MR-002-carveout-inventar.md) <a id="mr-002"></a> | [slice-harness-carveouts-baseline-form](../docs/plan/planning/in-progress/slice-harness-carveouts-baseline-form.md) (Entscheidung des Projektinhabers 2026-11-02: volle Baseline-Form — `docs/plan/carveouts/` trägt README-Index und CO-Dateien, die dauerhaften Ausschlüsse tragen ihre ADR-/Spec-Anker, [ADR-0042](../docs/plan/adr/0042-dauerhafte-lint-ausnahmen.md) für die zwei Kommentar-getragenen) |
 | [011](conventions/done/MR-011-werkzeug-fragmente-repo-gefuehrt.md) <a id="mr-011"></a> | [`MR-012`](#mr-012) (Baseline `v6.18.1`: `ai-harness-init` ist eingeführt) |
 
 ## Zusatzklassen-Deklaration für Sensors-Bindung

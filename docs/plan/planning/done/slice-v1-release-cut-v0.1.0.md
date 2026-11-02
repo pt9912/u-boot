@@ -84,5 +84,5 @@ nicht Auto-Trigger.
   [ADR-0007](../../adr/0007-distributionswege-ghcr.md),
   [`docs/user/branch-protection.md`](../../../maintainer/branch-protection.md).
 - Phase: V1 (release-cut), keine Carveout-Auflösung — daher kein
-  Eintrag in [`carveouts.md`](../in-progress/carveouts.md),
+  Eintrag in [`carveouts.md`](../../carveouts/README.md),
   sondern nur in der Roadmap.

@@ -25,8 +25,6 @@ Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-k
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
-Nichts in Arbeit.
-
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
@@ -136,9 +134,10 @@ flowchart LR
 
 ## Verwandte Dokumente
 
-- [`carveouts.md`](carveouts.md) — Master-Inventar aller temporären und
-  permanenten Carveouts (Baseline-Regelwerk `modul-07-carveouts.md`),
-  plus Audit-Trail der Slices, die offene Carveouts geschlossen haben.
+- [`docs/plan/carveouts/README.md`](../../carveouts/README.md) — der
+  Carveout-Index der Baseline-Form, README und CO-Dateien
+  (Baseline-Regelwerk `modul-07-carveouts.md`; das frühere Inventar ist
+  aufgelöst, [`MR-002`](../../../harness/conventions/done/MR-002-carveout-inventar.md)).
 - [`README.md`](../README.md) — Slice-/Tranche-Konventionen für Dateinamen in
   `docs/plan/planning/` (Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine).
 - [`docs/archive/roadmap-history-v0.1-v0.3.md`](../../../archive/roadmap-history-v0.1-v0.3.md)

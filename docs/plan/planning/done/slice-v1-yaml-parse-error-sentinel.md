@@ -183,7 +183,7 @@ Bis dahin bleibt die Lücke explizit im Top-Kommentar von
 
 ### Carveout-Cleanup
 
-- Eintrag in [`carveouts.md`](../in-progress/carveouts.md) wird
+- Eintrag in [`carveouts.md`](../../carveouts/README.md) wird
   entfernt.
 - Slice-Datei wird nach `done/` verschoben; **die DoD-Line in
   diesem File trägt direkt den Implementations-Commit-Hash**

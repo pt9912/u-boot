@@ -64,7 +64,7 @@ Der Slice schreibt kein Produktcode. Fundstellen gelesen am 2026-11-02 (Planner 
 
 ## 4. Trigger
 
-**Start** (`open` → `next` → `in-progress`): `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/` (WIP-Limit 1, gelesen beim Start — `in-progress/` trägt aktuell `roadmap.md` und [`carveouts.md`](../in-progress/carveouts.md) nur; der Umsetzungs-Slice der Werkzeugkette liegt in `done/`). Die vier Entscheidungen (2026-11-02) liegen vor; die Freigabe des Wortlauts entsteht im Slice (DoD-Zeile 1) — der Implementer legt sie dem Projektinhaber vor und ändert die Verträge erst nach der Freigabe.
+**Start** (`open` → `next` → `in-progress`): `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/` (WIP-Limit 1, gelesen beim Start — `in-progress/` trägt aktuell `roadmap.md` und [`carveouts.md`](../../carveouts/README.md) nur; der Umsetzungs-Slice der Werkzeugkette liegt in `done/`). Die vier Entscheidungen (2026-11-02) liegen vor; die Freigabe des Wortlauts entsteht im Slice (DoD-Zeile 1) — der Implementer legt sie dem Projektinhaber vor und ändert die Verträge erst nach der Freigabe.
 
 **Rückführungen — vorab benannt:**
 

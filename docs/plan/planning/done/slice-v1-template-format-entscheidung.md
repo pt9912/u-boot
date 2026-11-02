@@ -44,7 +44,7 @@ zwischen mindestens diesen Optionen:
 ## Bezug
 
 - Auslösende Spec: [`LH-OPEN-004`](../../../../spec/lastenheft.md#lh-open-004--template-format-entschieden), [`LH-FA-TPL-001`](../../../../spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen)..[`LH-FA-TPL-004`](../../../../spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten).
-- Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
+- Inventar-Eintrag: [`carveouts.md`](../../carveouts/README.md) →
   [`LH-OPEN-004`](../../../../spec/lastenheft.md#lh-open-004--template-format-entschieden) (mit Slice-Closure entfernt).
 - Hängt von: erstem konkreten Template-Bedarf (vermutlich nach
   MVP-Closure, weil MVP nur das `basic`-Template per Default

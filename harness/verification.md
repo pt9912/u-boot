@@ -91,7 +91,7 @@ wenn ein naheliegender Sensor nicht gelaufen ist.
   [`harness/replay.md`](replay.md).
 - Nicht ausgefuehrte Sensors sind erlaubt, aber nur mit Grund.
 - Neue temporaere Carveouts brauchen parallel einen Eintrag in
-  [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md)
+  [`docs/plan/carveouts/README.md`](../docs/plan/carveouts/README.md)
   und einen Plan-Anker.
 - Reviewer-Findings sind keine Verification-Evidence. Sie koennen
   Evidence ausloesen, aber der Verifier prueft DoD, Spec und Sensors

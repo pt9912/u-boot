@@ -155,6 +155,13 @@ Suppressions, sondern bewusste Profil-Entscheidungen:
 | `_test\.go$`          | `noctx`, `unparam`, `revive` (`unused-parameter`)            | Tests gegen `httptest.Server`/Fakes brauchen die Linter nicht. |
 | `cmd/uboot/`          | `testpackage`, `gochecknoglobals` (für `var version`)         | Wiring-Schicht braucht `main`-Package; `version` wird per `-ldflags` überschrieben. |
 | `errcheck` global     | `fmt.Fprintln`, `fmt.Fprintf`, `fmt.Fprint` (stdout/stderr)  | CLI-Writes können nicht meaningful fehlschlagen; `_, _ =`-Prefix bringt keinen Wert. |
+| depguard-Regelblöcke  | `!**/*_test.go` als erstes `files`-Pattern jeder Regel       | Tests importieren Fakes und Test-Bibliotheken (`testify`, …) frei; die Schicht-Regeln gelten production-only ([`SPEC-034`](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln); [`ADR-0042`](../plan/adr/0042-dauerhafte-lint-ausnahmen.md), Entscheidung 3). |
+| `internal/adapter/driving/cli/` | `contextcheck` | Cobras `RunE`-Signatur trägt keinen Context-Parameter; die strenge Propagation lebt eine Ebene tiefer in `runInit` ([`ADR-0042`](../plan/adr/0042-dauerhafte-lint-ausnahmen.md), Entscheidung 1). |
+| `internal/hexagon/port/driven/filesystem.go` | `interfacebloat` | `driven.FileSystem` bedient die Backup-Mechanik ([`LH-FA-INIT-005`](../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)) in ihrer ganzen Breite; die künstliche Aufspaltung würde die Test-Fakes verkomplizieren ohne semantischen Mehrwert, das globale Limit (10) bleibt ([`ADR-0042`](../plan/adr/0042-dauerhafte-lint-ausnahmen.md), Entscheidung 2). |
+
+Die Zeilen `_test\.go$`, `cmd/uboot/` und `errcheck` sind Entscheidungen von
+[`ADR-0003`](../plan/adr/0003-solid-nahes-lint-profil.md); die dauerhafte Lesart
+der Tabelle: bewusste Profil-Entscheidungen, keine Suppressions.
 
 ---
 

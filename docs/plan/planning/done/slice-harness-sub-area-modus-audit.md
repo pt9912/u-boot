@@ -115,7 +115,7 @@ Scope:
 - Artefakte: §9 dieses Slice (Audit-Protokoll),
   [`harness/conventions.md`](../../../../harness/conventions.md)
   (§Modus-Deklaration ersetzt, `MR-006` eingelöst),
-  [`carveouts.md`](../in-progress/carveouts.md) (neuer Eintrag),
+  [`carveouts.md`](../../carveouts/README.md) (neuer Eintrag),
   [`slice-harness-internal-readme-kennungs-retrofit`](slice-harness-internal-readme-kennungs-retrofit.md)
   (neuer `open/`-Plan), [`roadmap.md`](../in-progress/roadmap.md).
 

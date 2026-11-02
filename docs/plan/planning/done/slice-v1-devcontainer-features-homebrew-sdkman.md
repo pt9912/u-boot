@@ -132,7 +132,7 @@ Traceability:
 Carveouts:
 - Neu: none
 - Geloest: none
-- Unveraendert: none (`docs/plan/planning/in-progress/carveouts.md` nicht berührt)
+- Unveraendert: none (`docs/plan/carveouts/README.md` nicht berührt)
 
 Nicht ausgefuehrt:
 - `make ci` / `make fullbuild` — vom Verifier nicht selbst belegbar; der Implementer meldet einen lokalen Lauf, der hier nicht reproduziert wurde.

@@ -239,7 +239,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
   Mid-Write zweiter File in Phase 2 (`executeDevcontainerPlans`)
   hinterlässt **halbgeschriebenen Zustand** auf Disk — File 1
   ist committed, File 2 fehlt/teilweise. Carveout-Eintrag in
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](../../carveouts/README.md) §Temporäre
   Carveouts mit Re-Trigger auf einen Devcontainer-Rollback-aware-
   Slice (offen, V2-Scope; Cluster-Out-of-Scope per T0-(b) Variante 3).
   **Envelope-Form (Recorder-Realität, R4-Korrektur)**: der

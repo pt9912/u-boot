@@ -85,7 +85,7 @@ die korrekte Version; `u-boot doctor` läuft ohne Errors.
   — Linux-Binaries existieren seit T1 `dc9a336`/`f3f1731` als
   GitHub-Release-Asset.
 - Carveout:
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](../../carveouts/README.md) §Temporäre
   Carveouts, [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Zeile.
 - Roadmap:
   [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0+ Backlog.

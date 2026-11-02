@@ -39,7 +39,7 @@ zwischen mindestens diesen Optionen:
 ## Bezug
 
 - Auslösende Spec: [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden), `spec/architecture.md` §7.
-- Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
+- Inventar-Eintrag: [`carveouts.md`](../../carveouts/README.md) →
   [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden) (mit Slice-Closure entfernt).
 - Hängt von: erster Wunsch nach drittem Add-on oder externem Service,
   der nicht zum Kern gehört (vermutlich nach MVP-Closure).

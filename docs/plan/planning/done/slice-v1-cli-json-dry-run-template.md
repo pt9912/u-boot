@@ -67,7 +67,7 @@ T3+T4 hat das lokale `--json`-Flag auf `template list` entfernt
 und das Output-Format **bewusst unverändert** gelassen: heutige
 `templateJSON`-Array-Struktur ohne Spec-§1841-Minimalkontrakt-
 Felder. Carveouts-Eintrag in
-[`carveouts.md`](../in-progress/carveouts.md) §Temporäre Carveouts
+[`carveouts.md`](../../carveouts/README.md) §Temporäre Carveouts
 verweist auf diesen Slice als Re-Trigger.
 
 Code-Realität heute:
@@ -341,7 +341,7 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
   LH-Codes genutzt, keine tool-internen Codes; `template list`
   emittiert auf dem Happy-Path `diagnostics: []`.
 - ✅ **Carveouts-Eintrag entfernt**: Zeile aus
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](../../carveouts/README.md) §Temporäre
   Carveouts gestrichen (T4).
 - ✅ **bare-`template`-Verhalten festgezurrt** (T0-(a) (i)):
   `u-boot template --json` → **Reject Exit 2**, **envelope-LOS**
@@ -412,7 +412,7 @@ leakt rohen Output).
   [`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)
   T3+T4 (Flag-Schnitt + Carveouts-Eintrag).
 - Carveouts:
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](../../carveouts/README.md) §Temporäre
   Carveouts §`template list --json`.
 - Code-Realität: `internal/adapter/driving/cli/template.go`,
   `internal/adapter/driving/cli/jsonenvelope.go`.

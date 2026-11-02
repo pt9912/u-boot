@@ -22,7 +22,7 @@
 > [`slice-v1-cli-json-dry-run-remove`](slice-v1-cli-json-dry-run-remove.md)
 > §Review-Round-15. Carveout-Plan-Anker ([[feedback_carveouts_need_plans]]);
 > verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
+> [`docs/plan/carveouts/README.md`](../../carveouts/README.md)
 > §Temporäre Carveouts.
 >
 > **Standalone, NICHT in T_close absorbiert**: der Stub nannte als

@@ -73,7 +73,7 @@ nicht, weil sie kein Release ist).
   Lastenheft 0.7.0 nahm die Zusage für Docker Desktop zurück ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)),
   und der Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) verließ die Welle.
   Die Intel-Abbrüche des Smokes kamen vom abgekündigten Label `macos-13`, nicht von knappen Runnern.
-- **Trigger-Audit:** Carveout: [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) in [`carveouts.md`](../in-progress/carveouts.md) aufgelöst.
+- **Trigger-Audit:** Carveout: [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) in [`carveouts.md`](../../carveouts/README.md) aufgelöst.
   Bootstrap-aware Gate: `coverage-gate` unverändert, 90,90 % gegen 90 %; 0 offen. ADR: [`ADR-0016`](../../adr/0016-homebrew-distribution-per-tap.md)
   und [`ADR-0018`](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) tragen keinen eingetretenen Re-Evaluierungs-Trigger (die Geschichte der zweiten
   vermerkt die Lastenheft-Eingrenzung); 0 offen.

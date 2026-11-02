@@ -58,7 +58,7 @@ begründet — ohne Inventar-Eintrag, ohne Plan.
 |---|---|---|
 | `internal/**/README.md` (7 Dateien) | update | Kennungen verlinken, Status entzeitlichen |
 | [`.d-check.yml`](../../../../.d-check.yml) `scan.ignore` | update | `internal/**` entfernen bzw. minimal fassen |
-| [`carveouts.md`](../in-progress/carveouts.md) | update | Eintrag auflösen mit Audit-Trail |
+| [`carveouts.md`](../../carveouts/README.md) | update | Eintrag auflösen mit Audit-Trail |
 
 ## 4. Trigger
 
@@ -116,7 +116,7 @@ Scope:
   (Carveout aufgelöst) sind die tragenden Anker.
 - Artefakte: sieben `internal/**/README.md`,
   [`.d-check.yml`](../../../../.d-check.yml) (`scan.ignore` verengt),
-  [`carveouts.md`](../in-progress/carveouts.md) (Eintrag aufgelöst, Audit-Trail
+  [`carveouts.md`](../../carveouts/README.md) (Eintrag aufgelöst, Audit-Trail
   ergänzt).
 
 DoD-Abgleich: alle Punkte erfüllt. Der `scan.ignore`-Glob ist **vollständig**

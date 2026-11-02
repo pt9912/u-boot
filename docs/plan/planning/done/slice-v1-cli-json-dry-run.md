@@ -177,7 +177,7 @@ Wenn ein Folge-Slice tatsächlich slipt (z. B. weil die
 Sub-Decision in `next/` blockiert): **vor** dem Cluster-Move
 nach `done/` muss
 (1) ein expliziter Carveout-Eintrag in
-[`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+[`carveouts.md`](../../carveouts/README.md) §Temporäre
 Carveouts erscheinen, der den fehlenden Subcommand benennt
 und mit einem benannten Re-Trigger-Slice-Plan-Stub in `open/`
 verlinkt ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) Carveout-Plan-Anker-Pflicht);

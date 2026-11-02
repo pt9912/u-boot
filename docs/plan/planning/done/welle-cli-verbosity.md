@@ -107,7 +107,7 @@ einen Release-Cut-Slice gibt es nicht (der CHANGELOG ist vollständig, ein Cut i
   Warnungen“, dann „nur Fehler“ mit einer, dann mit vier Ausnahmen), die Entscheidung zu `--quiet` fiel in drei Schritten (Sicherheitslockerungen,
   weitere Ausnahmen, Vorschau), und der Code-Slice `slice-v1-cli-quiet-nur-fehler` brauchte drei Review-Runden (zwei Reports und der Verifier); die Vorschau und
   die Rangfolge schnitten sich als eigene Slices ab. Docker- und Mac-Ressourcen waren nicht beteiligt.
-- **Trigger-Audit:** Carveout: keiner berührt, [`carveouts.md`](../in-progress/carveouts.md) unverändert; 0 offen. Bootstrap-aware Gate:
+- **Trigger-Audit:** Carveout: keiner berührt, [`carveouts.md`](../../carveouts/README.md) unverändert; 0 offen. Bootstrap-aware Gate:
   `coverage-gate` 91,10 % gegen 90 %; 0 offen. ADR: keine ADR trägt einen eingetretenen Re-Evaluierungs-Trigger (eine Suche nach `--quiet` und
   Verbosity in [`docs/plan/adr/`](../../adr/README.md) trifft keine ADR; [`ADR-0003`](../../adr/0003-solid-nahes-lint-profil.md) nennt `log/slog` nur als Linter-Regel); 0 offen. Hard Rule: keine hat
   einen eingetretenen Auflösungs-Trigger; die neue Regel `AGENTS.md` §3.9 ist permanent.

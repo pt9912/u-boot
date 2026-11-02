@@ -205,7 +205,7 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von 
 | `repo.mk` | update | in der Planung nicht aufgeführt: `-timeout 30m` im `go test`-Rezept von `test-docker` (Entscheidung des Projektinhabers 2026-10-18, §1); Zeitbudget, keine Prüfung gelockert | — |
 | `docs/reviews/2026-10-18-slice-v1-sandbox-fallback-host-ausweisung.md` | neu | Review-Report (Reviewer); die Befunde F-1 bis F-6 sind behoben, F-7 bis F-11 vermerkt | — |
 | `docs/plan/planning/done/slice-v1-sandbox-fallback-host-ausweisung.md` | update | diese Tabelle gegen `git diff --stat` abgeglichen, DoD-Zeile „Folge-ADR `Accepted`“ abgehakt, Lastenheft-Stand 0.13.0 (nach dem vorgelagerten CR); in der Closure DoD, §6 (Ausgänge) und §7 | — |
-| `docs/plan/planning/in-progress/carveouts.md`, `.golangci.yml` (depguard), `.d-check.yml` | unverändert | kein neuer Carveout, kein neues Paket | — |
+| `docs/plan/carveouts/README.md`, `.golangci.yml` (depguard), `.d-check.yml` | unverändert | kein neuer Carveout, kein neues Paket | — |
 | `spec/lastenheft.md` | **unverändert** | Entscheidung 2026-10-17 | — |
 
 ### Architect: Entwurf und Messprotokoll (2026-10-17)

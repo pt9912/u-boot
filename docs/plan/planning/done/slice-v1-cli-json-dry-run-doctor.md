@@ -272,7 +272,7 @@ JSON-Modus darum semantisch ein No-op.
   Minimal-konforme Form folgt mit Cluster-Platz 9
   [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md). **Carveouts-Eintrag-
   Pflicht**: dieser Slice trägt einen Carveout-Eintrag in
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](../../carveouts/README.md) §Temporäre
   Carveouts mit dem Re-Trigger-Verweis auf
   [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md).
 - ✅ **Schema-Konformität via Helper**: drei Acceptance-Tests

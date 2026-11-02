@@ -39,6 +39,6 @@ und ADR-0001s Folgepunkt schließt.
 ## Bezug
 
 - Auslösende ADR: `0001-implementierungssprache-go.md` Folgepunkte.
-- Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
+- Inventar-Eintrag: [`carveouts.md`](../../carveouts/README.md) →
   [ADR-0001](../../adr/0001-implementierungssprache-go.md) CLI-Framework offen.
 - Hängt von: M3-T3 (CLI-Adapter mit Cobra).

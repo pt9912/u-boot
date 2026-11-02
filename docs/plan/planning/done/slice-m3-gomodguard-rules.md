@@ -77,7 +77,7 @@ für die Carveout-Auflösung.
 ## Bezug
 
 - Auslösende Konfig: `.golangci.yml` `gomodguard_v2.blocked: {}` (vor diesem Slice).
-- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
+- Aufhebung dokumentiert in: [`carveouts.md`](../../carveouts/README.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle).
 - Hängt von: M3-T1 (yaml.v3 in go.mod), M3-T3 (Cobra).

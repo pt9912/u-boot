@@ -72,7 +72,7 @@ package `driven`, interface `Logger`. Konsumenten schreiben
 ## Bezug
 
 - Auslösende Konfig: `.golangci.yml` `forbidigo.msg`.
-- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
+- Aufhebung dokumentiert in: [`carveouts.md`](../../carveouts/README.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle).
 - Hängt von: nichts; vorgezogen vor M4-doctor, damit der Konsument

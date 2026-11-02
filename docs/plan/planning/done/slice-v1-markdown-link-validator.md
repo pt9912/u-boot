@@ -40,7 +40,7 @@ Markdown-Beispiel-Block produziert.
     `slice-v1-docker-integrationstests.md` → `slice-m6-docker-...`
     (Slice-Rename bei Phase-Re-Anker).
   - `docs/plan/planning/done/[slice-m3-coverage-threshold-aktivieren.md](slice-m3-coverage-threshold-aktivieren.md):40`:
-    same-dir-Link auf `carveouts.md` → `../in-progress/carveouts.md`
+    same-dir-Link auf `carveouts.md` → `../../carveouts/README.md`
     (Datei lebt dauerhaft in `in-progress/`).
   - `docs/archive/README.md:14`: Falsch-Positiv durch Beispiel im
     fenced-markdown-Block; via Validator-Patch (Fenced-Code-Stripping)
@@ -66,7 +66,7 @@ Markdown-Beispiel-Block produziert.
 
 - Auslösende Konvention: [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) Carveout-Disziplin +
   M2-Review #11.
-- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
+- Aufhebung dokumentiert in: [`carveouts.md`](../../carveouts/README.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle).
 - Vorlage: `../c-hsm-doc/tools/check_refs.py`.

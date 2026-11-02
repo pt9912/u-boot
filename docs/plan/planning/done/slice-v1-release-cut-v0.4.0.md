@@ -75,7 +75,7 @@ final + Tag-Push).
   config-structured-hint, volume-auto-removal, recreate-detection,
   multi-port, …): alle on-hold ohne gefeuerten Trigger — kein
   v0.4.0-Blocker, gelistet in [`roadmap.md`](../in-progress/roadmap.md)
-  §v0.4.0+ Backlog und [`carveouts.md`](../in-progress/carveouts.md).
+  §v0.4.0+ Backlog und [`carveouts.md`](../../carveouts/README.md).
 - **V2-Distribution** (Homebrew, Distro-Pakete) + **slice-later-***
   (local-templates, migration, custom-data-sources, podman-formal):
   Post-v0.4.0.

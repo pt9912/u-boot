@@ -186,7 +186,7 @@ V1-V2-Pakete als Folge-Slices).
   Implementierungsdetails) — im Spec-Change durchhalten.
 - **Carveout-Potential:** falls der Spec-Change Teile zurückstellt (z. B.
   Doctor-Checks), Carveout-Eintrag in
-  [`carveouts.md`](../in-progress/carveouts.md) mit Plan-Anker ergänzen.
+  [`carveouts.md`](../../carveouts/README.md) mit Plan-Anker ergänzen.
 
 ## 7. Closure-Notiz (nach `done/`)
 

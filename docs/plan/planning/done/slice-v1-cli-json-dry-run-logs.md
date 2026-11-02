@@ -554,7 +554,7 @@ Memory-Feedback `carveouts_need_plans` (R1-MED-7 + R2-HIGH-2):
 **sofort** mit Plan in `open/` versehen. Drei `open/`-Stubs
 sind bei R2-Adressierung angelegt (Verzicht auf T8-Verschiebung
 um Memory-konform zu bleiben). Forward-Link auf
-[`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
+[`docs/plan/carveouts/README.md`](../../carveouts/README.md)
 für Symmetrie (R3-LOW-1): die drei sub-Stubs verlinken
 `carveouts.md` als Container, der logs-Stub verlinkt hier
 ebenfalls dorthin — `carveouts.md`-Einträge werden in T8-

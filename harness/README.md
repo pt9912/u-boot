@@ -43,7 +43,7 @@ Diese Datei dupliziert sie nicht.
 | [`spec/architecture.md`](../spec/architecture.md) | Komponenten (`ARC-*`), Schichten, Importregeln, depguard-Kontrakt |
 | [`docs/plan/adr/`](../docs/plan/adr/README.md) | Architekturentscheidungen, ADR-Index |
 | [`docs/plan/planning/`](../docs/plan/planning/) | Slice-Pläne und Roadmap |
-| [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) | temporäre und permanente Carveouts |
+| [`docs/plan/carveouts/`](../docs/plan/carveouts/README.md) | temporäre und permanente Carveouts (Index und CO-Dateien) |
 | [`docs/maintainer/quality.md`](../docs/maintainer/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
 | [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Workflow |
 | [`conventions.md`](conventions.md) | repo-lokale Strukturregeln, Adaptions-Block (`MR-*`), Modus-Deklarationen |
@@ -91,7 +91,7 @@ Diese Datei dupliziert sie nicht.
 
 **Aktueller Lauf-Status:** CI-Badge bzw. lokal `make help` / `make gates`.
 **Nicht behauptet** (geplant): — keine —.
-**Rote Gates:** keine strukturell roten; Begründung eines etwaigen Carveouts im Master-Inventar [`carveouts.md`](../docs/plan/planning/in-progress/carveouts.md).
+**Rote Gates:** keine strukturell roten; Begründung eines etwaigen Carveouts im Carveout-Index [`README.md`](../docs/plan/carveouts/README.md) zu `docs/plan/carveouts/`.
 Läuft ein Sensor wegen Umgebung oder Sandbox nicht, wird der Grund im Handoff genannt; eine grüne Closure wird nicht behauptet, wenn der passende Sensor nicht lief.
 
 ## Traceability rules

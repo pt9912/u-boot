@@ -76,4 +76,4 @@ Application-Service mit Logger-Konsumenten) soll:
 - Slice-Vorgänger: [`slice-m4-doctor`](../done/slice-m4-doctor.md)
   T7 hat `--verbose`/`--debug` per Spec eingebaut, aber bewusst
   ohne Logger-Level-Wiring (Scope-Constraint).
-- Inventar-Eintrag in [`carveouts.md`](../in-progress/carveouts.md).
+- Inventar-Eintrag in [`carveouts.md`](../../carveouts/README.md).

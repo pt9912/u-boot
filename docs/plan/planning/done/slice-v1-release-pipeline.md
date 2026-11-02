@@ -172,7 +172,7 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 
 ### T5 — Slice-Closure
 
-- `docs/plan/planning/in-progress/carveouts.md`:
+- `docs/plan/carveouts/README.md`:
   - Image-Publish/Trivy-Zeile entfernen.
   - [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Zeile auf verbleibende Wege (Binary / Homebrew /
     Distro-Pakete) reduzieren, mit Verweis auf [ADR-0007](../../adr/0007-distributionswege-ghcr.md).
@@ -203,7 +203,7 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 - Auslösende ADR: `0004-ci-system.md` Folgepunkte (3 davon),
   `0007-distributionswege-ghcr.md` (mit T1 aus diesem Slice angelegt).
 - Auslösende Spec: [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) Paketierung, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) PR-Blocking.
-- Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
+- Inventar-Eintrag: [`carveouts.md`](../../carveouts/README.md) →
   Image-Publish + Trivy mit Slice-Closure entfernt;
   [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Zeile auf Restwege (Binary / Homebrew /
   Distro-Pakete) reduziert (siehe

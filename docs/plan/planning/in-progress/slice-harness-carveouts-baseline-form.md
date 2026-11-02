@@ -138,7 +138,8 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 | Datei / Komponente | Art | Begründung / Fundstelle |
 |---|---|---|
 | docs/plan/carveouts/README.md (Link bei der Anlage, die Datei entsteht in diesem Slice) | neu | Index aus `README.template.md` (Baseline `templates/docs/plan/carveouts/`); Nachfolger des Master-Inventars |
-| `docs/plan/carveouts/CO-<NNN>-crlf-logs.md` | neu | aus `carveout.template.md`; trägt den CRLF-Edge-Case (Fundstellen gelesen 2026-11-02: `splitLogLines` in `internal/adapter/driving/cli/logs.go`, Absatz in `docs/maintainer/cli-json-contract.md` §6.8); die Kennung ist bei der Anlage gesetzt, dann Berichtigung der Verweise in dieser Datei |
+| `docs/plan/carveouts/CO-<NNN>-crlf-logs.md` | neu | aus `carveout.template.md`; trägt den CRLF-Edge-Case (Fundstellen gelesen 2026-11-02: `splitLogLines` in `internal/adapter/driving/cli/logs.go`, Absatz in `docs/maintainer/cli-json-contract.md` §6.8); die Kennung ist bei der Anlage gesetzt — CO-001, Verweise in dieser Datei berichtigt |
+| `docs/plan/planning/in-progress/carveouts.md` | gelöscht | die Inventar-Ablage geht auf — jede Zeile trägt einen Anker weiter (§1), Löschung im Umsetzungs-Commit |
 | `docs/plan/carveouts/.gitkeep` | gelöscht | das Verzeichnis trägt Dateien; kein Bestand im `ablage-prüfung`-Positivbestand (mutiert werden nur die drei `.gitkeep` unter `docs/plan/planning/`) |
 | [`slice-v1-logs-crlf.md`](../open/slice-v1-logs-crlf.md) | neu | Folge-Slice-Plan des CRLF-Carveouts, aus `slice.template.md` |
 | `docs/plan/adr/0042-<slug>.md` | neu | aus `NNNN-titel.template.md` (MADR, [MR-008](../../../../harness/conventions/MR-008-adr-form.md)); trägt `contextcheck` (Fundstelle: `Why:`-Kommentar zu `path: internal/adapter/driving/cli/`) und `interfacebloat` (Fundstelle: `Why:`-Kommentar zu `path: internal/hexagon/port/driven/filesystem\.go$`) |
@@ -154,14 +155,14 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 | `.harness/skills/closure-note-reviewer.md` | update | die zwei Inventar-Verweise (Zeilen 31 bis 33 und 75 bis 76) auf den Index |
 | [`harness/conventions.md`](../../../../harness/conventions.md) | update | Aktive-Tabelle: `MR-002`-Zeile in die Aufgelöste-Tabelle (aufgelöst durch diesen Slice); Bereichsangabe der Zeile berichtigt |
 | `harness/conventions/MR-002-carveout-inventar.md` | git mv nach `done/` | reiner Move-Commit, Inhalt unverändert (Muster [`MR-011`](../../../../harness/conventions/done/MR-011-werkzeug-fragmente-repo-gefuehrt.md)) |
-| Verweis-Nachzug | update | alle Dateien, die `planning/in-progress/carveouts.md` hrefen oder nennen (132 Treffer im Baum, geprüft am 2026-11-02: 69 in `../in-progress/carveouts.md`-Form aus `done/`/`next/`/`open/`, 63 in `docs/plan/planning/in-progress/carveouts.md`-Form aus Reviews, Maintainer-Doku, Archiv und Konventionen) — mechanische Berichtigung; Abgleich gegen `git diff --stat` nach jeder Fix-Runde (AGENTS.md §3.10) |
+| Verweis-Nachzug | update | alle Dateien, die `planning/in-progress/carveouts.md` hrefen oder nennen (132 Treffer im Baum, geprüft am 2026-11-02: 69 in `../../carveouts/README.md`-Form aus `done/`/`next/`/`open/`, 63 in `docs/plan/planning/in-progress/carveouts.md`-Form aus Reviews, Maintainer-Doku, Archiv und Konventionen) — mechanische Berichtigung; Abgleich gegen `git diff --stat` nach jeder Fix-Runde (AGENTS.md §3.10) |
 
 **Ansatz als Liste** (die Referenz-Berichtigung ist gruppen-gleichrangig):
 
 - Die Verweis-Berichtigung folgt zwei Regeln: (1) jede Zeile, deren Pfadteil
   `docs/plan/planning/in-progress/carveouts.md` trägt, zeigt künftig auf
   `docs/plan/carveouts/README.md` am selben Wurzel-Anker; (2) die
-  Geschwister-Form `../in-progress/carveouts.md` aus `done/`, `next/` und
+  Geschwister-Form `../../carveouts/README.md` aus `done/`, `next/` und
   `open/` wird zu `../../carveouts/README.md`. Textnachweise (Backticks,
   Prosa) folgten derselben Ersetzung.
 - Die historischen Done-Reporte halten ihre Zitate (Berichte sind

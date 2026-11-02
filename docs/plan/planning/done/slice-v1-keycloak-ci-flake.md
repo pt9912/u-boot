@@ -120,7 +120,7 @@ denselben Pfad gehen.
   (Commit `beb222b` E2E + Helper-Extraktion; Commit `9d0be1c`
   CI-Flake-Carveout).
 - Carveout-Eintrag:
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre Carveouts.
+  [`carveouts.md`](../../carveouts/README.md) §Temporäre Carveouts.
 - Spec-Bezug: [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow) Keycloak-Flow (V1) — Test existiert,
   läuft aber nicht in der CI-Pflicht-Lane bis dieser Slice
   schließt.

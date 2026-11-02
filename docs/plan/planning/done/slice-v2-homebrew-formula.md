@@ -78,7 +78,7 @@ läuft ohne Errors.
   [`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md)
   — Binaries existieren seit T2 `5e5166b` als GitHub-Release-Asset.
 - Carveout:
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](../../carveouts/README.md) §Temporäre
   Carveouts, [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Zeile.
 - Roadmap:
   [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0+ Backlog.
@@ -159,4 +159,4 @@ echten Mac stehen aus.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt — einmaliger externer Anlass (Runner-Abkündigung), nicht wiederholbar im
   Sinne der 3×-Schwelle.
 - **Folge-Slices:** [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md).
-- **Risiken:** keine offenen; der Carveout [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) in [`carveouts.md`](../in-progress/carveouts.md) ist aufgelöst.
+- **Risiken:** keine offenen; der Carveout [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) in [`carveouts.md`](../../carveouts/README.md) ist aufgelöst.

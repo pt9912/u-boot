@@ -44,7 +44,7 @@ fertigen `.exe`.
   „Vertagt" auf „Gewählt (zusätzlich zu GHCR)" gehoben mit
   Verweis auf diesen Slice.
 - ✅ [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restwege-Carveout in
-  [`carveouts.md`](../in-progress/carveouts.md) auf Homebrew +
+  [`carveouts.md`](../../carveouts/README.md) auf Homebrew +
   Debian/RPM reduziert (Binary ausgeliefert).
 - ✅ `make build-binaries` Make-Target lokal reproduzierbar;
   Inner-/Outer-Loop-Parität nach [`LH-FA-BUILD-007`](../../../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow).
@@ -79,6 +79,6 @@ fertigen `.exe`.
   §Entscheidung (Binary-Zeile auf „Gewählt" gehoben) +
   §Folgepunkte (Trigger materialisiert).
 - Carveout-Inventar:
-  [`carveouts.md`](../in-progress/carveouts.md) →
+  [`carveouts.md`](../../carveouts/README.md) →
   [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restwege auf Homebrew + Debian/RPM reduziert.
 - Phase: V2 (nach v0.1.1).

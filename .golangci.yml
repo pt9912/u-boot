@@ -49,6 +49,9 @@ linters:
     - unparam
 
   settings:
+    # Why: CLI writes to stdout/stderr cannot fail meaningfully;
+    # a `_, _ =` prefix adds nothing (ADR-0003 §Entscheidung, last
+    # bullet).
     errcheck:
       exclude-functions:
         - fmt.Fprintln
@@ -168,7 +171,8 @@ linters:
     depguard:
       # Layer rules per LH-FA-ARCH-003 / spec/architecture.md §4.
       # Match production code only (`!**/*_test.go`); tests can use
-      # fakes and test libraries freely.
+      # fakes and test libraries freely (SPEC-034; the named decision
+      # is ADR 0042, Entscheidung 3).
       rules:
         domain-isoliert:
           list-mode: lax
@@ -261,7 +265,8 @@ linters:
     generated: lax
     rules:
       # Why: table-driven tests legitimately have higher complexity
-      # without indicating design smell.
+      # without indicating design smell (ADR-0003 §Entscheidung,
+      # first MVP carveout).
       - linters:
           - cyclop
           - gocognit
@@ -272,7 +277,8 @@ linters:
 
       # Why: tests against fakes/httptest.Server commonly miss ctx,
       # unused params (`always receives ...`) and similar without
-      # design implications.
+      # design implications (ADR-0003 §Entscheidung, first MVP
+      # carveout).
       - linters:
           - noctx
           - unparam
@@ -299,7 +305,7 @@ linters:
       # Aufspaltung würde Test-Fakes verkomplizieren ohne semantischen
       # Mehrwert; das interfacebloat-Limit (10) bewusst aufgeweicht
       # für genau diese eine Schnittstelle. Andere Ports bleiben unter
-      # dem Limit.
+      # dem Limit (ADR-0042, Entscheidung 2).
       - linters:
           - interfacebloat
         path: internal/hexagon/port/driven/filesystem\.go$
@@ -307,7 +313,7 @@ linters:
       # Why: cmd/uboot/ is the wiring layer — it must be `package main`
       # (so testpackage cannot enforce external _test packages), and
       # `var version` is the canonical pattern for `-ldflags`-overridden
-      # build metadata.
+      # build metadata (ADR-0003 §Entscheidung).
       - linters:
           - testpackage
           - gochecknoglobals
@@ -319,7 +325,7 @@ linters:
       # use-case; contextcheck cannot see through the closure boundary
       # and flags it as missing propagation. Strict propagation
       # happens one level down in runInit (LH-FA-ARCH-003); the closure
-      # itself is structurally required by Cobra.
+      # itself is structurally required by Cobra (ADR-0042, Entscheidung 1).
       - linters:
           - contextcheck
         path: internal/adapter/driving/cli/

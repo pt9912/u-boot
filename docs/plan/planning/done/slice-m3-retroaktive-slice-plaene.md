@@ -50,7 +50,7 @@ verweist jeweils auf den Slice-Plan statt nur auf den Commit-Hash.
 
 - Auslösende Spec: [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle) Lifecycle,
   [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) Carveout-Disziplin.
-- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
+- Aufhebung dokumentiert in: [`carveouts.md`](../../carveouts/README.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle + M1–M2d-Artefakt-Spalte).
 - Vorausgegangene Re-Phasierung: Commit `3b9f4eb` (M3-Anker-Triage)

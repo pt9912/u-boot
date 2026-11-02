@@ -89,7 +89,7 @@ Bestandscodes) werden als **dokumentierte Folge-Slices** ausgelagert
     Spec-Straten (`contract_spec` = Lastenheft, `view_spec` = Architektur) und
     **ohne** Technik-Stratum (`spec/spezifikation.md`) — konform, da das
     Technik-Stratum laut Regelwerk optional ist. Repo-Klasse: Tooling/Referenz.
-  - `MR-002` — Carveout-Inventar-Ort: `docs/plan/planning/in-progress/carveouts.md`
+  - `MR-002` — Carveout-Inventar-Ort: `docs/plan/carveouts/README.md`
     statt `docs/plan/carveouts/CO-<NNN>-*.md` (etablierte Abweichung, bereits in
     [`AGENTS.md`](../../../../AGENTS.md) und der d-check-`matrix` verankert).
   - `MR-003` — Roadmap-Ort `in-progress/roadmap.md` (nicht

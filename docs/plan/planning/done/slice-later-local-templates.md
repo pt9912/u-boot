@@ -9,7 +9,7 @@
 > dokumentiert (README EN+DE, CHANGELOG, `cli-json-output.md` §6.4,
 > [ADR-0009](../../adr/0009-template-format-yaml-files.md) §Folgepunkte ✅). Der [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)-Carveout ist
 > mit dieser Closure aufgelöst → von §Temporäre Carveouts in
-> [`carveouts.md`](../in-progress/carveouts.md) §Carveout-Auflösungs-
+> [`carveouts.md`](../../carveouts/README.md) §Carveout-Auflösungs-
 > Slices (historisch) gewandert. `--var`-Variablen bleiben
 > out-of-scope (eigener Folge-Slice).
 >
@@ -159,7 +159,7 @@ Render-Vertrag geprüft (T0-(g)).
 - Spec: [`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates) (`spec/lastenheft.md`), `Priorität: Later`.
 - ADR: [ADR-0009 §Entscheidung „Lokale User-Templates" + §Folgepunkte](../../adr/0009-template-format-yaml-files.md)
   — verbindlicher Architektur-Anker.
-- Carveout: [`carveouts.md`](../in-progress/carveouts.md) §Carveout-
+- Carveout: [`carveouts.md`](../../carveouts/README.md) §Carveout-
   Auflösungs-Slices (historisch), [`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)-Zeile — der
   [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)-Carveout wurde mit dieser Closure aufgelöst
   und aus §Temporäre Carveouts entfernt.

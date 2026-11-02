@@ -57,7 +57,7 @@ auch bei Abbruch.
 ## Bezug
 
 - Auslösende Spec: [`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), `spec/architecture.md` §4.
-- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
+- Aufhebung dokumentiert in: [`carveouts.md`](../../carveouts/README.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle).
 - Hängt von: M3-T1..T4c — erste produktive Pakete pro Schicht.

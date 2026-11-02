@@ -555,7 +555,7 @@ nächste Lauf erneut als Konflikt sieht):
   `generate`-Subkommando dokumentieren.
 - **Carveouts:** `carveouts.md` enthält Stand Pre-T1 keinen
   offenen Eintrag zu `LH-FA-GEN-*` oder „Devcontainer-Generator"
-  (gegen `docs/plan/planning/in-progress/carveouts.md` verifiziert);
+  (gegen `docs/plan/carveouts/README.md` verifiziert);
   dieser Schritt ist deshalb erwartungsgemäß ein No-op. Sollte vor
   T6-Merge dennoch ein passender Eintrag entstanden sein, wird er
   mit M7-DoD-Hash als gelöst markiert.

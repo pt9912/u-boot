@@ -251,7 +251,7 @@ Spec-IDs **nicht** im T2-Unit-Pfad eingelöst werden.
 ## Bezug
 
 - Auslösende Spec: `spec/architecture.md` §5 Build-Tag-Konvention.
-- Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
+- Inventar-Eintrag: [`carveouts.md`](../../carveouts/README.md) →
   Docker-Integrationstests fehlen.
 - Hängt von: M6 `u-boot up`/`down` — erst dort entsteht
   `internal/adapter/driven/docker/`, gegen das die getaggten Tests

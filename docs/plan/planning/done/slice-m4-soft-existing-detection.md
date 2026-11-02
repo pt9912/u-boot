@@ -108,7 +108,7 @@ Projekt". Entscheidungs-Baum vor `planTemplatedFiles`:
 ## Bezug
 
 - Auslösende Spec: [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen), [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung).
-- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
+- Aufhebung dokumentiert in: [`carveouts.md`](../../carveouts/README.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle).
 - Hängt von: M3-T3 (CLI-Adapter), M3-T4c (`--assume-existing`-

@@ -48,15 +48,12 @@ Zwei bewusst getrennte Status-Mechanismen:
   *Abgeschlossene Wellen*.
 
 u-boot-Abweichungen vom Baseline-Default (dokumentiert in
-[`harness/conventions.md`](../../../harness/conventions.md), [`MR-003`](../../../harness/conventions/MR-003-roadmap-wellen.md)/[`MR-002`](../../../harness/conventions/MR-002-carveout-inventar.md)):
+[`harness/conventions.md`](../../../harness/conventions.md), [`MR-003`](../../../harness/conventions/MR-003-roadmap-wellen.md)):
 
 - **Keine `welle-<Kennung>-results.md`** — die Closure-Notiz steht in §7 der Welle-Datei und
   verweist auf den `done/`-Release-Cut-Slice als Detailquelle (inkl. Tranchen-Hashes).
 - **Keine Archivierung** der Zeitdokumente geschlossener Wellen (`make archive-welle` bleibt
   ungenutzt); `done/` behält den Volltext.
-- **Aufgelöste Carveouts** wandern **nicht** nach `done/`, sondern bleiben im
-  Master-Inventar [`in-progress/carveouts.md`](in-progress/carveouts.md) mit
-  Audit-Trail des auflösenden Slice.
 
 ## Referenzsemantik
 
@@ -85,13 +82,16 @@ inkrementell auslieferbare Stücke.
 
 ## Ausnahmen: Master-Dokumente
 
-Zwei übergreifende Master-Dokumente folgen keinem der drei Formate
-und liegen dauerhaft in `in-progress/`:
+Ein übergreifendes Master-Dokument folgt keinem der drei Formate
+und liegt dauerhaft in `in-progress/`:
 
 - [`in-progress/roadmap.md`](in-progress/roadmap.md) — Stand aller
   Slices und Tranchen (Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine).
-- [`in-progress/carveouts.md`](in-progress/carveouts.md) — Inventar
-  aller bewussten Carveouts mit Plan-Verweis (Baseline-Regelwerk `modul-07-carveouts.md`).
+
+Die Carveout-Ablage liegt nicht mehr im Planning-Baum:
+[`docs/plan/carveouts/README.md`](../carveouts/README.md) trägt die
+Baseline-Ziel-Form (README-Index und CO-Dateien, Baseline-Regelwerk
+`modul-07-carveouts.md`; die Adaption [`MR-002`](../../../harness/conventions/done/MR-002-carveout-inventar.md) ist aufgelöst).
 
 Das Beobachtungs-Register [`observations/`](observations/README.md) liegt dauerhaft unter `planning/`
 und folgt ebenfalls keinem der Formate; Form und Kürzel stehen in dessen README und in
