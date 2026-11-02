@@ -3,7 +3,7 @@
 **Review-Art:** Plan-Review des CR-Diffs — geprüft wird der Schreib-Lauf
 (Lastenheft 0.30.0, [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv),
 Planning-Nachzug, §7-Verifikation) gegen den freigegebenen
-[CR-Vorschlag](../plan/planning/in-progress/cr-vorschlag-gepinnte-werkzeugkette.md),
+[CR-Vorschlag](../plan/planning/done/cr-vorschlag-gepinnte-werkzeugkette.md),
 die Hard Rules ([`AGENTS.md`](../../AGENTS.md) §3) und die Rollenentscheidungen.
 Keine DoD-Closure — die prüft der Verifier
 ([`harness/roles.md`](../../harness/roles.md) §Kontext-Trennung).
@@ -18,7 +18,7 @@ Keine DoD-Closure — die prüft der Verifier
 **Eingangs-Kontext:**
 
 - [Slice-Plan](../plan/planning/done/slice-cr-devcontainer-gepinnte-werkzeugkette.md) inkl. §7-Verifikation des Implementers
-- [CR-Vorschlag](../plan/planning/in-progress/cr-vorschlag-gepinnte-werkzeugkette.md) (Freigabe-Block, §§2 Stellen 1 bis 8, §4 F1 bis F6)
+- [CR-Vorschlag](../plan/planning/done/cr-vorschlag-gepinnte-werkzeugkette.md) (Freigabe-Block, §§2 Stellen 1 bis 8, §4 F1 bis F6)
 - [`spec/lastenheft.md`](../../spec/lastenheft.md) ([`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), neue [`LH-FA-DEV-011`](../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette), Grabstein [`LH-FA-BUILD-003`](../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik)), [`spec/spezifikation.md`](../../spec/spezifikation.md) ([`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)), [`spec/architecture.md`](../../spec/architecture.md)
 - [`ADR-0041`](../plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md) (`Accepted`), [`ADR-0020`](../plan/adr/0020-drittanbieter-features-im-katalog.md), [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md) (nur Referenzebene)
 - Messprotokoll [`docs/messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md`](../messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md) (m1c/m2c/m3/m3z)

@@ -18,7 +18,7 @@ F3-Klarstellung (`6dd2a14d`).
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
 - Slice-Plan [`slice-v1-katalog-gepinnte-toolchain-entwurf`](../plan/planning/done/slice-v1-katalog-gepinnte-toolchain-entwurf.md)
-  (Stand `6dd2a14d`), CR-Vorschlag [`cr-vorschlag-gepinnte-werkzeugkette`](../plan/planning/in-progress/cr-vorschlag-gepinnte-werkzeugkette.md)
+  (Stand `6dd2a14d`), CR-Vorschlag [`cr-vorschlag-gepinnte-werkzeugkette`](../plan/planning/done/cr-vorschlag-gepinnte-werkzeugkette.md)
   (Freigabe 2026-11-02, F3-Klarstellung `6dd2a14d`)
 - [`ADR-0041`](../plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
   (`Accepted`, eigener Commit `56ce6c4b`), [`ADR-0020`](../plan/adr/0020-drittanbieter-features-im-katalog.md),
