@@ -497,11 +497,11 @@ func TestFeatureFor_LookupContract(t *testing.T) {
 // spelling of the key (the keys with a hyphen carry no upper-case ARG name).
 func blockPinArg() map[string]string {
 	return map[string]string{
-		"ollama":        "OLLAMA",
-		"gh":            "GH",
-		"glab":          "GLAB",
-		"go-toolchain":  "GO",
-		"golangci-lint": "GOLANGCI_LINT",
+		"ollama":         "OLLAMA",
+		"gh":             "GH",
+		"glab":           "GLAB",
+		"go-toolchain":   "GO",
+		"golangci-lint":  "GOLANGCI_LINT",
 		"java-toolchain": "JDK",
 	}
 }
@@ -511,11 +511,11 @@ func blockPinArg() map[string]string {
 // and `ollama` carry none.
 func blockChecksumSource() map[string]string {
 	return map[string]string{
-		"ollama":        "",
-		"gh":            "",
-		"glab":          "",
-		"go-toolchain":  "the download listing of go.dev/dl",
-		"golangci-lint": "the CHECKSUMS file of the release of golangci/golangci-lint",
+		"ollama":         "",
+		"gh":             "",
+		"glab":           "",
+		"go-toolchain":   "the download listing of go.dev/dl",
+		"golangci-lint":  "the CHECKSUMS file of the release of golangci/golangci-lint",
 		"java-toolchain": "the checksums file of the same release of the Temurin binaries",
 	}
 }

@@ -204,12 +204,12 @@ type featureCatalogueEntry struct {
 // Catalogue keys of the Dockerfile-block features and of the entry that adds
 // a container option.
 const (
-	featureOllama       = "ollama"
-	featureGh           = "gh"
-	featureGlab         = "glab"
-	featureOllamaHost   = "ollama-host"
-	featureGoToolchain  = "go-toolchain"
-	featureGolangciLint = "golangci-lint"
+	featureOllama        = "ollama"
+	featureGh            = "gh"
+	featureGlab          = "glab"
+	featureOllamaHost    = "ollama-host"
+	featureGoToolchain   = "go-toolchain"
+	featureGolangciLint  = "golangci-lint"
 	featureJavaToolchain = "java-toolchain"
 )
 
@@ -255,6 +255,18 @@ func (e featureCatalogueEntry) hasNoSource() bool {
 // `defaultVersion` reads these keys and fills the two fields;
 // `TestFeatureCatalogue_SecurityProperties` pins the table, not the upstream.
 func featureCatalogue() map[string]featureCatalogueEntry {
+	out := ociFeatureCatalogue()
+	for k, v := range blockAndOptionCatalogue() {
+		out[k] = v
+	}
+	return out
+}
+
+// ociFeatureCatalogue carries the OCI-Quelle entries (their `source:` names
+// the registry image, the T3 renderer emits `<source>:<defaultVersion>`);
+// the split keeps [featureCatalogue] under the funlen threshold and the two
+// halves reviewable per entry kind.
+func ociFeatureCatalogue() map[string]featureCatalogueEntry {
 	return map[string]featureCatalogueEntry{
 		"git": {
 			source:         "ghcr.io/devcontainers/features/git",
@@ -325,6 +337,15 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			shortDesc:      "Claude Code CLI (Anthropic feature; needs the node feature)",
 			publisher:      "anthropics",
 		},
+	}
+}
+
+// blockAndOptionCatalogue carries the entries without OCI source: the
+// Dockerfile blocks (their installation pins stand in the template; the
+// pinned-toolchain keys carry their official checksum source, SPEC-054) and
+// the container option of `ollama-host`.
+func blockAndOptionCatalogue() map[string]featureCatalogueEntry {
+	return map[string]featureCatalogueEntry{
 		featureOllama: {
 			shortDesc:       "Ollama, CPU only (Dockerfile block; sandbox profile only)",
 			dockerfileBlock: true,
