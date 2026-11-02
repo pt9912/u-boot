@@ -99,13 +99,13 @@ Abgeglichen für den Stand nach der letzten Fix-Runde (`724c5e5e`).
 | Commit | Dateien | gegen Plan-Tabelle |
 |---|---|---|
 | `827601be` (MR-003-Nachzug, vor dem Cut) | `MR-003…`, `harness/conventions.md`, `roadmap.md`, `planning/README.md`, `plan-welle.md`, `close-welle.md`, `planner.md`, Slice selbst | Deckung je Zeile der Plan-Tabelle (MR-Zeilen und roadmap/README/command-Zeilen) |
-| `b160d4ac`, `77e88143`, `44c6b644`, `dcc3697c` (Moves + Ruheort-Nachzüge) | Planungs-Doku | Deckung (Plan-Zeile „dieser Slice · `make slice-mv` je Lifecycle-Schritt") |
+| `b160d4ac`, `77e88143`, `44c6b644`, `dcc3697c` (Moves + Ruheort-Nachzüge) | Planungs-Doku | Deckung (Plan-Zeile „dieser Slice · `make slice-mv` <!-- d-check:ignore (Make-Target, keine Slice-Kennung) --> je Lifecycle-Schritt") |
 | `9a7db2f1` (Review-Fix-Runde) | `CHANGELOG.md` (Plan-Zeile), `releasing.md` (1 Zeile, F-7), `roadmap.md` (F-5/F-8), Slice (F-6/F-10), `open/README.md` (F-9), zwei CR-Entwürfe (F-9), Review-Report | Deckung bis auf zwei Stellen s. u. |
 | `724c5e5e` (d-check-Korrektur) | Review-Report, 1 Zeile | Abgleich-Artikel, kein Release-Inhalt |
 
 **Abweichungen vom Plan-Abgleich — benannt, nicht als Befund gewertet:**
 
-1. `docs/plan/planning/open/slice-v1-katalog-*.md` (2 Dateien) und der Review-Report stehen nicht
+1. die zwei Katalog-Entwürfe unter `docs/plan/planning/open/` und der Review-Report stehen nicht
    in der Plan-Tabelle §3. Beide sind Produkte der Review-Runde (F-9 in den Planning-Doku außerhalb
    des Release, Report-Pflicht DoD-Zeile 5) — der Plan-Abgleich nach [`AGENTS.md`](../../AGENTS.md)
    §3.10 nennt sie, wie hier geschehen; der Plan-Stand vom 2026-11-01 konnte die Review-Produkte
