@@ -62,6 +62,47 @@ RUN arch="$(dpkg --print-architecture)" \
  && tar -xzf "gh_${GH_VERSION}_linux_${arch}.tar.gz" -C /usr/local --strip-components=1 --no-same-owner "gh_${GH_VERSION}_linux_${arch}/bin/gh" \
  && cd / \
  && rm -rf "$work"
+# Go toolchain: the release archive of go.dev/dl (the same origin as the
+# download). Version and checksums stand here as build arguments and in one
+# place; a `version:` override of the project replaces the value and both
+# checksums together, read for the chosen version from the download listing,
+# so the check stays a check against the official source. The build stops
+# before the extraction unless the SHA-256 matches. The archive is not signed
+# and the build verifies no signature: the check catches a file replaced
+# later, not a release that was harmful from the start.
+ARG GO_VERSION=1.27.3
+ARG GO_SHA256_AMD64=65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40
+ARG GO_SHA256_ARM64=a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49
+RUN arch="$(dpkg --print-architecture)" \
+ && case "$arch" in amd64) sha256="${GO_SHA256_AMD64}" ;; arm64) sha256="${GO_SHA256_ARM64}" ;; *) echo "go has no archive for $arch" >&2; exit 1 ;; esac \
+ && work="$(mktemp -d)" \
+ && cd "$work" \
+ && curl -fsSLO "https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz" \
+ && echo "${sha256}  go${GO_VERSION}.linux-${arch}.tar.gz" | sha256sum -c - \
+ && tar -xzf "go${GO_VERSION}.linux-${arch}.tar.gz" -C /usr/local \
+ && cd / \
+ && rm -rf "$work"
+ENV PATH="/usr/local/go/bin:${PATH}"
+# golangci-lint: the release archive of golangci/golangci-lint, only the
+# program golangci-lint is extracted. Version and checksums stand here as
+# build arguments and in one place; a `version:` override of the project
+# replaces the value and both checksums together, read for the chosen version
+# from the checksums file of that release. The build stops before the
+# extraction unless the SHA-256 matches. The archive is not signed and the
+# build verifies no signature: the check catches a file replaced later, not a
+# release that was harmful from the start.
+ARG GOLANGCI_LINT_VERSION=v2.14.0
+ARG GOLANGCI_LINT_SHA256_AMD64=ab90aeb7b066f92a33415b638a50fe5344bbb75a0d32ad30cc248d88f81032ab
+ARG GOLANGCI_LINT_SHA256_ARM64=ee7ec5f3453d15ddf106fae5a4d6c71737712348a979d1fe9cd52ec7ea299bae
+RUN arch="$(dpkg --print-architecture)" \
+ && case "$arch" in amd64) sha256="${GOLANGCI_LINT_SHA256_AMD64}" ;; arm64) sha256="${GOLANGCI_LINT_SHA256_ARM64}" ;; *) echo "golangci-lint has no archive for $arch" >&2; exit 1 ;; esac \
+ && work="$(mktemp -d)" \
+ && cd "$work" \
+ && curl -fsSLO "https://github.com/golangci/golangci-lint/releases/download/${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz" \
+ && echo "${sha256}  golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz" | sha256sum -c - \
+ && tar -xzf "golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz" --strip-components=1 -C /usr/local/bin "golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}/golangci-lint" \
+ && cd / \
+ && rm -rf "$work"
 # Status files of the container start scripts; `u-boot doctor`
 # reads them from the host. The directory belongs to the container user so the
 # `postCreateCommand` and the `sudo` scripts can write there.
@@ -74,46 +115,15 @@ RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf
 USER vscode
 # END U-BOOT MANAGED BLOCK: init
 
-# ---- Hand-written part (behind the managed block) ---------------------------
-# `u-boot generate devcontainer` leaves the lines below untouched. They install
-# the toolchain of the local build mode (BUILD_MODE=local in repo.mk): Go and
-# golangci-lint as release archives, each checked against its SHA-256 before
-# it is unpacked. The checksums come from the same release as the archive
-# (go.dev/dl, golangci-lint checksums file); they protect against a file that
-# is replaced later, not against a release that was harmful from the start.
-# Hebung betrifft drei Stellen: Dockerfile (ARG), repo.mk and this file; the
-# versions must stay equal.
-USER root
-ARG GO_VERSION=1.27.3
-ARG GO_SHA256_AMD64=65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40
-ARG GO_SHA256_ARM64=a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49
-ARG GOLANGCI_LINT_VERSION=v2.14.0
-ARG GOLANGCI_LINT_SHA256_AMD64=ab90aeb7b066f92a33415b638a50fe5344bbb75a0d32ad30cc248d88f81032ab
-ARG GOLANGCI_LINT_SHA256_ARM64=ee7ec5f3453d15ddf106fae5a4d6c71737712348a979d1fe9cd52ec7ea299bae
-RUN set -eu; \
-    arch="$(dpkg --print-architecture)"; \
-    case "$arch" in \
-      amd64) go_sha="${GO_SHA256_AMD64}"; lint_sha="${GOLANGCI_LINT_SHA256_AMD64}" ;; \
-      arm64) go_sha="${GO_SHA256_ARM64}"; lint_sha="${GOLANGCI_LINT_SHA256_ARM64}" ;; \
-      *) echo "no Go or golangci-lint archive for $arch" >&2; exit 1 ;; \
-    esac; \
-    lint_dir="golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}"; \
-    cd /tmp; \
-    curl -fsSLO "https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz"; \
-    echo "${go_sha}  go${GO_VERSION}.linux-${arch}.tar.gz" | sha256sum -c -; \
-    tar -C /usr/local -xzf "go${GO_VERSION}.linux-${arch}.tar.gz"; \
-    curl -fsSLO "https://github.com/golangci/golangci-lint/releases/download/${GOLANGCI_LINT_VERSION}/${lint_dir}.tar.gz"; \
-    echo "${lint_sha}  ${lint_dir}.tar.gz" | sha256sum -c -; \
-    tar -xzf "${lint_dir}.tar.gz" --strip-components=1 -C /usr/local/bin "${lint_dir}/golangci-lint"; \
-    rm -f /tmp/go*.tar.gz "/tmp/${lint_dir}.tar.gz"
-# BUILD_MODE=local selects the local mode of repo.mk. GOFLAGS and GOTOOLCHAIN
-# mirror the stage `deps` of the Dockerfile and the official Go images
-# (GOTOOLCHAIN=local: Go never fetches another toolchain). The caches live in
-# the workspace volume, so they survive `u-boot devcontainer up --recreate`.
-ENV PATH="/usr/local/go/bin:${PATH}" \
-    BUILD_MODE=local \
+# ---- Hand-written rest (behind the managed block) ---------------------------
+# `u-boot generate devcontainer` leaves the lines below untouched. The two
+# toolchain keys `go-toolchain` and `golangci-lint` carry the installations
+# and the cache directories of the managed block and the `containerEnv` of
+# the generated devcontainer.json; the keys set none of these three values,
+# so they stand here, in the hand-written rest: BUILD_MODE=local selects the
+# local mode of repo.mk, GOFLAGS and GOTOOLCHAIN mirror the stage `deps` of
+# the root Dockerfile and the official Go images (GOTOOLCHAIN=local: Go never
+# fetches another toolchain).
+ENV BUILD_MODE=local \
     GOFLAGS="-mod=readonly -buildvcs=false" \
-    GOTOOLCHAIN=local \
-    GOCACHE=/workspaces/u-boot/.cache/go-build \
-    GOMODCACHE=/workspaces/u-boot/.cache/go-mod
-USER vscode
+    GOTOOLCHAIN=local

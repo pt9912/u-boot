@@ -44,8 +44,12 @@
 #   make fullbuild   — ci plus build (runtime image).
 
 IMAGE                   ?= u-boot
-# Hebung von GO_VERSION und GOLANGCI_LINT_VERSION betrifft drei Stellen:
-# Dockerfile (ARG), diese Datei und .devcontainer/Dockerfile (hand-written part).
+# Hebung von GO_VERSION und GOLANGCI_LINT_VERSION (LH-FA-DEV-011): die
+# Quellen-Stelle des Pins sind die Build-Argumente des Katalog-Templates der
+# zwei Toolchain-Schluessel (`go-toolchain`, `golangci-lint`); gleich sind
+# vier Stellen: dieses Dockerfile (ARG), jenes Template, diese Datei (?=) und
+# die erzeugte .devcontainer/Dockerfile des eigenen Projekts (ARG). Der
+# Pin-Stellen-Test (generate_toolchain_test.go) liest alle vier.
 GO_VERSION              ?= 1.27.3
 GOLANGCI_LINT_VERSION   ?= v2.14.0
 GOVULNCHECK_VERSION     ?= v1.8.0

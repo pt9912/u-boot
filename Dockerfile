@@ -20,10 +20,14 @@
 #   binary-archive — Cross-compiled release binaries as a tar stream.
 #   runtime   — distroless/static:nonroot (LH-FA-BUILD-002).
 #
-# Pin policy (LH-FA-BUILD-003): GO_VERSION and GOLANGCI_LINT_VERSION are
+# Pin policy (LH-FA-DEV-011): GO_VERSION and GOLANGCI_LINT_VERSION are
 # routine pins, hebung without separate ADR; rationale goes into the
-# commit body. Hebung betrifft drei Stellen: this file, repo.mk and
-# .devcontainer/Dockerfile (hand-written part behind the managed block).
+# commit body. The source place of the pin is the catalogue template of
+# the two toolchain keys (`go-toolchain`, `golangci-lint`) — the build
+# arguments there are the one place a Hebung leads; the pin values of the
+# four places of the coupling stay equal: this file, that template,
+# repo.mk and the generated .devcontainer/Dockerfile of the own project,
+# all carried by the pin-places test.
 #
 # The commands of the stages compile, lint, test and coverage live in
 # scripts/bau.sh; the local mode of repo.mk (BUILD_MODE=local) calls the same
