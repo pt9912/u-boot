@@ -35,7 +35,7 @@ im Vertrag entfallen; die [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa
 stehen als Anker innerhalb der Zieldatei.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
-[`slice-cr-devcontainer-java-toolchain`](slice-cr-devcontainer-java-toolchain.md)
+[`slice-cr-devcontainer-java-toolchain`](../done/slice-cr-devcontainer-java-toolchain.md)
 („Wortlaut-Entwurf je Stelle und Freigabe" — die Stellen (a) bis (f) der Zeile).
 Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an
 den Verträgen und diskutiert die Entscheidungen 2026-11-02 nicht neu

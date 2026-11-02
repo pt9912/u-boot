@@ -18,7 +18,7 @@ von der DoD dieses Slice verschieden ist).
 permanente Einträge über den Trichter). Das kehrt die Adaption
 [`MR-002`](../../../../harness/conventions/MR-002-carveout-inventar.md) (Baseline-Regelwerk
 `modul-07-carveouts.md` §Ziel-Form: Carveout) um. Wegen des WIP-Limits 1
-(belegt durch [`slice-cr-devcontainer-java-toolchain`](../in-progress/slice-cr-devcontainer-java-toolchain.md))
+(belegt durch [`slice-cr-devcontainer-java-toolchain`](../done/slice-cr-devcontainer-java-toolchain.md))
 läuft die Umsetzung in einem eigenen Slice, sobald kein anderer Slice in
 `in-progress/` ist; dieser Plan wartet in `open/`.
 
@@ -175,7 +175,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 
 **Start** (`next` → `in-progress`): Der Projektinhaber gibt den Auftrag;
 kein anderer Slice in `in-progress/` (WIP-Limit 1 — Stand 2026-11-02:
-belegt durch [`slice-cr-devcontainer-java-toolchain`](../in-progress/slice-cr-devcontainer-java-toolchain.md),
+belegt durch [`slice-cr-devcontainer-java-toolchain`](../done/slice-cr-devcontainer-java-toolchain.md),
 Projektinhaber-Entscheidung 2026-11-02: dieser Plan wartet, siehe Anlass).
 
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
