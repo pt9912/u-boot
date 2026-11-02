@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** Vorschlag Release `v0.18.0` (Roadmap *Nächste Wellen*, Feature-Katalog); bis zur Entscheidung des Projektinhabers ist der Slice ohne Welle geführt und in der Roadmap nicht eingetragen. Anlass: Wunsch des Projektinhabers vom 2026-10-31, Kotlin/Gradle-Projekte im Devcontainer mit gepinnten Werkzeugen zu bauen.
+**Welle:** Vorschlag Release `v0.19.0` (Roadmap *Nächste Wellen*, Feature-Katalog); bis zur Entscheidung des Projektinhabers ist der Slice ohne Welle geführt und in der Roadmap nicht eingetragen. Anlass: Wunsch des Projektinhabers vom 2026-10-31, Kotlin/Gradle-Projekte im Devcontainer mit gepinnten Werkzeugen zu bauen.
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Katalog der Features; ob der neue Schlüssel einen Lastenheft-CR braucht, entscheidet der Projektinhaber, siehe §4), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Ausweisung dessen, was beim Bau läuft); [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md) (Katalog und Drittanbieter), [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) (Muster Release-Archiv mit Prüfsumme im Dockerfile-Block).
 

@@ -75,7 +75,7 @@ der **Ablauf** steht vollständig in diesem Dokument:
    prüft es nachher noch einmal.
 4. **Roadmap** (`docs/plan/planning/in-progress/roadmap.md`): den Release unter „Offene Wellen"
    führen, bis der Tag gesetzt ist; danach nach „Abgeschlossene Wellen".
-5. **Release-Cut-Slice** nach dem Muster der früheren Cuts anlegen und nach dem Tag nach
+5. **Release-Cut-Slice** aus der Skelett-Vorlage `slice.template.md` anlegen und nach dem Tag nach
    `done/` verschieben (Planning-Sensor: der Ruhe-Marker der Roadmap gilt nur, wenn kein
    Slice in `in-progress/` liegt).
 

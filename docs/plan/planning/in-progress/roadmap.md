@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-11-01.
+**Status:** Aktiv. **Letzte Änderung:** 2026-11-02.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -29,7 +29,7 @@ Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-do
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| `v0.18.0` — Feature-Katalog: Quellen, Optionen und Basis-Image (geplant) | `v0.17.0` geschlossen; der Projektinhaber hat den Weg (A, B oder C) zu `slice-v1-docker-cli-bau-auf-standard-basis-image` entschieden | [`slice-v1-docker-cli-bau-auf-standard-basis-image`](../open/slice-v1-docker-cli-bau-auf-standard-basis-image.md); [`slice-v1-katalog-features-quellen-und-freigabe`](../open/slice-v1-katalog-features-quellen-und-freigabe.md) | M |
+| `v0.19.0` — Feature-Katalog: Quellen, Optionen und Basis-Image (geplant) | `v0.18.0` veröffentlicht; der Projektinhaber hat den Weg (A, B oder C) zu `slice-v1-docker-cli-bau-auf-standard-basis-image` entschieden | [`slice-v1-docker-cli-bau-auf-standard-basis-image`](../open/slice-v1-docker-cli-bau-auf-standard-basis-image.md); [`slice-v1-katalog-features-quellen-und-freigabe`](../open/slice-v1-katalog-features-quellen-und-freigabe.md) | M |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 
