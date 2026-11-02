@@ -16,7 +16,7 @@ von der DoD dieses Slice verschieden ist).
 `docs/plan/planning/in-progress` gehören in den Ordner `docs/plan/carveouts`“
 — und auf Nachfrage die Werkzeug-Wahl: **volle Baseline-Form** (CO-Dateien,
 permanente Einträge über den Trichter). Das kehrt die Adaption
-[`MR-002`](../../../../harness/conventions/MR-002-carveout-inventar.md) (Baseline-Regelwerk
+[`MR-002`](../../../../harness/conventions/done/MR-002-carveout-inventar.md) (Baseline-Regelwerk
 `modul-07-carveouts.md` §Ziel-Form: Carveout) um. Wegen des WIP-Limits 1
 (belegt durch [`slice-cr-devcontainer-java-toolchain`](../done/slice-cr-devcontainer-java-toolchain.md))
 läuft die Umsetzung in einem eigenen Slice, sobald kein anderer Slice in
@@ -57,7 +57,7 @@ acht; [SPEC-031](../../../../spec/spezifikation.md#spec-031--regeln-des-docker-o
 depguard-Test-Ausschluss) — und ein neuer ADR trägt die zwei, die bislang
 nur in `.golangci.yml`-Kommentaren stehen (`contextcheck` für
 `internal/adapter/driving/cli/`, `interfacebloat` für
-`internal/hexagon/port/driven/filesystem.go`). [`MR-002`](../../../../harness/conventions/MR-002-carveout-inventar.md)
+`internal/hexagon/port/driven/filesystem.go`). [`MR-002`](../../../../harness/conventions/done/MR-002-carveout-inventar.md)
 wird aufgelöst (reiner `git mv` nach `conventions/done/`, Muster
 [`MR-011`](../../../../harness/conventions/done/MR-011-werkzeug-fragmente-repo-gefuehrt.md)).
 
@@ -111,7 +111,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
       entfallen; jede Zeile des früheren Inventars trägt einen Anker nach der
       Zuordnungstabelle in §1 — geprüft je Zeile mit Fundstelle in der
       Closure.
-- [ ] [`MR-002`](../../../../harness/conventions/MR-002-carveout-inventar.md) ist aufgelöst: reiner
+- [ ] [`MR-002`](../../../../harness/conventions/done/MR-002-carveout-inventar.md) ist aufgelöst: reiner
       `git mv` nach `harness/conventions/done/` (AGENTS.md §3.3), die
       Tabellen in [`conventions.md`](../../../../harness/conventions.md) zeigen die Resolution;
       [`.d-check.yml`](../../../../.d-check.yml) (matrix `carveout`, ids-Target `CO`), die
@@ -154,7 +154,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 | [`harness/verification.md`](../../../../harness/verification.md) | update | Zeile 93 bis 94: Parallel-Eintrag der neuen temporären Carveouts zeigt auf [`docs/plan/carveouts/`](../../carveouts/) |
 | `.harness/skills/closure-note-reviewer.md` | update | die zwei Inventar-Verweise (Zeilen 31 bis 33 und 75 bis 76) auf den Index |
 | [`harness/conventions.md`](../../../../harness/conventions.md) | update | Aktive-Tabelle: `MR-002`-Zeile in die Aufgelöste-Tabelle (aufgelöst durch diesen Slice); Bereichsangabe der Zeile berichtigt |
-| `harness/conventions/MR-002-carveout-inventar.md` | git mv nach `done/` | reiner Move-Commit, Inhalt unverändert (Muster [`MR-011`](../../../../harness/conventions/done/MR-011-werkzeug-fragmente-repo-gefuehrt.md)) |
+| `harness/conventions/done/MR-002-carveout-inventar.md` | git mv nach `done/` | reiner Move-Commit, Inhalt unverändert (Muster [`MR-011`](../../../../harness/conventions/done/MR-011-werkzeug-fragmente-repo-gefuehrt.md)) |
 | Verweis-Nachzug | update | alle Dateien, die `planning/in-progress/carveouts.md` hrefen oder nennen (132 Treffer im Baum, geprüft am 2026-11-02: 69 in `../../carveouts/README.md`-Form aus `done/`/`next/`/`open/`, 63 in `docs/plan/planning/in-progress/carveouts.md`-Form aus Reviews, Maintainer-Doku, Archiv und Konventionen) — mechanische Berichtigung; Abgleich gegen `git diff --stat` nach jeder Fix-Runde (AGENTS.md §3.10) |
 
 **Ansatz als Liste** (die Referenz-Berichtigung ist gruppen-gleichrangig):

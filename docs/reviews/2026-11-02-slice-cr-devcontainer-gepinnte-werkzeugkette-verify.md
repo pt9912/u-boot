@@ -73,7 +73,7 @@ Neun Dateien im Range; je Zeile ein Plan-Eintrag: `spec/lastenheft.md`, `spec/sp
 
 ## Carveouts
 
-Neu: keine. Gelöst: keine. Unverändert: [`carveouts.md`](../plan/planning/in-progress/carveouts.md) liegt nicht im Diff; kein Gate gelockert, keine Schwelle gesenkt (der Lastenheft-Diff trägt ausschließlich freigegebenen Wortlaut).
+Neu: keine. Gelöst: keine. Unverändert: [`carveouts.md`](../plan/carveouts/README.md) liegt nicht im Diff; kein Gate gelockert, keine Schwelle gesenkt (der Lastenheft-Diff trägt ausschließlich freigegebenen Wortlaut).
 
 ## Nicht ausgeführt
 

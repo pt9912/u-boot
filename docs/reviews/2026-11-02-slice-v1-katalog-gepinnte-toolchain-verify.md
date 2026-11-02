@@ -118,7 +118,7 @@ Stand nach `b32e9c38`):
 - Spec und Planung: `spec/spezifikation.md`, `spec/architecture.md` (Zeile Spec), die Slice-Datei selbst, `docs/reviews/` mit den drei Reports (Erst-Report, r2, dieser Verifier-Report) nach der berichtigten Zeile.
 - Erzeugnis: `.devcontainer/Dockerfile`, `.devcontainer/devcontainer.json`, `u-boot.yaml` (Zeile Erzeugnis).
 - Build-Dateien: `Dockerfile`, `repo.mk` (Zeile Pin-Politik-Kommentar, Pins unverändert).
-- Gegenprobe der drei Zeilen „unverändert“: `spec/lastenheft.md`, alle ADRs inkl. [`ADR-0041`](../plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md), `docs/plan/planning/in-progress/carveouts.md`, `.golangci.yml`, `Makefile`, `.d-check.yml`, `internal/adapter/driving/**` — je leerer Treffer in `git diff --stat 41667865..b32e9c38` (hier durchgeführt).
+- Gegenprobe der drei Zeilen „unverändert“: `spec/lastenheft.md`, alle ADRs inkl. [`ADR-0041`](../plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md), `docs/plan/carveouts/README.md`, `.golangci.yml`, `Makefile`, `.d-check.yml`, `internal/adapter/driving/**` — je leerer Treffer in `git diff --stat 41667865..b32e9c38` (hier durchgeführt).
 
 ### Traceability
 

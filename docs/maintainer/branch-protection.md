@@ -105,4 +105,4 @@ bewusste Entscheidung.
   T3 `image-scan` 2026-05-31; [LH-OPEN-002](../../spec/lastenheft.md#lh-open-002--paketierung)-Restwege bleiben mit
   Trigger-Slices vertagt — siehe
   [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md)).
-- Carveout-Inventar: [`carveouts.md`](../plan/planning/in-progress/carveouts.md).
+- Carveout-Inventar: [`carveouts.md`](../plan/carveouts/README.md).

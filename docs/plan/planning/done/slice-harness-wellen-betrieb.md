@@ -10,7 +10,7 @@ verschieden ist (Prozess-Umbau am Harness).
 
 **Bezug:** [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)
 (Roadmap-Form, Auflösungs-Trigger „solange Release-Versionen die Wellen sind“),
-[`MR-002`](../../../../harness/conventions/MR-002-carveout-inventar.md),
+[`MR-002`](../../../../harness/conventions/done/MR-002-carveout-inventar.md),
 [`MR-012`](../../../../harness/conventions.md#mr-012) (Punkt 4: planner, plan-welle,
 close-welle, Register liegen ungenutzt). Voraussetzung:
 [`slice-cr-lastenheft-produktanforderungen`](../done/slice-cr-lastenheft-produktanforderungen.md)

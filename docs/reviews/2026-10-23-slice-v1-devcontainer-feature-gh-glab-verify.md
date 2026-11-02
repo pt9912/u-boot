@@ -82,4 +82,4 @@ Die gesetzten Haken stimmen mit den tatsächlichen Läufen überein; kein Sensor
 
 ## Carveouts
 
-Neu: keine. Gelöst: keine. Unverändert: keine berührt (`docs/plan/planning/in-progress/carveouts.md` nicht im Diff).
+Neu: keine. Gelöst: keine. Unverändert: keine berührt (`docs/plan/carveouts/README.md` nicht im Diff).

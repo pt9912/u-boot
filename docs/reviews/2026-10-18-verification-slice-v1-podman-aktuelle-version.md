@@ -83,7 +83,7 @@ Alle 12 geänderten Dateien haben einen Plan-Eintrag; jeder „update (umgesetzt
 
 ## Carveouts
 
-Neu: keine. Gelöst: keine. Unverändert: alle (`docs/plan/planning/in-progress/carveouts.md` nicht im Diff).
+Neu: keine. Gelöst: keine. Unverändert: alle (`docs/plan/carveouts/README.md` nicht im Diff).
 
 ## Nicht ausgeführt / nicht geprüft
 

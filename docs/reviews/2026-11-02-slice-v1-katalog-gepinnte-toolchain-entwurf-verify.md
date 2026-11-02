@@ -72,7 +72,7 @@ Commit-Messages aller Entwurfs-Commits tragen mindestens eine `LH-*`- oder `ADR-
 
 ## Carveouts
 
-- Neu: **keine**. Gelöst: **keine**. Unverändert: [`carveouts.md`](../plan/planning/in-progress/carveouts.md) berührt der Range nicht. Keine Gate-Schwelle gelockert, Lastenheft unverändert (0.29.0, am Kopf gelesen).
+- Neu: **keine**. Gelöst: **keine**. Unverändert: [`carveouts.md`](../plan/carveouts/README.md) berührt der Range nicht. Keine Gate-Schwelle gelockert, Lastenheft unverändert (0.29.0, am Kopf gelesen).
 
 ## Rest-Risiken und offene Punkte (Übergabe an den Planner)
 

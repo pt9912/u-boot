@@ -142,7 +142,7 @@ oben decken dieselbe Verstoßklasse an denselben Stellen frisch nach.
 | `make verify-depguard` | not run | keine Importregel berührt: `.golangci.yml` unverändert, Paketgrenzen unverändert (neuer Port im `internal/hexagon/port/driven`, Adapter in `internal/adapter/driven/git`, Anwendung kennt nur den Port, Verdrahtung nur `cmd/uboot/main.go`) — Grenzen gelesen statt gefahren, wie im Erst-Review |
 | `make modus-pruefung` | not run | kein Makefile-/Dockerfile-Griff im Diff; der Modus der Läufe ist der Docker-Standardmodus (ohne `BUILD_MODE`), wie die Logs zeigen (`docker build … --target test`) |
 
-**Carveouts:** unverändert — kein neuer Eintrag; `docs/plan/planning/in-progress/carveouts.md` im Diff nicht berührt.
+**Carveouts:** unverändert — kein neuer Eintrag; `docs/plan/carveouts/README.md` im Diff nicht berührt.
 
 **Traceability:**
 

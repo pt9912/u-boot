@@ -83,7 +83,7 @@
 
 ## Carveouts
 
-- Neu: none. Gelöst: none. Unverändert: Inventar `docs/plan/planning/in-progress/carveouts.md` (nur Verweis-Nachzug im Diff).
+- Neu: none. Gelöst: none. Unverändert: Inventar `docs/plan/carveouts/README.md` (nur Verweis-Nachzug im Diff).
 
 ## Nicht ausgeführt
 

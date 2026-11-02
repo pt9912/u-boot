@@ -137,7 +137,7 @@ flowchart LR
 - [`docs/plan/carveouts/README.md`](../../carveouts/README.md) — der
   Carveout-Index der Baseline-Form, README und CO-Dateien
   (Baseline-Regelwerk `modul-07-carveouts.md`; das frühere Inventar ist
-  aufgelöst, [`MR-002`](../../../harness/conventions/done/MR-002-carveout-inventar.md)).
+  aufgelöst, [`MR-002`](../../../../harness/conventions/done/MR-002-carveout-inventar.md)).
 - [`README.md`](../README.md) — Slice-/Tranche-Konventionen für Dateinamen in
   `docs/plan/planning/` (Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine).
 - [`docs/archive/roadmap-history-v0.1-v0.3.md`](../../../archive/roadmap-history-v0.1-v0.3.md)

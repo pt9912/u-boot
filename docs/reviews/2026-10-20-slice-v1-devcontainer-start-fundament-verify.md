@@ -111,7 +111,7 @@ Traceability:
 | [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) | Pins in den eingebetteten Dateien (`TestHelperContext_Pins`), S5 mit verfälschter `integrity` |
 | [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) | Sentinel im Port, Preflight-Tests (11); Eintrag in beide Klassifikatoren im Befehl-Slice |
 
-Carveouts: Neu: none. Gelöst: none. Unverändert: Inventar nicht berührt (`docs/plan/planning/in-progress/carveouts.md` nicht im Diff). Gates nicht gelockert (`.golangci.yml`, `repo.mk`, `Dockerfile`, `.github/workflows/` unverändert).
+Carveouts: Neu: none. Gelöst: none. Unverändert: Inventar nicht berührt (`docs/plan/carveouts/README.md` nicht im Diff). Gates nicht gelockert (`.golangci.yml`, `repo.mk`, `Dockerfile`, `.github/workflows/` unverändert).
 
 Nicht ausgeführt:
 

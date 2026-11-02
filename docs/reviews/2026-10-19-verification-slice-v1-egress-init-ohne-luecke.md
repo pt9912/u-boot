@@ -16,7 +16,7 @@
 | `TestE2E_SandboxDevcontainer_EgressRerun` einzeln (`-tags docker -count=1 -v`, im Image des Ziels `test-docker`, kein Host-Go) | pass, 13,97 s | Unterfälle `repeated_runs` (3,31 s) und `failed_transaction` (0,92 s) PASS, kein SKIP |
 | `make test-docker` (voll) | **nicht von mir gefahren** | Die Zusage des Implementers (643 s, voll grün) ist mir nur als Behauptung bekannt; ein Beleg liegt nicht in einer Datei. Der Diff nach dem letzten Lauf (laut Implementer) ist `05dc167` (Doctor-Meldung, Unit-Test, kein Docker-Pfad). Die Lücke ist benannt, nicht geschlossen. |
 | `make verify-depguard` | nicht gelaufen | keine Importregel berührt (Diff: Template, Tests, zwei Zeichenfolgen in `devcontainer_fallback.go`, Doku) |
-| `git diff --stat 12c34da..HEAD -- docs/plan/adr spec docs/plan/planning/in-progress/carveouts.md` | leer | kein ADR, keine Spec, kein Carveout berührt |
+| `git diff --stat 12c34da..HEAD -- docs/plan/adr spec docs/plan/carveouts/README.md` | leer | kein ADR, keine Spec, kein Carveout berührt |
 
 ## 2. Review-Findings gegen den Code (nicht dem Report geglaubt)
 

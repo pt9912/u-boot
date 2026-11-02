@@ -99,7 +99,7 @@ Traceability:
 | [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) | `Accepted`; `make doc-immutable` 0 Befunde; ADR-Index Z. 56/57; Review F-1..F-14 und Abschnitt 3 |
 | [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)/`006`/`009`, [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)/`006`/`007`, [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-SA-CLI-002`](../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) | Wortlaut-Vorschlag §7 (Alt-Texte gegen `spec/lastenheft.md` gelesen); `make doc-trace` 83 Anforderungen, 0 Waisen; Umsetzung ausdrücklich in den Folge-Slices |
 
-Carveouts: Neu: none. Gelöst: none. Unverändert: Inventar nicht berührt (`docs/plan/planning/in-progress/carveouts.md` im Range unverändert).
+Carveouts: Neu: none. Gelöst: none. Unverändert: Inventar nicht berührt (`docs/plan/carveouts/README.md` im Range unverändert).
 
 Nicht ausgeführt:
 

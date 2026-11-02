@@ -175,7 +175,7 @@ Das Lastenheft `0.23.2` sagt zu, was die tieferen Straten und der Code nicht tra
 | Katalog im Code (`featureCatalogue`) | kennt `ollama-host` nicht (Beleg: ADR *Stand im Code und im Vertrag*) | Carveout 1 |
 | Zwei Zusage-Mengen im Feature `ollama` (Zeile 412 Colima/`arm64`, Zeilen 414 und 418 Linux `amd64`) | im Lastenheft selbst | Carveout 2 |
 
-Das Inventar [`carveouts.md`](../plan/planning/in-progress/carveouts.md) trägt beide als **temporär** (Diff +2 Zeilen):
+Das Inventar [`carveouts.md`](../plan/carveouts/README.md) trägt beide als **temporär** (Diff +2 Zeilen):
 
 - **Carveout 1:** Plan-Anker [`welle-ollama-cloud-modelle`](../plan/planning/done/welle-ollama-cloud-modelle.md) §4 (Folge-Slices `slice-v1-devcontainer-ollama-cloud`, `slice-v2-spec-ollama-cloud`, Kennungen vorläufig) und die *Folgepflicht* der ADR; **Trigger:** beide Folge-Slices liegen in `done/`; der Zwischenzustand erreicht keinen Release. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 - **Carveout 2:** Plan-Anker [`slice-cr-lastenheft-messstaende`](../plan/planning/done/slice-cr-lastenheft-messstaende.md) (Datei besteht, Frage 1); **Trigger:** der Slice liegt in `done/`; die Bindung vor dem Release-Cut entscheidet der Projektinhaber (Frage G6).
@@ -198,7 +198,7 @@ Die ADR-*Folgepflicht* nennt außerdem `CHANGELOG.md` und die Golden-Zeile in `h
 | `docs/plan/planning/open/README.md` | ja |
 | `docs/plan/planning/done/slice-cr-lastenheft-messstaende.md` | ja | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 | `docs/plan/planning/welle-ollama-cloud-modelle.md` | ja |
-| `docs/plan/planning/in-progress/carveouts.md` | ja |
+| `docs/plan/carveouts/README.md` | ja |
 | `docs/plan/planning/done/slice-cr-lastenheft-ollama-cloud-modelle.md` („diese Datei“) | ja | <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 | `docs/reviews/` (drei Reports) | ja (Zeile „neu“; der Verification-Report kommt mit diesem Commit hinzu) |
 | `docs/plan/planning/observations/` | Plan-Zeile „update (Closure)“; **kein** Diff, weil die Closure noch aussteht |

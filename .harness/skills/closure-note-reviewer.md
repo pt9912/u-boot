@@ -29,7 +29,7 @@ Was der Reviewer *immer* mitbringt, bevor er urteilt:
   ausgeführt, Commit/Artefakt) und die harten Regeln
 - der zugehörige Slice-Plan (DoD-Liste — wogegen der Abgleich läuft)
 - das Carveout-Inventar
-  ([`carveouts.md`](../../docs/plan/planning/in-progress/carveouts.md)) für die
+  ([`carveouts.md`](../../docs/plan/carveouts/README.md)) für die
   Gegenprobe der Carveout-Zeile
 - die tatsächliche Commit-Historie des Slice (belegt die Hash-Angabe)
 
@@ -72,7 +72,7 @@ nicht Substanz diskutiert wird, wo schon das Feld fehlt.
   je Sensor.
 - **Carveout-Zeile fehlt oder widerspricht dem Inventar.** Neuer Carveout ohne
   Eintrag in
-  [`carveouts.md`](../../docs/plan/planning/in-progress/carveouts.md)
+  [`carveouts.md`](../../docs/plan/carveouts/README.md)
   (Baseline-Regelwerk `modul-07-carveouts.md`).
 
 **MEDIUM** — genau *einer* der drei Pflicht-Inhalte fehlt oder ist unkonkret:

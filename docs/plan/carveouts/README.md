@@ -24,8 +24,8 @@ Aktive Carveouts mit Auflösungs-Trigger. Aufgelöste Carveouts wandern nach
   2026-11-02): die dauerhaften Ausschlüsse des früheren Master-Inventars tragen
   [ADR-0003](../adr/0003-solid-nahes-lint-profil.md) (vier Lint-Ausnahmen, Zeilen 62 bis 72),
   [ADR-0042](../adr/0042-dauerhafte-lint-ausnahmen.md) (`contextcheck`, `interfacebloat` —
-  im Migrationsslice angelegt), [SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)
-  (GNU `make` am Host) und [SPEC-034](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)
+  im Migrationsslice angelegt), [SPEC-031](../../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)
+  (GNU `make` am Host) und [SPEC-034](../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)
   (depguard-Regeln production-only); die Werkzeug-Wahl-Spur der
   Überführung trägt [`MR-002`](../../../harness/conventions/done/MR-002-carveout-inventar.md) (resolved).
 - Siehe Baseline-Regelwerk `modul-07-carveouts.md` (§Ziel-Form: Carveout,

@@ -104,7 +104,7 @@ Dateiunion der Slice-Commits (je `git show --stat`, union über `9b349879`…`be
 
 ## Carveouts
 
-- Neu: **keine** — `docs/plan/planning/in-progress/carveouts.md` ist im Diff nicht berührt; keine Lockierung von Gates, Schwellen oder Architekturregeln.
+- Neu: **keine** — `docs/plan/carveouts/README.md` ist im Diff nicht berührt; keine Lockierung von Gates, Schwellen oder Architekturregeln.
 - Gelöst: —
 - Unverändert: —
 

@@ -78,7 +78,7 @@ Beide Rest-Befunde sind Planning-Text-Berichtigungen (kein Vertrags-Diff); nach 
 
 ## Carveouts
 
-Neu: keine. Gelöst: keine. Unverändert: [`carveouts.md`](../plan/planning/in-progress/carveouts.md) liegt nicht im Diff; kein Gate gelockert, keine Schwelle gesenkt (Vertrags- und Planungs-Diffs tragen ausschließlich freigegebenen Wortlaut bzw. Planning-Berichtigungen).
+Neu: keine. Gelöst: keine. Unverändert: [`carveouts.md`](../plan/carveouts/README.md) liegt nicht im Diff; kein Gate gelockert, keine Schwelle gesenkt (Vertrags- und Planungs-Diffs tragen ausschließlich freigegebenen Wortlaut bzw. Planning-Berichtigungen).
 
 ## Unbelegte Auftrags-Angaben (die Verhaltensregel des Auftrags angewendet)
 
