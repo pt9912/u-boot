@@ -265,7 +265,7 @@ ohne neue Sub-Area-Berührung; keine BF-/Hybrid-Markierung).
 
 **Carveouts:** keiner — die Ablage-Form selbst ist der Gegenstand; CO-001 bleibt als aktiver temporärer Carveout mit Folge-Slice (kein Gate gelockert, keine Schwelle gesenkt; Review-Negativbefund).
 
-**Weiter offen:** der Folge-Slice [`slice-v1-logs-crlf`](../open/slice-v1-logs-crlf.md) (CO-001-Konsequenz, Start am Trigger); der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../next/slice-v1-katalog-feature-jdk-gepinnt.md) mit seinen Rest-Aufträgen und die Ableitung des Release-Cut (F-6 des CR-Reviews: kein Cut, der den java-Schlüssel als implementiert meldet, solange der Katalog-Code ihn nicht trägt); die open/-README-Sub-Datei und das `next/`-README analog zur in-progress/-Sub-Datei zu prüfen (gleiche Regeln, kein Aufhebungsauftrag).
+**Weiter offen:** der Folge-Slice [`slice-v1-logs-crlf`](../open/slice-v1-logs-crlf.md) (CO-001-Konsequenz, Start am Trigger); der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../in-progress/slice-v1-katalog-feature-jdk-gepinnt.md) mit seinen Rest-Aufträgen und die Ableitung des Release-Cut (F-6 des CR-Reviews: kein Cut, der den java-Schlüssel als implementiert meldet, solange der Katalog-Code ihn nicht trägt); die open/-README-Sub-Datei und das `next/`-README analog zur in-progress/-Sub-Datei zu prüfen (gleiche Regeln, kein Aufhebungsauftrag).
 
 **Drei Paarungen:** Anker — kein `liegt in`-Feld, nichts verkörpert; Folge-Slice — [`slice-v1-logs-crlf`](../open/slice-v1-logs-crlf.md) liegt als Datei in `open/` (`ls` bei der Closure); Register — jede genannte Kennung ist ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls`). Der Welle-Bezug ist der der nächsten Welle-Closure (Modul 6).
 
