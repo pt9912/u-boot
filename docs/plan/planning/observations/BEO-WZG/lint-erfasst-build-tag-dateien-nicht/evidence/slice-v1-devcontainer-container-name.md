@@ -1,0 +1,8 @@
+**Vorgang:** [`slice-v1-devcontainer-container-name`](../../../../done/slice-v1-devcontainer-container-name.md)
+
+**Fund:** Zwei Buildfehler in Dateien mit Build-Tag `docker` überlebten die lokale Prüfung (Lint ohne Tags) und wurden erst am Docker-Stand sichtbar — derselbe Vorgang, zwei Fix-Runden:
+
+- Der instance-Test benutzte die veraltete Bezeichnung `dcWorkspaceDest` statt `dcWorkspacePath(dir)` (`internal/e2e/devcontainer_instance_docker_test.go`, Zeile 246); der Buildfehler überlebte `make lint`, zerbrach den CI-Lauf `integration-docker` 41337521454 (Paket `internal/e2e`) und wurde im lokalen `make test-docker`-Lauf gefangen; berichtigt in `0ff780ba`.
+- `dcProjectName` benutzte `strings.Cut` mit zwei statt drei Rückgabewerten (`internal/e2e/devcontainer_name_docker_test.go`); der Buildfehler überlebte `make lint` wiederum nur im docker-Tag und wurde im lokalen `make test-docker`-Lauf gefangen; berichtigt in `be98839f` (lesend auf `strings.CutPrefix` umgestellt).
+
+**Beleg-Qualität:** belegt durch die Commit-Messages und die rote bzw. grüne Läufe-Paarung (`41340086697`/`41340086783` rot-los; `41337521454` rot vor `0ff780ba`, `41340432215`/`41340432264` grün nach beiden Berichtigungen); kein Gate am Host compilet die docker-getaggten Dateien. Zustand im Register: `make lint` deckt die Tag-Dateien nicht ab — die Entscheidung über den Tag im Gate bleibt beim Projektinhaber ([`AGENTS.md`](../../../../../../../AGENTS.md) §3.1 umfasst sie nicht). Zweiter Vorgang; unter der Schwelle von drei.

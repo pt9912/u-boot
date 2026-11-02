@@ -95,6 +95,7 @@ Gelesen am 2026-11-01 ([`AGENTS.md`](../../../../AGENTS.md) §3.10); der Impleme
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Abschnitt zu mehreren Instanzen; ohne Kennungen |
 | `docs/plan/adr/` | **unverändert** | Frage 9 entschieden (2026-11-01): kein Folge-ADR — [ADR-0038](../../adr/0038-devcontainer-instanz-zweites-id-label.md) bleibt unberührt, der Name ist Produktzusage im CR |
 | diese Datei, `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | neu / update | Bestand-Zeile; Moves per `make slice-mv`; die Roadmap trägt die Arbeitszeile zum Start und den Ruhe-Marker bei Closure (Commit `95b5c864`) |
+| `docs/reviews/2026-11-01-slice-v1-devcontainer-container-name.md`, `docs/reviews/verification-2026-11-01-slice-v1-devcontainer-container-name.md` | neu | Review- und Verification-Report (Nachtrag beim Abgleich vor der Closure: die zwei Reports lagen im Diff ohne Plan-Zeile) |
 
 **Wächter und rot färbende Mutationen** (Implementer führt sie aus):
 
@@ -153,7 +154,53 @@ DoD vollständig; `make gates` grün; Docker-Test im CI-Lauf grün; Review- und 
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `open/` (Entwurf).
+**Evidence (Berichte und Läufe):**
+
+- Review-Report [`2026-11-01-slice-v1-devcontainer-container-name`](../../../reviews/2026-11-01-slice-v1-devcontainer-container-name.md): F-1 (HIGH), F-2 und F-3 (MEDIUM), F-4 (LOW), F-5 bis F-7 (INFO); Negativbefunde über die Subcommand-Klassifikation, Architekturgrenzen, Replay, Sprachvertrag, Handbuch und CHANGELOG ohne Fund.
+- Verification-Report [`verification-2026-11-01-slice-v1-devcontainer-container-name`](../../../reviews/verification-2026-11-01-slice-v1-devcontainer-container-name.md): Gesamturteil Closure-fähig. `make gates` lokal im Docker-Modus, Exit 0 (2026-11-02, auf dem Stand `71cf2f23`): d-check 1007 Dateien, 0 Befunde; `baseline-verify` v6.18.1 OK; `coverage-gate` 92,20 % gegen 90 %; `ablage-pruefung` OK. CI auf dem Tip grün: `ci` 41340432264, `integration-docker` 41340432215 (2026-11-01). `make test-docker` nicht lokal gelaufen (Projektinhaber-Entscheidung, 2026-11-01: der CI-Lauf ist der Nachweis); `make verify-depguard` nicht gelaufen (keine Importrichtung berührt, Nachweis im Review-Report).
+- Umsetzung `b5be7aaa` ([`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-FA-INIT-002`](../../../../spec/lastenheft.md#lh-fa-init-002--projektname)), Messungen M1 bis M6 samt Zusatzprobe 6 (Protokoll [`docs/messungen/slice-v1-devcontainer-container-name`](../../../messungen/slice-v1-devcontainer-container-name/README.md), je Messung zwei Läufe), CR-Wortlaut freigegeben 2026-11-01 (Lastenheft `0.29.0`), [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), Handbuch und `CHANGELOG.md` nachgezogen.
+
+**DoD je Liefer-Punkt (alle erbracht):**
+
+1. **Messung und Freigabe** — M1 bis M6 gefahren und datiert; Namensform A (`u-boot-<Projekt>[-<Instanz>]`), Weg S1' (`--override-config` mit einer je Aufruf gerenderten Kopie; die erzeugte `devcontainer.json` bleibt byte-identisch, e2e-Gegenprobe im Tag `docker`), Kollisions-Abbruch, Ausgabe des Namens, letzte Fragen und CR-Wortlaut freigegeben 2026-11-01 (§6).
+2. **Der Name** — `up` startet den benannten Container (mit und ohne `--instance`, `--recreate` nennt ihn neu), Übernahme bei gleichem Ordner, Kollisionsabbruch mit Exit `10` auch für einen Container ohne `local_folder`-Label (Unterfall gepinnt in `ff56fd50`), ungültiger Name endet Exit `10`; die Suche von `down`/`shell` bleibt Label-gebunden (`inspector.go` unverändert); `devcontainerId` und Volume-Namen namensunabhängig (Messung 3 und Tests); Docker-Tests im CI 41340432215.
+3. **Doku und Zusage-Menge** — Lastenheft `0.29.0`, `SPEC-049`, Handbuch und CHANGELOG ohne Kennungen und ohne Planverweise (Review-Negativbefunde Sprachvertrag, Handbuch, CHANGELOG); die Spec-Bedingung zur Kollision trägt ihren Test (F-3); die zwei restlichen Bedingungen sind mess-getragen und als Rest-Risiko im Verification-Report ausgewiesen.
+4. **Gates, Review, Verification, Closure** — Gates im Abschnitt Verifikation unten; Reports und Register-Fortschreibung in dieser Notiz.
+
+**Befunde von Review und Verification, Ausgang je Befund:**
+
+| Befund | Ausgang |
+|---|---|
+| F-1 HIGH (zwei neue Exit-`10`-Sentinel ohne Pin-Tabellen-Eintrag; `-Invalid` auf Exit-Code-Ebene nirgends gepinnt) | behoben `ff56fd50` je Sentinel mit Exit `10` und Diagnose-Code je Pin; der Verifier hat die Pin-Zeilen im Nachweis gelesen |
+| F-2 MEDIUM (`roadmap.md` im Diff ohne Plan-Eintrag) | behoben `ff56fd50`; die e2e-Dateien der CI-Fix-Runden folgen in `94564e5b`; der Verifier befundet den Abgleich voll deckend (einziger Nicht-Eintrag: der Review-Report selbst, als Review-Artefakt ausgewiesen) |
+| F-3 MEDIUM (Spec-Bedingung Kollision ohne pinnenden Test) | behoben `ff56fd50` (fakeDocker-Zeile ohne Label im Kollisionstest); Register-Evidence angelegt |
+| F-4 LOW (zwei bedingt-entschiedene Plan-Zeilen unverändert) | behoben `ff56fd50` |
+| F-5 INFO (Doppelprüfpfad im Launcher, Klasse `11` für künftigen Direktaufrufer) | kein Handlungsbedarf (Pfad heute nicht erreichbar; Kommentar zutreffend) |
+| F-6 INFO (Zusage „auch nicht mit `--recreate`“ nur gemessen) | kein eigener Testpin; der Abbruchpfad liegt vor `runUp`, implizit durch denselben Test getragen; als Rest-Risiko im Verification-Report ausgewiesen |
+| F-7 INFO (`down`-Kommentar enger als der Stand) | kein Handlungsbedarf (nicht falsch; `down` vergibt keinen Namen) |
+| Verification-Rest-Risiken (zwei mess-getragene Spec-Bedingungen; Länge oberhalb 257 Zeichen nicht gemessen) | tragfähig befundet (Verification); die Zusage der Länge grenzt die Spec bewusst auf das Gemessene (Zusammensetzung ≤ 103 Zeichen) |
+
+**Was ging anders als geplant:** Die docker-getaggten e2e-Dateien brachen dreimal, lokal bzw. im CI (`41335734895` Verhaltenstest-Fix `b919d4b4`; `41337521454` Buildfehler `dcWorkspaceDest`, gefangen erst am Docker-Stand, `0ff780ba`; ein weiterer Buildfehler am docker-Tag, gefangen im lokalen `test-docker`-Lauf, `be98839f`), weil `make lint` die Tag-Dateien nicht deckt — Register [`BEO-WZG/lint-erfasst-build-tag-dateien-nicht`](../observations/BEO-WZG/lint-erfasst-build-tag-dateien-nicht/observation.md), jetzt zwei Vorgänge, die Entscheidung über den Tag im Gate bleibt beim Projektinhaber. Dazu F-1 (HIGH): die Sentinel-Pin-Tabelle hielt die Dual-Classifier-Zusage nicht; kein Gate prüft diese Abdeckung, gefunden hat der Review.
+
+**Steering-Loop-Eintrag** (gezählt, nicht verkörpert; kein Eintrag trägt das Feld `liegt in`):
+
+- *Lehre:* **Ein Buildfehler in einer docker-getaggten Datei überlebt `make lint` und wird erst am Docker-Stand sichtbar** — im diesem Slice zweimal (Register `BEO-WZG/lint-erfasst-build-tag-dateien-nicht`, Stand zwei Vorgänge). Kandidat eines Pflichtschritts im Gate: ein Compile- oder Lint-Lauf über die docker-getaggten Dateien (beispielsweise `go build -tags docker ./...` oder das Lint-Profil mit `run.build-tags: [docker]`), Zielort-Vorschlag ein Target in `repo.mk`; die Entscheidung bleibt beim Projektinhaber. Kein Eintrag erreicht die Schwelle von drei; es wird nichts verkörpert.
+- *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine. *Folge-Slices:* keiner; das Release des Slices ist dem Cut-Slice [`slice-v1-release-cut-v0.18.0`](../../open/slice-v1-release-cut-v0.18.0.md) zugeordnet (Minor, *Changed*, §6 Frage 8).
+
+**Beobachtungs-Register (`../observations/`):**
+
+- *Evidence neu (ein Vorgang je Kürzel):* [`BEO-WZG/lint-erfasst-build-tag-dateien-nicht`](../observations/BEO-WZG/lint-erfasst-build-tag-dateien-nicht/observation.md) (`evidence/slice-v1-devcontainer-container-name.md`, zweiter Vorgang: zwei Buildfehler, berichtigt) · [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) (`evidence/slice-v1-devcontainer-container-name.md`: F-3, Kollisions-Bedingung ohne Test) · [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) (`evidence/slice-v1-devcontainer-container-name.md`: F-2 und F-4, Plan-Tabelle).
+- *Nicht gezählt:* [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) — kein Fund: die Zusage-Menge trägt die Grenzen der Lastenheft-Stände, F-6 ist implizit getragen; [`BEO-E2E/docker-test-hinterlaesst-zwischencontainer`](../observations/BEO-E2E/docker-test-hinterlaesst-zwischencontainer/observation.md) — kein Fund: Review-Negativbefund File Safety, die e2e-Tests räumen die Zwischencontainer auf.
+
+**Carveouts:** keiner neu, keiner gelöst, keiner verändert.
+
+**Weiter offen (nicht abgehakt):** `make verify-depguard` nicht gelaufen (Begründung: Review); `make test-docker` lokal nicht gelaufen (Entscheidung des Projektinhabers, CI-Nachweis); M7-Mac-Probe gehört dem Release, nicht diesem Slice.
+
+**Abgleich der Plan-Tabelle** (Verifizierungsnachzug; Stand nach der letzten Fix-Runde `be98839f`): der Abgleich des Verifiers befundet voll deckend; nachträglich ergänzt die Zeile der zwei Reports (Review- und Verification-Report) beim Abschnitt dieser Notiz.
+
+**Drei Paarungen** (geprüft auf den Inhalt dieser Notiz): *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert, nichts zu paaren. *Folge-Slice* — kein neuer Slice versprochen; die Release-Zuordnung zum Cut-Slice ist eine Datei in `open/` (bei der Closure mit `ls` bestätigt, Pfad nach dem Move von `make slice-mv` berichtigt). *Register* — jede genannte Kennung `BEO-<KUERZEL>/<slug>` ist ein Verzeichnis mit der Evidence-Datei dieser Closure (bei der Closure mit `ls` bestätigt).
+
+**Verifikation** (Läufe nach Closure-Inhalt, Move und Verweise-Nachzug; Modus der Umgebung): wird nach dem Nachzug geführt und steht als Zeile danach hier.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
