@@ -64,6 +64,7 @@ Dieser Slice schreibt kein Produktcode. Gelesene Stellen am 2026-11-01.
 | `cr-vorschlag-gepinnte-werkzeugkette.md` | neu | der CR-Wortlaut je Stelle samt Freigabe-Block (`3cb04e77`, Nachzüge `dd3763a4`, `6dd2a14d`) |
 | `docs/plan/planning/in-progress/roadmap.md` | update | die `v0.19.0`-Zeile der Nächsten Wellen (entschieden, beide Folge-Slices genannt) |
 | `docs/reviews/` (Review- und Verification-Report dieses Slices) | neu | Review (2026-11-02) und Verification vor der Closure (Nachtrag beim Abgleich: die Reports lagen im Diff ohne Plan-Zeile) |
+| diese Datei (Berichtigungsrunde `cd4f7c11`), `cr-vorschlag-gepinnte-werkzeugkette.md`, `slice-cr-devcontainer-gepinnte-werkzeugkette.md`, `slice-v1-katalog-gepinnte-toolchain.md`, `open/README.md` | update | die Reststellen des überholten `13`/`10`-Standes und der Fundstellen (Review F-1 bis F-4, Fix-Runde); die Zeilen der Nachzüge stehen oben |
 | `internal/hexagon/application/**`, `tests/**`, e2e | **ungeöffnet** | bewusst: der Entwurf liest die Fundstellen (befundet), ändert sie nicht |
 
 ## 4. Trigger

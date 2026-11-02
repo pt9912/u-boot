@@ -1007,6 +1007,7 @@ Die URL-Form des Abrufs je Version ist eine Umsetzungs-Stelle dieses Eintragstyp
 | `containerEnv` mit `GOCACHE`/`GOMODCACHE` unter `${containerWorkspaceFolder}`, beide Schlüssel → Werte genau einmal | Golden Case der erzeugten `devcontainer.json` mit je einem und mit beiden Schlüsseln |
 | Cache liegt unter dem Workspace-Volume und übersteht das Neuanlegen (nur Sandbox-Profil) | Docker-Test mit Recreate und Marker im Cache (Linux-Host `amd64`, lokale, nicht verschachtelte Engine) |
 | Warn-Meldungen je aktiviertem Schlüssel samt Grenz-Hinweis; keine unter `--quiet` | Test der Befehlsausgabe von `generate devcontainer`: je Schlüssel eine `warn`-Diagnose, unter `--quiet` keine |
+| `u-boot doctor` meldet für die zwei Schlüssel keinen Befund der Prüfungen `devcontainer.features.allowlist` und `devcontainer.features.drift` | Doctor-Test im Umsetzungs-Slice: mit je einem aktivierten Schlüssel meldet `doctor` keinen dieser Codes (Satz im Abschnitt *Eintragstyp*) |
 
 **Nicht zugesagt:** das Arbeitsverhalten der Werkzeuge in einer übersteuerten Version, das Überstehen des Neubaus des Images durch die Installationen, soweit kein Test es belegt, die Umgebungswerte `BUILD_MODE`, `GOFLAGS` und `GOTOOLCHAIN` (die Schlüssel setzen sie nicht) und, für die Cache-Werte, das Standardprofil sowie andere Hosts, Engines und Basis-Images als die der Docker-Tests.
 
