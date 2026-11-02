@@ -21,7 +21,7 @@ Release-Cuts stehen hier mit ihrem Slice, woran gearbeitet wird, sagt das
 Verzeichnis der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien stehen
 in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
-[`slice-v1-release-cut-v0.18.0`](../in-progress/slice-v1-release-cut-v0.18.0.md) liegt in `in-progress/` — Minor-Release `v0.18.0` von `main` nach `v0.17.0` (entschieden 2026-11-01, Minor/*Changed*; Freigabe des Projektinhabers für Push und Tag erteilt 2026-11-02), trägt die drei `[Unreleased]`-Träger seit `v0.17.0`: die Auflösung von Git-Zugangsdaten und Identität des Hosts (Lastenheft `0.28.0`, [`slice-v1-devcontainer-host-git-uebernehmen`](../done/slice-v1-devcontainer-host-git-uebernehmen.md)), die Schlüssel `devcontainer.resources.memory`/`.cpus` (Lastenheft `0.27.0`, [`slice-v1-devcontainer-ressourcenlimits`](../done/slice-v1-devcontainer-ressourcenlimits.md)) und der Containername `u-boot-<project>[-<instance>]` (Lastenheft `0.29.0`, [`slice-v1-devcontainer-container-name`](../done/slice-v1-devcontainer-container-name.md)).
+`Nichts in Arbeit.`
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
@@ -113,6 +113,7 @@ flowchart LR
 | v0.16.0 (Cloud-Modelle von Ollama mit Claude Code im Container des Sandbox-Profils und das Katalog-Feature `ollama-host` (eine Zeile in `runArgs`, beide Profile, ausgewiesen); zugesagt für einen Linux-Host `amd64` mit lokaler Docker-Engine, der Weg über `u-boot devcontainer up` nicht gemessen, der Dienst des Hosts nur über einen Relay des Nutzers; Lastenheft 0.23.2; trägt die Welle `welle-ollama-cloud-modelle`) | 2026-10-25 | [`slice-v1-release-cut-v0.16.0`](../done/slice-v1-release-cut-v0.16.0.md) — Tag `v0.16.0` auf `0f4a6afc` |
 | v0.16.1 (Patch-Release ohne Welle-Datei: Lastenheft 0.24.0 nennt die Zusage-Mengen von `ollama` und `podman` im Sandbox-Devcontainer im Wortlaut statt als Messstand, Nachzug in Handbuch, READMEs und `CHANGELOG.md`; der Code des Binary bleibt unverändert; Einstufung *Changed*; trägt [`slice-cr-lastenheft-messstaende`](../done/slice-cr-lastenheft-messstaende.md) und [`slice-v1-testkommentar-ollama-ci-pass`](../done/slice-v1-testkommentar-ollama-ci-pass.md)) | 2026-10-26 | [`slice-v1-release-cut-v0.16.1`](../done/slice-v1-release-cut-v0.16.1.md) — Tag `v0.16.1` auf `ae4e06cb` |
 | v0.17.0 (Minor-Release ohne Welle-Datei: `--instance` für `u-boot devcontainer up`, `down` und `shell`, `CLAUDE_CODE_OAUTH_TOKEN` als Referenz für `claude-code`, Lastenheft 0.26.0) | 2026-11-01 | [`slice-v1-release-cut-v0.17.0`](../done/slice-v1-release-cut-v0.17.0.md) — Tag `v0.17.0` auf `f89424e1` |
+| v0.18.0 (Minor-Release ohne Welle-Datei: der Containername `u-boot-<project>[-<instance>]`, die Auflösung von Git-Zugangsdaten und Identität des Hosts (opt-in), die Schlüssel `devcontainer.resources.memory`/`.cpus` und die Hilfetexte ohne Kennungen; Lastenheft 0.27.0, 0.28.0 und 0.29.0) | 2026-11-02 | [`slice-v1-release-cut-v0.18.0`](../done/slice-v1-release-cut-v0.18.0.md) — Tag `v0.18.0` auf `e6c87379` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen

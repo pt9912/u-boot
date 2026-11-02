@@ -95,7 +95,63 @@ DoD vollständig; Tag `v0.18.0` gesetzt und gepusht (M5, nur mit Freigabe); `pub
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `open/` (Plan).
+**Evidence (Berichte und Läufe):**
+
+- Review-Report [`2026-11-02-slice-v1-release-cut-v0.18.0`](../../../reviews/2026-11-02-slice-v1-release-cut-v0.18.0.md): 0 HIGH, 2 MEDIUM (F-1, F-2), 8 LOW (F-3 bis F-10), 1 INFO (F-11); Plan-Tabelle gegen `git show --stat e6c87379` ohne Befund, Negativbefunde über die Klassen des Vorgänger-Cuts ohne neuen Fund auf den gelesenen Linien.
+- Verification-Report [`2026-11-02-slice-v1-release-cut-v0.18.0-verify`](../../../reviews/2026-11-02-slice-v1-release-cut-v0.18.0-verify.md): DoD-Konform verifiziert, closure-fähig; alle Lauf-IDs und Digests vom Verifier selbst nachgelesen (`gh run view`, `gh release view`, Manifest-Inspekte), Gate-Stempel gegen Inhalts-Hash geprüft, Tap-Trockenlauf im Verifier-Lauf neu gefahren.
+- Läufe: lokal `make gates` Exit 0 (Stempel = HEAD `724c5e5e`, Docker-Modus), `make ci` Exit 0, `make fullbuild` Exit 0; `make build VERSION=0.18.0` melde `u-boot version 0.18.0` und OCI-Label `0.18.0`; Tap-Trockenlauf v0.18.0 Exit 0 (Protokoll clone/add/`commit -m u-boot 0.18.0`/push), Gegenprobe v0.17.0 Exit 1 vor `clone`; `make doc-immutable RANGE="v0.17.0..HEAD"` grün (98 Commits nach den Nachzügen). CI auf dem Tag-Commit `e6c87379`: [`ci`](https://github.com/pt9912/u-boot/actions/runs/41403124364) `41403124364`, [`integration-docker`](https://github.com/pt9912/u-boot/actions/runs/41403124438) `41403124438`, [`tap-check`](https://github.com/pt9912/u-boot/actions/runs/41403131805) `41403131805` — je success. Nach dem Tag: [`publish`](https://github.com/pt9912/u-boot/actions/runs/41405100611) `41405100611` success (Jobs publish, package smoke deb+rpm, `tap` je success).
+- Release: `u-boot v0.18.0`, 12 Assets, kein Draft, kein Prerelease, publiziert `2026-11-02T07:17:01Z`; Tag lightweight (`git cat-file -t` = `commit`) auf `e6c87379`. GHCR-Digests `:0.18.0` und `:latest` gleich (`sha256:bef5b03dff71467cc439ed015e98f0b8552e827ddef79789f8c19ca82ad50383`), `docker run --rm ghcr.io/pt9912/u-boot:0.18.0 --version` = `u-boot version 0.18.0`. Tap-Commit `b52a0bc` (`u-boot 0.18.0`).
+- M7 (Mac): gelaufen, Aktion des Projektinhabers — Meldung im Hauptagenten-Gespräch 2026-11-02: `u-boot v0.18.0` läuft auf dem macOS. Der Job `tap` ersetzt die Bestätigung nicht; hier ist sie der Meldung nach erbracht.
+
+**DoD je Liefer-Punkt (alle erbracht):**
+
+1. **Release-Text und Versionsstellen** — `CHANGELOG.md` trägt `[0.18.0] - 2026-11-02` mit Lead (Tag-Datum = Datum), leerem Anker `[Unreleased]` und Compare-Links; `0.18.0-dev` an den drei Stellen samt Kommentaren; READMEs und Handbuch auf `v0.18.0`, Handbuch-`Stand` = Tag-Datum (Review-Negativbefunde zu Kopf, Fuß, Versionen und Kennungsfreiheit).
+2. **Vorab-Prüfungen** — `make gates`, `make ci`, `make fullbuild` lokal grün; Trockenlauf des Tap-Pfads mit Gegenprobe auf den Vorgänger-Tag; `ci` und `integration-docker` auf dem Push-Tip grün; `tap-check` grün; danach Tag `v0.18.0` gesetzt und gepusht (Freigabe erteilt 2026-11-02); Kontrolle nach `releasing.md` §6 (M6) erbracht.
+3. **Doku nachgezogen** — Roadmap-Zeile unter *Abgeschlossene Wellen* mit Tag-Hash (diese Closure), Bestand-Zeile in `open/README.md`; der [`releasing.md`](../../../maintainer/releasing.md)-Zeiger „zuletzt" ist entfallen (`8cd0976b`, Review F-6) und die DoD-Zeile ist berichtigt; `releasing.md` Punkt 5 trägt die Skelett-Vorlage statt „Muster der früheren Cuts" (Review F-7, `9a7db2f1`).
+4. `make gates` grün nach dem letzten Commit vor dem Handoff (Abschnitt Verifikation unten) und mit dieser Closure.
+5. **Review und Verification** — Reports unter `docs/reviews/` (oben); Nachlauf-Review über den Diff von Vertragstext (`9a7db2f1`).
+6. Closure-Notiz mit Steering-Loop-Lerneintrag; Register fortgeschrieben (unten); jedes Risiko aus §6 mit Ausgang; die drei Paarungen getragen.
+
+**Befunde von Review und Verification, Ausgang je Befund:**
+
+| Befund | Ausgang |
+|---|---|
+| F-1 MEDIUM (Lead-Satz „`down`, `shell`, `doctor`, `init` and `generate` work as before" widerspricht der Lieferung) | behoben `9a7db2f1`: der Lead nennt jetzt die Fehlerklassen von `up` und `shell` (startet wie `up` ohne `--recreate`), die Label-Suche von `down` und die geänderten Dateien von `init`/`generate`; Verifier hat den Fix gegen [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) gelesen |
+| F-2 MEDIUM (Grenzliste ohne „the behaviour of a host `gh` with several accounts") | behoben `9a7db2f1`; Verifier liest die Grenzliste deckungsgleich mit den drei Einträgen |
+| F-3 LOW („the value travels by name on the command line" lesbar als Wert auf der Kommandozeile) | behoben `9a7db2f1`: „the handover travels by name on the command line, the value in the environment of the `docker` client process" |
+| F-4 LOW (Slice-§7-Marker „liegt in `open/`" abgelaufen) | entfällt mit dieser Closure (die Notiz ersetzt den Marker) |
+| F-5 LOW (Roadmap „Letzte Änderung" einen Tag zurück) | behoben `9a7db2f1` |
+| F-6 LOW (DoD-Punkt nennt den gestrichenen `releasing.md`-Zeiger) | behoben `9a7db2f1` |
+| F-7 LOW (`releasing.md` Punkt 5 „nach dem Muster der früheren Cuts") | behoben `9a7db2f1` (Skelett-Vorlage) |
+| F-8 LOW (Roadmap-Zeile „`v0.18.0` — Feature-Katalog (geplant)", Tag vergeben) | behoben `9a7db2f1` (`v0.19.0`, Trigger „`v0.18.0` veröffentlicht") |
+| F-9 LOW (Vorschlag `v0.18.0` in zwei CR-Entwürfen und Bestand-Zeilen) | behoben `9a7db2f1` (`v0.19.0`) |
+| F-10 LOW (Kopfliste „Planungs-Commits ohne Release-Wirkung" unvollständig) | behoben `9a7db2f1` (Host-git-Mess-Commits, zwei `tools/mk`-Commits) |
+| F-11 INFO (Handbuch-Version `2.1`) | aktionslos (`releasing.md` verlangt keine Anhebung) |
+| Verification-Rest-Risiken | M7 erbracht (Meldung des Projektinhabers, oben); die zwei vom Verifier benannten mess-getragenen Bedingungen des Container-Name-Slices sind dort zur Closure geführt und nicht Gegenstand dieses Slices |
+| Review-Rest (nicht geprüft: CI-/Gate-Evidence, Träger-Produktcode im Ganzen) | vom Verifier nachgeprüft (IDs und Digests, Report oben); die Träger tragen je ein eigenes Review |
+
+**Was ging anders als geplant:** Der Release-Text trug zwei MEDIUM-Fehler (F-1 Widerspruch zur eigenen Lieferung, F-2 Grenzliste kürzer als der Vertrag), gefangen erst vom Review **nach dem Tag** — derselbe Hergang wie im Cut `v0.17.0` (dort F-1/N-1). Die Nachzugs-Commits berichtigen nur `main`, den Tag-Stand nicht ([`releasing.md`](../../../maintainer/releasing.md) *Zweck*). Dazu die Klasse „Zustandsmarker nach Ablauf": vier weitere Funde (F-4 bis F-6, F-8, F-9) trotz der Berichtigungsrunde `827601be`, die vor dem Tag lief.
+
+**Steering-Loop-Eintrag** (gezählt, nicht verkörpert; kein Eintrag trägt das Feld `liegt in`):
+
+- *Lehre 1 (Muster, 3× überschritten innerhalb der verkörperten Regel):* **Zustandsmarker mit Beleg- oder Versionsbezug stehen nach ihrem Ablauf** — im Cut `v0.17.0` zwei Funde (dort F-3/F-4), hier trotz Berichtigungsrunde vier (dieser Review F-4 bis F-6, F-8, F-9). Rückfälle nach der Verkörperung in [`AGENTS.md`](../../../../AGENTS.md) §3.10; Register [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md). Kandidat eines Sensors (zur Entscheidung des Projektinhabers): eine `d-check`-Regel, die „Vorschlag Release `v<X.Y.0>`"-Zusätze in `open/` und Bestand nach einem gesetzten Tag `v<X.Y.0>` rot färbt; ein solcher Sensor ist mechanisch prüfbar (Tag-Liste gegen Textstellen). Es wird nichts verkörpert, ohne die Entscheidung.
+- *Lehre 2 (Muster, 2. Vorgang):* **Der Lead des Release-Textes wird nur vom Review gegen die ausgelieferten Einträge gelesen** — kein Gate liest Lead gegen Einträge oder Code [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) (Plan-Risiko 1); F-1 und F-3 gehören zur Klasse der ausgelieferten Vertragsstellen. Wie beim Vorgänger-Cut zählt sie zur Closure; ein Pflichtschritt „Lead gegen die drei Einträge lesen" in [`releasing.md`](../../../maintainer/releasing.md) §3 bliebe eine Setzung des Projektinhabers.
+- *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine. *Folge-Slices:* keiner; die Katalog-Entwürfe liegen als Dateien in `open/` und die Roadmap führt `v0.19.0` unter *Nächste Wellen*.
+
+**Beobachtungs-Register (`../observations/`):**
+
+- *Evidence neu (ein Vorgang je Kürzel):* [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) (`evidence/slice-v1-release-cut-v0.18.0.md`: F-5, F-6, F-8, F-9, F-10 — Zustandsmarker nach Ablauf und unvollständige Kopfliste, behoben) · [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) (`evidence/slice-v1-release-cut-v0.18.0.md`: F-1 und F-3 — Lead-Aussagen über Verhalten des Codes ohne Beleg, behoben).
+- *Nicht gezählt:* [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) — F-2 ist die engere Grenzliste (der Lead sagt weniger als das Lastenheft, nicht mehr), wie beim Vorgänger-Cut F-2; zweiter Vorgang der Klasse, kein Register-Dach. [`BEO-DOK/ci-log-falsch-gelesen`](../observations/BEO-DOK/ci-log-falsch-gelesen/observation.md) — Prüfweg über Lauf-IDs und `gh run view` angewandt, kein Fund. [`BEO-DOK/unumkehrbarer-schritt-vor-der-kontrolle`](../observations/BEO-DOK/unumkehrbarer-schritt-vor-der-kontrolle/observation.md) — `tap-check` lief vor dem Tag, der Trockenlauf mit Gegenprobe davor, kein Fund.
+
+**Carveouts:** keiner neu, keiner gelöst, keiner verändert.
+
+**Weiter offen (nicht abgehakt):** nichts aus der DoD; der Pflichtschritt „Lead gegen die drei Einträge lesen" und der Sensor-Kandidat für die Marker-Klasse liegen als Entscheidungen beim Projektinhaber (Lehre 1 und 2, keine Dateien versprochen).
+
+**Abgleich der Plan-Tabelle** (`git show --stat e6c87379` und die Nachzugs-Commits `827601be`, `9a7db2f1`, `724c5e5e`): der Cut trägt die sieben Dateien der Plan-Tabelle; die Nachzüge sind Review-Fix (Review-Report, CHANGELOG-Lead, Planning-Marker) und Link-Berichtigung, jeder mit Zeile in §3 oder als Review-Artefakt ausgewiesen; „kein Diff"-Zeilen (`spec/`, ADRs, `.github/`, `scripts/`, `packaging/`, `Makefile`, `go.mod`) durch die Lesung des Reviewers belegt.
+
+**Drei Paarungen** (geprüft auf den Inhalt dieser Notiz): *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert, nichts zu paaren. *Folge-Slice* — kein neuer Slice versprochen; die zwei Katalog-Entwürfe und der Basis-Image-Entwurf liegen als Dateien in `open/` (`ls` bei der Closure). *Register* — jede genannte Kennung `BEO-<KUERZEL>/<slug>` ist ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls` bei der Closure).
+
+**Verifikation** (Läufe nach Closure-Inhalt, Move und Verweise-Nachzug; Modus der Umgebung): wird nach dem Nachzug geführt und steht als Zeile danach hier.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
