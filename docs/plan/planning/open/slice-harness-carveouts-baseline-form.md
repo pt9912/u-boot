@@ -32,7 +32,7 @@ dauerhaften Abweichungen sind bereits getragen: [SPEC-034](../../../../spec/spez
 bei der Anlage) trägt die zwei dauerhaften Lint-Ausnahmen, die bislang keinen
 ADR-Namen tragen.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Implementer; Umsetzung nach dem freigegebenen Plan des Projektinhabers, Start beim freien WIP-Limit)
 
 **Autor:** pt9912 (Rolle Planner; Anweisung und Werkzeug-Wahl des
 Projektinhabers 2026-11-02). **Datum:** 2026-11-02.
