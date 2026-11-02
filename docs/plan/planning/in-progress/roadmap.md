@@ -21,7 +21,7 @@ Release-Cuts stehen hier mit ihrem Slice, woran gearbeitet wird, sagt das
 Verzeichnis der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien stehen
 in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
-[`slice-v1-katalog-gepinnte-toolchain-entwurf`](../in-progress/slice-v1-katalog-gepinnte-toolchain-entwurf.md) liegt in `in-progress/` — Entwurf des Katalog-Eintragstyps "gepinnte Werkzeugkette" (Vorschlag `v0.19.0`, Feature-Katalog): Messung M1 bis M3 (ENV-/Cache-Mechanik), CR-Wortlaut je Stelle, Folge-Slice-Plan als DoD.
+`Nichts in Arbeit.`
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
