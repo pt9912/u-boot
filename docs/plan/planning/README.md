@@ -36,11 +36,15 @@ Zwei bewusst getrennte Status-Mechanismen:
 - **Slices** (und Tranchen) tragen ihren Status über das **Verzeichnis**
   (`open/` → `next/` → `in-progress/` → `done/`). Der aktive Durchlauf nimmt
   ausschließlich Slices/Tranchen auf.
-- **Wellen** sind bei u-boot die **Release-Versionen**. Eine **offene** Welle liegt als flache
+- **Release-Versionen sind bei u-boot keine Wellen**: sie laufen als welle-lose Cut-Slices
+  ([`MR-003`](../../../harness/conventions/MR-003-roadmap-wellen.md), neu gefasst 2026-11-02), die
+  in der Roadmap unter *Offene Wellen* geführt und nach dem Tag unter *Abgeschlossene Wellen*
+  geschlossen werden; die Closure lebt in §7 des `done/`-Cut-Slices. Welle-Dateien gelten für
+  Arbeit, die nicht als Release-Cut läuft: Eine **offene** Welle liegt als flache
   Datei `welle-<kebab-slug>.md` direkt in `planning/` (kein Lifecycle-Ordner); bei Closure wandert
   sie per `git mv` nach `done/`. **Geplante** Wellen haben noch keine Datei: sie stehen in der
   [`in-progress/roadmap.md`](in-progress/roadmap.md) unter *Nächste Wellen*. Die Roadmap führt
-  *Offene Wellen* (ein Zeiger je Welle-Datei), *Nächste Wellen*, Meilensteine und
+  *Offene Wellen* (ein Zeiger je offener Arbeit), *Nächste Wellen*, Meilensteine und
   *Abgeschlossene Wellen*.
 
 u-boot-Abweichungen vom Baseline-Default (dokumentiert in

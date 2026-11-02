@@ -22,11 +22,14 @@ Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der
   ist) → nach dem Wave-Self-Close-Commit `make gates` grün bestätigen.
 - **Strenges Doc-Gate.** `LH-`/`ADR-`/`MR-`-Kennungen in gescannten `.md` als klickbare Anker-Links —
   die Welle-Datei und die Roadmap werden gescannt.
-- **u-boots Wellen sind die Release-Versionen** ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)):
-  Eine Welle bekommt ihre Datei `welle-<kebab-slug>.md` flach unter `docs/plan/planning/` erst bei der
-  **Eröffnung**; geplante Wellen stehen nur in der Roadmap unter *Nächste Wellen*. Es gibt **keine**
-  `welle-<Kennung>-results.md` — die Closure-Notiz steht in §7 der Welle-Datei und verweist auf den
-  `done/`-Release-Cut-Slice als Detailquelle — und **keine Archivierung** (`make archive-welle` bleibt ungenutzt).
+- **Release-Versionen sind bei u-boot keine Wellen** ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)):
+  Release-Cuts laufen welle-los als Release-Cut-Slices; ihre Closure lebt in §7
+  des `done/`-Cut-Slices und der Roadmap-Zeile, nicht in einer Welle-Datei. Welle-Dateien gelten für
+  Arbeit, die nicht als Release-Cut läuft: ihre Datei `welle-<kebab-slug>.md` liegt flach unter
+  `docs/plan/planning/` erst bei der **Eröffnung**; geplante Wellen stehen nur in der Roadmap unter
+  *Nächste Wellen*. Es gibt **keine** `welle-<Kennung>-results.md` — die Closure-Notiz steht in §7 der
+  Welle-Datei (Release-Cuts: in §7 des `done/`-Cut-Slices) — und **keine Archivierung** (`make
+  archive-welle` bleibt ungenutzt).
 - **Beobachtungs-Register:** `docs/plan/planning/observations/`, Kennung `BEO-<KUERZEL>/<slug>`; das
   Kürzel steht in der Spalte *Kürzel* der Modus-Deklaration in `harness/conventions.md`.
 - **Roadmap-Marker:** `.d-check.yml` (`planning`) erwartet im Block „Offene Wellen“ den Ruhe-Marker genau

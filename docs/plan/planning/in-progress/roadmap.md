@@ -4,20 +4,26 @@
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
-`.harness/baseline/v6.18.1/regelwerk/modul-06-roadmap.md`). u-boots Wellen
-entsprechen den **Release-Versionen**; Termine erscheinen nur als *Konsequenz*
-einer abgeschlossenen Welle (Release-Datum), nicht als Treiber. Diese Datei
+`.harness/baseline/v6.18.1/regelwerk/modul-06-roadmap.md`). Die
+**Release-Versionen sind bei u-boot keine Wellen**: sie laufen als welle-lose
+Cut-Slices ([`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)); Termine
+erscheinen nur als *Konsequenz* abgeschlossener Arbeit (Release-Datum nach dem
+Tag), nicht als Treiber. Diese Datei
 liegt dauerhaft in `in-progress/` und bleibt bewusst knapp: der per-Slice-
 Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 [`docs/archive/roadmap-history-v0.1-v0.3.md`](../../../archive/roadmap-history-v0.1-v0.3.md).
 
 ## Offene Wellen
 
-Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/`; woran gearbeitet
-wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
-stehen in der Welle-Datei, nicht hier.
+Derivativ: Der Zustand sind die flachen Welle-Dateien der Arbeit, die nicht als
+Release-Cut läuft ([`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md));
+Release-Cuts stehen hier mit ihrem Slice, woran gearbeitet wird, sagt das
+Verzeichnis der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien stehen
+in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
-[`slice-v1-devcontainer-container-name`](slice-v1-devcontainer-container-name.md) liegt in `in-progress/` (ohne Welle, Release-Zuordnung nächstes Minor nach `v0.17.0`, *Changed*; Messung und Entscheidungen: §6 des Slices und [`docs/messungen/slice-v1-devcontainer-container-name`](../../../messungen/slice-v1-devcontainer-container-name/README.md)). Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
+`Nichts in Arbeit.`
+
+Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
 ## Nächste Wellen
 
