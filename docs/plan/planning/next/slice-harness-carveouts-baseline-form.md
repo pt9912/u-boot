@@ -85,7 +85,7 @@ gelesen 2026-11-02 — Fundstellen: [ADR-0003](../../adr/0003-solid-nahes-lint-p
   nicht neu (das wäre ein anderer Vorgang — Werkzeug-Wahl des Trichters ist
   mit der Projektinhaber-Wahl 2026-11-02 abgeschlossen).
 - **Kein Fix des CRLF-Edge-Cases.** Er ist das Objekt des Folge-Slice (siehe
-  [`slice-v1-logs-crlf.md`](slice-v1-logs-crlf.md)); dieses Slice legt nur dessen Plan
+  [`slice-v1-logs-crlf.md`](../open/slice-v1-logs-crlf.md)); dieses Slice legt nur dessen Plan
   und die CO-Datei an.
 - **Kein Auflösungs-Entzug der Lint-Ausnahmen.** Die `.golangci.yml`-Werte
   (Schwellen, Ausschlüsse, Pattern) bleiben wortwörtlich; der Diff berührt
@@ -140,7 +140,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 | docs/plan/carveouts/README.md (Link bei der Anlage, die Datei entsteht in diesem Slice) | neu | Index aus `README.template.md` (Baseline `templates/docs/plan/carveouts/`); Nachfolger des Master-Inventars |
 | `docs/plan/carveouts/CO-<NNN>-crlf-logs.md` | neu | aus `carveout.template.md`; trägt den CRLF-Edge-Case (Fundstellen gelesen 2026-11-02: `splitLogLines` in `internal/adapter/driving/cli/logs.go`, Absatz in `docs/maintainer/cli-json-contract.md` §6.8); die Kennung ist bei der Anlage gesetzt, dann Berichtigung der Verweise in dieser Datei |
 | `docs/plan/carveouts/.gitkeep` | gelöscht | das Verzeichnis trägt Dateien; kein Bestand im `ablage-prüfung`-Positivbestand (mutiert werden nur die drei `.gitkeep` unter `docs/plan/planning/`) |
-| [`slice-v1-logs-crlf.md`](slice-v1-logs-crlf.md) | neu | Folge-Slice-Plan des CRLF-Carveouts, aus `slice.template.md` |
+| [`slice-v1-logs-crlf.md`](../open/slice-v1-logs-crlf.md) | neu | Folge-Slice-Plan des CRLF-Carveouts, aus `slice.template.md` |
 | `docs/plan/adr/0042-<slug>.md` | neu | aus `NNNN-titel.template.md` (MADR, [MR-008](../../../../harness/conventions/MR-008-adr-form.md)); trägt `contextcheck` (Fundstelle: `Why:`-Kommentar zu `path: internal/adapter/driving/cli/`) und `interfacebloat` (Fundstelle: `Why:`-Kommentar zu `path: internal/hexagon/port/driven/filesystem\.go$`) |
 | [`docs/plan/adr/README.md`](../../adr/README.md) | update | Index-Zeile für den neuen ADR (AGENTS.md §5.3) |
 | [`.golangci.yml`](../../../../.golangci.yml) | update | nur Warum-Kommentare: die Kommentar-Blöcke der `exclude-rules` nennen den tragenden ADR (`errcheck`-Settings, `_test.go`-Zeilen, `cmd/uboot/`, `contextcheck`, `interfacebloat`); kein Wert oder Regeln geändert |
