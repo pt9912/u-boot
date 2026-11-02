@@ -151,7 +151,7 @@ DoD vollständig; Tag `v0.18.0` gesetzt und gepusht (M5, nur mit Freigabe); `pub
 
 **Drei Paarungen** (geprüft auf den Inhalt dieser Notiz): *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert, nichts zu paaren. *Folge-Slice* — kein neuer Slice versprochen; die zwei Katalog-Entwürfe und der Basis-Image-Entwurf liegen als Dateien in `open/` (`ls` bei der Closure). *Register* — jede genannte Kennung `BEO-<KUERZEL>/<slug>` ist ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls` bei der Closure).
 
-**Verifikation** (Läufe nach Closure-Inhalt, Move und Verweise-Nachzug; Modus der Umgebung): wird nach dem Nachzug geführt und steht als Zeile danach hier.
+**Verifikation** (Läufe nach Closure-Inhalt, Move, Verweise-Nachzug und den zwei d-check-Berichtigungen am Verification-Report; Docker-Modus): `make gates` Exit 0 am 2026-11-02 (`record-gates`-Stempel = HEAD `d4008b00`). Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
