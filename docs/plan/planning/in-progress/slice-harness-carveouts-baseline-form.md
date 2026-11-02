@@ -105,13 +105,13 @@ gelesen 2026-11-02 — Fundstellen: [ADR-0003](../../adr/0003-solid-nahes-lint-p
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Ziel-Form: Slice — ≤ 3 Liefer-Punkte.
 
-- [ ] [`docs/plan/carveouts/`](../../carveouts/) trägt die Baseline-Ziel-Form:
+- [x] [`docs/plan/carveouts/`](../../carveouts/) trägt die Baseline-Ziel-Form:
       README-Index (aus `README.template.md`) und eine CO-Datei für den
       CRLF-Carveout (aus `carveout.template.md`); das `.gitkeep` ist
       entfallen; jede Zeile des früheren Inventars trägt einen Anker nach der
       Zuordnungstabelle in §1 — geprüft je Zeile mit Fundstelle in der
       Closure.
-- [ ] [`MR-002`](../../../../harness/conventions/done/MR-002-carveout-inventar.md) ist aufgelöst: reiner
+- [x] [`MR-002`](../../../../harness/conventions/done/MR-002-carveout-inventar.md) ist aufgelöst: reiner
       `git mv` nach `harness/conventions/done/` (AGENTS.md §3.3), die
       Tabellen in [`conventions.md`](../../../../harness/conventions.md) zeigen die Resolution;
       [`.d-check.yml`](../../../../.d-check.yml) (matrix `carveout`, ids-Target `CO`), die
@@ -120,14 +120,14 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
       [`docs/plan/planning/README.md`](../README.md), die Sub-README unter `in-progress/` (im Slice gelöscht — nicht Regelwerks-konform),
       [`roadmap.md`](../in-progress/roadmap.md)) zeigen auf die neuen Orte; `make docs-check` 0
       Befunde.
-- [ ] Der neue ADR (MADR, Folgeentscheidung „Ergänzt, ersetzt nichts“ zu
+- [x] Der neue ADR (MADR, Folgeentscheidung „Ergänzt, ersetzt nichts“ zu
       [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md)) trägt `contextcheck` und `interfacebloat`
       (Fundstellen der bislang kommentar-getragenen Ausnahmen gelesen:
       `.golangci.yml` `issues.exclude-rules`); die `Why:`-Kommentare und
       [`docs/maintainer/quality.md`](../../../../docs/maintainer/quality.md) §1.3 nennen die tragenen ADRs;
       `make lint` grün (Konfig-Werte unverändert).
-- [ ] `make gates` grün. *(nicht gezählt — Gate-Lauf)*
-- [ ] Review, Verifikation, Closure-Notiz, Beobachtungs-Register, Risiko-Ausgänge,
+- [x] `make gates` grün. *(nicht gezählt — Gate-Lauf)*
+- [x] Review, Verifikation, Closure-Notiz, Beobachtungs-Register, Risiko-Ausgänge,
       Drei-Paarungen. *(nicht gezählt — Closure-Pflichten)*
 
 ## 3. Plan (vor Code)
@@ -251,3 +251,22 @@ Evidenz-Datei im Register für diesen Plan.
 
 **Modus-Begründungsblock:** entfällt — alle berührten Sub-Areas GF (Refactor
 ohne neue Sub-Area-Berührung; keine BF-/Hybrid-Markierung).
+### Closure (Planner, 2026-11-02, nach Verifier-Fix-Runde `ff528d08`)
+
+**Evidence:** Review-Report [`2026-11-02-slice-harness-carveouts-baseline-form`](../../../reviews/2026-11-02-slice-harness-carveouts-baseline-form.md) (0 HIGH / 2 MEDIUM / 6 LOW / 1 INFO, Verdikt *nicht merge-blockierend*; Negativbefunde: `.golangci.yml` wortwörtlich ohne Werte-Diff, ADR-0003 unberührt, Ziel-Form von CO-001 und Index gegen die Baseline-Vorlagen konform, MR-002-Move reines `R100`, Trichter-Spur lesbar, `.d-check.yml`-Bindung korrekt) und Verification-Report [`2026-11-02-slice-harness-carveouts-baseline-form-verify`](../../../reviews/2026-11-02-slice-harness-carveouts-baseline-form-verify.md) (DoD-Zeilen 1 bis 3 belegt erfüllt — je-Zeile-Anker der acht dauerhaften Inventar-Zeilen voll deckend geprüft, `make lint` Exit 0; die Reste V-1 und V-2 (LOW, reine Planning-Texte) sind berichtigt `ff528d08`). Sensors der Runden: `make docs-check` 0 Befunde (1045/1046/1047 Dateien je Stand), `make baseline-verify` v6.18.1 OK, `make ablage-pruefung` 26 Fälle 0 Fehlschläge, `make lint` 0 issues.
+
+**Zuordnung der dauerhaften Inventar-Zeilen zu ihren Ankern** (Beleg der DoD-Zeile 1, Fundstellen je Zeile stehen in §1; Verifier geprüft): `errcheck` `fmt.Fprint*`, `testpackage`/`gochecknoglobals`, `_test.go`-Cluster → [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md); depguard `!**/*_test.go`, `contextcheck`, `interfacebloat` → [ADR-0042](../../adr/0042-dauerhafte-lint-ausnahmen.md) (E3, E1, E2) bzw. [SPEC-034](../../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln); GNU `make` → [SPEC-031](../../../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows). Der historische Audit-Trail des Inventory (die Tabelle der Auflösungs-Slices) lebt in der Git-Historie der Datei `docs/plan/planning/in-progress/carveouts.md` und in deren Einträgen der done-Slices; eine Kopie entsteht nicht (Referenzmodell, [ADR-0013](../../adr/0013-dokumentationsreferenzmodell.md)).
+
+**Risiken aus §6, Ausgang je Punkt:** (1) Verweis-Nachzug unvollständig — **entfallen** (zwei Nachzugs-Runden; `make docs-check` 0 am Schluss; der Verifier-Fund der Reste war Planning-Text, kein Link). (2) Inventar-Zeile ohne Anker — **entfallen** (je-Zeile-Prüfung voll deckend, Verifier). (3) CO-ID-Linkpflichten — **entfallen** (die Pflichten sind getragen: CO-001 gelinkt im Index, ADR-0042 im Index; `make docs-check` 0). (4) Konflikt mit dem laufenden CR-Slice — **entfallen** (der CR-Slice schloss mit `c1de2582` vor dem Start dieses Laufs; der Start-Trigger hielt die Reihenfolge, WIP-Limit frei).
+
+**Steering-Loop-Eintrag** (gezählt, nicht verkörpert; kein Eintrag trägt das Feld `liegt in`): *Lehre:* der §3.10-Abgleich lief nicht vollständig nach den Runden — die Berichte-Dateien fehlten als §3-Zeilen und sechs „Inventar“-Vokabeln des Nachzugs standen (Verifier V-1, V-2); Register [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md). Die Lehre der letzten Closures gilt: der Abgleich läuft nach jeder Berichtigungs-Runde erneut — die Klasse trat hier auf, obwohl die Lehre getragen wurde, weil der Abgleich den Umfang der Runden (Berichte, Vokabel-Nachzug) nicht reichhaltig nahm. Die Sensor-Fragen der früheren Closures bleiben beim Projektinhaber. *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine.
+
+**Beobachtungs-Register:** *Evidence neu:* [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) (`evidence/slice-harness-carveouts-baseline-form.md`: F-1, F-2, V-1, V-2). *Nicht gezählt:* [`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md) — kein Fund (kein Vertrags-Diff im Slice).
+
+**Carveouts:** keiner — die Ablage-Form selbst ist der Gegenstand; CO-001 bleibt als aktiver temporärer Carveout mit Folge-Slice (kein Gate gelockert, keine Schwelle gesenkt; Review-Negativbefund).
+
+**Weiter offen:** der Folge-Slice [`slice-v1-logs-crlf`](../../../planning/open/slice-v1-logs-crlf.md) (CO-001-Konsequenz, Start am Trigger); der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../../../planning/open/slice-v1-katalog-feature-jdk-gepinnt.md) mit seinen Rest-Aufträgen und die Ableitung des Release-Cut (F-6 des CR-Reviews: kein Cut, der den java-Schlüssel als implementiert meldet, solange der Katalog-Code ihn nicht trägt); die open/-README-Sub-Datei und das `next/`-README analog zur in-progress/-Sub-Datei zu prüfen (gleiche Regeln, kein Aufhebungsauftrag).
+
+**Drei Paarungen:** Anker — kein `liegt in`-Feld, nichts verkörpert; Folge-Slice — [`slice-v1-logs-crlf`](../../../planning/open/slice-v1-logs-crlf.md) liegt als Datei in `open/` (`ls` bei der Closure); Register — jede genannte Kennung ist ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls`). Der Welle-Bezug ist der der nächsten Welle-Closure (Modul 6).
+
+**Verifikation** (Docker-Modus): `make gates` läuft nach Closure-Inhalt, Move, Register- und Verweis-Nachzug auf dem Abschluss-Commit; der `record-gates`-Stempel trägt den Nachweis; die Commit-Meldung des Nachzugs trägt das Ergebnis. Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa.
