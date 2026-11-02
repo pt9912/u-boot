@@ -40,6 +40,11 @@ type GenerateService struct {
 	// container after `generate devcontainer` wrote (LH-FA-DEV-007);
 	// never nil (noop default).
 	inspector driven.DevcontainerInspector
+	// checksums reads the official checksum source of a pinned-toolchain
+	// key when a project overrides its version (`version:`, SPEC-054);
+	// never nil (noop default — its errors turn every override into the
+	// unreadable-source rejection).
+	checksums driven.Fetcher
 	// generateMu serialises Generate() invocations on a single service
 	// instance. The PreviewMode-aware s.fs-swap mutates a shared field;
 	// concurrent Generate calls would race on swap/restore pairs and
@@ -72,7 +77,7 @@ func NewGenerateService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driv
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	return &GenerateService{fs: fs, yaml: yaml, logger: logger, inspector: noopDevcontainerInspector{}}
+	return &GenerateService{fs: fs, yaml: yaml, logger: logger, inspector: noopDevcontainerInspector{}, checksums: noopFetcher{}}
 }
 
 // WithDevcontainerInspector wires the [driven.DevcontainerInspector]
@@ -85,6 +90,19 @@ func (s *GenerateService) WithDevcontainerInspector(i driven.DevcontainerInspect
 		i = noopDevcontainerInspector{}
 	}
 	s.inspector = i
+	return s
+}
+
+// WithChecksumFetcher wires the [driven.Fetcher] that reads the official
+// checksum source of a pinned-toolchain key for a `version:` override
+// (LH-FA-DEV-003, SPEC-054). Without it, a nil value or a failing read,
+// the override ends as the unreadable-source rejection (exit code 10,
+// nothing written); the default pin needs no read.
+func (s *GenerateService) WithChecksumFetcher(f driven.Fetcher) *GenerateService {
+	if f == nil {
+		f = noopFetcher{}
+	}
+	s.checksums = f
 	return s
 }
 
@@ -120,6 +138,7 @@ func NewGenerateServiceWithFactory(
 		yaml:      yaml,
 		logger:    logger,
 		inspector: noopDevcontainerInspector{},
+		checksums: noopFetcher{},
 	}
 }
 
@@ -809,6 +828,15 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	if msg := sandboxHostSocketFeatureMessage(cfg.Devcontainer, sandbox); msg != "" {
 		return driving.GenerateResponse{}, fmt.Errorf("%w: %s", domain.ErrInvalidSandboxSetting, msg)
 	}
+	// LH-FA-DEV-003 (pinned toolchain, SPEC-054): the S8 conflict and the
+	// checksum-source read of a `version:` override stand before the plan
+	// and write, so a rejected call changes nothing; the errors carry
+	// [driving.ErrConfigValueInvalid] (exit code 10, LH-FA-DEV-003).
+	toolchain, err := resolveToolchain(ctx, cfg.Devcontainer, s.checksums)
+	if err != nil {
+		return driving.GenerateResponse{}, fmt.Errorf("generate devcontainer: %w: %s",
+			driving.ErrConfigValueInvalid, err.Error())
+	}
 	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, sandbox, cfg.Devcontainer)
 	if err != nil {
 		return driving.GenerateResponse{}, err
@@ -816,12 +844,17 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	data := devcontainerTemplateData(cfg.Project.Name, cfg.Devcontainer, sandbox, cloneURL)
 	data.ForwardPorts = ports
 	data.Features = features
+	data.GoToolchain = toolchain.goToolchain
+	data.GolangciLint = toolchain.golangciLint
+	data.GoToolchainPin = toolchain.goPin
+	data.GolangciLintPin = toolchain.lintPin
 	warnings = append(warnings, sandboxRelaxationWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, thirdPartyFeatureWarnings(cfg)...)
 	warnings = append(warnings, agentNodeWarnings(cfg.Devcontainer)...)
 	warnings = append(warnings, ollamaWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, ollamaHostWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, forgeCLIWarnings(cfg.Devcontainer)...)
+	warnings = append(warnings, toolchainWarnings(toolchain)...)
 	plans, err := s.planDevcontainerFiles(req.BaseDir, data)
 	if err != nil {
 		return driving.GenerateResponse{}, err

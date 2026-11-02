@@ -17,11 +17,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/pt9912/u-boot/internal/adapter/driven/clock"
 	"github.com/pt9912/u-boot/internal/adapter/driven/confirm"
 	"github.com/pt9912/u-boot/internal/adapter/driven/docker"
 	"github.com/pt9912/u-boot/internal/adapter/driven/externaltemplates"
+	"github.com/pt9912/u-boot/internal/adapter/driven/fetch"
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
 	"github.com/pt9912/u-boot/internal/adapter/driven/localtemplates"
@@ -101,6 +103,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// for the UpService polling loop. Stateless; depguard rule
 	// `application-no-net` enforces all net.* usage funnels through here.
 	netprobeAdapter := netprobe.New()
+	// The fetch adapter (LH-FA-DEV-003, SPEC-054) reads the official
+	// checksum source of a pinned-toolchain key when a project overrides
+	// its `version:`; u-boot wires it for `generate devcontainer` only.
+	checksumFetcher := fetch.New(30 * time.Second)
 	// The clock adapter (M6-T4-fund) wraps time.Now / time.Sleep
 	// so the UpService polling-loop iteration timing is injectable
 	// in tests.
@@ -160,7 +166,8 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
 	generateSvc := application.NewGenerateServiceWithFactory(generateFSFactory, yamlAdapter, logAdapter).
-		WithDevcontainerInspector(inspectorAdapter)
+		WithDevcontainerInspector(inspectorAdapter).
+		WithChecksumFetcher(checksumFetcher)
 	configSvc := application.NewConfigServiceWithFactory(configFSFactory, yamlAdapter, logAdapter)
 	templateListSvc := application.NewTemplateListService(templateCatalogAdapter, logAdapter)
 	logsSvc := application.NewLogsService(fsAdapter, dockerEngineAdapter, logAdapter)

@@ -1111,3 +1111,41 @@ func (n *fakeNetProbe) callCount() int {
 	defer n.mu.Unlock()
 	return len(n.calls)
 }
+
+// fakeFetcher implements driven.Fetcher via a `url → outcome` lookup
+// table (the checksum sources of the pinned-toolchain keys, SPEC-054).
+// A registered error turns the Get into a failed read — the unreadable
+// source; a URL without an outcome is a failed read as well, so a
+// fixture that names no body models a source that does not cover the
+// call. The calls list carries the requested URLs in order.
+type fakeFetcher struct {
+	mu     sync.Mutex
+	bodies map[string][]byte
+	errs   map[string]error
+	calls  []string
+}
+
+func newFakeFetcher() *fakeFetcher {
+	return &fakeFetcher{bodies: map[string][]byte{}, errs: map[string]error{}}
+}
+
+func (f *fakeFetcher) setBody(url string, body []byte) {
+	f.bodies[url] = body
+}
+
+func (f *fakeFetcher) setErr(url string, err error) {
+	f.errs[url] = err
+}
+
+func (f *fakeFetcher) Get(_ context.Context, url string) ([]byte, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.calls = append(f.calls, url)
+	if err, ok := f.errs[url]; ok {
+		return nil, err
+	}
+	if body, ok := f.bodies[url]; ok {
+		return body, nil
+	}
+	return nil, fmt.Errorf("Get %s: unexpected request", url)
+}

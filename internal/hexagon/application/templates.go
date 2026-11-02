@@ -83,6 +83,17 @@ type templateData struct {
 	Gh   bool
 	Glab bool
 
+	// GoToolchain and GolangciLint switch on the installation block of the
+	// pinned toolchain (LH-FA-DEV-003, lastenheft 0.30.0, both profiles);
+	// the pin (version plus both SHA-256 values) stands in the template
+	// when the matching Pin field is its zero value, and a project
+	// `version:` override carries the read checksums of its official
+	// checksum source in the Pin field (SPEC-054).
+	GoToolchain     bool
+	GolangciLint    bool
+	GoToolchainPin  toolchainPin
+	GolangciLintPin toolchainPin
+
 	// Egress switches on the LH-FA-DEV-008 outbound restriction;
 	// EgressHosts is the effective allowlist baked into the startup
 	// script. RunArgs is the composed `runArgs` list (options of the sandbox

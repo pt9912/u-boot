@@ -134,6 +134,8 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	}
 	data.Gh = dockerfileBlockFeatureActive(dc, featureGh)
 	data.Glab = dockerfileBlockFeatureActive(dc, featureGlab)
+	data.GoToolchain = dockerfileBlockFeatureActive(dc, featureGoToolchain)
+	data.GolangciLint = dockerfileBlockFeatureActive(dc, featureGolangciLint)
 	if !sandbox {
 		data.RunArgs = append(resourceRunArgs(dc), hostGatewayRunArgs(dc)...)
 		return data

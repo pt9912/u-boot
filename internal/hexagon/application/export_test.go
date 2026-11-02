@@ -319,6 +319,10 @@ type FeatureCatalogueEntryForTest struct {
 	BindsHostSocket bool
 	// Relaxations lists the container options the feature adds to the start.
 	Relaxations []string
+	// ChecksumSource is the official checksum source of a pinned-toolchain
+	// entry (`go-toolchain`, `golangci-lint`; SPEC-054); empty for every
+	// other entry.
+	ChecksumSource string
 }
 
 // FeatureCatalogueForTest exposes the unexported [featureCatalogue]
@@ -336,6 +340,7 @@ func FeatureCatalogueForTest() map[string]FeatureCatalogueEntryForTest {
 			ContainerOption: v.containerOption,
 			BindsHostSocket: v.bindsHostSocket,
 			Relaxations:     v.relaxations,
+			ChecksumSource:  v.checksumSource,
 		}
 	}
 	return out
@@ -357,6 +362,7 @@ func FeatureForTest(name domain.FeatureName) (FeatureCatalogueEntryForTest, bool
 		ContainerOption: entry.containerOption,
 		BindsHostSocket: entry.bindsHostSocket,
 		Relaxations:     entry.relaxations,
+		ChecksumSource:  entry.checksumSource,
 	}, true
 }
 
@@ -520,3 +526,56 @@ func SessionEnvNamesForTest(text string) []string { return sessionEnvNames(text)
 // WithoutCommentsForTest exposes the package-internal comment stripper that
 // sessionEnvNames reads through.
 func WithoutCommentsForTest(text string) string { return withoutComments(text) }
+
+// ToolchainPinForTest is the test-package projection of the unexported
+// [toolchainPin] (SPEC-054): the version in the ARG convention of its key
+// and the two checksums read from the official checksum source.
+type ToolchainPinForTest struct {
+	Version     string
+	SHA256AMD64 string
+	SHA256ARM64 string
+}
+
+// GoChecksumsForTest exposes the unexported [goChecksumsFor] parser so spec-
+// 054 tests can pin the read of the go.dev/dl listing against record fixtures
+// without the network: the not-covered rejection (the listing does not name
+// the version) and the accepted form.
+func GoChecksumsForTest(listing []byte, version string) (ToolchainPinForTest, error) {
+	pin, err := goChecksumsFor(listing, version)
+	return ToolchainPinForTest{Version: pin.version, SHA256AMD64: pin.sha256AMD64, SHA256ARM64: pin.sha256ARM64}, err
+}
+
+// GolangciChecksumsForTest exposes the unexported [golangciChecksumsFor]
+// parser so SPEC-054 tests can pin the read of the release checksums file
+// against recorded fixtures without the network.
+func GolangciChecksumsForTest(body []byte, tag string) (ToolchainPinForTest, error) {
+	pin, err := golangciChecksumsFor(body, tag)
+	return ToolchainPinForTest{Version: pin.version, SHA256AMD64: pin.sha256AMD64, SHA256ARM64: pin.sha256ARM64}, err
+}
+
+// GolangciChecksumsURLForTest exposes the URL form of the CHECKSUMS read
+// (the per-version release file) so the Docker test of the override names
+// the same form the production run fetches.
+func GolangciChecksumsURLForTest(tag string) string { return golangciChecksumsURL(tag) }
+
+// GoChecksumsSourceURLForTest exposes the URL form of the go.dev/dl listing
+// read (SPEC-054: the URL form of the read is an implementation place of
+// the type).
+func GoChecksumsSourceURLForTest() string { return goReleaseListingURL }
+
+// ToolchainVersionOverrideAcceptedForTest exposes the version rule of the
+// pinned toolchain (SPEC-054, S5/S6) for synthetic catalogue entries, so the
+// type boundary is testable without modifying the built-in catalogue: an
+// entry of the type without a checksum source rejects a `version:` override,
+// and so does every entry outside the type.
+func ToolchainVersionOverrideAcceptedForTest(dockerfileBlock bool, checksumSource, version, sourceOverride string) bool {
+	entry := ubootYAMLDevcontainerFeature{Source: sourceOverride, Version: version}
+	cat := featureCatalogueEntry{dockerfileBlock: dockerfileBlock, checksumSource: checksumSource}
+	if sourceOverride != "" {
+		// An entry with a `source:` override renders as an external OCI
+		// feature, so the version rule of the Dockerfile block does not
+		// apply.
+		return true
+	}
+	return !featureVersionNeedsSourceForCat(cat, entry)
+}

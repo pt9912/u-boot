@@ -164,11 +164,22 @@ type featureCatalogueEntry struct {
 	publisher string
 	// dockerfileBlock marks an entry that is no OCI feature: the Dockerfile
 	// carries its installation (the pin stays in the template; `ollama` in
-	// the sandbox profile only, `gh` and `glab` in both profiles), so the
+	// the sandbox profile only, `gh` and `glab` plus the pinned-toolchain
+	// keys `go-toolchain` and `golangci-lint` in both profiles), so the
 	// entry has no `source`, no `defaultVersion` and renders no key under
 	// `features`. A `source:` override turns it into an external OCI
 	// feature without the block.
 	dockerfileBlock bool
+	// checksumSource marks the official checksum source of a pinned-toolchain
+	// entry (`go-toolchain`, `golangci-lint`): a `version:` override of the
+	// entry is accepted and the generator reads the source for the chosen
+	// version, the read checksums stand in the generated block (SPEC-054).
+	// A Dockerfile-block entry without the field (the forge-CLIs and
+	// `ollama`) takes no `version:` without a `source:` override; the
+	// field is the type boundary of the pinned toolchain, so the values
+	// are the exact [checksumSourceGo] / [checksumSourceGolangci]
+	// constants the URL builders switch on.
+	checksumSource string
 	// containerOption marks an entry that is no OCI feature either and has
 	// no Dockerfile block: it adds this one option to `runArgs` of the
 	// generated `devcontainer.json`, in both profiles (`ollama-host`). Like
@@ -193,10 +204,20 @@ type featureCatalogueEntry struct {
 // Catalogue keys of the Dockerfile-block features and of the entry that adds
 // a container option.
 const (
-	featureOllama     = "ollama"
-	featureGh         = "gh"
-	featureGlab       = "glab"
-	featureOllamaHost = "ollama-host"
+	featureOllama       = "ollama"
+	featureGh           = "gh"
+	featureGlab         = "glab"
+	featureOllamaHost   = "ollama-host"
+	featureGoToolchain  = "go-toolchain"
+	featureGolangciLint = "golangci-lint"
+)
+
+// The official checksum sources of the pinned-toolchain keys (SPEC-054).
+// The values double as the wording of the generate notices; the URL
+// builders of [devcontainer_toolchain.go] switch on these exact values.
+const (
+	checksumSourceGo       = "the download listing of go.dev/dl"
+	checksumSourceGolangci = "the CHECKSUMS file of the release of golangci/golangci-lint"
 )
 
 // hostGatewayOption is the `runArgs` entry of the `ollama-host` feature: it
@@ -313,6 +334,16 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 		featureGlab: {
 			shortDesc:       "GitLab CLI (Dockerfile block)",
 			dockerfileBlock: true,
+		},
+		featureGoToolchain: {
+			shortDesc:       "Go toolchain from a pinned release (Dockerfile block)",
+			dockerfileBlock: true,
+			checksumSource:  checksumSourceGo,
+		},
+		featureGolangciLint: {
+			shortDesc:       "golangci-lint from a pinned release (Dockerfile block)",
+			dockerfileBlock: true,
+			checksumSource:  checksumSourceGolangci,
 		},
 		featureOllamaHost: {
 			shortDesc:       "Connection to an Ollama service of the host (container option; no relay)",
@@ -799,8 +830,25 @@ func featureSourceViolationMessage(violations []featureSourceViolation) string {
 // without OCI source (a Dockerfile block or a container option) has no
 // `version:` without a `source:`". [validateDevcontainerFeatures] (read
 // path) and [revalidateFeatureEntry] (write path of config set) both ask it.
+//
+// The pinned-toolchain keys (`go-toolchain`, `golangci-lint`; SPEC-054) are
+// the exception of the type: their catalogue entry carries the official
+// checksum source, so a `version:` override is accepted without a `source:`
+// and the generate run checks the override by reading the source (see
+// [resolveToolchain]); an entry of the type without a checksum source keeps
+// the plain rule.
 func featureVersionNeedsSource(name string, entry ubootYAMLDevcontainerFeature) bool {
-	return entry.Source == "" && entry.Version != "" && featureCatalogue()[name].hasNoSource()
+	return featureVersionNeedsSourceForCat(featureCatalogue()[name], entry)
+}
+
+// featureVersionNeedsSourceForCat is the single rule over one catalogue
+// entry; the split keeps the type boundary testable for synthetic entries
+// (SPEC-054) without modifying the built-in catalogue.
+func featureVersionNeedsSourceForCat(cat featureCatalogueEntry, entry ubootYAMLDevcontainerFeature) bool {
+	if toolchainChecksumSourceSupported(cat) {
+		return false
+	}
+	return entry.Source == "" && entry.Version != "" && cat.hasNoSource()
 }
 
 // featureWithoutVersionReason is the reason, per entry type, that the entry

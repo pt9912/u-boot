@@ -319,6 +319,8 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"git",
 		"glab",
 		"go",
+		"go-toolchain",
+		"golangci-lint",
 		"homebrew",
 		"java",
 		"kubectl-helm",
@@ -375,12 +377,22 @@ func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 			if entry.DockerfileBlock {
 				// ADR-0024 decision 2: a Dockerfile-block entry has no OCI
 				// source, version or publisher (the namespace rule applies to
-				// OCI sources), and its template carries the pin.
+				// OCI sources), and its template carries the pin. The
+				// pinned-toolchain keys (`go-toolchain`, `golangci-lint`;
+				// SPEC-054) carry their official checksum source in addition,
+				// the other block entries none.
 				if entry.Source != "" || entry.DefaultVersion != "" || entry.Publisher != "" {
 					t.Errorf("Dockerfile-block entry %q must carry no source, defaultVersion or publisher: %+v", key, entry)
 				}
-				if !strings.Contains(blockSandboxDockerfile(t, key), "ARG "+strings.ToUpper(key)+"_VERSION=") {
-					t.Errorf("Dockerfile template lacks the pin ARG %s_VERSION for the Dockerfile-block entry %q", strings.ToUpper(key), key)
+				if want := blockChecksumSource()[key]; entry.ChecksumSource != want {
+					t.Errorf("Dockerfile-block entry %q: ChecksumSource = %q, want %q", key, entry.ChecksumSource, want)
+				}
+				arg, known := blockPinArg()[key]
+				if !known {
+					t.Fatalf("the test has no pin ARG name for the Dockerfile-block entry %q", key)
+				}
+				if !strings.Contains(blockSandboxDockerfile(t, key), "ARG "+arg+"_VERSION=") {
+					t.Errorf("Dockerfile template lacks the pin ARG %s_VERSION for the Dockerfile-block entry %q", arg, key)
 				}
 				return
 			}
@@ -477,4 +489,30 @@ func TestFeatureFor_LookupContract(t *testing.T) {
 			t.Errorf("entry on miss = %+v, want zero value", entry)
 		}
 	})
+}
+
+// blockPinArg is the pin ARG prefix of each Dockerfile-block key: the
+// generated names follow the pin names of the catalogue template, not the
+// spelling of the key (the keys with a hyphen carry no upper-case ARG name).
+func blockPinArg() map[string]string {
+	return map[string]string{
+		"ollama":        "OLLAMA",
+		"gh":            "GH",
+		"glab":          "GLAB",
+		"go-toolchain":  "GO",
+		"golangci-lint": "GOLANGCI_LINT",
+	}
+}
+
+// blockChecksumSource is the official checksum source per Dockerfile-block
+// key (SPEC-054): the two pinned-toolchain keys carry theirs, the forge-CLIs
+// and `ollama` carry none.
+func blockChecksumSource() map[string]string {
+	return map[string]string{
+		"ollama":        "",
+		"gh":            "",
+		"glab":          "",
+		"go-toolchain":  "the download listing of go.dev/dl",
+		"golangci-lint": "the CHECKSUMS file of the release of golangci/golangci-lint",
+	}
 }

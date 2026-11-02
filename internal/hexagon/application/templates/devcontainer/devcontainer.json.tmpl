@@ -39,6 +39,12 @@
 {{- else if .RunArgs}}
   "runArgs": [{{range $i, $a := .RunArgs}}{{if $i}}, {{end}}"{{$a}}"{{end}}],
 {{- end}}
+{{- if or .GoToolchain .GolangciLint}}
+  "containerEnv": {
+    "GOCACHE": "${containerWorkspaceFolder}/.cache/go-build",
+    "GOMODCACHE": "${containerWorkspaceFolder}/.cache/go-mod"
+  },
+{{- end}}
 {{- if .ForwardPorts}}
   "forwardPorts": [{{range $i, $p := .ForwardPorts}}{{if $i}}, {{end}}{{$p}}{{end}}],
 {{- end}}

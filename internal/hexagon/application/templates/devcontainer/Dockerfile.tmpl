@@ -3,7 +3,7 @@
 FROM mcr.microsoft.com/devcontainers/base:debian
 
 # Non-root default user.
-{{- if or .UID .Sandbox .Gh .Glab}}
+{{- if or .UID .Sandbox .Gh .Glab .GoToolchain .GolangciLint}}
 USER root
 {{- if .UID}}
 ARG USER_UID={{.UID}}
@@ -132,6 +132,63 @@ RUN arch="$(dpkg --print-architecture)" \
  && curl -fsSLO "https://gitlab.com/gitlab-org/cli/-/releases/v${GLAB_VERSION}/downloads/glab_${GLAB_VERSION}_linux_${arch}.tar.gz" \
  && echo "${sha256}  glab_${GLAB_VERSION}_linux_${arch}.tar.gz" | sha256sum -c - \
  && tar -xzf "glab_${GLAB_VERSION}_linux_${arch}.tar.gz" -C /usr/local --no-same-owner bin/glab \
+ && cd / \
+ && rm -rf "$work"
+{{- end}}
+{{- if .GoToolchain}}
+# Go toolchain: the release archive of go.dev/dl (the same origin as the
+# download). Version and checksums stand here as build arguments and in one
+# place; a `version:` override of the project replaces the value and both
+# checksums together, read for the chosen version from the download listing,
+# so the check stays a check against the official source. The build stops
+# before the extraction unless the SHA-256 matches. The archive is not signed
+# and the build verifies no signature: the check catches a file replaced
+# later, not a release that was harmful from the start.
+{{- if .GoToolchainPin.Version}}
+ARG GO_VERSION={{.GoToolchainPin.Version}}
+ARG GO_SHA256_AMD64={{.GoToolchainPin.SHA256AMD64}}
+ARG GO_SHA256_ARM64={{.GoToolchainPin.SHA256ARM64}}
+{{- else}}
+ARG GO_VERSION=1.27.3
+ARG GO_SHA256_AMD64=65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40
+ARG GO_SHA256_ARM64=a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49
+{{- end}}
+RUN arch="$(dpkg --print-architecture)" \
+ && case "$arch" in amd64) sha256="${GO_SHA256_AMD64}" ;; arm64) sha256="${GO_SHA256_ARM64}" ;; *) echo "go has no archive for $arch" >&2; exit 1 ;; esac \
+ && work="$(mktemp -d)" \
+ && cd "$work" \
+ && curl -fsSLO "https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz" \
+ && echo "${sha256}  go${GO_VERSION}.linux-${arch}.tar.gz" | sha256sum -c - \
+ && tar -xzf "go${GO_VERSION}.linux-${arch}.tar.gz" -C /usr/local \
+ && cd / \
+ && rm -rf "$work"
+ENV PATH="/usr/local/go/bin:${PATH}"
+{{- end}}
+{{- if .GolangciLint}}
+# golangci-lint: the release archive of golangci/golangci-lint, only the
+# program golangci-lint is extracted. Version and checksums stand here as
+# build arguments and in one place; a `version:` override of the project
+# replaces the value and both checksums together, read for the chosen version
+# from the checksums file of that release. The build stops before the
+# extraction unless the SHA-256 matches. The archive is not signed and the
+# build verifies no signature: the check catches a file replaced later, not a
+# release that was harmful from the start.
+{{- if .GolangciLintPin.Version}}
+ARG GOLANGCI_LINT_VERSION={{.GolangciLintPin.Version}}
+ARG GOLANGCI_LINT_SHA256_AMD64={{.GolangciLintPin.SHA256AMD64}}
+ARG GOLANGCI_LINT_SHA256_ARM64={{.GolangciLintPin.SHA256ARM64}}
+{{- else}}
+ARG GOLANGCI_LINT_VERSION=v2.14.0
+ARG GOLANGCI_LINT_SHA256_AMD64=ab90aeb7b066f92a33415b638a50fe5344bbb75a0d32ad30cc248d88f81032ab
+ARG GOLANGCI_LINT_SHA256_ARM64=ee7ec5f3453d15ddf106fae5a4d6c71737712348a979d1fe9cd52ec7ea299bae
+{{- end}}
+RUN arch="$(dpkg --print-architecture)" \
+ && case "$arch" in amd64) sha256="${GOLANGCI_LINT_SHA256_AMD64}" ;; arm64) sha256="${GOLANGCI_LINT_SHA256_ARM64}" ;; *) echo "golangci-lint has no archive for $arch" >&2; exit 1 ;; esac \
+ && work="$(mktemp -d)" \
+ && cd "$work" \
+ && curl -fsSLO "https://github.com/golangci/golangci-lint/releases/download/${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz" \
+ && echo "${sha256}  golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz" | sha256sum -c - \
+ && tar -xzf "golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz" --strip-components=1 -C /usr/local/bin "golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}/golangci-lint" \
  && cd / \
  && rm -rf "$work"
 {{- end}}
