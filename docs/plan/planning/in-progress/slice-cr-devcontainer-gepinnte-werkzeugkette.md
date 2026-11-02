@@ -81,7 +81,35 @@ DoD vollständig, `make gates` grün, Review-Report (und Nachlauf-Review, falls 
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `open/` (CR-Disziplin: Freigabe liegt vor, der Slice schreibt den freigegebenen Wortlaut).
+Der Slice liegt in `in-progress/` (Start 2026-11-02); nicht geschlossen — Review (`docs/reviews/`), Verification und Closure folgen. Die Umsetzung des freigegebenen Wortlauts steht unten.
+
+### Umsetzung (Implementer, 2026-11-02)
+
+**Commits:** `0c214395` — Lastenheft 0.30.0 (Stelle 1: zwei Beispiel-Zeilen und Eintrags-Absatz S1 bis S11 in [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features); Stelle 2: [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) in §4.3 nach [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Grabstein [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) unverändert; Stelle 3: `containerEnv`-Absatz in [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen); Versionsfeld und Historie-Zeile 0.30.0). `56469d8b` — [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) und Spec-Historie-Zeile 2026-11-02. `8f704cfb` — Planning-Nachzug (Marker entfallen, echte Anker-Links) und Plan-Berichtigung nach der Entscheidung des Projektinhabers 2026-11-02 (Handbuch, READMEs, `CHANGELOG.md`: kein Diff im CR-Slice).
+
+**Wortlaut-Abgleich gegen den CR-Vorschlag, Zeichen für Zeichen** (geprüft mit einem Textvergleich im Scratchpad, Muster [`slice-cr-lastenheft-messstaende`](../done/slice-cr-lastenheft-messstaende.md) §7): Stellen 1 (zwei Beispiel-Zeilen byte-gleich; Eintrags-Absatz byte-gleich, siehe Abweichungen 1 und 2), Stelle 2 (Überschrift und Absatz byte-gleich, siehe Abweichung 2) und Stelle 3 (Absatz byte-gleich) identisch. Abweichungen vom Blockwortlaut, alle drei Ankündigungen des Plans, keine inhaltliche Änderung:
+
+1. Die Satz-Marker (**S1**) bis (**S11**) des CR-Vorschlags sind die Satz-Nummern der Beleg-Tabelle, nicht Vertragstext (das Lastenheft trägt keine Satz-Numerierung; Muster der Freigabe von [`slice-cr-devcontainer-forge-cli`](../done/slice-cr-devcontainer-forge-cli.md)); sie sind im Lastenheft fortgelassen, der Wortlaut der Sätze unverändert.
+2. Kennungs-Links im Vertragswortlaut stehen als Anker innerhalb der Datei (`#lh-fa-cli-006--exit-codes`, `#lh-fa-dev-003--devcontainer-features`), statt des datei-relativen Pfads des CR-Vorschlags (Plan-Tabelle: „Links als Anker innerhalb der Datei“).
+3. Die Stelle-2-Überschrift **im CR-Vorschlag** trägt inzwischen den Anker-Link statt der `d-check:ignore`-Notiz; die blockquote-Fassung im CR-Vorschlag zeigt damit einen Link, den das Lastenheft nicht trägt — Format-Änderung am Vorschlags-Dokument (Nachtrag der Marker), nicht am Vertragstext.
+
+**Decken-Regel prüfen lassen:** keine ADR-, Slice-, Welle-, Tranchen-, BEO- oder `SPEC-*`-Kennung im Lastenheft (Suchlauf im Scratchpad, Treffermenge 0 für alle Muster); das Lastenheft nennt die Spec-Stelle nicht ([`AGENTS.md`](../../../../AGENTS.md) §3.4).
+
+**Gate-Läufe** (Implementer, Docker-Modus):
+
+| Lauf | Ergebnis |
+|---|---|
+| `make docs-check` (nach den Contract-Commits, vor dem Planning-Nachzug) | 1023 Dateien, 0 Befunde |
+| `make gates` erster Lauf | Abbruch am `test`-Stage: Registry-Fehler (HTTP 502 beim Auflösen von `docker/dockerfile:1.7` auf Docker Hub) — Umgebung, nicht der Diff; der `lint`-Stage lief grün bis zum Abbruch |
+| `make gates` zweiter Lauf (nach dem Planning-Nachzug, HEAD `8f704cfb`) | grün; `record-gates` stempelt `.harness/state/gates-passed.head` = `8f704cfb` (diffsha gesetzt); `d-check`: 1023 Dateien, 0 Befunde; `ablage-pruefung: OK` (26 Fälle, 0 Fehlschläge) |
+
+`make test-docker` und `make verify-depguard` nicht gelaufen: kein Code-, Docker-Pfad- und Importregel-Diff (Plan-Tabelle „ungeöffnet / unverändert“ belegt durch den Fundstellen-Abgleich).
+
+**Fundstellen-Abgleich** ([`AGENTS.md`](../../../../AGENTS.md) §3.10, gegen `git diff --stat cc028b69..8f704cfb`): `spec/lastenheft.md`, `spec/spezifikation.md`, der CR-Vorschlag, `in-progress/roadmap.md`, `open/README.md`, `open/slice-v1-katalog-gepinnte-toolchain.md` und diese Datei — jede Datei trägt einen Plan-Eintrag, kein Eintrag ohne Diff. „Unverändert“ geführt und durch denselben Diff belegt: `spec/architecture.md`, `internal/**`, `cmd/**`, Root-`Dockerfile`, `repo.mk`, `.devcontainer/Dockerfile`, `docs/user/`, beide READMEs, `CHANGELOG.md`, ADR-Verzeichnis. Die Fundstellen der Plan-Tabelle (Lastenheft-Zeilen, Code-Symbole `featureVersionNeedsSource`, Meldungs-Muster) sind beim Lesen der Stellen am Fundort neu gelesen, der Abgleich ändert keine Angabe; ein Zeilenversatz ergab sich nicht (die Zeilenangaben der Plan-Tabelle stehen auf den Stand vor dem Lastenheft-Commit).
+
+**Plan-Berichtigung (Projektinhaber 2026-11-02, im Auftrag nachgetragen):** Handbuch, READMEs und `CHANGELOG.md` tragen im CR-Slice keinen Diff — die Nutzer-Doku beschreibt den Ist-Zustand, der CR bringt dort keine Planung und keine Chronik; die Abschnitte und der `[Unreleased]`-Eintrag folgen der Implementierung im Umsetzungs-Slice, Wortlaut-Vorlage bleibt CR-Vorschlag §8. Plan-Tabelle §3 (drei Zeilen) und DoD-Zeile 2 berichtigt.
+
+**Offene Punkte an den Umsetzungs-Slice** ([`slice-v1-katalog-gepinnte-toolchain`](../open/slice-v1-katalog-gepinnte-toolchain.md)): F6-ENV-Rest (`BUILD_MODE`/`GOFLAGS`/`GOTOOLCHAIN` — Hand-written-Rest oder eigener `containerEnv`-Schritt, Entscheidung im Slice); die URL-Form des Prüfsummen-Abrufs je Version (Implementation-Stelle, je Schlüssel ein Docker-Test); die konkreten `containerEnv`-Unterpfade (`go-build`/`go-mod`-Muster); die Code-Kennung der Warn-Meldungen — der CR (Stelle 6) sagt „mit der Kennung als `code`“ ohne die Anforderung zu nennen; [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) trägt die Lieferketten-Anforderung ([`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)) nach dem Muster der Ollama- und Forge-CLI-Meldungen, das im Umsetzungs-Diff gegen den Code zu bestätigen ist; die Beleg-Tabelle Zusage → Test in [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) füllt der Umsetzungs-Diff; [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) trägt den vierten Eintragstyp mit der Umsetzung; die Pin-Politik-Kommentare (Root-`Dockerfile`, `repo.mk`) bekommen [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) statt der Grabstein-Kennung; Handbuch-Abschnitt und README-Katalogzeile (heute 17 Built-in-Features) folgen mit der Implementierung.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
