@@ -9,13 +9,13 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle; Vorschlag `v0.19.0` (die Feature-Katalog-Welle der Roadmap *Nächste Wellen*, in der [`slice-v1-katalog-feature-jdk-gepinnt`](slice-v1-katalog-feature-jdk-gepinnt.md) ebenfalls vorgeschlagen ist). Anlass: Auftrag des Projektinhabers 2026-11-01 — "Ja ein CR-Slice aufsetzen (so dass wir den ganzen 'Hand-written part' ersetzen können)".
+**Welle:** ohne Welle; Vorschlag `v0.19.0` (die Feature-Katalog-Welle der Roadmap *Nächste Wellen*, in der [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md) ebenfalls vorgeschlagen ist). Anlass: Auftrag des Projektinhabers 2026-11-01 — "Ja ein CR-Slice aufsetzen (so dass wir den ganzen 'Hand-written part' ersetzen können)".
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Katalog, Dockerfile-Blöcke mit Pin), [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) (erzeugte Konfiguration), [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) (Pin-Politik, Hebung dreier Stellen), [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md) (Katalog und Drittanbieter), [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) (Muster Release-Archiv mit Prüfsumme), [`ADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md) (lokaler Bau-Modus des eigenen Devcontainers).
 
 **Berührte Spec-Stellen:** [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) (Katalog), [`SPEC-050`](../../../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen) (prüfen); gelesen beim Start, sie stehen hier nur als Zeiger. Der Verweis zeigt **aufwärts**.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Implementer; Messung und CR-Vorbereitung, keine Produktcode-Änderung in diesem Entwurf)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-11-01.
 
@@ -36,7 +36,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Ausdrücklich NICHT in diesem Slice (Entwurf, kein Produktcode) — je Punkt mit Begründung:**
 
-- **Der Katalog-Eintrag JDK** — eigenes Vorhaben mit eigenem Hersteller-Auswahl-Entscheidungsraum ([`slice-v1-katalog-feature-jdk-gepinnt`](slice-v1-katalog-feature-jdk-gepinnt.md), §4 Wege A bis C); der Eintragstyp hier ist seine Voraussetzung, nicht seine Umsetzung. Der JDK-Slice wird auf diesen Entwurf verweisen und ihn nicht duplizieren.
+- **Der Katalog-Eintrag JDK** — eigenes Vorhaben mit eigenem Hersteller-Auswahl-Entscheidungsraum ([`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md), §4 Wege A bis C); der Eintragstyp hier ist seine Voraussetzung, nicht seine Umsetzung. Der JDK-Slice wird auf diesen Entwurf verweisen und ihn nicht duplizieren.
 - **Hebung der Versionen von Go und `golangci-lint`** — bleibt die Routine-Hebung der Pin-Politik [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik); der Slice ändert keine Version.
 - **Der Umsetzungs-Code** (Template-Block, Renderer, Tests, das Ersetzen im eigenen `.devcontainer/` und der Regenerate-Vergleich) — eigener Folge-Slice nach der Entscheidung (§2, Liefer-Punkt 3).
 - **Das externe Projekt oder eine andere Engine** — der Nachweis folgt dem üblichem Muster: Linux-Host `amd64`, lokale Engine, belegt bis zum Docker-Test.
@@ -63,7 +63,7 @@ Dieser Slice schreibt kein Produktcode. Gelesene Stellen am 2026-11-01.
 
 **Entscheidungen des Projektinhabers vor dem Start des Umsetzungs-Slices** (dieser Entwurf bereitet sie vor, der Umsetzungs-Slice braucht sie):
 
-1. **Eintragstyp:** **A:** fest gepinnte Version im Template (wie `ollama`, `gh`, `glab`; Hebung ändert das Template); **B:** Version aus einer gepinnten Tabelle wählbar (`version:` bei einem Dockerfile-Block verlässt die heutige Abweisungsregel, [`slice-v1-katalog-feature-jdk-gepinnt`](slice-v1-katalog-feature-jdk-gepinnt.md) §4 Weg B trägt dieselbe Frage). Empfehlung des Entwurfs: **A**, weil die Kopplung an die CI-Pins ([`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik)) die Version ohnehin zentral wählt.
+1. **Eintragstyp:** **A:** fest gepinnte Version im Template (wie `ollama`, `gh`, `glab`; Hebung ändert das Template); **B:** Version aus einer gepinnten Tabelle wählbar (`version:` bei einem Dockerfile-Block verlässt die heutige Abweisungsregel, [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md) §4 Weg B trägt dieselbe Frage). Empfehlung des Entwurfs: **A**, weil die Kopplung an die CI-Pins ([`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik)) die Version ohnehin zentral wählt.
 2. **Schlüssel-Namen und Verhältnis zum Eintrag `go`:** zwei neue Schlüssel (`go-toolchain`, `golangci-lint`) oder einer (Werkzeugkette in einem Block); bleibt das externe `go`-Feature bestehen (für Projects, die kein gepinntes Release brauchen)? Empfehlung: zwei Schlüssel, eins je Werkzeug, das externe `go` bleibt.
 3. **Umfang der ENV-/Cache-Form nach der Messung:** Dockerfile-`ENV` im Block, `containerEnv`/`remoteEnv` der erzeugten Konfiguration, oder ein Rest bleibt im eigenen Projekt handgeschrieben (sichtbar in den Rohdaten von M1/M2; "ganz ersetzen" heißt hier nicht um jeden Preis).
 4. **Wo die zwei Versionen künftig ihre eine Quelle haben:** die Hebung berührt heute Root-`Dockerfile`, `repo.mk` und `.devcontainer/Dockerfile`; mit dem Typ tritt eine vierte, erzeugte Stelle an die dritte (Template-ARG). Zu entscheiden, ob die Pin-Politik in [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) die Stellenliste benennt und wie der Abgleich geprüft wird (Test oder Gate-Prüfung der drei/vier Stellen).
