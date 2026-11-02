@@ -21,7 +21,7 @@ Release-Cuts stehen hier mit ihrem Slice, woran gearbeitet wird, sagt das
 Verzeichnis der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien stehen
 in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
-[`slice-v1-release-cut-v0.19.0`](../in-progress/slice-v1-release-cut-v0.19.0.md) liegt in `in-progress/` — Minor-Release `v0.19.0`: Tag `v0.19.0` auf `3564ac31` gesetzt und gepusht, `publish` `41463337361` grün mit Job `tap`; Doku-Nachzug und Closure folgen.
+`Nichts in Arbeit.`
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
@@ -114,7 +114,7 @@ flowchart LR
 | v0.16.1 (Patch-Release ohne Welle-Datei: Lastenheft 0.24.0 nennt die Zusage-Mengen von `ollama` und `podman` im Sandbox-Devcontainer im Wortlaut statt als Messstand, Nachzug in Handbuch, READMEs und `CHANGELOG.md`; der Code des Binary bleibt unverändert; Einstufung *Changed*; trägt [`slice-cr-lastenheft-messstaende`](../done/slice-cr-lastenheft-messstaende.md) und [`slice-v1-testkommentar-ollama-ci-pass`](../done/slice-v1-testkommentar-ollama-ci-pass.md)) | 2026-10-26 | [`slice-v1-release-cut-v0.16.1`](../done/slice-v1-release-cut-v0.16.1.md) — Tag `v0.16.1` auf `ae4e06cb` |
 | v0.17.0 (Minor-Release ohne Welle-Datei: `--instance` für `u-boot devcontainer up`, `down` und `shell`, `CLAUDE_CODE_OAUTH_TOKEN` als Referenz für `claude-code`, Lastenheft 0.26.0) | 2026-11-01 | [`slice-v1-release-cut-v0.17.0`](../done/slice-v1-release-cut-v0.17.0.md) — Tag `v0.17.0` auf `f89424e1` |
 | v0.18.0 (Minor-Release ohne Welle-Datei: der Containername `u-boot-<project>[-<instance>]`, die Auflösung von Git-Zugangsdaten und Identität des Hosts (opt-in), die Schlüssel `devcontainer.resources.memory`/`.cpus` und die Hilfetexte ohne Kennungen; Lastenheft 0.27.0, 0.28.0 und 0.29.0) | 2026-11-02 | [`slice-v1-release-cut-v0.18.0`](../done/slice-v1-release-cut-v0.18.0.md) — Tag `v0.18.0` auf `e6c87379` |
-| v0.19.0 (Minor-Release: der Katalog-Eintragstyp „gepinnte Werkzeugkette“ mit den zwei Schlüssel `go-toolchain`/`golangci-lint`, Übersteuerung per `version:` mit Prüfsummen-Verifikation, die Exit-10-Abweisungen, `containerEnv`-Cache-Pfade und die Pin-Politik der vier Stellen; Lastenheft 0.30.0) | 2026-11-02 | [`slice-v1-release-cut-v0.19.0`](../in-progress/slice-v1-release-cut-v0.19.0.md) (liegt in `in-progress/`, nach der Closure `done/`) — Tag `v0.19.0` auf `3564ac31` |
+| v0.19.0 (Minor-Release: der Katalog-Eintragstyp „gepinnte Werkzeugkette“ mit den zwei Schlüssel `go-toolchain`/`golangci-lint`, Übersteuerung per `version:` mit Prüfsummen-Verifikation, die Exit-10-Abweisungen, `containerEnv`-Cache-Pfade und die Pin-Politik der vier Stellen; Lastenheft 0.30.0) | 2026-11-02 | [`slice-v1-release-cut-v0.19.0`](../done/slice-v1-release-cut-v0.19.0.md) — Tag `v0.19.0` auf `3564ac31` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen
