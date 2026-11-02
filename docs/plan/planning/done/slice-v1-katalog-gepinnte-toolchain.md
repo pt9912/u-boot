@@ -18,4 +18,4 @@
 
 **Drei Paarungen:** *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert. *Folge-Slice* — keiner versprochen; der Release-Cut `v0.19.0` führt dieses Release als eigene Slice-Datei, geschneidet beim Start, und trägt bis dahin die Belege in diesem Slice hier (`ls` bei der Closure). *Register* — jede genannte Kennung ist ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls`).
 
-**Verifikation** (Läufe nach Closure-Inhalt, Move und Verweise-Nachzug; Modus der Umgebung): wird nach dem Nachzug geführt und steht als Zeile danach hier.
+**Verifikation** (Läufe nach Closure-Inhalt, Move, Register-Anker und Verweise-Nachzug; Docker-Modus): `make gates` Exit 0 am 2026-11-02 (`record-gates`-Stempel = HEAD nach dem Nachzug). Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa.
