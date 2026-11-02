@@ -1,10 +1,10 @@
-// Package fetch: unit tests of the driven GET adapter against a local
+// Unit tests of the driven GET adapter against a local
 // recording server (net/http/httptest runs on 127.0.0.1, no external
 // network). The adapter is the single net/http site of the project
 // (application-no-net); these tests pin its error classes: a 2xx body, a
 // non-2xx status and a transport failure are all errors the caller
 // of the use case classifies (SPEC-054).
-package fetch
+package fetch_test
 
 import (
 	"context"
@@ -14,6 +14,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/pt9912/u-boot/internal/adapter/driven/fetch"
 )
 
 func TestGet_OKReturnsBody(t *testing.T) {
@@ -22,7 +24,7 @@ func TestGet_OKReturnsBody(t *testing.T) {
 		_, _ = w.Write([]byte("BODY"))
 	}))
 	defer srv.Close()
-	c := New(5 * time.Second)
+	c := fetch.New(5 * time.Second)
 	body, err := c.Get(context.Background(), srv.URL)
 	if err != nil {
 		t.Fatalf("Get: %v", err)
@@ -38,7 +40,7 @@ func TestGet_Non2xxIsAnError(t *testing.T) {
 		http.Error(w, "not the file", http.StatusNotFound)
 	}))
 	defer srv.Close()
-	c := New(5 * time.Second)
+	c := fetch.New(5 * time.Second)
 	_, err := c.Get(context.Background(), srv.URL)
 	if err == nil {
 		t.Fatal("Get of a 404 source returned no error, want the unreadable class")
@@ -50,7 +52,7 @@ func TestGet_Non2xxIsAnError(t *testing.T) {
 
 func TestGet_UnreachableIsAnError(t *testing.T) {
 	t.Parallel()
-	c := New(1 * time.Second)
+	c := fetch.New(1 * time.Second)
 	// A port of the loopback range nothing should listen on for this test;
 	// the refused connection is the transport failure the read carries.
 	_, err := c.Get(context.Background(), "http://127.0.0.1:1/x")
@@ -73,7 +75,7 @@ func TestGet_ContextCancellation(t *testing.T) {
 		<-time.After(100 * time.Millisecond)
 		cancel()
 	}()
-	_, err := New(5*time.Second).Get(ctx, srv.URL)
+	_, err := fetch.New(5*time.Second).Get(ctx, srv.URL)
 	if err == nil {
 		t.Fatal("Get on a cancelled context returned no error")
 	}
