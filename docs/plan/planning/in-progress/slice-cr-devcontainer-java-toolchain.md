@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) (Katalog und Einträge, gelesen am 2026-11-02), [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) (der Eintragstyp, gelesen; Erweiterung um den dritten Schlüssel oder neue Stelle — Struktur-Entscheidung beim Implementer, §1), [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (gelesen; die Hosts-Zeile des Schlüssels braucht die Hosts des Temurin-Vertriebs), [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config) (gelesen; die zwei Schlüssel-Namen-Zeilen 522 und 544 bekommen den dritten Namen), [`SPEC-050`](../../../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen) (liest der Implementer am Start, Betroffenheit prüfen). Die Spec-Stelle kann [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md) nicht nennen (Decken-Regel, [`AGENTS.md`](../../../../AGENTS.md) §3.4); ihre Belege stehen in dieser Datei. Der Verweis zeigt **aufwärts**: Die Spec nennt diesen Slice nie.
 
-**Verantwortlich:** — (Beim Start gesetzt.)
+**Verantwortlich:** pt9912 (Implementer; schreibt den freigegebenen CR der Zwölf-Stellen-Vorlage)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-11-02.
 
@@ -57,7 +57,9 @@ Der Slice schreibt kein Produktcode. Fundstellen gelesen am 2026-11-02 (Planner 
 | `docs/user/benutzerhandbuch.md`, READMEs, `CHANGELOG.md` | **ohne Diff** (Ist-Zustand-Regel des Projektinhabers, 2026-11-02, nachträglich im Werkzeugketten-CR bestätigt) | die Nutzer-Doku beschreibt den Ist-Zustand — die Schlüssel existieren in ihr noch nicht; die Träger folgen der Implementierung und gehören dem Umsetzungs-Slice (die Form der Stellen 11/12 des Vorschlags bleibt Umsetzungs-Vorlage) |
 | `docs/reviews/` (Review-Report, ggf. Nachlauf-Review, Verifier-Report) | neu | DoD-Zeile 4 |
 | diese Datei, `open/README.md` (Bestand), Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md) (Berührte Spec-Stellen und §3-Tabelle nachziehen), Berichte unter `docs/reviews/` | update | Lifecycle, Stand, Verweise; Übergänge per `git mv` (eigene Commits, [`AGENTS.md`](../../../../AGENTS.md) §3.3), Werkzeug `make slice-mv` |
-| `internal/hexagon/application/**`, `internal/e2e/**`, Root-`Dockerfile`, `repo.mk`, `.devcontainer/Dockerfile`, `spec/architecture.md`, ADRs | **ungeöffnet / unverändert** | der Umsetzungs-Slice trägt den Code, die Templates und die Sicht; ADRs sind `Accepted` und bleiben unverändert |
+| `cr-vorschlag-java-toolchain.md` | update | die Vorschlags-Datei (Freigabe/F-Tabelle) ist Teil der Abgabe — kein Vertragsort |
+| `internal/hexagon/application/**`, `internal/e2e/**`, Root-`Dockerfile`, `repo.mk`, `.devcontainer/Dockerfile`, `harness/replay.md` | **ungeöffnet** | der Umsetzungs-Slice trägt den Code, die Templates und das Replay; kein Diff in diesem CR |
+| `spec/architecture.md`, ADRs | **vom Anker-Nachzug berührt** / unverändert | die Sicht trägt die zwei Anker-Zeilen des Slug-Nachzugs; ADRs sind `Accepted` und bleiben unverändert |
 
 ## 4. Trigger
 
