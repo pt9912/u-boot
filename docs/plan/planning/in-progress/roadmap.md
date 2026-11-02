@@ -21,13 +21,9 @@ Release-Cuts stehen hier mit ihrem Slice, woran gearbeitet wird, sagt das
 Verzeichnis der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien stehen
 in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
-Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../in-progress/slice-v1-katalog-feature-jdk-gepinnt.md) liegt in `open/` — Umsetzung des Katalog-Schlüssels `java-toolchain` (Temurin LTS 21, Same-Origin-Prüfsummen-Quelle, Konflikt-Abweisung Exit 10, Brew-Befund als Messpunkt); der CR ist mit dem freigegebenen Wortlaut geliefert und liegt in [`done/`](../done/slice-cr-devcontainer-java-toolchain.md) (Lastenheft `0.30.0` → `0.31.0`).
+Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../in-progress/slice-v1-katalog-feature-jdk-gepinnt.md) liegt in `in-progress/` — Umsetzung des Katalog-Schlüssels `java-toolchain` (Temurin LTS 21, Same-Origin-Prüfsummen-Quelle, Konflikt-Abweisung Exit 10, Brew-Befund als Messpunkt); der CR ist mit dem freigegebenen Wortlaut geliefert und liegt in [`done/`](../done/slice-cr-devcontainer-java-toolchain.md) (Lastenheft `0.30.0` → `0.31.0`).
 
-Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)); der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../in-progress/slice-v1-katalog-feature-jdk-gepinnt.md) folgt dem geschlossenen CR (beide in `open/`).
-
-Nichts in Arbeit.
-
-## Nächste Wellen
+Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
