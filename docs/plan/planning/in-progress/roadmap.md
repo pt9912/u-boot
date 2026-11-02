@@ -21,7 +21,7 @@ Release-Cuts stehen hier mit ihrem Slice, woran gearbeitet wird, sagt das
 Verzeichnis der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien stehen
 in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
-`Nichts in Arbeit.`
+[`slice-v1-release-cut-v0.19.0`](../in-progress/slice-v1-release-cut-v0.19.0.md) liegt in `in-progress/` — Minor-Release `v0.19.0` von `main` nach `v0.18.0`, trägt den Katalog-Eintragstyp „gepinnte Werkzeugkette“ ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette), [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv), Lastenheft `0.30.0`, [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)).
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
