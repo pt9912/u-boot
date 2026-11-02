@@ -111,7 +111,7 @@ DoD vollständig; `make gates` grün (`docs-check` 0 Befunde); Messprotokoll mit
 **Risiken aus §6, Ausgang je Punkte:**
 
 1. `${localWorkspaceFolder}` nicht aufgeteilt-tragend — gemessen widerlegt: `containerEnv` mit `${containerWorkspaceFolder}` trägt (m1c); `remoteEnv` scheidet aus (m1d). *Ausgang:* Messung, Wortlaut im CR (Stelle 3).
-2. Zweite Pin-Definition — entschieden (F1): eine Quellen-Regel, die neue Kennung `LH-FA-DEV-011` <!-- d-check:ignore (Kennung des CR-Entwurfs; Anker entsteht mit dem Lastenheft-Commit) --> trägt die Vier-Stellen-Liste samt Test-Abgleich; der Grabstein [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) wird zitiert, nicht belebt. *Ausgang:* CR-Stelle 2.
+2. Zweite Pin-Definition — entschieden (F1): eine Quellen-Regel, die neue Kennung [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) trägt die Vier-Stellen-Liste samt Test-Abgleich; der Grabstein [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) wird zitiert, nicht belebt. *Ausgang:* CR-Stelle 2.
 3. `go` + `go-toolchain` widersprechen einander — entschieden (F2): Abweisung mit Exit-Code `10` (S8 des CR). *Ausgang:* CR-Stelle 5.
 4. Block-`ENV` gilt je Konfiguration — gemessen real (m2); der CR-Wortlaut begrenzt: `containerEnv` übersteuert den Block (m2c), die Zusage bleibt auf das Gemessene begrenzt. *Ausgang:* Messung und CR-Grenzliste.
 5. Messwert im CR, den der Test nicht belegt — die Stellen tragen je ihre Beleggrenze („nur soweit ein Docker-Test belegt", URL-Form je Version als Implementation-Stelle).
