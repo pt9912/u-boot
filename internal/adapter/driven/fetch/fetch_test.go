@@ -9,6 +9,7 @@ package fetch_test
 import (
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -83,3 +84,29 @@ func TestGet_ContextCancellation(t *testing.T) {
 		t.Errorf("err = %v, want the cancellation reason", err)
 	}
 }
+
+// The port contract bounds the body: a response over the adapter's size cap
+// is a non-nil error, not a memory exhaustion of a generate run. The server
+// streams limit+1 bytes from a zero reader; the client reads at most cap+1.
+func TestGet_ResponseOverTheLimitIsAnError(t *testing.T) {
+	t.Parallel()
+	// Streaming without Content-Length: the chunked body carries one byte
+	// over the 64-MiB cap; the client reads at most cap+1 and reports the
+	// breach instead of reading the whole body.
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.CopyN(w, unitReader{}, 64<<20+1)
+	}))
+	defer srv.Close()
+	_, err := fetch.New(30*time.Second).Get(context.Background(), srv.URL)
+	if err == nil {
+		t.Fatal("Get of a body over the cap returned no error")
+	}
+	if !strings.Contains(err.Error(), "over the") {
+		t.Errorf("err = %v, want the cap wording", err)
+	}
+}
+
+// unitReader serves ones at no per-byte cost in memory.
+type unitReader struct{}
+
+func (unitReader) Read(p []byte) (int, error) { return len(p), nil }

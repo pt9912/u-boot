@@ -814,3 +814,139 @@ func TestDoctor_ToolchainKeys_NoFindings(t *testing.T) {
 		})
 	}
 }
+
+// SPEC-054 (S5/S6), the type boundary of the `version:` override: an entry
+// of the type without its official checksum source rejects the override, and
+// so does every entry outside the type; an entry of the type with its source
+// accepts the override without a `source:` (the load path and the write path
+// of `config set` share [validateDevcontainerFeatures]). The synthetic
+// entries run through the bridge; the two real keys through the load path.
+func TestFeatureCatalogue_ToolchainChecksumSources(t *testing.T) {
+	t.Parallel()
+	accepted := application.ToolchainVersionOverrideAcceptedForTest
+	if !accepted(true, "the download listing of go.dev/dl", "1.26.10", "") {
+		t.Errorf("an entry of the type with its checksum source must accept the override")
+	}
+	for _, tc := range []struct {
+		name            string
+		dockerfileBlock bool
+		checksumSource  string
+		version         string
+		sourceOverride  string
+		want            bool
+	}{
+		{"type without source rejects", true, "no real key of the catalogue carries none; the case is synthetic", "9.9.9", "", false},
+		{"outside the type rejects", true, "", "1.2.3", "", false},
+		{"with a source override the block rule does not apply", true, "", "9.9.9", "https://ghcr.io/x/y", true},
+		{"an OCI entry accepts without a checksum source", false, "", "1.2.3", "", true},
+	} {
+		if got := accepted(tc.dockerfileBlock, tc.checksumSource, tc.version, tc.sourceOverride); got != tc.want {
+			t.Errorf("case %q: accepted = %v, want %v", tc.name, got, tc.want)
+		}
+	}
+	// The real catalogue keys carry their source (the S6 rejection stays
+	// synthetic); the load path accepts the overrides of the two keys and
+	// keeps the rejection for a block entry without source.
+	const withOverride = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    go-toolchain:\n      enabled: true\n      version: 1.26.10\n    golangci-lint:\n      enabled: true\n      version: v2.13.2\n"
+	if err := application.ValidateDevcontainerFeaturesForTest(t, []byte(withOverride)); err != nil {
+		t.Errorf("the load path rejected the overrides of the two keys: %v", err)
+	}
+	const blockWithoutSource = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    gh:\n      enabled: true\n      version: \"9.9.9\"\n"
+	if err := application.ValidateDevcontainerFeaturesForTest(t, []byte(blockWithoutSource)); err == nil {
+		t.Errorf("the load path accepted a version override of a block entry without source (gh)")
+	}
+}
+
+// The parsers and the URL forms of the two checksum sources (SPEC-054):
+// the read matches the file names, the not-covered rejection and the
+// malformed listing are the error cases, and the URL of the read stands in
+// the forms of the two real sources (the go.dev/dl listing, the release
+// checksums file of golangci/golangci-lint).
+func TestToolchainChecksumParsing(t *testing.T) {
+	t.Parallel()
+	t.Run("listing", func(t *testing.T) {
+		t.Parallel()
+		pin, err := application.GoChecksumsForTest(toolchainListing(goDefaultVersion, goOverrideVersion), goOverrideVersion)
+		if err != nil {
+			t.Fatalf("read: %v", err)
+		}
+		want := application.ToolchainPinForTest{Version: goOverrideVersion, SHA256AMD64: goOverrideAMD64, SHA256ARM64: goOverrideARM64}
+		if pin != want {
+			t.Errorf("pin = %+v, want %+v", pin, want)
+		}
+		// The spelling with the `go` prefix reads the same source.
+		pin, err = application.GoChecksumsForTest(toolchainListing(goDefaultVersion, goOverrideVersion), "go"+goOverrideVersion)
+		if err != nil || pin.Version != goOverrideVersion {
+			t.Errorf("read with the go prefix: pin = %+v err = %v, want the bare form", pin, err)
+		}
+		_, err = application.GoChecksumsForTest([]byte("not json"), goDefaultVersion)
+		if err == nil || !strings.Contains(err.Error(), "is not the version listing") {
+			t.Errorf("a malformed listing must carry the unreadable-source wording, got %v", err)
+		}
+		_, err = application.GoChecksumsForTest(toolchainListing(goDefaultVersion), goOverrideVersion)
+		if err == nil || !strings.Contains(err.Error(), "does not cover") {
+			t.Errorf("a listing without the version must be the not-covered rejection, got %v", err)
+		}
+	})
+	t.Run("checksums file", func(t *testing.T) {
+		t.Parallel()
+		pin, err := application.GolangciChecksumsForTest(checksumsFileFixture(lintOverrideTag, lintOverrideAMD64, lintOverrideARM64), lintOverrideTag)
+		if err != nil {
+			t.Fatalf("read: %v", err)
+		}
+		want := application.ToolchainPinForTest{Version: lintOverrideTag, SHA256AMD64: lintOverrideAMD64, SHA256ARM64: lintOverrideARM64}
+		if pin != want {
+			t.Errorf("pin = %+v, want %+v", pin, want)
+		}
+		// The tag-less spelling parses to the same file names.
+		pin, err = application.GolangciChecksumsForTest(checksumsFileFixture(lintOverrideTag, lintOverrideAMD64, lintOverrideARM64), strings.TrimPrefix(lintOverrideTag, "v"))
+		if err != nil || pin.SHA256AMD64 != lintOverrideAMD64 {
+			t.Errorf("read without the v prefix: pin = %+v err = %v, want the archive checksum", pin, err)
+		}
+		_, err = application.GolangciChecksumsForTest(checksumsFileFixture(lintOverrideTag, lintOverrideAMD64, lintOverrideARM64), lintOverrideTag+"x")
+		if err == nil || !strings.Contains(err.Error(), "does not cover") {
+			t.Errorf("a checksums file without the archive must be the not-covered rejection, got %v", err)
+		}
+	})
+	t.Run("url forms", func(t *testing.T) {
+		t.Parallel()
+		if got, want := application.GolangciChecksumsURLForTest(lintOverrideTag),
+			"https://github.com/golangci/golangci-lint/releases/download/v2.13.2/golangci-lint-2.13.2-checksums.txt"; got != want {
+			t.Errorf("golangci checksums URL = %q, want %q", got, want)
+		}
+		if got, want := application.GoChecksumsSourceURLForTest(), "https://go.dev/dl/?mode=json&include=all"; got != want {
+			t.Errorf("go listing URL = %q, want %q", got, want)
+		}
+	})
+}
+
+// SPEC-054 (the normalisation of S4): the two spellings of a version read
+// the same source — `go1.26.10` overrides `go-toolchain` and the tag-less
+// spelling overrides `golangci-lint`; the generated Dockerfile carries the
+// normalised forms (the ARG convention of the key).
+func TestGenerateDevcontainer_Toolchain_OverrideSpellings(t *testing.T) {
+	t.Parallel()
+	fetch := newFakeFetcher()
+	fetch.setBody(application.GoChecksumsSourceURLForTest(), toolchainListing(goDefaultVersion, goOverrideVersion))
+	fetch.setBody(application.GolangciChecksumsURLForTest(lintOverrideTag),
+		checksumsFileFixture(lintOverrideTag, lintOverrideAMD64, lintOverrideARM64))
+	svc, fs := newToolchainService(t, fetch)
+	seedToolchainYAML(t, fs, toolchainFixture(
+		"    go-toolchain:\n      enabled: true\n      version: go"+goOverrideVersion+"\n",
+		"    golangci-lint:\n      enabled: true\n      version: "+strings.TrimPrefix(lintOverrideTag, "v")+"\n"))
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	raw, _ := fs.ReadFile(dockerfilePath())
+	df := string(raw)
+	assertToolchainBlock(t, df, toolchainSpec{
+		key: "go-toolchain", arg: "GO", version: goOverrideVersion, shaAMD64: goOverrideAMD64, shaARM64: goOverrideARM64,
+		downloadURL: "https://go.dev/dl/go${GO_VERSION}.linux-${arch}.tar.gz"})
+	assertToolchainBlock(t, df, toolchainSpec{
+		key: "golangci-lint", arg: "GOLANGCI_LINT", version: lintOverrideTag, shaAMD64: lintOverrideAMD64, shaARM64: lintOverrideARM64,
+		downloadURL: "https://github.com/golangci/golangci-lint/releases/download/${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz"})
+	assertToolchainJSON(t, mustRead(t, fs, devcontainerJSONPath()))
+	if !strings.Contains(df, "ARG GOLANGCI_LINT_VERSION="+lintOverrideTag+"\n") {
+		t.Errorf("the golangci-lint ARG carries not the v-form:\n%s", df)
+	}
+}

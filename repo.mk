@@ -49,7 +49,9 @@ IMAGE                   ?= u-boot
 # zwei Toolchain-Schluessel (`go-toolchain`, `golangci-lint`); gleich sind
 # vier Stellen: dieses Dockerfile (ARG), jenes Template, diese Datei (?=) und
 # die erzeugte .devcontainer/Dockerfile des eigenen Projekts (ARG). Der
-# Pin-Stellen-Test (generate_toolchain_test.go) liest alle vier.
+# Pin-Stellen-Test (generate_toolchain_test.go) liest alle vier. Die Routine
+# der Hebung ohne eigenen ADR traegt ADR-0041, Abschnitt Konsequenzen
+# (docs/plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md).
 GO_VERSION              ?= 1.27.3
 GOLANGCI_LINT_VERSION   ?= v2.14.0
 GOVULNCHECK_VERSION     ?= v1.8.0
