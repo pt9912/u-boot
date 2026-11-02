@@ -200,7 +200,7 @@ DoD vollständig; `make gates` grün; Docker-Test im CI-Lauf grün; Review- und 
 
 **Drei Paarungen** (geprüft auf den Inhalt dieser Notiz): *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert, nichts zu paaren. *Folge-Slice* — kein neuer Slice versprochen; die Release-Zuordnung zum Cut-Slice ist eine Datei in `open/` (bei der Closure mit `ls` bestätigt, Pfad nach dem Move von `make slice-mv` berichtigt). *Register* — jede genannte Kennung `BEO-<KUERZEL>/<slug>` ist ein Verzeichnis mit der Evidence-Datei dieser Closure (bei der Closure mit `ls` bestätigt).
 
-**Verifikation** (Läufe nach Closure-Inhalt, Move und Verweise-Nachzug; Modus der Umgebung): wird nach dem Nachzug geführt und steht als Zeile danach hier.
+**Verifikation** (Läufe nach Closure-Inhalt, Move, d-check-Berichtigung und Verweise-Nachzug; Docker-Modus): `make gates` Exit 0 am 2026-11-02 (`coverage-gate` 92,20 % gegen 90 %; `ablage-pruefung-test` 26 Fälle, 0 Fehlschläge; `record-gates`-Stempel = HEAD `7cf74b1d`). Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa. Nicht gelaufen: `make ci`, `make fullbuild`, `make test-docker` (Entscheidung des Projektinhabers, CI-Nachweis), `make verify-depguard`.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
