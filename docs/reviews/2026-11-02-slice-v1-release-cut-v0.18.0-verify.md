@@ -68,7 +68,7 @@ Fehler der Startklasse; `TestExecute_DevcontainerShell_NameOfTheSessionContainer
 | F-6 (LOW) | behoben — DoD-Zeile berichtigt auf den gestrichenen Zustand (Diff `9a7db2f1`); die DoD-Tabelle oben liest die berichtigte Fassung. |
 | F-7 (LOW) | behoben — [`releasing.md`](../maintainer/releasing.md) Punkt 5: „aus der Skelett-Vorlage `slice.template.md` anlegen" (Diff `9a7db2f1`); Residuum entfernt. |
 | F-8 (LOW) | behoben — Roadmap *Nächste Wellen* führt die Katalog-Welle als `v0.19.0` (Diff `9a7db2f1`). |
-| F-9 (LOW) | behoben — beide CR-Entwürfe ([`slice-v1-katalog-gepinnte-toolchain-entwurf`](../plan/planning/open/slice-v1-katalog-gepinnte-toolchain-entwurf.md) inkl. §5 Frage 5, [`slice-v1-katalog-feature-jdk-gepinnt`](../plan/planning/open/slice-v1-katalog-feature-jdk-gepinnt.md)) und `open/README.md` tragen `v0.19.0` (Diff `9a7db2f1`). |
+| F-9 (LOW) | behoben — beide CR-Entwürfe ([`slice-v1-katalog-gepinnte-toolchain-entwurf`](../plan/planning/in-progress/slice-v1-katalog-gepinnte-toolchain-entwurf.md) inkl. §5 Frage 5, [`slice-v1-katalog-feature-jdk-gepinnt`](../plan/planning/open/slice-v1-katalog-feature-jdk-gepinnt.md)) und `open/README.md` tragen `v0.19.0` (Diff `9a7db2f1`). |
 | F-10 (LOW) | behoben — Kopfliste des Slice nennt die Host-git-Messungs-Commits und die zwei `tools/mk`-Commits `82682508`/`7bbb8185` (Diff `9a7db2f1`). |
 | F-11 (INFO) | keine Aktion nötig — keine [Regel](../maintainer/releasing.md) §3/§5 verlangt die Anhebung der Handbuch-Version; `Stand` = 2026-11-02 = Tag-Datum bestätigt. |
 
