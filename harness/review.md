@@ -50,7 +50,7 @@ Ein Finding ist HIGH, wenn es eines dieser Muster trifft:
   `.golangci.yml` ([`AGENTS.md`](../AGENTS.md) §3.2).
 - Generierte Artefakte koennen kaputt oder inkonsistent werden
   (`compose.yaml`, `.env.example`, devcontainer, README/CHANGELOG).
-- Neuer temporaerer Carveout entsteht ohne Inventar-Eintrag und
+- Neuer temporaerer Carveout entsteht ohne CO-Datei samt Index-Zeile und
   Plan-Anker.
 - Ein Kommentar beschreibt die verworfene Alternative oder abwesenden
   Text, oder eine `Stand`-/`Status`-Zelle traegt Chronik statt Zustand und
@@ -141,5 +141,6 @@ Wenn dasselbe Finding dreimal auftritt:
 2. Pruefen, ob `AGENTS.md`, ADR oder Spec eine Hard Rule braucht.
 3. Pruefen, ob ein computational Sensor moeglich ist
    (`make lint`, `make docs-check`, `make verify-depguard`, Tests).
-4. Falls es nur temporaer toleriert wird: Carveout-Inventar und
+4. Falls es nur temporaer toleriert wird: Carveout-Ablage (CO-Datei
+   samt Index-Zeile) und
    Plan-Anker aktualisieren.

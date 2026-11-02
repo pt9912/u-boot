@@ -102,7 +102,7 @@ Läuft ein Sensor wegen Umgebung oder Sandbox nicht, wird der Grund im Handoff g
 - Slice-Closure braucht Verification-Evidence nach [`verification.md`](verification.md); Generator-Änderungen brauchen Replay-/Golden-Evidence nach [`replay.md`](replay.md).
 - Neue ADRs müssen im ADR-Index ergänzt werden.
 - Änderungen an Planning-Dokumenten müssen die Lifecycle-Regeln beachten (open → next → in-progress → done; reine `git mv`-Commits siehe [`AGENTS.md`](../AGENTS.md) §3.3).
-- Temporäre Carveouts brauchen parallel einen Inventar-Eintrag und einen Plan-Anker.
+- Temporäre Carveouts brauchen parallel eine CO-Datei samt Index-Zeile (`docs/plan/carveouts/`) und einen Plan-Anker.
 
 ## Safety and scope boundaries
 

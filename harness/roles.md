@@ -33,7 +33,7 @@ Kontextwechsel ohne Pruefbarkeit.
 
 Der Planner bewegt Planning-Artefakte durch
 `open/ -> next/ -> in-progress/ -> done/`, schneidet zu grosse Arbeit
-in Tranchen und pflegt Roadmap sowie Carveout-Inventar.
+in Tranchen und pflegt Roadmap sowie Carveout-Ablage (CO-Dateien und Index).
 
 Der Planner implementiert nicht und stuft Review-Findings nicht ohne
 Architektur- oder Verification-Artefakt herunter.
@@ -74,7 +74,7 @@ des Verifier.
 
 Verifier prueft "built the thing right": DoD gegen Diff, Tests gegen
 Spec-ID, Make-Targets gegen Handoff, Docs gegen Links, Carveouts gegen
-Inventar.
+Ablage.
 
 Verification-Evidence folgt [`harness/verification.md`](verification.md).
 Sie ist ein eigenes Closure-Artefakt im Slice oder ein verlinktes

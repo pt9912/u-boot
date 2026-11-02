@@ -150,6 +150,8 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 | `docs/plan/planning/in-progress/README.md` | gelöscht | nicht Regelwerks-konform — das Baseline-Regelwerk kennt keinen Sub-README; Projektinhaber-Anweisung 2026-11-02, Bestand war veraltet 
 | [`docs/plan/planning/in-progress/roadmap.md`](../in-progress/roadmap.md) | update | Pointer-Zeilen (Zeilen 137 bis 139) auf docs/plan/carveouts/README.md (Link bei der Anlage, die Datei entsteht in diesem Slice) |
 | [`docs/plan/planning/open/README.md`](../open/README.md) | update | Bestand-Zeilen im Verweis-Nachzug; Bestand-Zeile für den Folge-Slice-Plan [`slice-v1-logs-crlf`](../open/slice-v1-logs-crlf.md) (Review F-6) und die Trichter-Formulierung; Link-Lauf des CR-Slices |
+| Berichte unter `docs/reviews/` (Review des Laufs, Verify des Laufs) | neu | Review-Runde und Verification-Runde (DoD-Zeilen des Slice); **Nachtrag nach Verifier V-1** — die Zeilen fehlten in der Erst-Tabelle |
+| diese Datei | update | Plan-Berichtigungen der Runden (F-1, F-2, V-1; §3.10-Abgleich nach jeder Runde) |
 | [`.d-check.yml`](../../../../.d-check.yml) | update | `matrix`-Eintrag `carveout` → `docs/plan/carveouts/CO-*.md`; `ids`-Teil: Target der CO-Regel → `docs/plan/carveouts/` (aktuell `spec/lastenheft.md`, keine CO-ID in Verwendung — geprüft per Suche, 0 Verwendungen) |
 | [`harness/README.md`](../../../../harness/README.md) | update | Guides-Zeile (Carveout-Verweis) und die Master-Inventar-Zeile in der Rote-Gates-Liste |
 | [`harness/verification.md`](../../../../harness/verification.md) | update | Zeile 93 bis 94: Parallel-Eintrag der neuen temporären Carveouts zeigt auf [`docs/plan/carveouts/`](../../carveouts/) |

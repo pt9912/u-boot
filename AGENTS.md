@@ -95,7 +95,7 @@ dienen.
 
 Inline-`//nolint` bricht das Lint-Gate und ist nicht die Standardlösung.
 Dauerhafte Ausnahmen leben zentral in [`.golangci.yml`](.golangci.yml) mit
-Begründung und, wenn temporär, zusätzlich im Carveout-Inventar.
+Begründung und, wenn temporär, zusätzlich in der Carveout-Ablage (CO-Datei samt Index-Zeile, `docs/plan/carveouts/`).
 
 ### 3.3 git mv + Inhaltsänderung = zwei Commits
 
