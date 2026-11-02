@@ -255,7 +255,7 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
     Services ([`LH-FA-UP-003`](lastenheft.md#lh-fa-up-003--startstatus-anzeigen)).
   - `Fetcher` (`Get(ctx, url)`) für das Lesen der offiziellen Prüfsummen-Quelle
     eines Schlüssels der gepinnten Werkzeugkette bei einer `version:`-Übersteuerung
-    ([`SPEC-054`](spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)).
+    ([`SPEC-054`](spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)).
     Ein eigener Port, weil die Application frei von `net/http` bleiben muss
     (§4, Linter-Regel `application-no-net`); der Adapter führt einen GET mit
     Zeit- und Antwortgrenze aus und klassifiziert nichts — ein nicht lesbarer
@@ -346,7 +346,7 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
   - `netprobe/` — `NetProbe`-Adapter für die Erreichbarkeits-Prüfung startender Services.
   - `runtime/` — `RuntimeEnvironment`-Adapter (Container-Self-Detection).
   - `fetch/` — `Fetcher`-Adapter via `net/http` (ein GET mit Zeit- und
-    Antwortgrenze, [`SPEC-054`](spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv));
+    Antwortgrenze, [`SPEC-054`](spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv));
     die einzige Stelle des Projekts, an der `net/http` läuft — wie bei
     `netprobe/` als eigenes Paket, damit die Depguard-Liste den Weg trägt.
   - `localtemplates/` und `externaltemplates/` — zwei `TemplateCatalog`-/`TemplateFiles`-Quellen: eingebettete Vorlagen und ein lokales Verzeichnis ([`LH-FA-TPL-003`](lastenheft.md#lh-fa-tpl-003--eigene-templates)). Dieselben Ports, austauschbare Herkunft — der Use-Case sieht keinen Unterschied.

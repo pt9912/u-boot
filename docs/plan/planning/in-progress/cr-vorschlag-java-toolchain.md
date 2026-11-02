@@ -44,7 +44,7 @@ Schlüssel erbt den Typ),
 (Pin-Politik — bleibt bei den zwei Go-Schlüsseln, Regel 4 unten),
 [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 (die Abweisungs-Fälle enden je mit Exit-Code `10`),
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 (der Eintragstyp in der Technik),
 [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen),
 [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion),
@@ -252,7 +252,7 @@ Zeilen 139 bis 146):
 
 | Schlüssel | Offizielle Prüfsummen-Quelle (Vorschlag) | Begründung (gelesen) |
 |---|---|---|
-| `java-toolchain` | die Prüfsummen-Datei derselben Veröffentlichung der Temurin-Binaries, aus der das Release-Archiv stammt, je gewählter Version | entschieden (2026-11-02, §4 Frage 4 des Plans) — Same-Origin am Archiv wie die zwei Schlüssel ([`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) Tabelle, Fundstelle [`spec/spezifikation.md`](../../../../spec/spezifikation.md) Zeilen 983 bis 986); die JSON-Schnittstelle `api.adoptium.net` bleibt **ausdrücklich** nicht Quelle: zusätzlicher Host ohne Same-Origin-Garantie (derselben Entscheidung) |
+| `java-toolchain` | die Prüfsummen-Datei derselben Veröffentlichung der Temurin-Binaries, aus der das Release-Archiv stammt, je gewählter Version | entschieden (2026-11-02, §4 Frage 4 des Plans) — Same-Origin am Archiv wie die zwei Schlüssel ([`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) Tabelle, Fundstelle [`spec/spezifikation.md`](../../../../spec/spezifikation.md) Zeilen 983 bis 986); die JSON-Schnittstelle `api.adoptium.net` bleibt **ausdrücklich** nicht Quelle: zusätzlicher Host ohne Same-Origin-Garantie (derselben Entscheidung) |
 
 **Abweisungsfall:** der Schlüssel trägt seine Quelle (die Tabelle oben, Träger
 Satz **J5**); `api.adoptium.net` ist kein Fall der Quelle, sondern ihr
@@ -272,7 +272,7 @@ Umsetzungs-Stellen (Muster der URL-Bauer der zwei Quellen,
 erzeugte Block mit einer `version:`-Übersteuerung gegen die für die gewählte
 Version gelesenen Prüfsummen baut und dass eine verfälschte Prüfsumme den Bau
 vor dem Entpacken abbricht (Negativprobe, Muster
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 Beleg-Tabelle Zeile 1001) — die Prüf-Form, nicht die Quelle im Einzelnen; die
 URL-Formen der Temurin-Veröffentlichung pinnt der Docker-Test auf den dritten
 Schlüssel, für andere Umgebungen als die der Messung bleibt der Abruf
@@ -283,7 +283,7 @@ unbelegt (Muster der Grenze, ebenda Absatz zur URL-Form, Zeile 988).
 **Alt (gelesen 2026-11-02):** die zwei Go-Schlüssel tragen unter `containerEnv`
 der erzeugten `devcontainer.json` die Cache-Verzeichnisse `GOCACHE` und
 `GOMODCACHE` unterhalb von `${containerWorkspaceFolder}` (Lastenheft-Zeile 385;
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 Abschnitt *Cache-Werte*, Fundstelle [`spec/spezifikation.md`](../../../../spec/spezifikation.md)
 Zeile 992). Die Render-Stelle trägt den Zustand je Schlüssel:
 [`devcontainer.json.tmpl`](../../../../internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl)
@@ -384,10 +384,10 @@ bleibt möglich; sie ist durch die Entscheidungen 2026-11-02 (Frage 3
 ausdrücklich: CHANGELOG und Historie, nicht Vertragstext) abweichend — kein
 F-Punkt, der Wortlaut trägt die Setzung.
 
-### Stelle 7 — Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle
+### Stelle 7 — Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle
 
 **Alt (gelesen 2026-11-02):**
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 trägt den Eintragstyp an einer Stelle — Titel (Zeile 973), die Absätze
 *Eintragstyp* (Zeile 977), *Default-Pin und Übersteuerung* (Zeile 979),
 *Prüfsummen-Quellen* mit der zwei-Schlüssel-Tabelle (Zeilen 981 bis 986),
@@ -404,7 +404,7 @@ Quellen-Tabelle bekommt die Zeile der Stelle 3, die Beleg-Tabelle bekommt die
 Java-Zeilen (je Bedingung der Beleg-Auftrag; die Test-Namen trägt der
 Umsetzungs-Diff — [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)),
 und der Titel nennt `java-toolchain`. In der Gegenoption (eine eigene Stelle
-neben [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))
+neben [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))
 stünden die Typ-Regeln (Abweisungen, Meldungen,
 `version:`-Bedingung) an zwei Stellen; dieselbe Regel wäre doppelt
 belegt und driftfähig — genau die Kopie-Form, die
@@ -484,9 +484,9 @@ Stände steht ein erfundener Host im Vertrag (Regel 2).
 [`spec/spezifikation.md`](../../../../spec/spezifikation.md), Zeile 522) und die
 Schreibpipeline-Stufe 6 (Zeile 544) tragen je den Klammer-Zusatz mit den zwei
 Namen: „(`go-toolchain`, `golangci-lint` — ihre Übersteuerung prüft
-`generate devcontainer` gegen die Quellen-Angabe, [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))"
+`generate devcontainer` gegen die Quellen-Angabe, [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))"
 (Zeile 522; Zeile 544 in der verkürzten Form „(`go-toolchain`, `golangci-lint`;
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))"
+[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))"
 in derselben Regel-Weise).
 
 **Neu (Vorschlag):** je Zeile der dritte Name in der Klammer, der Zusatz selbst
@@ -495,11 +495,11 @@ unverändert:
 > ... oder einer der Schlüssel der gepinnten Werkzeugkette ist (`go-toolchain`,
 > `golangci-lint`, `java-toolchain` — ihre Übersteuerung prüft
 > `generate devcontainer` gegen die Quellen-Angabe,
-> [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) ...
+> [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) ...
 
 > ... muss der Eintrag eine `source` tragen oder einer der Schlüssel der
 > gepinnten Werkzeugkette sein (`go-toolchain`, `golangci-lint`,
-> `java-toolchain`; [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) ...
+> `java-toolchain`; [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) ...
 
 **Beleg:** die Regel steht schlüsselfrei im
 Code (`featureVersionNeedsSourceForCat`, Fundstelle Zeilen 844 bis 852 —
@@ -584,6 +584,6 @@ F8:
 | **F3** | Default-Pin-Zahlen im Vertragstext | nein — Chronik im CHANGELOG und in der Lastenheft-Historie; im CR Muster F4 des Vorlaufs | **entschieden** — nein (Stelle 6) |
 | **F4** | Prüfsummen-Quelle | Same-Origin je Release; `api.adoptium.net` aus | **entschieden** — Prüfsummen-Datei derselben Veröffentlichung, je gewählter Version (Stelle 3) |
 | **F5** | Die Brew-Auflage (2026-11-02) — Vertriebs-Befund über Homebrew (Cask `temurin`/`temurin@21`, Formel-Verhältnis zum Feature `homebrew`) | Mess-Punkt des Umsetzungs-Slices; keine zweite Installationsform im CR | **Auflage** — Mess-Pflicht in [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md) §2 (d); der CR trägt sie nicht |
-| **F6** | Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle daneben | erweitern — der Eintragstyp bleibt an einer Stelle (Stelle 7) | **offen** — entscheidet mit der Wortlaut-Freigabe |
+| **F6** | Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle daneben | erweitern — der Eintragstyp bleibt an einer Stelle (Stelle 7) | **offen** — entscheidet mit der Wortlaut-Freigabe |
 | **F7** | Fall `sdkman` + `java-toolchain`: derselbe Abweisungsfall wie externes `java`? | derselbe Abweisungsfall, sobald die gelesene Feature-Lage ihn trägt; sonst Absatz beim externen `java` allein und Frage ins Beobachtungs-Register (Stelle 5) | **offen** — entscheidet mit der Wortlaut-Freigabe |
 | **F8** | Zeitpunkt der Hosts-Zeile in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) | im CR-Commit auf die gelesene Vertriebs-Lage, gepinnt durch den Docker-Test des Umsetzungs-Slices (Stelle 9) | **offen** — entscheidet mit der Wortlaut-Freigabe |

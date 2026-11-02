@@ -10,7 +10,7 @@
 ## Scope
 
 - Slice: [[`slice-v1-release-cut-v0.19.0`](../plan/planning/done/slice-v1-release-cut-v0.19.0.md)](../plan/planning/done/slice-v1-release-cut-v0.19.0.md) (liegt in `in-progress/`, vor der Closure)
-- IDs: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Eintragstyp, S1–S11), [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) (Cache-Werte unter `containerEnv`), [`LH-FA-DEV-011`](../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) (Pin-Politik), [`LH-FA-BUILD-003`](../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) (Grabstein, nicht belebt), [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv), [`ADR-0041`](../plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md), [`ADR-0004`](../plan/adr/0004-ci-system.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)
+- IDs: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Eintragstyp, S1–S11), [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) (Cache-Werte unter `containerEnv`), [`LH-FA-DEV-011`](../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) (Pin-Politik), [`LH-FA-BUILD-003`](../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) (Grabstein, nicht belebt), [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv), [`ADR-0041`](../plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md), [`ADR-0004`](../plan/adr/0004-ci-system.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)
 - Artefakte: [`CHANGELOG.md`](../../CHANGELOG.md) Block `[0.19.0]` · Version v0.19.0 (Tag `3564ac31`) · Release `u-boot v0.19.0` (12 Assets) · GHCR `pt9912/u-boot:0.19.0` == `:latest` · Tap-Commit `72cabea` in `pt9912/homebrew-u-boot`
 
 ## Lead gegen die Lastenheft-Stände 0.30.0 und SPEC-054 (Wortlaut-Sonden, Fix-Stand)
@@ -19,7 +19,7 @@ Gelesen am Fix-Stand [`CHANGELOG.md`](../../CHANGELOG.md) Block `[0.19.0]` gegen
 Fassung von [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
 (Absatz zum Eintragstyp), [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)
 (Cache-Absatz, Zeile 385 des Lastenhefts) und
-[`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) (Abschnitte Default-Pin/Übersteuerung, Abweisungen, Cache-Werte):
+[`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) (Abschnitte Default-Pin/Übersteuerung, Abweisungen, Cache-Werte):
 
 - **F-1 (Profil-Grenze) behoben:** der Lead nennt jetzt die Profil-Grenze in der Zusage —
   „so that in the sandbox profile the caches survive `u-boot devcontainer up --recreate`" —
@@ -34,7 +34,7 @@ Fassung von [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontain
   im Kern ausgeräumt.
 - **F-2 (Lese-Moment) behoben:** der Lead sagt jetzt „the *generation* then reads the official
   checksum source of the chosen version … and the *build* verifies the archive against it" —
-  Wortlaut-kongruent zu [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+  Wortlaut-kongruent zu [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
   („Der Generator liest bei der Erzeugung die Prüfsummen-Quelle …"). Der Netzgriff liegt im
   Erzeugungs-Schritt, der Build verifiziert; die Träger-Eintrag-Lesart („u-boot then reads …
   and builds the override against the read checksums") deckt der Lead nun.
@@ -42,7 +42,7 @@ Fassung von [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontain
   checksum source, a version that the source does not cover, an entry without a source, and the
   combination of the external `go` feature with `go-toolchain`, each end the call with exit
   code `10`" — deckend mit den Abweisungen der
-  [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+  [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
   (Quelle nicht lesbar oder überdeckt die Version nicht · Eintrag ohne Quellen-Angabe · externes
   `go` plus `go-toolchain`); der Promised-Zähler „the three exit codes" zählt die drei
   Abweisungs-Gruppen der Vertrags-Historie („die drei Abweisungen je Exit-Code `10`") — konsistent.
@@ -50,7 +50,7 @@ Fassung von [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontain
   (Linux `amd64`, lokale nicht verschachtelte Engine, Testbasis Unit/Golden/`docker`-Tag) und
   die Not-promised-Liste (Arbeitsverhalten übersteuerter Werkzeuge, Lint ohne Go-Installation,
   `BUILD_MODE`/`GOFLAGS`/`GOTOOLCHAIN`, Grenze jenseits der Messung) decken die
-  [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)-Ausweisung
+  [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)-Ausweisung
   der nicht zugesagten Punkte ab. — **geprüft, ohne Befund abseits des F-1-Residuums oben.**
 
 ## DoD-Abgleich
@@ -70,7 +70,7 @@ Fassung von [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontain
 | ID | Prüfung nach `6daf52ac`/`27bf4304` |
 |---|---|
 | F-1 (MEDIUM) | behoben — Profil-Grenze in der Lead-Zusage (Wortlaut-Sonde oben); Residuum in der Not-promised-Liste ohne Blocker-Wirkung dokumentiert. |
-| F-2 (MEDIUM) | behoben — Erzeugung liest, Build verifiziert; gegen [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) gelesen. |
+| F-2 (MEDIUM) | behoben — Erzeugung liest, Build verifiziert; gegen [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) gelesen. |
 | F-3 (LOW) | behoben — vier-Fälle-Enumeration im Lead, deckend mit den Abweisungen der Spec; `go.dev/dl`/`CHECKSUMS`-Quellen benannt. |
 | F-4 (MEDIUM) | nicht aufgehoben — ist mit der Closure selbst zu lösen: §7 des Slice trägt unverändert „Noch nicht geschlossen; der Slice liegt in `open/` (Plan)" (Fundstelle Zeile 65 des Slice). Bedingung der Move-Freigabe: die Closure-Notiz ersetzt den Marker **vor** dem `git mv` nach `done/` ([`AGENTS.md`](../../AGENTS.md) §3.3 Fall 2). Kein Blocker für dieses Verdict — die zwei MEDIUM-Behandlungen (`v0.17.0`/`v0.18.0`) zeigen denselben Weg. |
 | F-5 (LOW) | behoben — die Plan-Zeile `docs/plan/planning/open/README.md` (§3 des Slice) hat jetzt den Diff: Bestand-Zeile in `27bf4304` nachgetragen; die Message von `6daf52ac` (F-5-Absatz unzutreffend) wurde in der Message von `27bf4304` ehrlich berichtigt — der Abgleich steht damit auf dem Ist-Stand. |
@@ -125,7 +125,7 @@ Abgeglichen für den Stand nach der letzten Berichtigung (`27bf4304`) gegen
 | [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | CHANGELOG Block `[0.19.0]`, erster `Added`-Eintrag (Eintragstyp samt Prüfsummen, Übersteuerung, drei Abweisungen, Ausweisung unter `--quiet`) gegen die S1–S11-Fassung gelesen — Lastenheft 0.30.0; Release als Lieferung |
 | [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) | zweiter `Added`-Eintrag (Cache-Werte) gegen die Zeile 385 des Lastenhefts; Lead post-F-1 trägt die Profil-Grenze |
 | [`LH-FA-DEV-011`](../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) | dritter `Added`-Eintrag (eine Quelle, vier Stellen, Test) und die Versionszeilen des Cuts (`main.go:45`, `repo.mk:67`, `Dockerfile:51`) |
-| [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) | Lead post-F-2/F-3 gegen die Abschnitte Übersteuerung/Abweisungen gelesen |
+| [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) | Lead post-F-2/F-3 gegen die Abschnitte Übersteuerung/Abweisungen gelesen |
 | [`ADR-0041`](../plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md) | Hybrid-Pin als Träger des Blocks `Unreleased` → `[0.19.0]`; Pin-Politik-Eintrag |
 | [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md) | `tap-check` `41463190182` success, `publish`-Job `tap` success, Tap-Commit `72cabea`, Formel-Prüfsummen gegen `SHA256SUMS` identisch |
 | [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md) | Release `u-boot v0.19.0` (12 Assets), `publish` `41463337361` mit Image-Push-Job, `docker run --version` = `0.19.0`, Digest-Gleichheit |
@@ -154,7 +154,7 @@ Abgeglichen für den Stand nach der letzten Berichtigung (`27bf4304`) gegen
 ## Verdikt
 
 **Der Release-Schnitt `v0.19.0` ist DoD-Konform verifiziert — closure-fähig nach Berichtigung der zwei Residuen.**
-Jede DoD-Zeile trägt einen Beleg; die offenen Punkte sind genau die Closure-Schritte selbst (§7-Notiz inkl. F-4, Risiko-Ausgänge, Register, fresh `make gates`, reiner `git mv`) und die vom Projektinhaber getragene M7-Probe. Die Fix-Runde hat die drei Lead-Befunde (F-1/F-2/F-3) wortlaut-kongruent zur Vertragslage gelöst und F-5 vollständig; offene Reste sind **V-2** (Roadmap-Zeile 117, ein Zeichen) und **V-3** (`open/README.md` Zeile 86, Vorschlagswert) — beide berichtigt sein müssen, bevor der Slice den `done/`-Move fährt, da beide Fundstellen als Beleg-Anker des geschlossenen Stands gelesen werden. Alle Release-Nachweise sind im Verifier-Lauf selbst nachgelesen (Run-IDs, Release-Metadaten, Tap-Commit mit Prüfsummen-Abgleich, GHCR-Digests, Remote-`--version`), der Gate-Stempel deckt den exakten Baum von HEAD, und auch die CI-Läufe des Nachzugs-Heads sind success (Nachtrag unten). Der Lead sagt an keiner Stelle mehr, als Lastenheft `0.30.0` und [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-und-golangci-lint-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) tragen.
+Jede DoD-Zeile trägt einen Beleg; die offenen Punkte sind genau die Closure-Schritte selbst (§7-Notiz inkl. F-4, Risiko-Ausgänge, Register, fresh `make gates`, reiner `git mv`) und die vom Projektinhaber getragene M7-Probe. Die Fix-Runde hat die drei Lead-Befunde (F-1/F-2/F-3) wortlaut-kongruent zur Vertragslage gelöst und F-5 vollständig; offene Reste sind **V-2** (Roadmap-Zeile 117, ein Zeichen) und **V-3** (`open/README.md` Zeile 86, Vorschlagswert) — beide berichtigt sein müssen, bevor der Slice den `done/`-Move fährt, da beide Fundstellen als Beleg-Anker des geschlossenen Stands gelesen werden. Alle Release-Nachweise sind im Verifier-Lauf selbst nachgelesen (Run-IDs, Release-Metadaten, Tap-Commit mit Prüfsummen-Abgleich, GHCR-Digests, Remote-`--version`), der Gate-Stempel deckt den exakten Baum von HEAD, und auch die CI-Läufe des Nachzugs-Heads sind success (Nachtrag unten). Der Lead sagt an keiner Stelle mehr, als Lastenheft `0.30.0` und [`SPEC-054`](../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) tragen.
 
 ## Nachtrag: CI auf dem Nachzugs-Head
 
