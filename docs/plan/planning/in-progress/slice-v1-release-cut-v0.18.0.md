@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; dieses Lastenheft `0.29.0` lieferte der CR des Container-Name-Slices; dieser Slice ändert `spec/` nicht).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Implementer; Umsetzung und Gate-Läufe durch den Hauptagenten im Auftrag)
 
 **Autor:** pt9912 (Rolle Planner, im Auftrag des Hauptagenten). **Datum:** 2026-11-01.
 

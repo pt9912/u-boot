@@ -21,7 +21,7 @@ Release-Cuts stehen hier mit ihrem Slice, woran gearbeitet wird, sagt das
 Verzeichnis der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien stehen
 in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
-`Nichts in Arbeit.`
+[`slice-v1-release-cut-v0.18.0`](../in-progress/slice-v1-release-cut-v0.18.0.md) liegt in `in-progress/` — Minor-Release `v0.18.0` von `main` nach `v0.17.0` (entschieden 2026-11-01, Minor/*Changed*; Freigabe des Projektinhabers für Push und Tag erteilt 2026-11-02), trägt die drei `[Unreleased]`-Träger seit `v0.17.0`: die Auflösung von Git-Zugangsdaten und Identität des Hosts (Lastenheft `0.28.0`, [`slice-v1-devcontainer-host-git-uebernehmen`](../done/slice-v1-devcontainer-host-git-uebernehmen.md)), die Schlüssel `devcontainer.resources.memory`/`.cpus` (Lastenheft `0.27.0`, [`slice-v1-devcontainer-ressourcenlimits`](../done/slice-v1-devcontainer-ressourcenlimits.md)) und der Containername `u-boot-<project>[-<instance>]` (Lastenheft `0.29.0`, [`slice-v1-devcontainer-container-name`](../done/slice-v1-devcontainer-container-name.md)).
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
