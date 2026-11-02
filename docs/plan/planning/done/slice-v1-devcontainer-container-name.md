@@ -164,7 +164,7 @@ DoD vollständig; `make gates` grün; Docker-Test im CI-Lauf grün; Review- und 
 
 1. **Messung und Freigabe** — M1 bis M6 gefahren und datiert; Namensform A (`u-boot-<Projekt>[-<Instanz>]`), Weg S1' (`--override-config` mit einer je Aufruf gerenderten Kopie; die erzeugte `devcontainer.json` bleibt byte-identisch, e2e-Gegenprobe im Tag `docker`), Kollisions-Abbruch, Ausgabe des Namens, letzte Fragen und CR-Wortlaut freigegeben 2026-11-01 (§6).
 2. **Der Name** — `up` startet den benannten Container (mit und ohne `--instance`, `--recreate` nennt ihn neu), Übernahme bei gleichem Ordner, Kollisionsabbruch mit Exit `10` auch für einen Container ohne `local_folder`-Label (Unterfall gepinnt in `ff56fd50`), ungültiger Name endet Exit `10`; die Suche von `down`/`shell` bleibt Label-gebunden (`inspector.go` unverändert); `devcontainerId` und Volume-Namen namensunabhängig (Messung 3 und Tests); Docker-Tests im CI 41340432215.
-3. **Doku und Zusage-Menge** — Lastenheft `0.29.0`, `SPEC-049`, Handbuch und CHANGELOG ohne Kennungen und ohne Planverweise (Review-Negativbefunde Sprachvertrag, Handbuch, CHANGELOG); die Spec-Bedingung zur Kollision trägt ihren Test (F-3); die zwei restlichen Bedingungen sind mess-getragen und als Rest-Risiko im Verification-Report ausgewiesen.
+3. **Doku und Zusage-Menge** — Lastenheft `0.29.0`, [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), Handbuch und CHANGELOG ohne Kennungen und ohne Planverweise (Review-Negativbefunde Sprachvertrag, Handbuch, CHANGELOG); die Spec-Bedingung zur Kollision trägt ihren Test (F-3); die zwei restlichen Bedingungen sind mess-getragen und als Rest-Risiko im Verification-Report ausgewiesen.
 4. **Gates, Review, Verification, Closure** — Gates im Abschnitt Verifikation unten; Reports und Register-Fortschreibung in dieser Notiz.
 
 **Befunde von Review und Verification, Ausgang je Befund:**
@@ -185,7 +185,7 @@ DoD vollständig; `make gates` grün; Docker-Test im CI-Lauf grün; Review- und 
 **Steering-Loop-Eintrag** (gezählt, nicht verkörpert; kein Eintrag trägt das Feld `liegt in`):
 
 - *Lehre:* **Ein Buildfehler in einer docker-getaggten Datei überlebt `make lint` und wird erst am Docker-Stand sichtbar** — im diesem Slice zweimal (Register `BEO-WZG/lint-erfasst-build-tag-dateien-nicht`, Stand zwei Vorgänge). Kandidat eines Pflichtschritts im Gate: ein Compile- oder Lint-Lauf über die docker-getaggten Dateien (beispielsweise `go build -tags docker ./...` oder das Lint-Profil mit `run.build-tags: [docker]`), Zielort-Vorschlag ein Target in `repo.mk`; die Entscheidung bleibt beim Projektinhaber. Kein Eintrag erreicht die Schwelle von drei; es wird nichts verkörpert.
-- *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine. *Folge-Slices:* keiner; das Release des Slices ist dem Cut-Slice [`slice-v1-release-cut-v0.18.0`](../../open/slice-v1-release-cut-v0.18.0.md) zugeordnet (Minor, *Changed*, §6 Frage 8).
+- *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine. *Folge-Slices:* keiner; das Release des Slices ist dem Cut-Slice [`slice-v1-release-cut-v0.18.0`](../open/slice-v1-release-cut-v0.18.0.md) zugeordnet (Minor, *Changed*, §6 Frage 8).
 
 **Beobachtungs-Register (`../observations/`):**
 
