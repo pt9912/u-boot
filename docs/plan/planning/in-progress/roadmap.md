@@ -21,7 +21,7 @@ Release-Cuts stehen hier mit ihrem Slice, woran gearbeitet wird, sagt das
 Verzeichnis der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien stehen
 in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
-`Nichts in Arbeit.`
+[`slice-cr-devcontainer-gepinnte-werkzeugkette`](../in-progress/slice-cr-devcontainer-gepinnte-werkzeugkette.md) liegt in `in-progress/` — CR-Slice der `v0.19.0`-Katalog-Welle: schreibt den freigegebenen Wortlaut (alle acht Stellen, Freigabe-Block im [`cr-vorschlag-gepinnte-werkzeugkette`](cr-vorschlag-gepinnte-werkzeugkette.md)) wortgleich ins Lastenheft (`0.30.0`, neue Kennung `LH-FA-DEV-011`), die Spec (`SPEC-054`), Handbuch und `CHANGELOG.md`.
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 

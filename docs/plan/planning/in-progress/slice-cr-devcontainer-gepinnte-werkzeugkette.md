@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-054`](../../../../spec/spezifikation.md) (neu; Kennung nach dem `SPEC-<NNN>`-Schema von [`harness/conventions.md`](../../../../harness/conventions.md), nächste freie Nummer beim Start des Implementers — Stand beim Anlegen dieses Plans: [`SPEC-053`](../../../../spec/spezifikation.md#spec-053--grenzen-für-arbeitsspeicher-und-cpu-des-devcontainers-schlüssel-werte-und-runargs) ist die letzte). Die Stelle trägt die Technik, die das freigegebene Lastenheft voraussetzt: die offiziellen Prüfsummen-Quellen je Schlüssel (CR-Vorschlag Stelle 4), die Render-Stelle `containerEnv` der Cache-Pfade (Stelle 3) und die Abweisungs-Fälle je mit Exit-Code `10` (Sätze S5, S6, S8). Sie kann [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md) nicht nennen (Decken-Regel, [`AGENTS.md`](../../../../AGENTS.md) §3.4); ihre Belege stehen in dieser Datei und im CR-Vorschlag. [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) und [`SPEC-050`](../../../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen) liest der Implementer am Start (Betroffenheit prüfen). Der Verweis zeigt **aufwärts**: Die Spec nennt diesen Slice nie.
 
-**Verantwortlich:** — (Implementer; gesetzt beim Übergang `open` → `next`).
+**Verantwortlich:** pt9912 (Implementer; schreibt den freigegebenen CR-Wortlaut wortgleich ins Lastenheft und die Spec)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-11-02.
 
