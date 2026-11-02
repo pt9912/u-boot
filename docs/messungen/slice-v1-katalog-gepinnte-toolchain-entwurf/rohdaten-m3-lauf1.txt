@@ -1,0 +1,53 @@
+Messung M3, Lauf 1 (Dockerfile-ENV-Form, Sandbox-Form, named volume ub-messung-m3-lauf1-ws)
+2026-11-02T08:01:22+00:00
+Engine: 29.9.2 (linux/amd64)
+0.89.0
+--- devcontainer.json ---
+{
+  "name": "m3-lauf1",
+  "build": {"dockerfile": "Dockerfile", "context": "."},
+  "workspaceMount": "",
+  "workspaceFolder": "/workspaces/m",
+  "mounts": ["source=ub-messung-m3-lauf1-ws,target=/workspaces/m,type=volume"],
+  "remoteUser": "vscode"
+}
+--- Dockerfile ---
+FROM mcr.microsoft.com/devcontainers/base:debian
+USER root
+RUN mkdir -p /workspaces/m && chown vscode:vscode /workspaces/m
+USER vscode
+# ENV im Block, Pfade unter dem Workspace-Volume
+ENV GOCACHE=/workspaces/m/.cache/go-build \
+    GOMODCACHE=/workspaces/m/.cache/gomod
+--- Container nach erstem up: ef5f03b528025f14b0b1f92151a0542c803322bc4952df87f074f618d8f98a53 ---
+--- GOCACHE: Marker schreiben ---
+total 76
+drwxr-xr-x 2 vscode vscode  4096 Nov  2 08:01 .
+drwxr-xr-x 3 vscode vscode  4096 Nov  2 08:01 ..
+-rw-r--r-- 1 vscode vscode    41 Nov  2 08:01 marker.txt
+-rw-r--r-- 1 vscode vscode 65536 Nov  2 08:01 pad.bin
+--- GOMODCACHE: Marker schreiben ---
+total 76
+drwxr-xr-x 2 vscode vscode  4096 Nov  2 08:01 .
+drwxr-xr-x 4 vscode vscode  4096 Nov  2 08:01 ..
+-rw-r--r-- 1 vscode vscode    38 Nov  2 08:01 marker.txt
+-rw-r--r-- 1 vscode vscode 65536 Nov  2 08:01 pad.bin
+--- Container nach recreate: cd17073659dc7c17917bafd9f7d48ee248837f7f6ff92dbf0637c2070891d856 (vorher: ef5f03b528025f14b0b1f92151a0542c803322bc4952df87f074f618d8f98a53) ---
+Container-ID gewechselt: ja
+--- GOCACHE nach recreate ---
+total 76
+drwxr-xr-x 2 vscode vscode  4096 Nov  2 08:01 .
+drwxr-xr-x 4 vscode vscode  4096 Nov  2 08:01 ..
+-rw-r--r-- 1 vscode vscode    41 Nov  2 08:01 marker.txt
+-rw-r--r-- 1 vscode vscode 65536 Nov  2 08:01 pad.bin
+--- Marker GOCACHE nach recreate ---
+go-build-lauf1 2026-11-02T08:01:25+00:00
+--- GOMODCACHE nach recreate ---
+total 76
+drwxr-xr-x 2 vscode vscode  4096 Nov  2 08:01 .
+drwxr-xr-x 4 vscode vscode  4096 Nov  2 08:01 ..
+-rw-r--r-- 1 vscode vscode    38 Nov  2 08:01 marker.txt
+-rw-r--r-- 1 vscode vscode 65536 Nov  2 08:01 pad.bin
+--- Marker GOMODCACHE nach recreate ---
+gomod-lauf1 2026-11-02T08:01:26+00:00
+--- Volume nach recreate: ub-messung-m3-lauf1-ws created 2026-11-02T08:01:25Z ---

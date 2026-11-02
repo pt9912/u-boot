@@ -1,0 +1,44 @@
+[2026-11-02T07:59:32.692Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+[2026-11-02T07:59:33.073Z] Start: Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 -f /tmp/devcontainercli-root/container-features/0.89.0-1793606373070/Dockerfile-with-features -t vsc-ub-messung-m1b-lauf1-vxxc4d-94ff3b3e4574d27d1f0487dc6b1b273bc3f36b6d8d50b6fd5a67a1d0c05e8c96 --target dev_containers_target_stage --build-arg _DEV_CONTAINERS_BASE_IMAGE=dev_container_auto_added_stage_label /tmp/ub-messung-m1b-lauf1-VXXc4d/.devcontainer
+[2026-11-02T07:59:33.481Z] #0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile-with-features
+#1 transferring dockerfile: 1.09kB done
+
+[2026-11-02T07:59:33.482Z] #1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [dev_container_auto_added_stage_label 1/2] FROM mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6
+#4 resolve mcr.microsoft.com/devcontainers/base:debian@sha256:71b6fe7c4e07ec747a94a72b2a17f2f8c286eaa7b1c59862888df764efb8b6c6 0.0s done
+#4 CACHED
+
+#5 [dev_container_auto_added_stage_label 2/2] RUN mkdir -p /workspaces/ub-messung-m1b-lauf1-VXXc4d && chown vscode:vscode /workspaces/ub-messung-m1b-lauf1-VXXc4d
+
+[2026-11-02T07:59:33.496Z] #5 DONE 0.2s
+
+[2026-11-02T07:59:33.597Z] 
+#6 exporting to image
+#6 exporting layers 0.1s done
+#6 preparing layers for inline cache 0.0s done
+#6 exporting manifest sha256:4d7374a8fe5bc89783fe8e051422b33b497bdc7c23d6693b661107350d6711be 0.0s done
+#6 exporting config sha256:08b41438296eb67066ee90be614a33b9f6fc1357afaabf7ae4fd295c16da96fb
+
+[2026-11-02T07:59:33.757Z] #6 exporting config sha256:08b41438296eb67066ee90be614a33b9f6fc1357afaabf7ae4fd295c16da96fb done
+#6 exporting attestation manifest sha256:2a20fab5b89b4485b4051b1665b53dff445cd0b0ee94712e501647a9b7b205ca 0.0s done
+#6 exporting manifest list sha256:3596bf1b21eb179f5dff64f8b12f7666ba400eb5e7400449b2f9cfebff54f3e1 done
+#6 naming to docker.io/library/vsc-ub-messung-m1b-lauf1-vxxc4d-94ff3b3e4574d27d1f0487dc6b1b273bc3f36b6d8d50b6fd5a67a1d0c05e8c96:latest done
+#6 unpacking to docker.io/library/vsc-ub-messung-m1b-lauf1-vxxc4d-94ff3b3e4574d27d1f0487dc6b1b273bc3f36b6d8d50b6fd5a67a1d0c05e8c96:latest 0.0s done
+#6 DONE 0.2s
+
+[2026-11-02T07:59:34.470Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=ub-messung-m1b-lauf1-ws,target=/workspaces/ub-messung-m1b-lauf1-VXXc4d,type=volume -l devcontainer.local_folder=/tmp/ub-messung-m1b-lauf1-VXXc4d -l devcontainer.config_file=/tmp/ub-messung-m1b-lauf1-VXXc4d/.devcontainer/devcontainer.json -e GOCACHE=/tmp/ub-messung-m1b-lauf1-VXXc4d/.cache/go-build -e GOMODCACHE=/tmp/ub-messung-m1b-lauf1-VXXc4d/.cache/gomod --entrypoint /bin/sh vsc-ub-messung-m1b-lauf1-vxxc4d-94ff3b3e4574d27d1f0487dc6b1b273bc3f36b6d8d50b6fd5a67a1d0c05e8c96-uid -c echo Container started
+[2026-11-02T07:59:34.658Z] Container started
+{"outcome":"success","containerId":"e9e400f0c865b8e9b608bfdea9bcd21e9c8111bfb75e9e02573d1d6ecc36da29","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/ub-messung-m1b-lauf1-VXXc4d","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
+e9e400f0c865b8e9b608bfdea9bcd21e9c8111bfb75e9e02573d1d6ecc36da29
+ub-messung-m1b-lauf1-ws
+--- leftovers after teardown ---

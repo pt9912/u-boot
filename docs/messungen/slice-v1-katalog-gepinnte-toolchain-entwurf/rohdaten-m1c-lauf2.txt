@@ -1,0 +1,36 @@
+Messung M1, Zelle m1c (containerEnv, container-Workspace-Form, sandbox-Form), Lauf 2
+2026-11-02T07:59:42+00:00
+Engine: 29.9.2 (linux/amd64)
+0.89.0
+Host-Architektur: amd64
+--- devcontainer.json ---
+{
+  "name": "m1c-lauf2",
+  "build": {"dockerfile": "Dockerfile", "context": "."},
+  "workspaceMount": "",
+  "workspaceFolder": "/workspaces/ub-messung-m1c-lauf2-DiY3sd",
+  "mounts": ["source=ub-messung-m1c-lauf2-ws,target=/workspaces/ub-messung-m1c-lauf2-DiY3sd,type=volume"],
+  "containerEnv": {
+    "GOCACHE": "${containerWorkspaceFolder}/.cache/go-build",
+    "GOMODCACHE": "${containerWorkspaceFolder}/.cache/gomod"
+  },
+  "remoteUser": "vscode"
+}
+--- Dockerfile ---
+FROM mcr.microsoft.com/devcontainers/base:debian
+USER root
+RUN mkdir -p /workspaces/ub-messung-m1c-lauf2-DiY3sd && chown vscode:vscode /workspaces/ub-messung-m1c-lauf2-DiY3sd
+USER vscode
+--- docker inspect .Config.Env ---
+GOCACHE=/workspaces/ub-messung-m1c-lauf2-DiY3sd/.cache/go-build
+GOMODCACHE=/workspaces/ub-messung-m1c-lauf2-DiY3sd/.cache/gomod
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+LANG=C.UTF-8
+
+--- docker exec -u vscode env (Weg des Launchers) ---
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=2cf032568814
+GOCACHE=/workspaces/ub-messung-m1c-lauf2-DiY3sd/.cache/go-build
+GOMODCACHE=/workspaces/ub-messung-m1c-lauf2-DiY3sd/.cache/gomod
+LANG=C.UTF-8
+HOME=/home/vscode

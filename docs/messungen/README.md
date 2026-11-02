@@ -37,3 +37,4 @@ Die Regel steht in [`harness/conventions.md`](../../harness/conventions.md#ablag
 | [`slice-v1-devcontainer-instanz-messung`](slice-v1-devcontainer-instanz-messung/README.md) | `tools/messung/devcontainer-instanz/` |
 | [`slice-v1-shell-erkennung-fehlender-benutzer-eng`](slice-v1-shell-erkennung-fehlender-benutzer-eng/README.md) | `tools/messung/shell-benutzer-fehlt/` |
 | [`slice-v1-devcontainer-claude-oauth-token`](slice-v1-devcontainer-claude-oauth-token/README.md) | keine (Test `internal/e2e/claude_oauth_token_docker_test.go`) |
+| [`slice-v1-katalog-gepinnte-toolchain-entwurf`](slice-v1-katalog-gepinnte-toolchain-entwurf/README.md) | `tools/messung/katalog-gepinnte-toolchain/` |

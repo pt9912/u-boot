@@ -1,0 +1,32 @@
+Messung M2, Zelle m2b (gleich), Lauf 2
+2026-11-02T08:00:50+00:00
+Engine: 29.9.2 (linux/amd64)
+0.89.0
+--- devcontainer.json ---
+{
+  "name": "m2b-lauf2",
+  "build": {"dockerfile": "Dockerfile", "context": "."},
+  "containerEnv": {
+    "GOCACHE": "/ub-messung-block/go-build",
+    "GOMODCACHE": "/ub-messung-block/gomod"
+  },
+  "remoteUser": "vscode"
+}
+--- Dockerfile ---
+FROM mcr.microsoft.com/devcontainers/base:debian
+# ENV-Namen im Block: GOCACHE/GOMODCACHE
+ENV GOCACHE=/ub-messung-block/go-build \
+    GOMODCACHE=/ub-messung-block/gomod
+--- docker inspect .Config.Env ---
+GOMODCACHE=/ub-messung-block/gomod
+GOCACHE=/ub-messung-block/go-build
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+LANG=C.UTF-8
+
+--- docker exec -u vscode env (Weg des Launchers) ---
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=a2fc434a53e9
+GOMODCACHE=/ub-messung-block/gomod
+GOCACHE=/ub-messung-block/go-build
+LANG=C.UTF-8
+HOME=/home/vscode

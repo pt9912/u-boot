@@ -1,0 +1,38 @@
+Messung M1, Zelle m1d (remoteEnv, local-Workspace-Form, standard-Form), Lauf 1
+2026-11-02T07:59:47+00:00
+Engine: 29.9.2 (linux/amd64)
+0.89.0
+Host-Architektur: amd64
+--- devcontainer.json ---
+{
+  "name": "m1d-lauf1",
+  "build": {"dockerfile": "Dockerfile", "context": "."},
+  "remoteEnv": {
+    "GOCACHE": "${localWorkspaceFolder}/.cache/go-build",
+    "GOMODCACHE": "${localWorkspaceFolder}/.cache/gomod"
+  },
+  "remoteUser": "vscode"
+}
+--- Dockerfile ---
+FROM mcr.microsoft.com/devcontainers/base:debian
+--- docker inspect .Config.Env ---
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+LANG=C.UTF-8
+
+--- docker exec -u vscode env (Weg des Launchers) ---
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=b4fb3e1fc839
+LANG=C.UTF-8
+HOME=/home/vscode
+--- devcontainer exec env (Weg der CLI; remoteEnv wirkt nur hier) ---
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/vscode/.local/bin
+HOSTNAME=b4fb3e1fc839
+LANG=C.UTF-8
+HOME=/home/vscode
+LS_COLORS=
+USER=vscode
+SHLVL=1
+PROMPT_DIRTRIM=4
+_=/usr/bin/cat
+GOCACHE=/tmp/ub-messung-m1d-lauf1-3dYmQO/.cache/go-build
+GOMODCACHE=/tmp/ub-messung-m1d-lauf1-3dYmQO/.cache/gomod
