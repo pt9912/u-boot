@@ -117,7 +117,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
       [`.d-check.yml`](../../../../.d-check.yml) (matrix `carveout`, ids-Target `CO`), die
       Gate-Index-/Pointer-Zeilen ([`harness/README.md`](../../../../harness/README.md) §Guides,
       [`harness/verification.md`](../../../../harness/verification.md), `.harness/skills/closure-note-reviewer.md`,
-      [`docs/plan/planning/README.md`](../README.md), [`in-progress/README.md`](../in-progress/README.md),
+      [`docs/plan/planning/README.md`](../README.md), die Sub-README unter `in-progress/` (im Slice gelöscht — nicht Regelwerks-konform),
       [`roadmap.md`](../in-progress/roadmap.md)) zeigen auf die neuen Orte; `make docs-check` 0
       Befunde.
 - [ ] Der neue ADR (MADR, Folgeentscheidung „Ergänzt, ersetzt nichts“ zu
@@ -147,7 +147,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 | [`.golangci.yml`](../../../../.golangci.yml) | update | nur Warum-Kommentare: die Kommentar-Blöcke der `exclude-rules` nennen den tragenden ADR (`errcheck`-Settings, `_test.go`-Zeilen, `cmd/uboot/`, `contextcheck`, `interfacebloat`); kein Wert oder Regeln geändert |
 | [`docs/maintainer/quality.md`](../../../../docs/maintainer/quality.md) | update | §1.3 um die drei der Tabelle fehlenden Ausnahmen erweitert (gelesen: Tabelle trägt vier Zeilen, `_test\.go$`/`cmd/uboot/`/`errcheck`); Referenzmodell: maintainer-Doku trägt ADR-Verweise |
 | [`docs/plan/planning/README.md`](../README.md) | update | die Carveout-Ausnahme und die zwei Inventar-Verweise berichtigt (Zeilen 51 und 57 bis 58, 93 bis 94) |
-| [`docs/plan/planning/in-progress/README.md`](../in-progress/README.md) | update | Bestand-Zeile `carveouts.md` entfällt; die Dauerdokumente-Anmerkung |
+| `docs/plan/planning/in-progress/README.md` | gelöscht | nicht Regelwerks-konform — das Baseline-Regelwerk kennt keinen Sub-README; Projektinhaber-Anweisung 2026-11-02, Bestand war veraltet 
 | [`docs/plan/planning/in-progress/roadmap.md`](../in-progress/roadmap.md) | update | Pointer-Zeilen (Zeilen 137 bis 139) auf docs/plan/carveouts/README.md (Link bei der Anlage, die Datei entsteht in diesem Slice) |
 | [`.d-check.yml`](../../../../.d-check.yml) | update | `matrix`-Eintrag `carveout` → `docs/plan/carveouts/CO-*.md`; `ids`-Teil: Target der CO-Regel → `docs/plan/carveouts/` (aktuell `spec/lastenheft.md`, keine CO-ID in Verwendung — geprüft per Suche, 0 Verwendungen) |
 | [`harness/README.md`](../../../../harness/README.md) | update | Guides-Zeile (Carveout-Verweis) und die Master-Inventar-Zeile in der Rote-Gates-Liste |
@@ -215,7 +215,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
   **Ausgang:** bei Closure (`make docs-check` iterativ; die Pflichten
   stehen in `.d-check.yml` §ids).
 - **Konflikt mit dem laufenden CR-Slice** (beide berühren
-  `roadmap.md`/[`in-progress/README.md`](../in-progress/README.md) am Rand — gelesen: der CR-Slice
+  `roadmap.md`/die Sub-README unter `in-progress/` (im Slice gelöscht — nicht Regelwerks-konform) am Rand — gelesen: der CR-Slice
   fügt Wellen- und Bestand-Zeilen hinzu, der hier nur eine Carveout-Zeile
   korrigiert). — **Ausgang:** bei Closure; der Start-Trigger bindet den
   Slice an die freie WIP-Lage.
