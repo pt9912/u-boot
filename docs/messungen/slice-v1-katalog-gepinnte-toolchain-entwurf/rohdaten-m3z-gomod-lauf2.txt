@@ -1,0 +1,44 @@
+Messung M3-Zusatz, Zelle m3z-gomod (containerEnv GOMODCACHE = ${containerWorkspaceFolder}/.cache, Sandbox-Form, named volume ub-messung-m3z-gomod-lauf2-ws)
+2026-11-02T08:10:41+00:00
+Engine: 29.9.2 (linux/amd64)
+0.89.0
+--- devcontainer.json ---
+{
+  "name": "m3z-gomod-lauf2",
+  "build": {"dockerfile": "Dockerfile", "context": "."},
+  "workspaceMount": "",
+  "workspaceFolder": "/workspaces/m",
+  "mounts": ["source=ub-messung-m3z-gomod-lauf2-ws,target=/workspaces/m,type=volume"],
+  "containerEnv": {
+    "GOMODCACHE": "${containerWorkspaceFolder}/.cache"
+  },
+  "remoteUser": "vscode"
+}
+--- Dockerfile ---
+FROM mcr.microsoft.com/devcontainers/base:debian
+USER root
+RUN mkdir -p /workspaces/m && chown vscode:vscode /workspaces/m
+USER vscode
+# Kein ENV im Block: die ENV-Form dieser Reihe ist containerEnv allein
+--- Container nach erstem up: 2ce020c1669036421f91518c1e1406d50d870fc1515f1c2fff009c8cafd0ce4d ---
+--- GOMODCACHE im Container (docker exec env) ---
+GOMODCACHE=/workspaces/m/.cache
+--- Marker schreiben ---
+total 76
+drwxr-xr-x 2 vscode vscode  4096 Nov  2 08:10 .
+drwxr-xr-x 3 vscode vscode  4096 Nov  2 08:10 ..
+-rw-r--r-- 1 vscode vscode    42 Nov  2 08:10 marker.txt
+-rw-r--r-- 1 vscode vscode 65536 Nov  2 08:10 pad.bin
+--- Container nach recreate: 612b1bf1c957660527babbb700efddd85585664cb5170190b2f49f29ea8095c1 (vorher: 2ce020c1669036421f91518c1e1406d50d870fc1515f1c2fff009c8cafd0ce4d) ---
+Container-ID gewechselt: ja
+--- GOMODCACHE nach recreate (docker exec env) ---
+GOMODCACHE=/workspaces/m/.cache
+--- Cache-Verzeichnis nach recreate ---
+total 76
+drwxr-xr-x 2 vscode vscode  4096 Nov  2 08:10 .
+drwxr-xr-x 3 vscode vscode  4096 Nov  2 08:10 ..
+-rw-r--r-- 1 vscode vscode    42 Nov  2 08:10 marker.txt
+-rw-r--r-- 1 vscode vscode 65536 Nov  2 08:10 pad.bin
+--- Marker nach recreate ---
+m3z-gomod-lauf2 2026-11-02T08:10:44+00:00
+--- Volume nach recreate: ub-messung-m3z-gomod-lauf2-ws created 2026-11-02T08:10:43Z ---

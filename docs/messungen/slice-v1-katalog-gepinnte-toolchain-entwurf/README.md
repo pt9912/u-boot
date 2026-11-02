@@ -1,12 +1,12 @@
 # Messprotokoll: ENV- und Cache-Mechanik der erzeugten Dev-Container-Konfiguration (Workspace-Variable, Block-ENV gegen `containerEnv`, Cache unter dem Workspace-Volume)
 
-Messung zum Entwurf [`slice-v1-katalog-gepinnte-toolchain-entwurf`](../../plan/planning/in-progress/slice-v1-katalog-gepinnte-toolchain-entwurf.md) (DoD Zeile 1), für [`LH-FA-BUILD-003`](../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) (§4 Frage 3) und [`LH-FA-DEV-001`](../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)/[`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Form der erzeugten Konfiguration). Gemessen ist: löst die Dev-Container-CLI eine Workspace-Pfad-Form in `containerEnv`/`remoteEnv` auf, welchen Wert ein `ENV` aus dem Dockerfile-Block und `containerEnv` der Konfiguration bei Konkurrenz haben, und übersteht der Cache unter dem Workspace-Volume ein `up --recreate`. Es lief **nicht** `u-boot devcontainer up`; das Skript spiegelt den `docker run` der CLI-Adapter (`internal/adapter/driven/docker/devcontainer_launcher.go`, Funktion `runArgs`, Zeilen 481 bis 511) und ruft die gepinnte CLI direkt.
+Messung zum Entwurf [`slice-v1-katalog-gepinnte-toolchain-entwurf`](../../plan/planning/in-progress/slice-v1-katalog-gepinnte-toolchain-entwurf.md) (DoD Zeile 1), für [`LH-FA-BUILD-003`](../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) (§4 Frage 3) und [`LH-FA-DEV-001`](../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)/[`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Form der erzeugten Konfiguration). Gemessen ist: löst die Dev-Container-CLI eine Workspace-Pfad-Form in `containerEnv`/`remoteEnv` auf, welchen Wert ein `ENV` aus dem Dockerfile-Block und `containerEnv` der Konfiguration bei Konkurrenz haben, und übersteht der Cache unter dem Workspace-Volume ein `up --recreate` — in beiden ENV-Trägerformen (Dockerfile-Block `ENV` und, als Zusatzreihe nach der Entscheidung zu §4 Frage 3, `containerEnv` mit `${containerWorkspaceFolder}`). Es lief **nicht** `u-boot devcontainer up`; das Skript spiegelt den `docker run` der CLI-Adapter (`internal/adapter/driven/docker/devcontainer_launcher.go`, Funktion `runArgs`, Zeilen 481 bis 511) und ruft die gepinnte CLI direkt.
 
 ## Messstand
 
 | Eigenschaft | Wert |
 |---|---|
-| Datum | 2026-11-02 (Läufe 07:59 bis 08:01 UTC) |
+| Datum | 2026-11-02 (Läufe 07:59 bis 08:10 UTC) |
 | Host | Linux 7.0.0-42-generic, `x86_64` |
 | Docker | Server 29.9.2 (`linux/amd64`), Engine lokal |
 | Dev-Container-CLI | `0.89.0` (`devcontainer --version` im Mess-Image) |
@@ -35,6 +35,7 @@ Messung zum Entwurf [`slice-v1-katalog-gepinnte-toolchain-entwurf`](../../plan/p
 bash tools/messung/katalog-gepinnte-toolchain/m1-workspace-variablen.sh
 bash tools/messung/katalog-gepinnte-toolchain/m2-env-block-vs-containerenv.sh
 bash tools/messung/katalog-gepinnte-toolchain/m3-cache-recreate.sh
+bash tools/messung/katalog-gepinnte-toolchain/m3z-cache-recreate-containerenv.sh
 ```
 
 - Je Zelle zwei Läufe; jeder Lauf legt ein **frisches Wegwerf-Projekt** an (`mktemp -d /tmp/ub-messung-<zelle>-lauf<L>-XXXXXX`) — frischer Ordner heißt frisches `devcontainer.local_folder`-Label, also zwei unabhängige Starts statt Bestands-Übernahme (Bestand-Verhalten ist in [`slice-v1-devcontainer-container-name`](../slice-v1-devcontainer-container-name/README.md) gemessen).
@@ -71,7 +72,7 @@ Lesarten mit Rohdatabeleg:
 - Bei Konkurrenz trägt `.Config.Env` nur **einen** Wert je Namen: der `containerEnv`-Eintrag ersetzt den Bild-`ENV`, die Liste zeigt keinen zweiten Eintrag (Rohdaten m2c).
 - Vorab-Lauf verworfen: Die erste M2-Reihe (07:59, alle sechs Läufe) trug einen Skript-Fehler — die Zellen-Übergabe (`mode`-Wort) paßte nicht zum Vergleich im Skript, alle Zellen liefen ohne `containerEnv` (zusammen also sechs weitere m2a-Bestätigungen). Die aufbewahrten Rohdaten stammen aus der korrigierten Reihe; die erste Reihe wurde von derselben Dateibasis überschrieben (siehe M3, gleicher Verwerfen-Mechanismus).
 
-### M3 — Cache unter dem Workspace-Volume über `up --recreate` (zwei Läufe)
+### M3 — Cache unter dem Workspace-Volume über `up --recreate` (Dockerfile-ENV-Form, zwei Läufe)
 
 Ablauf je Lauf: frisches Sandbox-Form-Projekt (named Volume am `workspaceFolder`), Dockerfile-Block setzt `GOCACHE=/workspaces/m/.cache/go-build` und `GOMODCACHE=/workspaces/m/.cache/gomod`; erster `up`, `docker exec` als `vscode` schreibt Marker + 64-KiB-Pad in beide Caches, dann `up --remove-existing-container` (die recreate-Form des Adapters), Prüfung im neuen Container:
 
@@ -85,6 +86,22 @@ Ablauf je Lauf: frisches Sandbox-Form-Projekt (named Volume am `workspaceFolder`
 
 - Protokoll-Verwerfen: Der erste M3-Lauf der Reihe brach an einem Skript-Fehler ab (Dockerfile- und Konfigurationspfad standen nicht unter `.devcontainer/` und die CLI fand die Konfiguration nicht, 08:00 UTC); das abgebrochene Projekt-Verzeichnis blieb und wurde nachträglich geräumt. Die aufbewahrten Läufe stammen aus der korrigierten Reihe (08:01 UTC). Weil `set -euo pipefail` vor dem ersten `up` abbrach, entstanden dabei keine Container oder Volumes.
 
+### M3-Zusatz — Cache über `up --recreate` in der containerEnv-Form (zwei Zellen, je zwei Läufe)
+
+Der Gegenlauf zur `m1c`-Form, die der Projektinhaber in §4 Frage 3 gewählt hat (Entscheidung 2026-11-02, Commit `b89943ea`): das Dockerfile trägt **keinen** `ENV`, die ENV kommt allein aus `containerEnv` — je Zelle ein Name (`GOCACHE` beziehungsweise `GOMODCACHE`) mit dem Wert `${containerWorkspaceFolder}/.cache`; sonst dieselbe Sandbox-Form und derselbe Ablauf wie M3 (Marker + 64-KiB-Pad, dann `up --remove-existing-container`, Prüfung im neuen Container):
+
+| Prüfstelle | m3z-gocache Lauf 1 / Lauf 2 | m3z-gomod Lauf 1 / Lauf 2 |
+|---|---|---|
+| `containerEnv`-Variable aufgelöst (vor recreate) | `GOCACHE=/workspaces/m/.cache` (beide Läufe) | `GOMODCACHE=/workspaces/m/.cache` (beide Läufe) |
+| Container-ID gewechselt | ja / ja | ja / ja |
+| Variable nach recreate erneut aufgelöst | ja / ja | ja / ja |
+| Marker-Datei im Volume nach recreate | ja / ja (Marker `m3z-gocache-lauf1`/`-lauf2` mit Zeitstempel) | ja / ja (Marker `m3z-gomod-lauf1`/`-lauf2`) |
+| Inhalt (Marker + Pad, 65536 B) nach recreate | vollständig / vollständig | vollständig / vollständig |
+| Eigentumsrechte nach recreate | `vscode:vscode` (beide, `ls -la` der Rohdaten) | `vscode:vscode` (beide) |
+| Volume nach recreate | gleiches Volume (beide) | gleiches Volume (beide) |
+
+- Der Pfad der `m1c`-Messung bleibt unter dem Volume erhalten, und die Form übersteht das Recreate mit denselben Prüfstellen wie das Block-`ENV`-Vorbild von M3 — andere Trägerform der ENV, gleiches Ergebnis.
+
 ## Rohdaten
 
 | Datei | Inhalt |
@@ -92,6 +109,8 @@ Ablauf je Lauf: frisches Sandbox-Form-Projekt (named Volume am `workspaceFolder`
 | `rohdaten-m1{a,b,c,d}-lauf{1,2}.txt` + gleiche Namen mit `.log` | M1, je Zelle je Lauf die Konfiguration, die `.Config.Env`-Liste und die env der beiden exec-Wege; das Log trägt den stdout/stderr des `up` |
 | `rohdaten-m2{a,b,c}-lauf{1,2}.txt` + `.log` | M2 |
 | `rohdaten-m3-lauf{1,2}.txt` + `.log` | M3 komplett (Marker-Listen vor und nach dem recreate) |
+| `rohdaten-m3z-gocache-lauf{1,2}.txt` + `.log` | M3-Zusatz, Zelle containerEnv/GOCACHE |
+| `rohdaten-m3z-gomod-lauf{1,2}.txt` + `.log` | M3-Zusatz, Zelle containerEnv/GOMODCACHE |
 
 ## Aufräumen (Beobachtung BEO-E2E/docker-test-hinterlaesst-zwischencontainer)
 
@@ -106,5 +125,5 @@ Ablauf je Lauf: frisches Sandbox-Form-Projekt (named Volume am `workspaceFolder`
 - Gemessen ist die CLI 0.89.0 auf Docker Engine 29.9.2, Linux `amd64`, lokale Engine, Basis-Image `mcr.microsoft.com/devcontainers/base:debian`. Andere CLI-Versionen, andere Engines (Podman, Colima) und andere Basis-Images wurden nicht gemessen.
 - Es lief kein `u-boot devcontainer up`; der Helper spiegelt den `docker run` des Adapters. Der Content-Hash-Tag des Launcher-Images wurde nicht nachgerechnet — der Kontext ist aus denselben drei Embedded-Dateien gebaut.
 - M1 misst je Variablenform nur die eine Kombination aus ENV-Schlüssel (`containerEnv`/`remoteEnv`) und Konformations-Form, wie die Zellen-Tabelle sie nennt; `remoteEnv` mit `${containerWorkspaceFolder}` wurde nicht gemessen, ebensowenig `containerEnv` mit `${containerWorkspaceFolder}` im Standardprofil.
-- M3 misst die Dockerfile-ENV-Form mit `$GOCACHE`/`$GOMODCACHE` **unterhalb** des gemounteten Workspace-Ordners; ob die `containerEnv`/`${containerWorkspaceFolder}`-Form (M1c) dieselben Eigentums- und Recreate-Eigenschaften hat, folgt aus der Messung nicht direkt — beides mal liegt der Pfad aber im selben Volume, was M3 belegt.
+- M3 misst die Dockerfile-ENV-Form mit `$GOCACHE`/`$GOMODCACHE` **unterhalb** des gemounteten Workspace-Ordners; die `containerEnv`/`${containerWorkspaceFolder}`-Form (M1c) ist im M3-Zusatz mit denselben Prüfstellen gemessen. Was die Messung nicht trennt: die beiden Formen werden nicht am selben Projekt gemessen; der Gleichlauf folgt den Paar-Messungen, nicht einem Doppelträger-Vergleich in einem Lauf.
 - Nur zwei Läufe je Zelle auf einem Host; keine Statistik, eine Reproduktion.
