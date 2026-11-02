@@ -25,6 +25,8 @@ Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-k
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
+Nichts in Arbeit.
+
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
