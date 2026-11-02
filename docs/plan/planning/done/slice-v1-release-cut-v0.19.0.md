@@ -77,4 +77,4 @@ Noch nicht geschlossen; der Slice liegt in `open/` (Plan).
 
 **Drei Paarungen** (geprüft): *Anker* — kein `liegt in`-Feld, nichts verkörpert · *Folge-Slice* — keiner versprochen; die Katalog-Restthemen laufen als Vorschlag `v0.20.0` (Roadmap-`Nächste-Wellen`-Zeile und open/README-Bestand, gepinnt durch die F-7-Berichtigung) · *Register* — jede genannte Kennung ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls`).
 
-**Verifikation** (Läufe nach Closure-Inhalt, Move und Verweise-Nachzug; Modus der Umgebung): wird nach dem Nachzug geführt und steht als Zeile danach hier.
+**Verifikation** (Läufe nach Closure-Inhalt, Register-Tiefen und Verweise-Nachzug; Docker-Modus): `make gates` Exit 0 am 2026-11-02 (`record-gates`-Stempel = HEAD nach dem Nachzug `ecf0adfa`). Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa.
