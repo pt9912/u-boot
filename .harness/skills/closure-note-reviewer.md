@@ -28,9 +28,11 @@ Was der Reviewer *immer* mitbringt, bevor er urteilt:
   Pflichtfelder (Scope, DoD-Abgleich, Sensors, Traceability, Carveouts, Nicht
   ausgeführt, Commit/Artefakt) und die harten Regeln
 - der zugehörige Slice-Plan (DoD-Liste — wogegen der Abgleich läuft)
-- das Carveout-Inventar
-  ([`carveouts.md`](../../docs/plan/carveouts/README.md)) für die
-  Gegenprobe der Carveout-Zeile
+- das Carveout-Inventar — die CO-Dateien unter `docs/plan/carveouts/`
+  (`CO-<NNN>-<kurztitel>.md`, aus der Baseline-Vorlage) für die
+  Gegenprobe der Carveout-Zeile; der Index
+  ([`README.md`](../../docs/plan/carveouts/README.md)) ist der Pointer, nicht
+  die Gegenprobe
 - die tatsächliche Commit-Historie des Slice (belegt die Hash-Angabe)
 
 Ohne diese Liste prüft der Reviewer Text, nicht *die Pflicht-Inhalte, die eine
@@ -70,9 +72,9 @@ nicht Substanz diskutiert wird, wo schon das Feld fehlt.
   Datei-/Befundzahl. Ein grüner Sensor ohne Beleg ist eine Behauptung, und
   [`harness/verification.md`](../../harness/verification.md) verlangt Evidence
   je Sensor.
-- **Carveout-Zeile fehlt oder widerspricht dem Inventar.** Neuer Carveout ohne
-  Eintrag in
-  [`carveouts.md`](../../docs/plan/carveouts/README.md)
+- **Carveout-Zeile fehlt oder widerspricht dem Inventar.** Neuer temporärer
+  Carveout ohne CO-Datei (`CO-<NNN>`-Form, Baseline-Vorlage) ohne
+  Index-Zeile in [`README.md`](../../docs/plan/carveouts/README.md)
   (Baseline-Regelwerk `modul-07-carveouts.md`).
 
 **MEDIUM** — genau *einer* der drei Pflicht-Inhalte fehlt oder ist unkonkret:

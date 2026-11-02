@@ -172,7 +172,7 @@ linters:
       # Layer rules per LH-FA-ARCH-003 / spec/architecture.md §4.
       # Match production code only (`!**/*_test.go`); tests can use
       # fakes and test libraries freely (SPEC-034; the named decision
-      # is ADR 0042, Entscheidung 3).
+      # is ADR-0042, Entscheidung 3).
       rules:
         domain-isoliert:
           list-mode: lax
@@ -284,6 +284,9 @@ linters:
           - unparam
         path: _test\.go$
 
+      # Why: revive flags unused test-callback parameters; table-driven
+      # tests legitimately leave them (ADR-0003 §Entscheidung, eighth
+      # carveout of the list).
       - linters:
           - revive
         path: _test\.go$

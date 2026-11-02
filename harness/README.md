@@ -43,7 +43,7 @@ Diese Datei dupliziert sie nicht.
 | [`spec/architecture.md`](../spec/architecture.md) | Komponenten (`ARC-*`), Schichten, Importregeln, depguard-Kontrakt |
 | [`docs/plan/adr/`](../docs/plan/adr/README.md) | Architekturentscheidungen, ADR-Index |
 | [`docs/plan/planning/`](../docs/plan/planning/) | Slice-Pläne und Roadmap |
-| [`docs/plan/carveouts/`](../docs/plan/carveouts/README.md) | temporäre und permanente Carveouts (Index und CO-Dateien) |
+| [`docs/plan/carveouts/`](../docs/plan/carveouts/README.md) | temporäre Carveouts (Index und CO-Dateien; dauerhafte Ausnahmen sind über den Trichter ADR-/Spec-getragen — Modul 7) |
 | [`docs/maintainer/quality.md`](../docs/maintainer/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
 | [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Workflow |
 | [`conventions.md`](conventions.md) | repo-lokale Strukturregeln, Adaptions-Block (`MR-*`), Modus-Deklarationen |

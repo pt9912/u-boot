@@ -70,8 +70,8 @@ gelesen 2026-11-02 — Fundstellen: [ADR-0003](../../adr/0003-solid-nahes-lint-p
 |---|---|---|
 | `errcheck` `fmt.Fprint*` | [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) §Entscheidung (getragen) | Why-Kommentar nennt den ADR |
 | `testpackage` + `gochecknoglobals` für `cmd/uboot/` | [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) §Entscheidung (getragen) | Why-Kommentar nennt den ADR |
-| Test-Carveouts `_test.go` (acht Linter) | [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) §Entscheidung (getragen) | Warum-Kommentare nennen den ADR |
-| depguard `!**/*_test.go` als erstes files-Pattern | [SPEC-034](../../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln) (getragen) | — |
+| Test-Carveouts `_test.go` (acht Linter) | [ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) §Entscheidung (getragen) | die `Why:`-Kommentare der Ausschluss-Blöcke nennen den ADR — **berichtigung nach F-1(c)**: der achte („revive`/`unused-parameter`) bekam seinen Block-Kommentar erst in der Fix-Runde; der Nachbar-Block (`unused-receiver`, kein Inventar-Eintrag) trägt seinen Namen ohne ADR-Ausweisung (Bestand) |
+| depguard `!**/*_test.go` als erstes files-Pattern | [SPEC-034](../../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln) (getragen) | **berichtigung nach F-1(b):** der depguard-Kopf-Kommentar nennt [ADR-0042](../../adr/0042-dauerhafte-lint-ausnahmen.md) entschieden — Entscheidung 3 (bis zur Fix-Runde stand hier „—“) |
 | GNU `make` am Host | [SPEC-031](../../../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows) (getragen) | — |
 | `contextcheck` für `internal/adapter/driving/cli/` | **neuer ADR** (bislang nur `Why:`-Kommentar) | Anlage + Why-Kommentar nennt den ADR |
 | `interfacebloat` für `driven/filesystem.go` | **neuer ADR** (bislang nur `Why:`-Kommentar) | Anlage + Why-Kommentar nennt den ADR |
@@ -149,12 +149,13 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 | [`docs/plan/planning/README.md`](../README.md) | update | die Carveout-Ausnahme und die zwei Inventar-Verweise berichtigt (Zeilen 51 und 57 bis 58, 93 bis 94) |
 | `docs/plan/planning/in-progress/README.md` | gelöscht | nicht Regelwerks-konform — das Baseline-Regelwerk kennt keinen Sub-README; Projektinhaber-Anweisung 2026-11-02, Bestand war veraltet 
 | [`docs/plan/planning/in-progress/roadmap.md`](../in-progress/roadmap.md) | update | Pointer-Zeilen (Zeilen 137 bis 139) auf docs/plan/carveouts/README.md (Link bei der Anlage, die Datei entsteht in diesem Slice) |
+| [`docs/plan/planning/open/README.md`](../open/README.md) | update | Bestand-Zeilen im Verweis-Nachzug; Bestand-Zeile für den Folge-Slice-Plan [`slice-v1-logs-crlf`](../open/slice-v1-logs-crlf.md) (Review F-6) und die Trichter-Formulierung; Link-Lauf des CR-Slices |
 | [`.d-check.yml`](../../../../.d-check.yml) | update | `matrix`-Eintrag `carveout` → `docs/plan/carveouts/CO-*.md`; `ids`-Teil: Target der CO-Regel → `docs/plan/carveouts/` (aktuell `spec/lastenheft.md`, keine CO-ID in Verwendung — geprüft per Suche, 0 Verwendungen) |
 | [`harness/README.md`](../../../../harness/README.md) | update | Guides-Zeile (Carveout-Verweis) und die Master-Inventar-Zeile in der Rote-Gates-Liste |
 | [`harness/verification.md`](../../../../harness/verification.md) | update | Zeile 93 bis 94: Parallel-Eintrag der neuen temporären Carveouts zeigt auf [`docs/plan/carveouts/`](../../carveouts/) |
 | `.harness/skills/closure-note-reviewer.md` | update | die zwei Inventar-Verweise (Zeilen 31 bis 33 und 75 bis 76) auf den Index |
 | [`harness/conventions.md`](../../../../harness/conventions.md) | update | Aktive-Tabelle: `MR-002`-Zeile in die Aufgelöste-Tabelle (aufgelöst durch diesen Slice); Bereichsangabe der Zeile berichtigt |
-| `harness/conventions/done/MR-002-carveout-inventar.md` | git mv nach `done/` | reiner Move-Commit, Inhalt unverändert (Muster [`MR-011`](../../../../harness/conventions/done/MR-011-werkzeug-fragmente-repo-gefuehrt.md)) |
+| `harness/conventions/MR-002-carveout-inventar.md` | git mv nach `done/` | reiner Move-Commit (Muster [`MR-011`](../../../../harness/conventions/done/MR-011-werkzeug-fragmente-repo-gefuehrt.md)); **berichtigung nach F-1(a)/F-2:** die Formulierung „Inhalt unverändert“ trug der Stand nicht — der Record bekam danach zwei Link-/Pfad-Berichtigungs-Commits (f021780f, e04e126c, dann die F-2-Rücksetzung der Prosa); der Herkunfts-Regel zuliebe: der `git mv` zieht die Pfad-Berichtigung nach sich, sie berührt Referenzen, nicht die Adaption-Sätze |
 | Verweis-Nachzug | update | alle Dateien, die `planning/in-progress/carveouts.md` hrefen oder nennen (132 Treffer im Baum, geprüft am 2026-11-02: 69 in `../../carveouts/README.md`-Form aus `done/`/`next/`/`open/`, 63 in `docs/plan/planning/in-progress/carveouts.md`-Form aus Reviews, Maintainer-Doku, Archiv und Konventionen) — mechanische Berichtigung; Abgleich gegen `git diff --stat` nach jeder Fix-Runde (AGENTS.md §3.10) |
 
 **Ansatz als Liste** (die Referenz-Berichtigung ist gruppen-gleichrangig):
@@ -162,9 +163,13 @@ Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
 - Die Verweis-Berichtigung folgt zwei Regeln: (1) jede Zeile, deren Pfadteil
   `docs/plan/planning/in-progress/carveouts.md` trägt, zeigt künftig auf
   `docs/plan/carveouts/README.md` am selben Wurzel-Anker; (2) die
-  Geschwister-Form `../../carveouts/README.md` aus `done/`, `next/` und
-  `open/` wird zu `../../carveouts/README.md`. Textnachweise (Backticks,
-  Prosa) folgten derselben Ersetzung.
+  Geschwister-Form `../in-progress/carveouts.md` aus `done/`, `next/` und
+  `open/` wird zu `../../carveouts/README.md`. Textnachweise in **lebenden**
+  Dokumenten (Planung, Gate-Index, Skills) folgten derselben Ersetzung;
+  **berichtigung nach F-2:** die link-freien Backtick-Nennungen der alten
+  Ablage im aufgelösten Konvention-Record ([`MR-002`](../../../../harness/conventions/done/MR-002-carveout-inventar.md))
+  bleiben unverändert stehen — die Pfad-Berichtigung deckt Referenzen, nicht
+  die Inhaltsaussage eines Records.
 - Die historischen Done-Reporte halten ihre Zitate (Berichte sind
   korrigierend änderbar, see `.d-check.yml` Kommentar): nur der href
   wandert, kein Inhalt.

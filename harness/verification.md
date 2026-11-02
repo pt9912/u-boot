@@ -90,7 +90,9 @@ wenn ein naheliegender Sensor nicht gelaufen ist.
 - Generator-Aenderungen brauchen Replay-/Golden-Evidence nach
   [`harness/replay.md`](replay.md).
 - Nicht ausgefuehrte Sensors sind erlaubt, aber nur mit Grund.
-- Neue temporaere Carveouts brauchen parallel einen Eintrag in
+- Neue temporaere Carveouts brauchen parallel die CO-Datei
+  (`docs/plan/carveouts/CO-<NNN>-<kurztitel>.md`, aus der
+  Baseline-Vorlage) samt ihrer Zeile im Index
   [`docs/plan/carveouts/README.md`](../docs/plan/carveouts/README.md)
   und einen Plan-Anker.
 - Reviewer-Findings sind keine Verification-Evidence. Sie koennen

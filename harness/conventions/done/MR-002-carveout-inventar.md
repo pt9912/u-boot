@@ -2,11 +2,12 @@
 
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** Carveout-Ablage;
-  [`docs/plan/carveouts/README.md`](../../../docs/plan/carveouts/README.md),
+  `docs/plan/planning/in-progress/carveouts.md` (die damalige Ablage; der
+  Nachfolger ist [`docs/plan/carveouts/README.md`](../../../docs/plan/carveouts/README.md)),
   Baseline-Regelwerk `modul-07-carveouts.md`, `.d-check.yml` `matrix`.
 - **Ersetzt-Baseline-Regel:** [`modul-07-carveouts.md` §Ziel-Form: Carveout](../../../.harness/baseline/v6.18.1/regelwerk/modul-07-carveouts.md#ziel-form-carveout)
 - **Adaption:** Carveouts werden **inventarisiert** in der einen Datei
-  `docs/plan/carveouts/README.md` (mit Plan-Anker je Eintrag),
+  `docs/plan/planning/in-progress/carveouts.md` (mit Plan-Anker je Eintrag),
   nicht als je eine Datei `docs/plan/carveouts/CO-<NNN>-<titel>.md`. Das
   `CO-*`-Schema bleibt fuer die ID-Vergabe gueltig.
 - **Begruendung:** Etablierte u-boot-Struktur, bereits in `AGENTS.md` und der
