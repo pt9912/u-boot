@@ -7,7 +7,7 @@
 [`slice-cr-devcontainer-forge-cli`](../done/slice-cr-devcontainer-forge-cli.md)
 §1: Freigabe als eigener Schritt vor der Lastenheft-Änderung); die vier
 Entscheidungen des Hauptagenten-Gesprächs (§4 des Plans
-[`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md))
+[`slice-v1-katalog-feature-jdk-gepinnt`](../next/slice-v1-katalog-feature-jdk-gepinnt.md))
 tragen ihn weiter: **Schlüsselname und Konflikt-Regel** — `java-toolchain`,
 aktiviertes externes `java` neben dem Schlüssel ist ein fachlicher
 Validierungsfehler (Exit-Code `10`), das externe `java` allein bleibt wählbar;
@@ -65,7 +65,7 @@ Die Mess-Basis der Werkzeugkette
 trägt die Mechanik (Same-Origin, Exit-Codes, Meldungs-Form); die JDK-Neuheiten
 (Temurin-Archivform, `JAVA_HOME`/`java -version`, Brew-Befund) sind
 Umsetzungs-Messung
-([`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md)
+([`slice-v1-katalog-feature-jdk-gepinnt`](../next/slice-v1-katalog-feature-jdk-gepinnt.md)
 §2) — der CR trägt Zusage nur soweit ein Docker-Test sie belegt.
 
 **Verantwortlich:** — (Freigabe: Projektinhaber).
@@ -309,7 +309,7 @@ erzeugten Dockerfile-Block — Muster der `ENV PATH`-Zeile des Go-Blocks
 Zeile 165); der konkrete `JAVA_HOME`-Wert (Installationspfad der entpackten
 Distribution) und die Form des Entpackens sind Umsetzungs-Mess-Stellen, die
 der Docker-Test pinnt (`java -version` und `JAVA_HOME` im gebauten Container —
-Plan [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md)
+Plan [`slice-v1-katalog-feature-jdk-gepinnt`](../next/slice-v1-katalog-feature-jdk-gepinnt.md)
 §2). Was die Messung entscheidet, ist also die **Form der Installations-Umgebung**
 im Block, nicht ein `containerEnv`-Wert.
 
@@ -603,7 +603,7 @@ der *Neu*-Wortlaut je Stelle (§§2) und die Punkte F6 bis F8 sind freigegeben
 | **F2** | JDK-Vertrieb und Archivform | Eclipse Temurin, LTS 21, Archive aus der Veröffentlichung der Temurin-Binaries | **entschieden** — Temurin, LTS 21; die konkrete Revision liest die Messung des Umsetzungs-Slices |
 | **F3** | Default-Pin-Zahlen im Vertragstext | nein — Chronik im CHANGELOG und in der Lastenheft-Historie; im CR Muster F4 des Vorlaufs | **entschieden** — nein (Stelle 6) |
 | **F4** | Prüfsummen-Quelle | Same-Origin je Release; `api.adoptium.net` aus | **entschieden** — Prüfsummen-Datei derselben Veröffentlichung, je gewählter Version (Stelle 3) |
-| **F5** | Die Brew-Auflage (2026-11-02) — Vertriebs-Befund über Homebrew (Cask `temurin`/`temurin@21`, Formel-Verhältnis zum Feature `homebrew`) | Mess-Punkt des Umsetzungs-Slices; keine zweite Installationsform im CR | **Auflage** — Mess-Pflicht in [`slice-v1-katalog-feature-jdk-gepinnt`](../open/slice-v1-katalog-feature-jdk-gepinnt.md) §2 (d); der CR trägt sie nicht |
+| **F5** | Die Brew-Auflage (2026-11-02) — Vertriebs-Befund über Homebrew (Cask `temurin`/`temurin@21`, Formel-Verhältnis zum Feature `homebrew`) | Mess-Punkt des Umsetzungs-Slices; keine zweite Installationsform im CR | **Auflage** — Mess-Pflicht in [`slice-v1-katalog-feature-jdk-gepinnt`](../next/slice-v1-katalog-feature-jdk-gepinnt.md) §2 (d); der CR trägt sie nicht |
 | **F6** | Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle daneben | erweitern — der Eintragstyp bleibt an einer Stelle (Stelle 7) | **entschieden** — erweitern (Stelle 7); der Titel nennt die drei Schlüssel, der Anker-Nachzug läuft mit dem Technik-Commit |
 | **F7** | Fall `sdkman` + `java-toolchain`: derselbe Abweisungsfall wie externes `java`? | derselbe Abweisungsfall, sobald die gelesene Feature-Lage ihn trägt; sonst Absatz beim externen `java` allein und Frage ins Beobachtungs-Register (Stelle 5) | **entschieden** — `sdkman` ohne Abweisung: der CR nennt nur den Konflikt mit dem externen `java` (Stelle 5); die Frage geht als offener Punkt an den Umsetzungs-Slice |
 | **F8** | Zeitpunkt der Hosts-Zeile in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) | im CR-Commit auf die gelesene Vertriebs-Lage, gepinnt durch den Docker-Test des Umsetzungs-Slices (Stelle 9) | **entschieden** — die Zeile kommt in den CR-Commit, Aufstellung (a) (Stelle 9); Fundstelle der gelesenen Lage im CR-Slice §7 |
