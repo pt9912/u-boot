@@ -19,7 +19,7 @@
   Beziehung zweimal führen. Grundlage ist die dokumentierte Praxis: die vier welle-losen
   Cuts `v0.13.1`, `v0.15.1`, `v0.16.1` und `v0.17.0` sowie die Releases `v0.1.0` bis
   `v0.9.0` ohne Welle-Datei; bis zur Neufassung trug die Praxis keinen MR-Anker
-  (Drift-Audit-Kandidat, Frage im Cut-Slice [`slice-v1-release-cut-v0.18.0`](../../docs/plan/planning/in-progress/slice-v1-release-cut-v0.18.0.md) §6).
+  (Drift-Audit-Kandidat, Frage im Cut-Slice [`slice-v1-release-cut-v0.18.0`](../../docs/plan/planning/done/slice-v1-release-cut-v0.18.0.md) §6).
   Wellen-Dateien (`welle-<kebab-slug>.md`, Vorlage `welle.template.md`) bleiben der Arbeit
   vorbehalten, die nicht als Release-Cut läuft (etwa eine mehrschichtige Welle mit eigenem
   Validation-Beleg); eine solche Welle bekommt bei der Eroeffnung die flache Datei unter

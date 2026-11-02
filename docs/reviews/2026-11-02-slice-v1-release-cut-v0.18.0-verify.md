@@ -1,7 +1,7 @@
 # Verifikations-Report: slice-v1-release-cut-v0.18.0 — 2026-11-02
 
 **Rolle:** Verifier (`harness/roles.md` §Verifier — „built the thing right")
-**Gegenstand:** [`slice-v1-release-cut-v0.18.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.18.0.md), Diff `v0.17.0` (`f89424e1`)..HEAD; Cut-Commit `e6c87379` (Tag `v0.18.0`), Nachzüge `9a7db2f1` (Review-Fix-Runde, kein Release-Inhalt) und `724c5e5e` (d-check-Befund am Review-Report)
+**Gegenstand:** [`slice-v1-release-cut-v0.18.0`](../plan/planning/done/slice-v1-release-cut-v0.18.0.md), Diff `v0.17.0` (`f89424e1`)..HEAD; Cut-Commit `e6c87379` (Tag `v0.18.0`), Nachzüge `9a7db2f1` (Review-Fix-Runde, kein Release-Inhalt) und `724c5e5e` (d-check-Befund am Review-Report)
 **Skill:** `.harness/skills/verifier` (Rollenvertrag [`roles.md`](../../harness/roles.md), Schema [`verification.md`](../../harness/verification.md)) · **Modell:** glm-5.3-flash · **Datum:** 2026-11-02
 **Basis:** Review-Report [`2026-11-02-slice-v1-release-cut-v0.18.0.md`](2026-11-02-slice-v1-release-cut-v0.18.0.md) (0 HIGH/2 MEDIUM/8 LOW/1 INFO), DoD des Slice, [`releasing.md`](../maintainer/releasing.md) §§3–8
 
@@ -9,7 +9,7 @@
 
 ## Scope
 
-- Slice: [`slice-v1-release-cut-v0.18.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.18.0.md)
+- Slice: [`slice-v1-release-cut-v0.18.0`](../plan/planning/done/slice-v1-release-cut-v0.18.0.md)
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-CONF-002`](../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [`LH-LESE-002`](../../spec/lastenheft.md#lh-lese-002--sprache), [`LH-FA-BUILD-003`](../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) (Pins unverändert), [`ADR-0004`](../plan/adr/0004-ci-system.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`ADR-0017`](../plan/adr/0017-linux-pakete-nfpm.md), [ADR-0040](../plan/adr/0040-host-git-quellen-fuer-token-und-identitaet.md), [`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)
 - Artefakte: [`CHANGELOG.md`](../../CHANGELOG.md) Block `[0.18.0]` · Version v0.18.0 (Tag `e6c87379`) · Release `u-boot v0.18.0` (12 Assets) · GHCR `pt9912/u-boot:0.18.0` · Tap-Commit `b52a0bc` im Repo `pt9912/homebrew-u-boot`
 
