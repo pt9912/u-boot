@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-katalog-projekt-containerenv`](../../../../in-progress/slice-v1-katalog-projekt-containerenv.md)
+**Vorgang:** [`slice-v1-katalog-projekt-containerenv`](../../../../done/slice-v1-katalog-projekt-containerenv.md)
 **Fund:** drei Teil-Fundstellen der Klasse im Umsetzungs-Vorgang:
 
 - **F-1 (Review, HIGH, `kommentar-falsche-verhaltensaussage`):** der Kommentar von `listCandidatePaths` (`internal/hexagon/application/config_many.go`) behauptete, hand-editierte Namen außerhalb der env-name-Regel würden vom Domain-Konstruktor abgewiesen und aus `config list` herausgefiltert — das Gegenteil gilt absichtlich (Konstruktor splitet unvalidiert, `TestNewConfigPath_ContainerEnv_EntryParsTheName`); der zweite Kommentar desselben Diffs („a hand edit can name anything") trug das korrekte Ist. Berichtigt mit der Fix-Runde `e8e04909`; §3.9-Klasse.

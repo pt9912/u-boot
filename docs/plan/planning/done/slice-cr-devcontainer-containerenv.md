@@ -15,7 +15,7 @@ Adaption des CR-Musters [`slice-cr-devcontainer-java-toolchain`](../done/slice-c
 (erzeugte `devcontainer.json` — der Absatz der Zusage kommt dort), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
 (Konfig-Schema der Dev-Container-Form — Pfad-Zeilen), [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)
 (`config set`/Anzeige berühren den Schlüssel), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
-(Abweisungen je Exit-Code `10`); Umsetzungs-Plan [`slice-v1-katalog-projekt-containerenv`](../in-progress/slice-v1-katalog-projekt-containerenv.md)
+(Abweisungen je Exit-Code `10`); Umsetzungs-Plan [`slice-v1-katalog-projekt-containerenv`](../done/slice-v1-katalog-projekt-containerenv.md)
 (liegt in `open/`, vier Entscheidungen je §4 — der CR trägt sie als Freigabe-Form).
 
 **Berührte Spec-Stellen** (gelesen am 2026-11-03 im Vorbefund des
@@ -46,7 +46,7 @@ Projektinhaber freigegeben und wortgleich in die Verträge übernommen. **Kein
 Produktcode und keine Implementierung in diesem Slice** (Muster der CR-Slices).
 
 **Ausdrücklich NICHT in diesem Slice:** der Umsetzungs-Diff (Tests, Generator,
-Validation — der Umsetzungs-Slice [`slice-v1-katalog-projekt-containerenv`](../in-progress/slice-v1-katalog-projekt-containerenv.md)
+Validation — der Umsetzungs-Slice [`slice-v1-katalog-projekt-containerenv`](../done/slice-v1-katalog-projekt-containerenv.md)
 trägt ihn, nachdem der CR geschlossen hat) · die Messung ENV-vs-`containerEnv`
 (per Docker-Test, Umsetzungs-Slice — der CR trägt nur die Ebene-Entscheidung,
 nicht den Mess-Weg) · die Umstellung des eigenen DevContainers (Umsetzungs-Slice,
@@ -149,7 +149,7 @@ liegen vor; Closure-Notiz mit Lerneintrag geschrieben (§7).
 
 **Beobachtungs-Register:** *Evidence neu:* [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) ([`evidence/slice-cr-devcontainer-containerenv.md`](../observations/BEO-DOK/plan-aussage-ueber-code/evidence/slice-cr-devcontainer-containerenv.md): F-1, F-2/F-3, V-1 bis V-3; berichtigt `df6c40ce` und `45833353`) · [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) ([`evidence/slice-cr-devcontainer-containerenv.md`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/evidence/slice-cr-devcontainer-containerenv.md): V-4, zwei Beleg-Aufträge nachgetragen). *Klassenfrage:* Lehre 2 oben (Projektinhaber).
 
-**Carveouts:** keiner — kein Gate, keine Schwelle und kein Code im Range. **Folge-Slice:** die Umsetzung [`slice-v1-katalog-projekt-containerenv`](../in-progress/slice-v1-katalog-projekt-containerenv.md) trägt die Produkt-Träger (Konfig-Schema, Generator, Validation, Golden Cases, Docker-Test der Ebene, Umstellung des eigenen Devcontainers) und die Test-Namen der Beleg-Aufträge; ihr Start folgt der Closure (Reihenfolge-Beschluss 2026-11-03). **Weiter offen:** nichts aus der DoD.
+**Carveouts:** keiner — kein Gate, keine Schwelle und kein Code im Range. **Folge-Slice:** die Umsetzung [`slice-v1-katalog-projekt-containerenv`](../done/slice-v1-katalog-projekt-containerenv.md) trägt die Produkt-Träger (Konfig-Schema, Generator, Validation, Golden Cases, Docker-Test der Ebene, Umstellung des eigenen Devcontainers) und die Test-Namen der Beleg-Aufträge; ihr Start folgt der Closure (Reihenfolge-Beschluss 2026-11-03). **Weiter offen:** nichts aus der DoD.
 
 **Drei Paarungen:** *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert. *Folge-Slice* — der Umsetzungs-Slice ist eine Datei in `open/` (Verzeichnis-Lesung); er übernimmt die Beleg-Aufträge als Test-Aufträge. *Register* — jede `BEO-*`-Kennung in §7 löst in ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls`).
 

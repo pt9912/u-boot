@@ -19,7 +19,7 @@ ist im Agenten-Gespräch gefallen und außerhalb der Repo-Evidenz.
 **Eingangs-Kontext** (gelesen, gegen die geprüft wurden):
 
 - Slice-Plan §1–§8 samt Risiken und §3-Dateitabelle; Umsetzungs-Plan
-  [`slice-v1-katalog-projekt-containerenv`](../plan/planning/in-progress/slice-v1-katalog-projekt-containerenv.md)
+  [`slice-v1-katalog-projekt-containerenv`](../plan/planning/done/slice-v1-katalog-projekt-containerenv.md)
   als Kontext (liegt in `open/`)
 - Freigegebener Vorschlag Stellen (a)–(d) samt vier gebilligten Entscheidungen
 - Lastenheft: Absatz *Projekt-Umgebungswerte* (Zeile 387, innerhalb

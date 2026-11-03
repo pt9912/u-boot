@@ -4,7 +4,7 @@
 Hard Rules). Nicht geprüft: DoD-Closure und Verification-Evidence — Verifier
 ([`harness/verification.md`](../../harness/verification.md)).
 
-**Gegenstand:** [`slice-v1-katalog-projekt-containerenv`](../plan/planning/in-progress/slice-v1-katalog-projekt-containerenv.md),
+**Gegenstand:** [`slice-v1-katalog-projekt-containerenv`](../plan/planning/done/slice-v1-katalog-projekt-containerenv.md),
 Commit `59ad23b4` auf `main` (einziger Umsetzungs-Commit; CR-Slice und
 Vertrags-Übernahme liegen im Vorgänger-Vorgang
 [`slice-cr-devcontainer-containerenv`](../plan/planning/done/slice-cr-devcontainer-containerenv.md)).
@@ -135,7 +135,7 @@ Historie-Zeilen 2026-11-03 (1627–1628).
   (CR-Review F-4; das CR-Vorkommen wurde in `45833353`/`df6c40ce`
   berichtigt). Steering-Loop-Zähler der Klasse: 2/3.
 - **Fundstellen:**
-  - [`docs/plan/planning/in-progress/slice-v1-katalog-projekt-containerenv.md`](../plan/planning/in-progress/slice-v1-katalog-projekt-containerenv.md)
+  - [`docs/plan/planning/done/slice-v1-katalog-projekt-containerenv.md`](../plan/planning/done/slice-v1-katalog-projekt-containerenv.md)
     §3 · „READMEs, `CHANGELOG.md`“
   - `git show 59ad23b4 --name-status` — kein `README*.md`-Berührungs-Eintrag;
     [README.md](../../README.md)/[README.de.md](../../README.de.md) führen
