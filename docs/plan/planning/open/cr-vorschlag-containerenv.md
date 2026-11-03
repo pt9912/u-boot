@@ -1,12 +1,18 @@
 # CR-Vorschlag: Konfig-Schlüssel `devcontainer.containerEnv` (Projekt-Umgebungswerte) — Alt/Neu-Wortlaut je Stelle
 
-**Status:** freigegeben (2026-11-03, Projektinhaber: „Freigabe wie vorgelegt“ im Agenten-Gespräch); die Vertrags-Übernahme folgt im CR-Slice.
+**Status:** freigegeben und übernommen (2026-11-03; Freigabe des Projektinhabers „wie vorgelegt” im Agenten-Gespräch, Vertrags-Übernahme committet `d62aad5e`).
+
+**Abweichungen der Übernahme je Stelle** (Ausweis nach dem Review-Report F-2/F-3; je Bestätigung des Projektinhabers, 2026-11-03):
+
+- **Stelle (c):** der Schlüssel trägt eine **eigene Wertetabellen-Zeile**; die zwei Übersteuerungs-Zeilen (`devcontainer.features.<feature>.version`, Pipeline-Schritt 6) bleiben unberührt — die vorgelegte Formulierung „beide Zeilen tragen den Namen” bezog sie semantisch unzutreffend ein. Bestätigt („eigene Zeile”).
+- **Stelle (c, Nachtrag der Fix-Runde):** die Wertetabellen-Zeile sagt Schreiben nur über die Unterpfade `devcontainer.containerEnv.<name>`; der Basis-Pfad ist nicht schreibbar (kein Ganz-Map-Set). Bestätigt („nur Unterpfade”).
+- **Stelle (b):** die Historie-Zeile trägt eine dritte Zelle (Freigabe/Ausgang) — Hausform der Tabelle; die vorgelegte Zellen-Form war unvollständig. Keine Down-Referenz (Decken-Regel) — die im Vorschlag genannten Links entfallen im Vertrag.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
 [`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md).
 Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an
 den Verträgen. Der *Neu*-Wortlaut der Stellen (a) bis (d) ist freizugeben; die
-vii Entscheidungen des Umsetzungs-Plans
+die vier Entscheidungen des Umsetzungs-Plans
 ([`§4`](slice-v1-katalog-projekt-containerenv.md)) tragen ihn.
 
 **Grundlage:** Vorbefund des Umsetzungs-Plans §1 (die ENV-Ebene ist heute die
