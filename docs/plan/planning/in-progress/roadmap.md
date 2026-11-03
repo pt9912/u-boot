@@ -40,7 +40,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 [`slice-harness-dcheck-pinsync`](../done/slice-harness-dcheck-pinsync.md) liegt in [`done/`](../done/) (geschlossen 2026-11-03 mit Reports und dem live pinsync-Waechter) — der CR der Pin-Inventur ([`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) fünfter Ort `go.mod`; `pinsync`-Gatter über die Werkzeugketten samt Basis-Image-Gruppen-Grenze; der d-check-Bump v0.91.0 und die drei Pin-Gruppen sind von den Commits getragen, der CR ist freigegeben).
 
 
-Nichts in Arbeit.
+[](../in-progress/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
 ## Nächste Wellen
 
