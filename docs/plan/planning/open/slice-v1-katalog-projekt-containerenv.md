@@ -31,7 +31,7 @@ genau die Lücke, die dieser Slice schließt), [`SPEC-049`](../../../../spec/spe
 zu `Config.Env` — bestehend, wird nicht geändert). Der Verweis zeigt
 **aufwärts**: Lastenheft und Spezifikation nennen diesen Slice nie.
 
-**Verantwortlich:** — (Setzung beim Übergang `open` → `next`)
+**Verantwortlich:** pt9912 (Implementer; Umsetzung nach der CR-Closure 2026-11-03, Reihenfolge-Beschluss des Projektinhabers)
 
 **Autor:** pt9912 (Rolle Planner, im Auftrag des Hauptagenten). **Datum:** 2026-11-03.
 

@@ -4,7 +4,7 @@
 Hard Rules). Nicht geprüft: DoD-Closure und Verification-Evidence — Verifier.
 
 **Gegenstand:** [`slice-cr-devcontainer-containerenv`](../plan/planning/done/slice-cr-devcontainer-containerenv.md),
-Range `f36d5f59..d62aad5e` — Schnitt `89b584e2` (Plan + [`cr-vorschlag-containerenv.md`](../plan/planning/open/cr-vorschlag-containerenv.md)),
+Range `f36d5f59..d62aad5e` — Schnitt `89b584e2` (Plan + [`cr-vorschlag-containerenv.md`](../plan/planning/done/cr-vorschlag-containerenv.md)),
 reine Moves `046ea7ba`/`367046c6` (0-Diff, R100) mit Verweis-Nachzug je eigenem
 Commit `2c7f4521`/`0be9cc54` (je 1 eingehend), Roadmap-Start `2830bb4c`,
 Vertrags-Übernahme `d62aad5e` (`spec/lastenheft.md` 0.32.0, `spec/spezifikation.md`
@@ -43,7 +43,7 @@ ist im Agenten-Gespräch gefallen und außerhalb der Repo-Evidenz.
 - **Quelle:** [`AGENTS.md`](../../AGENTS.md) §3.10 (Zustandsmarker mit Ablaufpunkt wird beim Ablauf auf den Ist-Stand gesetzt) und §3.7
 - **Fundstellen:**
   - [`docs/plan/planning/in-progress/roadmap.md`](../plan/planning/in-progress/roadmap.md) · „die Freigabe steht aus.“
-  - [`docs/plan/planning/open/cr-vorschlag-containerenv.md`](../plan/planning/open/cr-vorschlag-containerenv.md) · „die Vertrags-Übernahme folgt im CR-Slice.“
+  - [`docs/plan/planning/done/cr-vorschlag-containerenv.md`](../plan/planning/done/cr-vorschlag-containerenv.md) · „die Vertrags-Übernahme folgt im CR-Slice.“
 - **Klasse:** `zustandsmarker-abgelaufen-bei-uebernahme`
 - **Befund:** `d62aad5e` setzt die Statuszeile des Vorschlags auf *freigegeben*
   und übernimmt den Vertrags-Wortlaut — die Freigabe ist also vor dem Commit
@@ -62,7 +62,7 @@ ist im Agenten-Gespräch gefallen und außerhalb der Repo-Evidenz.
 - **Kategorie:** MEDIUM
 - **Quelle:** Freigabe „wie vorgelegt“ (Wortlaut ist Norm) + [`AGENTS.md`](../../AGENTS.md) §3.10 (Abgleich nach jeder Änderung; eintragsgenauer Ausweis)
 - **Fundstellen:**
-  - [`cr-vorschlag-containerenv.md`](../plan/planning/open/cr-vorschlag-containerenv.md) Stelle (c) · „beide Zeilen tragen den Namen `devcontainer.containerEnv` neben die bestehenden“
+  - [`cr-vorschlag-containerenv.md`](../plan/planning/done/cr-vorschlag-containerenv.md) Stelle (c) · „beide Zeilen tragen den Namen `devcontainer.containerEnv` neben die bestehenden“
   - [`spec/spezifikation.md`](../../spec/spezifikation.md) Wertetabelle · „| `devcontainer.containerEnv` | ja | ja | Map von Namen zu String-Werten;“
   - Commit `d62aad5e` · „Vertrags-Übernahme wortgleich“ / „[`SPEC-040`](../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config) die Pfad-Zeile devcontainer.containerEnv“
 - **Klasse:** `abweichung-freigabe-wortlaut-nicht-ausgewiesen`
@@ -92,7 +92,7 @@ ist im Agenten-Gespräch gefallen und außerhalb der Repo-Evidenz.
 - **Kategorie:** LOW
 - **Quelle:** [`AGENTS.md`](../../AGENTS.md) §3.4 (Decken-Regel) + Freigabe „wie vorgelegt“
 - **Fundstellen:**
-  - [`cr-vorschlag-containerenv.md`](../plan/planning/open/cr-vorschlag-containerenv.md) Stelle (b) · „`| 0.32.0 | Projekt-Umgebungswerte: `devcontainer.containerEnv` als Map des erzeugten DevContainers (Umsetzungs-Slice nach diesem CR) |`"
+  - [`cr-vorschlag-containerenv.md`](../plan/planning/done/cr-vorschlag-containerenv.md) Stelle (b) · „`| 0.32.0 | Projekt-Umgebungswerte: `devcontainer.containerEnv` als Map des erzeugten DevContainers (Umsetzungs-Slice nach diesem CR) |`"
   - [`spec/lastenheft.md`](../../spec/lastenheft.md) Historie · „| 0.32.0 | 2026-11-03 | [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen): neuer Absatz der Projekt-Umgebungswerte — …“
 - **Klasse:** `abweichung-freigabe-wortlaut-nicht-ausgewiesen` (zweites Vorkommen — Drift-Signal)
 - **Befund:** Die übernommene Historie-Zeile trägt vier Zellen (Version, Datum,
@@ -155,7 +155,7 @@ ist im Agenten-Gespräch gefallen und außerhalb der Repo-Evidenz.
 
 - **Kategorie:** INFO
 - **Quelle:** Maintainability
-- **Fundstelle:** [`cr-vorschlag-containerenv.md`](../plan/planning/open/cr-vorschlag-containerenv.md) · „die vii Entscheidungen des Umsetzungs-Plans“
+- **Fundstelle:** [`cr-vorschlag-containerenv.md`](../plan/planning/done/cr-vorschlag-containerenv.md) · „die vii Entscheidungen des Umsetzungs-Plans“
 - **Klasse:** `zahlangabe-typo`
 - **Befund:** „vii“ statt „vier“ — als römische Zahl gelesen zählt der Satz
   sieben Entscheidungen; gebilligt sind vier. Reiner Schreibfehler ohne
@@ -169,7 +169,7 @@ ist im Agenten-Gespräch gefallen und außerhalb der Repo-Evidenz.
 - **Quelle:** Maintainability (Vorgänger-Muster)
 - **Fundstellen:**
   - Plan §3 führt nur die Neuanlage der Vorschlags-Datei · „`cr-vorschlag-containerenv.md` (neu)“
-  - Vorgänger: [`cr-vorschlag-java-toolchain.md`](../plan/planning/done/cr-vorschlag-java-toolchain.md) und [`cr-vorschlag-gepinnte-werkzeugkette.md`](../plan/planning/done/cr-vorschlag-gepinnte-werkzeugkette.md) liegen in `done/`; hier liegt die übernommene Datei in [`open/`](../plan/planning/open/cr-vorschlag-containerenv.md) mit Verweis `../in-progress/`
+  - Vorgänger: [`cr-vorschlag-java-toolchain.md`](../plan/planning/done/cr-vorschlag-java-toolchain.md) und [`cr-vorschlag-gepinnte-werkzeugkette.md`](../plan/planning/done/cr-vorschlag-gepinnte-werkzeugkette.md) liegen in `done/`; hier liegt die übernommene Datei in [`open/`](../plan/planning/done/cr-vorschlag-containerenv.md) mit Verweis `../in-progress/`
 - **Klasse:** `move-nachzug-vorschlagsdatei`
 - **Befund:** Die freigegebene und übernommene Vorschlags-Datei liegt im
   Lifecycle-Verzeichnis `open/`, während ihr Slice in `in-progress/` liegt; beim

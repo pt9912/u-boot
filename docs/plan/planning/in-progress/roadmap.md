@@ -27,7 +27,9 @@ Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-k
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
-Der CR-Schnitt [`slice-cr-devcontainer-containerenv`](../done/slice-cr-devcontainer-containerenv.md) liegt in `in-progress/` — der Konfig-Schlüssel `devcontainer.containerEnv` (Projekt-Umgebungswerte der erzeugten Dev-Container; gebilligt 2026-11-03, Umsetzung folgt im Slice [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md)); der Wortlaut ist freigegeben (2026-11-03, wie vorgelegt; Übernahme committet `d62aad5e`, die Übertragungs-Lesart je Stelle (c) vom Projektinhaber bestätigt).
+Der CR-Schnitt [`slice-cr-devcontainer-containerenv`](../done/slice-cr-devcontainer-containerenv.md) liegt in [`done/`](../done/) — freigegeben wie vorgelegt (2026-11-03; Übertragungs-Lesarten je bestätigt), Vertrags-Übernahme wortgleich (Lastenheft `0.31.0` → `0.32.0`, [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config) Unterabschnitt *Projekt-Umgebungswerte*); Vorschlag [`cr-vorschlag-containerenv.md`](../done/cr-vorschlag-containerenv.md) ebenfalls in `done/`.
+
+Der Umsetzungs-Slice [`slice-v1-katalog-projekt-containerenv`](../in-progress/slice-v1-katalog-projekt-containerenv.md) liegt in `in-progress/` — Umsetzung des Schlüssels `devcontainer.containerEnv` (Konfig-Schema, Generator-Render verwaltet und idempotent, Validation je Exit-Code `10`, Golden Cases mit Mischfall der Cache-Werte, Docker-Test der `containerEnv`-Ebene, Umstellung des eigenen Devcontainers samt ENV-Rest-Entfall).
 
 ## Nächste Wellen
 
