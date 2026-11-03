@@ -35,7 +35,10 @@ Der Umsetzungs-Slice [`slice-v1-katalog-projekt-containerenv`](../done/slice-v1-
 
 Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcontainer-katalog-quellen.md) liegt in [`done/`](../done/) (geschlossen 2026-11-03 mit Reports; Wortlaut freigegeben wie vorgelegt, Übernahme `151a7976`) — der CR der zwei Wege: Entfernung der Katalog-Einträge samt Lastenheft-Beispielzeile und die Abweisung unverarbeitbarer Formen externer Quellen je Exit-Code `10` (Wortlaut freigegeben wie vorgelegt 2026-11-03, Übernahme committet `151a7976`).
 
-[`slice-v1-release-cut-v0.21.0`](../done/slice-v1-release-cut-v0.21.0.md) liegt in `in-progress/` — Minor-Release `v0.21.0` von `main` nach `v0.20.0`, trägt die drei [Unreleased]-Träger ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), Lastenheft 0.32.0/0.33.0).
+[`slice-v1-release-cut-v0.21.0`](../done/slice-v1-release-cut-v0.21.0.md) liegt in [`done/`](../done/) (geschlossen 2026-11-03; Tag `v0.21.0` auf `f0026b4d`) — Minor-Release `v0.21.0` von `main` nach `v0.20.0`, trägt die drei [Unreleased]-Träger ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), Lastenheft 0.32.0/0.33.0).
+
+Nichts in Arbeit.
+
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
@@ -74,6 +77,8 @@ flowchart LR
 ```
 
 ## Abgeschlossene Wellen
+
+| v0.21.0 (Minor-Release: der Konfig-Schluessel `devcontainer.containerEnv` — Projekt-Umgebungswerte in der erzeugten Dev-Container-Konfiguration; Katalog-Eintraege `cpp`/`postgres-client` entfernt, Abweisung unverarbeitbarer externer Formen je Exit-Code `10`; Lastenheft 0.32.0 und 0.33.0) | 2026-11-03 | [`slice-v1-release-cut-v0.21.0`](../done/slice-v1-release-cut-v0.21.0.md) — Tag `v0.21.0` auf `f0026b4d` |
 
 | Welle | Abschluss | Closure-Notiz (Detailquelle) |
 |---|---|---|
