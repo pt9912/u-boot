@@ -26,7 +26,7 @@ DoD dieses Slice verschieden wäre.
 
 **Berührte Spec-Stellen:** [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) (Katalogtabelle und Form der externen Quelle), [`SPEC-050`](../../../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen) (Warnung je Feature aus einer externen Quelle), [`SPEC-017`](../../../../spec/spezifikation.md#spec-017--diagnose-codes-der-doctor-prüfungen-code-registry) (Beschreibung von `devcontainer.features.allowlist`, voraussichtlich). Der Verweis zeigt **aufwärts**: Lastenheft und Spezifikation nennen diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Implementer; Messung N1/N2 zuerst, Weg-Entscheidung des Projektinhabers danach; Reihenfolge-Beschluss 2026-11-03)
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-22.
 
