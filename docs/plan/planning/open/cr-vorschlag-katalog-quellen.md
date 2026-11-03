@@ -1,6 +1,6 @@
 # CR-Vorschlag: Katalogquellen `cpp`/`postgres-client` entfernen und unverarbeitbare Quellen-Formen abweisen — Alt/Neu je Stelle
 
-**Status:** vorgelegt (2026-11-03); wartet auf die Freigabe des Projektinhabers.
+**Status:** freigegeben wie vorgelegt (Projektinhaber, 2026-11-03 im Agenten-Gespräch).
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
 [`slice-cr-devcontainer-katalog-quellen`](../in-progress/slice-cr-devcontainer-katalog-quellen.md).
