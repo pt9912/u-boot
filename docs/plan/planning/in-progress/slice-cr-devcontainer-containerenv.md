@@ -55,21 +55,21 @@ Muster der Werkzeugketten-Kette).
 
 ## 2. Definition of Done
 
-- [ ] **Vorschlags-Datei:** [`cr-vorschlag-containerenv.md`](../open/cr-vorschlag-containerenv.md)
+- [x] **Vorschlags-Datei:** [`cr-vorschlag-containerenv.md`](../open/cr-vorschlag-containerenv.md)
   mit Alt/Neu-Wortlaut je Stelle (Muster [`cr-vorschlag-java-toolchain`](../done/cr-vorschlag-java-toolchain.md))
   — Stellen (a) Lastenheft-Absatz, (b) Historie-Zeile `0.32.0`, (c)
   [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)
   Pfad-Zeilen, (d) TECH-Unterabschnitt (Render/Merge/Validation, Ebene der
   Werte) — samt den vier Entscheidungen des Umsetzungs-Plans.
-- [ ] **Freigabe:** Projektinhaber erteilt den Neu-Wortlaut (je Stelle oder
+- [x] **Freigabe:** Projektinhaber erteilt den Neu-Wortlaut (je Stelle oder
   mit benannten Änderungen); Abweichungen je ausgewiesen.
-- [ ] **Vertrags-Übernahme wortgleich:** `spec/lastenheft.md` (Absatz,
+- [x] **Vertrags-Übernahme wortgleich:** `spec/lastenheft.md` (Absatz,
   Historie `0.32.0`, Versionsfeld) und `spec/spezifikation.md`
   ([`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)-Zeilen,
   TECH-Unterabschnitt mit Zusage-Sätzen) — Abgleich Zeichen für Zeichen im
   §7; **erst nach der Freigabe** (`AGENTS.md` §Source-Precedence des
   Umsetzungs-Plans §4).
-- [ ] `make gates` grün; Review (kein Self-Review) und Verification mit
+- [x] `make gates` grün; Review (kein Self-Review) und Verification mit
   Reports unter `docs/reviews/`; Doku-Nutzertext bleibt ohne Kennungen (der
   CR-Diff berührt nur die Vertrags-Straten — Muster [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features));
   Closure-Notiz mit Steering-Loop-Lerneintrag; Register fortgeschrieben oder
@@ -131,7 +131,29 @@ liegen vor; Closure-Notiz mit Lerneintrag geschrieben (§7).
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt.)*
+### Closure (Planner, 2026-11-03, nach Review-Fix `df6c40ce`, Verifier-Berichtigung `45833353` und Vertrags-Übernahme `d62aad5e`)
+
+**Evidence:** Review-Report [`2026-11-03-slice-cr-devcontainer-containerenv`](../../../reviews/2026-11-03-slice-cr-devcontainer-containerenv.md) (2 MEDIUM/3 LOW/2 INFO — F-1 Zustandsmarker bei der Übernahme, F-2 Übertragungs-Lesart der Stelle (c), F-3 Historie-Zellen, F-4/F-5 §3- und Basis-Pfad-Klärung, F-6/F-7 INFO; je berichtigt, F-2/F-5 je Projektinhaber-Bestätigung) · Verify-Report [`…-verify`](../../../reviews/2026-11-03-slice-cr-devcontainer-containerenv-verify.md) (1 INFO/3 LOW — V-1 doppelter Artikel, V-2 Ausweis unterzählt Zellen, V-3 Stelle-(d)-Ausweis ohne Abgrenzung, V-4 zwei Verhaltens-Zusagen ohne Beleg-Auftrag; je berichtigt; DoD-Zeilen 1 bis 3 belegt erfüllt).
+
+**Abgleich je Stelle §§2 der Freigabe:** (a) zeichenweise wortgleich (difflib-Abgleich des Verifiers) · (b) vollen vier Tabellen-Zellen statt der vorgeschlagenen Zelle — Ausweis · (c) eigene Wertetabellen-Zeile samt Nur-Unterpfade-Präzisierung statt Anhängen an die zwei Übersteuerungs-Zeilen — Ausweis samt zwei Bestätigungen · (d) Namens-Norm im Vertrag ohne die Prüffunktion — Ausweis.
+
+**Risiken aus §6 — je Ausgang:**
+1. *Der freigegebene Wortlaut geht nicht wortgleich ins Lastenheft* — **eingetreten (abgemildert):** die Stellen (b)–(d) tragen je bestätigte Abweichungen (Ausweis in der Vorschlags-Datei und hier); die Stelle (a) ist zeichenweise wortgleich.
+2. *Eine Zusage geht weiter als die Ebene-Frage trägt* — **entfallen:** der CR trägt die Ebene als Entscheidung (nur `containerEnv`), die Wirkungs-Messung bleibt Pflicht des Umsetzungs-Slices; der Absatz formuliert keine Verhaltens-Zusage über die Erzeugung hinaus.
+3. *Eine Abweisung ohne Träger im Code* — **entfallen für den CR:** die Abweisungen stehen als Vertrags-Sätze mit Beleg-Aufträgen in der Beleg-Tabelle von [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config) (seit der Verifier-Runde auch die zwei Nachgetragenen); die Code-Träger liefert der Umsetzungs-Diff (V-4-Klasse).
+4. *Plan-Aussagen über Code, die am Fundort nicht gelesen sind* — **eingetreten (abgemildert):** die Ausweis-Familie trat (V-1 bis V-3) und ist berichtigt; der §3.10-Abgleich des Ranges ist voll deckend (die zwei `open/`-Diffs trägt der eigene Slices-Commit `60f9b6c5`).
+
+**Was ging anders als geplant:** (a) Die Übernahme brauchte zwei Bestätigungen des Projektinhabers, weil der Vorschlag an Stelle (c) die zwei Übersteuerungs-Zeilen semantisch unzutreffend nannte und die Basis-Pfad-Schreibform unbestimmt ließ (F-2, F-5) — die Freigabe „wie vorgelegt" galt je Stelle, und die Abweichungen sind je ausgewiesen. (b) Die Zustandsmarker-Klasse trat bei der Übernahme erneut auf (F-1: Roadmap-Zeile und Vorschlags-Status trugen „Freigabe steht aus" über den Vertrags-Commit hinaus) — dieselbe Träger-Aussage wie bei den Release-Cuts. (c) Die Historie-Zelle-Zahl (F-3, V-2) und zwei fehlende Beleg-Aufträge (V-4) kamen erst vom Verifier.
+
+**Steering-Loop-Eintrag** (gezählt, nicht verkörpert; kein Eintrag trägt das Feld `liegt in`): *Lehre 1:* die Zustandsmarker-Variante „Abgelaufen bei der Übernahme eines Vertrags" ist von [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) getragen (dritter Träger-Kontext in Folge: Release-Cuts, CR-Übernahme). *Lehre 2:* die Abweichungs-Klasse (Freigabe-Wortlaut gegenüber dem Entwurf verdichtet, Abweichung nicht je Stelle ausgewiesen) ist von keiner bestehenden Klasse exakt getragen — **Klassenaufstellung (eigener `BEO-DOK/<slug>` oder Zitat-Gewichtung) liegt zur Entscheidung beim Projektinhaber**; die Findings F-2/F-3/V-2/V-3 sind in der Evidence-Datei dieses Vorgangs getragen. *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine.
+
+**Beobachtungs-Register:** *Evidence neu:* [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) ([`evidence/slice-cr-devcontainer-containerenv.md`](../observations/BEO-DOK/plan-aussage-ueber-code/evidence/slice-cr-devcontainer-containerenv.md): F-1, F-2/F-3, V-1 bis V-3; berichtigt `df6c40ce` und `45833353`) · [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) ([`evidence/slice-cr-devcontainer-containerenv.md`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/evidence/slice-cr-devcontainer-containerenv.md): V-4, zwei Beleg-Aufträge nachgetragen). *Klassenfrage:* Lehre 2 oben (Projektinhaber).
+
+**Carveouts:** keiner — kein Gate, keine Schwelle und kein Code im Range. **Folge-Slice:** die Umsetzung [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md) trägt die Produkt-Träger (Konfig-Schema, Generator, Validation, Golden Cases, Docker-Test der Ebene, Umstellung des eigenen Devcontainers) und die Test-Namen der Beleg-Aufträge; ihr Start folgt der Closure (Reihenfolge-Beschluss 2026-11-03). **Weiter offen:** nichts aus der DoD.
+
+**Drei Paarungen:** *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert. *Folge-Slice* — der Umsetzungs-Slice ist eine Datei in `open/` (Verzeichnis-Lesung); er übernimmt die Beleg-Aufträge als Test-Aufträge. *Register* — jede `BEO-*`-Kennung in §7 löst in ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls`).
+
+**Verifikation** (Läufe nach Closure-Inhalt, Move und Vorschlags-Nachzug; Docker-Modus): `make gates` Exit 0 am 2026-11-03 (`record-gates`-Stempel = HEAD nach dem Nachzug). Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
@@ -146,3 +168,5 @@ Greenfield. Keine Code-Sub-Area im CR-Diff.
 Slice; die Ebene-Frage bleibt Messung des Umsetzungs-Slices).
 
 **Modus-Begründungsblock:** alle berührten Sub-Areas sind Greenfield.
+
+**Belege (Closure 2026-11-03, je DoD-Zeile):** (1) [`cr-vorschlag-containerenv.md`](../open/cr-vorschlag-containerenv.md) trägt die vier Stellen samt den vier Entscheidungen und dem je-Stelle-Abweichungs-Ausweis. (2) Freigabe „wie vorgelegt" 2026-11-03 samt den zwei Bestätigungen der Übertragungs-Lesarten (Stelle (c) eigene Wertetabellen-Zeile; Nur-Unterpfade-Schreiben) — die vier Träger-Spuren stimmen überein (Vorschlags-Status, Roadmap, Fix-Commit-Message, Plan; Verifier-Zeile 2). (3) Stelle (a) ist zeichenweise wortgleich (difflib-Abgleich des Verifiers); Stellen (b)/(c)/(d) tragen die bestätigten Abweichungen; kein Produktcode-, kein Nutzertext- und kein Gate-Diff im Range. (4) [`make gates`] grün je Berichtigungs-Runde (Stempel `df6c40ce` und `45833353` = HEAD, Coverage 92,20 %, `docs-check` 0 Befunde); [Review-Report](../../../reviews/2026-11-03-slice-cr-devcontainer-containerenv.md) (2 MEDIUM/3 LOW/2 INFO, je berichtigt) und [Verify-Report](../../../reviews/2026-11-03-slice-cr-devcontainer-containerenv-verify.md) (1 INFO/3 LOW, je berichtigt) committet; Register, Risiko-Ausgänge und Paarungen in §7.
