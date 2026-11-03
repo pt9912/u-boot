@@ -12,7 +12,7 @@
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** der freigegebene CR-Wortlaut ([`cr-vorschlag-katalog-quellen.md`](cr-vorschlag-katalog-quellen.md)) — die Entfernung der zwei Katalog-Einträge samt der Vertrags-Beispielzeile und die Abweisung unverarbeitbarer externer Quell-Formen je Exit-Code `10` — wird je Stelle freigegeben und wortgleich übernommen. Kein Produktcode in diesem CR (Muster der CR-Slices).
+**Ziel:** der freigegebene CR-Wortlaut ([`cr-vorschlag-katalog-quellen.md`](../open/cr-vorschlag-katalog-quellen.md)) — die Entfernung der zwei Katalog-Einträge samt der Vertrags-Beispielzeile und die Abweisung unverarbeitbarer externer Quell-Formen je Exit-Code `10` — wird je Stelle freigegeben und wortgleich übernommen. Kein Produktcode in diesem CR (Muster der CR-Slices).
 
 **Nicht in diesem Slice:** die Umsetzung (Katalog-Entfernung im Code samt Tabellentesten, Generator-Abweisung samt Klassifikatoren, Doku-Nachzug) — Umsetzungs-Slice nach der CR-Closure; die Tarball-Probe (bleibt Offenpunkt mit Historie-Vermerk).
 
