@@ -101,6 +101,7 @@ Tap-Formel-Inhalte über das vom Cut getragene Heben der Version hinaus.
 | `docs/plan/planning/in-progress/roadmap.md` | update | Zeile nach dem Tag *Abgeschlossene Wellen* mit Tag-Hash und Datum; Zustandsmarker („Vorschlag Release"-Zeile der `Nächste Wellen`-Tabelle) nach dem Tag auf den Ist-Stand (Muster-Marker-Klasse, vier Auftritte) |
 | `docs/plan/planning/open/README.md` | update | Bestand-Zeile für diesen Slice (mit dem Plan-Commit, nicht erst beim Start — M-F-5-Lektion `v0.19.0`) |
 | dieser Slice | neu/Moves | `make slice-mv` je Lifecycle-Schritt; nach dem Tag nach `done/` |
+| `docs/reviews/` — [Review-Report](../../../reviews/2026-11-03-slice-v1-release-cut-v0.20.0.md) (committet `0a7f7e6b`, Link-Berichtigung samt V-2-Fundstellen-Fix in der Berichtigungs-Runde) und [Verify-Report](../../../reviews/2026-11-03-slice-v1-release-cut-v0.20.0-verify.md) (committet mit der Berichtigungs-Runde) | neu | die Berichte der zwei Rollen — Review nach dem Schnitt (kein Self-Review), Verification am Tag-Stand (frischer Kontext); **Nachtrag nach Verify-Report V-5** — die Berichts-Dateien fehlen als §3-Zeilen (vierte Auftritts-Runde der Familie [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md)) |
 | `spec/`, `docs/plan/adr/`, `templates/`, `.github/`, `scripts/`, `packaging/`, `Makefile`, `go.mod` | kein Diff | Kein Pin-Bump, keine Pipeline-Änderung (`AGENTS.md` §3.6); der Temurin-Default-Pin bleibt bei `21.0.13+9` |
 
 **Reihenfolge der Maintainer-Aktionen** (aus `releasing.md` §§4 bis 6, Muster
