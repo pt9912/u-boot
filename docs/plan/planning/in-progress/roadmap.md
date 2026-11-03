@@ -23,9 +23,9 @@ in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
 Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-katalog-feature-jdk-gepinnt.md) liegt in [`done/`](../done/) — Umsetzung des Katalog-Schlüssels `java-toolchain` (Temurin LTS 21, Same-Origin-Prüfsummen-Quelle, Konflikt-Abweisung Exit 10, Brew-Befund als Messpunkt; geschlossen 2026-11-03 mit CI-Nachweis `integration-docker`); der CR ist mit dem freigegebenen Wortlaut geliefert und liegt in [`done/`](../done/slice-cr-devcontainer-java-toolchain.md) (Lastenheft `0.30.0` → `0.31.0`).
 
-Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
+[`slice-v1-release-cut-v0.20.0`](../in-progress/slice-v1-release-cut-v0.20.0.md) liegt in `in-progress/` — Minor-Release `v0.20.0` von `main` nach `v0.19.0`, trägt den Katalog-Schlüssel `java-toolchain` ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv), Lastenheft `0.31.0`, [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)).
 
-Nichts in Arbeit.
+Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
 ## Nächste Wellen
 
