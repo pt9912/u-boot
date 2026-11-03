@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-cr-devcontainer-katalog-quellen`](../../../../in-progress/slice-cr-devcontainer-katalog-quellen.md)
+**Vorgang:** [`slice-cr-devcontainer-katalog-quellen`](../../../../done/slice-cr-devcontainer-katalog-quellen.md)
 **Fund:** drei Teil-Fundstellen der Klasse im CR-Vorgang der zwei Werte:
 
 - **F-1/F-2 (Review, je MEDIUM, zustandsmarker-Familie):** die Roadmap trug die Lese-Wahrheit des WIP-Wechsels nicht (quellen-Slice „liegt in `in-progress/`" nach dem Rück-Move; der aktive CR-Schnitt fehlte je Absatz) und zwei Marker des quellen-Slice-Rests standen über ihres Ablaufs (Bestand „nicht gemessen" bei gemessener Lage; „CR-Schnitt liegt in `in-progress/`" ohne Kennung). Berichtigt mit der Fix-Runde `283f815b` und den Link-Tiefen `b122f697`.

@@ -14,7 +14,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 `v0.18.0` ist überholt — `v0.18.0` bis `v0.20.0` sind gelaufen, ohne das
 Slice. **Reihenfolge (Projektinhaber, 2026-11-03):** Umsetzung nach dem
 Vorgang [`slice-v1-katalog-projekt-containerenv`](../done/slice-v1-katalog-projekt-containerenv.md)
-(CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../in-progress/slice-cr-devcontainer-katalog-quellen.md) liegt in `in-progress/`). Folge-Punkt von
+(CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcontainer-katalog-quellen.md) liegt in `in-progress/`). Folge-Punkt von
 [`slice-v1-sandbox-features-socket-und-lockerungen`](../done/slice-v1-sandbox-features-socket-und-lockerungen.md)
 (Nebenbefunde N1 und N2, [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md)
 *Nicht Gegenstand* (a) und (b)). Es gibt keine Closure-Bedingung, die von der

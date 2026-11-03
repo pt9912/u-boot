@@ -33,7 +33,7 @@ Der Umsetzungs-Slice [`slice-v1-katalog-projekt-containerenv`](../done/slice-v1-
 
 [`slice-v1-katalog-features-quellen-und-freigabe`](../open/slice-v1-katalog-features-quellen-und-freigabe.md) liegt in `open/` — die zwei Nebenbefunde N1/N2 aus [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md) ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)): die Katalogquellen `cpp`/`postgres-client` und der Render-Schlüssel externer Quellen; die **Messung ist belegt** (`docs/messungen/slice-v1-katalog-features-quellen-und-freigabe/`), die Wege sind entschieden (N1 Einträge entfernen, N2 Abweisung unverarbeitbarer Formen, je 2026-11-03) — der CR-Schnitt trägt sie (Zeile unten); die Umsetzung des Quellen-Slices folgt der CR-Closure (Reihenfolge-Beschluss 2026-11-03).
 
-Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../in-progress/slice-cr-devcontainer-katalog-quellen.md) liegt in `in-progress/` — der CR der zwei Wege: Entfernung der Katalog-Einträge samt Lastenheft-Beispielzeile und die Abweisung unverarbeitbarer Formen externer Quellen je Exit-Code `10` (Wortlaut freigegeben wie vorgelegt 2026-11-03, Übernahme committet `151a7976`).
+Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcontainer-katalog-quellen.md) liegt in `in-progress/` — der CR der zwei Wege: Entfernung der Katalog-Einträge samt Lastenheft-Beispielzeile und die Abweisung unverarbeitbarer Formen externer Quellen je Exit-Code `10` (Wortlaut freigegeben wie vorgelegt 2026-11-03, Übernahme committet `151a7976`).
 
 ## Nächste Wellen
 
