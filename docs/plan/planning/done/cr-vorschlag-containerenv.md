@@ -14,7 +14,7 @@
 Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an
 den Verträgen. Der *Neu*-Wortlaut der Stellen (a) bis (d) ist freizugeben; die
 vier Entscheidungen des Umsetzungs-Plans
-([`§4`](../open/slice-v1-katalog-projekt-containerenv.md)) tragen ihn.
+([`§4`](../next/slice-v1-katalog-projekt-containerenv.md)) tragen ihn.
 
 **Grundlage:** Vorbefund des Umsetzungs-Plans §1 (die ENV-Ebene ist heute die
 einzige Trägerin für Projekt-Werte; die zwei Go-Schlüssel tragen die einzigen

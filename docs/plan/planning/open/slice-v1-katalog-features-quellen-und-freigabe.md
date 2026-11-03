@@ -13,7 +13,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (Entscheidung des Projektinhabers). Die Zuordnung von 2026-10-22 auf
 `v0.18.0` ist überholt — `v0.18.0` bis `v0.20.0` sind gelaufen, ohne das
 Slice. **Reihenfolge (Projektinhaber, 2026-11-03):** Umsetzung nach dem
-Vorgang [`slice-v1-katalog-projekt-containerenv`](slice-v1-katalog-projekt-containerenv.md)
+Vorgang [`slice-v1-katalog-projekt-containerenv`](../next/slice-v1-katalog-projekt-containerenv.md)
 (CR-Schnitt liegt in `in-progress/`). Folge-Punkt von
 [`slice-v1-sandbox-features-socket-und-lockerungen`](../done/slice-v1-sandbox-features-socket-und-lockerungen.md)
 (Nebenbefunde N1 und N2, [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md)
@@ -110,7 +110,7 @@ Die Zeilennummern dieser Tabelle gelten am 2026-10-22; seit der Closure von [`sl
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der Projektinhaber priorisiert beim Start und ordnet ggf. einen Release zu (Reihenfolge-Beschluss 2026-11-03: Umsetzung nach dem Vorgang [`slice-v1-katalog-projekt-containerenv`](slice-v1-katalog-projekt-containerenv.md)); kein anderer Slice in `in-progress/` (WIP-Limit 1, gelesen beim Start). Die Messung zu N1 und N2 ist der erste Schritt des Slice, nicht seine Voraussetzung. **Vor dem Commit des Schlüssels aus N2** liegt [`slice-v1-generate-prueft-freigabeliste`](../done/slice-v1-generate-prueft-freigabeliste.md) in `done/` (beobachtbar: die Datei liegt dort; erfüllt seit 2026-10-24); die Messung selbst darf vorher laufen.
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der Projektinhaber priorisiert beim Start und ordnet ggf. einen Release zu (Reihenfolge-Beschluss 2026-11-03: Umsetzung nach dem Vorgang [`slice-v1-katalog-projekt-containerenv`](../next/slice-v1-katalog-projekt-containerenv.md)); kein anderer Slice in `in-progress/` (WIP-Limit 1, gelesen beim Start). Die Messung zu N1 und N2 ist der erste Schritt des Slice, nicht seine Voraussetzung. **Vor dem Commit des Schlüssels aus N2** liegt [`slice-v1-generate-prueft-freigabeliste`](../done/slice-v1-generate-prueft-freigabeliste.md) in `done/` (beobachtbar: die Datei liegt dort; erfüllt seit 2026-10-24); die Messung selbst darf vorher laufen.
 
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
 
