@@ -6,13 +6,14 @@
 
 - **Stelle (c):** der Schlüssel trägt eine **eigene Wertetabellen-Zeile**; die zwei Übersteuerungs-Zeilen (`devcontainer.features.<feature>.version`, Pipeline-Schritt 6) bleiben unberührt — die vorgelegte Formulierung „beide Zeilen tragen den Namen” bezog sie semantisch unzutreffend ein. Bestätigt („eigene Zeile”).
 - **Stelle (c, Nachtrag der Fix-Runde):** die Wertetabellen-Zeile sagt Schreiben nur über die Unterpfade `devcontainer.containerEnv.<name>`; der Basis-Pfad ist nicht schreibbar (kein Ganz-Map-Set). Bestätigt („nur Unterpfade”).
-- **Stelle (b):** die Historie-Zeile trägt eine dritte Zelle (Freigabe/Ausgang) — Hausform der Tabelle; die vorgelegte Zellen-Form war unvollständig. Keine Down-Referenz (Decken-Regel) — die im Vorschlag genannten Links entfallen im Vertrag.
+- **Stelle (b):** die übernommene Historie-Zeile folgt der vollen Tabellenform (vier Zellen: Datum, Anforderung, Inhalt, Freigabe); der Vorschlag nannte den Gehalt nur in einer Zelle. Keine Down-Referenz (Decken-Regel) — die im Vorschlag genannten Links entfallen im Vertrag.
+- **Stelle (d):** im Vertrag heißt die Namens-Norm nur *gültiger Dev-Container-Umgebungsname*; die konkrete Prüffunktion, die der Vorschlag als Kandidat nannte (`driven.ValidateDevcontainerEnvName`, Fundstelle beim Umsetzungs-Schnitt), ist Umsetzungs-Fundstelle und kein Vertrags-Inhalt.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
 [`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md).
 Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an
 den Verträgen. Der *Neu*-Wortlaut der Stellen (a) bis (d) ist freizugeben; die
-die vier Entscheidungen des Umsetzungs-Plans
+vier Entscheidungen des Umsetzungs-Plans
 ([`§4`](slice-v1-katalog-projekt-containerenv.md)) tragen ihn.
 
 **Grundlage:** Vorbefund des Umsetzungs-Plans §1 (die ENV-Ebene ist heute die

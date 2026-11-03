@@ -556,6 +556,8 @@ Beleg-Tabelle (Stand: CR — die Test-Namen entstehen mit dem Umsetzungs-Diff, M
 | Werte im verwalteten `containerEnv`, je Profil, ohne Duplikate, idempotent; ohne die Map byte-identische erzeugte Datei | Golden Case je Profil samt Mischfall mit den Cache-Werten (Auftrag Umsetzung) |
 | Validation Name/Wert je Exit-Code `10`, nichts geschrieben (auch `config set`) | Validation-Tests je Fehlerfall (Auftrag Umsetzung) |
 | Kollision mit `GOCACHE`/`GOMODCACHE` bei aktivem Toolchain-Schlüssel → Exit `10`, nichts geschrieben; ohne den Schlüssel erlaubt | Abweisungs-Tests je Schlüsselkombination (Auftrag Umsetzung) |
+| `config set devcontainer.containerEnv` (Basis-Pfad) endet mit Exit-Code `10` (kein Ganz-Map-Set, Wertetabelle oben) | Abweisungs-Test des Basis-Pfads (Auftrag Umsetzung) |
+| Die Ausweisung der Erzeugung nennt jede erzeugte Projekt-Wert-Zeile | Meldungs-Test über die Ausweisung je erzeugter Zeile (Auftrag Umsetzung) |
 | Werte im Container-Prozess sichtbar (`env`/`go env`), nicht im Dockerfile-Block oder im handgeschriebenen Rest | Docker-Test mit Build-Tag `docker` (Auftrag Umsetzung — die Ebene-Messung) |
 
 Bezieht sich auf: [`LH-FA-DEV-001`](lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-FA-DEV-003`](lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes).
