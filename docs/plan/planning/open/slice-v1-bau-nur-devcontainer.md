@@ -41,7 +41,7 @@
 
 ## 4. Trigger
 
-**Start** (`open` → `next`): die drei Entscheidungen sind bejaht (2026-11-03, oben) und der CR-Schnitt der Pin-Inventur [`slice-harness-dcheck-pinsync`](../in-progress/slice-harness-dcheck-pinsync.md) ist geschlossen; `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/`. **Rückführungen:** `in-progress` → `open` (die CI-Messung widerspricht — etwa der Devcontainer-Container schlägt in der CI an dem Punkt, der die Docker-Stage trägt).
+**Start** (`open` → `next`): die drei Entscheidungen sind bejaht (2026-11-03, oben) und der CR-Schnitt der Pin-Inventur [`slice-harness-dcheck-pinsync`](../done/slice-harness-dcheck-pinsync.md) ist geschlossen; `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/`. **Rückführungen:** `in-progress` → `open` (die CI-Messung widerspricht — etwa der Devcontainer-Container schlägt in der CI an dem Punkt, der die Docker-Stage trägt).
 
 ## 5. Closure-Trigger
 

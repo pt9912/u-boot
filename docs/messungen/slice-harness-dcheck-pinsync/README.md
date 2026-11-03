@@ -1,4 +1,4 @@
-# Messprotokoll: Pin-Gleichheit im Gatter und Mismatch-Gegenproben zu [`slice-harness-dcheck-pinsync`](../../plan/planning/in-progress/slice-harness-dcheck-pinsync.md)
+# Messprotokoll: Pin-Gleichheit im Gatter und Mismatch-Gegenproben zu [`slice-harness-dcheck-pinsync`](../../plan/planning/done/slice-harness-dcheck-pinsync.md)
 
 Beleg-Läufe des Umsetzungs-Diffs (Pin-Inventar, [`LH-FA-DEV-011`](../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)): der positive Gatter-Lauf, je Pin-Gruppe eine Mismatch-Gegenprobe mit Rückführung, die Negativprobe des GNU-make-Guards, die Byte-Stabilität der `go.mod`-Normierung und die Digest-Verifikation des d-check-Bumps. Rohdaten in diesem Verzeichnis.
 
