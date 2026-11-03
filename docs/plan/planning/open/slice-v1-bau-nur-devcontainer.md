@@ -10,11 +10,11 @@
 
 **Ziel:** `BUILD_MODE` entfällt als Betriebsentscheidung — die Rezepte (`bau.sh`) sind der einzige Weg, das Repo zu bauen/linten/testen; der Container (Devcontainer) ist die Bau-Umgebung, und der Modus-Gewirr (`modus-pruefung` mit seinen Kreuzproben) entfällt zugunsten einer Lage.
 
-**Die Entscheidungen des Projektinhabers stehen vor der Umsetzung** (der Schnitt ist erst sinnvoll, wenn sie bejaht sind — §4):
+**Die Entscheidungen des Projektinhabers (2026-11-03, alle drei bejaht):**
 
-1. **CI:** laufen die Gatter in der CI in einem Devcontainer-Container (GitHub-Runner mit `docker run` auf dem Devcontainer-Image statt der Docker-Stage-Zweige)? Das ist der eigentliche Träger-Zug.
-2. **Host-Vertrag:** bleibt der „Host braucht Docker und GNU make"-Vertrag (AGENTS §3.1) stehen — nur verschiebt sich die Nutzungs-Sicht auf den Devcontainer — oder entfällt der Host-Twist ganz?
-3. **`modus-pruefung` und `BUILD_MODE`-Zweig:** entfallen je (Bau-art) oder bleiben als Abgewiesene-Form (Fehlermeldung „die zwei Modi entfallen; der Devcontainer ist der Weg")?
+1. **CI:** bejaht — die Gatter laufen in der CI in einem Devcontainer-Container (`docker run` auf dem Devcontainer-Image statt der Docker-Stage-Zweige); die Migration ist der eigentliche Träger-Zug.
+2. **Host-Vertrag:** bleibt — der Host braucht Docker und GNU make (AGENTS §3.1); die Nutzungs-Sicht verschiebt sich auf den Devcontainer, der Vertrag selbst wird nicht gesenkt.
+3. **`modus-pruefung`/`BUILD_MODE`-Zweig:** bejaht entfallen — der Zweig entfällt, `modus-pruefung` entfällt mit ihm (keine Abweisungs-Form).
 
 **Ausdrücklich NICHT in diesem Slice:** Pin-/Werkzeug-Änderungen (die Pin-Inventur läuft separat), das Publish-/Tap-Verhalten der Release-Pipeline (läuft in Docker-Containern, unabhängig vom Entwicklungsmodus; falls die CI-Migration sie berührt, je Entscheidung 1), Doku-Nutzertext-Nachzug gehört zur Umsetzung.
 
@@ -41,7 +41,7 @@
 
 ## 4. Trigger
 
-**Start** (`open` → `next`): die drei Entscheidungen sind bejaht und der CR-Schnitt der Pin-Inventur ist geschlossen. **Rückführungen:** `in-progress` → `open` (die CI-Messung widerspricht — etwa der Devcontainer-Container schlägt in der CI an dem Punkt, der die Docker-Stage trägt).
+**Start** (`open` → `next`): die drei Entscheidungen sind bejaht (2026-11-03, oben) und der CR-Schnitt der Pin-Inventur [`slice-harness-dcheck-pinsync`](../in-progress/slice-harness-dcheck-pinsync.md) ist geschlossen; `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/`. **Rückführungen:** `in-progress` → `open` (die CI-Messung widerspricht — etwa der Devcontainer-Container schlägt in der CI an dem Punkt, der die Docker-Stage trägt).
 
 ## 5. Closure-Trigger
 
