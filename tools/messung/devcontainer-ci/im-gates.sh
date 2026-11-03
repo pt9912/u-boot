@@ -6,7 +6,7 @@ cd /workspaces/u-boot
 echo "== Benutzer: $(whoami) uid=$(id -u)"
 sudo sh /usr/local/bin/u-boot-docker-init >/tmp/docker-init.log 2>&1
 echo "docker-init-exit=$?"
-for i in $(seq 1 60); do docker info >/dev/null 2>&1 && break; sleep 1; done
+for i in $(seq 1 120); do docker info >/dev/null 2>&1 && break; sleep 1; done
 docker info --format 'daemon server={{.ServerVersion}} storage={{.Driver}}' | head -1
 echo "BUILD_MODE=${BUILD_MODE:-<ungesetzt>} GOTOOLCHAIN=${GOTOOLCHAIN:-<ungesetzt>} GOFLAGS=${GOFLAGS:-<ungesetzt>}"
 echo "GOCACHE=${GOCACHE:-<ungesetzt>} GOMODCACHE=${GOMODCACHE:-<ungesetzt>}"
