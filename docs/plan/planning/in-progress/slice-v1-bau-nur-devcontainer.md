@@ -4,7 +4,7 @@
 
 **Welle:** ohne Welle-Datei (Vorschlag des Projektinhabers, 2026-11-03: „[ein] weiter[er] Slice für die Umstellung auf nur devcontainer (siehe `bau.sh` und `BUILD_MODE=local`) — also nur noch `build_mode=local`").
 
-**Bezug:** [`SPEC-031`](../../../../spec/spezifikation.md) (Regeln des Docker-only-Workflows; der lokale Modus ist dort der Devcontainer-Modus), [`AADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md) (`Accepted` — der Umzug braucht eine Folge-ADR `Supersedes`), `scripts/bau.sh` (die lokalen Rezepte), `repo.mk` `BUILD_MODE`-Zweig, `modus-pruefung` (die zwei Modi je `make -n`), `AGENTS.md` §3.1 (Docker-only: der Host braucht nur Docker und GNU make — der Host-Vertrag würde neu), `.github/workflows/` (CI läuft heute Docker-Modus). **Verantwortlich:** pt9912 (Implementer; Messung CI-im-Devcontainer zuerst, CR je danach; Entscheidungen bejaht 2026-11-03). **Autor:** pt9912 (Rolle Planner, im Auftrag). **Datum:** 2026-11-03.
+**Bezug:** [`SPEC-031`](../../../../spec/spezifikation.md) (Regeln des Docker-only-Workflows; der lokale Modus ist dort der Devcontainer-Modus), [`ADR-0043`](../../adr/0043-nur-devcontainer-bau-pfad.md) (die Folge-ADR mit `Supersedes` zu [`ADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md), `Accepted` — Stand bei Eröffnung des Slices), `scripts/bau.sh` (die lokalen Rezepte), `repo.mk` `BUILD_MODE`-Zweig, `modus-pruefung` (die zwei Modi je `make -n`), `AGENTS.md` §3.1 (Docker-only: der Host braucht nur Docker und GNU make — der Host-Vertrag würde neu), `.github/workflows/` (CI läuft heute Docker-Modus). **Verantwortlich:** pt9912 (Implementer; Messung CI-im-Devcontainer zuerst, CR je danach; Entscheidungen bejaht 2026-11-03). **Autor:** pt9912 (Rolle Planner, im Auftrag). **Datum:** 2026-11-03.
 
 ## 1. Ziel und Abgrenzung
 
@@ -31,14 +31,17 @@
 
 | Datei | Änderungs-Art | Begründung |
 |---|---|---|
-| `scripts/bau.sh` | update | bleibt (der einzige Bau-Pfad); Aufrufe je Entscheidung |
-| `repo.mk`, `Makefile` | update | `BUILD_MODE`-Zweige entfallen je Entscheidung 3; Targets rufen `bau.sh` direkt |
-| `.github/workflows/*.yml` | update | CI-Läufe über das Devcontainer-Image je Entscheidung 1 |
-| `spec/spezifikation.md` | update | [`SPEC-031`](../../../../spec/spezifikation.md) Umformulierung, Beleg-Tabelle |
-| `docs/plan/adr/` | neu | Folge-ADR mit `Supersedes` zu [`ADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md) |
-| `AGENTS.md`, `docs/user/benutzerhandbuch.md`, READMEs | update | Host-Vertrag je Entscheidung 2, Modus-Doku entfällt |
-| `.d-check.yml` | update | der `modus-pruefung`-Index-Zeile je Entscheidung 3 |
+| `scripts/bau.sh` | update | bleibt (der einzige Bau-Pfad); Kopfkommentar nennt die neue Aufruf-Ebene je Entscheidung |
+| `repo.mk`, `Makefile` | update | `BUILD_MODE`-Zweige entfallen je Entscheidung 3; Targets rufen `bau.sh` direkt (`Makefile` ohne Diff — es trägt keine Modus-Logik) |
+| `Dockerfile`, `scripts/bau.sh` (Kopfkommentare) | update | die Kommentare nennen den Docker-Modus als Default je §3.7 berichtigt (Abgleich-Nachtrag, nicht im ersten Plan-Zug) |
+| `.github/workflows/*.yml` | update | CI-Läufe über das Devcontainer-Image je Entscheidung 1 (`ci.yml::gates`); `integration.yml` nur Kommentar je Sockelform |
+| `spec/spezifikation.md` | update | [`SPEC-031`](../../../../spec/spezifikation.md) Umformulierung, Beleg-Tabelle; [`SPEC-008`](../../../../spec/spezifikation.md) Folgepflicht (Zweck-Spalte ohne Zweitmodus) |
+| `docs/plan/adr/` | neu / update | Folge-ADR 0043 mit Supersedes-Kante zu [`ADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md); `Geschichte`-Zeile und Index des Vorgängers |
+| `AGENTS.md`, READMEs | update | Host-Vertrag je Entscheidung 2, Modus-Doku entfällt; `docs/user/benutzerhandbuch.md` ohne Diff (geprüft: die `BUILD_MODE`-Nennung(en) des Handbuchs tragen die Zusage zu generierten Projekten, nicht zum Bau-Pfad des Repos) |
+| `harness/README.md`, `docs/maintainer/quality.md`, `CHANGELOG.md` | update | Die `modus-pruefung`-Sensors-Zeile entfällt und der Lauf-Ebene-Absatz folgt je Entscheidung 3; Handbuch-Abschnitte je Ist-Stand; `[Unreleased]`-Eintrag (Nachtrag des ersten Plan-Zugs) |
+| `.d-check.yml` | — (kein Diff) | Plan-Korrektur: `modus-pruefung` ist dort nicht eingetragen; die Entfernung trägt die Sensors-Zeile von `harness/README.md` allein |
 | `tools/messung/devcontainer-ci/` (Skripte), `docs/messungen/slice-v1-bau-nur-devcontainer/` (Protokoll + Rohdaten), `docs/messungen/README.md` (Bestands-Zeile) | neu / update | Messung M1 (Plan-Risiko 1), vor dem Vertrags-Wortlaut; nur Lesen und Protokollieren, kein Code- oder Vertrags-Diff |
+| `docs/plan/planning/in-progress/cr-vorschlag-spec-031-devcontainer-bau.md` | update | Link-Berichtigungen je d-check-Befund (Messbasis-Href, `Supersedes`-Link im Backtick) |
 
 ## 4. Trigger
 

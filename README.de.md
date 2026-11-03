@@ -64,7 +64,8 @@ unten listet jedes Subkommando.
   `image-scan (trivy HIGH+CRITICAL)`.
 - **Docker-only Inner-Loop.** `make build` baut das Runtime-Image
   ohne Go-Toolchain am Host; `make gates` läuft Lint + Test +
-  Coverage im selben pinned Image-Stack den CI verwendet.
+  Coverage im Devcontainer-Container des Repos, mit derselben
+  gepinnten Toolchain, die auch der CI-`gates`-Job nutzt.
 
 ## Installation
 
@@ -261,12 +262,14 @@ Für den Bau aus den Quellen:
 
 Der Build ist Docker-only; es wird keine
 Go-Toolchain am Host benötigt. Nur Docker und `make` müssen
-installiert sein.
+installiert sein. Die Nutzungs-Ebene ist der Devcontainer des
+Repos: die Gatter-Kette (`make gates`) läuft im Devcontainer-Container,
+`make test-docker` bindet an den Docker-Daemon außerhalb des Containers.
 
 ```bash
 make help                       # alle Targets auflisten
 make build                      # Runtime-Image bauen (Distroless)
-make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung
+make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung (im Devcontainer-Container)
 make ci                         # gates + govulncheck + image-scan
 make fullbuild                  # ci + build (vollständiger Closure-Lauf)
 ```

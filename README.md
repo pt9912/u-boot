@@ -62,7 +62,8 @@ are described in the [user manual](docs/user/benutzerhandbuch.md) (German).
   and `image-scan (trivy HIGH+CRITICAL)`.
 - **Docker-only inner-loop.** `make build` builds the runtime image
   without any Go toolchain on the host; `make gates` runs lint + test
-  + coverage in the same pinned image stack CI uses.
+  + coverage inside the repository's devcontainer container, with the
+  pinned toolchain the CI `gates` job uses as well.
 
 ## Install
 
@@ -254,12 +255,15 @@ For building from source:
 ## Build, Test, Lint
 
 The build is Docker-only; no Go toolchain on the
-host is required. Only Docker and `make` need to be installed.
+host is required. Only Docker and `make` need to be installed. The usage
+level is the repository's devcontainer: the gate chain (`make gates`) runs
+inside the devcontainer container, and `make test-docker` binds to the
+Docker daemon outside of it.
 
 ```bash
 make help                       # list all targets
 make build                      # build runtime image (distroless)
-make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung
+make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung (inside the devcontainer container)
 make ci                         # gates + govulncheck + image-scan
 make fullbuild                  # ci + build (full closure)
 ```

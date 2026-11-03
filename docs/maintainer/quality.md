@@ -20,20 +20,22 @@ Konfigurations- und Schwellwerte hier.
 
 ## 1. Statische Analyse (`golangci-lint`)
 
-Statische Analyse läuft im Docker-Modus (Standard, Host und CI) über die
-`lint`-Stage des Top-Level-`Dockerfile`
-([SPEC-025](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)):
+Statische Analyse läuft in der Devcontainer-Umgebung des Repos über das
+Rezept `scripts/bau.sh lint`
+([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)):
 
 ```bash
-docker build --target lint -t u-boot:lint .
-# oder bequemer:
-make lint
+make lint        # im Devcontainer-Container (der Nachweis-Pfad, ADR-0043)
+make gates       # die Gatter-Kette, ebenfalls im Container
 ```
 
-Im Devcontainer des Repos (`BUILD_MODE=local`, dort gesetzt) ruft `make lint`
-dasselbe Skript (`scripts/bau.sh lint`) mit dem installierten
-`golangci-lint` auf, ohne `docker build`
-([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)).
+Die `lint`-Stage des Top-Level-`Dockerfile`
+([SPEC-025](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles))
+ruft dasselbe Skript wie `make lint` und bleibt je per
+`docker build --target lint` einzeln baubar; der CI-`gates`-Job läuft die
+Gatter-Kette im Devcontainer-Container
+(`docker build -f .devcontainer/Dockerfile .devcontainer`, dann `docker run`,
+[`ADR-0043`](../plan/adr/0043-nur-devcontainer-bau-pfad.md)).
 
 Die Stage führt `golangci-lint run ./...` mit Default-Lintern und dem
 SOLID-nahen Zusatzprofil aus:
@@ -204,14 +206,19 @@ Pins gegen Compose-veröffentlichte Ports funktionieren.
 CI-Lauf, sodass ein übersprungener Test dort von einem bestandenen
 unterscheidbar ist.
 
-Im Devcontainer (`BUILD_MODE=local`) startet das Target keinen Test-Container,
-sondern führt `go test -tags docker` gegen den dort verschachtelten
-Docker-Daemon aus. Die Tests sind dort nicht als Nachweis zugesagt
+Das Target trägt die Sockelform
 ([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)):
-Gemessen scheiterten im verschachtelten Daemon 9 Tests, im Docker-Modus am
-selben Host keiner ([Messprotokoll](../messungen/slice-v1-devcontainer-bau-lokal/README.md),
-Abschnitt G). Den Nachweis liefern der Docker-Modus an einem Host mit lokaler
-Engine und die CI.
+der Test-Container bindet über den gemounteten Docker-Socket an den
+Docker-Daemon außerhalb des Devcontainer-Containers — den, der den
+Devcontainer-Container erzeugt
+([`ADR-0043`](../plan/adr/0043-nur-devcontainer-bau-pfad.md)). Die Tests sind
+im verschachtelten Daemon des Devcontainers nicht als Nachweis zugesagt
+([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)):
+Gemessen scheiterten dort 12 von 1771 Testfunktionen, im Docker-Modus am
+selben Host keiner ([Messprotokoll](../messungen/slice-v1-bau-nur-devcontainer/README.md),
+Abschnitt M4; ältere Messung [2026-10-31](../messungen/slice-v1-devcontainer-bau-lokal/README.md),
+Abschnitt G: 9 Fehlschläge). Den Nachweis liefern die Sockelform am
+erzeugenden Docker und die CI.
 
 Welche Aussagen des Benutzerhandbuchs zugesagt, nicht zugesagt, gemessen oder nicht
 gemessen sind (Hosts, Versionen, Läufe, CI-Verhalten einzelner Docker-Tests), steht in
@@ -333,8 +340,11 @@ Pflichten `ci.yml`:
     + `aquasecurity/trivy-action` (`severity: HIGH,CRITICAL`,
     `exit-code: 1`).
 - **Runner:** `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
-- **Keine Host-Toolchain:** Docker-only im Docker-Modus ([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows));
-  die Workflows setzen `BUILD_MODE` nicht, und der Workflow installiert weder
+- **Keine Host-Toolchain:** Docker-only mit dem Devcontainer als Bau-Pfad
+  ([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows),
+  [`ADR-0043`](../plan/adr/0043-nur-devcontainer-bau-pfad.md)); der `gates`-Job
+  baut das Devcontainer-Image und übergibt die `containerEnv`-Werte des
+  Devcontainers als `docker run`-Optionen, und der Workflow installiert weder
   Go noch `golangci-lint` am Runner.
 - **Actions SHA-gepinnt** mit Tag-Kommentar, z. B.
   `uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2`.
