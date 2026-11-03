@@ -3,7 +3,7 @@
 **Status:** vorgelegt (2026-11-03); wartet auf die Freigabe des Projektinhabers.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
-[`slice-cr-devcontainer-katalog-quellen`](slice-cr-devcontainer-katalog-quellen.md).
+[`slice-cr-devcontainer-katalog-quellen`](../in-progress/slice-cr-devcontainer-katalog-quellen.md).
 Mess-Basis: [`docs/messungen/slice-v1-katalog-features-quellen-und-freigabe/`](../../../messungen/slice-v1-katalog-features-quellen-und-freigabe/README.md)
 (M1: die Quellen `ghcr.io/devcontainers/features/{cpp,postgresql-client}` existieren
 nicht — Upstream 29 Features ohne beide, Token-Verweigerung 403 DENIED;
