@@ -79,9 +79,12 @@ func listCandidatePaths(cfg ubootYAMLConfig) []domain.ConfigPath {
 	}
 	if cfg.Devcontainer != nil {
 		// The project environment map contributes one path per
-		// name; a name the domain constructor rejects (an entry
-		// hand-edited outside the env-name rule) never gets a
-		// whitelisted path and stays out of the list.
+		// name; the domain constructor splits the remainder
+		// deliberately without a name validator, so a hand-edited
+		// entry outside the env-name rule still gets a whitelisted
+		// path and appears in the list (only the empty name yields
+		// no path); the name rule is enforced at config set and at
+		// devcontainer start, not here.
 		for name := range cfg.Devcontainer.ContainerEnv {
 			add("devcontainer.containerEnv." + name)
 		}

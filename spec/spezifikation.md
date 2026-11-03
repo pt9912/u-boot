@@ -516,7 +516,7 @@ Verfeinert [`LH-FA-CONF-005`](lastenheft.md#lh-fa-conf-005--konfiguration-anzeig
 |---|---|---|---|
 | `project.name` | ja | ja | gültiger Projektname ([`SPEC-004`](#spec-004--projektnamen-muster)) |
 | `devcontainer.enabled` | ja | ja | Wahrheitswert |
-| `devcontainer.containerEnv` | ja | ja (nur Unterpfade `devcontainer.containerEnv.<name>`, je Name ein Wert) | Map von Namen zu String-Werten; jeder Name ein gültiger Dev-Container-Umgebungsname, jeder Wert ein String; der Basis-Pfad selbst ist nicht schreibbar (kein Ganz-Map-Set) |
+| `devcontainer.containerEnv` | nein (der Basis-Pfad ist keine Pfadform — auch `config get` liest ihn nicht; die Map bleibt via `config` und Anzeige lesbar) | ja (nur Unterpfade `devcontainer.containerEnv.<name>`, je Name ein Wert) | Map von Namen zu String-Werten; jeder Name ein gültiger Dev-Container-Umgebungsname, jeder Wert ein String; der Basis-Pfad selbst ist nicht schreibbar (kein Ganz-Map-Set) |
 | `devcontainer.featureSources.allow` | ja | ja (Liste) | kommagetrennte Quellen |
 | `devcontainer.features.<feature>.enabled` | ja | ja | Wahrheitswert |
 | `devcontainer.features.<feature>.source` | ja | ja | gültige Quelle, die wörtlich in `devcontainer.featureSources.allow` steht |
