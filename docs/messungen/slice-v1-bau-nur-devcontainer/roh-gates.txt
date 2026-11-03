@@ -1,0 +1,60 @@
+== M3 Lauf 1
+== Benutzer: vscode uid=1000
+docker-init-exit=0
+daemon server=29.9.2 storage=overlayfs
+BUILD_MODE=local GOTOOLCHAIN=local GOFLAGS=-mod=readonly -buildvcs=false
+GOCACHE=/workspaces/u-boot/.cache/go-build GOMODCACHE=/workspaces/u-boot/.cache/go-mod
+== make gates, Lauf 1
+gates-exit=0 wall=62.0s
+== Ergebniszeilen des Laufes 1
+github.com/pt9912/u-boot/internal/hexagon/application/devcontainer_start.go:366:		onlyInstancesError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/application/doctor.go:1287:				featureErrorMessage				100.0%
+github.com/pt9912/u-boot/internal/hexagon/application/generate_rollback.go:120:			rollbackOnError					83.3%
+github.com/pt9912/u-boot/internal/hexagon/application/initproject.go:958:			collisionError					100.0%
+github.com/pt9912/u-boot/internal/hexagon/application/noop.go:43:				Error						0.0%
+github.com/pt9912/u-boot/internal/hexagon/domain/diagnostic.go:130:				HasErrors					100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:94:				NewConfigHintError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:98:				Error						100.0%
+coverage-gate: OK — coverage 92.20% meets threshold 90%
+ablage-pruefung: OK
+== Ende des Protokolls des Laufes 1
+ok    Datei ohne Endung unter messungen
+ok    Symlink unter messungen
+ok    md mit Ausfuehrungsbit
+ok    png ausserhalb von messungen und planning ist erlaubt
+ok    ungetrackte Datei zaehlt nicht
+ablage-pruefung-test: 26 Faelle, 0 Fehlschlaege
+== M3 Lauf 2
+== Benutzer: vscode uid=1000
+docker-init-exit=0
+daemon server=29.9.2 storage=overlayfs
+BUILD_MODE=local GOTOOLCHAIN=local GOFLAGS=-mod=readonly -buildvcs=false
+GOCACHE=/workspaces/u-boot/.cache/go-build GOMODCACHE=/workspaces/u-boot/.cache/go-mod
+== make gates, Lauf 2
+gates-exit=0 wall=33.0s
+== Ergebniszeilen des Laufes 2
+github.com/pt9912/u-boot/internal/hexagon/application/devcontainer_start.go:366:		onlyInstancesError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/application/doctor.go:1287:				featureErrorMessage				100.0%
+github.com/pt9912/u-boot/internal/hexagon/application/generate_rollback.go:120:			rollbackOnError					83.3%
+github.com/pt9912/u-boot/internal/hexagon/application/initproject.go:958:			collisionError					100.0%
+github.com/pt9912/u-boot/internal/hexagon/application/noop.go:43:				Error						0.0%
+github.com/pt9912/u-boot/internal/hexagon/domain/diagnostic.go:130:				HasErrors					100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:94:				NewConfigHintError				100.0%
+github.com/pt9912/u-boot/internal/hexagon/port/driving/config.go:98:				Error						100.0%
+coverage-gate: OK — coverage 92.20% meets threshold 90%
+ablage-pruefung: OK
+== Ende des Protokolls des Laufes 2
+ok    Datei ohne Endung unter messungen
+ok    Symlink unter messungen
+ok    md mit Ausfuehrungsbit
+ok    png ausserhalb von messungen und planning ist erlaubt
+ok    ungetrackte Datei zaehlt nicht
+ablage-pruefung-test: 26 Faelle, 0 Fehlschlaege
+== Einzelläufe (warm)
+docs-check     exit=0 wall=6.8s
+docker run --rm --network none -v "/workspaces/u-boot:/repo:ro" ghcr.io/pt9912/d-check@sha256:5d2f650d102c1d8224bb26930ec96d237506c07612fb8e0dbcdc42291702c57f
+d-check: pinsync: 3 Pin(s) geprüft, 11 Quelle(n) gelesen
+d-check: 1086 Datei(en) geprüft, 0 Befund(e)
+lint           exit=0 wall=5.4s
+test           exit=0 wall=0.4s
+coverage-gate  exit=0 wall=0.7s

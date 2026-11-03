@@ -1,0 +1,43 @@
+== Benutzer: vscode uid=1000
+docker-init-exit=0
+== docker version im laufenden Container (Client und SERVER = der verschachtelte Daemon)
+Client: Docker Engine - Community
+ Version:           29.9.2
+ API version:       1.56
+ Go version:        go1.26.10
+ Git commit:        a82e528
+ Built:             Tue Oct 20 18:45:13 2026
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          29.9.2
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.10
+  Git commit:       0367cbe
+  Built:            Tue Oct 20 18:45:13 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+== docker info (Kurzform)
+server=29.9.2 storage=overlayfs cgroup=cgroupfs cgroupv2
+
+== Test-Container im Container: docker run --rm busybox true (mit Pull)
+pull-exit=0 wall=2s
+run-exit=0 wall=1s
+
+== docker ps -a (Bestand im verschachtelten Daemon)
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+== make modus-pruefung im Container
+modus-pruefung: OK (8 targets in both modes; build, run, image-scan, packages, docs-check in docker; BUILD_MODE, PKG and RUN rules)
+modus-pruefung-exit=0 wall=0s

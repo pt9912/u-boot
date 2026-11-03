@@ -38,6 +38,7 @@
 | `docs/plan/adr/` | neu | Folge-ADR mit `Supersedes` zu [`ADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md) |
 | `AGENTS.md`, `docs/user/benutzerhandbuch.md`, READMEs | update | Host-Vertrag je Entscheidung 2, Modus-Doku entfällt |
 | `.d-check.yml` | update | der `modus-pruefung`-Index-Zeile je Entscheidung 3 |
+| `tools/messung/devcontainer-ci/` (Skripte), `docs/messungen/slice-v1-bau-nur-devcontainer/` (Protokoll + Rohdaten), `docs/messungen/README.md` (Bestands-Zeile) | neu / update | Messung M1 (Plan-Risiko 1), vor dem Vertrags-Wortlaut; nur Lesen und Protokollieren, kein Code- oder Vertrags-Diff |
 
 ## 4. Trigger
 

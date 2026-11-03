@@ -1,0 +1,35 @@
+== gezielte Läufe der sechs ungenannten Fehlschläge (jede Meldung je Test)
+ergaenzung-exit=1 wall=20.0s
+== Meldungen je Fehlschlag (die Assert-Zeilen, nicht die nachfolgenden RUN-Zeilen)
+    devcontainer_launcher_docker_test.go:598: the value was on a command line: ["docker exec -i -u vscode -e HOSTNAME=5f928d58f33c -e HOME=/home/vscode -e LANG=C.UTF-8 -e LS_COLORS= -e USER=vscode -e SHLVL=1 -e PROMPT_DI
+--- FAIL: TestLauncher_Docker_S6_ValueIsNeverInImageLabelFileOrCommandLine (5.39s)
+=== RUN   TestLauncher_Docker_S5_GuardFalsifiedIntegrityBreaksTheBuild
+    devcontainer_launcher_docker_test.go:825: the build failed for another reason than the integrity check: exit status 1: Dockerfile:17
+--- FAIL: TestLauncher_Docker_S5_GuardFalsifiedIntegrityBreaksTheBuild (3.59s)
+--- FAIL: TestE2E_ForgeCLI_PinMismatchBreaksBuild (2.78s)
+    --- FAIL: TestE2E_ForgeCLI_PinMismatchBreaksBuild/GH (0.99s)
+    --- FAIL: TestE2E_ForgeCLI_PinMismatchBreaksBuild/GLAB (1.79s)
+=== RUN   TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild
+    sandbox_devcontainer_docker_test.go:1362: build output lacks the checksum failure:
+--- FAIL: TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild (9.58s)
+=== RUN   TestE2E_SandboxDevcontainer_StatusFiles_VFS
+=== RUN   TestE2E_Toolchain_PinMismatchBreaksBuild
+=== RUN   TestE2E_Toolchain_PinMismatchBreaksBuild/go
+    toolchain_docker_test.go:153: build output lacks the checksum failure:
+=== RUN   TestE2E_Toolchain_PinMismatchBreaksBuild/golangci-lint
+--- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild (4.53s)
+    --- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild/go (1.42s)
+    --- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild/golangci-lint (1.08s)
+    --- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild/jdk (2.03s)
+    sandbox_status_docker_test.go:173: restricted host: init exit 0, want 11 with the blocked-namespaces message:
+    sandbox_status_docker_test.go:173: host restricts unprivileged user namespaces (kernel.apparmor_restrict_unprivileged_userns=1); nested Podman cannot run here, degradation verified
+--- FAIL: TestE2E_SandboxDevcontainer_StatusFiles_VFS (1.45s)
+== Zählung
+PASS=0 FAIL=6 SKIP=0
+== gezielter Lauf: TestE2E_ForgeCLI_PinMismatchBreaksBuild
+ergaenzung-exit=1 wall=4.0s
+== alle Meldungszeilen des Laufes (ohne RUN-Texte)
+    forge_cli_docker_test.go:107: build output lacks the checksum failure:
+    forge_cli_docker_test.go:107: build output lacks the checksum failure:
+== Zählung
+PASS=0 FAIL=1 SKIP=0

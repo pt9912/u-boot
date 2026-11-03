@@ -1,0 +1,28 @@
+== M5: Container A (unprivilegiert, nur den Host-Docker-Socket eingehaengt; die Analogie zum CI-Job-Container)
+== Container A: vscode uid=1000 unprivilegiert gestartet (kein --privileged)
+CapEff=CapEff:	0000000000000000
+docker (Client) in A: Docker version 29.9.2, build a82e528 — Server ist der layer-1-Daemon über den Socket:
+layer-1 server=29.9.2
+
+== (a) Ebene 2 mit --privileged: der Devcontainer-Container, DIND-Analogie
+== Ebene 2: vscode uid=1000
+docker-init-exit=0
+== Ebene-2-Daemon: server=29.9.2 storage=overlayfs
+== Test-Container auf Ebene 3: docker run --rm busybox true (mit Pull)
+pull-exit=0 wall=2s
+ebene3-run-exit=0 wall=0s
+ebene2-priv-exit=0
+
+== (b) Ebene 2 ohne --privileged: was fehlt (Erwartung: der Daemon-Start fällt zurück)
+== Ebene 2 (ohne --privileged): vscode uid=1000
+docker-init-exit=0
+== Status-Datei (u-boot doctor liest diese): cat /var/lib/u-boot/status/daemon
+u-boot-status 1
+result=fallback
+at=2026-11-03T14:36:36Z
+== docker info (Erwartung: kein Daemon)
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+(info gelang unerwartet)
+== docker run (Erwartung: Fehler)
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+ebene2-nop-exit=0

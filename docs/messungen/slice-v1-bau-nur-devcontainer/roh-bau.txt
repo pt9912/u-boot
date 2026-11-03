@@ -1,0 +1,55 @@
+== M1a Kontext-Probelauf: docker build -f .devcontainer/Dockerfile .
+exit=1 wall=0s
+--------------------
+  16 |      && rm -rf /var/lib/apt/lists/* \
+  17 |      && usermod -aG docker vscode
+  18 | >>> COPY docker-init.sh /usr/local/bin/u-boot-docker-init
+  19 |     # Ollama: the CPU-only release archive of ollama/ollama.
+  20 |     # Version and checksums are pinned here, in one place; the build stops before
+--------------------
+ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref ffl8d2hx55ugjzrmu0idvi7bd::p71b9ylqm87csb7aqq9k8uezv: "/docker-init.sh": not found
+
+== M1b Image-Bau: docker build -t uboot-devc-m1 -f .devcontainer/Dockerfile .devcontainer
+exit=0 wall=40s
+#15 exporting layers
+#15 exporting layers 10.5s done
+#15 exporting manifest sha256:8273e24c818731c1ba8b93d66be954dd2e4fd3c2bf2615bc9ee5d6381c23b9a7
+#15 exporting manifest sha256:8273e24c818731c1ba8b93d66be954dd2e4fd3c2bf2615bc9ee5d6381c23b9a7 0.0s done
+#15 exporting config sha256:8d346eb514f7bf04f05f763c83f657efe92b4326f6d886aca61eef7ce72242a6 0.0s done
+#15 exporting attestation manifest sha256:8b625a44ba0a56ed746bb98b1cbd8f6f5d8cb2e5cbcc68bfbdb515d1c6d68af6 0.1s done
+#15 exporting manifest list sha256:fc2aa5e219c8e2b7955e478388f461f446bf6acf5431fe9bd2c5011f8560d0b8
+#15 exporting manifest list sha256:fc2aa5e219c8e2b7955e478388f461f446bf6acf5431fe9bd2c5011f8560d0b8 0.0s done
+#15 naming to docker.io/library/uboot-devc-m1:latest done
+#15 unpacking to docker.io/library/uboot-devc-m1:latest
+#15 unpacking to docker.io/library/uboot-devc-m1:latest 4.7s done
+#15 DONE 15.4s
+
+== Image-Steckbrief
+id=sha256:fc2aa5e219c8e2b7955e478388f461f446bf6acf5431fe9bd2c5011f8560d0b8
+size_bytes=2474989058 created=2026-11-03T14:18:42.429410561Z arch=amd64
+== Werkzeuge im Image
+vscode
+HOME=/home/vscode
+GNU Make 4.4.1
+GNU bash, version 5.2.37(1)-release (x86_64-pc-linux-gnu)
+go version go1.27.3 linux/amd64
+golangci-lint has version 2.14.0 built with go1.27.0 from 114493f9 on 2026-09-24T11:07:15Z
+Docker version 29.9.2, build a82e528
+git version 2.56.0
+Warning: could not connect to a running Ollama instance
+Warning: client version is 0.40.6
+gh version 2.103.0 (2026-10-21)
+bash: line 1: node: command not found
+== Pfade der Werkzeuge
+/usr/bin/make
+/usr/bin/bash
+/usr/local/go/bin/go
+/usr/local/bin/golangci-lint
+/usr/bin/docker
+/usr/bin/dockerd
+/usr/local/bin/ollama
+/usr/local/bin/gh
+== docker info ohne gestarteten Daemon (Erwartung: Fehler)
+
+Server:
+failed to connect to the docker API at unix:///var/run/docker.sock; check if the path is correct and if the daemon is running: dial unix /var/run/docker.sock: connect: no such file or directory

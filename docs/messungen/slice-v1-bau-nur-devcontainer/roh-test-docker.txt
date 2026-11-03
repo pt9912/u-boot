@@ -1,0 +1,217 @@
+== Benutzer: vscode uid=1000
+docker-init-exit=0
+== Docker: server 29.9.2, storage overlayfs
+BUILD_MODE=local GOCACHE=/workspaces/u-boot/.cache/go-build
+== make test-docker (bis zu 30 Minuten)
+test-docker-exit=2 wall=869.0s
+== Zählung (Testfunktionen der obersten Ebene)
+PASS=1758 FAIL=12 SKIP=1
+== fehlgeschlagene Tests (Namen)
+--- FAIL: TestLauncher_Docker_S6_ValueIsNeverInImageLabelFileOrCommandLine (5.95s)
+--- FAIL: TestLauncher_Docker_S5_GuardFalsifiedIntegrityBreaksTheBuild (2.05s)
+--- FAIL: TestE2E_ForgeCLI_PinMismatchBreaksBuild (2.49s)
+--- FAIL: TestE2E_Resources_DefaultProfileLimitsReachTheContainer (2.75s)
+--- FAIL: TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer (34.68s)
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_Build (1.58s)
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress (6.70s)
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman (1.51s)
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild (14.42s)
+--- FAIL: TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild (9.77s)
+--- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild (4.06s)
+--- FAIL: TestE2E_SandboxDevcontainer_StatusFiles_VFS (1.37s)
+== übersprungene Tests (Namen)
+--- SKIP: TestDevcontainerUp_Docker_S3_ObserveUpdateRemoteUserUID (0.00s)
+== Paketergebnisse (alles außer ok)
+FAIL	github.com/pt9912/u-boot/internal/adapter/driven/docker	219.855s
+FAIL	github.com/pt9912/u-boot/internal/e2e	864.913s
+== Kontext je Fehlschlag (je 14 Zeilen nach der FAIL-Marker, gekürzt)
+--- FAIL: TestLauncher_Docker_S6_ValueIsNeverInImageLabelFileOrCommandLine (5.95s)
+=== RUN   TestLauncher_Docker_S6_LimitRemoteEnvValueIsOnHelperCommandLine
+--- PASS: TestLauncher_Docker_S6_LimitRemoteEnvValueIsOnHelperCommandLine (6.86s)
+=== RUN   TestLauncher_Docker_S6_LimitContainerEnvValueIsInDevContainerMetadata
+--- PASS: TestLauncher_Docker_S6_LimitContainerEnvValueIsInDevContainerMetadata (2.82s)
+=== RUN   TestLauncher_Docker_S6_ContainerEnvValueIsMaskedInProgressAndError
+=== RUN   TestLauncher_Docker_S6_ContainerEnvValueIsMaskedInProgressAndError/Up_succeeds
+=== RUN   TestLauncher_Docker_S6_ContainerEnvValueIsMaskedInProgressAndError/Up_fails
+--- PASS: TestLauncher_Docker_S6_ContainerEnvValueIsMaskedInProgressAndError (11.54s)
+    --- PASS: TestLauncher_Docker_S6_ContainerEnvValueIsMaskedInProgressAndError/Up_succeeds (5.59s)
+    --- PASS: TestLauncher_Docker_S6_ContainerEnvValueIsMaskedInProgressAndError/Up_fails (5.95s)
+=== RUN   TestLauncher_Docker_S6_GuardCommandLineScanFindsValueInArguments
+--- PASS: TestLauncher_Docker_S6_GuardCommandLineScanFindsValueInArguments (0.07s)
+=== RUN   TestLauncher_Docker_S5_BuildFromEmbeddedContext
+--- PASS: TestLauncher_Docker_S5_BuildFromEmbeddedContext (5.93s)
+--
+--- FAIL: TestLauncher_Docker_S5_GuardFalsifiedIntegrityBreaksTheBuild (2.05s)
+=== RUN   TestLauncher_Docker_S7_EngineOfTheRunner
+--- PASS: TestLauncher_Docker_S7_EngineOfTheRunner (0.08s)
+=== RUN   TestLauncher_Docker_StopStopsButKeepsTheContainer
+--- PASS: TestLauncher_Docker_StopStopsButKeepsTheContainer (2.63s)
+=== RUN   TestRunArgs
+=== RUN   TestRunArgs/defaults
+=== RUN   TestRunArgs/env_by_name,_recreate,_read-only
+=== RUN   TestRunArgs/instance
+=== RUN   TestRunArgs/instance_with_recreate
+=== RUN   TestRunArgs/per-call_configuration_with_the_container_name
+--- PASS: TestRunArgs (0.00s)
+    --- PASS: TestRunArgs/defaults (0.00s)
+    --- PASS: TestRunArgs/env_by_name,_recreate,_read-only (0.00s)
+    --- PASS: TestRunArgs/instance (0.00s)
+--
+--- FAIL: TestE2E_ForgeCLI_PinMismatchBreaksBuild (2.49s)
+    --- FAIL: TestE2E_ForgeCLI_PinMismatchBreaksBuild/GH (1.02s)
+    --- FAIL: TestE2E_ForgeCLI_PinMismatchBreaksBuild/GLAB (1.47s)
+=== RUN   TestE2E_ForgeCLI_EgressHosts
+time=2026-11-03T14:28:14.987Z level=INFO msg="config set: updated" path=devcontainer.features.gh.enabled old="" new=true
+time=2026-11-03T14:28:14.987Z level=INFO msg="config set: updated" path=devcontainer.features.glab.enabled old="" new=true
+time=2026-11-03T14:28:14.988Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+time=2026-11-03T14:28:14.988Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=warn
+time=2026-11-03T14:28:14.989Z level=INFO msg="generate devcontainer: updated-block" project=dcsdmlnaea9gg0n forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfil
+--- PASS: TestE2E_ForgeCLI_EgressHosts (10.50s)
+=== RUN   TestStreamContains_FindsNeedleAcrossReads
+--- PASS: TestStreamContains_FindsNeedleAcrossReads (0.00s)
+=== RUN   TestE2E_ForgeCLI_TokenReferencesCarryNoValue
+time=2026-11-03T14:28:25.490Z level=INFO msg="config set: updated" path=devcontainer.features.gh.enabled old="" new=true
+time=2026-11-03T14:28:25.490Z level=INFO msg="config set: updated" path=devcontainer.features.glab.enabled old="" new=true
+--
+--- FAIL: TestE2E_Resources_DefaultProfileLimitsReachTheContainer (2.75s)
+=== RUN   TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer
+time=2026-11-03T14:30:32.255Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=warn
+time=2026-11-03T14:30:32.256Z level=INFO msg="config set: updated" path=devcontainer.resources.memory old="" new=512m
+time=2026-11-03T14:30:32.256Z level=INFO msg="config set: updated" path=devcontainer.resources.cpus old="" new=1.5
+time=2026-11-03T14:30:32.256Z level=INFO msg="config set: updated" path=devcontainer.sandbox.nestedRuntime old="" new=docker
+time=2026-11-03T14:30:32.257Z level=INFO msg="generate devcontainer: updated-block" project=dcsdmlnc5cfbq4h forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfil
+    resources_docker_test.go:75: Up: devcontainer up failed (exit status 1: 68Z] #11 exporting layers 20.1s done
+        #11 preparing layers for inline cache
+        
+        [2026-11-03T14:31:03.304Z] #11 preparing layers for inline cache 0.1s done
+        
+        [2026-11-03T14:31:03.497Z] #11 exporting manifest sha256:41d8a7b2c5a0f7de519342bb78c50943a551c69e1706b22d9d1ad0c6995a6d29 done
+        #11 exporting config sha256:0b6645cd5c7aa2b082146bab188ed1e6a8559fa83742387490bdfc3b1b3e1ded done
+        #11 exporting attestation manifest sha256:d61969ff5a5aadb3f1e356e95d36084b5cbd6047532cd41e11d203c7bbf4e509 done
+--
+--- FAIL: TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer (34.68s)
+=== RUN   TestE2E_SandboxDevcontainer_Egress
+time=2026-11-03T14:31:06.933Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+time=2026-11-03T14:31:06.934Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=warn
+time=2026-11-03T14:31:06.936Z level=INFO msg="generate devcontainer: updated-block" project=egrese2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devc
+time=2026-11-03T14:31:08.981Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+time=2026-11-03T14:31:08.982Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=fail
+time=2026-11-03T14:31:08.984Z level=INFO msg="generate devcontainer: updated-block" project=egrese2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devc
+--- PASS: TestE2E_SandboxDevcontainer_Egress (3.50s)
+=== RUN   TestE2E_SandboxDevcontainer_EgressSubdomains
+time=2026-11-03T14:31:10.431Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+time=2026-11-03T14:31:10.432Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=warn
+time=2026-11-03T14:31:10.433Z level=INFO msg="generate devcontainer: updated-block" project=egrese2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devc
+--- PASS: TestE2E_SandboxDevcontainer_EgressSubdomains (1.89s)
+=== RUN   TestE2E_SandboxDevcontainer_EgressUpstreamDNS
+--
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_Build (1.58s)
+=== RUN   TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress
+time=2026-11-03T14:31:47.533Z level=INFO msg="config set: updated" path=devcontainer.sandbox.nestedRuntime old="" new=podman
+time=2026-11-03T14:31:47.533Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=warn
+time=2026-11-03T14:31:47.534Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+time=2026-11-03T14:31:47.537Z level=INFO msg="generate devcontainer: updated-block" project=sbxe2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcon
+    sandbox_devcontainer_docker_test.go:737: restricted host: init exit 0, want 11 with the blocked-namespaces message:
+    sandbox_devcontainer_docker_test.go:737: host restricts unprivileged user namespaces (kernel.apparmor_restrict_unprivileged_userns=1); nested Podman cannot run here, degradation verified
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress (6.70s)
+=== RUN   TestE2E_SandboxDevcontainer_NestedPodman
+time=2026-11-03T14:31:54.239Z level=INFO msg="config set: updated" path=devcontainer.sandbox.nestedRuntime old="" new=podman
+time=2026-11-03T14:31:54.239Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=warn
+time=2026-11-03T14:31:54.242Z level=INFO msg="generate devcontainer: updated-block" project=sbxe2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcon
+    sandbox_devcontainer_docker_test.go:778: restricted host: init exit 0, want 11 with the blocked-namespaces message:
+    sandbox_devcontainer_docker_test.go:778: host restricts unprivileged user namespaces (kernel.apparmor_restrict_unprivileged_userns=1); nested Podman cannot run here, degradation verified
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman (1.51s)
+=== RUN   TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild
+time=2026-11-03T14:31:55.754Z level=INFO msg="config set: updated" path=devcontainer.sandbox.nestedRuntime old="" new=podman
+time=2026-11-03T14:31:55.755Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=warn
+time=2026-11-03T14:31:55.758Z level=INFO msg="generate devcontainer: updated-block" project=sbxe2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcon
+=== RUN   TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild/wrong_checksum
+    sandbox_devcontainer_docker_test.go:923: build output does not show the failed step's container removed, so the leftover check proves nothing (builder is not the classic one, or --force-rm is miss
+        #0 building with "default" instance using docker driver
+        
+        #1 [internal] load build definition from Dockerfile
+        #1 transferring dockerfile: 3.29kB done
+        #1 WARN: SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PODMAN_SIGNING_KEY") (line 16)
+        #1 DONE 0.0s
+        
+        #2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+--
+--- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild (14.42s)
+    --- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild/wrong_checksum (4.78s)
+    --- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild/signing_subkey_as_the_pin (4.92s)
+    --- FAIL: TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild/unknown_fingerprint_as_the_pin (4.70s)
+=== RUN   TestE2E_SandboxDevcontainer_MissingHostFuseDeviceRefusesStart
+time=2026-11-03T14:32:10.169Z level=INFO msg="config set: updated" path=devcontainer.sandbox.nestedRuntime old="" new=podman
+time=2026-11-03T14:32:10.170Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=warn
+time=2026-11-03T14:32:10.172Z level=INFO msg="generate devcontainer: updated-block" project=sbxe2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcon
+--- PASS: TestE2E_SandboxDevcontainer_MissingHostFuseDeviceRefusesStart (1.47s)
+=== RUN   TestE2E_SandboxDevcontainer_FailPolicyWithoutFuse
+time=2026-11-03T14:32:11.638Z level=INFO msg="config set: updated" path=devcontainer.sandbox.nestedRuntime old="" new=podman
+time=2026-11-03T14:32:11.638Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=fail
+time=2026-11-03T14:32:11.639Z level=INFO msg="generate devcontainer: updated-block" project=sbxe2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcon
+--- PASS: TestE2E_SandboxDevcontainer_FailPolicyWithoutFuse (2.18s)
+=== RUN   TestE2E_SandboxDevcontainer_NestedDocker
+--
+--- FAIL: TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild (9.77s)
+=== RUN   TestE2E_SandboxDevcontainer_StatusFiles_VFS
+=== PAUSE TestE2E_SandboxDevcontainer_StatusFiles_VFS
+=== RUN   TestE2E_SandboxDevcontainer_StatusFiles_Daemon
+=== PAUSE TestE2E_SandboxDevcontainer_StatusFiles_Daemon
+=== RUN   TestE2E_SandboxDevcontainer_StatusFiles_Egress
+=== PAUSE TestE2E_SandboxDevcontainer_StatusFiles_Egress
+=== RUN   TestE2E_SandboxDevcontainer_StatusFiles_InspectorAgainstEngine
+--- PASS: TestE2E_SandboxDevcontainer_StatusFiles_InspectorAgainstEngine (5.96s)
+=== RUN   TestE2E_Toolchain_BuildsAndReportsPins
+time=2026-11-03T14:33:48.569Z level=INFO msg="config set: updated" path=devcontainer.features.go-toolchain.enabled old="" new=true
+time=2026-11-03T14:33:48.569Z level=INFO msg="config set: updated" path=devcontainer.features.golangci-lint.enabled old="" new=true
+time=2026-11-03T14:33:48.570Z level=INFO msg="config set: updated" path=devcontainer.features.java-toolchain.enabled old="" new=true
+time=2026-11-03T14:33:48.572Z level=INFO msg="generate devcontainer: updated-block" project=dcsdmlnenj33ld8 forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfil
+--- PASS: TestE2E_Toolchain_BuildsAndReportsPins (27.37s)
+--
+--- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild (4.06s)
+    --- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild/go (1.67s)
+    --- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild/golangci-lint (0.83s)
+    --- FAIL: TestE2E_Toolchain_PinMismatchBreaksBuild/jdk (1.55s)
+=== RUN   TestE2E_Toolchain_OverrideBuildsAgainstReadChecksums
+time=2026-11-03T14:34:19.999Z level=INFO msg="config set: updated" path=devcontainer.features.go-toolchain.enabled old="" new=true
+time=2026-11-03T14:34:19.999Z level=INFO msg="config set: updated" path=devcontainer.features.golangci-lint.enabled old="" new=true
+time=2026-11-03T14:34:20.000Z level=INFO msg="config set: updated" path=devcontainer.features.java-toolchain.enabled old="" new=true
+time=2026-11-03T14:34:20.001Z level=INFO msg="config set: updated" path=devcontainer.features.go-toolchain.version old="" new=1.26.10
+time=2026-11-03T14:34:20.001Z level=INFO msg="config set: updated" path=devcontainer.features.golangci-lint.version old="" new=v2.13.2
+time=2026-11-03T14:34:20.002Z level=INFO msg="config set: updated" path=devcontainer.features.java-toolchain.version old="" new=21.0.9+10
+time=2026-11-03T14:34:21.948Z level=INFO msg="generate devcontainer: updated-block" project=dcsdmlnf1yvc8p8 forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfil
+--- PASS: TestE2E_Toolchain_OverrideBuildsAgainstReadChecksums (30.78s)
+=== RUN   TestE2E_Toolchain_CacheSurvivesRecreate
+time=2026-11-03T14:34:50.781Z level=INFO msg="config set: updated" path=devcontainer.features.go-toolchain.enabled old="" new=true
+--
+--- FAIL: TestE2E_SandboxDevcontainer_StatusFiles_VFS (1.37s)
+time=2026-11-03T14:35:58.804Z level=INFO msg="doctor: checks complete" baseDir=/tmp/TestE2E_SandboxDevcontainer_StatusFiles_Egress298378446/001 items=17 maxSeverity=warn
+time=2026-11-03T14:35:58.805Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+time=2026-11-03T14:35:58.805Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=fail
+time=2026-11-03T14:35:58.807Z level=INFO msg="generate devcontainer: updated-block" project=egrese2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devc
+time=2026-11-03T14:35:58.986Z level=INFO msg="doctor: checks complete" baseDir=/tmp/TestE2E_SandboxDevcontainer_StatusFiles_Daemon3056466168/001 items=17 maxSeverity=warn
+time=2026-11-03T14:35:59.965Z level=INFO msg="doctor: checks complete" baseDir=/tmp/TestE2E_SandboxDevcontainer_StatusFiles_Egress298378446/002 items=17 maxSeverity=error
+--- PASS: TestE2E_SandboxDevcontainer_StatusFiles_Egress (3.74s)
+time=2026-11-03T14:36:01.063Z level=INFO msg="doctor: checks complete" baseDir=/tmp/TestE2E_SandboxDevcontainer_StatusFiles_Daemon3056466168/001 items=17 maxSeverity=warn
+time=2026-11-03T14:36:01.255Z level=INFO msg="config set: updated" path=devcontainer.sandbox.nestedRuntime old="" new=docker
+time=2026-11-03T14:36:01.255Z level=INFO msg="config set: updated" path=devcontainer.sandbox.onUnavailable old="" new=fail
+time=2026-11-03T14:36:01.256Z level=INFO msg="generate devcontainer: updated-block" project=sbxe2e forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcon
+time=2026-11-03T14:36:03.707Z level=INFO msg="doctor: checks complete" baseDir=/tmp/TestE2E_SandboxDevcontainer_StatusFiles_Daemon3056466168/002 items=17 maxSeverity=error
+--- PASS: TestE2E_SandboxDevcontainer_StatusFiles_Daemon (7.72s)
+FAIL
+== letzte 15 Zeilen
+--- PASS: TestConfigSetResponse_WarningsField (0.00s)
+=== CONT  TestConfigSetRequest_T2Fields
+--- PASS: TestConfigSetRequest_T2Fields (0.00s)
+=== CONT  TestConfigT2Sentinels_SurviveContextualWrap
+--- PASS: TestConfigT2Sentinels_SurviveContextualWrap (0.00s)
+=== CONT  TestConfigT2Sentinels_DistinctFromValueInvalid
+--- PASS: TestConfigT2Sentinels_DistinctFromValueInvalid (0.00s)
+=== CONT  TestUpSentinels_Identity/ErrStabilizationTimeout
+--- PASS: TestUpSentinels_Identity (0.00s)
+    --- PASS: TestUpSentinels_Identity/ErrComposeFileMissing (0.00s)
+    --- PASS: TestUpSentinels_Identity/ErrStabilizationTimeout (0.00s)
+PASS
+ok  	github.com/pt9912/u-boot/internal/hexagon/port/driving	0.010s
+FAIL
+make: *** [repo.mk:155: test-docker] Error 1

@@ -39,3 +39,4 @@ Die Regel steht in [`harness/conventions.md`](../../harness/conventions.md#ablag
 | [`slice-v1-devcontainer-claude-oauth-token`](slice-v1-devcontainer-claude-oauth-token/README.md) | keine (Test `internal/e2e/claude_oauth_token_docker_test.go`) |
 | [`slice-v1-katalog-gepinnte-toolchain-entwurf`](slice-v1-katalog-gepinnte-toolchain-entwurf/README.md) | `tools/messung/katalog-gepinnte-toolchain/` |
 | [`slice-v1-katalog-feature-jdk-gepinnt`](slice-v1-katalog-feature-jdk-gepinnt/README.md) | `tools/messung/katalog-feature-jdk/` |
+| [`slice-v1-bau-nur-devcontainer`](slice-v1-bau-nur-devcontainer/README.md) | `tools/messung/devcontainer-ci/` |
