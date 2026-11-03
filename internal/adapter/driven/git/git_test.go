@@ -12,7 +12,7 @@ import (
 
 // gitAvailable returns true when the host `git` binary is reachable.
 // Tests skip with a clear message when it isn't — that keeps the
-// default `make test` path green on `golang:1.26.3` (which has git
+// default `make test` path green on `golang:1.27.3` (which has git
 // pre-installed) and on lean CI runners that don't.
 func gitAvailable(t *testing.T) {
 	t.Helper()

@@ -4,9 +4,10 @@
 # Image-Digest gepinnt (Reproduzierbarkeit). advisory doc-*-Targets verbatim, ohne
 # die Kennungen aus dem Register von d-check in Kommentaren und Hilfetexten.
 # Einbinden: `include d-check.mk`; eigene .d-check.yml danebenlegen.
-# Image-Bump 2026-11-03 auf v0.91.0 (Digest aus den Release-Notes verifiziert
-# und gegen den gezogenen Lauf gegengeprueft); neu ist das Modul pinsync — die
-# doc-*-Ein-Modul-Targets tragen --disable pinsync je --print-mk der Version.
+# Das gepinnte d-check-Image steht auf v0.91.0 (Digest aus den Release-Notes
+# verifiziert und gegen den gezogenen Lauf gegengeprueft); der Modul-Satz
+# traegt pinsync, und die doc-*-Ein-Modul-Targets tragen --disable pinsync
+# je --print-mk der Version.
 DCHECK_IMAGE ?= ghcr.io/pt9912/d-check:v0.91.0
 DCHECK_DIGEST ?= sha256:5d2f650d102c1d8224bb26930ec96d237506c07612fb8e0dbcdc42291702c57f
 # TRACE_FLAGS: optionale Flags für die RTM-Targets (z. B. --json).

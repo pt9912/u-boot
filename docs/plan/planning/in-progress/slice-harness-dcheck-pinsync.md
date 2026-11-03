@@ -27,7 +27,7 @@
 | `harness/README.md` | update (Umsetzungs-Diff) | docs-check-Zeile des Gate-Index nennt die Pin-Gleichheit |
 | `CHANGELOG.md` | update (Umsetzungs-Diff) | Eintrag unter `[Unreleased]` |
 | `docs/messungen/slice-harness-dcheck-pinsync/` | neu (Umsetzungs-Diff) | Beleg-Lauf je Gatter mit Mismatch-Gegenproben und make-Guard-Negativprobe |
-| dieser Slice (diese Datei), Roadmap | update | Plan-Tabelle und Umsetzungs-Zeilen; Lifecycle je `make slice-mv` bei Closure |
+| dieser Slice (diese Datei), Roadmap | update | Plan-Tabelle und Umsetzungs-Zeilen; Lifecycle je `make slice-mv`; **nach §3.10 berichtigt (Review):** von der Roadmap trägt dieser Diff **keine Zeile** — die Bestand-/Marker-Züge laufen je nachbarkommenden Zügen; die §3.10-Abgleiche laufen je Fix-und-Closure-Runde erneut | bei Closure |
 | Tests der Vier-Stellen-Kopplung | kein Diff in diesem Slice | `TestToolchainPinPlacesEqual` bleibt (liest die vier Code-Stellen, [`SPEC-054`](../../../../spec/spezifikation.md)); die Pin-Gruppen im Gatter prüfen die Quellen-Zeilen je Pin |
 
 ## 4. Trigger und Rückführungen

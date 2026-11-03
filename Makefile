@@ -5,17 +5,18 @@
 # (das serialisierte das ganze Makefile). Sprach-agnostisch: ohne --lang matchen nur
 # baseline/doc-gate/enforce, mit --lang zusaetzlich das Code-Gate-Fragment.
 
+# Floor of the GNU make: the host and the CI runners carry at least this (LH-FA-DEV-011).
+MAKE_MIN_MAJOR := 4
+MAKE_MIN_MINOR := 3
+MAKE_MIN_VERSION := $(MAKE_MIN_MAJOR).$(MAKE_MIN_MINOR)
+MAKE_MAJOR := $(firstword $(subst ., ,$(MAKE_VERSION)))
+MAKE_MINOR := $(word 2,$(subst ., ,$(MAKE_VERSION)))
 # Mindest-Version der GNU make (LH-FA-DEV-011): der Lauf bricht ab, wenn die
 # laufende make-Version (MAKE_VERSION, "major.minor") aelter als die
 # Mindest-Version ist — make-eigener Guard, kein Stellenvergleich; er greift an
 # der Pars-Zeit jedes Laufs, vor jeder anderen Logik. Stand des Messwerts:
 # Host und Devcontainer-Image tragen 4.4.1, die CI-Runner (ubuntu-24.04) 4.3,
 # die Mindest-Version ist 4.3.
-MAKE_MIN_MAJOR := 4
-MAKE_MIN_MINOR := 3
-MAKE_MIN_VERSION := $(MAKE_MIN_MAJOR).$(MAKE_MIN_MINOR)
-MAKE_MAJOR := $(firstword $(subst ., ,$(MAKE_VERSION)))
-MAKE_MINOR := $(word 2,$(subst ., ,$(MAKE_VERSION)))
 ifeq (,$(shell if [ $(MAKE_MAJOR) -gt $(MAKE_MIN_MAJOR) ] || { [ $(MAKE_MAJOR) -eq $(MAKE_MIN_MAJOR) ] && [ $(MAKE_MINOR) -ge $(MAKE_MIN_MINOR) ]; }; then echo ok; fi))
 $(error GNU make $(MAKE_MIN_VERSION) or newer is required, the running make reports $(MAKE_VERSION))
 endif

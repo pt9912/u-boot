@@ -63,7 +63,7 @@ func TestEngine_MissingBinary_DoesNotReturnErrComposeRuntime(t *testing.T) {
 
 // shellBinaryAvailable skips the test when the requested
 // always-present POSIX utility is missing. CI runs inside
-// `golang:1.26.3` (Debian) and `golangci/golangci-lint:v2.12.2-alpine`,
+// `golang:1.27.3` (Debian) and `golangci/golangci-lint:v2.14.0-alpine`,
 // both of which ship `/bin/echo`, `/bin/true`, and `/bin/false`.
 // The skip keeps the tests portable for developer environments
 // that strip them.

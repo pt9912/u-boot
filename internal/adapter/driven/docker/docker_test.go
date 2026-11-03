@@ -10,7 +10,7 @@ import (
 
 // dockerAvailable returns true when the host `docker` binary is on
 // PATH. Most CI runners do not have it (the project's own gates
-// image runs in golang:1.26.3, no docker-in-docker); tests skip
+// image runs in golang:1.27.3, no docker-in-docker); tests skip
 // cleanly in that case. Full daemon-tests live under build tag
 // `docker` (slice-m6-docker-integrationstests).
 func dockerAvailable(t *testing.T) {
