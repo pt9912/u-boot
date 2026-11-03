@@ -8,6 +8,11 @@
 # vorherigen Gate-Lauf erzeugt dagegen keinen passenden Nachweis und wird vom
 # Stop-Hook nicht mehr durchgewunken.
 set -euo pipefail
+# Collation-Pin (BEO-Grund: die Host-/Image-Lage der sort-Implementierung
+# unterscheidet sich — uutils-sort vs. GNU-sort sortieren Byte-Streifen je
+# Locale unterschiedlich; der Hash ist sonst umgebungsgetragen, und der im
+# Container gestempelte Nachweis liest am Host anders): C-Collation, byte-genau.
+export LC_ALL=C
 cd "$(git rev-parse --show-toplevel)"
 
 git ls-files -z --cached --others --exclude-standard \

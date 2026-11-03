@@ -36,9 +36,26 @@ LINT_PIN=$(sed -n 's/^GOLANGCI_LINT_VERSION[[:space:]]*?=[[:space:]]*//p' "$root
 # go: die Ausgabe heisst "go version go1.27.3 linux/amd64"; der Pin heisst
 # "1.27.3" (repo.mk) — der Versionsteil der Ausgabe trägt ihn.
 tool go "$GO_PIN" "go"
-# golangci-lint: "golangci-lint has version 2.14.0 ..."; der Pin heisst "2.14.0"
-# (repo.mk trägt v2.14.0? Nein — die Pin-Stelle der lint-Version heisst "v2.14.0"
-# am Template und "2.14.0" je repo.mk-Lesung; verglichen wird der Teil nach dem v).
+# golangci-lint: "golangci-lint has version 2.14.0 ..."; der Pin heisst "v2.14.0"
+# (repo.mk) — verglichen wird der Versionsteil.
 tool golangci-lint "${LINT_PIN#v}" "golangci-lint"
 
-echo "tool-pruefung: the running context carries the pinned toolchain (go $GO_PIN, golangci-lint ${LINT_PIN#v}) — OK"
+# make: die Mindest-Form der Inventur (der Parse-Guard des Makefiles traegt
+# denselben Floor; hier die Laufzeit-Lesart, weil ein make eines anderen
+# Kontexts den Floor nicht trägt).
+MAKE_FLOOR="$(sed -n 's/^MAKE_MIN_MAJOR := *//p' "$root/Makefile" | head -1).$(sed -n 's/^MAKE_MIN_MINOR := *//p' "$root/Makefile" | head -1)"
+[ -n "$MAKE_FLOOR" ] || fail "the MAKE_MIN_VERSION floor of the Makefile is unparseable"
+have="$(make --version 2>/dev/null | sed -n '1s/^GNU Make \([0-9.]*\).*$/\1/p')"
+[ -n "$have" ] || fail "make reports no GNU make version line"
+awk -v have="$have" -v floor="$MAKE_FLOOR" 'BEGIN{ m=(have<floor) ; if (m) exit 1 }' \
+  || fail "make reports $have, the floor of the inventory is $MAKE_FLOOR"
+
+# Die Anwesenheits-Form der Inventur (Vollstaendigkeit der Entwicklungsumgebung;
+# LX-Feld: je Werkzeug je Pruefform, LH-FA-DEV-011): go/golangci-lint exakt oben,
+# make ueber den Floor, und diese ueber die Anwesenheit. Ein fehlendes Werkzeug
+# ist ein Befund mit Name; sed/awk/coreutils tragen keine Einzel-Form je
+# Basis-Image-Grenze des Inventur-Absatzes.
+for t in bash curl gh git docker; do
+  command -v "$t" >/dev/null 2>&1 || fail "the tool $t of the development inventory is not installed in the running context"
+done
+echo "tool-pruefung: the running context carries the pinned toolchain (go $GO_PIN, golangci-lint ${LINT_PIN#v}, make >= $MAKE_FLOOR) and the complete development inventory (bash, curl, gh, git, docker client) — OK"

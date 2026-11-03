@@ -59,4 +59,6 @@ DoD vollständig; `make gates` und die CI-Läufe je am neuen Weg grün; Reports;
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
-Berührt: `scripts/`/`tools/` (WZG), Code-Sub-Areas indirekt über die Gatter (keine Code-Diffs), `DOK`. Alle Greenfield. Evidenz-Risiko: mittel (CI-Läufe im verschachtelten Daemon nicht gemessen).
+Berührt: `scripts/`/`tools/` (WZG), Code-Sub-Areas indirekt über die Gatter (keine Code-Diffs), `DOK`. Alle Greenfield. Evidenz-Risiko: mittel (CI-Läufe im verschachtelten Daemon nicht gemessen)
+| tools/harness/tool-pruefung.sh (das Laufzeit-Gate samt Vollstaendigkeits-Form: Pins exakt, make-Floor, Anwesenheit von bash/curl/gh/git/docker-Client) und das Fragment tools/mk/tool-pruefung.mk (per Glob include tools/mk/*.mk gebunden) | neu | die Trager der Fix-Runde (F-1-Form je Freigabe); der Ablage-Waechter-Test bleibt bei tools/harness/ |
+| die Fragmente tools/mk/ablage-pruefung.mk (der include-Glob) und repo.mk-Traeger | update | die include-Form der Fix-Runde (keine Doppelnennungen; make -n gates exit 0 je Probelauf) |.
