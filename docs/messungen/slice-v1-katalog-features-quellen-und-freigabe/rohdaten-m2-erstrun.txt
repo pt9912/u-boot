@@ -1,0 +1,18 @@
+===== form: ghcr.io/devcontainers/features/go:9.9.9
+    at async Sp (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1947)
+    at async LG (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:608)
+    at async kW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:4689)
+{"outcome":"error","message":"ERR: Feature 'ghcr.io/devcontainers/features/go:9.9.9' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature author.","description":"An error occurred setting up the container."}
+(probe exit: 1)
+===== form: oci://ghcr.io/devcontainers/features/go:9.9.9
+    at async LG (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:608)
+    at async kW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:4689)
+    at async hI (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:5808)
+{"outcome":"error","message":"ERR: Feature 'oci://ghcr.io/devcontainers/features/go:9.9.9' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature author.","description":"An error occurred setting up the container."}
+(probe exit: 1)
+===== form: https://ghcr.io/devcontainers/features/go:9.9.9
+    at async LG (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:608)
+    at async kW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:4689)
+    at async hI (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:5808)
+{"outcome":"error","message":"ERR: Feature 'https://ghcr.io/devcontainers/features/go:9.9.9' could not be processed.  You may not have permission to access this Feature, or may not be logged in.  If the issue persists, report this to the Feature author.","description":"An error occurred setting up the container."}
+(probe exit: 1)
