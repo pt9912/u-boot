@@ -64,7 +64,7 @@ Ist-Stand), [`releasing.md`](../maintainer/releasing.md) §3 Punkt 4
 (§7-Roadmap-Nacharbeit), Eigenes Plan-Risiko 5 (dieser Slice)
 Befund: Die Tabelle *Nächste Wellen* trägt die Restthemen (Quellen, Optionen,
 Basis-Image, [`slice-v1-docker-cli-bau-auf-standard-basis-image`](../plan/planning/open/slice-v1-docker-cli-bau-auf-standard-basis-image.md) und
-[`slice-v1-katalog-features-quellen-und-freigabe`](../plan/planning/in-progress/slice-v1-katalog-features-quellen-und-freigabe.md), beide weiter in `open/`) unter
+[`slice-v1-katalog-features-quellen-und-freigabe`](../plan/planning/open/slice-v1-katalog-features-quellen-und-freigabe.md), beide weiter in `open/`) unter
 dem Label `v0.20.0` — das Label war die Zuordnung des Nachzugs `b32e9c38` nach
 dem `v0.19.0`-F-7-Bericht. Der Tag `v0.20.0` ist jetzt gesetzt und trägt allein
 den Katalog-Schlüssel `java-toolchain`; die Restthemen stehen ohne Nummer. Der
