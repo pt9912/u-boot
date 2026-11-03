@@ -9,7 +9,16 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** Release `v0.18.0` (geplant, Roadmap *Nächste Wellen*; die Welle-Datei entsteht bei der Eröffnung). Folge-Punkt von [`slice-v1-sandbox-features-socket-und-lockerungen`](../done/slice-v1-sandbox-features-socket-und-lockerungen.md) (Nebenbefunde N1 und N2, [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md) *Nicht Gegenstand* (a) und (b)); nicht Teil von `v0.13.1`, Release-Zuordnung beim Projektinhaber. Es gibt keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre.
+**Welle:** ohne Welle-Datei; die Release-Zuordnung fällt beim Start
+(Entscheidung des Projektinhabers). Die Zuordnung von 2026-10-22 auf
+`v0.18.0` ist überholt — `v0.18.0` bis `v0.20.0` sind gelaufen, ohne das
+Slice. **Reihenfolge (Projektinhaber, 2026-11-03):** Umsetzung nach dem
+Vorgang [`slice-v1-katalog-projekt-containerenv`](slice-v1-katalog-projekt-containerenv.md)
+(CR-Schnitt liegt in `in-progress/`). Folge-Punkt von
+[`slice-v1-sandbox-features-socket-und-lockerungen`](../done/slice-v1-sandbox-features-socket-und-lockerungen.md)
+(Nebenbefunde N1 und N2, [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md)
+*Nicht Gegenstand* (a) und (b)). Es gibt keine Closure-Bedingung, die von der
+DoD dieses Slice verschieden wäre.
 
 **Teilung (2026-10-24):** Der Punkt N3 (die Prüfung der Freigabeliste in `generate devcontainer`) ist ausgegliedert in [`slice-v1-generate-prueft-freigabeliste`](../done/slice-v1-generate-prueft-freigabeliste.md): Er ist entscheidungsfrei und brauchte keine Messung (die Lücke ist am Binary gezeigt, dort §1). Dieser Slice behält N1 und N2 mit ihrem Start-Trigger (§4): die Messung steht am Anfang, die Entscheidung des Projektinhabers zu N1 folgt der Messung. Die Reihenfolge „N3 vor N2“ bleibt: der Schlüssel aus N2 wird erst committet, wenn der ausgegliederte Slice geliefert ist (§4, §6). **Stand 2026-10-24:** N3 liegt in `done/` ([`slice-v1-generate-prueft-freigabeliste`](../done/slice-v1-generate-prueft-freigabeliste.md)); der Schlüssel aus N2 darf damit committet werden. Der Start-Trigger von N1 und N2 (§4: Priorisierung und Release-Zuordnung durch den Projektinhaber, Messung zuerst) ist unverändert.
 
@@ -101,7 +110,7 @@ Die Zeilennummern dieser Tabelle gelten am 2026-10-22; seit der Closure von [`sl
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der Projektinhaber hat den Slice priorisiert und einem Release zugeordnet; kein anderer Slice in `in-progress/` (WIP-Limit 1, gelesen beim Start); der Release-Cut `v0.13.1` ist geschnitten, damit der Slice das Patch-Release nicht hält. Die Messung zu N1 und N2 ist der erste Schritt des Slice, nicht seine Voraussetzung. **Vor dem Commit des Schlüssels aus N2** liegt [`slice-v1-generate-prueft-freigabeliste`](../done/slice-v1-generate-prueft-freigabeliste.md) in `done/` (beobachtbar: die Datei liegt dort); die Messung selbst darf vorher laufen.
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der Projektinhaber priorisiert beim Start und ordnet ggf. einen Release zu (Reihenfolge-Beschluss 2026-11-03: Umsetzung nach dem Vorgang [`slice-v1-katalog-projekt-containerenv`](slice-v1-katalog-projekt-containerenv.md)); kein anderer Slice in `in-progress/` (WIP-Limit 1, gelesen beim Start). Die Messung zu N1 und N2 ist der erste Schritt des Slice, nicht seine Voraussetzung. **Vor dem Commit des Schlüssels aus N2** liegt [`slice-v1-generate-prueft-freigabeliste`](../done/slice-v1-generate-prueft-freigabeliste.md) in `done/` (beobachtbar: die Datei liegt dort; erfüllt seit 2026-10-24); die Messung selbst darf vorher laufen.
 
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
 
