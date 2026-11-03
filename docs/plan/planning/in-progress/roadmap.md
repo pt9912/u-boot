@@ -25,9 +25,9 @@ Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-k
 
  [`slice-v1-release-cut-v0.20.0`](../done/slice-v1-release-cut-v0.20.0.md) liegt in [`done/`](../done/) — Minor-Release `v0.20.0` von `main` nach `v0.19.0`, trägt den Katalog-Schlüssel `java-toolchain` ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv), Lastenheft `0.31.0`, [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)); Tag `v0.20.0` auf `90f2a1d2` (2026-11-03, Freigabe des Projektinhabers nach grünen Vorabprüfungen), siehe *Abgeschlossene Wellen*.
 
-Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)); der CR-Schnitt des Vorschlags [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md) (Projekt-Umgebungswerte, gebilligt 2026-11-03) wartet auf den freien WIP-Limit-Platz.
+Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
-Nichts in Arbeit.
+Der CR-Schnitt [`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md) liegt in `in-progress/` — der Konfig-Schlüssel `devcontainer.containerEnv` (Projekt-Umgebungswerte der erzeugten Dev-Container; billigt 2026-11-03, Umsetzung folgt im Slice [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md)); der Wortlaut ist vorgelegt ([`cr-vorschlag-containerenv.md`](../../open/cr-vorschlag-containerenv.md)), die Freigabe steht aus.
 
 ## Nächste Wellen
 
