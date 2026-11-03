@@ -3,7 +3,7 @@
 **Status:** vorgelegt (2026-11-03); wartet auf die Freigabe des Projektinhabers.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
-[`slice-cr-devcontainer-containerenv`](../next/slice-cr-devcontainer-containerenv.md).
+[`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md).
 Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an
 den Verträgen. Der *Neu*-Wortlaut der Stellen (a) bis (d) ist freizugeben; die
 vii Entscheidungen des Umsetzungs-Plans
