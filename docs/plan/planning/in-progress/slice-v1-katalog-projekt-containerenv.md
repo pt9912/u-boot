@@ -108,24 +108,25 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Ziel-Form: Slice — **≤ 3 Liefer-Punkte**; Gate-Läufe und Closure-Pflichten
 zählen nicht mit.
 
-- [ ] **CR-Wortlaut und Freigabe:** Lastenheft-Absatz für
+- [x] **CR-Wortlaut und Freigabe:** Lastenheft-Absatz für
   [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
   (Schlüssel, Map-Form, Merge-Verhalten je §4-Frage 2, Abweisungen je
   Exit-Code `10`, Grenz-Sätze S10/S11-Muster), [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)-Zeilen;
   freigegeben vom Projektinhaber, **bevor** Verträge geändert werden.
-- [ ] **Umsetzung:** Konfig-Schema samt Validation (`u-boot config set`
+  **Beleg (Closure):** geliefert im CR [`slice-cr-devcontainer-containerenv`](../done/slice-cr-devcontainer-containerenv.md) — freigegeben wie vorgelegt 2026-11-03 samt den zwei Bestätigungen der Übertragungs-Lesarten (eigenes Zeile, Nur-Unterpfade), Vertrags-Übernahme `d62aad5e`; Vorschlag in [`done/`](../done/cr-vorschlag-containerenv.md).
+- [x] **Umsetzung:** Konfig-Schema samt Validation (`u-boot config set`
   prüft die Map — Name gegen den Namensraum, Wert vom Typ String),
   Generator-Render der Werte in das `containerEnv`-Objekt der erzeugten
   `devcontainer.json` (idempotent, Golden Cases: mit Werten, ohne Werte
   byte-identisch zum heutigen Stand, je Profil, Merge-Fall mit den
   Cache-Werten je §4-Frage 2), Abweisungs-Meldung je Fehlerfall, Docker-Test
   misst die Werte im Container-Prozess (`env`/`go env GOTOOLCHAIN` im
-  gebauten Container — der ENV-vs-containerEnv-Satz des CR).
-- [ ] **Eigenes Devcontainer umgestellt:** das u-boot-Projekt trägt die drei
+  gebauten Container — der ENV-vs-containerEnv-Satz des CR). **Beleg (Closure):** Umsetzung `59ad23b4` — Pfad-Kind samt Basis-Pfad-Abweisung, `config set`-Pipeline mit der Validation via `driven.ValidateDevcontainerEnvName`, Render sortiert/escaped verwaltet idempotent, Kollisions-Abweisung je Schlüsselkombination vor jedem Schreiben, Ausweisung je Wert; die 16 Beleg-Tabellen-Testnamen sind geliefert ([`SPEC-040`](../../../../spec/spezifikation.md)) und vom Verifier im Baum gefunden; die Basis-Golden bleiben byte-identisch (cache-only und ohne-Map); Docker-Tests: die Ebene-Messung `TestE2E_ContainerEnv_ValuesReachTheContainerProcess` samt Image-Negativprobe.
+- [x] **Eigenes Devcontainer umgestellt:** das u-boot-Projekt trägt die drei
   Rest-Werte in `.devcontainer/u-boot.yaml` (oder wie die Projektdatei am
   Umsetzungs-Stand heißt), der ENV-Block hinter dem Managed-Block entfällt;
   `.devcontainer` regeneriert; `make targets` der Sicht mit `make gates`
-  grün am umgestellten Stand.
+  grün am umgestellten Stand. **Beleg (Closure):** umsetzung `59ad23b4` — Pfad-Kind `ConfigDevcontainerContainerEnv` (Basis-Pfad und leerer Name = unbekannter Pfad), `config set` je Name über die PatchScalar-Pipeline mit der Validation via `driven.ValidateDevcontainerEnvName`, Basis-Pfad auch für `config get` abgewiesen (je Projektinhaber-Bestätigung Wertetabelle Lesen `nein`), Render sortiert/escaped verwaltet idempotent, Kollisions-Abweisung je Schlüsselkombination vor jedem Schreiben, Ausweisung je Wert; die 16 Beleg-Tabellen-Testnamen trägt [`SPEC-040`](../../../../spec/spezifikation.md).
 
 Zusätzlich (nicht gezählt): `make gates` grün, `make docs-check` 0 Befunde;
 Review und Verification mit Reports unter `docs/reviews/`; Doku-Update
@@ -133,6 +134,33 @@ Review und Verification mit Reports unter `docs/reviews/`; Doku-Update
 Nutzertext, `harness/replay.md`); Closure-Notiz mit
 Steering-Loop-Lerneintrag; Beobachtungs-Register fortgeschrieben oder „keine
 Beobachtung"; jedes Risiko aus §6 mit Ausgang; die drei Paarungen getragen.
+**Belege (Closure 2026-11-03):** `make gates` grün je Runde (Stempel `59ad23b4` und `e8e04909` = HEAD), `make docs-check` 0 Befunde; [Review-Report](../../../reviews/2026-11-03-slice-v1-katalog-projekt-containerenv.md) (1 HIGH/1 MEDIUM/1 LOW/2 INFO, je berichtigt — F-2 je Projektinhaber-Bestätigung) und [Verify-Report](../../../reviews/2026-11-03-slice-v1-katalog-projekt-containerenv-verify.md) (V-1 berichtigt mit der Closure) committet; Doku nachgezogen (Handbuch §4.9, `CHANGELOG.md` [Unreleased] mit Promised/Not promised, `harness/replay.md` Golden-Zeile); die Docker-Evidence trägt der volle `make test-docker`-Lauf der Umsetzung (`59ad23b4`, `internal/e2e ok 1788.460s`) samt CI [`integration-docker` 41606993604](https://github.com/pt9912/u-boot/actions/runs/41606993604) success am Tip `e8e04909` (je [`ci` 41606993558](https://github.com/pt9912/u-boot/actions/runs/41606993558) success); Register und Risiko-Ausgänge und Paarungen in §7.
+
+### Closure (Planner, 2026-11-03, nach Umsetzung `59ad23b4`, Review-Fix `e8e04909` und [Verification-Report](../../../reviews/2026-11-03-slice-v1-katalog-projekt-containerenv-verify.md))
+
+**Evidence:** Review-Report [`2026-11-03-slice-v1-katalog-projekt-containerenv`](../../../reviews/2026-11-03-slice-v1-katalog-projekt-containerenv.md) (1 HIGH/1 MEDIUM/1 LOW/2 INFO — F-1 Kommentar-Versprechen-High, F-2 Spezial-Zelle, F-3 Plan-Zeile, F-4/F-5 INFO-Grenzfälle; je nach der Fix-Runde `e8e04909` bzw. der Projektinhaber-Bestätigung „Zelle auf nein" berichtigt) · Verify-Report [`…-verify`](../../../reviews/2026-11-03-slice-v1-katalog-projekt-containerenv-verify.md) (frischer Kontext: DoD-Zeilen 1–3 belegt erfüllt; V-1 Bericht-Dateien mit der Closure berichtigt; die Docker-Evidence per UNVERÄNDERT-LESUNG und dem grünen Implementer-Voll-Lauf, der Nachlauf des Verifiers vom Projektinhaber abgebrochen — siehe [`BEO-E2E/test-docker-nachlauf-ohne-stempel`](../observations/BEO-E2E/test-docker-nachlauf-ohne-stempel/observation.md)).
+
+**Läufe:** Umsetzung `59ad23b4` — `make gates` grün (Stempel = HEAD je Runde), `make test-docker` **voll grün** (`internal/e2e ok 1788.460s`, zwei frühere Rot-Läufe waren go.dev-Netz-503 im Einzel-Nachlauf grün), `make verify-depguard` 9/9, `make docs-check` 0 Befunde; Fix-Runde `e8e04909` — `make gates` grün; CI am Push-Tip: [`ci` 41606993558](https://github.com/pt9912/u-boot/actions/runs/41606993558) und [`integration-docker` 41606993604](https://github.com/pt9912/u-boot/actions/runs/41606993604) je **success**; Eigen-Umstellung über `config set` im Docker-Modus samt Regeneration NoOp und `make -n`-Kette (`BUILD_MODE=local` → lokale Rezepte) je Review-/Verifier-Eigenmessung.
+
+**Offengelegte Grenzen (F-4/F-5 INFO, beurteilt im Review-Report):** die Ausweisung zeigt den Wert JSON-escaped; hand-editierte Einträge mit verletzender Namensform erzeugen valides JSON mit ungewöhnlichem Schlüssel — die Abweisung bindet der Wortlaut nur an `config set` (und `devcontainer up` an der bestehenden Namens-Stelle); `config list` zeigt einen leeren Wert nicht (bestehender Filter), `config get` liest ihn verbatim. Keine Grenze reicht über die Vertrags-Zusagen hinaus (Decken-Regel je Review geprüft).
+
+**Risiken aus §6 — je Ausgang:**
+1. *Eine Zusage reicht weiter als die Messung* — **entfallen:** die Ebene-Messung lief der Umsetzung (`Config.Env` des CLI-gestarteten Containers vs. Image-`ENV`) und die Grenz-Sätze stecken die Weite je CHANGELOG, Handbuch-Grenzen; die Befunde der Prüflinse [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md): keiner.
+2. *Still gemergte `containerEnv`-Konflikte* — **entfallen:** Kollisions-Abweisung vor jedem Schreiben je Schlüsselkombination (Tests trägt die Beleg-Tabelle).
+3. *Eine Bedingung der Technik-Stelle ohne Test* — **entfallen:** alle [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)-Beleg-Aufträge mit Test-Namen gefüllt, 16 Namen im Baum, vom Verifier je Bedingung gelesen; [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) — kein neuer Fund.
+4. *Plan-Aussagen über Code, die am Fundort nicht gelesen sind* — **eingetreten (abgemildert):** die Fundstellen-Klasse trat (Review F-1/F-3, Verifier V-1) und ist berichtigt (`e8e04909`, Closure-Runde) — [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) (`evidence/slice-v1-katalog-projekt-containerenv.md`); der Abgleich läuft je Runde erneut.
+
+**Was ging anders als geplant:** (a) Die Ausweisung der Basis-Pfad-Frage brauchte **zwei** Lesart-Bestätigungen des Projektinhabers (eigene Wertetabellen-Zeile im CR; Lesen `nein` nach der Umsetzung) — der CR-Vorschlag formulierte die Stelle schärfungslos. (b) Der Kommentar der `listCandidatePaths` versprach sicheres Abweisungs-Verhalten, das der Code absichtlich nicht trägt (F-1, HIGH-Klasse §3.9). (c) Der Verifier startete einen Docker-Nachlauf bei unverändertem Pfad — abgebrochen (Projektinhaber), ersetzt durch die UNVERÄNDERT-LESUNG; die Beobachtung [`BEO-E2E/test-docker-nachlauf-ohne-stempel`](../observations/BEO-E2E/test-docker-nachlauf-ohne-stempel/observation.md) trägt den Fall (Sensor-Kandidat Stempel-Erweiterung beim Projektinhaber).
+
+**Steering-Loop-Eintrag** (gezählt, nicht verkörpert; kein Eintrag trägt das Feld `liegt in`): *Lehre 1:* die Kommentar-Klasse (§3.9) reichte bis in den Implementer-Code-Commit — die Absicherung ist die eigene Runde, nicht die Verkörperung (die Regel steht in [`AGENTS.md`](../../../../AGENTS.md) §3.9). *Lehre 2:* die Grenz-Anweisung („Nachlaufen ohne Stempel") trägt eine Beobachtungs-Aufnahme (1×) — die 3×-Schwelle fragt die Verkörperung, ein Sensor-Kandidat (Stempel-Erweiterung des `record-gates`) liegt beim Projektinhaber. *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine.
+
+**Beobachtungs-Register:** *Evidence neu:* [`BEO-E2E/test-docker-nachlauf-ohne-stempel`](../observations/BEO-E2E/test-docker-nachlauf-ohne-stempel/observation.md) (neue Beobachtung, 1×; auf Wunsch des Projektinhabers 2026-11-03) · [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) ([`evidence/slice-v1-katalog-projekt-containerenv.md`](../observations/BEO-DOK/plan-aussage-ueber-code/evidence/slice-v1-katalog-projekt-containerenv.md): F-1, F-3, V-1). *Nicht gezählt:* [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) — kein Fund; [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) — kein neuer Fund.
+
+**Carveouts:** keiner — kein Gate, keine Schwelle und kein Lint-Bestand in den Ranges berührt. **Folge-Slice:** die Messung und Weg-Entscheidung [`slice-v1-katalog-features-quellen-und-freigabe`](../open/slice-v1-katalog-features-quellen-und-freigabe.md) folgt je Reihenfolge-Beschluss (2026-11-03); START nach dieser Closure. **Weiter offen:** nichts aus der DoD.
+
+**Drei Paarungen:** *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert. *Folge-Slice* — der quellen-Slice ist eine Datei in `open/` (Verzeichnis-Lesung); er übernimmt die Mess-Pflicht-N3-Nachfolge. *Register* — jede `BEO-*`-Kennung löst in ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls`).
+
+**Verifikation** (Läufe nach Closure-Inhalt, Move und Marker; Docker-Modus): `make gates` Exit 0 am 2026-11-03 (`record-gates`-Stempel = HEAD nach dem Nachzug). Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa.
 
 ## 3. Plan (vor Code)
 

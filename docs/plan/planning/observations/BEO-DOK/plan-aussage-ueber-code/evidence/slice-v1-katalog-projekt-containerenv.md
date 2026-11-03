@@ -1,0 +1,8 @@
+**Vorgang:** [`slice-v1-katalog-projekt-containerenv`](../../../../in-progress/slice-v1-katalog-projekt-containerenv.md)
+**Fund:** drei Teil-Fundstellen der Klasse im Umsetzungs-Vorgang:
+
+- **F-1 (Review, HIGH, `kommentar-falsche-verhaltensaussage`):** der Kommentar von `listCandidatePaths` (`internal/hexagon/application/config_many.go`) behauptete, hand-editierte Namen außerhalb der env-name-Regel würden vom Domain-Konstruktor abgewiesen und aus `config list` herausgefiltert — das Gegenteil gilt absichtlich (Konstruktor splitet unvalidiert, `TestNewConfigPath_ContainerEnv_EntryParsTheName`); der zweite Kommentar desselben Diffs („a hand edit can name anything") trug das korrekte Ist. Berichtigt mit der Fix-Runde `e8e04909`; §3.9-Klasse.
+- **F-3 (Review, LOW):** die §3-Zeile „READMEs" nannte eine Änderungs-Art ohne Diff und ohne Begründung (zweitvorkommen der CR-Klasse `plan-zeile-ohne-diff-und-ohne-begründung`, Zähler 2 von 3); berichtigt `e8e04909` (ohne-Diff-Ausweis in der Zeile).
+- **V-1 (Verifier, LOW):** das §3 des Plans trug die Berichts-Dateien nicht, obwohl der Range beide Reviews trug — die Bericht-Dateien-Familie wiederum; Berichtigung mit der Closure-Runde.
+
+**Beleg-Qualität:** belegt durch die Reports ([Review](../../../../../../reviews/2026-11-03-slice-v1-katalog-projekt-containerenv.md), [Verification](../../../../../../reviews/2026-11-03-slice-v1-katalog-projekt-containerenv-verify.md)). Alle Stellen berichtigt (`e8e04909` und die Closure-Runde); der §3.10-Abgleich läuft je Fix-und-Closure-Runde erneut. Keine weitere Verkörperung entschieden.
