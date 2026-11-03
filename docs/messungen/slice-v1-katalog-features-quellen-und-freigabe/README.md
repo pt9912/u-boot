@@ -2,7 +2,7 @@
 
 | Dokument    | Messprotokoll |
 | ----------- | ------------- |
-| Auslösender Vorgang | [`slice-v1-katalog-features-quellen-und-freigabe`](../../plan/planning/next/slice-v1-katalog-features-quellen-und-freigabe.md) (Nebenbefunde N1/N2 aus [`ADR-0032`](../../plan/adr/0032-katalog-features-socket-und-lockerungen.md)), [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) |
+| Auslösender Vorgang | [`slice-v1-katalog-features-quellen-und-freigabe`](../../plan/planning/in-progress/slice-v1-katalog-features-quellen-und-freigabe.md) (Nebenbefunde N1/N2 aus [`ADR-0032`](../../plan/adr/0032-katalog-features-socket-und-lockerungen.md)), [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) |
 | Gelesen am  | 2026-11-03 |
 | Skripte     | `tools/messung/katalog-quellen/registry-quellen.sh` (Aufruf je Quelle, Umleitung in die Rohdaten) |
 

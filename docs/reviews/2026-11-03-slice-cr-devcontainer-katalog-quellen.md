@@ -19,7 +19,7 @@ Wortlaut-Norm: [`cr-vorschlag-katalog-quellen.md`](../plan/planning/done/cr-vors
 **Modell:** `glm-5.3-flash:cloud[1m]` · **Datum:** 2026-11-03 · frischer Kontext, kein Self-Review.
 
 **Eingangs-Kontext:** der CR-Slice-Plan und die WIP-Slot-Bewegung des quellen-Slices
-[slice-v1-katalog-features-quellen-und-freigabe](../plan/planning/next/slice-v1-katalog-features-quellen-und-freigabe.md),
+[slice-v1-katalog-features-quellen-und-freigabe](../plan/planning/in-progress/slice-v1-katalog-features-quellen-und-freigabe.md),
 [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
 [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes),
 [ADR-0032](../plan/adr/0032-katalog-features-socket-und-lockerungen.md),
