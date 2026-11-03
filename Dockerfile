@@ -3,11 +3,13 @@
 # ---------------------------------------------------------------------------
 # u-boot — developer environment bootloader for Docker-based projects.
 #
-# Docker-only workflow per LH-FA-BUILD-007: the repository carries no
-# host-side Go toolchain requirement. In the Docker mode (the default) build /
-# lint / test / coverage all run via
-# `docker build --target <stage> -t u-boot:<stage> .` and are wrapped in the
-# Makefile; the devcontainer adds a local mode (BUILD_MODE=local in repo.mk).
+# Docker-only workflow per LH-FA-BUILD-007, single build path (ADR-0043): the
+# repository carries no host-side Go toolchain requirement, and the devcontainer
+# of the repo is the build environment — `make gates` runs inside it, with the
+# same recipes of scripts/bau.sh the stages compile, lint, test and coverage
+# call. `docker build --target <stage> -t u-boot:<stage> .` builds each stage
+# individually (SPEC-029); the container-facing targets (build, test-docker,
+# build-binaries, govulncheck, image-scan) wrap the Docker calls in repo.mk.
 #
 # Stages (LH-FA-BUILD-001):
 #   deps      — Go module resolution (cache layer).
@@ -32,8 +34,8 @@
 # project, all carried by the pin-places test.
 #
 # The commands of the stages compile, lint, test and coverage live in
-# scripts/bau.sh; the local mode of repo.mk (BUILD_MODE=local) calls the same
-# script inside the devcontainer.
+# scripts/bau.sh; repo.mk calls the same script for compile, lint, test and
+# coverage-gate.
 # ---------------------------------------------------------------------------
 
 # Global build args. Both must be declared before the first FROM so they
@@ -131,8 +133,7 @@ RUN apt-get update -qq && \
 #
 # The commands live in scripts/bau.sh, which sets `pipefail` itself so that
 # `go test … | tee …` propagates the `go test` exit code instead of being
-# masked by tee. The local mode of repo.mk (BUILD_MODE=local) calls the same
-# script.
+# masked by tee. The coverage-gate target of repo.mk calls the same script.
 FROM deps AS coverage
 
 ARG COVERAGE_THRESHOLD=90

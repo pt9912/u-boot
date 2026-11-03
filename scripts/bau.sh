@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # bau.sh — die Befehle der Stages compile, lint, test und coverage.
 #
-# ZUSAGE. Das Dockerfile (Stages compile, lint, test, coverage) und der lokale
-# Modus von repo.mk (BUILD_MODE=local) rufen dieses Skript; beide führen damit
-# dieselben Befehle aus. Das Skript setzt CGO_ENABLED=0 bei compile, test und
-# coverage und sonst nichts. GOFLAGS kommt aus der Umgebung (Docker: ENV der
-# Stage deps; lokal: ENV im .devcontainer/Dockerfile). lint setzt nichts: Die
-# Stage baut auf dem Image golangci/golangci-lint und kennt weder GOFLAGS noch
-# CGO_ENABLED.
+# ZUSAGE. Das Dockerfile (Stages compile, lint, test, coverage) und die
+# Targets von repo.mk mit derselben Befehlsfamilie (compile, lint, test,
+# coverage-gate) rufen dieses Skript; beide führen damit dieselben Befehle
+# aus. Das Skript setzt CGO_ENABLED=0 bei compile, test und coverage und sonst
+# nichts. GOFLAGS kommt aus der Umgebung (Docker: ENV der Stage deps;
+# im Devcontainer: die containerEnv von .devcontainer/devcontainer.json).
+# lint setzt nichts: Die Stage baut auf dem Image golangci/golangci-lint und
+# kennt weder GOFLAGS noch CGO_ENABLED.
 #
 # AUFRUF.   bau.sh compile | lint | test | coverage
 # UMGEBUNG. compile:  BAU_COMPILE_OUT  Ausgabepfad des Binary (Standard /tmp/u-boot)

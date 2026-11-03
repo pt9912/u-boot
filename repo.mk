@@ -3,7 +3,7 @@
 # Diese Datei gehoert dem Repo. Der Bootstrap legt sie an, wo sie fehlt, und
 # schreibt sie danach nie wieder; harness/mk/ und das Root-Makefile dagegen
 # schreibt jeder Lauf neu. Das Root-Makefile bindet sie nach den Fragmenten
-# unter harness/mk/ ein (-include repo.mk); fehlt sie, laeuft make ohne sie.
+# ein (-include repo.mk); fehlt sie, laeuft make ohne sie.
 #
 # Ein eigenes Target steht hier wie in jedem Makefile. Ein eigenes Gate haengt
 # sich an die Gate-Kette mit
@@ -28,16 +28,19 @@
 
 # u-boot — developer environment bootloader for Docker-based projects.
 #
-# Docker-only workflow (LH-FA-BUILD-007): in the Docker mode (BUILD_MODE=docker,
-# the default) build/lint/test/coverage all run via
-# `docker build --target <stage>` inside containers. The repo has no
-# host-side Go toolchain requirement; only Docker and `make` are expected on
-# the host. `make` is a deliberate carveout to LH-NFA-PORT-002 — it is the
-# only host dependency beyond Docker. The devcontainer sets BUILD_MODE=local
-# (the `containerEnv` object of the generated .devcontainer/devcontainer.json;
-# the value reaches the environment of the container processes): there the
-# targets run with the toolchain installed in the container (scripts/bau.sh);
-# CI and hosts stay in the Docker mode.
+# Docker-only workflow (LH-FA-BUILD-007), single build path (ADR-0043): the
+# devcontainer of the repo is the build environment, and the recipes of
+# scripts/bau.sh call the toolchain installed in the container (the
+# containerEnv of .devcontainer/devcontainer.json carries the Go caches under
+# the workspace). `make gates` runs inside the devcontainer container; its
+# container work (docs-check with the d-check image) is carried by the nested
+# daemon of the container. `make test-docker` binds to the Docker daemon
+# outside the devcontainer (socket form): the integration tests are not
+# promised in the nested daemon (SPEC-031, Messbasis M4). The build of the
+# runtime image, the release binaries, packages and govulncheck run against a
+# Docker daemon as before. The host carries Docker and GNU make, no host-side
+# Go toolchain requirement (`make` is the deliberate carveout to
+# LH-NFA-PORT-002 — it is the only host dependency beyond Docker).
 #
 # Quality gates (LH-FA-BUILD-006):
 #   make gates       — inner-loop mandatory gates (lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung).
@@ -77,25 +80,21 @@ VERSION                 ?= 0.21.0-dev
 TRIVY_VERSION           ?= 0.70.0
 THRESHOLD               ?= 90
 
-# BUILD_MODE selects where the build targets run: `docker` (default) builds
-# the Dockerfile stages, `local` runs the commands with the toolchain of the
-# environment (the devcontainer). The mode is explicit; there is no detection
-# of a `go` on the PATH.
-BUILD_MODE              ?= docker
-ifeq ($(filter $(BUILD_MODE),docker local),)
-$(error BUILD_MODE must be docker or local, not '$(BUILD_MODE)')
+# The build-mode decision is retired (ADR-0043): the devcontainer is the build
+# environment, and there is no second mode. The value `local`, which the
+# containerEnv of the devcontainer sets, is accepted; every other value,
+# notably the retired `docker`, ends with this make error.
+BUILD_MODE              ?= local
+ifneq ($(filter-out local,$(BUILD_MODE)),)
+$(error BUILD_MODE must be local or unset, not '$(BUILD_MODE)'; the repo carries a single build path, the devcontainer (docs/plan/adr/0043-nur-devcontainer-bau-pfad.md))
 endif
 
-# PKG and RUN narrow `make test` to a partial run (local mode only). Only a
-# value given on the command line counts; a PKG or RUN in the environment is
-# ignored. A partial run is no evidence: it is refused together with the
-# evidence targets.
+# PKG and RUN narrow `make test` to a partial run. Only a value given on the
+# command line counts; a PKG or RUN in the environment is ignored. A partial
+# run is no evidence: it is refused together with the evidence targets.
 TEST_PKG := $(if $(filter command%,$(origin PKG)),$(PKG))
 TEST_RUN := $(if $(filter command%,$(origin RUN)),$(RUN))
 ifneq ($(strip $(TEST_PKG)$(TEST_RUN)),)
-ifeq ($(BUILD_MODE),docker)
-$(error PKG and RUN exist in the local mode only (BUILD_MODE=local))
-endif
 ifneq ($(filter gates record-gates ci fullbuild,$(MAKECMDGOALS)),)
 $(error PKG and RUN make a partial run, which is no evidence: not with gates, record-gates, ci or fullbuild)
 endif
@@ -108,13 +107,6 @@ ifeq ($(CI),1)
 PROGRESS_FLAG := --progress=plain
 endif
 
-# `--no-cache-filter <stage>` forces BuildKit to re-evaluate the given
-# stage without invalidating the `deps` cache layer. Without this, a
-# stale layer hash could mask test/lint/coverage failures.
-NO_CACHE_FILTER_TEST     := --no-cache-filter test
-NO_CACHE_FILTER_LINT     := --no-cache-filter lint
-NO_CACHE_FILTER_COVERAGE := --no-cache-filter coverage
-
 DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
     --build-arg GO_VERSION=$(GO_VERSION) \
     --build-arg GOLANGCI_LINT_VERSION=$(GOLANGCI_LINT_VERSION) \
@@ -123,56 +115,33 @@ DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
 .DEFAULT_GOAL := help
 
 .PHONY: deps compile lint test test-docker coverage coverage-gate build build-binaries run clean \
-        ci fullbuild govulncheck packages image-scan verify-depguard ablage-pruefung modus-pruefung
+        ci fullbuild govulncheck packages image-scan verify-depguard ablage-pruefung
 
 # ---- inner-loop ------------------------------------------------------------
 
-ifeq ($(BUILD_MODE),local)
-
-# Local mode: the targets run with the toolchain of the environment (the
-# devcontainer, .devcontainer/Dockerfile). The commands come from
-# scripts/bau.sh, the script the Dockerfile stages call as well. The build and
-# test cache of Go stays between runs, so a repeated run is not a rebuild.
-# PKG and RUN reach the script through the environment (BAU_PKG, BAU_RUN), not
-# through the command line of the recipe: a quote in the value stays text. They
-# apply to `test` only.
+# The targets that start no container call the recipes of scripts/bau.sh — the
+# same commands the Dockerfile stages call. PKG and RUN reach the script
+# through the environment (BAU_PKG, BAU_RUN), not through the command line of
+# the recipe: a quote in the value stays text. They apply to `test` only.
 export BAU_PKG := $(TEST_PKG)
 export BAU_RUN := $(TEST_RUN)
 
-deps: ## Resolve Go module dependencies (Docker mode: deps stage; local mode: go mod download).
+deps: ## Resolve Go module dependencies (the toolchain of the build environment; the containerEnv of the devcontainer sets the Go caches under the workspace).
 	go mod download
 
-compile: ## Fast compile feedback, no tests/lint (Docker mode: compile stage; local mode: go build).
+compile: ## Fast compile feedback, no tests/lint (the recipe of scripts/bau.sh, the same command as the compile stage).
 	bash scripts/bau.sh compile
 
-lint: ## golangci-lint with the project profile (Docker mode: lint stage; local mode: golangci-lint run).
+lint: ## golangci-lint with the project profile (the recipe of scripts/bau.sh, the same command as the lint stage).
 	bash scripts/bau.sh lint
 
-test: ## Run the Go tests (Docker mode: test stage; local mode: PKG=… RUN=… makes a partial run, which is no evidence; write a $ in RUN as $$).
+test: ## Run the Go tests (the recipe of scripts/bau.sh; PKG=… RUN=… makes a partial run, which is no evidence; write a $ in RUN as $$).
 	bash scripts/bau.sh test
 
-test-docker: ## Run //go:build docker integration tests against a Docker daemon (Docker mode: the host daemon; local mode: the nested daemon of the devcontainer, where the tests are no evidence, see SPEC-031).
-	go test -v -tags docker -timeout 30m ./...
-
-coverage-gate: ## Coverage threshold gate, bootstrap-aware (LH-FA-BUILD-008; Docker mode: coverage stage; local mode: scripts/bau.sh).
-	OUT=coverage COVERAGE_THRESHOLD=$(THRESHOLD) bash scripts/bau.sh coverage
-
-else
-
-deps:
-	$(DOCKER_BUILD) --target deps -t $(IMAGE):deps .
-
-compile:
-	$(DOCKER_BUILD) --target compile -t $(IMAGE):compile .
-
-lint:
-	$(DOCKER_BUILD) $(NO_CACHE_FILTER_LINT) --target lint -t $(IMAGE):lint .
-
-test:
-	$(DOCKER_BUILD) $(NO_CACHE_FILTER_TEST) --target test -t $(IMAGE):test .
-
-test-docker:
-	@# Two-step target (slice-m6-docker-integrationstests Sub-T4):
+# Two-step target (slice-m6-docker-integrationstests Sub-T4), socket form
+# (SPEC-031): the tests bind to the Docker daemon outside the devcontainer
+# container — the daemon that creates it.
+test-docker: ## Run //go:build docker integration tests against the Docker daemon outside the devcontainer (socket form; SPEC-031, the tests are not promised in the nested daemon).
 	@# 1) Build the `test-docker-tools` Dockerfile stage — golang +
 	@#    docker-ce-cli + docker-compose-plugin (from the official
 	@#    Docker repo). Cached after first build.
@@ -207,13 +176,8 @@ test-docker:
 	    $(IMAGE):test-docker-tools \
 	    go test -v -tags docker -timeout 30m ./...
 
-coverage-gate:
-	$(DOCKER_BUILD) $(NO_CACHE_FILTER_COVERAGE) \
-	    --target coverage \
-	    --build-arg COVERAGE_THRESHOLD=$(THRESHOLD) \
-	    -t $(IMAGE):coverage .
-
-endif
+coverage-gate: ## Coverage threshold gate, bootstrap-aware (LH-FA-BUILD-008; the recipes of scripts/bau.sh, the same commands as the coverage stage).
+	OUT=coverage COVERAGE_THRESHOLD=$(THRESHOLD) bash scripts/bau.sh coverage
 
 # Alias for ergonomics; the gate is the same target.
 coverage: coverage-gate
@@ -235,23 +199,7 @@ run: build ## Smoke test: run `u-boot --help` from the built image.
 BIN_DIR    ?= bin
 PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64
 
-# packages always builds its binaries in the Docker mode, whatever BUILD_MODE
-# says: a package is a release artefact, and release artefacts come from the
-# Docker mode (SPEC-031). nfpm runs in a container as well.
-packages: ## Build the .deb and .rpm packages (amd64, arm64) with nfpm (slice-v2-distro-pakete); binaries from the Docker mode.
-	$(MAKE) BUILD_MODE=docker build-binaries
-	./scripts/build-packages.sh $(VERSION) $(BIN_DIR) packages
-
-ifeq ($(BUILD_MODE),local)
-
-build-binaries: ## Cross-compile u-boot binaries for all release platforms (Docker mode: binary-archive stage; local mode: go build; the release pipeline uses the Docker mode).
-	@mkdir -p $(BIN_DIR)
-	@bash -c 'set -o pipefail; out=$$(mktemp -d); trap "rm -rf $$out" EXIT; UBOOT_VERSION="$(VERSION)" PLATFORMS="$(PLATFORMS)" OUT_DIR="$$out" sh scripts/build-binary-archive.sh | tar --no-same-owner -xf - -C "$(BIN_DIR)"'
-	@echo "[build-binaries] $(words $(PLATFORMS)) binaries built in $(BIN_DIR)/ (local mode)"
-
-else
-
-build-binaries:
+build-binaries: ## Cross-compile u-boot binaries for all release platforms (the binary-archive stage; the release pipeline uses this path).
 	@mkdir -p $(BIN_DIR)
 	$(DOCKER_BUILD) --target binary-archive -t $(IMAGE):binary-archive .
 	@docker run --rm \
@@ -260,29 +208,23 @@ build-binaries:
 	    | tar --no-same-owner -xf - -C $(BIN_DIR)
 	@echo "[build-binaries] $(words $(PLATFORMS)) binaries built in $(BIN_DIR)/"
 
-endif
+# packages builds its binaries over the binary-archive stage: a package is a
+# release artefact (SPEC-031).
+packages: ## Build the .deb and .rpm packages (amd64, arm64) with nfpm (slice-v2-distro-pakete); binaries from the binary-archive stage.
+	$(MAKE) build-binaries
+	./scripts/build-packages.sh $(VERSION) $(BIN_DIR) packages
 
 # ---- security gates --------------------------------------------------------
 
 # govulncheck runs inside an ephemeral Go container with the project
 # mounted in. Pinned via GOVULNCHECK_VERSION (ADR-0004 pin policy);
 # routine upgrade documented in the commit body.
-ifeq ($(BUILD_MODE),local)
-
-govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006; Docker mode: golang container; local mode: the toolchain of the environment).
-	GOFLAGS=-buildvcs=false go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
-	GOFLAGS=-buildvcs=false "$$(go env GOPATH)/bin/govulncheck" ./...
-
-else
-
-govulncheck:
+govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006; ephemeral Go container).
 	docker run --rm \
 	    -v "$(CURDIR)":/src -w /src \
 	    -e GOFLAGS=-buildvcs=false \
 	    golang:$(GO_VERSION) \
 	    sh -c "go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) && govulncheck ./..."
-
-endif
 
 # image-scan reproduces the third PR-blocking ci.yml job locally.
 # Builds the runtime image, then runs Trivy against it inside an
@@ -304,71 +246,6 @@ image-scan: build ## Trivy scan of the runtime image (LH-QA-003 third gate).
 # depguard config changes.
 verify-depguard: ## Verify all nine depguard layer rules fire (LH-FA-ARCH-003).
 	bash scripts/verify-depguard.sh
-
-# modus-pruefung pins the conditions of SPEC-031 with `make -n`:
-#   - the targets with a local variant call no `docker build` in the local mode
-#     and `docker build` or `docker run` in the Docker mode (the default);
-#   - `build`, `run`, `image-scan`, `packages` and `docs-check` call docker in
-#     both modes;
-#   - a BUILD_MODE other than docker and local is an error;
-#   - PKG and RUN are an error in the Docker mode, ignored when they come from
-#     the environment, and refused together with gates, record-gates, ci and
-#     fullbuild in the local mode, while these four without them are accepted;
-#   - the Dockerfile stages compile, lint, test and coverage and the local
-#     recipes call scripts/bau.sh, the local `deps` is `go mod download`, and a
-#     `go` on the PATH does not switch the mode.
-# On demand, not part of `gates` (a dry run costs seconds, but the rules it
-# guards change rarely). Mutations that turn it red: a `docker build` line in a
-# local recipe; a missing $(error …) line for BUILD_MODE, for PKG in the Docker
-# mode or for an evidence target.
-MODUS_TARGETS := deps compile lint test test-docker coverage-gate govulncheck build-binaries
-modus-pruefung: ## Check that the local mode calls no docker build and the Docker mode does (make -n).
-	@set -e; \
-	for t in $(MODUS_TARGETS); do \
-	    if $(MAKE) -s -n BUILD_MODE=local $$t 2>&1 | grep -q 'docker build'; then \
-	        echo "modus-pruefung: $$t calls docker build in the local mode"; exit 1; fi; \
-	    if ! $(MAKE) -s -n BUILD_MODE=docker $$t 2>&1 | grep -q 'docker \(build\|run\)'; then \
-	        echo "modus-pruefung: $$t calls no docker in the Docker mode"; exit 1; fi; \
-	done; \
-	for t in build run image-scan packages docs-check; do \
-	    if ! $(MAKE) -s -n BUILD_MODE=local $$t 2>&1 | grep -q 'docker \(build\|run\)'; then \
-	        echo "modus-pruefung: $$t calls no docker in the local mode"; exit 1; fi; \
-	done; \
-	if $(MAKE) -s -n BUILD_MODE=foo test >/dev/null 2>&1; then \
-	    echo "modus-pruefung: an unknown BUILD_MODE is accepted"; exit 1; fi; \
-	for v in PKG=./x RUN=X; do \
-	    if $(MAKE) -s -n BUILD_MODE=docker test $$v >/dev/null 2>&1; then \
-	        echo "modus-pruefung: $$v is accepted in the Docker mode"; exit 1; fi; \
-	done; \
-	for t in compile lint test coverage-gate; do \
-	    if ! $(MAKE) -s -n BUILD_MODE=local $$t 2>&1 | grep -q 'scripts/bau.sh'; then \
-	        echo "modus-pruefung: the local recipe of $$t does not call scripts/bau.sh"; exit 1; fi; \
-	done; \
-	for s in compile lint test; do \
-	    if ! grep -q "^RUN bash scripts/bau.sh $$s\$$" Dockerfile; then \
-	        echo "modus-pruefung: the Dockerfile stage $$s does not call scripts/bau.sh"; exit 1; fi; \
-	done; \
-	if ! grep -q '^RUN OUT=/out bash scripts/bau.sh coverage$$' Dockerfile; then \
-	    echo "modus-pruefung: the Dockerfile stage coverage does not call scripts/bau.sh"; exit 1; fi; \
-	if ! $(MAKE) -s -n BUILD_MODE=local deps 2>&1 | grep -q 'go mod download'; then \
-	    echo "modus-pruefung: the local recipe of deps is not go mod download"; exit 1; fi; \
-	fake=$$(mktemp -d); printf '#!/bin/sh\nexit 0\n' > "$$fake/go"; chmod +x "$$fake/go"; \
-	if ! env -u BUILD_MODE PATH="$$fake:$$PATH" $(MAKE) -s -n test 2>&1 | grep -q 'docker build'; then \
-	    rm -rf "$$fake"; echo "modus-pruefung: a go on the PATH switches the mode (it must not)"; exit 1; fi; \
-	rm -rf "$$fake"; \
-	if ! PKG=./x RUN=X $(MAKE) -s -n BUILD_MODE=docker test >/dev/null 2>&1; then \
-	    echo "modus-pruefung: PKG or RUN from the environment is refused (only the command line counts)"; exit 1; fi; \
-	for g in gates record-gates ci fullbuild; do \
-	    for v in PKG=./x RUN=X; do \
-	        if $(MAKE) -s -n BUILD_MODE=local $$g $$v >/dev/null 2>&1; then \
-	            echo "modus-pruefung: $$g accepts $$v (a partial run is no evidence)"; exit 1; fi; \
-	    done; \
-	done; \
-	for g in gates record-gates ci fullbuild; do \
-	    if ! $(MAKE) -s -n BUILD_MODE=local $$g >/dev/null 2>&1; then \
-	        echo "modus-pruefung: $$g without PKG and RUN is refused in the local mode"; exit 1; fi; \
-	done; \
-	echo "modus-pruefung: OK ($(words $(MODUS_TARGETS)) targets in both modes; build, run, image-scan, packages, docs-check in docker; BUILD_MODE, PKG and RUN rules)"
 
 # ---- gate chain ------------------------------------------------------------
 
