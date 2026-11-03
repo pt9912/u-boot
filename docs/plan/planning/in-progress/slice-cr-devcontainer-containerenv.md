@@ -41,7 +41,7 @@ DevContainers, Map Name → Wert in [`u-boot.yaml`](../../../../spec/lastenheft.
 [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen),
 [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)-Zeilen
 und die Beleg-Aufträge der Technik-Stelle — wird vorgelegt
-([`cr-vorschlag-containerenv.md`](cr-vorschlag-containerenv.md)), vom
+([`cr-vorschlag-containerenv.md`](../open/cr-vorschlag-containerenv.md)), vom
 Projektinhaber freigegeben und wortgleich in die Verträge übernommen. **Kein
 Produktcode und keine Implementierung in diesem Slice** (Muster der CR-Slices).
 
@@ -55,7 +55,7 @@ Muster der Werkzeugketten-Kette).
 
 ## 2. Definition of Done
 
-- [ ] **Vorschlags-Datei:** [`cr-vorschlag-containerenv.md`](cr-vorschlag-containerenv.md)
+- [ ] **Vorschlags-Datei:** [`cr-vorschlag-containerenv.md`](../open/cr-vorschlag-containerenv.md)
   mit Alt/Neu-Wortlaut je Stelle (Muster [`cr-vorschlag-java-toolchain`](../done/cr-vorschlag-java-toolchain.md))
   — Stellen (a) Lastenheft-Absatz, (b) Historie-Zeile `0.32.0`, (c)
   [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)

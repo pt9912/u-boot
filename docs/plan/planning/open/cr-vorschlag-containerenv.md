@@ -1,6 +1,6 @@
 # CR-Vorschlag: Konfig-Schlüssel `devcontainer.containerEnv` (Projekt-Umgebungswerte) — Alt/Neu-Wortlaut je Stelle
 
-**Status:** vorgelegt (2026-11-03); wartet auf die Freigabe des Projektinhabers.
+**Status:** freigegeben (2026-11-03, Projektinhaber: „Freigabe wie vorgelegt“ im Agenten-Gespräch); die Vertrags-Übernahme folgt im CR-Slice.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
 [`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md).

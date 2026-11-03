@@ -27,7 +27,7 @@ Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-k
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
-Der CR-Schnitt [`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md) liegt in `in-progress/` — der Konfig-Schlüssel `devcontainer.containerEnv` (Projekt-Umgebungswerte der erzeugten Dev-Container; billigt 2026-11-03, Umsetzung folgt im Slice [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md)); der Wortlaut ist vorgelegt ([`cr-vorschlag-containerenv.md`](../../open/cr-vorschlag-containerenv.md)), die Freigabe steht aus.
+Der CR-Schnitt [`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md) liegt in `in-progress/` — der Konfig-Schlüssel `devcontainer.containerEnv` (Projekt-Umgebungswerte der erzeugten Dev-Container; billigt 2026-11-03, Umsetzung folgt im Slice [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md)); der Wortlaut ist vorgelegt ([`cr-vorschlag-containerenv.md`](../open/cr-vorschlag-containerenv.md)), die Freigabe steht aus.
 
 ## Nächste Wellen
 
