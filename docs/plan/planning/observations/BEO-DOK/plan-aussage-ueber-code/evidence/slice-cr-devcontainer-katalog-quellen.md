@@ -1,0 +1,7 @@
+**Vorgang:** [`slice-cr-devcontainer-katalog-quellen`](../../../../in-progress/slice-cr-devcontainer-katalog-quellen.md)
+**Fund:** drei Teil-Fundstellen der Klasse im CR-Vorgang der zwei Werte:
+
+- **F-1/F-2 (Review, je MEDIUM, zustandsmarker-Familie):** die Roadmap trug die Lese-Wahrheit des WIP-Wechsels nicht (quellen-Slice „liegt in `in-progress/`" nach dem Rück-Move; der aktive CR-Schnitt fehlte je Absatz) und zwei Marker des quellen-Slice-Rests standen über ihres Ablaufs (Bestand „nicht gemessen" bei gemessener Lage; „CR-Schnitt liegt in `in-progress/`" ohne Kennung). Berichtigt mit der Fix-Runde `283f815b` und den Link-Tiefen `b122f697`.
+- **V-1 (Verifier, HIGH):** die neue Historie-Zeile 0.33.0 der Spezifikation trug hinter ihrem schließenden Zellen-Trenner das eingekleinte Reststück der alten 0.32.0-Umsetzung-Prosa — gebrochene Edit-Kante der Umsetzungs-Runde, von keinem Gate gelesen (d-check liest Anker, keine Zellen). Berichtigt mit der Berichtigung vor der Closure.
+
+**Beleg-Qualität:** belegt durch die Reports ([Review](../../../../../../reviews/2026-11-03-slice-cr-devcontainer-katalog-quellen.md), [Verification](../../../../../../reviews/2026-11-03-slice-cr-devcontainer-katalog-quellen-verify.md)). Alle Stellen berichtigt; der §3.10-Abgleich je Fix-und-Closure-Runde erneut. Keine weitere Verkörperung entschieden.
