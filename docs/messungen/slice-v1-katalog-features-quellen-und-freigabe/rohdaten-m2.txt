@@ -1,0 +1,18 @@
+===== form: ghcr.io/devcontainers/features/go:1.0.3
+exit: 1
+Feature dependencies for 'ghcr.io/devcontainers/features/go:1.0.3'...
+Feature       : Go
+Feature 
+0
+===== form: oci://ghcr.io/devcontainers/features/go:1.0.3
+exit: 1
+Feature dependencies for 'oci://ghcr.io/devcontainers/features/go:1.0.3'...
+Feature manifest for 'oci://ghcr.io/devcontainers/features/go:1.0.3'.  If necessary, provide regi
+Feature 'oci://ghcr.io/devcontainers/features/go:1.0.3'.  Ensure the Feature is published and acc
+0
+===== form: https://ghcr.io/devcontainers/features/go:1.0.3
+exit: 1
+Feature dependencies for 'https://ghcr.io/devcontainers/features/go:1.0.3'...
+ERR: Feature 'https://ghcr.io/devcontainers/features/go:1.0.3' could not be processed.  You may not have permission
+Feature, or may not be logged in.  If the issue persists, report this to the Feature author.
+0

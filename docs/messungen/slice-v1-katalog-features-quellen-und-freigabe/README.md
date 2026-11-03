@@ -37,8 +37,29 @@ Rohdaten.
   das gleiche Muster und sind als Steuerwahl-Fehler notiert, nicht als
   Befund-Kontrast.
 
+## M2 — Schlüsselform-Probe der Dev-Container-CLI (gemessen 2026-11-03)
+
+Fixture-Workspace (`busybox:latest`, Features je Form), CLI 0.89.0 (Image
+`u-boot-devcontainer-cli:0.89.0-f1a94cce795e`, docker.sock-Mount), Befehl
+`devcontainer up`, Formen mit existierendem Tag `go:1.0.3`
+(`rohdaten-m2.txt`; Erst-Läufe mit Nicht-Tag `9.9.9` diskrimierten nicht,
+`rohdaten-m2-erstrun.txt`):
+
+| Form | Ergebnis |
+|---|---|
+| `ghcr.io/devcontainers/features/go:1.0.3` (Controlle) | Feature-Metadaten und Dependencies gelesen („Feature : Go"); der weitere Bau scheiterte am `docker buildx build`-Zug der Probe-Umgebung (rohdaten-m2-f1-voll.log) — keine Form-Aussage, Auflösung trägt |
+| `oci://ghcr.io/devcontainers/features/go:1.0.3` | scheitert mit eigener Fehlerklasse („Feature manifest for 'oci://…' … Ensure the Feature is published and accessible") — **unverarbeitet** |
+| `https://ghcr.io/devcontainers/features/go:1.0.3` | scheitert am Identifier-Verarbeiten („could not be processed") — **unverarbeitet** |
+
+Das Muster des ADR-0032-Vermerks (b) ist für die zwei Form-Schreibweisen
+bestätigt; u-boot rendert `source:version` wörtlich — externe Quellen in
+dieser Form bauen nicht.
+
 ## Grenzen
 
+- Der `https://…/devcontainer-feature-<id>.tgz`-Tarball-Weg (ADR-0032 (b)) wurde
+  **nicht gemessen** — nur die bloßen `https://…:1`-Schlüsselformen; eine
+  Tarball-servierte Quelle bleibt offene Probe.
 - Die Manifest-Zugriffsform (`/v2/.../manifests/<tag>`) wurde nicht probeziert
  — der Token-Ausgang reicht fürs Urteil der Registry-Lage; die Antwortform
  `NAME_UNKNOWN` (Annahme der ADR) bleibt so nicht wörtlich gemessen, sondern

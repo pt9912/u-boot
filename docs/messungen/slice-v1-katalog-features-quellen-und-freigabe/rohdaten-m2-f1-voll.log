@@ -1,0 +1,111 @@
+[2026-11-03T10:16:05.851Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 7.0.0-42-generic x64.
+[2026-11-03T10:16:08.108Z] Resolving Feature dependencies for 'ghcr.io/devcontainers/features/go:1.0.3'...
+[2026-11-03T10:16:09.050Z] Files to omit: ''
+[2026-11-03T10:16:09.289Z] Files to omit: ''
+[2026-11-03T10:16:09.307Z] Start: Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/container-features/0.89.0-1793700968104 --build-arg _DEV_CONTAINERS_BASE_IMAGE=busybox:latest --build-arg _DEV_CONTAINERS_IMAGE_USER=root --build-arg _DEV_CONTAINERS_FEATURE_CONTENT_SOURCE=dev_container_feature_content_temp --target dev_containers_target_stage -f /tmp/devcontainercli-root/container-features/0.89.0-1793700968104/Dockerfile.extended -t vsc-probe-87d0b7f87c920efa1019e362ff5f9d0aec22b5ae4144a16de7b1f109a76c662c-features /tmp/devcontainercli-root/empty-folder
+[2026-11-03T10:16:09.714Z] #0 building with "default" instance using docker driver
+
+
+[2026-11-03T10:16:09.714Z] #1 [internal] load build definition from Dockerfile.extended
+
+[2026-11-03T10:16:09.714Z] #1 transferring dockerfile: 1.84kB done
+#1 DONE 0.0s
+
+#2 [context dev_containers_feature_content_source] load .dockerignore
+#2 transferring dev_containers_feature_content_source: 2B done
+
+[2026-11-03T10:16:09.714Z] #2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/busybox:latest
+
+[2026-11-03T10:16:09.737Z] #3 DONE 0.2s
+
+[2026-11-03T10:16:09.967Z] 
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+
+[2026-11-03T10:16:09.967Z] #4 DONE 0.0s
+
+#5 [context dev_containers_feature_content_source] load from client
+#5 transferring dev_containers_feature_content_source: 12.97kB done
+#5 DONE 0.0s
+
+#6 [dev_containers_feature_content_normalize 1/3] FROM docker.io/library/busybox:latest@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4
+#6 resolve docker.io/library/busybox:latest@sha256:a46257e06c82ad85242d0d38077d0a52d9896389ca60a1a59d3463db586e5fa4 0.0s done
+#6 DONE 0.0s
+
+#7 [context dev_containers_feature_content_source] load from client
+#7 transferring dev_containers_feature_content_source: 99B done
+#7 DONE 0.0s
+
+#8 [dev_containers_feature_content_normalize 2/3] COPY --from=dev_containers_feature_content_source devcontainer-features.builtin.env /tmp/build-features/
+#8 CACHED
+
+#9 [dev_containers_feature_content_normalize 3/3] RUN chmod -R 0755 /tmp/build-features/
+#9 CACHED
+
+#10 [dev_containers_target_stage 3/5] COPY --from=dev_containers_feature_content_normalize /tmp/build-features/ /tmp/dev-container-features
+#10 CACHED
+
+#11 [dev_containers_target_stage 2/5] RUN mkdir -p /tmp/dev-container-features
+#11 CACHED
+
+#12 [dev_containers_target_stage 4/5] RUN echo "_CONTAINER_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'root' || grep -E '^root|^[^:]*:[^:]*:root:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env && echo "_REMOTE_USER_HOME=$( (command -v getent >/dev/null 2>&1 && getent passwd 'root' || grep -E '^root|^[^:]*:[^:]*:root:' /etc/passwd || true) | cut -d: -f6)" >> /tmp/dev-container-features/devcontainer-features.builtin.env
+#12 CACHED
+
+#13 [dev_containers_target_stage 5/5] RUN --mount=type=bind,from=dev_containers_feature_content_source,source=go_0,target=/tmp/build-features-src/go_0     cp -ar /tmp/build-features-src/go_0 /tmp/dev-container-features  && chmod -R 0755 /tmp/dev-container-features/go_0  && cd /tmp/dev-container-features/go_0  && chmod +x ./devcontainer-features-install.sh  && ./devcontainer-features-install.sh  && rm -rf /tmp/dev-container-features/go_0
+
+[2026-11-03T10:16:09.979Z] #13 0.163 ===========================================================================
+#13 0.163 Feature       : Go
+#13 0.163 Description   : Installs Go and common Go utilities. Auto-detects latest version and installs needed dependencies.
+#13 0.163 Id            : ghcr.io/devcontainers/features/go
+#13 0.163 Version       : 1.0.3
+#13 0.163 Documentation : https://github.com/devcontainers/features/tree/main/src/go
+#13 0.163 Options       :
+#13 0.163     VERSION="latest"
+#13 0.163 ===========================================================================
+
+[2026-11-03T10:16:10.063Z] #13 0.164 env: can't execute 'bash': No such file or directory
+#13 0.164 ERROR: Feature "Go" (ghcr.io/devcontainers/features/go) failed to install! Look at the documentation at https://github.com/devcontainers/features/tree/main/src/go for help troubleshooting this error.
+#13 ERROR: process "/bin/sh -c cp -ar /tmp/build-features-src/go_0 /tmp/dev-container-features  && chmod -R 0755 /tmp/dev-container-features/go_0  && cd /tmp/dev-container-features/go_0  && chmod +x ./devcontainer-features-install.sh  && ./devcontainer-features-install.sh  && rm -rf /tmp/dev-container-features/go_0" did not complete successfully: exit code: 127
+------
+ > [dev_containers_target_stage 5/5] RUN --mount=type=bind,from=dev_containers_feature_content_source,source=go_0,target=/tmp/build-features-src/go_0     cp -ar /tmp/build-features-src/go_0 /tmp/dev-container-features  && chmod -R 0755 /tmp/dev-container-features/go_0  && cd /tmp/dev-container-features/go_0  && chmod +x ./devcontainer-features-install.sh  && ./devcontainer-features-install.sh  && rm -rf /tmp/dev-container-features/go_0:
+0.163 Feature       : Go
+0.163 Description   : Installs Go and common Go utilities. Auto-detects latest version and installs needed dependencies.
+0.163 Id            : ghcr.io/devcontainers/features/go
+0.163 Version       : 1.0.3
+0.163 Documentation : https://github.com/devcontainers/features/tree/main/src/go
+0.163 Options       :
+0.163     VERSION="latest"
+0.163 ===========================================================================
+0.164 env: can't execute 'bash': No such file or directory
+0.164 ERROR: Feature "Go" (ghcr.io/devcontainers/features/go) failed to install! Look at the documentation at https://github.com/devcontainers/features/tree/main/src/go for help troubleshooting this error.
+
+[2026-11-03T10:16:10.063Z] ------
+
+[2026-11-03T10:16:10.065Z] Dockerfile.extended:27
+--------------------
+  26 |     ENV PATH="${GOPATH}/bin:${PATH}"
+  27 | >>> RUN --mount=type=bind,from=dev_containers_feature_content_source,source=go_0,target=/tmp/build-features-src/go_0 \
+  28 | >>>     cp -ar /tmp/build-features-src/go_0 /tmp/dev-container-features \
+  29 | >>>  && chmod -R 0755 /tmp/dev-container-features/go_0 \
+  30 | >>>  && cd /tmp/dev-container-features/go_0 \
+  31 | >>>  && chmod +x ./devcontainer-features-install.sh \
+  32 | >>>  && ./devcontainer-features-install.sh \
+  33 | >>>  && rm -rf /tmp/dev-container-features/go_0
+  34 |     
+--------------------
+
+[2026-11-03T10:16:10.065Z] ERROR: failed to build: failed to solve: process "/bin/sh -c cp -ar /tmp/build-features-src/go_0 /tmp/dev-container-features  && chmod -R 0755 /tmp/dev-container-features/go_0  && cd /tmp/dev-container-features/go_0  && chmod +x ./devcontainer-features-install.sh  && ./devcontainer-features-install.sh  && rm -rf /tmp/dev-container-features/go_0" did not complete successfully: exit code: 127
+
+[2026-11-03T10:16:10.072Z] Exit code 1
+Error: Command failed: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/container-features/0.89.0-1793700968104 --build-arg _DEV_CONTAINERS_BASE_IMAGE=busybox:latest --build-arg _DEV_CONTAINERS_IMAGE_USER=root --build-arg _DEV_CONTAINERS_FEATURE_CONTENT_SOURCE=dev_container_feature_content_temp --target dev_containers_target_stage -f /tmp/devcontainercli-root/container-features/0.89.0-1793700968104/Dockerfile.extended -t vsc-probe-87d0b7f87c920efa1019e362ff5f9d0aec22b5ae4144a16de7b1f109a76c662c-features /tmp/devcontainercli-root/empty-folder
+    at sW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1277)
+    at LG (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:469:1021)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async kW (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:4689)
+    at async hI (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:5808)
+    at async C9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:669:206)
+    at async I9 (/opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:668:16607)
+    at async /opt/devcontainer-cli/node_modules/@devcontainers/cli/dist/spec-node/devContainersSpecCLI.js:488:1917
+{"outcome":"error","message":"Command failed: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/container-features/0.89.0-1793700968104 --build-arg _DEV_CONTAINERS_BASE_IMAGE=busybox:latest --build-arg _DEV_CONTAINERS_IMAGE_USER=root --build-arg _DEV_CONTAINERS_FEATURE_CONTENT_SOURCE=dev_container_feature_content_temp --target dev_containers_target_stage -f /tmp/devcontainercli-root/container-features/0.89.0-1793700968104/Dockerfile.extended -t vsc-probe-87d0b7f87c920efa1019e362ff5f9d0aec22b5ae4144a16de7b1f109a76c662c-features /tmp/devcontainercli-root/empty-folder","description":"An error occurred setting up the container."}
