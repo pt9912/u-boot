@@ -51,13 +51,13 @@ Fixture-Workspace (`busybox:latest`, Features je Form), CLI 0.89.0 (Image
 | `oci://ghcr.io/devcontainers/features/go:1.0.3` | scheitert mit eigener Fehlerklasse („Feature manifest for 'oci://…' … Ensure the Feature is published and accessible") — **unverarbeitet** |
 | `https://ghcr.io/devcontainers/features/go:1.0.3` | scheitert am Identifier-Verarbeiten („could not be processed") — **unverarbeitet** |
 
-Das Muster des ADR-0032-Vermerks (b) ist für die zwei Form-Schreibweisen
+Das Muster des [ADR-0032](../../plan/adr/0032-katalog-features-socket-und-lockerungen.md)-Vermerks (b) ist für die zwei Form-Schreibweisen
 bestätigt; u-boot rendert `source:version` wörtlich — externe Quellen in
 dieser Form bauen nicht.
 
 ## Grenzen
 
-- Der `https://…/devcontainer-feature-<id>.tgz`-Tarball-Weg (ADR-0032 (b)) wurde
+- Der `https://…/devcontainer-feature-<id>.tgz`-Tarball-Weg ([ADR-0032](../../plan/adr/0032-katalog-features-socket-und-lockerungen.md) (b)) wurde
   **nicht gemessen** — nur die bloßen `https://…:1`-Schlüsselformen; eine
   Tarball-servierte Quelle bleibt offene Probe.
 - Die Manifest-Zugriffsform (`/v2/.../manifests/<tag>`) wurde nicht probeziert
