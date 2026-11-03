@@ -3,7 +3,7 @@
 **Review-Art:** Contract-Review (CR-Diff gegen den freigegebenen Wortlaut, Plan und
 Hard Rules). Nicht geprüft: DoD-Closure und Verification-Evidence — Verifier.
 
-**Gegenstand:** [`slice-cr-devcontainer-containerenv`](../plan/planning/in-progress/slice-cr-devcontainer-containerenv.md),
+**Gegenstand:** [`slice-cr-devcontainer-containerenv`](../plan/planning/done/slice-cr-devcontainer-containerenv.md),
 Range `f36d5f59..d62aad5e` — Schnitt `89b584e2` (Plan + [`cr-vorschlag-containerenv.md`](../plan/planning/open/cr-vorschlag-containerenv.md)),
 reine Moves `046ea7ba`/`367046c6` (0-Diff, R100) mit Verweis-Nachzug je eigenem
 Commit `2c7f4521`/`0be9cc54` (je 1 eingehend), Roadmap-Start `2830bb4c`,
@@ -113,7 +113,7 @@ ist im Agenten-Gespräch gefallen und außerhalb der Repo-Evidenz.
 - **Kategorie:** LOW
 - **Quelle:** [`AGENTS.md`](../../AGENTS.md) §3.10 (jeder Eintrag ohne Diff wird berichtigt)
 - **Fundstellen:**
-  - [`slice-cr-devcontainer-containerenv.md`](../plan/planning/in-progress/slice-cr-devcontainer-containerenv.md) §3 · „`roadmap.md` (die Zeile beim Start), `open/README.md` (Bestand-Zeile)“
+  - [`slice-cr-devcontainer-containerenv.md`](../plan/planning/done/slice-cr-devcontainer-containerenv.md) §3 · „`roadmap.md` (die Zeile beim Start), `open/README.md` (Bestand-Zeile)“
   - [`docs/plan/planning/open/README.md`](../plan/planning/open/README.md) §Bestand — keine Zeile für diesen Slice; `git diff --name-status f36d5f59..d62aad5e` berührt die Datei nicht
 - **Klasse:** `plan-zeile-ohne-diff-und-ohne-begründung`
 - **Befund:** Die Plan-§3-Tabelle führt die Bestand-Zeile in `open/README.md`

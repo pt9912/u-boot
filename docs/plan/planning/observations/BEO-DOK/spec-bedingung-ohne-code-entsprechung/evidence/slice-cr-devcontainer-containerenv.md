@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-cr-devcontainer-containerenv`](../../../../in-progress/slice-cr-devcontainer-containerenv.md)
+**Vorgang:** [`slice-cr-devcontainer-containerenv`](../../../../done/slice-cr-devcontainer-containerenv.md)
 **Fund:** Verifier V-4 (LOW) — die Beleg-Tabelle des [`SPEC-040`](../../../../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)-Unterabschnitts *Projekt-Umgebungswerte* trug zwei Verhaltens-Zusagen ohne Beleg-Auftrag: die Ausweisung der Erzeugung („meldet jede erzeugte Projekt-Wert-Zeile") und die Ganz-Map-Set-Abweisung des Basis-Pfads (Exit-Code `10` — die Zeile kam mit der F-5-Präzisierung der Review-Fix-Runde, ohne eigenen Auftrag). Beide Zeilen sind mit der Berichtigung `45833353` nachgetragen (Auftrags-Form; die Test-Namen liefert der Umsetzungs-Diff).
 
 Rückfall nach der Verkörperung; die Beleg-Auftrags-Form hält — die Zeile entsteht mit der Zusage, nicht mit dem Diff. Keine weitere Schärfung entschieden.

@@ -27,7 +27,7 @@ Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-k
 
 Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
 
-Der CR-Schnitt [`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md) liegt in `in-progress/` — der Konfig-Schlüssel `devcontainer.containerEnv` (Projekt-Umgebungswerte der erzeugten Dev-Container; gebilligt 2026-11-03, Umsetzung folgt im Slice [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md)); der Wortlaut ist freigegeben (2026-11-03, wie vorgelegt; Übernahme committet `d62aad5e`, die Übertragungs-Lesart je Stelle (c) vom Projektinhaber bestätigt).
+Der CR-Schnitt [`slice-cr-devcontainer-containerenv`](../done/slice-cr-devcontainer-containerenv.md) liegt in `in-progress/` — der Konfig-Schlüssel `devcontainer.containerEnv` (Projekt-Umgebungswerte der erzeugten Dev-Container; gebilligt 2026-11-03, Umsetzung folgt im Slice [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md)); der Wortlaut ist freigegeben (2026-11-03, wie vorgelegt; Übernahme committet `d62aad5e`, die Übertragungs-Lesart je Stelle (c) vom Projektinhaber bestätigt).
 
 ## Nächste Wellen
 

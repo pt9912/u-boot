@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-cr-devcontainer-containerenv`](../../../../in-progress/slice-cr-devcontainer-containerenv.md)
+**Vorgang:** [`slice-cr-devcontainer-containerenv`](../../../../done/slice-cr-devcontainer-containerenv.md)
 **Fund:** zwei Teil-Fundstellen dieser Klasse im CR-Vorgang der Projekt-Umgebungswerte:
 
 - **F-1 (Review, MEDIUM, Variante „zustandsmarker-abgelaufen-bei-uebernahme"):** der Vertrags-Commit `d62aad5e` übernahm den Vertrag, aber die Roadmap-Zeile trug „die Freigabe steht aus" und der Vorschlags-Status „die Vertrags-Übernahme folgt" weiter — beide Zustandssätze am Commit-Zeitpunkt falsch. Berichtigt mit der Fix-Runde.

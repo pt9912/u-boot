@@ -10,7 +10,7 @@
 - **Stelle (d):** im Vertrag heißt die Namens-Norm nur *gültiger Dev-Container-Umgebungsname*; die konkrete Prüffunktion, die der Vorschlag als Kandidat nannte (`driven.ValidateDevcontainerEnvName`, Fundstelle beim Umsetzungs-Schnitt), ist Umsetzungs-Fundstelle und kein Vertrags-Inhalt.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
-[`slice-cr-devcontainer-containerenv`](../in-progress/slice-cr-devcontainer-containerenv.md).
+[`slice-cr-devcontainer-containerenv`](../done/slice-cr-devcontainer-containerenv.md).
 Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an
 den Verträgen. Der *Neu*-Wortlaut der Stellen (a) bis (d) ist freizugeben; die
 vier Entscheidungen des Umsetzungs-Plans
