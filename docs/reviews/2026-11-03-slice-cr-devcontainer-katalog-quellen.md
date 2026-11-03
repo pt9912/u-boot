@@ -11,7 +11,7 @@ Abweisungs-Bullet, Versionsfeld `0.33.0`, Historie-Zeile; [`spec/spezifikation.m
 [SPEC-023](../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) Katalog-Aufzählung
 und [SPEC-040](../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)
 Schreib-Pipeline-Schritt 6), Link-Berichtigung `137f2f92`.
-Wortlaut-Norm: [`cr-vorschlag-katalog-quellen.md`](../plan/planning/open/cr-vorschlag-katalog-quellen.md)
+Wortlaut-Norm: [`cr-vorschlag-katalog-quellen.md`](../plan/planning/done/cr-vorschlag-katalog-quellen.md)
 (Status *freigegeben wie vorgelegt*, Projektinhaber 2026-11-03). Mess-Basis:
 [`docs/messungen/slice-v1-katalog-features-quellen-und-freigabe/README.md`](../messungen/slice-v1-katalog-features-quellen-und-freigabe/README.md) (M1/M2).
 
