@@ -759,6 +759,27 @@ ergeben sich aus den aktivierten Diensten.
   `nestedRuntime: docker`. Nicht zugesagt sind die Wirkung auf
   das verschachtelte Docker, das Verhalten bei einem zu kleinen Limit, andere Hosts
   und Engines (Docker Desktop, Colima, Podman) und die Summe mehrerer Instanzen.
+- Eigene Umgebungswerte des Containers tragen Sie pro Eintrag mit
+  `u-boot config set devcontainer.containerEnv.<NAME> <Wert>` in die
+  Projektkonfiguration ein; `u-boot generate devcontainer` führt sie in das
+  `containerEnv`-Objekt der erzeugten `devcontainer.json` auf — neben den
+  Werten, die `u-boot` selbst dort für die Werkzeugketten-Schlüssel
+  ablegt, ohne doppelte Einträge. Ein neuer Lauf schreibt die Einträge neu;
+  entfernen Sie einen Namen in der Datei, verschwindet er bei der nächsten
+  Erzeugung. Erlaubt sind Namen, die einen Umgebungsvariablennamen bilden
+  (Buchstaben, Ziffern und Unterstrich, nicht mit einer Ziffer beginnend);
+  der Wert ist eine Zeichenkette, auch eine leere. Ein nicht zulässiger Name
+  oder die Angabe des Basispfads ohne Namen (`devcontainer.containerEnv`)
+  enden mit Exit-Code 10, ohne dass die Datei geändert wird. Die Werte gelten
+  für die Prozesse des Containers; sie stehen nicht im Image und in keiner
+  Zeile des erzeugten Dockerfiles. Dass sie im gestarteten Container sichtbar
+  sind (und im Bild nicht), belegen Docker-Tests. Setzt ein Projekt mit
+  aktiviertem Werkzeugketten-Schlüssel (`go-toolchain`, `golangci-lint`) einen
+  der beiden Cache-Werte (`GOCACHE`, `GOMODCACHE`), die dieser Schlüssel
+  selbst erzeugt, beendet `u-boot generate devcontainer` den Lauf mit
+  Exit-Code 10, ohne etwas zu schreiben; ohne den Schlüssel darf das Projekt
+  beide Werte setzen. Jede erzeugte Projekt-Zeile weist die Erzeugung in der
+  Befehlsausgabe aus (eine gewöhnliche Warnung, die `--quiet` unterdrückt).
 - Das Standardprofil bindet den Projektordner ein, aber keine
   Geheimnis-Verzeichnisse wie `~/.ssh` oder `~/.aws`. Das Docker-Socket des
   Hosts bindet es ein, wenn ein Feature es tut, zum Beispiel `docker-cli`

@@ -832,10 +832,13 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	// checksum-source read of a `version:` override stand before the plan
 	// and write, so a rejected call changes nothing; the errors carry
 	// [driving.ErrConfigValueInvalid] (exit code 10, LH-FA-DEV-003).
-	toolchain, err := resolveToolchain(ctx, cfg.Devcontainer, s.checksums)
+	// Same for the collision of the project environment values with the
+	// cache names (lastenheft 0.32.0) — both pre-write rejections of the
+	// run live in one helper ([toolchainRenderState]) to keep this
+	// dispatcher under the gocyclo budget.
+	toolchain, err := toolchainRenderState(ctx, cfg.Devcontainer, s.checksums)
 	if err != nil {
-		return driving.GenerateResponse{}, fmt.Errorf("generate devcontainer: %w: %s",
-			driving.ErrConfigValueInvalid, err.Error())
+		return driving.GenerateResponse{}, err
 	}
 	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, sandbox, cfg.Devcontainer)
 	if err != nil {
@@ -850,6 +853,7 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	data.GoToolchainPin = toolchain.goPin
 	data.GolangciLintPin = toolchain.lintPin
 	data.JdkToolchainPin = toolchain.javaPin
+	data.ContainerEnv = collectContainerEnvData(cfg.Devcontainer)
 	warnings = append(warnings, sandboxRelaxationWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, thirdPartyFeatureWarnings(cfg)...)
 	warnings = append(warnings, agentNodeWarnings(cfg.Devcontainer)...)
@@ -857,6 +861,7 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	warnings = append(warnings, ollamaHostWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, forgeCLIWarnings(cfg.Devcontainer)...)
 	warnings = append(warnings, toolchainWarnings(toolchain)...)
+	warnings = append(warnings, containerEnvWarnings(cfg.Devcontainer)...)
 	plans, err := s.planDevcontainerFiles(req.BaseDir, data)
 	if err != nil {
 		return driving.GenerateResponse{}, err

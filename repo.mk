@@ -34,9 +34,10 @@
 # host-side Go toolchain requirement; only Docker and `make` are expected on
 # the host. `make` is a deliberate carveout to LH-NFA-PORT-002 — it is the
 # only host dependency beyond Docker. The devcontainer sets BUILD_MODE=local
-# (.devcontainer/Dockerfile): there the targets run with the toolchain
-# installed in the container (scripts/bau.sh); CI and hosts stay in the
-# Docker mode.
+# (the `containerEnv` object of the generated .devcontainer/devcontainer.json;
+# the value reaches the environment of the container processes): there the
+# targets run with the toolchain installed in the container (scripts/bau.sh);
+# CI and hosts stay in the Docker mode.
 #
 # Quality gates (LH-FA-BUILD-006):
 #   make gates       — inner-loop mandatory gates (lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung).

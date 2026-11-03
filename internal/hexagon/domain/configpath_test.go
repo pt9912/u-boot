@@ -251,3 +251,44 @@ func TestConfigPath_String_DefensiveBranch(t *testing.T) {
 		t.Errorf("ConfigPath{Kind: 99}.String() = %q, want substring %q", got, "99")
 	}
 }
+
+// TestNewConfigPath_ContainerEnv_EntryParsesTheName pins the
+// containerEnv kind: the whole remainder behind the prefix is the
+// name (plain split, the validity check sits in the application
+// layer), the base path and the empty name stay unknown paths, and
+// the dotted form round-trips.
+func TestNewConfigPath_ContainerEnv_EntryParsesTheName(t *testing.T) {
+	t.Parallel()
+	raw := "devcontainer.containerEnv.BUILD_MODE"
+	p, err := domain.NewConfigPath(raw)
+	if err != nil {
+		t.Fatalf("NewConfigPath(%q): %v", raw, err)
+	}
+	if p.Kind != domain.ConfigDevcontainerContainerEnv || !p.WriteAllowed || p.EnvName != "BUILD_MODE" {
+		t.Errorf("NewConfigPath(%q) = %+v, want the containerEnv kind, write allowed, name BUILD_MODE", raw, p)
+	}
+	if got, want := p.String(), raw; got != want {
+		t.Errorf("String() = %q, want %q", got, want)
+	}
+	p2, err := domain.NewConfigPath(p.String())
+	if err != nil || p != p2 {
+		t.Errorf("round-trip: p2 = %+v err = %v, want an equal path", p2, err)
+	}
+	// A name the application layer rejects (dots are no env-name
+	// characters) still parses to the kind — the rejection is a
+	// value-validation failure, not an unknown path.
+	dotted, err := domain.NewConfigPath("devcontainer.containerEnv.A.B")
+	if err != nil || dotted.EnvName != "A.B" || dotted.Kind != domain.ConfigDevcontainerContainerEnv {
+		t.Errorf("NewConfigPath(\"devcontainer.containerEnv.A.B\") = %+v err = %v, want the raw remainder as name", dotted, err)
+	}
+
+	// The base path carries no whole-map write: it is not a path of
+	// the whitelist (neither to write nor to read), and neither is
+	// the empty name.
+	for _, bad := range []string{"devcontainer.containerEnv", "devcontainer.containerEnv."} {
+		_, err := domain.NewConfigPath(bad)
+		if !errors.Is(err, domain.ErrInvalidConfigPath) {
+			t.Errorf("NewConfigPath(%q): err = %v, want ErrInvalidConfigPath", bad, err)
+		}
+	}
+}

@@ -23,7 +23,10 @@
   },
   "containerEnv": {
     "GOCACHE": "${containerWorkspaceFolder}/.cache/go-build",
-    "GOMODCACHE": "${containerWorkspaceFolder}/.cache/go-mod"
+    "GOMODCACHE": "${containerWorkspaceFolder}/.cache/go-mod",
+    "BUILD_MODE": "local",
+    "GOFLAGS": "-mod=readonly -buildvcs=false",
+    "GOTOOLCHAIN": "local"
   },
   "features": {
     "ghcr.io/anthropics/devcontainer-features/claude-code:1.0.5": {},

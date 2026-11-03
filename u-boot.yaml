@@ -24,3 +24,7 @@ devcontainer:
       enabled: true
     golangci-lint:
       enabled: true
+  containerEnv:
+    BUILD_MODE: local
+    GOTOOLCHAIN: local
+    GOFLAGS: -mod=readonly -buildvcs=false

@@ -121,6 +121,20 @@ const (
 	// `devcontainer.resources.cpus` (LH-FA-CONF-002). Read + write;
 	// see [NewCPULimit].
 	ConfigDevcontainerResourcesCPUs
+
+	// ConfigDevcontainerContainerEnv addresses
+	// `devcontainer.containerEnv.<name>` (lastenheft 0.32.0, Absatz
+	// Projekt-Umgebungswerte): one name→value entry of the project
+	// environment map. Read + write both allowed; the name travels
+	// in [ConfigPath.EnvName] as the raw remainder of the dotted
+	// path (plain split, no domain validator — the
+	// `[driven.ValidateDevcontainerEnvName]` check lives in the
+	// application layer because the domain must not import the
+	// driven port). The base path `devcontainer.containerEnv`
+	// without the name segment is not a whitelisted path: a whole-
+	// map write has no shape in [application.ConfigService] and
+	// falls through to the unknown-path rejection.
+	ConfigDevcontainerContainerEnv
 )
 
 // ConfigPath is a typed, whitelisted reference to a leaf in
@@ -151,6 +165,16 @@ type ConfigPath struct {
 	// (T3 silently skips unknown names; T4 enforces source-in-
 	// allowlist when a Source override is set).
 	Feature FeatureName
+
+	// EnvName is populated only when Kind ==
+	// ConfigDevcontainerContainerEnv: the raw remainder of the
+	// dotted path after the prefix `devcontainer.containerEnv.`.
+	// It is a plain split, deliberately without a domain validator
+	// — the env-name check is `[driven.ValidateDevcontainerEnvName]`
+	// and the domain layer does not import the driven port, so the
+	// application layer validates it at the value-coercion stage
+	// (lastenheft 0.32.0: exit code 10, nothing written).
+	EnvName string
 
 	// WriteAllowed reports whether `u-boot config set <path>` is
 	// permitted for this path. false for ConfigServiceEnabled;
@@ -184,6 +208,10 @@ var ErrInvalidConfigPath = errors.New("invalid config path")
 //   - `devcontainer.sandbox.repository`             → ConfigDevcontainerSandboxRepository, write-OK
 //   - `devcontainer.resources.memory`               → ConfigDevcontainerResourcesMemory, write-OK
 //   - `devcontainer.resources.cpus`                 → ConfigDevcontainerResourcesCPUs, write-OK
+//   - `devcontainer.containerEnv.<name>`            → ConfigDevcontainerContainerEnv, write-OK
+//     (one map entry; the base path
+//     `devcontainer.containerEnv` itself is
+//     NOT whitelisted — no whole-map write)
 //
 // Wildcard segments (`<svc>`, `<feature>`) are parsed through their
 // respective domain validators; format failures wrap into
@@ -243,7 +271,29 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 		}
 	}
 
-	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository,egress.enabled,egress.allow,hostGitToken}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
+	// `devcontainer.containerEnv.<name>` — 3-segment split: the
+	// whole remainder behind the prefix is the environment-variable
+	// name. The split is deliberately unvalidated here (the env-name
+	// rule sits in the driven port, see [ConfigPath.EnvName]), so a
+	// name the application later rejects still parses to the kind —
+	// the rejection is a value-validation failure, not an unknown
+	// path. An empty name (`devcontainer.containerEnv.`) is no name
+	// at all and stays an unknown path.
+	if envName, ok := strings.CutPrefix(raw, "devcontainer.containerEnv."); ok {
+		if envName == "" {
+			return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; "+
+				"the containerEnv map is written per entry as devcontainer.containerEnv.<name> "+
+				"(the base path carries no whole-map write)",
+				ErrInvalidConfigPath, raw)
+		}
+		return ConfigPath{
+			Kind:         ConfigDevcontainerContainerEnv,
+			EnvName:      envName,
+			WriteAllowed: true,
+		}, nil
+	}
+
+	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.containerEnv.<name>, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository,egress.enabled,egress.allow,hostGitToken}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
 		ErrInvalidConfigPath, raw)
 }
 
@@ -298,6 +348,8 @@ func (p ConfigPath) String() string {
 		return "devcontainer.features." + p.Feature.String() + ".source"
 	case ConfigDevcontainerFeatureVersion:
 		return "devcontainer.features." + p.Feature.String() + ".version"
+	case ConfigDevcontainerContainerEnv:
+		return "devcontainer.containerEnv." + p.EnvName
 	default:
 		return fmt.Sprintf("ConfigPath(kind=%d)", int(p.Kind))
 	}

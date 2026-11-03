@@ -78,6 +78,13 @@ func listCandidatePaths(cfg ubootYAMLConfig) []domain.ConfigPath {
 		add("services." + name + ".enabled")
 	}
 	if cfg.Devcontainer != nil {
+		// The project environment map contributes one path per
+		// name; a name the domain constructor rejects (an entry
+		// hand-edited outside the env-name rule) never gets a
+		// whitelisted path and stays out of the list.
+		for name := range cfg.Devcontainer.ContainerEnv {
+			add("devcontainer.containerEnv." + name)
+		}
 		for name := range cfg.Devcontainer.Features {
 			for _, leaf := range []string{"enabled", "source", "version"} {
 				add("devcontainer.features." + name + "." + leaf)
@@ -165,6 +172,10 @@ func (s *ConfigService) applySetItem(
 	case domain.ConfigDevcontainerSandboxEgressAllow:
 		next, changed, err := planEgressAllow(cfg, it)
 		return s.marshalIfChanged(body, cfg, next, changed, err)
+	case domain.ConfigDevcontainerContainerEnv:
+		// lastenheft 0.32.0 (Projekt-Umgebungswerte): one map entry;
+		// the comment-preserving patch, not the marshal rewrite.
+		return s.applyContainerEnvItem(body, cfg, it)
 	}
 	coerced, formatted, err := coerceConfigValue(it.Path, it.Value)
 	if err != nil {
@@ -183,6 +194,24 @@ func (s *ConfigService) applySetItem(
 	}
 	if err := revalidateConfigDomain(patchedCfg, it.Path); err != nil {
 		return nil, cfg, err
+	}
+	return patched, patchedCfg, nil
+}
+
+// applyContainerEnvItem is the SetMany arm of one
+// `devcontainer.containerEnv.<name>` item: validation, NoOp and the
+// comment-preserving patch live in [ConfigService.planContainerEnvEntry];
+// a NoOp item returns the inputs untouched so the outer all-or-
+// nothing write stays byte-identical.
+func (s *ConfigService) applyContainerEnvItem(
+	body []byte, cfg ubootYAMLConfig, it driving.ConfigSetItem,
+) ([]byte, ubootYAMLConfig, error) {
+	patched, patchedCfg, changed, err := s.planContainerEnvEntry(body, cfg, it.Path, it.Value)
+	if err != nil {
+		return nil, cfg, err
+	}
+	if !changed {
+		return body, cfg, nil
 	}
 	return patched, patchedCfg, nil
 }

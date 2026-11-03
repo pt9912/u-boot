@@ -39,12 +39,19 @@
 {{- else if .RunArgs}}
   "runArgs": [{{range $i, $a := .RunArgs}}{{if $i}}, {{end}}"{{$a}}"{{end}}],
 {{- end}}
-{{- if or .GoToolchain .GolangciLint}}
+{{- $goKeys := or .GoToolchain .GolangciLint}}
+{{- if or $goKeys .ContainerEnv}}
   "containerEnv": {
+{{- if $goKeys}}
     "GOCACHE": "${containerWorkspaceFolder}/.cache/go-build",
     "GOMODCACHE": "${containerWorkspaceFolder}/.cache/go-mod"
+{{- end}}
+{{- range $i, $e := .ContainerEnv}}
+{{- if $goKeys}},{{else if $i}},{{end}}
+    "{{$e.Name}}": "{{$e.Value}}"
+{{- end}}
   },
-{{- end}}{{- /* kein containerEnv-Wert für java-toolchain: JAVA_HOME/PATH stehen im Block (SPEC-054) */ -}}
+{{- end}}{{- /* kein containerEnv-Wert für java-toolchain: JAVA_HOME/PATH stehen im Block (SPEC-054); die Projekt-Werte von devcontainer.containerEnv kommen als sortierte Einträge hinzu (lastenheft 0.32.0) */ -}}
 {{- if .ForwardPorts}}
   "forwardPorts": [{{range $i, $p := .ForwardPorts}}{{if $i}}, {{end}}{{$p}}{{end}}],
 {{- end}}

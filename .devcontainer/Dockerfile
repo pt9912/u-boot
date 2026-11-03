@@ -114,16 +114,3 @@ RUN mkdir -p "/workspaces/u-boot" && chown vscode:vscode "/workspaces/u-boot"
 RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
 USER vscode
 # END U-BOOT MANAGED BLOCK: init
-
-# ---- Hand-written rest (behind the managed block) ---------------------------
-# `u-boot generate devcontainer` leaves the lines below untouched. The two
-# toolchain keys `go-toolchain` and `golangci-lint` carry the installations
-# and the cache directories of the managed block and the `containerEnv` of
-# the generated devcontainer.json; the keys set none of these three values,
-# so they stand here, in the hand-written rest: BUILD_MODE=local selects the
-# local mode of repo.mk, GOFLAGS and GOTOOLCHAIN mirror the stage `deps` of
-# the root Dockerfile and the official Go images (GOTOOLCHAIN=local: Go never
-# fetches another toolchain).
-ENV BUILD_MODE=local \
-    GOFLAGS="-mod=readonly -buildvcs=false" \
-    GOTOOLCHAIN=local

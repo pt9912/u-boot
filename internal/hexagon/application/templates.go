@@ -99,6 +99,16 @@ type templateData struct {
 	GolangciLintPin toolchainPin
 	JdkToolchainPin toolchainPin
 
+	// ContainerEnv carries the project environment values of
+	// `devcontainer.containerEnv` (lastenheft 0.32.0, Absatz
+	// Projekt-Umgebungswerte): the sorted, JSON-escaped entries the
+	// devcontainer.json template renders into the `containerEnv`
+	// object beside the cache values of the two Go keys. A project
+	// value with a cache directory name beside an active Go key is
+	// the exit-10 rejection before the render, so the object never
+	// carries one entry twice. nil keeps the pre-0.32.0 bytes.
+	ContainerEnv []containerEnvData
+
 	// Egress switches on the LH-FA-DEV-008 outbound restriction;
 	// EgressHosts is the effective allowlist baked into the startup
 	// script. RunArgs is the composed `runArgs` list (options of the sandbox

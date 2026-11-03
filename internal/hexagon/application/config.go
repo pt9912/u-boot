@@ -204,20 +204,12 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 		return driving.ConfigSetResponse{}, err
 	}
 
-	// LH-FA-DEV-003 list-path branch: `featureSources.allow` is a
-	// LIST, not a scalar — PatchScalar cannot represent it. The
-	// list-append/dedupe + marshal-rewrite code-route lives in
-	// [setFeatureSourcesAllow]. Trade-off: marshal-rewrite loses
-	// comments in u-boot.yaml; the Spec (LH-FA-DEV-003) does not require
-	// comment preservation for this list. The scalar feature paths
-	// (.enabled, .source, .version) take the standard PatchScalar
-	// path below.
-	if req.Path.Kind == domain.ConfigDevcontainerFeatureSourcesAllow {
-		return s.setFeatureSourcesAllow(req, cfg)
-	}
-	// LH-FA-DEV-008 list-path: `devcontainer.sandbox.egress.allow`.
-	if req.Path.Kind == domain.ConfigDevcontainerSandboxEgressAllow {
-		return s.setEgressAllow(req, cfg)
+	// LH-FA-DEV-003 / LH-FA-DEV-008 / lastenheft 0.32.0: the three
+	// map/list kinds route to their dedicated branches in one guard
+	// (gocyclo budget of this dispatcher); ok=false continues with
+	// the scalar route below.
+	if resp, handled, err := s.setNonScalarKind(req, body, cfg); handled {
+		return resp, err
 	}
 
 	// Stage 1: value coercion (catches LH-FA-INIT-006 / bool-
@@ -450,6 +442,11 @@ func configPathToYAMLPath(path domain.ConfigPath) []string {
 		return []string{"project", "name"}
 	case domain.ConfigDevcontainerEnabled:
 		return []string{"devcontainer", "enabled"}
+	case domain.ConfigDevcontainerContainerEnv:
+		// One leaf of the project environment map; the name was
+		// validated before the patch (`validateContainerEnvName`),
+		// so the raw remainder travels as the third key.
+		return []string{"devcontainer", "containerEnv", path.EnvName}
 	case domain.ConfigDevcontainerFeatureEnabled:
 		return []string{"devcontainer", "features", path.Feature.String(), "enabled"}
 	case domain.ConfigDevcontainerFeatureSource:
@@ -527,6 +524,17 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 			return fmt.Errorf(
 				"%w: post-patch devcontainer.enabled is absent or unbound",
 				driving.ErrConfigPostPatchSanityFailed)
+		}
+		return nil
+	case domain.ConfigDevcontainerContainerEnv:
+		// The patch writes one scalar leaf under the map; the
+		// re-read binds it into [ubootYAMLDevcontainer.ContainerEnv].
+		// A missing binding means the patch did not land — the
+		// same structural class as an unbound bool leaf.
+		if _, exists := containerEnvEntry(cfg, path.EnvName); !exists {
+			return fmt.Errorf(
+				"%w: post-patch %s is absent or unbound",
+				driving.ErrConfigPostPatchSanityFailed, path)
 		}
 		return nil
 	case domain.ConfigDevcontainerFeatureEnabled,
@@ -837,6 +845,17 @@ func extractConfigValueRaw(cfg ubootYAMLConfig, path domain.ConfigPath) (string,
 		domain.ConfigDevcontainerFeatureSource,
 		domain.ConfigDevcontainerFeatureVersion:
 		return extractDevcontainerFeatureValue(cfg, path)
+
+	case domain.ConfigDevcontainerContainerEnv:
+		value, exists := containerEnvEntry(cfg, path.EnvName)
+		if !exists {
+			return "", fmt.Errorf("%w: %s — set it via `u-boot config set %s <value>`",
+				driving.ErrConfigValueNotSet, path, path)
+		}
+		// An existing entry reads verbatim: the empty string is a
+		// set value of the map (lastenheft 0.32.0, Wert ein String),
+		// not an unset one.
+		return value, nil
 	}
 	// Unreachable: domain.NewConfigPath only constructs the kinds
 	// above. Defensive branch surfaces the int so a future enum
@@ -1024,6 +1043,167 @@ func (s *ConfigService) setFeatureSourcesAllow(
 		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
 	}
 	return resp, nil
+}
+
+// setNonScalarKind routes the three map/list kinds of the Set
+// pipeline to their dedicated branches and keeps the dispatched
+// conditions of the scalar route out of [ConfigService.Set]'s
+// gocyclo budget. The `ok` return marks the kind handled:
+//
+//   - ConfigDevcontainerFeatureSourcesAllow (LH-FA-DEV-003): a LIST,
+//     not a scalar — PatchScalar cannot represent it; the
+//     append/dedupe + marshal-rewrite route lives in
+//     [setFeatureSourcesAllow]. Trade-off: marshal-rewrite loses
+//     comments in u-boot.yaml; the spec does not require comment
+//     preservation for this list. The scalar feature paths
+//     (.enabled, .source, .version) take the standard PatchScalar
+//     route.
+//   - ConfigDevcontainerSandboxEgressAllow (LH-FA-DEV-008): the
+//     same list route for the egress hosts.
+//   - ConfigDevcontainerContainerEnv (lastenheft 0.32.0): one map
+//     entry; the branch runs before the scalar route because the
+//     NoOp comparison needs the existence of the entry — an
+//     explicitly set empty value is a set value, which the lenient
+//     extraction cannot express.
+func (s *ConfigService) setNonScalarKind(
+	req driving.ConfigSetRequest, body []byte, cfg ubootYAMLConfig,
+) (driving.ConfigSetResponse, bool, error) {
+	switch req.Path.Kind {
+	case domain.ConfigDevcontainerFeatureSourcesAllow:
+		resp, err := s.setFeatureSourcesAllow(req, cfg)
+		return resp, true, err
+	case domain.ConfigDevcontainerSandboxEgressAllow:
+		resp, err := s.setEgressAllow(req, cfg)
+		return resp, true, err
+	case domain.ConfigDevcontainerContainerEnv:
+		resp, err := s.setContainerEnvEntry(req, body, cfg)
+		return resp, true, err
+	}
+	return driving.ConfigSetResponse{}, false, nil
+}
+
+// containerEnvEntry returns the value of one name in the project
+// environment map (`devcontainer.containerEnv`, lastenheft 0.32.0)
+// plus whether the entry exists. The existence flag keeps an
+// explicitly set empty value apart from an absent entry — the NoOp
+// comparison needs both, and the extraction reads an existing empty
+// value verbatim while an absent entry is NotSet.
+func containerEnvEntry(cfg ubootYAMLConfig, name string) (string, bool) {
+	if cfg.Devcontainer == nil || cfg.Devcontainer.ContainerEnv == nil {
+		return "", false
+	}
+	value, ok := cfg.Devcontainer.ContainerEnv[name]
+	return value, ok
+}
+
+// validateContainerEnvName applies the env-name rule of the driven
+// launcher to the name segment of one `devcontainer.containerEnv.<name>`
+// path. It is the only validation of the kind: the value is a
+// string taken verbatim (an empty value is a string value too), so
+// only the name can fail, and the failure is the user-actionable
+// [driving.ErrConfigValueInvalid] (exit code 10, nothing written).
+func validateContainerEnvName(path domain.ConfigPath) error {
+	if err := driven.ValidateDevcontainerEnvName(path.EnvName); err != nil {
+		return fmt.Errorf("%w: %s: %v", driving.ErrConfigValueInvalid, path, err)
+	}
+	return nil
+}
+
+// setContainerEnvEntry is the Set route of one
+// `devcontainer.containerEnv.<name>` entry. PatchScalar keeps the
+// comments and sibling keys of u-boot.yaml — the map leaf is an
+// ordinary scalar in the read model's shape. The NoOp short-circuit
+// fires on an existing equal value; setting the empty value over an
+// absent entry writes (the existence flag of [containerEnvEntry]
+// expresses the difference the lenient extraction cannot).
+func (s *ConfigService) setContainerEnvEntry(
+	req driving.ConfigSetRequest, body []byte, cfg ubootYAMLConfig,
+) (driving.ConfigSetResponse, error) {
+	logger := s.logger
+	if req.SilenceLogger {
+		logger = noopLogger{}
+	}
+	patched, _, changed, err := s.planContainerEnvEntry(body, cfg, req.Path, req.Value)
+	if err != nil {
+		return driving.ConfigSetResponse{}, err
+	}
+	if !changed {
+		oldValue, _ := containerEnvEntry(cfg, req.Path.EnvName)
+		logger.Debug("config set: no-op",
+			"path", req.Path.String(), "value", req.Value)
+		return driving.ConfigSetResponse{
+			Path: req.Path, OldValue: oldValue, NewValue: req.Value,
+		}, nil
+	}
+
+	fs, recorder := s.selectFS(req.PreviewMode)
+	path := filepath.Join(req.BaseDir, domain.ConfigFileName)
+	if err := fs.WriteFile(path, patched, defaultFileMode); err != nil {
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
+			driving.ErrConfigFileSystem, path, err)
+	}
+	oldValue, _ := containerEnvEntry(cfg, req.Path.EnvName)
+	logWrite(logger, req.PreviewMode, "config set: updated", "config set: would update",
+		"path", req.Path.String(), "old", oldValue, "new", req.Value)
+	resp := driving.ConfigSetResponse{
+		Path:     req.Path,
+		OldValue: oldValue,
+		NewValue: req.Value,
+	}
+	if recorder != nil {
+		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
+	}
+	return resp, nil
+}
+
+// planContainerEnvEntry applies one project-environment entry to the
+// in-memory document: name validation, NoOp on an existing equal
+// value, then the comment-preserving patch plus the post-patch
+// re-read and sanity stages. The bool reports whether the document
+// changed — a SetMany item leaves the document untouched on NoOp.
+func (s *ConfigService) planContainerEnvEntry(
+	body []byte, cfg ubootYAMLConfig, path domain.ConfigPath, value string,
+) ([]byte, ubootYAMLConfig, bool, error) {
+	if err := validateContainerEnvName(path); err != nil {
+		return nil, cfg, false, err
+	}
+	if oldValue, exists := containerEnvEntry(cfg, path.EnvName); exists && oldValue == value {
+		return body, cfg, false, nil
+	}
+	patched, patchedCfg, err := s.patchContainerEnvEntry(body, cfg, path, value)
+	if err != nil {
+		return nil, cfg, false, err
+	}
+	return patched, patchedCfg, true, nil
+}
+
+// patchContainerEnvEntry patches one map entry in memory and
+// re-reads the document; the re-unmarshal plus the leaf's
+// re-validation are the post-patch stages of the scalar Set path.
+func (s *ConfigService) patchContainerEnvEntry(
+	body []byte, cfg ubootYAMLConfig, path domain.ConfigPath, value string,
+) ([]byte, ubootYAMLConfig, error) {
+	patched, err := s.yaml.PatchScalar(body, configPathToYAMLPath(path), value)
+	if err != nil {
+		if errors.Is(err, driven.ErrYAMLParse) {
+			return nil, cfg, fmt.Errorf(
+				"%w: PatchScalar parse failure on %s: %v",
+				driving.ErrConfigSchemaInvalid, path, err)
+		}
+		return nil, cfg, fmt.Errorf(
+			"%w: PatchScalar(%s): %v",
+			driving.ErrConfigSchemaInvalid, path, err)
+	}
+	var patchedCfg ubootYAMLConfig
+	if err := s.yaml.Unmarshal(patched, &patchedCfg); err != nil {
+		return nil, cfg, fmt.Errorf(
+			"%w: post-patch re-unmarshal failed: %v",
+			driving.ErrConfigSchemaInvalid, err)
+	}
+	if err := revalidateConfigDomain(patchedCfg, path); err != nil {
+		return nil, cfg, err
+	}
+	return patched, patchedCfg, nil
 }
 
 // parseFeatureSourcesArgument splits a comma-separated user

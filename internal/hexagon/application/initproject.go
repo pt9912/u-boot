@@ -79,6 +79,16 @@ type ubootYAMLDevcontainer struct {
 	// Resources carries the container limits (LH-FA-CONF-002); absent =
 	// no `--memory` / `--cpus` in `runArgs`.
 	Resources *ubootYAMLDevcontainerResources `yaml:"resources,omitempty"`
+	// ContainerEnv carries the project environment values
+	// `devcontainer.containerEnv` (lastenheft 0.32.0, Absatz
+	// Projekt-Umgebungswerte): a map of names to string values the
+	// generate run renders into the `containerEnv` object of the
+	// generated `.devcontainer/devcontainer.json` beside the
+	// generator's own cache values. Written per entry with
+	// `u-boot config set devcontainer.containerEnv.<name>`; yaml.v3
+	// serialises the map keys sorted, so the file stays
+	// deterministic.
+	ContainerEnv map[string]string `yaml:"containerEnv,omitempty"`
 }
 
 // ubootYAMLDevcontainerResources is the `devcontainer.resources:` sub-tree.
