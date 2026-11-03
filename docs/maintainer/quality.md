@@ -351,3 +351,39 @@ ersten grünen Lauf gesetzt
 (Repository → Settings → Branches → Branch protection rules →
 `main`). Schritt-für-Schritt-Anleitung in
 [`docs/user/branch-protection.md`](branch-protection.md).
+
+---
+
+## 7. Werkzeug-Pins und GNU-make-Mindest-Version
+
+Die Pin-Politik der gepinnten Werkzeugkette steht im Lastenheft
+([`LH-FA-DEV-011`](../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette))
+und in der Spezifikation
+([`SPEC-006`](../../spec/spezifikation.md#spec-006--build-args-des-dockerfiles-und-pin-politik),
+Abschnitte *Pin-Inventar* und *Pin-Gleichheit im Gatter*); dieser Abschnitt
+trägt das Gate-Verhalten. Die Pin-Werte selbst stehen an ihren Stellen
+(`Dockerfile`, `repo.mk`, Katalog-Template, erzeugte `.devcontainer/Dockerfile`,
+`go.mod`, `package.json`/`package-lock.json`), nicht in dieser Datei.
+
+- **Pin-Gleichheit (`pinsync`).** Der `docs-check`-Lauf trägt das Modul
+  `pinsync` und gleicht je Pin-Gruppe die Quellen-Zeilen byte-genau ab
+  (Gruppen-Konfiguration in [`.d-check.yml`](../../.d-check.yml)): `go` über
+  die vier `GO_VERSION`-Stellen und die `go`-Direktive der `go.mod`
+  (Fanggruppe Major.Minor — die Direktive steht auf dem Pin-Minor, die
+  Patch-Stelle der Toolchain bleibt in den `GO_VERSION`-Stellen),
+  `golangci-lint` über die vier `GOLANGCI_LINT_VERSION`-Stellen,
+  `devcontainer-cli` über `package.json` und `package-lock.json`. Je
+  abweichender, nicht treffender oder mehrdeutiger Quelle ein Befund
+  (`pinsync-mismatch`, `pinsync-no-match`, `pinsync-ambiguous`) bricht das
+  Gate; der Wächter prüft Gleichheit, keine Aktualität. Mismatch-Gegenprobe:
+  Protokoll [`slice-harness-dcheck-pinsync`](../messungen/slice-harness-dcheck-pinsync/README.md).
+- **GNU make.** Die `Makefile` bricht vor jeder anderen Logik ab, wenn die
+  laufende GNU-make-Version älter als die Mindest-Version ist
+  (`MAKE_MIN_VERSION`, gegenwärtig `4.3`; make-eigener Guard, kein
+  Stellenvergleich; gemessener Stand `4.4.1` am Host und im
+  Devcontainer-Image, die CI-Runner ubuntu-24.04 tragen `4.3` der
+  Distribution).
+- **d-check.** Das Doku-Gate-Image ist tag- und digest-gepinnt
+  ([`d-check.mk`](../../d-check.mk), `DCHECK_DIGEST`), gegenwärtig v0.91.0;
+  die Hebung verifiziert den neuen Digest gegen die Release-Notes und den
+  gezogenen Lauf.

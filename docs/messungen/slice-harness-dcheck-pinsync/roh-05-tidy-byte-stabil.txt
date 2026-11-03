@@ -1,0 +1,7 @@
+# Byte-Stabilitaet der go.mod: der Aufraeum-Lauf der Modul-Werkzeugkette am Docker-Stage aendert sie nicht
+$ vor: sha256sum go.mod
+2c250d834ea4a74438fca77988077182da2a5ced5e9e62928d93d6020932c430
+go: downloading gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405
+$ nach dem Lauf: sha256sum go.mod
+2c250d834ea4a74438fca77988077182da2a5ced5e9e62928d93d6020932c430
+gleich: byte-stabil

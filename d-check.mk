@@ -4,8 +4,11 @@
 # Image-Digest gepinnt (Reproduzierbarkeit). advisory doc-*-Targets verbatim, ohne
 # die Kennungen aus dem Register von d-check in Kommentaren und Hilfetexten.
 # Einbinden: `include d-check.mk`; eigene .d-check.yml danebenlegen.
-DCHECK_IMAGE ?= ghcr.io/pt9912/d-check:v0.90.0
-DCHECK_DIGEST ?= sha256:d8ce395beb78c7f0b79dbdbfa6d294365463e30c572a94daa1d23ab63c72e1db
+# Image-Bump 2026-11-03 auf v0.91.0 (Digest aus den Release-Notes verifiziert
+# und gegen den gezogenen Lauf gegengeprueft); neu ist das Modul pinsync — die
+# doc-*-Ein-Modul-Targets tragen --disable pinsync je --print-mk der Version.
+DCHECK_IMAGE ?= ghcr.io/pt9912/d-check:v0.91.0
+DCHECK_DIGEST ?= sha256:5d2f650d102c1d8224bb26930ec96d237506c07612fb8e0dbcdc42291702c57f
 # TRACE_FLAGS: optionale Flags für die RTM-Targets (z. B. --json).
 TRACE_FLAGS ?=
 
@@ -38,27 +41,27 @@ doc-repair: ## Reparatur-Patch (unified diff) auf stdout, git-apply-rein
 
 .PHONY: doc-immutable
 doc-immutable: ## Doc-/ADR-Immutabilität via git-Diff (Modul vcs); RANGE=base..head oder STAGED=1
-	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable vcs --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable commits --disable planning --disable tracked --disable targets --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics $(if $(STAGED),--staged,--range $(RANGE))
+	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable vcs --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable commits --disable planning --disable tracked --disable targets --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics --disable pinsync $(if $(STAGED),--staged,--range $(RANGE))
 
 .PHONY: doc-commits
 doc-commits: ## Commit-Message-Traceability via Modul commits; RANGE=base..head
-	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable commits --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable planning --disable tracked --disable targets --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics --range $(RANGE)
+	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable commits --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable planning --disable tracked --disable targets --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics --disable pinsync --range $(RANGE)
 
 .PHONY: doc-planning
 doc-planning: ## Planning-Lifecycle-Konsistenz (Roadmap <-> in-progress) via Modul planning; hermetisch, ohne Range
-	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable planning --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable commits --disable tracked --disable targets --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics
+	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable planning --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable commits --disable tracked --disable targets --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics --disable pinsync
 
 .PHONY: doc-tracked
 doc-tracked: ## Getrackt-Status aufloesbarer Referenz-Ziele via Modul tracked; braucht .git im Mount, ohne Range
-	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable tracked --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable commits --disable planning --disable targets --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics
+	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable tracked --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable commits --disable planning --disable targets --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics --disable pinsync
 
 .PHONY: doc-targets
 doc-targets: ## Deklarations-Konsistenz Doku<->Build-Targets via Modul targets; hermetisch, ohne Range
-	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable targets --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable commits --disable planning --disable tracked --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics
+	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable targets --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable commits --disable planning --disable tracked --disable citations --disable sources --disable structure --disable workflows --disable reviews --disable mentions --disable file --disable metrics --disable pinsync
 
 .PHONY: doc-structure
 doc-structure: ## Struktur-Invarianten innerhalb der Dokumente via Modul structure; hermetisch, ohne Range
-	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable structure --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable commits --disable planning --disable tracked --disable targets --disable citations --disable sources --disable workflows --disable reviews --disable mentions --disable file --disable metrics
+	docker run --rm --network none -v "$(CURDIR):/repo:ro" $(DCHECK_REF) --enable structure --disable links --disable anchors --disable ids --disable matrix --disable external --disable codepaths --disable spans --disable hostpaths --disable diagrams --disable versions --disable pins --disable immutable --disable vcs --disable commits --disable planning --disable tracked --disable targets --disable citations --disable sources --disable workflows --disable reviews --disable mentions --disable file --disable metrics --disable pinsync
 
 .PHONY: doc-usage
 doc-usage: ## Aufruf und Optionen von d-check selbst (--help)

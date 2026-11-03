@@ -1,0 +1,15 @@
+# Gegenprobe: die Abhaengigkeitss-Version der package.json auf 0.90.0 geaendert (Kopie)
+$ sed: "@devcontainers/cli": "0.89.0" -> "0.90.0", danach derselbe Lauf
+$ verändert (Auszug package.json):
+7:    "@devcontainers/cli": "0.90.0"
+$ docker run --rm --network none -v "$PWD":/repo:ro ghcr.io/pt9912/d-check@<digest>
+internal/adapter/driven/docker/devcontainercli/package-lock.json:16	devcontainer-cli	pinsync-mismatch	Pin "devcontainer-cli": internal/adapter/driven/docker/devcontainercli/package-lock.json hat "0.89.0", der Bezug internal/adapter/driven/docker/devcontainercli/package.json hat "0.90.0" (Werte: internal/adapter/driven/docker/devcontainercli/package.json=0.90.0, internal/adapter/driven/docker/devcontainercli/package-lock.json=0.89.0)
+d-check: pinsync: 3 Pin(s) geprüft, 11 Quelle(n) gelesen
+d-check: 1074 Datei(en) geprüft, 1 Befund(e)
+exit-code=1
+--- Rueckfuehrung: package.json zurueck auf 0.89.0 ---
+7:    "@devcontainers/cli": "0.89.0"
+$ derselbe Lauf nach der Rueckfuehrung:
+d-check: pinsync: 3 Pin(s) geprüft, 11 Quelle(n) gelesen
+d-check: 1074 Datei(en) geprüft, 0 Befund(e)
+exit-code=0

@@ -16,10 +16,19 @@
 
 | Datei | Änderungs-Art | Begründung |
 |---|---|---|
-| `cr-vorschlag-lh-dev-011-fuenfte-stelle.md` | neu | Alt/Neu je Stelle |
-| `spec/lastenheft.md` | update (nach Freigabe) | Pin-Politik-Absatz um die Direktive erweitert, Historie |
-| dieser/Move-Träger, Roadmap | update | Lifecycle je `make slice-mv` |
-| `spec/spezifikation.md`, Tests, `.d-check.yml`, `d-check.mk` | kein Diff in diesem CR | die Umsetzung trägt sie |
+| `cr-vorschlag-lh-dev-011-pin-inventur.md` | neu (geliefert 2026-11-03) | Inventar je Werkzeugkette samt GNU-make-Erweiterung; Status freigegeben wie vorgelegt |
+| `spec/lastenheft.md` | update (geliefert 2026-11-03) | Pin-Inventar-Absatz unter [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette), Versionsfeld 0.34.0, Historie-Zeile |
+| `d-check.mk` | update (Umsetzungs-Diff) | Bump v0.91.0 samt verifiziertem Digest, Bump-Datums-Kommentar, die sechs `--disable pinsync`-Zusätze je `--print-mk` der Version |
+| `.d-check.yml` | update (Umsetzungs-Diff) | Modul `pinsync` in `modules`, drei Pin-Gruppen (`go` fünf Quellen, `golangci-lint` vier, `devcontainer-cli` zwei) |
+| `Makefile` | update (Umsetzungs-Diff) | GNU-make-Guard am Kopf, Mindest-Version 4.3 |
+| `go.mod` | update (Umsetzungs-Diff) | Direktive auf 1.27.0 (Pin-Minor), Require-Layout-Normierung des Tidy-Laufs |
+| `spec/spezifikation.md` | update (Umsetzungs-Diff) | [`SPEC-006`](../../../../spec/spezifikation.md#spec-006--build-args-des-dockerfiles-und-pin-politik) Abschnitte Pin-Inventar/Pin-Gleichheit samt Beleg-Tabelle, [`SPEC-016`](../../../../spec/spezifikation.md#spec-016--go-toolchain-mindestversion-und-dockerfile-pin) Direktive, Historie |
+| `docs/maintainer/quality.md` | update (Umsetzungs-Diff) | Abschnitt 7 (Werkzeug-Pins und GNU-make-Mindest-Version, Gate-Verhalten) |
+| `harness/README.md` | update (Umsetzungs-Diff) | docs-check-Zeile des Gate-Index nennt die Pin-Gleichheit |
+| `CHANGELOG.md` | update (Umsetzungs-Diff) | Eintrag unter `[Unreleased]` |
+| `docs/messungen/slice-harness-dcheck-pinsync/` | neu (Umsetzungs-Diff) | Beleg-Lauf je Gatter mit Mismatch-Gegenproben und make-Guard-Negativprobe |
+| dieser Slice (diese Datei), Roadmap | update | Plan-Tabelle und Umsetzungs-Zeilen; Lifecycle je `make slice-mv` bei Closure |
+| Tests der Vier-Stellen-Kopplung | kein Diff in diesem Slice | `TestToolchainPinPlacesEqual` bleibt (liest die vier Code-Stellen, [`SPEC-054`](../../../../spec/spezifikation.md)); die Pin-Gruppen im Gatter prüfen die Quellen-Zeilen je Pin |
 
 ## 4. Trigger und Rückführungen
 
@@ -29,7 +38,7 @@
 
 Closure-Trigger: Wortlaut wortgleich je Stelle + Gates + Reports + Notiz. Risiken: Wortlaut-Abgleiche (Muster der CR-Slices), Zusage-Messbasis (pinsync prüft Gleichheit, keine Aktualität — Grenze im Wortlaut), Beleg-Aufträge, §3.10. §7 bei Closure gefüllt. Sub-Areas: DOK Greenfield.
 
-**Der freizugebende Wortlaut (Stelle b, vorschlagen):** „Die `go`-Direktive der `go.mod` dieses Repos ist der fünfte Ort der Pin-Kopplung: die Direktive trägt denselben Wert wie die `GO_VERSION`-Stellen (der Minor gleich, die Patch-Stelle der Toolchain bleibt in den `GO_VERSION`-Stellen); jede Hebung des Pins zieht die Direktive nach. Ein Wächter (`pinsync`, gleiches Byte-Verhalten) prüft die Gleichheit je Gatter-Lauf."
+**Der freizugebende Wortlaut (Stelle b, freigegeben 2026-11-03 wie vorgelegt samt GNU-make-Erweiterung, übernommen ins Lastenheft 0.34.0 — der Minor-Vorbehalt der Direktive trägt die freigegebene Hebung `1.27.0` gegen den Pin `1.27.3` als Definition des „denselben Pin-Werts“):** „Die `go`-Direktive der `go.mod` dieses Repos ist der fünfte Ort der Pin-Kopplung: die Direktive trägt denselben Wert wie die `GO_VERSION`-Stellen (der Minor gleich, die Patch-Stelle der Toolchain bleibt in den `GO_VERSION`-Stellen); jede Hebung des Pins zieht die Direktive nach. Ein Wächter (`pinsync`, gleiches Byte-Verhalten) prüft die Gleichheit je Gatter-Lauf."
 
 ## 7. Closure-Notiz
 

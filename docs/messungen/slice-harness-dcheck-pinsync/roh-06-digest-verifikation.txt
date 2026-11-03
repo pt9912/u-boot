@@ -1,0 +1,9 @@
+# Digest-Verifikation des d-check-Bumps v0.90.0 -> v0.91.0
+$ Release-Notes des Tags v0.91.0 (GitHub-API, eigener Abruf): Digest-Zeile
+v0.91.0
+Siehe [CHANGELOG.md §[0.91.0]](https://github.com/pt9912/d-check/blob/main/CHANGELOG.md). Digest-Pin: `ghcr.io/pt9912/d-check@sha256:5d2f650d102c1d8224bb26930ec96d237506c07612fb8e0dbcdc42291702c57f`
+$ RepoDigests des gezogenen Images:
+ghcr.io/pt9912/d-check@sha256:5d2f650d102c1d8224bb26930ec96d237506c07612fb8e0dbcdc42291702c57f
+$ DCHECK-Digest-Position im Repo:
+3:# einziges als Gate behauptetes Target) und DCHECK_DIGEST auf den erzeugenden
+10:DCHECK_IMAGE ?= ghcr.io/pt9912/d-check:v0.91.0

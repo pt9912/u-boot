@@ -1,0 +1,15 @@
+# Gegenprobe: die Direktive der go.mod auf 1.26.0 zurueckgesetzt (Kopie)
+$ sed: go-Zeile der Kopie 1.27.0 -> 1.26.0, danach derselbe Lauf
+$ verändert (Auszug go.mod):
+3:go 1.26.0
+$ docker run --rm --network none -v "$PWD":/repo:ro ghcr.io/pt9912/d-check@<digest>
+go.mod:3	go	pinsync-mismatch	Pin "go": go.mod hat "1.26", der Bezug Dockerfile hat "1.27" (Werte: Dockerfile=1.27, repo.mk=1.27, internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl=1.27, .devcontainer/Dockerfile=1.27, go.mod=1.26)
+d-check: pinsync: 3 Pin(s) geprüft, 11 Quelle(n) gelesen
+d-check: 1074 Datei(en) geprüft, 1 Befund(e)
+exit-code=1
+--- Rueckfuehrung: go-Zeile zurueck auf 1.27.0 ---
+3:go 1.27.0
+$ derselbe Lauf nach der Rueckfuehrung:
+d-check: pinsync: 3 Pin(s) geprüft, 11 Quelle(n) gelesen
+d-check: 1074 Datei(en) geprüft, 0 Befund(e)
+exit-code=0

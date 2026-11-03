@@ -1,0 +1,7 @@
+# Negativprobe des GNU-make-Guards in der Kopie (Kommandozeilen-Setzung sticht den eingezogenen Wert)
+$ make MAKE_VERSION=4.2 -n help
+Makefile:20: *** GNU make 4.3 or newer is required, the running make reports 4.2.  Stop.
+exit-code=2
+$ Positivprobe ohne Setzung: make -n help (Auszug der Zeilen)
+grep -hE '^[a-z0-9-]+:.*##' Makefile harness/mk/archivierung.mk harness/mk/baseline.mk harness/mk/doc-gate.mk d-check.mk harness/mk/e2e-abdeckung.mk harness/mk/enforce.mk harness/mk/erfassung.mk harness/mk/hooks-install.mk harness/mk/selbstpruefung.mk harness/mk/slice-mv.mk harness/mk/traeger.mk repo.mk tools/mk/devcontainer.mk | sort | awk 'BEGIN{FS=":.*##"}{printf "  %-14s %s\n",$1,$2}'
+exit-code=0

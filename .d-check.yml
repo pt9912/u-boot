@@ -20,7 +20,7 @@
 scan:
   roots: ["."]
   ignore: [".harness/baseline/**", ".cache/**", ".claude/worktrees/**"]
-modules: [links, anchors, ids, matrix, planning, targets]
+modules: [links, anchors, ids, matrix, planning, targets, pinsync]
 
 # Linkpflicht für Kennungen — Muster aus tools/check_refs.py übersetzt
 # (\b-Wortgrenzen wie dort); Planning-Muster ohne Lookahead (RE2),
@@ -156,3 +156,50 @@ vcs:
   paths: ["docs/plan/adr/[0-9]*.md"]
   immutable-when: '^Accepted$'
   exclude-sections: [Status, Geschichte]
+
+# Pin-Gleichheit je benannter Pin-Gruppe (Modul pinsync, opt-in hier und im
+# make-Gatter-Lauf): der Lauf vergleicht die Fanggruppe der Quellen-Zeilen je
+# Pin byte-genau, er prueft Gleichheit, keine Aktualitaet. Die Pin-Gruppe "go"
+# traegt die zwei Go-Werkzeugketten-Schluessel: vier GO_VERSION-Stellen und die
+# go-Direktive der go.mod als fuenfte Stelle der Kopplung — die Fanggruppe je
+# Quelle liest den Major.Minor-Teil (die Direktive steht auf dem Pin-Minor,
+# 1.27.0 gegen den Pin 1.27.3; die Patch-Stelle der Toolchain bleibt in den
+# GO_VERSION-Stellen), den Minor vergleicht der Lauf byte-genau. "golangci-lint"
+# nimmt dieselben Stellen ohne go.mod (volles Wert-Feld mit dem v-Praefix),
+# "devcontainer-cli" die zwei Pin-Stellen der gepinnten Dev-Container-CLI
+# (package.json-Abhaengigkeit und die Resolved-URL im package-lock.json — das
+# Image-Tag des Helper-Images leitet sich aus der CLI-Version und dem Hash der
+# drei Dateien ab, es ist keine eigene Text-Stelle). bash, sed und weitere
+# Shell-Werkzeuge des Bau-Verlaufs tragen keine Einzel-Pins: ihre Versionen
+# kommen mit dem Basis-Image des jeweiligen Pins; das JDK ist nicht Teil einer
+# Pin-Gruppe (eine einzige Einstellen-Stelle, der Template-ARG).
+pinsync:
+  pins:
+    - name: go
+      sources:
+        - file: Dockerfile
+          pattern: '^ARG GO_VERSION=(\d+\.\d+)\.\d+$'
+        - file: repo.mk
+          pattern: '^GO_VERSION\s*\?=\s*(\d+\.\d+)\.\d+$'
+        - file: internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl
+          pattern: '^ARG GO_VERSION=(\d+\.\d+)\.\d+$'
+        - file: .devcontainer/Dockerfile
+          pattern: '^ARG GO_VERSION=(\d+\.\d+)\.\d+$'
+        - file: go.mod
+          pattern: '^go (\d+\.\d+)\.'
+    - name: golangci-lint
+      sources:
+        - file: Dockerfile
+          pattern: '^ARG GOLANGCI_LINT_VERSION=(v\S+)$'
+        - file: repo.mk
+          pattern: '^GOLANGCI_LINT_VERSION\s*\?=\s*(v\S+)$'
+        - file: internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl
+          pattern: '^ARG GOLANGCI_LINT_VERSION=(v\S+)$'
+        - file: .devcontainer/Dockerfile
+          pattern: '^ARG GOLANGCI_LINT_VERSION=(v\S+)$'
+    - name: devcontainer-cli
+      sources:
+        - file: internal/adapter/driven/docker/devcontainercli/package.json
+          pattern: '"@devcontainers/cli": "([0-9.]+)"'
+        - file: internal/adapter/driven/docker/devcontainercli/package-lock.json
+          pattern: '"resolved": "https://registry.npmjs.org/@devcontainers/cli/-/cli-([0-9.]+)\.tgz"'

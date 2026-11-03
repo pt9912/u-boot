@@ -11,6 +11,10 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Changed
+
+- The repository's toolchain pins are inventoried and coupled in the gate run: the `go` directive of `go.mod` is the fifth place of the pin coupling (raised `1.26.0` → `1.27.0`, the minor of the `GO_VERSION` toolchain pin `1.27.3`; the toolchain patch stays in the `GO_VERSION` places and every pin raise drags the directive along), the pinned places compare under the new d-check `pinsync` module of `docs-check` (pin groups `go`, `golangci-lint`, `devcontainer-cli`; equality, not currency), d-check moves to `v0.91.0` at a verified digest, and GNU make carries a minimum version at the head of the Makefile (`4.3`; the run aborts below it) ([`LH-FA-DEV-011`](spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)). **Promised:** the fifth place with the minor-level coupling, the three pin groups over their listed sources, and the version guard, as far as the gate runs and the mismatch probes of the measure protocol show. **Not promised:** currency of any pin, individual pins for shell tools (their versions come with the base image), and a pinsync group for the JDK key (its single set place). Lastenheft 0.34.0.
+
 ## [0.21.0] - 2026-11-03
 
 Twenty-first release. **Project environment values as a configuration key (`devcontainer.containerEnv`), and two cleanups of the feature catalogue: the dead keys `cpp` and `postgres-client` are gone, and external feature sources are registry references.**
