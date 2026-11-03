@@ -4,10 +4,10 @@
 
 **Freigabe (Projektinhaber, 2026-11-02):** der *Neu*-Wortlaut der zwölf Stellen
 §§2 ist je Stelle freigegeben, wie vorgelegt (wortgleich; Muster
-[`slice-cr-devcontainer-forge-cli`](../done/slice-cr-devcontainer-forge-cli.md)
+[`slice-cr-devcontainer-forge-cli`](../planning/done/slice-cr-devcontainer-forge-cli.md)
 §1: Freigabe als eigener Schritt vor der Lastenheft-Änderung); die vier
 Entscheidungen des Hauptagenten-Gesprächs (§4 des Plans
-[`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-katalog-feature-jdk-gepinnt.md))
+[`slice-v1-katalog-feature-jdk-gepinnt`](../planning/done/slice-v1-katalog-feature-jdk-gepinnt.md))
 tragen ihn weiter: **Schlüsselname und Konflikt-Regel** — `java-toolchain`,
 aktiviertes externes `java` neben dem Schlüssel ist ein fachlicher
 Validierungsfehler (Exit-Code `10`), das externe `java` allein bleibt wählbar;
@@ -19,11 +19,11 @@ Release, die JSON-Schnittstelle `api.adoptium.net` bleibt aus. Dazu die
 Brew-Form des Vertriebs und trägt nur den Befund — keine zweite
 Installationsform im CR. Die Freigabe-Punkte **F6 bis F8** sind entschieden:
 **F6** — erweitern, keine eigene Technik-Stelle (Stelle 7); der Titel von
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+[`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 nennt die drei Schlüssel. **F7** — `sdkman` ohne Abweisung: der
 CR nennt nur den Konflikt mit dem externen `java` (Stelle 5); die Frage, ob ein
 aktives `sdkman` allein ein JDK installiert, geht als offener Punkt an den
-Umsetzungs-Slice. **F8** — die [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)-Hosts-Zeile
+Umsetzungs-Slice. **F8** — die [`SPEC-019`](../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)-Hosts-Zeile
 kommt in den CR-Commit, auf die gelesene Vertriebs-Lage (Stelle 9, Aufstellung
 (a); Fundstelle beim Implementer, siehe §7 des CR-Slices); der Docker-Test des
 Umsetzungs-Slices pinnt die Hosts. Die Abweichungen des Lastenheft-Wortlauts
@@ -31,11 +31,11 @@ vom Block-Wortlaut der Stellen §§2 (im CR-Slice §7 ausgeführt): die J-Marker
 (**J1**..**J11**) sind Beleg-Marker dieses Dokuments, keine Vertragskennungen,
 und sind mit dem Lastenheft-Commit entfallen; der Verweis „(Stelle 4)" am Ende
 von **J11** ist eine interne Stelle dieses Vorschlags (Decken-Regel) und ist
-im Vertrag entfallen; die [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Verweise
+im Vertrag entfallen; die [`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Verweise
 stehen als Anker innerhalb der Zieldatei.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
-[`slice-cr-devcontainer-java-toolchain`](../done/slice-cr-devcontainer-java-toolchain.md)
+[`slice-cr-devcontainer-java-toolchain`](../planning/done/slice-cr-devcontainer-java-toolchain.md)
 („Wortlaut-Entwurf je Stelle und Freigabe" — die Stellen (a) bis (f) der Zeile).
 Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an
 den Verträgen und diskutiert die Entscheidungen 2026-11-02 nicht neu
@@ -45,27 +45,27 @@ den Verträgen und diskutiert die Entscheidungen 2026-11-02 nicht neu
 Feature-Katalog-Welle der Roadmap); die Versionsvergabe schneidet der
 Release-Cut.
 
-**Bezug:** [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
+**Bezug:** [`ADR-0041`](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
 (`Accepted`, 2026-11-02 — der Eintragstyp; wird verlinkt, nicht wiederholt),
-[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
+[`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
 (der Eintragstyp mit den Sätzen S1 bis S11, seit Lastenheft 0.30.0 — der neue
 Schlüssel erbt den Typ),
-[`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)
+[`LH-FA-DEV-011`](../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)
 (Pin-Politik — bleibt bei den zwei Go-Schlüsseln, Regel 4 unten),
-[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
+[`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 (die Abweisungs-Fälle enden je mit Exit-Code `10`),
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+[`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 (der Eintragstyp in der Technik),
-[`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen),
-[`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion),
-[`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config),
-[`SPEC-050`](../../../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen).
+[`SPEC-023`](../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen),
+[`SPEC-019`](../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion),
+[`SPEC-040`](../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config),
+[`SPEC-050`](../../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen).
 Die Mess-Basis der Werkzeugkette
-([`docs/messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md`](../../../messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md))
+([`docs/messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md`](../../messungen/slice-v1-katalog-gepinnte-toolchain-entwurf/README.md))
 trägt die Mechanik (Same-Origin, Exit-Codes, Meldungs-Form); die JDK-Neuheiten
 (Temurin-Archivform, `JAVA_HOME`/`java -version`, Brew-Befund) sind
 Umsetzungs-Messung
-([`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-katalog-feature-jdk-gepinnt.md)
+([`slice-v1-katalog-feature-jdk-gepinnt`](../planning/done/slice-v1-katalog-feature-jdk-gepinnt.md)
 §2) — der CR trägt Zusage nur soweit ein Docker-Test sie belegt.
 
 **Verantwortlich:** — (Freigabe: Projektinhaber).
@@ -79,10 +79,10 @@ Umsetzungs-Messung
 Fünf Regeln, an denen jede Stelle unten gemessen ist:
 
 1. **Decken-Regel.** Der *Neu*-Wortlaut als künftiger Lastenheft-Text trägt
-   keine ADR-, Slice-, Messungs- oder Planning-Kennungen ([`AGENTS.md`](../../../../AGENTS.md)
+   keine ADR-, Slice-, Messungs- oder Planning-Kennungen ([`AGENTS.md`](../../../AGENTS.md)
    §3.4; die Referenzmatrix verbietet die Kanten aus dem Vertrags-Stratum nach
    unten). Wo der Vertrag schweigt und der
-   [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md),
+   [`ADR-0041`](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md),
    die Messung oder eine der vier Entscheidungen die Einzelheit trägt, steht
    die Belegstelle im Kommentar — nicht im Blockquote.
 2. **Keine Zusage über den Typ, die Messung und die Entscheidungen hinaus.**
@@ -90,9 +90,9 @@ Fünf Regeln, an denen jede Stelle unten gemessen ist:
    Fundstellen stehen in den Belegen), nicht mehr. Die Temurin-Details sind vor
    der Umsetzungs-Messung Form, nicht Zusage; die Grenz-Sätze der Stellen
    folgen dem Muster „nur, soweit ein Test mit Build-Tag `docker` es belegt"
-   ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md);
+   ([`BEO-DOK/zusage-weiter-als-messung`](../planning/observations/BEO-DOK/zusage-weiter-als-messung/observation.md);
    die pinnenden Tests der Beleg-Tabelle trägt der Umsetzungs-Diff —
-   [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)).
+   [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)).
 3. **Keine Zahlen im Vertragstext.** Die konkrete Temurin-Revision (das gepinnte
    Release von LTS 21) ist eine Messung des Umsetzungs-Slices; der Vertrag nennt
    die LTS-Version und die Veröffentlichungs-Form, die Zahlen stehen im
@@ -101,9 +101,9 @@ Fünf Regeln, an denen jede Stelle unten gemessen ist:
    [`cr-vorschlag-gepinnte-werkzeugkette`](cr-vorschlag-gepinnte-werkzeugkette.md)
    §Stelle 7; im Lastenheft 0.30.0 trägt die Historie-Zeile 1627 die Werte als
    Chronik — gelesen am 2026-11-02).
-4. **[`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)
+4. **[`LH-FA-DEV-011`](../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)
    bleibt bei den zwei Go-Schlüsseln.** Gelesen 2026-11-02 (Fundstelle
-   [`spec/lastenheft.md`](../../../../spec/lastenheft.md) Zeilen 520 bis 522:
+   [`spec/lastenheft.md`](../../../spec/lastenheft.md) Zeilen 520 bis 522:
    „die Schlüssel `go-toolchain` und `golangci-lint`"). Eine Erweiterung wäre
    ein neuer Wortlaut-Anker und läge in keiner der vier Entscheidungen; die
    Pin-Stellen des JDK-Schlüssels sind die Template-`ARG` (Default-Pin) und die
@@ -119,10 +119,10 @@ Fünf Regeln, an denen jede Stelle unten gemessen ist:
 
 ## 2. Stellen
 
-### Stelle 1 — [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features): die Listen-Zeile
+### Stelle 1 — [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features): die Listen-Zeile
 
 **Alt (gelesen 2026-11-02):** die Beispiel-Liste (Fundstelle
-[`spec/lastenheft.md`](../../../../spec/lastenheft.md) Zeilen 402 bis 416)
+[`spec/lastenheft.md`](../../../spec/lastenheft.md) Zeilen 402 bis 416)
 trägt „Go-Toolchain aus gepinntem Release (`go-toolchain`)" (Zeile 414) und
 „golangci-lint mit gepinntem Release (`golangci-lint`)" (Zeile 415) nebeneinander,
 gefolgt von „Anschluss an einen Ollama-Dienst des Hosts (`ollama-host`)"
@@ -138,10 +138,10 @@ Familie an:
 **Beleg:** die Position folgt der Ordnung der zwei Go-Zeilen (gelesen Zeilen
 414 bis 416); der Schlüssel-Name `java-toolchain` ist entschieden (2026-11-02,
 §4 Frage 1 des Plans). Der Name der Listen-Zeile ist der gleiche, den
-[`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)
+[`SPEC-040`](../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)
 (Zeilen 522, 544) nach der Erweiterung trägt (Stelle 10).
 
-### Stelle 2 — [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features): der Zusage-Absatz des Schlüssels
+### Stelle 2 — [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features): der Zusage-Absatz des Schlüssels
 
 **Alt (gelesen 2026-11-02):** nach dem `gh`/`glab`-Absatz (Zeile 422) trägt
 der Absatz der zwei Go-Schlüssel (Zeile 424, Sätze S1 bis S11) die Typ-Zusage —
@@ -176,12 +176,12 @@ erzeugt“ (Zeile 426):
 > und die gelesenen Prüfsummen trägt der erzeugte Dockerfile-Block. Ist die Quelle nicht lesbar oder überdeckt sie die
 > gewählte Version nicht, schlägt die Erzeugung der Übersteuerung mit einem
 > fachlichen Validierungsfehler fehl
-> ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes): Exit-Code `10`; die nicht
+> ([`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes): Exit-Code `10`; die nicht
 > lesbare Quelle ist kein Feature-Source-Fehler, die Eingabe der
 > Übersteuerung selbst ist unbrauchbar). (**J6**) Ein Eintrag der gepinnten
 > Werkzeugkette ohne Angabe seiner offiziellen Prüfsummen-Quelle weist eine
 > `version:`-Angabe mit einem fachlichen Validierungsfehler ab
-> ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes): Exit-Code `10`). (**J7**)
+> ([`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes): Exit-Code `10`). (**J7**)
 > Die Archive des Typs sind nicht signiert, und `u-boot` prüft keine
 > Signatur; die Grenze der Prüfung weist `u-boot` beim Erzeugen aus. (**J8**)
 > Die gleichzeitige Aktivierung des externen Features `java` und des
@@ -201,22 +201,22 @@ erzeugt“ (Zeile 426):
 
 **Beleg je Satz:** **J1** — das Muster des Typs (Zeile 424, erster Satz); die
 Dockerfile-Block-Einträge wirken in beiden Profilen
-([`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
+([`SPEC-023`](../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
 Zeile 1555 „Anders als `ollama` wirken sie in beiden Profilen"); die
 Aktivierung ist profil-unabhängig (Fundstelle `dockerfileBlockFeatureActive`,
 `internal/hexagon/application/devcontainer_features.go` Zeilen 576 bis 589 —
 kein Profil-Schalter). **J2** — der Vertrieb und die LTS-Version sind
 entschieden (2026-11-02, §4 Frage 2); das Architektur-Muster trägt der
-Go-Block ([`Dockerfile.tmpl`](../../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
+Go-Block ([`Dockerfile.tmpl`](../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
 Zeilen 138 bis 165: zwei Prüfsummen-`ARG` je Architektur Zeilen 149 und 150,
 `sha256sum -c` vor dem Entpacken Zeile 161); die konkrete Archivform
 (Namensmuster, Lizenzform) liest die Messung des Umsetzungs-Slices (Plan §2) —
 der Satz sagt sie nicht (Regel 3); „eine abweichende Prüfsumme bricht den Bau
 vor dem Entpacken ab" ist die Typ-Zusage (Lastenheft-Zeile 424, zweiter
 Satz — und die Negativprobe des
-[`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
+[`ADR-0041`](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
 §Fitness Function). **J3/J4** — das Muster der Sätze S3/S4 (Zeile 424) und
-[`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
+[`ADR-0041`](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
 Entscheidung 2, erster Halbsatz. **J5** — die Bedingung ist die Typ-Regel
 (Entscheidung 2: „trägt er sie, geht eine `version:`-Übersteuerung ohne
 `source:` durch, und der Block prüft die Prüfsumme der nutzergewählten Version
@@ -232,37 +232,37 @@ schlüsselfrei im Code (Fundstelle `featureVersionNeedsSourceForCat`,
 Blocks ohne Quellen-Angabe `resolveToolchain`, `devcontainer_toolchain.go`
 Zeilen 219 bis 225). **J7** — das Muster von S7 (Zeile 424, siebter Satz) und
 die Grenz-Form der Block-Kommentare
-([`Dockerfile.tmpl`](../../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
+([`Dockerfile.tmpl`](../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
 Zeilen 144 bis 146: „not signed ... does not protect against a release that
-was harmful from the start"); [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
+was harmful from the start"); [`ADR-0041`](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
 Entscheidung 3. **J8** — entschieden (2026-11-02, Frage 1); das Muster der
 Abweisung trägt `goToolchainConflictMessage`
 (`internal/hexagon/application/devcontainer_toolchain.go` Zeilen 181 bis 192,
 Text der Abweisung mit den zwei Auswegen) und `goFeatureActive` (Zeilen 168
 bis 179); der Wortlaut ist der von S8, auf die zwei Java-Schlüssel angewandt —
 eine zweite Konflikt-Regel entsteht nicht (Regel 5). **J9** — das Muster von
-S9 (Zeile 424, achter Satz); [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
+S9 (Zeile 424, achter Satz); [`ADR-0041`](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
 Entscheidung 3 (letzter Satz). **J10/J11** — das Muster von S10/S11 (Zeile
 424, neunter und zehnter Satz) und der Grenz-Satz-Muster der Historie-Zeilen
 0.27.0/0.28.0 (Fundstelle Zeilen 1624 bis 1625); „nur soweit ein Test mit
 Build-Tag `docker` es belegt" trägt
-[`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md);
+[`BEO-DOK/zusage-weiter-als-messung`](../planning/observations/BEO-DOK/zusage-weiter-als-messung/observation.md);
 der `containerEnv`-Null-Beitrag ist die Abgrenzung zu der Form der zwei
 Go-Schlüssel (Stelle 4), im selben Satz-Strang wie der S11-Muster der zwei
 Schlüssel die dort nicht genannten Umgebungswerte nennt.
 
 ### Stelle 3 — die offizielle Prüfsummen-Quelle des Schlüssels
 
-Der [ADR-0041](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
+Der [ADR-0041](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
 lässt die Quelle je Schlüssel in der Tabelle der Spec stehen; der Vorschlag,
 gelesen am Same-Origin-Muster der zwei Schlüssel (die Prüfsummen kommen aus
 derselben Veröffentlichung wie das Archiv — Kommentar des Templates,
-[`Dockerfile.tmpl`](../../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
+[`Dockerfile.tmpl`](../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
 Zeilen 139 bis 146):
 
 | Schlüssel | Offizielle Prüfsummen-Quelle (Vorschlag) | Begründung (gelesen) |
 |---|---|---|
-| `java-toolchain` | die Prüfsummen-Datei derselben Veröffentlichung der Temurin-Binaries, aus der das Release-Archiv stammt, je gewählter Version | entschieden (2026-11-02, §4 Frage 4 des Plans) — Same-Origin am Archiv wie die zwei Schlüssel ([`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) Tabelle, Fundstelle [`spec/spezifikation.md`](../../../../spec/spezifikation.md) Zeilen 983 bis 986); die JSON-Schnittstelle `api.adoptium.net` bleibt **ausdrücklich** nicht Quelle: zusätzlicher Host ohne Same-Origin-Garantie (derselben Entscheidung) |
+| `java-toolchain` | die Prüfsummen-Datei derselben Veröffentlichung der Temurin-Binaries, aus der das Release-Archiv stammt, je gewählter Version | entschieden (2026-11-02, §4 Frage 4 des Plans) — Same-Origin am Archiv wie die zwei Schlüssel ([`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) Tabelle, Fundstelle [`spec/spezifikation.md`](../../../spec/spezifikation.md) Zeilen 983 bis 986); die JSON-Schnittstelle `api.adoptium.net` bleibt **ausdrücklich** nicht Quelle: zusätzlicher Host ohne Same-Origin-Garantie (derselben Entscheidung) |
 
 **Abweisungsfall:** der Schlüssel trägt seine Quelle (die Tabelle oben, Träger
 Satz **J5**); `api.adoptium.net` ist kein Fall der Quelle, sondern ihr
@@ -270,7 +270,7 @@ ausdrücklich ausgeschlossener Ersatz — der Abgleich der Übersteuerung liest
 nur die Quelle der Tabelle. Ob die Prüfsummen-Datei einer Veröffentlichung
 eine beliebige nutzergewählte Version abdeckt, liest die Messung des
 Umsetzungs-Slices; deckt sie eine gewählte Version nicht, bleibt dort die
-Abweisung ([`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
+Abweisung ([`ADR-0041`](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
 Re-Evaluierungs-Trigger; Rückführung §4 (b) des CR-Slices). Der Meldungs-Wortlaut
 der Quelle (die Konstante verdoppelt ihn als Meldungstext — Fundstelle
 `devcontainer_features.go` Zeilen 215 bis 217 „The values double as the wording
@@ -282,7 +282,7 @@ Umsetzungs-Stellen (Muster der URL-Bauer der zwei Quellen,
 erzeugte Block mit einer `version:`-Übersteuerung gegen die für die gewählte
 Version gelesenen Prüfsummen baut und dass eine verfälschte Prüfsumme den Bau
 vor dem Entpacken abbricht (Negativprobe, Muster
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+[`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 Beleg-Tabelle Zeile 1001) — die Prüf-Form, nicht die Quelle im Einzelnen; die
 URL-Formen der Temurin-Veröffentlichung pinnt der Docker-Test auf den dritten
 Schlüssel, für andere Umgebungen als die der Messung bleibt der Abruf
@@ -293,23 +293,23 @@ unbelegt (Muster der Grenze, ebenda Absatz zur URL-Form, Zeile 988).
 **Alt (gelesen 2026-11-02):** die zwei Go-Schlüssel tragen unter `containerEnv`
 der erzeugten `devcontainer.json` die Cache-Verzeichnisse `GOCACHE` und
 `GOMODCACHE` unterhalb von `${containerWorkspaceFolder}` (Lastenheft-Zeile 385;
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
-Abschnitt *Cache-Werte*, Fundstelle [`spec/spezifikation.md`](../../../../spec/spezifikation.md)
+[`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+Abschnitt *Cache-Werte*, Fundstelle [`spec/spezifikation.md`](../../../spec/spezifikation.md)
 Zeile 992). Die Render-Stelle trägt den Zustand je Schlüssel:
-[`devcontainer.json.tmpl`](../../../../internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl)
+[`devcontainer.json.tmpl`](../../../internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl)
 Zeilen 42 bis 47 (der Block rendert bei `{{- if or .GoToolchain .GolangciLint}}`,
 beide Werte untereinander).
 
 **Neu (Vorschlag):** der Schlüssel `java-toolchain` trägt **keinen** Wert unter
-`containerEnv`; der Block-Text in [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)
+`containerEnv`; der Block-Text in [`LH-FA-DEV-001`](../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)
 wird um diesen Schlüssel **nicht** erweitert, und der Satz **J11** sagt den
 Null-Beitrag als Grenze aus. `JAVA_HOME` und `PATH` stehen als `ENV`-Zeilen im
 erzeugten Dockerfile-Block — Muster der `ENV PATH`-Zeile des Go-Blocks
-([`Dockerfile.tmpl`](../../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
+([`Dockerfile.tmpl`](../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
 Zeile 165); der konkrete `JAVA_HOME`-Wert (Installationspfad der entpackten
 Distribution) und die Form des Entpackens sind Umsetzungs-Mess-Stellen, die
 der Docker-Test pinnt (`java -version` und `JAVA_HOME` im gebauten Container —
-Plan [`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-katalog-feature-jdk-gepinnt.md)
+Plan [`slice-v1-katalog-feature-jdk-gepinnt`](../planning/done/slice-v1-katalog-feature-jdk-gepinnt.md)
 §2). Was die Messung entscheidet, ist also die **Form der Installations-Umgebung**
 im Block, nicht ein `containerEnv`-Wert.
 
@@ -327,7 +327,7 @@ vier Entscheidungen 2026-11-02 trägt sie — der CR erfindet keinen Wert (Regel
 weichen ab): nicht durch den `containerEnv`-Weg getragen; der Docker-Test
 prüft `java -version` und `JAVA_HOME`, und die Konflikt-Frage ist die Stelle 5 —
 anders als beim Go-Fall trägt die Basis (`mcr.microsoft.com/devcontainers/base:debian`,
-[`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
+[`SPEC-023`](../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
 Zeile 1551) kein JDK; ob weitere aktivierte Features ein JDK bringen, liest
 der Umsetzungs-Diff als Beobachtung.
 
@@ -335,7 +335,7 @@ der Umsetzungs-Diff als Beobachtung.
 
 **Lage:** der Katalog führt `java` → `ghcr.io/devcontainers/features/java`,
 Standardversion `1`, „Java + SDKMAN“
-([`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
+([`SPEC-023`](../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
 Zeile 1552; Fundstelle `devcontainer_features.go` Zeilen 273 bis 277 —
 gelesen 2026-11-02) und die Konflikt-Wächter-Maschine des Typs prüft heute
 allein `go` gegen `go-toolchain` (`goFeatureActive`, `devcontainer_toolchain.go`
@@ -349,15 +349,15 @@ abgewiesen, wie in der Werkzeugkette vor ihr (Abwägung in
 die Wirkung der `PATH`-Reihenfolge der zwei JDK-Installationen — der Zustand,
 den kein Test trägt). Das externe `java` allein bleibt unverändert wählbar
 (Satz **J8**, zweiter Halbsatz); seine Zeile
-[`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)
+[`SPEC-019`](../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)
 (Zeile 1475, Stand nach dem CR-Diff) ändert sich nicht.
 
 **Entschieden — `sdkman` ohne Abweisung (F7, 2026-11-02):** der Katalog führt `sdkman` auf dieselbe Quelle mit
 geteiltem Render-Schlüssel („teilt sich den Render-Schlüssel mit `java`",
-[`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
+[`SPEC-023`](../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
 Zeile 1552; Katalog-Eintrag mit der Beschreibung „SDKMAN (installed by the
 official java feature)",
-[`devcontainer_features.go`](../../../../internal/hexagon/application/devcontainer_features.go)
+[`devcontainer_features.go`](../../../internal/hexagon/application/devcontainer_features.go)
 Zeilen 310 bis 314). Ob ein aktives `sdkman` allein ein JDK installiert (die
 Aktivierung rendert das `java`-Feature), ist nicht gelesen; die Freigabe fällt
 auf den zweiten Stand der Vorlage: der Absatz bleibt beim externen `java`
@@ -374,35 +374,35 @@ konkrete Revision — das gepinnte Temurin-Release von LTS 21 — ist die
 Default-Pin-Messung des Umsetzungs-Slices (Entscheidung 2026-11-02, Frage 3).
 Begründung aus der Hauspraxis: das Muster F4 des Vorlaufs — eine Zahl im
 Lastenheft machte jede Pin-Hebung zu einem Vertrags-Commit neben dem
-Code-Commit — und hier ohne die Vier-Stellen-Kopplung ([`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)
+Code-Commit — und hier ohne die Vier-Stellen-Kopplung ([`LH-FA-DEV-011`](../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)
 bleibt bei den zwei Go-Schlüsseln, Regel 4), also ohne Test-Abgleich über
 andere Stellen als die Template-`ARG` und die erzeugte Dockerfile-`ARG` (die
 zweite entsteht mit der Übersteuerung, Muster der Pin-Zweige
-[`Dockerfile.tmpl`](../../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
+[`Dockerfile.tmpl`](../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
 Zeilen 147 bis 155 und 176 bis 184 — gelesen am 2026-11-02). **Der gelesene
 Stand** der zwei bestehenden Pins (Beleg): Go `1.27.3`, `golangci-lint`
-`v2.14.0` in [`Dockerfile.tmpl`](../../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
+`v2.14.0` in [`Dockerfile.tmpl`](../../../internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl)
 Zeilen 152 bis 154 und 181 bis 183 — die Template-`ARG` ist die Quellen-Stelle der
-Pin-Werte ([`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette));
+Pin-Werte ([`LH-FA-DEV-011`](../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette));
 für `java-toolchain` existiert die `ARG`-Stelle nicht, sie entsteht mit dem
 Umsetzungs-Diff. Die Zahl steht im CHANGELOG-Eintrag der Stelle 12 und — nach
 der Lastenheft-Änderung — als Chronik in der Historie-Zeile `0.31.0` (Muster
 der Zeile 1627, gelesen). **Alternative** (ein Satz mit der Zahl in
-[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features))
+[`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features))
 bleibt möglich; sie ist durch die Entscheidungen 2026-11-02 (Frage 3
 ausdrücklich: CHANGELOG und Historie, nicht Vertragstext) abweichend — kein
 F-Punkt, der Wortlaut trägt die Setzung.
 
-### Stelle 7 — Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle
+### Stelle 7 — Technik-Stelle: [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle
 
 **Alt (gelesen 2026-11-02):**
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+[`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 trägt den Eintragstyp an einer Stelle — Titel (Zeile 973), die Absätze
 *Eintragstyp* (Zeile 977), *Default-Pin und Übersteuerung* (Zeile 979),
 *Prüfsummen-Quellen* mit der zwei-Schlüssel-Tabelle (Zeilen 981 bis 986),
 *Abweisungen* (Zeile 990), *Cache-Werte* (Zeile 992), *Meldungen*
 (Zeile 994) und die Beleg-Tabelle (Zeilen 996 bis 1010); der Katalog-Abschnitt
-[`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
+[`SPEC-023`](../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)
 listet die Dockerfile-Block-Keys Zeile für Zeile (Zeilen 1554 bis 1556 —
 gelesen); dort bekommt der `java-toolchain`-Eintrag seine Zeile.
 
@@ -411,14 +411,14 @@ Technik-Stelle daneben schneiden. **Empfehlung: erweitern** — der Eintragstyp
 steht an einer Stelle: die Absätze tragen den dritten Schlüssel, die
 Quellen-Tabelle bekommt die Zeile der Stelle 3, die Beleg-Tabelle bekommt die
 Java-Zeilen (je Bedingung der Beleg-Auftrag; die Test-Namen trägt der
-Umsetzungs-Diff — [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)),
+Umsetzungs-Diff — [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)),
 und der Titel nennt `java-toolchain`. In der Gegenoption (eine eigene Stelle
-neben [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))
+neben [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))
 stünden die Typ-Regeln (Abweisungen, Meldungen,
 `version:`-Bedingung) an zwei Stellen; dieselbe Regel wäre doppelt
 belegt und driftfähig — genau die Kopie-Form, die
-[`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)
-und [`AGENTS.md`](../../../../AGENTS.md) §3.10 vermeiden; nur die Java-Abweichungen (Vertrieb, JAVA_HOME)
+[`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)
+und [`AGENTS.md`](../../../AGENTS.md) §3.10 vermeiden; nur die Java-Abweichungen (Vertrieb, JAVA_HOME)
 wären neu — aber die Abweichungen sind Zeilen derselben Tabellen, keine
 eigenen Absätze. **Contra** (der Erweiterung): der Titel verlässt seine
 Zwei-Schlüssel-Fassung, und der Absatz *Cache-Werte* erweitert einen
@@ -427,25 +427,25 @@ des dritten (der CR trägt die Form der Abgrenzung — Stelle 4). Die Wahl wurde
 beim Implementer als Teil der Freigabe-Vorlage geführt (CR-Slice §1,
 DoD-Zeile 3); der *Neu*-Wortlaut der Spec-Stellen (nicht der Lastenheft-Stellen)
 ist Teil derselben Freigabe wie der Lastenheft-Wortlaut. **Entschieden
-(F6, 2026-11-02): erweitern** — [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+(F6, 2026-11-02): erweitern** — [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 steht erweitert; sein Titel nennt die drei Schlüssel, der Anker-Nachzug des
 neuen Slugs läuft mit dem Technik-Commit.
 
 ### Stelle 8 — Meldung des Erzeugens (Warn-Form)
 
 **Träger:** Sätze **J7**/**J9** (der
-[`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
+[`ADR-0041`](../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)
 Entscheidung 3 letzter Satz: die Meldung weist den aktiven Block und, bei
 einer Übersteuerung, deren Quelle aus; „Wortlaut und Ausweisung sind
 CR-Wortlaut, wie bei den Vorlagen eine Warnung" — die zwei Schlüssel tragen
 den freigegebenen Stand, Fundstelle Zeile 424, achter Satz).
 
 **Form (Vorschlag):** je aktiviertem Schlüssel ein Meldungseintrag der
-Ebene `warn` mit der Kennung [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)
-als `code` (Regel [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe),
+Ebene `warn` mit der Kennung [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)
+als `code` (Regel [`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe),
 Muster `toolchainNotice` — Fundstelle `devcontainer_toolchain.go` Zeilen 322
 bis 337, gelesen 2026-11-02: `Level: "warn"`, `Code` =
-[`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), die
+[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), die
 Message trägt die Quelle (als Wortlaut der Konstante), die Version (Default-Pin
 per `ARG`-Namen oder Übersteuerung samt gelesener Quelle) und die Grenze („the
 archive is not signed and u-boot checks no signature, so the check does not
@@ -454,15 +454,15 @@ protect against a release that was harmful from the start"); `Subject:
 Vertriebs-Form (Eclipse-Temurin-Distribution der LTS-Version 21) — sie ersetzt das
 Quellen-Formular nicht, sondern konkretisiert es. Die Meldung ist keine
 Sicherheitslockerung und kein Degradations-Fallback (keine der vier
-Ausnahmen von `--quiet`, [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)
+Ausnahmen von `--quiet`, [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)
 Zeile 196: „Alle anderen Hinweise und Warnungen entfallen unter `--quiet`") —
 der Typ ist seit 0.30.0 so vertraglich (keine fünfte Ausnahme); der CR
 erfindet keine zusätzliche Ausweis-Pflicht.
 
-### Stelle 9 — [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion): die Hosts-Zeile
+### Stelle 9 — [`SPEC-019`](../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion): die Hosts-Zeile
 
 **Alt (gelesen 2026-11-02):** die Allowlist-Tabelle (Fundstelle
-[`spec/spezifikation.md`](../../../../spec/spezifikation.md) Zeilen 1459 bis
+[`spec/spezifikation.md`](../../../spec/spezifikation.md) Zeilen 1459 bis
 1476) trägt die Zeile `java` mit `repo.maven.apache.org`, `repo1.maven.org`
 (Zeile 1466) und keine Zeile `java-toolchain`.
 
@@ -485,7 +485,7 @@ die Hosts; deckt die Umsetzungs-Messung die Zeile anders, ist sie eine
 Plan-Berichtigung (Rückführung §4 (b) des CR-Slices deckt den Widerspruch) —
 Empfehlung; (b) die Zeile entsteht mit dem Umsetzungs-Slice nach der Messung
 — der DoD-Punkt
-([`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)-Zeile)
+([`SPEC-019`](../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)-Zeile)
 verschiebt sich dorthin, was eine
 Plan-Berichtigung am CR-Slice (DoD-Zeile 3) voraussetzt. **Entschieden
 (F8, 2026-11-02): Aufstellung (a)** — die Zeile steht im CR-Commit auf die
@@ -498,15 +498,15 @@ des Umsetzungs-Slices pinnt die Hosts, und eine abweichende Umsetzungs-Messung
 berichtigt die Zeile. In keinem der beiden
 Stände steht ein erfundener Host im Vertrag (Regel 2).
 
-### Stelle 10 — [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config): die zwei Schlüssel-Namen-Zeilen
+### Stelle 10 — [`SPEC-040`](../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config): die zwei Schlüssel-Namen-Zeilen
 
 **Alt (gelesen 2026-11-02):** die Werte-Zelle der `version`-Zeile (Fundstelle
-[`spec/spezifikation.md`](../../../../spec/spezifikation.md), Zeile 522) und die
+[`spec/spezifikation.md`](../../../spec/spezifikation.md), Zeile 522) und die
 Schreibpipeline-Stufe 6 (Zeile 544) tragen je den Klammer-Zusatz mit den zwei
 Namen: „(`go-toolchain`, `golangci-lint` — ihre Übersteuerung prüft
-`generate devcontainer` gegen die Quellen-Angabe, [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))"
+`generate devcontainer` gegen die Quellen-Angabe, [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))"
 (Zeile 522; Zeile 544 in der verkürzten Form „(`go-toolchain`, `golangci-lint`;
-[`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))"
+[`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv))"
 in derselben Regel-Weise).
 
 **Neu (Vorschlag):** je Zeile der dritte Name in der Klammer, der Zusatz selbst
@@ -515,11 +515,11 @@ unverändert:
 > ... oder einer der Schlüssel der gepinnten Werkzeugkette ist (`go-toolchain`,
 > `golangci-lint`, `java-toolchain` — ihre Übersteuerung prüft
 > `generate devcontainer` gegen die Quellen-Angabe,
-> [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) ...
+> [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) ...
 
 > ... muss der Eintrag eine `source` tragen oder einer der Schlüssel der
 > gepinnten Werkzeugkette sein (`go-toolchain`, `golangci-lint`,
-> `java-toolchain`; [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) ...
+> `java-toolchain`; [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) ...
 
 **Beleg:** die Regel steht schlüsselfrei im
 Code (`featureVersionNeedsSourceForCat`, Fundstelle Zeilen 844 bis 852 —
@@ -530,13 +530,13 @@ Stelle 3); die Zwei-Zeilen-Fassung ist die Fundstellen-Aussage des CR-Slices
 ### Stelle 11 — Handbuch-Katalog-Stellen und Namenslisten
 
 **Alt (gelesen 2026-11-02):** die Nutzer-Doku trägt den Schlüssel nicht; die
-Katalog-Tabelle (Fundstelle [`docs/user/benutzerhandbuch.md`](../../../../docs/user/benutzerhandbuch.md)
+Katalog-Tabelle (Fundstelle [`docs/user/benutzerhandbuch.md`](../../user/benutzerhandbuch.md)
 Zeilen 1129 bis 1149) kennt `java` (Zeile 1134) und die zwei
 Go-Schlüssel-Zeilen (Zeilen 1147 und 1148); die Namenslisten der READMEs
 tragen die zwei Go-Schlüssel mit „`gh` and `glab` (GitHub and GitLab CLI),
 `go-toolchain` and `golangci-lint` (toolchains from pinned release archives,
-both profiles)" (Fundstelle [`README.md`](../../../../README.md) Zeile 153 bzw.
-[`README.de.md`](../../../../README.de.md) Zeile 156); das JVM-Beispiel
+both profiles)" (Fundstelle [`README.md`](../../../README.md) Zeile 153 bzw.
+[`README.de.md`](../../../README.de.md) Zeile 156); das JVM-Beispiel
 (Zeilen 1084 bis 1089, 1113) zeigt
 `java.version 21` — die Berichtigung dieses Beispiels ist eine Mess-Frage des
 Umsetzungs-Slices (Tags des `java`-Features, Plan §2 (c)), nicht dieses CR.
@@ -546,21 +546,21 @@ Muster der zwei Go-Zeilen (Zeilen 1147 bis 1148: „Kein OCI-Feature: Das
 erzeugte Dockerfile installiert ... beide Profile; die Version steht als
 Build-Argument im Dockerfile und ist mit `version` übersteuerbar
 (`u-boot` liest dafür die Prüfsummen-Datei derselben Veröffentlichung)"),
-ohne Kennungen im Nutzertext ([`AGENTS.md`](../../../../AGENTS.md) §5 Regel 6);
+ohne Kennungen im Nutzertext ([`AGENTS.md`](../../../AGENTS.md) §5 Regel 6);
 die Namenslisten der READMEs bekommen jeweils ein Paar `java-toolchain`
 (Wortlaut der Paare je der Form der Freigabe). **Ist-Zustand-Frage:** die
 Nutzer-Doku beschreibt den Ist-Zustand — die Schlüssel existieren dort noch
 nicht; falls der Projektinhaber die Ist-Zustand-Regel auch hier zieht, gehen
 die Diffs in den Umsetzungs-Slice (Rückführung §4 des CR-Slices; Muster der
 Plan-Berichtigung in
-[`slice-cr-devcontainer-gepinnte-werkzeugkette`](../done/slice-cr-devcontainer-gepinnte-werkzeugkette.md)
+[`slice-cr-devcontainer-gepinnte-werkzeugkette`](../planning/done/slice-cr-devcontainer-gepinnte-werkzeugkette.md)
 §7). Die Form der Stelle ist Teil der Freigabe; der CR-Disziplin-Abschnitt
 (§1) entscheidet sie, nicht dieser Vorschlag.
 
 ### Stelle 12 — CHANGELOG-Form
 
 **Alt (gelesen 2026-11-02):** der `## [Unreleased]`-Block (Fundstelle
-[`CHANGELOG.md`](../../../../CHANGELOG.md) Zeile 12) ist leer; der
+[`CHANGELOG.md`](../../../CHANGELOG.md) Zeile 12) ist leer; der
 hinterliegende `0.19.0`-Block (Zeilen 14 bis 29) trägt die Form der
 Werkzeugketten-Zusagen samt der Pin-Zahlen als Chronik (Zeile 23: „with this
 release Go `1.27.3` and golangci-lint `v2.14.0`“).
@@ -589,7 +589,7 @@ Link-Klammern (wie Zeile 23), nicht der Nutzertext.
 | 2 — Zusage weiter als ADR, Messung oder Freigabe | bearbeitet: Stelle 3 (Was der Docker-Test belegt) und die Grenz-Sätze **J10**/**J11**; die Brew-Form trägt keinen CR-Wortlaut (Freigabe-Kontext, Mess-Punkt F5). |
 | 3 — Bedingung der Technik-Stelle ohne pinnenden Test | bearbeitet: die Beleg-Tabelle trägt der Umsetzungs-Diff je Zeile (Stelle 7); keine Belege im CR. |
 | 4 — Handbuch beschreibt den Ist-Zustand | benannt: Stelle 11 — Form je Freigabe; falls die Ist-Zustand-Regel auch hier zieht, Diffs in den Umsetzungs-Slice (Rückführung CR-Slice §4). |
-| 5 — Plan-Aussagen am Fundort nicht gelesen | bearbeitet: die Fundstellen dieses Vorschlags sind am 2026-11-02 gelesen und jeder Satz je Stelle trägt seine; der Abgleich läuft nach jeder Fix-Runde erneut ([`AGENTS.md`](../../../../AGENTS.md) §3.10). |
+| 5 — Plan-Aussagen am Fundort nicht gelesen | bearbeitet: die Fundstellen dieses Vorschlags sind am 2026-11-02 gelesen und jeder Satz je Stelle trägt seine; der Abgleich läuft nach jeder Fix-Runde erneut ([`AGENTS.md`](../../../AGENTS.md) §3.10). |
 
 ## 4. Punkte für die Freigabe
 
@@ -603,7 +603,7 @@ der *Neu*-Wortlaut je Stelle (§§2) und die Punkte F6 bis F8 sind freigegeben
 | **F2** | JDK-Vertrieb und Archivform | Eclipse Temurin, LTS 21, Archive aus der Veröffentlichung der Temurin-Binaries | **entschieden** — Temurin, LTS 21; die konkrete Revision liest die Messung des Umsetzungs-Slices |
 | **F3** | Default-Pin-Zahlen im Vertragstext | nein — Chronik im CHANGELOG und in der Lastenheft-Historie; im CR Muster F4 des Vorlaufs | **entschieden** — nein (Stelle 6) |
 | **F4** | Prüfsummen-Quelle | Same-Origin je Release; `api.adoptium.net` aus | **entschieden** — Prüfsummen-Datei derselben Veröffentlichung, je gewählter Version (Stelle 3) |
-| **F5** | Die Brew-Auflage (2026-11-02) — Vertriebs-Befund über Homebrew (Cask `temurin`/`temurin@21`, Formel-Verhältnis zum Feature `homebrew`) | Mess-Punkt des Umsetzungs-Slices; keine zweite Installationsform im CR | **Auflage** — Mess-Pflicht in [`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-katalog-feature-jdk-gepinnt.md) §2 (d); der CR trägt sie nicht |
-| **F6** | Technik-Stelle: [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle daneben | erweitern — der Eintragstyp bleibt an einer Stelle (Stelle 7) | **entschieden** — erweitern (Stelle 7); der Titel nennt die drei Schlüssel, der Anker-Nachzug läuft mit dem Technik-Commit |
+| **F5** | Die Brew-Auflage (2026-11-02) — Vertriebs-Befund über Homebrew (Cask `temurin`/`temurin@21`, Formel-Verhältnis zum Feature `homebrew`) | Mess-Punkt des Umsetzungs-Slices; keine zweite Installationsform im CR | **Auflage** — Mess-Pflicht in [`slice-v1-katalog-feature-jdk-gepinnt`](../planning/done/slice-v1-katalog-feature-jdk-gepinnt.md) §2 (d); der CR trägt sie nicht |
+| **F6** | Technik-Stelle: [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv) erweitern oder eigene Stelle daneben | erweitern — der Eintragstyp bleibt an einer Stelle (Stelle 7) | **entschieden** — erweitern (Stelle 7); der Titel nennt die drei Schlüssel, der Anker-Nachzug läuft mit dem Technik-Commit |
 | **F7** | Fall `sdkman` + `java-toolchain`: derselbe Abweisungsfall wie externes `java`? | derselbe Abweisungsfall, sobald die gelesene Feature-Lage ihn trägt; sonst Absatz beim externen `java` allein und Frage ins Beobachtungs-Register (Stelle 5) | **entschieden** — `sdkman` ohne Abweisung: der CR nennt nur den Konflikt mit dem externen `java` (Stelle 5); die Frage geht als offener Punkt an den Umsetzungs-Slice |
-| **F8** | Zeitpunkt der Hosts-Zeile in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) | im CR-Commit auf die gelesene Vertriebs-Lage, gepinnt durch den Docker-Test des Umsetzungs-Slices (Stelle 9) | **entschieden** — die Zeile kommt in den CR-Commit, Aufstellung (a) (Stelle 9); Fundstelle der gelesenen Lage im CR-Slice §7 |
+| **F8** | Zeitpunkt der Hosts-Zeile in [`SPEC-019`](../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) | im CR-Commit auf die gelesene Vertriebs-Lage, gepinnt durch den Docker-Test des Umsetzungs-Slices (Stelle 9) | **entschieden** — die Zeile kommt in den CR-Commit, Aufstellung (a) (Stelle 9); Fundstelle der gelesenen Lage im CR-Slice §7 |

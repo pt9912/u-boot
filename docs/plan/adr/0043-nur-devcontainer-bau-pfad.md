@@ -4,7 +4,7 @@
 
 **Datum:** 2026-11-03
 
-**Autor:** pt9912 (Rolle Implementer — Umsetzung des freigegebenen CR [`cr-vorschlag-spec-031-devcontainer-bau`](../../plan/planning/in-progress/cr-vorschlag-spec-031-devcontainer-bau.md); die drei Entscheidungen und die test-docker-Platzierung trägt der Projektinhaber am 2026-11-03, Wortlaut wie vorgelegt)
+**Autor:** pt9912 (Rolle Implementer — Umsetzung des freigegebenen CR [`cr-vorschlag-spec-031-devcontainer-bau`](../cr/cr-vorschlag-spec-031-devcontainer-bau.md); die drei Entscheidungen und die test-docker-Platzierung trägt der Projektinhaber am 2026-11-03, Wortlaut wie vorgelegt)
 
 **Bezug:** [`LH-FA-DEV-001`](../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten), [ADR-0004](0004-ci-system.md); Messbasis [`docs/messungen/slice-v1-bau-nur-devcontainer/README.md`](../../messungen/slice-v1-bau-nur-devcontainer/README.md) (M1–M5 samt Grenzen)
 
@@ -81,7 +81,7 @@ Die Zusage des verschachtelten Daemon für die docker-getaggten Tests entfällt 
 
 | Datum | Ereignis | Verweis |
 |---|---|---|
-| 2026-11-03 | Entwurf, `Proposed` (Implementer), als Folge-ADR des CR [`cr-vorschlag-spec-031-devcontainer-bau`](../../plan/planning/in-progress/cr-vorschlag-spec-031-devcontainer-bau.md) | CR, Messbasis M1–M5 |
+| 2026-11-03 | Entwurf, `Proposed` (Implementer), als Folge-ADR des CR [`cr-vorschlag-spec-031-devcontainer-bau`](../cr/cr-vorschlag-spec-031-devcontainer-bau.md) | CR, Messbasis M1–M5 |
 | 2026-11-03 | `Accepted` durch den Projektinhaber — CR freigegeben wie vorgelegt, die drei Entscheidungen bejaht, test-docker-Platzierung Hybrid je Messbasis | CR (Status-Zeile), Messbasis (Bezug-Zeile) |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**.

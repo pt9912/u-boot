@@ -125,7 +125,7 @@ Daraus folgt die Ablage:
 | Skripte, Hilfs-Dockerfiles, Sonden einer Messung | `tools/messung/<name>/` (Skript und Hilfsdateien im selben Verzeichnis) |
 | Messprotokoll: `README.md` und Rohdaten (`.md`, `.txt`, `.log`) | `docs/messungen/<kennung>/`, Kennung des auslösenden Vorgangs ([`README.md`](../docs/messungen/README.md)) |
 | Beobachtung im Register | nur `observation.md`, `state.md`, `evidence/<vorgangs-id>.md` |
-| CR-Vorschlags-Datei (`cr-vorschlag-*.md`) | neben ihrem CR-Slice (Schreibort = Leseort des Slices in jenem Moment); sie wandert mit ihm per `git mv` nach `done/` — ihr Zustand folgt dem CR-Slice, kein eigener Lebenszyklus |
+| CR-Vorschlags-Datei (`cr-vorschlag-*.md`, Form aus [`docs/plan/cr/cr-vorschlag.template.md`](../docs/plan/cr/cr-vorschlag.template.md)) | [`docs/plan/cr/`](../docs/plan/cr/) — der eigene CR-Ordner je Projektinhaber-Form 2026-11-03; sie wandert bei der Closure per `git mv` nie — sie liegt dauerhaft im CR-Ordner, ihr Zustand folgt dem CR-Slice (kein eigener Lebenszyklus) |
 
 Diese Regel steht hier einmal; [`docs/plan/planning/README.md`](../docs/plan/planning/README.md) und
 [`observations/README.md`](../docs/plan/planning/observations/README.md) verweisen darauf.

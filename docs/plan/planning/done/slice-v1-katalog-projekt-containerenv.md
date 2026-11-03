@@ -113,7 +113,7 @@ zählen nicht mit.
   (Schlüssel, Map-Form, Merge-Verhalten je §4-Frage 2, Abweisungen je
   Exit-Code `10`, Grenz-Sätze S10/S11-Muster), [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)-Zeilen;
   freigegeben vom Projektinhaber, **bevor** Verträge geändert werden.
-  **Beleg (Closure):** geliefert im CR [`slice-cr-devcontainer-containerenv`](../done/slice-cr-devcontainer-containerenv.md) — freigegeben wie vorgelegt 2026-11-03 samt den zwei Bestätigungen der Übertragungs-Lesarten (eigenes Zeile, Nur-Unterpfade), Vertrags-Übernahme `d62aad5e`; Vorschlag in [`done/`](../done/cr-vorschlag-containerenv.md).
+  **Beleg (Closure):** geliefert im CR [`slice-cr-devcontainer-containerenv`](../done/slice-cr-devcontainer-containerenv.md) — freigegeben wie vorgelegt 2026-11-03 samt den zwei Bestätigungen der Übertragungs-Lesarten (eigenes Zeile, Nur-Unterpfade), Vertrags-Übernahme `d62aad5e`; Vorschlag in [`done/`](../../cr/cr-vorschlag-containerenv.md).
 - [x] **Umsetzung:** Konfig-Schema samt Validation (`u-boot config set`
   prüft die Map — Name gegen den Namensraum, Wert vom Typ String),
   Generator-Render der Werte in das `containerEnv`-Objekt der erzeugten

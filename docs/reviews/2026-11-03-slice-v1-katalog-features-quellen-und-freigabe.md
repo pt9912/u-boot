@@ -15,7 +15,7 @@ Vertrags-Range `d3c24eb6..HEAD`, Vertrags-Norm
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
 - [`slice-v1-katalog-features-quellen-und-freigabe`](../plan/planning/done/slice-v1-katalog-features-quellen-und-freigabe.md) (Plan samt DoD, §3-Tabelle, neuer §3.10-Abgleich)
-- [`slice-cr-devcontainer-katalog-quellen`](../plan/planning/done/slice-cr-devcontainer-katalog-quellen.md) samt [`cr-vorschlag-katalog-quellen.md`](../plan/planning/done/cr-vorschlag-katalog-quellen.md) (Stellen (a)–(d), Mess-Basis M1/M2)
+- [`slice-cr-devcontainer-katalog-quellen`](../plan/planning/done/slice-cr-devcontainer-katalog-quellen.md) samt [`cr-vorschlag-katalog-quellen.md`](../plan/cr/cr-vorschlag-katalog-quellen.md) (Stellen (a)–(d), Mess-Basis M1/M2)
 - [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Lastenheft 0.33.0), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte); [`SPEC-023`](../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [`SPEC-040`](../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)
 - [Messprotokoll der N1/N2-Messung](../messungen/slice-v1-katalog-features-quellen-und-freigabe/README.md) (M1 Token-Verweigerung, M2 Schlüsselform-Probe, Tarball offen)
 - [`AGENTS.md`](../../AGENTS.md) (Hard Rules §3), [`harness/conventions.md`](../../harness/conventions.md)

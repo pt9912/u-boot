@@ -41,7 +41,7 @@ DevContainers, Map Name → Wert in [`u-boot.yaml`](../../../../spec/lastenheft.
 [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen),
 [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)-Zeilen
 und die Beleg-Aufträge der Technik-Stelle — wird vorgelegt
-([`cr-vorschlag-containerenv.md`](cr-vorschlag-containerenv.md)), vom
+([`cr-vorschlag-containerenv.md`](../../cr/cr-vorschlag-containerenv.md)), vom
 Projektinhaber freigegeben und wortgleich in die Verträge übernommen. **Kein
 Produktcode und keine Implementierung in diesem Slice** (Muster der CR-Slices).
 
@@ -55,8 +55,8 @@ Muster der Werkzeugketten-Kette).
 
 ## 2. Definition of Done
 
-- [x] **Vorschlags-Datei:** [`cr-vorschlag-containerenv.md`](cr-vorschlag-containerenv.md)
-  mit Alt/Neu-Wortlaut je Stelle (Muster [`cr-vorschlag-java-toolchain`](../done/cr-vorschlag-java-toolchain.md))
+- [x] **Vorschlags-Datei:** [`cr-vorschlag-containerenv.md`](../../cr/cr-vorschlag-containerenv.md)
+  mit Alt/Neu-Wortlaut je Stelle (Muster [`cr-vorschlag-java-toolchain`](../../cr/cr-vorschlag-java-toolchain.md))
   — Stellen (a) Lastenheft-Absatz, (b) Historie-Zeile `0.32.0`, (c)
   [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)
   Pfad-Zeilen, (d) TECH-Unterabschnitt (Render/Merge/Validation, Ebene der
@@ -83,7 +83,7 @@ Muster der Werkzeugketten-Kette).
 | `cr-vorschlag-containerenv.md` (neu) | neu | DoD-Zeile 1 — Alt/Neu-Wortlaut je Stelle, Entscheidungen, Freigabe-Form |
 | `spec/lastenheft.md` | update (nach Freigabe) | Absatz der Zusage [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), Versionsfeld `0.32.0`, Historie-Zeile |
 | `spec/spezifikation.md` | update (nach Freigabe) | [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config)-Zeilen samt TECH-Unterabschnitt (Zusage-Sätze, Abweisungen; Beleg-Aufträge statt Test-Namen — die Namen liefert der Umsetzungs-Diff, Muster [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)); Spec-Historie-Zeile |
-| dieser Slice, [`roadmap.md`](../in-progress/roadmap.md) (die Zeile beim Start und die Freigabe-Berichtigung nach der Übernahme), [`cr-vorschlag-containerenv.md`](cr-vorschlag-containerenv.md) (Status- und Abweichungs-Zeilen je Review; **Move nach `done/` bei der Closure**, Muster [`cr-vorschlag-java-toolchain`](../done/cr-vorschlag-java-toolchain.md) — Review F-7), `open/README.md` (Bestand-Zeile — **ohne Diff in diesem CR**: die Zeile trägt den Start-Stand, die „geliefert"-Form folgt der Closure, Review F-4) | update | Lifecycle-Moves per `make slice-mv`; Zustand je Verzeichnis; Verweis-Nachzug je Move |
+| dieser Slice, [`roadmap.md`](../in-progress/roadmap.md) (die Zeile beim Start und die Freigabe-Berichtigung nach der Übernahme), [`cr-vorschlag-containerenv.md`](../../cr/cr-vorschlag-containerenv.md) (Status- und Abweichungs-Zeilen je Review; **Move nach `done/` bei der Closure**, Muster [`cr-vorschlag-java-toolchain`](../../cr/cr-vorschlag-java-toolchain.md) — Review F-7), `open/README.md` (Bestand-Zeile — **ohne Diff in diesem CR**: die Zeile trägt den Start-Stand, die „geliefert"-Form folgt der Closure, Review F-4) | update | Lifecycle-Moves per `make slice-mv`; Zustand je Verzeichnis; Verweis-Nachzug je Move |
 | `docs/reviews/` (Review-Report, ggf. Nachlauf-Review, Verify-Report) | neu | nach Vertrags-Diff: Nachlauf-Review über genau diesen Diff (Muster [`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)); Reports der zwei Rollen |
 | Produktcode, Templates, Tests, Handbuch, READMEs, `CHANGELOG.md` | **kein Diff in diesem CR** | der Umsetzungs-Slice trägt sie (Muster der Werkzeugketten-Kette) |
 
@@ -169,4 +169,4 @@ Slice; die Ebene-Frage bleibt Messung des Umsetzungs-Slices).
 
 **Modus-Begründungsblock:** alle berührten Sub-Areas sind Greenfield.
 
-**Belege (Closure 2026-11-03, je DoD-Zeile):** (1) [`cr-vorschlag-containerenv.md`](cr-vorschlag-containerenv.md) trägt die vier Stellen samt den vier Entscheidungen und dem je-Stelle-Abweichungs-Ausweis. (2) Freigabe „wie vorgelegt" 2026-11-03 samt den zwei Bestätigungen der Übertragungs-Lesarten (Stelle (c) eigene Wertetabellen-Zeile; Nur-Unterpfade-Schreiben) — die vier Träger-Spuren stimmen überein (Vorschlags-Status, Roadmap, Fix-Commit-Message, Plan; Verifier-Zeile 2). (3) Stelle (a) ist zeichenweise wortgleich (difflib-Abgleich des Verifiers); Stellen (b)/(c)/(d) tragen die bestätigten Abweichungen; kein Produktcode-, kein Nutzertext- und kein Gate-Diff im Range. (4) [`make gates`] grün je Berichtigungs-Runde (Stempel `df6c40ce` und `45833353` = HEAD, Coverage 92,20 %, `docs-check` 0 Befunde); [Review-Report](../../../reviews/2026-11-03-slice-cr-devcontainer-containerenv.md) (2 MEDIUM/3 LOW/2 INFO, je berichtigt) und [Verify-Report](../../../reviews/2026-11-03-slice-cr-devcontainer-containerenv-verify.md) (1 INFO/3 LOW, je berichtigt) committet; Register, Risiko-Ausgänge und Paarungen in §7.
+**Belege (Closure 2026-11-03, je DoD-Zeile):** (1) [`cr-vorschlag-containerenv.md`](../../cr/cr-vorschlag-containerenv.md) trägt die vier Stellen samt den vier Entscheidungen und dem je-Stelle-Abweichungs-Ausweis. (2) Freigabe „wie vorgelegt" 2026-11-03 samt den zwei Bestätigungen der Übertragungs-Lesarten (Stelle (c) eigene Wertetabellen-Zeile; Nur-Unterpfade-Schreiben) — die vier Träger-Spuren stimmen überein (Vorschlags-Status, Roadmap, Fix-Commit-Message, Plan; Verifier-Zeile 2). (3) Stelle (a) ist zeichenweise wortgleich (difflib-Abgleich des Verifiers); Stellen (b)/(c)/(d) tragen die bestätigten Abweichungen; kein Produktcode-, kein Nutzertext- und kein Gate-Diff im Range. (4) [`make gates`] grün je Berichtigungs-Runde (Stempel `df6c40ce` und `45833353` = HEAD, Coverage 92,20 %, `docs-check` 0 Befunde); [Review-Report](../../../reviews/2026-11-03-slice-cr-devcontainer-containerenv.md) (2 MEDIUM/3 LOW/2 INFO, je berichtigt) und [Verify-Report](../../../reviews/2026-11-03-slice-cr-devcontainer-containerenv-verify.md) (1 INFO/3 LOW, je berichtigt) committet; Register, Risiko-Ausgänge und Paarungen in §7.

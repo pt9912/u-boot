@@ -46,7 +46,7 @@ diese Liste ist der Lauf nicht reproduzierbar):
   [`SPEC-019`](../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)
   (Zeile `java-toolchain`), [`SPEC-040`](../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config),
   [`SPEC-043`](../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet)
-- Der CR-Vorgang [cr-vorschlag-java-toolchain](../plan/planning/done/cr-vorschlag-java-toolchain.md) (Freigabe, Fragen F4 bis F8 mit Antworten)
+- Der CR-Vorgang [cr-vorschlag-java-toolchain](../plan/cr/cr-vorschlag-java-toolchain.md) (Freigabe, Fragen F4 bis F8 mit Antworten)
 - [`AGENTS.md`](../../AGENTS.md) (Hard Rules, §3.10), [`harness/conventions.md`](../../harness/conventions.md)
   (Ablage-Regel, `MR-*`), [`harness/replay.md`](../../harness/replay.md) (Werkzeugketten-Zeile),
   Messprotokoll [slice-v1-katalog-feature-jdk-gepinnt](../messungen/slice-v1-katalog-feature-jdk-gepinnt/README.md)

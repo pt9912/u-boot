@@ -10,15 +10,15 @@
 - **Stelle (d):** im Vertrag heißt die Namens-Norm nur *gültiger Dev-Container-Umgebungsname*; die konkrete Prüffunktion, die der Vorschlag als Kandidat nannte (`driven.ValidateDevcontainerEnvName`, Fundstelle beim Umsetzungs-Schnitt), ist Umsetzungs-Fundstelle und kein Vertrags-Inhalt.
 
 **Gegenstand:** die Lieferung zu DoD-Zeile 1 des CR-Slices
-[`slice-cr-devcontainer-containerenv`](../done/slice-cr-devcontainer-containerenv.md).
+[`slice-cr-devcontainer-containerenv`](../planning/done/slice-cr-devcontainer-containerenv.md).
 Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an
 den Verträgen. Der *Neu*-Wortlaut der Stellen (a) bis (d) ist freizugeben; die
 vier Entscheidungen des Umsetzungs-Plans
-([`§4`](../done/slice-v1-katalog-projekt-containerenv.md)) tragen ihn.
+([`§4`](../planning/done/slice-v1-katalog-projekt-containerenv.md)) tragen ihn.
 
 **Grundlage:** Vorbefund des Umsetzungs-Plans §1 (die ENV-Ebene ist heute die
 einzige Trägerin für Projekt-Werte; die zwei Go-Schlüssel tragen die einzigen
-`containerEnv`-Werte des Generators, [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
+`containerEnv`-Werte des Generators, [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)
 Abschnitt *Cache-Werte*; `BUILD_MODE`/`GOFLAGS`/`GOTOOLCHAIN` stehen in der
 Historie ausdrücklich als „nicht belegt"). Die vier Entscheidungen sind
 gebilligt (2026-11-03, „Ok dein Vorschlag dazu"): **Schlüsselname** —
@@ -37,7 +37,7 @@ Wert verschwindet.
 ## Stelle (a) — Lastenheft, Absatz der Zusage unter `LH-FA-DEV-001`
 
 **Alt:** *(kein Absatz; der `containerEnv`-Träger ist der Cache-Absatz der
-Schlüssel, [`SPEC-054`](../../../../spec/spezifikation.md) verfeinert ihn.)*
+Schlüssel, [`SPEC-054`](../../../spec/spezifikation.md) verfeinert ihn.)*
 
 **Neu (Vorschlag, Sätze S1–S6 in der Lastenheft-Satzform):**
 
@@ -82,13 +82,13 @@ Kollision mit aktiven Toolchain-Schlüsseln, Vorschlags-Form von Stelle (a)),
 der Namens-Validation (`driven.ValidateDevcontainerEnvName`, Fundstelle beim
 Umsetzungs-Schnitt nachzulesen) und der Beleg-Tabelle in Auftrags-Form (je
 Bedingung ein Test-Auftrag; die Test-Namen liefert der Umsetzungs-Diff, Muster
-[`SPEC-054`](../../../../spec/spezifikation.md) unten). Spec-Historie-Zeile.
+[`SPEC-054`](../../../spec/spezifikation.md) unten). Spec-Historie-Zeile.
 
 ---
 
 **Offene Punkte an die Freigabe:** der Schlüsselname
 (`devcontainer.containerEnv`), die Kollisions-Abweisung der Cache-Werte
 (Frage 2), die Verwaltet-Form (Frage 4) und die TECH-Stelle innerhalb
-[`SPEC-040`](../../../../spec/spezifikation.md) statt als eigener `SPEC-<NNN>`
+[`SPEC-040`](../../../spec/spezifikation.md) statt als eigener `SPEC-<NNN>`
 (F6-Muster der java-Vorschlags). Bei Freigabe mit ändern trägt §7 des
 CR-Slices je Abweichung; der Umsetzungs-Slice folgt.
