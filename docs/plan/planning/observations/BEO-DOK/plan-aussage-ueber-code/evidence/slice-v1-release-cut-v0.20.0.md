@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-release-cut-v0.20.0`](../../../../in-progress/slice-v1-release-cut-v0.20.0.md)
+**Vorgang:** [`slice-v1-release-cut-v0.20.0`](../../../../done/slice-v1-release-cut-v0.20.0.md)
 **Fund:** die Zustandsmarker-Klasse in der Release-Cut-Familie — **dritter Cut in Folge, immer dieselben zwei Träger**:
 
 - **F-1 (Review, MEDIUM):** der §7-Marker des Plans trug „Noch nicht geschlossen; der Slice liegt in `open/` (Plan)." über den Tag hinaus — nach dem Tag ist der Inhalt-Commit vor dem `git mv` fällig (`AGENTS.md` §3.3 Fall 2), der Marker wandert sonst mit.
