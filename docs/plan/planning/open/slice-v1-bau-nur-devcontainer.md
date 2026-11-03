@@ -4,7 +4,7 @@
 
 **Welle:** ohne Welle-Datei (Vorschlag des Projektinhabers, 2026-11-03: „[ein] weiter[er] Slice für die Umstellung auf nur devcontainer (siehe `bau.sh` und `BUILD_MODE=local`) — also nur noch `build_mode=local`").
 
-**Bezug:** [`SPEC-031`](../../../../spec/spezifikation.md) (Regeln des Docker-only-Workflows; der lokale Modus ist dort der Devcontainer-Modus), [`AADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md) (`Accepted` — der Umzug braucht eine Folge-ADR `Supersedes`), `scripts/bau.sh` (die lokalen Rezepte), `repo.mk` `BUILD_MODE`-Zweig, `modus-pruefung` (die zwei Modi je `make -n`), `AGENTS.md` §3.1 (Docker-only: der Host braucht nur Docker und GNU make — der Host-Vertrag würde neu), `.github/workflows/` (CI läuft heute Docker-Modus). **Verantwortlich:** — (Setzung beim Start). **Autor:** pt9912 (Rolle Planner, im Auftrag). **Datum:** 2026-11-03.
+**Bezug:** [`SPEC-031`](../../../../spec/spezifikation.md) (Regeln des Docker-only-Workflows; der lokale Modus ist dort der Devcontainer-Modus), [`AADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md) (`Accepted` — der Umzug braucht eine Folge-ADR `Supersedes`), `scripts/bau.sh` (die lokalen Rezepte), `repo.mk` `BUILD_MODE`-Zweig, `modus-pruefung` (die zwei Modi je `make -n`), `AGENTS.md` §3.1 (Docker-only: der Host braucht nur Docker und GNU make — der Host-Vertrag würde neu), `.github/workflows/` (CI läuft heute Docker-Modus). **Verantwortlich:** pt9912 (Implementer; Messung CI-im-Devcontainer zuerst, CR je danach; Entscheidungen bejaht 2026-11-03). **Autor:** pt9912 (Rolle Planner, im Auftrag). **Datum:** 2026-11-03.
 
 ## 1. Ziel und Abgrenzung
 
