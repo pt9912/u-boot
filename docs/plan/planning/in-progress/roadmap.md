@@ -23,9 +23,11 @@ in der Welle-Datei bzw. im Cut-Slice, nicht hier.
 
 Der Umsetzungs-Slice [`slice-v1-katalog-feature-jdk-gepinnt`](../done/slice-v1-katalog-feature-jdk-gepinnt.md) liegt in [`done/`](../done/) — Umsetzung des Katalog-Schlüssels `java-toolchain` (Temurin LTS 21, Same-Origin-Prüfsummen-Quelle, Konflikt-Abweisung Exit 10, Brew-Befund als Messpunkt; geschlossen 2026-11-03 mit CI-Nachweis `integration-docker`); der CR ist mit dem freigegebenen Wortlaut geliefert und liegt in [`done/`](../done/slice-cr-devcontainer-java-toolchain.md) (Lastenheft `0.30.0` → `0.31.0`).
 
-[`slice-v1-release-cut-v0.20.0`](../done/slice-v1-release-cut-v0.20.0.md) liegt in `in-progress/` — Minor-Release `v0.20.0` von `main` nach `v0.19.0`, trägt den Katalog-Schlüssel `java-toolchain` ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv), Lastenheft `0.31.0`, [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)).
+ [`slice-v1-release-cut-v0.20.0`](../done/slice-v1-release-cut-v0.20.0.md) liegt in [`done/`](../done/) — Minor-Release `v0.20.0` von `main` nach `v0.19.0`, trägt den Katalog-Schlüssel `java-toolchain` ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`SPEC-054`](../../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv), Lastenheft `0.31.0`, [`ADR-0041`](../../adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)); Tag `v0.20.0` auf `90f2a1d2` (2026-11-03, Freigabe des Projektinhabers nach grünen Vorabprüfungen), siehe *Abgeschlossene Wellen*.
 
-Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)).
+Der BacklogSlice [`slice-v1-test-docker-wechselschutz`](../open/slice-v1-test-docker-wechselschutz.md) liegt in `open/` (Werkzeug-Änderung, [`MR-012`](../../../../harness/conventions.md#mr-012)); der CR-Schnitt des Vorschlags [`slice-v1-katalog-projekt-containerenv`](../open/slice-v1-katalog-projekt-containerenv.md) (Projekt-Umgebungswerte, gebilligt 2026-11-03) wartet auf den freien WIP-Limit-Platz.
+
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
@@ -117,6 +119,7 @@ flowchart LR
 | v0.17.0 (Minor-Release ohne Welle-Datei: `--instance` für `u-boot devcontainer up`, `down` und `shell`, `CLAUDE_CODE_OAUTH_TOKEN` als Referenz für `claude-code`, Lastenheft 0.26.0) | 2026-11-01 | [`slice-v1-release-cut-v0.17.0`](../done/slice-v1-release-cut-v0.17.0.md) — Tag `v0.17.0` auf `f89424e1` |
 | v0.18.0 (Minor-Release ohne Welle-Datei: der Containername `u-boot-<project>[-<instance>]`, die Auflösung von Git-Zugangsdaten und Identität des Hosts (opt-in), die Schlüssel `devcontainer.resources.memory`/`.cpus` und die Hilfetexte ohne Kennungen; Lastenheft 0.27.0, 0.28.0 und 0.29.0) | 2026-11-02 | [`slice-v1-release-cut-v0.18.0`](../done/slice-v1-release-cut-v0.18.0.md) — Tag `v0.18.0` auf `e6c87379` |
 | v0.19.0 (Minor-Release: der Katalog-Eintragstyp „gepinnte Werkzeugkette“ mit den zwei Schlüssel `go-toolchain`/`golangci-lint`, Übersteuerung per `version:` mit Prüfsummen-Verifikation, die Exit-10-Abweisungen, `containerEnv`-Cache-Pfade und die Pin-Politik der vier Stellen; Lastenheft 0.30.0) | 2026-11-02 | [`slice-v1-release-cut-v0.19.0`](../done/slice-v1-release-cut-v0.19.0.md) — Tag `v0.19.0` auf `3564ac31` |
+| v0.20.0 (Minor-Release: der dritte Schlüssel des Eintragstyp „gepinnte Werkzeugkette“, `java-toolchain` — JDK der Eclipse-Temurin-Distribution LTS 21 aus Prüfsummen-verifiziertem Release-Archiv, Übersteuerung per `version:`, Konflikt-Abweisung externes `java` + `java-toolchain` je Exit-Code `10`; Lastenheft 0.31.0) | 2026-11-03 | [`slice-v1-release-cut-v0.20.0`](../done/slice-v1-release-cut-v0.20.0.md) — Tag `v0.20.0` auf `90f2a1d2` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen
