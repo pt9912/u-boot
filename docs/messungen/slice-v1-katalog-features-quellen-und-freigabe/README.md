@@ -9,9 +9,7 @@
 ## Umgebung
 
 Linux-Host `amd64`, `curl` 8.18.0 netzgebunden; keine Engine- und CLI-Abhängigkeit
-(Die Registry- und GitHub-API-Lesung lief per `curl`; die
-Dev-Container-CLI trat nicht auf — die Schlüsselform-Probe (N2, Form `https://…:1`
-/ `oci://…:1`) ist als M2 geplant und in diesem Protokoll nicht geführt). Die
+(Die Registry- und GitHub-API-Lesung lief per `curl` (M1); die Schlüsselform-Probe (M2) lief mit der CLI 0.89.0 im Helper-Container mit gemountetem Docker-Socket — siehe Abschnitt M2). Die
 Messung liest nur; sie schreibt nichts ins Repo außer diesem Protokoll samt
 Rohdaten.
 
@@ -65,8 +63,10 @@ dieser Form bauen nicht.
  `NAME_UNKNOWN` (Annahme der ADR) bleibt so nicht wörtlich gemessen, sondern
  als Token-Verweigerung belegt.
 - Die Schlüsselform-Probe (N2: ob die Dev-Container-CLI `0.89.0` einen Schlüssel
- `https://…:1` oder `oci://…:1` auflöst) ist **M2, hier nicht geführt** — der
- Render-Schlüssel-Aspekt von [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) bleibt offen
- (keine Aussage über Form-Schwäche der externen Quellen steht in diesem Protokoll).
+ `https://…:1` oder `oci://…:1` auflöst) ist als M2 geführt (Abschnitt M2); die
+ Tarball-Variante des `https://`-Weges blieb ungemessen und bleibt offene
+ Grenze — deshalb trägt der [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)-Wortlaut
+ „Registry-Tarball-Form offen“; keine Aussage über die Verarbeitbarkeit des
+ Tarball-Weges steht in diesem Protokoll.
 - Der Stand gilt am 2026-11-03; künftige Upstream-Änderungen alter das
  Protokoll, nicht die Mess-Basis. Die Messung liest nur; sie schreibt nichts.

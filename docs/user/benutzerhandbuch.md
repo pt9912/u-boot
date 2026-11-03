@@ -2680,7 +2680,7 @@ mit `--json` einen strukturierten Hinweis in `data.hint` (`command`, `action`,
 | `devcontainer.resources.cpus` | CPU-Grenze des Containers (`--cpus`) | positive Dezimalzahl mit Punkt, zum Beispiel `1.5` | ja |
 | `devcontainer.features.<name>.enabled` | Feature aktiv | `true` / `false` | ja |
 | `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `ollama-host`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`); für `go-toolchain` und `golangci-lint` die Versions-Übersteuerung des Katalog-Pins (siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional)) | ja |
-| `devcontainer.features.<name>.source` | externe Feature-Quelle | URL aus der Freigabeliste | ja |
+| `devcontainer.features.<name>.source` | externe Feature-Quelle | freigegebene Quelle in verarbeitbarer Form (`host/pfad`; die CLI verarbeitet die Registry-Referenz — Schema-Formen wie `https://…` oder `oci://…` weist u-boot ab) | ja |
 | `devcontainer.featureSources.allow` | Freigabeliste externer Quellen | Registry-Referenzen (`host/pfad`), kommagetrennt | ja |
 | `devcontainer.sandbox.nestedRuntime` | Container-Laufzeit im Sandbox | `none` / `podman` / `docker` | ja |
 | `devcontainer.sandbox.onUnavailable` | Verhalten ohne Fähigkeit | `warn` / `fail` | ja |
