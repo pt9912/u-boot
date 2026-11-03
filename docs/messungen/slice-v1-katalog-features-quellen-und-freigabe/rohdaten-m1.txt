@@ -1,0 +1,12 @@
+== M1 Rohdaten (2026-11-03, kontrollierte Läufe; Erst-Läufe mit der Fehl-Controlle typescript siehe Protokoll Grenzen) ==
+== full src listing (api.github.com/repos/devcontainers/features/contents/src?per_page=100) ==
+"name": "anaconda" "name": "aws-cli" "name": "azure-cli" "name": "common-utils" "name": "conda" "name": "copilot-cli" "name": "desktop-lite" "name": "docker-in-docker" "name": "docker-outside-of-docker" "name": "dotnet" "name": "git-lfs" "name": "git" "name": "github-cli" "name": "go" "name": "hugo" "name": "java" "name": "kubectl-helm-minikube" "name": "nix" "name": "node" "name": "nvidia-cuda" "name": "oryx" "name": "php" "name": "powershell" "name": "python" "name": "ruby" "name": "rust" "name": "sshd" "name": "terraform"  (29 Features; kein cpp, kein postgres*)
+== ghcr token+tags probes ==
+java:  tags http 200 body: {"name":"devcontainers/features/java","tags":["1","latest","1.0","1.0.0",...
+go:    tags http 200 body: {"name":"devcontainers/features/go","tags":["1.0.0","1","latest","1.0","1.0.1",...
+cpp:   tags http 403 body: {"errors":[{"code":"DENIED","message":"invalid token"}]}
+postgresql-client: tags http 403 body: {"errors":[{"code":"DENIED","message":"invalid token"}]}
+== upstream devcontainer-feature.json (raw.githubusercontent.com, branch main, Pfad src/<feature>/) ==
+cpp:   404
+postgresql-client: 404
+(typescript: 404 — Fehlwahl der Erst-Controlle, existiert im Upstream ebenfalls nicht)
