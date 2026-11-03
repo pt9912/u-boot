@@ -52,7 +52,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **N4, der Bau von `docker-cli` mit der Standard-Option auf dem Standard-Basis-Image** — [`slice-v1-docker-cli-bau-auf-standard-basis-image`](slice-v1-docker-cli-bau-auf-standard-basis-image.md): andere Ursache (Installationsskript und Debian-Version, nicht die Auflösung der Quelle), und der Weg braucht eine Entscheidung des Projektinhabers (Feature-Optionen, Pin des Basis-Images oder Hinweis).
+- **N4, der Bau von `docker-cli` mit der Standard-Option auf dem Standard-Basis-Image** — [`slice-v1-docker-cli-bau-auf-standard-basis-image`](../open/slice-v1-docker-cli-bau-auf-standard-basis-image.md): andere Ursache (Installationsskript und Debian-Version, nicht die Auflösung der Quelle), und der Weg braucht eine Entscheidung des Projektinhabers (Feature-Optionen, Pin des Basis-Images oder Hinweis).
 - **Der Satz zum Volume `minikube-config` von `kubectl-helm` im Handbuch** — Entscheidung 9 des Vorgänger-Slice (Herkunft: Upstream-Metadaten, nicht gemessen, kein Test); ein eigener Vorgang, dem der Projektinhaber noch keinen Plan gegeben hat.
 - **Metadaten der Features online lesen, ein Sensor für spätere Minor-Versionen** — braucht Netz und einen neuen Port; `generate` bliebe nicht offline ([`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md) *Verglichene Alternativen*).
 - **N3, die Prüfung der Freigabeliste in `generate devcontainer`** — [`slice-v1-generate-prueft-freigabeliste`](../done/slice-v1-generate-prueft-freigabeliste.md) (Teilung 2026-10-24): entscheidungsfrei, braucht weder Netz noch Messung der CLI; die Liefer-Reihenfolge vor dem Schlüssel aus N2 steht in §4 und §6.
