@@ -14,10 +14,14 @@ name: ci
 # Namen sind die verbose `name:`-Felder der Jobs, nicht die kurzen
 # `jobs.<key>`-Identifier (siehe `docs/maintainer/branch-protection.md`).
 #
-# Docker-only-Pfad (LH-FA-BUILD-007): alle Werkzeuge laufen über
-# `docker build --target <stage>`, sodass der CI-Runner keine
-# Go-Toolchain installieren muss — er braucht nur das vorinstallierte
-# Docker + BuildKit auf `ubuntu-latest`.
+# Docker-only-Pfad (LH-FA-BUILD-007, ADR-0043): der `gates`-Job baut das
+# Devcontainer-Image (`docker build -f .devcontainer/Dockerfile .devcontainer`,
+# Kontext je Messbasis M1) und ruft `make gates` in einem privilegierten
+# `docker run` des Images auf (Muster je Messbasis M3; der verschachtelte
+# Daemon des Containers trägt die Container-Züge von `docs-check`). Der Runner
+# installiert keine Go-Toolchain — er braucht nur das vorinstallierte Docker +
+# BuildKit auf `ubuntu-latest`. Die Sockelform-Züge (`test-docker` im
+# Workflow `integration-docker`) laufen am Runner-Docker ohne diesen Container.
 #
 # Action-Pinning (Supply-Chain-Härtung): alle `uses:`-Einträge sind
 # SHA-gepinnt mit Tag-Kommentar. Pin-Hebung ist Routine; neuen Commit-
@@ -48,8 +52,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Run make gates
-        run: make gates
+      - name: Build the devcontainer image
+        run: docker build --tag u-boot-devcontainer:ci -f .devcontainer/Dockerfile .devcontainer
+
+      # Der Arbeits-Schritt je Messbasis M3: die containerEnv der
+      # .devcontainer/devcontainer.json als docker-run-Optionen nachgebaut (die
+      # bare `docker run`-Form übernimmt sie nicht), dann die Startscript-Fahrt
+      # (docker-init), die Daemon-Wartezeit und das safe.directory der
+      # Bind-Mount-Form vor `make gates`. Der Bind-Mount des Runner-Workspaces
+      # gehört auf dem Runner dem Job-Benutzer (uid 1001); der Container läuft
+      # als uid 1000 (vscode) — ohne die Übertragung des Eigentums bricht der
+      # erste Schreibzugriff im Bind-Mount (Go-Caches, Coverage-Ausgabe,
+      # record-gates-Stempel).
+      - name: Run make gates in the devcontainer container
+        run: |
+          mkdir -p .cache/go-build .cache/go-mod
+          sudo chown -R 1000:1000 "$PWD"
+          docker run --rm --privileged \
+            --volume u-boot-devcontainer-docker:/var/lib/docker \
+            --volume "$PWD:/workspaces/u-boot" \
+            --workdir /workspaces/u-boot \
+            --env BUILD_MODE=local \
+            --env GOTOOLCHAIN=local \
+            --env 'GOFLAGS=-mod=readonly -buildvcs=false' \
+            --env GOCACHE=/workspaces/u-boot/.cache/go-build \
+            --env GOMODCACHE=/workspaces/u-boot/.cache/go-mod \
+            u-boot-devcontainer:ci \
+            bash -c 'set -euo pipefail; \
+              sudo sh /usr/local/bin/u-boot-docker-init >/tmp/docker-init.log 2>&1; \
+              for i in $(seq 1 60); do docker info >/dev/null 2>&1 && break; sleep 1; done; \
+              docker info >/dev/null; \
+              git config --global --add safe.directory /workspaces/u-boot; \
+              make gates'
 
   security-gates:
     name: security-gates (govulncheck)

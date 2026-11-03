@@ -5,9 +5,13 @@ name: integration-docker
 #
 # Schicht-Trennung:
 #   - `ci.yml::gates` — Inner-Loop-Pflichten (lint + test +
-#     coverage-gate), läuft NIE die docker-getaggten Tests aus.
+#     coverage-gate), läuft NIE die docker-getaggten Tests aus;
+#     führt `make gates` im Devcontainer-Container aus (ADR-0043).
 #   - dieses Workflow — `make test-docker` mit echtem Daemon, läuft
-#     parallel zu `gates`.
+#     parallel zu `gates`. Sockelform (ADR-0043): der Test-Container
+#     bindet über den Runner-Socket an den Docker-Daemon der
+#     Ebene 1 — der verschachtelte Daemon des Devcontainers trägt
+#     die docker-getaggten Tests nicht (SPEC-031, Messbasis M4).
 #
 # Stabilisierungs-Disziplin (slice §Strukturelle Bedingungen):
 # `continue-on-error: true` ist eine zeitlich befristete Maßnahme.
