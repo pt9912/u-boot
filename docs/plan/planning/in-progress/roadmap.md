@@ -37,7 +37,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [`slice-v1-release-cut-v0.21.0`](../done/slice-v1-release-cut-v0.21.0.md) liegt in [`done/`](../done/) (geschlossen 2026-11-03; Tag `v0.21.0` auf `f0026b4d`) — Minor-Release `v0.21.0` von `main` nach `v0.20.0`, trägt die drei [Unreleased]-Träger ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), Lastenheft 0.32.0/0.33.0).
 
-[`slice-harness-dcheck-pinsync`](../in-progress/slice-harness-dcheck-pinsync.md) liegt in `in-progress/` — der CR der Pin-Inventur ([`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) fünfter Ort `go.mod`; `pinsync`-Gatter über die Werkzeugketten samt Basis-Image-Gruppen-Grenze; d-check-Bump folgt je Umsetzung).
+[`slice-harness-dcheck-pinsync`](../in-progress/slice-harness-dcheck-pinsync.md) liegt in `in-progress/` — der CR der Pin-Inventur ([`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) fünfter Ort `go.mod`; `pinsync`-Gatter über die Werkzeugketten samt Basis-Image-Gruppen-Grenze; der d-check-Bump v0.91.0 und die drei Pin-Gruppen sind von den Commits getragen, der CR ist freigegeben).
 
 ## Nächste Wellen
 
