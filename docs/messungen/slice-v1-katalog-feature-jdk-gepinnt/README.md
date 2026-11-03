@@ -2,7 +2,7 @@
 
 | Dokument    | Messprotokoll |
 | ----------- | ------------- |
-| Auslösender Vorgang | [`slice-v1-katalog-feature-jdk-gepinnt`](../../plan/planning/in-progress/slice-v1-katalog-feature-jdk-gepinnt.md) (Umsetzung zu Lastenheft 0.31.0, [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) |
+| Auslösender Vorgang | [`slice-v1-katalog-feature-jdk-gepinnt`](../../plan/planning/done/slice-v1-katalog-feature-jdk-gepinnt.md) (Umsetzung zu Lastenheft 0.31.0, [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) |
 | Gelesen am  | 2026-11-02 |
 | Skripte     | `tools/messung/katalog-feature-jdk/` (M1 `temurin-checksums.sh` — Aufruf je Version, Modus `download`/`verifyx64`; M2 `java-feature-tags.sh`; M3 `brew-casks.sh`) |
 

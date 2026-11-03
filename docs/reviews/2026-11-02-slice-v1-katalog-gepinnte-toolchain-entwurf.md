@@ -83,7 +83,7 @@ Schema nach Skill §Output-Schema (`v6.18.1` · `regelwerk/modul-10-review-harne
 | DoD-Häkchen, Lieferpunkte, Verification-/Closure-Bedingungen, Ausgang je §6-Risiko | Verifier-Rolle (dieser Lauf prüft nicht gegen die DoD) |
 | Validator-Ebene (reale Nutzerbedarf-Prüfung der CR-Zusagen, etwa Stelle 3 `containerEnv`-Nutzbarkeit) | Validator-Rolle |
 | Sämtliche 40 Rohdaten-Dateien einzeln im Volltext | Umfang; geprüft per Protokoll-Tabellen gegen die Datei-Bestände, Volltext-Stichprobe `m3-lauf1` + Credential-Sweep über alle Dateien |
-| Andere `open/`-Slices (etwa [`slice-v1-katalog-feature-jdk-gepinnt`](../plan/planning/in-progress/slice-v1-katalog-feature-jdk-gepinnt.md)) außer den zwei Folge-Slices | außerhalb des Auftrags |
+| Andere `open/`-Slices (etwa [`slice-v1-katalog-feature-jdk-gepinnt`](../plan/planning/done/slice-v1-katalog-feature-jdk-gepinnt.md)) außer den zwei Folge-Slices | außerhalb des Auftrags |
 | Interpretation der F3-Klarstellung (welche drei Fehlerfälle „alle drei“ zählt) | Entscheidung des Projektinhabers; der Reviewer prüft den Nachzug, nicht die Entscheidung |
 
 ## Summary
