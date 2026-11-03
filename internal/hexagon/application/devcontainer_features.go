@@ -25,8 +25,16 @@ var ErrInvalidFeatureSource = domain.ErrInvalidFeatureSource
 // isAllowedFeatureSourceScheme reports whether the given lowercased
 // scheme is one of the LH-FA-DEV-003 supported schemes:
 //
-//   - `http`/`https`: canonical devcontainers/features OCI-via-HTTPS.
+//   - `http`/`https`: the URL-with-scheme declaration forms of the
+//     stage-1 grammar.
 //   - `oci`: lower-level OCI scheme some private registries surface.
+//
+// The stage-1 grammar is deliberately wider than the forms the
+// Dev-Container-CLI processes: the CLI resolves external sources as
+// registry references (`host/path`), which [validateFeatureSource]
+// accepts without a scheme, while [rejectFeatureSourceViolations]
+// (`generate devcontainer`) and the `config set …source` Fachprüfung
+// reject the scheme'd forms (LH-FA-DEV-003, lastenheft 0.33.0).
 //
 // Implemented as a switch rather than a map to keep the application
 // package free of package-level mutable globals (gochecknoglobals).
@@ -38,13 +46,21 @@ func isAllowedFeatureSourceScheme(scheme string) bool {
 	return false
 }
 
-// validateFeatureSource checks a single allowlist entry against the
-// LH-FA-DEV-003 failure-table:
+// validateFeatureSource checks a single source string against the
+// LH-FA-DEV-003 stage-1 failure-table:
 //
 //   - empty source string
-//   - missing URL scheme
-//   - scheme not in [isAllowedFeatureSourceScheme]
-//   - missing host component
+//   - scheme'd URL with a scheme not in [isAllowedFeatureSourceScheme]
+//   - scheme'd URL with a missing host component
+//   - a scheme-less source without a registry path (the form is
+//     `host/path`, e.g. `ghcr.io/devcontainers/features/go`)
+//
+// The registry-reference form (host/path, no scheme) is valid: it is
+// the form the Dev-Container-CLI resolves for external feature
+// sources. Whether a source reaches that CLI is judged afterwards, at
+// the two call sites that render it as a feature key —
+// [rejectFeatureSourceViolations] in `generate devcontainer` and the
+// `config set …source` Fachprüfung ([revalidateFeatureEntry]).
 //
 // The function returns nil on success and an [ErrInvalidFeatureSource]-
 // wrapped error otherwise. Whitespace-only strings are treated as
@@ -63,9 +79,17 @@ func validateFeatureSource(raw string) error {
 		return fmt.Errorf("%w: empty source string", ErrInvalidFeatureSource)
 	}
 	schemeSep := strings.Index(trimmed, "://")
-	if schemeSep <= 0 {
-		return fmt.Errorf("%w: %q has no URL scheme (expected http://, https://, or oci://)",
-			ErrInvalidFeatureSource, trimmed)
+	if schemeSep < 0 {
+		// Registry-reference form (`host/path`): the source shape the
+		// Dev-Container-CLI resolves for external features. It needs a
+		// non-empty registry host and at least one path slash; a bare
+		// word stays invalid.
+		slash := strings.IndexByte(trimmed, '/')
+		if slash <= 0 {
+			return fmt.Errorf("%w: %q has no registry path (expected host/path, e.g. ghcr.io/devcontainers/features/go)",
+				ErrInvalidFeatureSource, trimmed)
+		}
+		return nil
 	}
 	scheme := strings.ToLower(trimmed[:schemeSep])
 	if !isAllowedFeatureSourceScheme(scheme) {
@@ -80,6 +104,80 @@ func validateFeatureSource(raw string) error {
 	if host == "" {
 		return fmt.Errorf("%w: %q has no host component",
 			ErrInvalidFeatureSource, trimmed)
+	}
+	return nil
+}
+
+// isUnprocessableFeatureSourceForm reports whether a source string has
+// a form the Dev-Container-CLI does not process. The CLI resolves
+// external feature sources as registry references (`host/path`); a
+// source with a URL scheme renders as a feature key the CLI does not
+// resolve (`<source>:<version>`, LH-FA-DEV-003, lastenheft 0.33.0).
+// The stage-1 grammar of [validateFeatureSource] stays scheme-permissive:
+// this predicate is the one the two feature-key call sites run —
+// [rejectFeatureSourceViolations] in `generate devcontainer` and the
+// `config set …source` Fachprüfung ([revalidateFeatureEntry]).
+func isUnprocessableFeatureSourceForm(source string) bool {
+	return strings.Contains(source, "://")
+}
+
+// unprocessableFeatureSources returns the enabled entries of cfg whose
+// `source:` override has a form the Dev-Container-CLI does not process,
+// sorted by feature name — the same iteration contract as
+// [unlistedFeatureSources]. Deactivated entries and entries without a
+// source render nothing and are not asked.
+func unprocessableFeatureSources(cfg ubootYAMLConfig) []featureSourceViolation {
+	if cfg.Devcontainer == nil {
+		return nil
+	}
+	var out []featureSourceViolation
+	for _, name := range sortedFeatureNames(cfg.Devcontainer.Features) {
+		entry := cfg.Devcontainer.Features[name]
+		if entry.Enabled == nil || !*entry.Enabled || entry.Source == "" {
+			continue
+		}
+		if isUnprocessableFeatureSourceForm(entry.Source) {
+			out = append(out, featureSourceViolation{feature: name, source: entry.Source})
+		}
+	}
+	return out
+}
+
+// unprocessableFeatureSourceMessage is the text of the rejection of
+// `generate devcontainer` for a source form the Dev-Container-CLI does
+// not process: per entry the feature and the source, then the Abhilfe
+// (the verarbeitbare Registry-Form — declare the source as the registry
+// reference). The check ran before the allowlist check, so no message
+// part carries a way to allow the scheme'd form.
+func unprocessableFeatureSourceMessage(violations []featureSourceViolation) string {
+	parts := make([]string, 0, len(violations))
+	for _, v := range violations {
+		parts = append(parts, fmt.Sprintf(
+			"devcontainer.features.%s: external source %q has a form the Dev-Container-CLI does not process; declare the source as the registry reference host/path (the processed form), e.g. ghcr.io/devcontainers/features/go",
+			v.feature, v.source))
+	}
+	return strings.Join(parts, "; ") + "."
+}
+
+// rejectFeatureSourceViolations is the pre-write source gate of
+// [GenerateService.generateDevcontainer], in order: first a source form
+// the Dev-Container-CLI does not process (LH-FA-DEV-003, lastenheft
+// 0.33.0 — its key would not resolve, so the allowlist way out cannot
+// fix it), then the freigabeliste rule over the effective allowlist
+// (the list plus the flag entries of the call). Both are read-only
+// here: the caller runs them before any plan and write.
+func rejectFeatureSourceViolations(cfg ubootYAMLConfig, flagSources []string) error {
+	if violations := unprocessableFeatureSources(cfg); len(violations) > 0 {
+		return fmt.Errorf("generate devcontainer: %w: %s",
+			driving.ErrConfigValueInvalid, unprocessableFeatureSourceMessage(violations))
+	}
+	unlisted, err := unlistedFeatureSources(cfg, flagSources)
+	if err != nil {
+		return fmt.Errorf("generate devcontainer: %w: %w", driving.ErrConfigValueInvalid, err)
+	}
+	if len(unlisted) > 0 {
+		return fmt.Errorf("generate devcontainer: %w: %s",
+			driving.ErrConfigValueInvalid, featureSourceViolationMessage(unlisted))
 	}
 	return nil
 }
@@ -248,10 +346,8 @@ func (e featureCatalogueEntry) hasNoSource() bool {
 // `bindsHostSocket` and `relaxations` carry the security properties of the
 // pinned feature version, taken from its metadata (`mounts`, `privileged`,
 // `capAdd`, `securityOpt`; also `entrypoint` and `dependsOn` for what the
-// feature pulls in). The metadata of every OCI entry was read except `cpp`
-// and `postgres-client`: `ghcr.io` knew no feature under their sources when
-// it was read (2026-10-21); those two carry neither field and stand
-// unread. Whoever adds an entry or raises a
+// feature pulls in). The metadata of every OCI entry was read.
+// Whoever adds an entry or raises a
 // `defaultVersion` reads these keys and fills the two fields;
 // `TestFeatureCatalogue_SecurityProperties` pins the table, not the upstream.
 func featureCatalogue() map[string]featureCatalogueEntry {
@@ -295,20 +391,10 @@ func ociFeatureCatalogue() map[string]featureCatalogueEntry {
 			shortDesc:      "Go toolchain",
 			relaxations:    []string{"--cap-add=SYS_PTRACE", "--security-opt=seccomp=unconfined"},
 		},
-		"cpp": {
-			source:         "ghcr.io/devcontainers/features/cpp",
-			defaultVersion: "1",
-			shortDesc:      "C++ toolchain",
-		},
 		"kubectl-helm": {
 			source:         "ghcr.io/devcontainers/features/kubectl-helm-minikube",
 			defaultVersion: "1",
 			shortDesc:      "kubectl + helm + minikube",
-		},
-		"postgres-client": {
-			source:         "ghcr.io/devcontainers/features/postgresql-client",
-			defaultVersion: "1",
-			shortDesc:      "PostgreSQL client",
 		},
 		"python": {
 			source:         "ghcr.io/devcontainers/features/python",

@@ -338,12 +338,12 @@ func TestRun_Generate_SandboxFeatureWarnings(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
-	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - oci://registry.example.test/acme\n"
-	const features = "  features:\n    go:\n      enabled: true\n    acme:\n      enabled: true\n      source: oci://registry.example.test/acme\n"
+	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - registry.example.test/acme\n"
+	const features = "  features:\n    go:\n      enabled: true\n    acme:\n      enabled: true\n      source: registry.example.test/acme\n"
 	want := []string{
 		"Warning: security relaxation for the devcontainer feature go: --cap-add=SYS_PTRACE",
 		"Warning: security relaxation for the devcontainer feature go: --security-opt=seccomp=unconfined",
-		"Warning: devcontainer feature acme comes from the external source oci://registry.example.test/acme",
+		"Warning: devcontainer feature acme comes from the external source registry.example.test/acme",
 	}
 	for _, tc := range []struct {
 		name  string
@@ -454,7 +454,7 @@ func TestRun_Generate_UnlistedFeatureSourceIsRejected(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
-	const src = "https://example.test/features/evil"
+	const src = "example.test/features/evil"
 	const project = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    evil:\n      enabled: true\n      source: " + src + "\n"
 	runArgs := func(args ...string) (int, string, string) {
 		var out, errOut bytes.Buffer
@@ -537,7 +537,7 @@ func TestRun_Generate_UnlistedFeatureSourceIsRejectedInSandboxProfile(t *testing
 	if testing.Short() {
 		t.Skip("skipping integration test in short mode")
 	}
-	const project = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    evil:\n      enabled: true\n      source: https://example.test/features/evil\n"
+	const project = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    evil:\n      enabled: true\n      source: example.test/features/evil\n"
 	dir := writeFeatureProject(t, project)
 	var out, errOut bytes.Buffer
 	if code := run(context.Background(), []string{"--json", "generate", "devcontainer"}, &out, &errOut); code != 10 {
@@ -555,6 +555,82 @@ func TestRun_Generate_UnlistedFeatureSourceIsRejectedInSandboxProfile(t *testing
 	}
 	if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !bytes.Equal(after, []byte(project)) {
 		t.Errorf("u-boot.yaml changed:\n%s", after)
+	}
+}
+
+// LH-FA-DEV-003 (lastenheft 0.33.0) at the user path (real adapters): an
+// enabled feature whose source form the Dev-Container-CLI does not process
+// (measured 2026-11-03: `oci://…:<tag>` and `https://…:<tag>` are not
+// processed, the registry-reference form is) ends `generate devcontainer`
+// with exit 10, the code LH-FA-DEV-003 and nothing written, also under
+// `--dry-run`. The message names the Abhilfe (the processed
+// registry-reference form), and that Abhilfe works: after listing the
+// registry reference and setting the source to it, the call renders the key.
+func TestRun_Generate_UnprocessableFeatureSourceFormIsRejected(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const src = "oci://ghcr.io/devcontainers/features/go"
+	const project = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - " + src + "\n  features:\n    evil:\n      enabled: true\n      source: " + src + "\n"
+	runArgs := func(args ...string) (int, string, string) {
+		var out, errOut bytes.Buffer
+		code := run(context.Background(), args, &out, &errOut)
+		return code, out.String(), errOut.String()
+	}
+
+	dir := writeFeatureProject(t, project)
+	before, err := os.ReadFile(filepath.Join(dir, "u-boot.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{
+		{"generate", "devcontainer"},
+		{"generate", "devcontainer", "--dry-run"},
+	} {
+		if code, out, errOut := runArgs(args...); code != 10 {
+			t.Fatalf("%v: exit %d, want 10; stdout=%q stderr=%q", args, code, out, errOut)
+		}
+	}
+	code, out, errOut := runArgs("--json", "generate", "devcontainer")
+	if code != 10 {
+		t.Fatalf("--json: exit %d, want 10; stdout=%q stderr=%q", code, out, errOut)
+	}
+	var env devcontainerRunEnvelope
+	if err := json.Unmarshal([]byte(out), &env); err != nil {
+		t.Fatalf("--json envelope: %v\n%s", err, out)
+	}
+	if len(env.Diagnostics) != 1 || env.Diagnostics[0].Code != "LH-FA-DEV-003" || env.Diagnostics[0].Level != "error" {
+		t.Errorf("envelope = %+v, want one error diagnostic LH-FA-DEV-003", env)
+	}
+	if !strings.Contains(env.Diagnostics[0].Message, "declare the source as the registry reference host/path (the processed form)") {
+		t.Errorf("diagnostic message lacks the Abhilfe: %s", env.Diagnostics[0].Message)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".devcontainer")); err == nil {
+		t.Error("the rejected calls created .devcontainer")
+	}
+	if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !bytes.Equal(after, before) {
+		t.Errorf("u-boot.yaml changed:\n%s", after)
+	}
+
+	// The Abhilfe of the message works: declare the source as the registry
+	// reference (listed beside the flag), and the call renders the key.
+	const registryRef = "ghcr.io/devcontainers/features/go"
+	dir = writeFeatureProject(t, project)
+	if code, out, errOut := runArgs("config", "set", "devcontainer.featureSources.allow", registryRef); code != 0 {
+		t.Fatalf("config set …featureSources.allow <registry reference>: exit %d; stdout=%q stderr=%q", code, out, errOut)
+	}
+	if code, out, errOut := runArgs("config", "set", "devcontainer.features.evil.source", registryRef); code != 0 {
+		t.Fatalf("config set …evil.source <registry reference>: exit %d; stdout=%q stderr=%q", code, out, errOut)
+	}
+	if code, out, errOut := runArgs("generate", "devcontainer"); code != 0 {
+		t.Fatalf("generate after the registry-reference Abhilfe: exit %d; stdout=%q stderr=%q", code, out, errOut)
+	}
+	body, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "devcontainer.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(body), `"ghcr.io/devcontainers/features/go:1"`) {
+		t.Errorf("registry-reference key not rendered:\n%s", body)
 	}
 }
 

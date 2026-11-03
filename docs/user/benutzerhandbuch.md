@@ -1158,9 +1158,7 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `node` | Node.js |
 | `java` | Java und SDKMAN |
 | `go` | Go-Toolchain; das Feature verlangt laut seinen Metadaten die Fähigkeit `SYS_PTRACE` und `seccomp=unconfined`, die `u-boot generate devcontainer` im Sandbox-Profil als Sicherheitslockerung ausweist (siehe [Features im Sandbox-Profil](#features-im-sandbox-profil)) |
-| `cpp` | C++-Toolchain |
 | `kubectl-helm` | kubectl, helm und minikube |
-| `postgres-client` | PostgreSQL-Client |
 | `python` | Python (das Betriebssystem-Python; `pip install` außerhalb eines virtuellen Environments lehnt es nach PEP 668 ab: `python -m venv .venv` verwenden) |
 | `sdkman` | SDKMAN (das offizielle `java`-Feature installiert es; zusammen mit `java` erscheint es einmal) |
 | `sshd` | SSH-Server (offizielles Feature `sshd`, Login-Dienst auf Port 2222 mit Passwort- und Schlüssel-Login, Root-Login erlaubt; siehe [Login-Dienst `sshd`](#login-dienst-sshd-optional)); keine Optionen (`gatewayPorts`, `version` kennt der Katalog nicht) |
@@ -1179,26 +1177,26 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 Jedes Feature außerhalb des Katalogs braucht eine Freigabe in
 `devcontainer.featureSources.allow`. `--yes` ersetzt sie bewusst nicht.
 
-1. Tragen Sie die URL in die Freigabeliste ein. Alle drei Wege sind
-   gleichwertig:
+1. Tragen Sie die Quelle als Registry-Referenz (`host/pfad`, ohne URL-Schema)
+   in die Freigabeliste ein. Alle drei Wege sind gleichwertig:
 
    ```bash
    # bei init
    u-boot init --devcontainer \
-     --allow-external-feature-sources https://ghcr.io/orgX/features/custom-rust
+     --allow-external-feature-sources ghcr.io/orgX/features/custom-rust
    # vor jedem generate (kann mehrfach angegeben werden)
    u-boot generate devcontainer \
-     --allow-external-feature-sources https://ghcr.io/orgX/features/custom-rust
-   # direkt per config set; mehrere URLs kommagetrennt
+     --allow-external-feature-sources ghcr.io/orgX/features/custom-rust
+   # direkt per config set; mehrere Quellen kommagetrennt
    u-boot config set devcontainer.featureSources.allow \
-     https://ghcr.io/orgX/features/custom-rust
+     ghcr.io/orgX/features/custom-rust
    ```
 
 2. Aktivieren Sie das Feature:
 
    ```bash
    u-boot config set devcontainer.features.custom-rust.source \
-     https://ghcr.io/orgX/features/custom-rust
+     ghcr.io/orgX/features/custom-rust
    u-boot config set devcontainer.features.custom-rust.enabled true
    u-boot generate devcontainer
    ```
@@ -1209,11 +1207,11 @@ Danach steht in `u-boot.yaml`:
 devcontainer:
   featureSources:
     allow:
-      - https://ghcr.io/orgX/features/custom-rust
+      - ghcr.io/orgX/features/custom-rust
   features:
     custom-rust:
       enabled: true
-      source: https://ghcr.io/orgX/features/custom-rust
+      source: ghcr.io/orgX/features/custom-rust
 ```
 
 Die Freigabeliste wird bei jeder Angabe ergänzt (nicht ersetzt); doppelte
@@ -1223,8 +1221,15 @@ atomar (siehe Abschnitt 5).
 #### Hinweise
 
 - Die Quelle muss **Zeichen für Zeichen** in der Freigabeliste stehen. Ein
-  abschließender Schrägstrich (`https://x/y` gegenüber `https://x/y/`) und die
+  abschließender Schrägstrich (`ghcr.io/x/y` gegenüber `ghcr.io/x/y/`) und die
   Groß-/Kleinschreibung des Hosts sind entscheidend.
+- Die Quelle ist als Registry-Referenz anzugeben (`host/pfad`, zum Beispiel
+  `ghcr.io/devcontainers/features/go`); die Dev-Container-CLI löst genau
+  diese Form auf. Eine Quelle mit URL-Schema (`oci://…` oder `https://…`)
+  verarbeitet die Dev-Container-CLI nicht: `config set …source` endet dafür
+  mit Exit-Code 10 und nennt die Abhilfe (die Registry-Referenz), auch wenn
+  die URL Zeichen für Zeichen in der Freigabeliste steht, und
+  `generate devcontainer` weist sie ab, ehe nichts geschrieben wird.
 - Ohne Freigabe endet `config set …source` mit Exit-Code 10:
   `external source "…" is not in devcontainer.featureSources.allow`. Die
   Fehlermeldung nennt den passenden `config set`-Befehl.
@@ -1306,7 +1311,7 @@ ein. Für die Features gilt:
 
 | Schweregrad | Auslöser | Abhilfe |
 |---|---|---|
-| Fehler | `source` ist gesetzt, steht aber nicht in `featureSources.allow` | URL freigeben (siehe oben) |
+| Fehler | `source` ist gesetzt, steht aber nicht in `featureSources.allow` | Quelle freigeben (siehe oben) |
 | Fehler | Das Profil ist `sandbox`, und das Feature `docker-cli` ist aktiv | `docker-cli` abschalten (wer Docker im Container braucht, setzt zusätzlich `nestedRuntime: docker`), `u-boot generate devcontainer` ausführen und den Container neu anlegen (siehe [Features im Sandbox-Profil](#features-im-sandbox-profil)) |
 | Warnung | Name steht nicht im Katalog und hat keine `source`; er wird beim Erzeugen übersprungen | `source` setzen oder den Eintrag entfernen |
 | Warnung | `enabled:` fehlt bei einem Feature-Eintrag | `enabled` setzen |
@@ -1331,9 +1336,9 @@ u-boot config set devcontainer.features.java.enabled true
 u-boot config set devcontainer.features.java.version 1.8.3
 
 u-boot config set devcontainer.featureSources.allow \
-  https://ghcr.io/orgX/features/custom-rust
+  ghcr.io/orgX/features/custom-rust
 u-boot config set devcontainer.features.custom-rust.source \
-  https://ghcr.io/orgX/features/custom-rust
+  ghcr.io/orgX/features/custom-rust
 u-boot config set devcontainer.features.custom-rust.enabled true
 
 u-boot generate devcontainer
@@ -2676,7 +2681,7 @@ mit `--json` einen strukturierten Hinweis in `data.hint` (`command`, `action`,
 | `devcontainer.features.<name>.enabled` | Feature aktiv | `true` / `false` | ja |
 | `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `ollama-host`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`); für `go-toolchain` und `golangci-lint` die Versions-Übersteuerung des Katalog-Pins (siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional)) | ja |
 | `devcontainer.features.<name>.source` | externe Feature-Quelle | URL aus der Freigabeliste | ja |
-| `devcontainer.featureSources.allow` | Freigabeliste externer Quellen | URLs, kommagetrennt | ja |
+| `devcontainer.featureSources.allow` | Freigabeliste externer Quellen | Registry-Referenzen (`host/pfad`), kommagetrennt | ja |
 | `devcontainer.sandbox.nestedRuntime` | Container-Laufzeit im Sandbox | `none` / `podman` / `docker` | ja |
 | `devcontainer.sandbox.onUnavailable` | Verhalten ohne Fähigkeit | `warn` / `fail` | ja |
 | `devcontainer.sandbox.repository` | Clone-Quelle statt `origin` | Git-Adresse ohne Zugangsdaten | ja |

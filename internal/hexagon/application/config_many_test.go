@@ -143,8 +143,8 @@ func TestConfigSetMany_OrderedDependency(t *testing.T) {
 	svc, fs := newConfigService(t)
 	seedMany(t, fs, manyFixture)
 	items := []driving.ConfigSetItem{
-		{Path: mustConfigPath(t, "devcontainer.features.node.source"), Value: "https://example.test/features/node"},
-		{Path: mustConfigPath(t, "devcontainer.featureSources.allow"), Value: "https://example.test/features/node"},
+		{Path: mustConfigPath(t, "devcontainer.features.node.source"), Value: "example.test/features/node"},
+		{Path: mustConfigPath(t, "devcontainer.featureSources.allow"), Value: "example.test/features/node"},
 	}
 	// Wrong order: the source is not allowlisted yet → rejected, nothing written.
 	before := readYAML(t, fs)
@@ -167,7 +167,7 @@ func TestConfigSetMany_OrderedDependency(t *testing.T) {
 // makes it work (the source is allowlisted by an earlier pair).
 func TestConfigSetMany_DockerfileBlockVersionNeedsSourceFirst(t *testing.T) {
 	t.Parallel()
-	const url = "https://example.test/features/"
+	const url = "example.test/features/"
 	for _, key := range []string{"ollama", "gh", "glab"} {
 		t.Run(key, func(t *testing.T) {
 			t.Parallel()

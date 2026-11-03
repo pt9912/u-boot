@@ -370,7 +370,7 @@ func TestGenerateDevcontainer_ForgeCLI_RemoteEnvReferences(t *testing.T) {
 		"with claude":    {sandboxProfile + featuresYAML(glabEntry, ghEntry, claude), env("ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "GH_TOKEN", "GITLAB_TOKEN")},
 		"disabled":       {sandboxProfile + featuresYAML("    gh:\n      enabled: false\n"), env()},
 		"no feature":     {sandboxProfile, env()},
-		"source for gh":  {sandboxProfile + "  featureSources:\n    allow:\n      - https://" + external + "\n" + featuresYAML("    gh:\n      enabled: true\n      source: https://"+external+"\n"), env()},
+		"source for gh":  {sandboxProfile + "  featureSources:\n    allow:\n      - " + external + "\n" + featuresYAML("    gh:\n      enabled: true\n      source: "+external+"\n"), env()},
 		"glab beside gh": {sandboxProfile + featuresYAML(ghEntry, "    glab:\n      enabled: false\n"), env("GH_TOKEN")},
 	}
 	for name, tc := range cases {
@@ -471,8 +471,8 @@ func TestGenerateDevcontainer_ForgeCLI_VersionOverrideWithoutSourceRejected(t *t
 func TestGenerateDevcontainer_ForgeCLI_SourceOverrideIsExternalFeature(t *testing.T) {
 	t.Parallel()
 	const external = "ghcr.io/example/features/gh"
-	features := "  featureSources:\n    allow:\n      - https://" + external + "\n" +
-		featuresYAML("    gh:\n      enabled: true\n      source: https://"+external+"\n")
+	features := "  featureSources:\n    allow:\n      - " + external + "\n" +
+		featuresYAML("    gh:\n      enabled: true\n      source: "+external+"\n")
 	for pname, head := range map[string]string{"default profile": defaultProfile, "sandbox profile": sandboxProfile} {
 		t.Run(pname, func(t *testing.T) {
 			t.Parallel()
@@ -491,7 +491,7 @@ func TestGenerateDevcontainer_ForgeCLI_SourceOverrideIsExternalFeature(t *testin
 			if strings.Contains(string(js), "GH_TOKEN") {
 				t.Errorf("no token reference expected:\n%s", js)
 			}
-			if keys := parseDevcontainerFeatures(t, js); len(keys) != 1 || keys["https://"+external+":1"] == nil {
+			if keys := parseDevcontainerFeatures(t, js); len(keys) != 1 || keys[external+":1"] == nil {
 				t.Errorf("features keys = %v, want the external feature", keys)
 			}
 			if n := len(forgeNotices(resp.Warnings, "gh")); n != 0 {

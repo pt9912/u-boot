@@ -1,6 +1,7 @@
 package application_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"path/filepath"
@@ -31,7 +32,7 @@ devcontainer:
   enabled: true
   featureSources:
     allow:
-      - https://ghcr.io/orgX/features/custom-rust
+      - ghcr.io/orgX/features/custom-rust
 `
 
 // TestConfigSet_FeatureSourcesAllow_Append pins the LH-FA-DEV-003
@@ -51,8 +52,8 @@ func TestConfigSet_FeatureSourcesAllow_Append(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Set: %v", err)
 	}
-	wantOld := "https://ghcr.io/orgX/features/custom-rust"
-	wantNew := "https://ghcr.io/orgX/features/custom-rust,https://example.test/x,https://example.test/y"
+	wantOld := "ghcr.io/orgX/features/custom-rust"
+	wantNew := "ghcr.io/orgX/features/custom-rust,https://example.test/x,https://example.test/y"
 	if resp.OldValue != wantOld {
 		t.Errorf("OldValue = %q, want %q", resp.OldValue, wantOld)
 	}
@@ -121,7 +122,7 @@ func TestConfigSet_FeatureSourcesAllow_FlagMergesWithPositional(t *testing.T) {
 
 // TestConfigSet_FeatureSource_AllowlistEnforced pins the
 // LH-FA-DEV-003 / LH-NFA-SEC-004 enforcement: setting
-// `devcontainer.features.<name>.source` to a URL not in
+// `devcontainer.features.<name>.source` to a source not in
 // `featureSources.allow` fails with ErrConfigValueInvalid (Code 10)
 // regardless of how the user runs the call. `--yes` does not
 // substitute.
@@ -133,7 +134,7 @@ func TestConfigSet_FeatureSource_AllowlistEnforced(t *testing.T) {
 	_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
 		BaseDir: configTestBaseDir,
 		Path:    mustConfigPath(t, "devcontainer.features.custom.source"),
-		Value:   "https://uninvited.test/feature",
+		Value:   "registry.test/other/feature",
 	})
 	if err == nil {
 		t.Fatalf("expected error, got nil")
@@ -147,7 +148,7 @@ func TestConfigSet_FeatureSource_AllowlistEnforced(t *testing.T) {
 }
 
 // TestConfigSet_FeatureSource_AllowlistOK pins the happy path —
-// setting source to an URL that IS in the allowlist succeeds.
+// setting source to a source that IS in the allowlist succeeds.
 func TestConfigSet_FeatureSource_AllowlistOK(t *testing.T) {
 	t.Parallel()
 	svc, fs := newConfigService(t)
@@ -156,13 +157,99 @@ func TestConfigSet_FeatureSource_AllowlistOK(t *testing.T) {
 	resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
 		BaseDir: configTestBaseDir,
 		Path:    mustConfigPath(t, "devcontainer.features.custom-rust.source"),
-		Value:   "https://ghcr.io/orgX/features/custom-rust",
+		Value:   "ghcr.io/orgX/features/custom-rust",
 	})
 	if err != nil {
 		t.Fatalf("Set: %v", err)
 	}
-	if resp.NewValue != "https://ghcr.io/orgX/features/custom-rust" {
+	if resp.NewValue != "ghcr.io/orgX/features/custom-rust" {
 		t.Errorf("NewValue = %q", resp.NewValue)
+	}
+}
+
+// TestConfigSet_FeatureSource_UnprocessableFormRejected pins the
+// LH-FA-DEV-003 (lastenheft 0.33.0) source-form branch of the Schreib-
+// Pipeline step 6: a `.source` value with a form the Dev-Container-CLI
+// does not process (measured 2026-11-03: `oci://…:<tag>` and
+// `https://…:<tag>` are not processed, the registry-reference form is)
+// fails with ErrConfigValueInvalid before the allowlist rule, even when
+// the value stands byte-equal in the list; `--yes` does not substitute;
+// u-boot.yaml stays byte-identical. The Abhilfe (the registry-reference
+// form) works: after listing it, the set succeeds.
+func TestConfigSet_FeatureSource_UnprocessableFormRejected(t *testing.T) {
+	t.Parallel()
+	for _, src := range []string{
+		"oci://ghcr.io/devcontainers/features/go",
+		"https://ghcr.io/devcontainers/features/go",
+	} {
+		svc, fs := newConfigService(t)
+		seedConfigUbootYAMLWithDevcontainer(t, fs, `schemaVersion: 1
+project:
+  name: t-uboot-config
+devcontainer:
+  enabled: true
+  featureSources:
+    allow:
+      - `+src+`
+`)
+		before, _ := fs.ReadFile(filepath.Join(configTestBaseDir, "u-boot.yaml"))
+
+		path := mustConfigPath(t, "devcontainer.features.custom.source")
+		_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+			BaseDir: configTestBaseDir,
+			Path:    path,
+			Value:   src,
+		})
+		if err == nil {
+			t.Fatalf("%s: expected error, got nil", src)
+		}
+		if !errors.Is(err, driving.ErrConfigValueInvalid) {
+			t.Errorf("%s: err = %v, want wrap of ErrConfigValueInvalid", src, err)
+		}
+		msg := err.Error()
+		if !strings.Contains(msg, "has a form the Dev-Container-CLI does not process") {
+			t.Errorf("%s: message lacks the form sentence: %s", src, msg)
+		}
+		if !strings.Contains(msg, "registry reference host/path (the processed form)") {
+			t.Errorf("%s: message lacks the Abhilfe: %s", src, msg)
+		}
+		if !strings.Contains(msg, "--yes is not sufficient") {
+			t.Errorf("%s: message lacks the confirmation sentence: %s", src, msg)
+		}
+		if strings.Contains(msg, "is not in devcontainer.featureSources.allow") {
+			t.Errorf("%s: message carries the allowlist rule instead of the form sentence: %s", src, msg)
+		}
+		if after, _ := fs.ReadFile(filepath.Join(configTestBaseDir, "u-boot.yaml")); !bytes.Equal(before, after) {
+			t.Errorf("%s: u-boot.yaml changed:\n%s", src, after)
+		}
+	}
+}
+
+// The Abhilfe of the step-6 message is executable: the registry-reference
+// form passes both branches of the Fachprüfung (form and allowlist).
+func TestConfigSet_FeatureSource_RegistryReferenceAccepted(t *testing.T) {
+	t.Parallel()
+	const src = "ghcr.io/orgX/features/custom-rust"
+	svc, fs := newConfigService(t)
+	seedConfigUbootYAMLWithDevcontainer(t, fs, `schemaVersion: 1
+project:
+  name: t-uboot-config
+devcontainer:
+  enabled: true
+  featureSources:
+    allow:
+      - `+src+`
+`)
+	resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "devcontainer.features.custom.source"),
+		Value:   src,
+	})
+	if err != nil {
+		t.Fatalf("Set: %v", err)
+	}
+	if resp.NewValue != src {
+		t.Errorf("NewValue = %q, want %q", resp.NewValue, src)
 	}
 }
 
@@ -306,7 +393,7 @@ devcontainer:
   enabled: true
   featureSources:
     allow:
-      - https://ghcr.io/orgX/features/custom-rust
+      - ghcr.io/orgX/features/custom-rust
   features:
     node:
       enabled: true
@@ -315,7 +402,7 @@ devcontainer:
       version: "21"
     custom-rust:
       enabled: true
-      source: https://ghcr.io/orgX/features/custom-rust
+      source: ghcr.io/orgX/features/custom-rust
 `)
 	cases := []struct {
 		path string
@@ -323,7 +410,7 @@ devcontainer:
 	}{
 		{"devcontainer.features.node.enabled", "true"},
 		{"devcontainer.features.java.version", "21"},
-		{"devcontainer.features.custom-rust.source", "https://ghcr.io/orgX/features/custom-rust"},
+		{"devcontainer.features.custom-rust.source", "ghcr.io/orgX/features/custom-rust"},
 	}
 	for _, tc := range cases {
 		resp, err := svc.Get(context.Background(), driving.ConfigGetRequest{
@@ -526,7 +613,7 @@ func TestConfigSet_FeatureSourcesAllow_EmptyElement(t *testing.T) {
 // entry. PatchScalar creates the intermediate map; revalidate
 // still sees the entry (post-patch), so the allowlist enforcement
 // runs against a now-existing feature with a non-empty source.
-// With an empty allowlist + a URL not in the allowlist → error.
+// With an empty allowlist + a source not in the allowlist → error.
 func TestConfigSet_FeatureSource_FeatureMissing(t *testing.T) {
 	t.Parallel()
 	svc, fs := newConfigService(t)
@@ -536,7 +623,7 @@ func TestConfigSet_FeatureSource_FeatureMissing(t *testing.T) {
 	_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
 		BaseDir: configTestBaseDir,
 		Path:    mustConfigPath(t, "devcontainer.features.custom.source"),
-		Value:   "https://anywhere.test/x",
+		Value:   "registry.test/anywhere/x",
 	})
 	if err == nil {
 		t.Fatalf("expected error, got nil")
@@ -638,8 +725,8 @@ func TestConfigSet_VersionWithSourceOrWithoutDockerfileBlock_Succeeds(t *testing
 	t.Parallel()
 	svc, fs := newConfigService(t)
 	seedConfigUbootYAMLWithDevcontainer(t, fs, "schemaVersion: 1\nproject:\n  name: t-uboot-config\n"+
-		"devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://example.test/features/gh\n"+
-		"  features:\n    gh:\n      enabled: true\n      source: https://example.test/features/gh\n")
+		"devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - example.test/features/gh\n"+
+		"  features:\n    gh:\n      enabled: true\n      source: example.test/features/gh\n")
 	for _, set := range []struct{ path, value string }{
 		{"devcontainer.features.gh.version", "2.0.0"},
 		{"devcontainer.features.java.version", "21"},

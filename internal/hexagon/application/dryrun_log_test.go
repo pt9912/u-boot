@@ -101,7 +101,7 @@ func dryRunLogCases() []dryRunLogCase {
 				return runConfigSet(t, manyFixture, "project.name", "renamed", m)
 			}},
 		{"config set featureSources.allow", "config set: updated", "config set: would update",
-			"[path devcontainer.featureSources.allow old https://ghcr.io/orgX/features/custom-rust new https://ghcr.io/orgX/features/custom-rust,https://example.test/x]",
+			"[path devcontainer.featureSources.allow old ghcr.io/orgX/features/custom-rust new ghcr.io/orgX/features/custom-rust,https://example.test/x]",
 			func(t *testing.T, m driving.PreviewMode) (*fakeLogger, error) {
 				return runConfigSet(t, fixtureUBootYAMLDevcontainerSeed, "devcontainer.featureSources.allow", "https://example.test/x", m)
 			}},

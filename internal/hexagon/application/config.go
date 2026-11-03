@@ -552,11 +552,14 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 // gocyclo threshold.
 //
 // For .source it additionally enforces the LH-FA-DEV-003 /
-// LH-NFA-SEC-004 allowlist rule: the newly written URL must appear
-// verbatim in `devcontainer.featureSources.allow`. `--yes` does not
+// LH-NFA-SEC-004 allowlist rule: the newly written source must appear
+// verbatim in `devcontainer.featureSources.allow`, and it must be a
+// form the Dev-Container-CLI processes (see
+// [isUnprocessableFeatureSourceForm], the Schreib-Pipeline step 6
+// branch of the source-form rule, lastenheft 0.33.0). `--yes` does not
 // suffice — the user must have populated the allowlist first via
-// `config set devcontainer.featureSources.allow <url>` or
-// `--allow-external-feature-sources <url>`.
+// `config set devcontainer.featureSources.allow <source>` or
+// `--allow-external-feature-sources <source>`.
 //
 // For .version it enforces the rule of [validateDevcontainerFeatures]
 // through [featureVersionNeedsSource]: an entry without OCI source
@@ -579,6 +582,17 @@ func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 		if entry.Source == "" {
 			return fmt.Errorf("%w: post-patch %s is empty",
 				driving.ErrConfigPostPatchSanityFailed, path)
+		}
+		// LH-FA-DEV-003 (lastenheft 0.33.0): a source whose form the
+		// Dev-Container-CLI does not process is rejected before the
+		// allowlist rule — its key would not resolve, so allowing it
+		// would not help; the message carries the Abhilfe (the
+		// processed registry-reference form). `--yes` does not
+		// substitute.
+		if isUnprocessableFeatureSourceForm(entry.Source) {
+			return fmt.Errorf(
+				"%w: %s: external source %q has a form the Dev-Container-CLI does not process; declare the source as the registry reference host/path (the processed form), e.g. ghcr.io/devcontainers/features/go; set it via `u-boot config set %s <source>` (--yes is not sufficient)",
+				driving.ErrConfigValueInvalid, path, entry.Source, path)
 		}
 		if !featureSourceInAllow(cfg, entry.Source) {
 			return fmt.Errorf(

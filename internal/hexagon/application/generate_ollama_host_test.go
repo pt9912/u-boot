@@ -726,8 +726,8 @@ func TestConfigSet_OllamaHostVersionWithoutSource_Rejected(t *testing.T) {
 func TestGenerateDevcontainer_OllamaHost_SourceOverrideIsExternalFeature(t *testing.T) {
 	t.Parallel()
 	const external = "ghcr.io/example/features/ollama-host"
-	features := "  featureSources:\n    allow:\n      - https://" + external + "\n" +
-		"  features:\n    ollama-host:\n      enabled: true\n      source: https://" + external + "\n"
+	features := "  featureSources:\n    allow:\n      - " + external + "\n" +
+		"  features:\n    ollama-host:\n      enabled: true\n      source: " + external + "\n"
 	for pname, head := range map[string]string{"default profile": defaultProfile, "sandbox profile": sandboxProfile} {
 		t.Run(pname, func(t *testing.T) {
 			t.Parallel()
@@ -736,7 +736,7 @@ func TestGenerateDevcontainer_OllamaHost_SourceOverrideIsExternalFeature(t *test
 			if strings.Contains(raw, "host.docker.internal") || len(runArgsOf(t, run.fs)) != 0 {
 				t.Errorf("a source override must not add the line:\n%s", raw)
 			}
-			if !strings.Contains(raw, `"https://`+external+`:1": {}`) {
+			if !strings.Contains(raw, `"`+external+`:1": {}`) {
 				t.Errorf("the external feature is not rendered:\n%s", raw)
 			}
 			if n := len(hostNotices(run.resp.Warnings)); n != 0 {

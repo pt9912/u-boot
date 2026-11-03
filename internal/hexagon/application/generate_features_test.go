@@ -242,7 +242,7 @@ func TestGenerateDevcontainer_FeaturesRendered_KeysSortedAndShape(t *testing.T) 
   enabled: true
   featureSources:
     allow:
-      - https://ghcr.io/orgX/features/custom-rust
+      - ghcr.io/orgX/features/custom-rust
   features:
     node:
       enabled: true
@@ -251,7 +251,7 @@ func TestGenerateDevcontainer_FeaturesRendered_KeysSortedAndShape(t *testing.T) 
       version: "21"
     custom-rust:
       enabled: true
-      source: https://ghcr.io/orgX/features/custom-rust
+      source: ghcr.io/orgX/features/custom-rust
 `)
 
 	if _, err := generateDevcontainer(t, svc); err != nil {
@@ -267,7 +267,7 @@ func TestGenerateDevcontainer_FeaturesRendered_KeysSortedAndShape(t *testing.T) 
 	wantKeys := []string{
 		"ghcr.io/devcontainers/features/java:21",
 		"ghcr.io/devcontainers/features/node:1",
-		"https://ghcr.io/orgX/features/custom-rust:1",
+		"ghcr.io/orgX/features/custom-rust:1",
 	}
 	gotKeys := make([]string, 0, len(features))
 	for k := range features {
@@ -374,15 +374,15 @@ func TestGenerateDevcontainer_FeaturesIdempotent_SameSourceTwoVersions(t *testin
   enabled: true
   featureSources:
     allow:
-      - https://example.test/feat
+      - example.test/feat
   features:
     primary:
       enabled: true
-      source: https://example.test/feat
+      source: example.test/feat
       version: "1"
     secondary:
       enabled: true
-      source: https://example.test/feat
+      source: example.test/feat
       version: "2"
 `)
 
@@ -689,7 +689,7 @@ func TestGenerateDevcontainer_FeaturesHomebrewSdkman(t *testing.T) {
 func TestGenerateDevcontainer_FeaturesHomebrew_ExternalOverrideNoWarning(t *testing.T) {
 	t.Parallel()
 	svc, fs := newGenerateService(t)
-	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://ghcr.io/stu-bell/devcontainer-features/homebrew\n  features:\n    homebrew:\n      enabled: true\n      source: https://ghcr.io/stu-bell/devcontainer-features/homebrew\n      version: \"1\"\n")
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - ghcr.io/stu-bell/devcontainer-features/homebrew\n  features:\n    homebrew:\n      enabled: true\n      source: ghcr.io/stu-bell/devcontainer-features/homebrew\n      version: \"1\"\n")
 	resp, err := generateSandbox(svc, false)
 	if err != nil {
 		t.Fatalf("generate: %v", err)
@@ -700,7 +700,7 @@ func TestGenerateDevcontainer_FeaturesHomebrew_ExternalOverrideNoWarning(t *test
 		}
 	}
 	feats, _ := devcontainerJSONMap(t, fs)["features"].(map[string]any)
-	if _, ok := feats["https://ghcr.io/stu-bell/devcontainer-features/homebrew:1"]; !ok {
+	if _, ok := feats["ghcr.io/stu-bell/devcontainer-features/homebrew:1"]; !ok {
 		t.Errorf("override not rendered: %v", feats)
 	}
 }
@@ -925,7 +925,7 @@ func TestGenerateDevcontainer_ClaudeCodeNodeNotice(t *testing.T) {
 		"with node":                {"devcontainer:\n  enabled: true\n  features:\n" + on + "    node:\n      enabled: true\n", 0},
 		"node switched off":        {"devcontainer:\n  enabled: true\n  features:\n" + on + "    node:\n      enabled: false\n", 1},
 		"claude-code switched off": {"devcontainer:\n  enabled: true\n  features:\n    claude-code:\n      enabled: false\n", 0},
-		"own source":               {"devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://ghcr.io/me/features/claude-code\n  features:\n    claude-code:\n      enabled: true\n      source: https://ghcr.io/me/features/claude-code\n", 0},
+		"own source":               {"devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - ghcr.io/me/features/claude-code\n  features:\n    claude-code:\n      enabled: true\n      source: ghcr.io/me/features/claude-code\n", 0},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {

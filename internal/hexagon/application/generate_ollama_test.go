@@ -281,14 +281,14 @@ func TestGenerateDevcontainer_Ollama_NotActive(t *testing.T) {
 	}{
 		"disabled":        {"  features:\n    ollama:\n      enabled: false\n", nil},
 		"absent":          {"", nil},
-		"source override": {"  features:\n    ollama:\n      enabled: true\n      source: https://" + external + "\n", []string{"https://" + external + ":1"}},
+		"source override": {"  features:\n    ollama:\n      enabled: true\n      source: " + external + "\n", []string{external + ":1"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			svc, fs := newGenerateService(t)
 			yaml := sandboxProfile + tc.features
 			if tc.wantKeys != nil {
-				yaml = sandboxProfile + "  featureSources:\n    allow:\n      - https://" + external + "\n" + tc.features
+				yaml = sandboxProfile + "  featureSources:\n    allow:\n      - " + external + "\n" + tc.features
 			}
 			seedUBootYAMLWithFeatures(t, fs, yaml)
 			resp, err := generateSandbox(svc, false)

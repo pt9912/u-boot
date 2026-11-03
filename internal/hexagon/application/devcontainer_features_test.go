@@ -24,6 +24,12 @@ func TestValidateFeatureSource(t *testing.T) {
 			"oci://registry.local/features/custom",
 			"HTTPS://UPPER.CASE/path",                 // scheme is case-insensitive per RFC 3986
 			"  https://leading.trailing/whitespace  ", // trimmed before parse
+			// Registry-reference form (host/path, no scheme): the form
+			// the Dev-Container-CLI resolves for external sources
+			// (LH-FA-DEV-003).
+			"ghcr.io/devcontainers/features/go",
+			"registry.local/org/feature",
+			"  ghcr.io/devcontainers/features/go  ",
 		}
 		for _, in := range cases {
 			in := in
@@ -45,7 +51,9 @@ func TestValidateFeatureSource(t *testing.T) {
 		}{
 			{"empty", "", "empty source string"},
 			{"whitespace only", "   ", "empty source string"},
-			{"no scheme", "ghcr.io/devcontainers/features/node", "no URL scheme"},
+			{"no registry path", "ghcr.io", "no registry path"},
+			{"no registry path (bare word)", "not-a-url", "no registry path"},
+			{"no registry path (leading slash)", "/path", "no registry path"},
 			{"unsupported scheme", "ftp://example.test/feature", "unsupported scheme"},
 			{"file scheme rejected", "file:///local/path", "unsupported scheme"},
 			{"no host (https://)", "https://", "no host component"},
@@ -190,7 +198,7 @@ devcontainer:
   enabled: true
   featureSources:
     allow:
-      - https://ghcr.io/orgX/features/custom-rust
+      - ghcr.io/orgX/features/custom-rust
   features:
     node:
       enabled: true
@@ -199,7 +207,7 @@ devcontainer:
       version: "21"
     custom-rust:
       enabled: true
-      source: https://ghcr.io/orgX/features/custom-rust
+      source: ghcr.io/orgX/features/custom-rust
 `)
 		if err := application.ValidateDevcontainerFeaturesForTest(t, yaml); err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -313,7 +321,6 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 	// update of this list when the catalogue changes.
 	want := []string{
 		"claude-code",
-		"cpp",
 		"docker-cli",
 		"gh",
 		"git",
@@ -328,7 +335,6 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"node",
 		"ollama",
 		"ollama-host",
-		"postgres-client",
 		"python",
 		"sdkman",
 		"sshd",

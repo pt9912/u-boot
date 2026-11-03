@@ -808,17 +808,14 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 
 	features := collectDevcontainerFeatures(cfg)
 
-	// LH-FA-DEV-003 / LH-NFA-SEC-004: every source of an enabled feature
-	// stands in the effective allowlist (the list plus the flag entries of
-	// this call) before the profile rejection, so a call with both
-	// violations ends in this code, and before any plan and write.
-	unlisted, err := unlistedFeatureSources(cfg, req.AllowExternalFeatureSources)
-	if err != nil {
-		return driving.GenerateResponse{}, fmt.Errorf("generate devcontainer: %w: %w", driving.ErrConfigValueInvalid, err)
-	}
-	if len(unlisted) > 0 {
-		return driving.GenerateResponse{}, fmt.Errorf("generate devcontainer: %w: %s",
-			driving.ErrConfigValueInvalid, featureSourceViolationMessage(unlisted))
+	// LH-FA-DEV-003 / LH-NFA-SEC-004: the two pre-write source checks in
+	// their order — first a source form the Dev-Container-CLI does not
+	// process (the key would not resolve; lastenheft 0.33.0), then the
+	// freigabeliste rule over the effective allowlist (the list plus the
+	// flag entries of the call, R2 below). Both stand before any plan and
+	// write, so a rejected call changes nothing.
+	if err := rejectFeatureSourceViolations(cfg, req.AllowExternalFeatureSources); err != nil {
+		return driving.GenerateResponse{}, err
 	}
 
 	sandbox := req.Sandbox || profileIsSandbox(cfg.Devcontainer)

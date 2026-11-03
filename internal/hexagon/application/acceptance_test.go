@@ -266,7 +266,7 @@ func TestLHFADEV003_AllowlistEnforcement(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewConfigPath: %v", err)
 	}
-	externalURL := "https://ghcr.io/orgX/features/custom-rust"
+	externalURL := "ghcr.io/orgX/features/custom-rust"
 	_, err = configSvc.Set(context.Background(), driving.ConfigSetRequest{
 		BaseDir: testBaseDir,
 		Path:    sourcePath,

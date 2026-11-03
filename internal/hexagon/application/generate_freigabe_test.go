@@ -19,7 +19,7 @@ import (
 // plus the `--allow-external-feature-sources` entries of the same call.
 
 const (
-	freigabeSource = "https://example.test/features/evil"
+	freigabeSource = "example.test/features/evil"
 
 	// freigabeEntryYAML enables one external feature and carries no allowlist.
 	freigabeEntryYAML = "devcontainer:\n  enabled: true\n  features:\n    evil:\n      enabled: true\n      source: " + freigabeSource + "\n"
@@ -69,7 +69,7 @@ func TestGenerateDevcontainer_FreigabeRejectsAlsoWithUnrelatedFlag(t *testing.T)
 	t.Parallel()
 	svc, fs := newGenerateService(t)
 	seedUBootYAMLWithFeatures(t, fs, freigabeEntryYAML)
-	_, err := generateWithFlag(svc, driving.PreviewNone, "https://example.test/features/other")
+	_, err := generateWithFlag(svc, driving.PreviewNone, "example.test/features/other")
 	if !errors.Is(err, driving.ErrConfigValueInvalid) {
 		t.Fatalf("err = %v, want ErrConfigValueInvalid (flag names another source)", err)
 	}
@@ -189,7 +189,7 @@ func TestGenerateDevcontainer_FreigabeSandboxProfileOnlyUnlistedSource(t *testin
 func TestGenerateDevcontainer_FreigabeSeveralUnlistedSortedByName(t *testing.T) {
 	t.Parallel()
 	svc, fs := newGenerateService(t)
-	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  features:\n    zeta:\n      enabled: true\n      source: https://example.test/features/z\n    alpha:\n      enabled: true\n      source: https://example.test/features/a\n")
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  features:\n    zeta:\n      enabled: true\n      source: example.test/features/z\n    alpha:\n      enabled: true\n      source: example.test/features/a\n")
 	_, err := generateWithFlag(svc, driving.PreviewNone)
 	if !errors.Is(err, driving.ErrConfigValueInvalid) {
 		t.Fatalf("err = %v, want ErrConfigValueInvalid", err)
@@ -245,7 +245,7 @@ func TestGenerateDevcontainer_FreigabeMessageParts(t *testing.T) {
 // same way: one predicate behind all three.
 func TestFeatureSourceAllow_ThreeCallersAgree(t *testing.T) {
 	t.Parallel()
-	const base = "https://Example.test/features/x"
+	const base = "Example.test/features/x"
 	cases := []struct {
 		name  string
 		src   string // the source of the feature entry
@@ -255,9 +255,9 @@ func TestFeatureSourceAllow_ThreeCallersAgree(t *testing.T) {
 		{"same", base, "  featureSources:\n    allow:\n      - " + base + "\n", true},
 		{"trailing slash in list", base, "  featureSources:\n    allow:\n      - " + base + "/\n", false},
 		{"trailing slash in source", base + "/", "  featureSources:\n    allow:\n      - " + base + "\n", false},
-		{"host case", base, "  featureSources:\n    allow:\n      - https://example.test/features/x\n", false},
+		{"host case", base, "  featureSources:\n    allow:\n      - example.test/features/x\n", false},
 		{"query in source", base + "?a=b", "  featureSources:\n    allow:\n      - " + base + "\n", false},
-		{"userinfo in source", "https://user@Example.test/features/x", "  featureSources:\n    allow:\n      - " + base + "\n", false},
+		{"userinfo in source", "user@Example.test/features/x", "  featureSources:\n    allow:\n      - " + base + "\n", false},
 		{"empty list", base, "  featureSources:\n    allow: []\n", false},
 		{"no block", base, "", false},
 	}
