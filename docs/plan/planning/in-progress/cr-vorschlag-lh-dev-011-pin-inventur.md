@@ -1,6 +1,6 @@
 # CR-Vorschlag: Pin-Inventur (`pinsync`) — die Werkzeugketten der `LH-FA-DEV-011`-Kopplung samt fünftem Ort `go.mod`
 
-**Status:** vorgelegt (2026-11-03); wartet auf die Freigabe des Projektinhabers.
+**Status:** freigegeben wie vorgelegt samt der GNU-make-Erweiterung (Projektinhaber 2026-11-03: „Inventur wie vorgeschlagen" + „auch das passende make tool (gnu)" — make als Mindest-Version am Kopf der Makefile mit ab-brechendem Guard, kein pinsync-Stellenvergleich).
 **Grundlage:** Projektinhaber 2026-11-03 („die Nummern müssen zusammenpassen"; „… auch alle anderen Tools, die für Entwicklung an diese Repo nötig sind: bash, sed, go, docker, …"); d-check v0.91.0 Modul `pinsync` (`DC-FA-PSYNC-001`, byte-gleicher Wert an ≥2 Dateistellen).
 
 **Die vorgeschlagenen Pin-Gruppen** (je eine benannte pinsync-Regel, jede Quellen-Zeile ein RE2-Ausdruck mit einer Fanggruppe):
