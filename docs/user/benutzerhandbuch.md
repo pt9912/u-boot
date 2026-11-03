@@ -1113,7 +1113,7 @@ Das Feature steht im verwalteten Bereich von `.devcontainer/devcontainer.json`:
 ```
 
 Mit `version 1.8.3` heißt der Eintrag `"ghcr.io/devcontainers/features/java:1.8.3": {}`.
-Die installierte Java-Version wählt das Feature selbst; ein gepinnte JDK-Installation
+Die installierte Java-Version wählt das Feature selbst; eine gepinnte JDK-Installation
 steuert der Katalog-Schlüssel `java-toolchain` (siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional)).
 In `u-boot.yaml` steht:
 

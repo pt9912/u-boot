@@ -37,6 +37,7 @@ func TestRun_Generate_ToolchainNotices(t *testing.T) {
 				"Warning: devcontainer feature go-toolchain installs",
 				"Warning: devcontainer feature golangci-lint installs",
 				"Warning: devcontainer feature java-toolchain installs",
+				"the JDK of the Eclipse Temurin distribution of the LTS version 21",
 			} {
 				if n := strings.Count(out.String(), want); n != 1 {
 					t.Errorf("stdout contains %q %d times, want 1:\n%s", want, n, out.String())

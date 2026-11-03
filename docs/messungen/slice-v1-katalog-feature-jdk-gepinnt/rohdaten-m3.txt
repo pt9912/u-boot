@@ -1,0 +1,10 @@
+== cask temurin
+token: temurin
+url: https://github.com/adoptium/temurin27-binaries/releases/download/jdk-27.0.1.0.2%2B1/OpenJDK27U-jdk_aarch64_mac_hotspot_27.0.1.0.2_1.pkg
+"generated_date":"2026-11-02"}
+
+== cask temurin@21
+token: temurin@21
+url: https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.13_9.pkg
+"generated_date":"2026-11-02"}
+

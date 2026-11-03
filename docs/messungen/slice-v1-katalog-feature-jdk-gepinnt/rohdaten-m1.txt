@@ -1,0 +1,13 @@
+== x64
+d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c  OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz
+
+http=200 redirects=1
+final=https://release-assets.githubusercontent.com/github-production-release-asset/602574963/de4f664e-32b7-4ea5-b5a5-ac15b1493e6e?…
+== aarch64
+e3522e707fc7dbe2a72c30746b1e7068301a0213ecd213d4491f35a14eb55578  OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.13_9.tar.gz
+
+http=200 redirects=1
+final=https://release-assets.githubusercontent.com/github-production-release-asset/602574963/57175219-e593-4a02-8627-3d14fef3c51c?…
+== Veröffentlichungs-Lage (GitHub-API):
+tag_name: jdk-21.0.13+9
+published_at: 2026-10-22T08:58:06Z

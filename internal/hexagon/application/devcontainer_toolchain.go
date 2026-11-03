@@ -12,17 +12,18 @@ import (
 )
 
 // The catalogue entry type "gepinnte Werkzeugkette" (LH-FA-DEV-003, lastenheft
-// 0.30.0; SPEC-054): the keys `go-toolchain` and `golangci-lint` carry the
-// toolchains of the u-boot build itself as Dockerfile blocks — release-
-// archive installation with a SHA-256 check before the extraction, in both
-// profiles. The version stands as a build argument in the catalogue template
-// (the one pin place, LH-FA-DEV-011); a project overrides it per key with
-// `version:` and the generate run reads the official checksum source of the
-// key for the chosen version before anything is written (SPEC-054, S5).
-// The conflict with an enabled external `go` feature and an override whose
-// source is unreadable or does not cover the version end the run with a
-// fachlicher Validierungsfehler (exit code 10, nothing written); callers
-// wrap this file's errors into [driving.ErrConfigValueInvalid].
+// 0.31.0; SPEC-054): the keys `go-toolchain` and `golangci-lint` carry the
+// toolchains of the u-boot build itself, `java-toolchain` the JDK of the
+// Eclipse-Temurin-Distribution of the LTS version 21 — all three render as
+// Dockerfile blocks with release-archive installation and a SHA-256 check
+// before the extraction, in both profiles. The version stands as a build
+// argument in the catalogue template; a project overrides it per key with
+// `version:` and the generate run reads the official checksum source of
+// the key for the chosen version before anything is written (SPEC-054, S5).
+// The conflicts with an enabled external `go` / `java` feature and an
+// override whose source is unreadable or does not cover the version end the
+// run with a fachlicher Validierungsfehler (exit code 10, nothing written);
+// callers wrap this file's errors into [driving.ErrConfigValueInvalid].
 
 // goReleaseListingURL is the URL of the download listing of go.dev/dl with
 // ALL versions (`include=all`): a `version:` override may name an older,
@@ -31,7 +32,7 @@ import (
 const goReleaseListingURL = "https://go.dev/dl/?mode=json&include=all"
 
 // toolchainVersionCharset is the character set of a `version:` value of the
-// two keys: release-version slugs ("1.27.3", "v2.14.0", "1.27rc1"). The value
+// three keys: release-version slugs ("1.27.3", "v2.14.0", "1.27rc1"). The value
 // enters a download URL and the ARG block of the generated Dockerfile, so
 // characters outside the set are unusable input (SPEC-054, S5: the input of
 // the override is useless, exit code 10) and not the path of a shell escape.

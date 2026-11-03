@@ -330,9 +330,11 @@ func TestGenerateDevcontainer_Toolchain_BlocksInBothProfiles(t *testing.T) {
 	}
 	for pname, p := range profiles {
 		for fname, keys := range map[string][]string{
-			"go-toolchain":  {"go-toolchain"},
-			"golangci-lint": {"golangci-lint"},
-			"both":          {"go-toolchain", "golangci-lint"},
+			"go-toolchain":   {"go-toolchain"},
+			"golangci-lint":  {"golangci-lint"},
+			"both":           {"go-toolchain", "golangci-lint"},
+			"java-toolchain": {"java-toolchain"},
+			"all":            {"go-toolchain", "golangci-lint", "java-toolchain"},
 		} {
 			t.Run(pname+"/"+fname, func(t *testing.T) {
 				t.Parallel()
@@ -357,7 +359,14 @@ func TestGenerateDevcontainer_Toolchain_BlocksInBothProfiles(t *testing.T) {
 					}
 				}
 				body, _ := fs.ReadFile(devcontainerJSONPath())
-				assertToolchainJSON(t, body)
+				// The two Go keys carry the cache values of `containerEnv`;
+				// the JDK key alone carries none (SPEC-054,
+				// Cache-Werte-Absatz).
+				if contains(keys, "go-toolchain") || contains(keys, "golangci-lint") {
+					assertToolchainJSON(t, body)
+				} else {
+					assertNoContainerEnv(t, body)
+				}
 				if _, ok := strippedJSONMap(t, body)["features"]; ok {
 					t.Errorf("devcontainer.json renders no key under features for the pinned toolchain:\n%s", body)
 				}
@@ -748,6 +757,19 @@ func TestGenerateDevcontainer_Toolchain_Notices(t *testing.T) {
 				t.Errorf("no notice carries %q:\n%v", key, notices)
 			}
 		}
+		// The Vertriebs-Form of the java notice is asserted (SPEC-054,
+		// Meldungen: sie konkretisiert die Quelle, sie ersetzt sie nicht) —
+		// removing the distribution clause turns this subtest red.
+		for _, n := range notices {
+			if !strings.Contains(n.Message, "feature java-toolchain ") {
+				continue
+			}
+			for _, want := range []string{"installs the JDK of the Eclipse Temurin distribution of the LTS version 21", "not signed"} {
+				if !strings.Contains(n.Message, want) {
+					t.Errorf("the java notice lacks %q:\n%s", want, n.Message)
+				}
+			}
+		}
 		for _, n := range notices {
 			if n.Code != "LH-NFA-SEC-004" || n.Level != "warn" {
 				t.Errorf("notice = %+v, want code LH-NFA-SEC-004 at level warn", n)
@@ -1031,11 +1053,11 @@ func TestFeatureCatalogue_ToolchainChecksumSources(t *testing.T) {
 		}
 	}
 	// The real catalogue keys carry their source (the S6 rejection stays
-	// synthetic); the load path accepts the overrides of the two keys and
+	// synthetic); the load path accepts the overrides of the three keys and
 	// keeps the rejection for a block entry without source.
 	const withOverride = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    go-toolchain:\n      enabled: true\n      version: 1.26.10\n    golangci-lint:\n      enabled: true\n      version: v2.13.2\n    java-toolchain:\n      enabled: true\n      version: 21.0.9+10\n"
 	if err := application.ValidateDevcontainerFeaturesForTest(t, []byte(withOverride)); err != nil {
-		t.Errorf("the load path rejected the overrides of the two keys: %v", err)
+		t.Errorf("the load path rejected the overrides of the three keys: %v", err)
 	}
 	const blockWithoutSource = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    gh:\n      enabled: true\n      version: \"9.9.9\"\n"
 	if err := application.ValidateDevcontainerFeaturesForTest(t, []byte(blockWithoutSource)); err == nil {

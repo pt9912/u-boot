@@ -4,12 +4,16 @@
 | ----------- | ------------- |
 | Auslösender Vorgang | [`slice-v1-katalog-feature-jdk-gepinnt`](../../plan/planning/in-progress/slice-v1-katalog-feature-jdk-gepinnt.md) (Umsetzung zu Lastenheft 0.31.0, [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`SPEC-054`](../../../spec/spezifikation.md#spec-054--katalog-eintragstyp-gepinnte-werkzeugkette-go-toolchain-golangci-lint-und-java-toolchain-prüfsummen-quellen-version-übersteuerung-und-cache-werte-unter-containerenv)) |
 | Gelesen am  | 2026-11-02 |
-| Skripte     | `tools/messung/` unter derselben Kennung [`slice-v1-katalog-feature-jdk-gepinnt`](../../plan/planning/in-progress/slice-v1-katalog-feature-jdk-gepinnt.md) (M1 `temurin-checksums.sh`, M2 `java-feature-tags.sh`, M3 `brew-casks.sh`) |
+| Skripte     | `tools/messung/katalog-feature-jdk/` (M1 `temurin-checksums.sh` — Aufruf je Version, Modus `download`/`verifyx64`; M2 `java-feature-tags.sh`; M3 `brew-casks.sh`) |
 
 ## Umgebung
 
-Linux-Host `amd64`, `curl` 8.x netzgebunden; keine Engine- und CLI-Abhängigkeit.
-Die Messung liest nur; sie schreibt nichts ins Repo außer diesem Protokoll.
+Linux-Host `amd64`, `curl` 8.18.0 (x86_64-pc-linux-gnu) netzgebunden; keine
+Engine- und CLI-Abhängigkeit (die Tag- und Cask-Lesung lief über Registry- und
+GitHub-API per `curl`; der Devcontainer-CLI war nicht beteiligt). Die Messung
+liest nur; sie schreibt nichts ins Repo außer diesem Protokoll samt Rohdaten
+(`rohdaten-m1.txt`, `rohdaten-m2.txt`, `rohdaten-m3.txt` — die gelesenen
+Läufe, archiviert).
 
 ## M1 — Temurin-Release-Archiv und Prüfsummen-Quelle
 
@@ -50,29 +54,28 @@ Die Messung liest nur; sie schreibt nichts ins Repo außer diesem Protokoll.
   SDKMAN! (if not installed), and needed dependencies."; die Option `version`
   des Features nimmt die Java-Versionen (`latest`, `none`, `21`, `17`, `11`,
   `8`) — sie wählt das JDK, das das Feature selbst installiert, und hat mit
-  dem Tag-Suffix des Render-Schlüssels nichts zu tun. **Kein separater
-  Abweisungsfall `sdkman`** — der Konflikt des Typs gilt der zwei JDKs
-  (externes `java` plus Schlüssel).
-- Damit die Handbuch-Berichtigung: das Beispiel `java.version 21` heißt
-  (Fassung vor diesem Slice: „Mit `version 21` heißt der Eintrag
-  `ghcr.io/devcontainers/features/java:21`") — der Eintrag hieße so, aber
-  ein solcher Tag existiert nicht (der Build des Features bricht ab); berichtigt auf
-  `1.8.3` mit der Auslegungs-Zeile.
+  dem Tag-Suffix des Render-Schlüssels nichts zu tun. Die Fassung vor diesem
+  Slice sagte zum Beispiel `java.version 21`, der Eintrag hieße dann
+  `ghcr.io/devcontainers/features/java:21` — der Eintrag hieße so, aber ein
+  solcher Tag existiert nicht (der Feature-Build bricht ab); berichtigt auf
+  `1.8.3` samt Auslegungs-Zeile zum Schlüssel `java-toolchain`. **Kein
+  separater Abweisungsfall `sdkman`** — der Konflikt des Typs gilt der zwei
+  JDKs (externes `java` plus Schlüssel).
 
 ## M3 — Brew-Form des Vertriebs (Auflage)
 
 - **Cask `temurin`** (tap `homebrew/cask`): „Eclipse Temurin Java Development
-  Kit", Version `27.0.1.0.2,1`, Installation über die `.pkg`-Form der
-  Veröffentlichung `temurin27-binaries` mac.
+  Kit", Version `27.0.1.0.2,1`; die Installation lädt die `.pkg`-Form der
+  mac-Veröffentlichung `temurin27-binaries`.
 - **Cask `temurin@21`** (tap `homebrew/cask`): „Eclipse Temurin 21", Version
   `21.0.13,9`,Installation über die `.pkg`-Form **derselben Veröffentlichung**
   (`jdk-21.0.13+9`), `aarch64_mac`.
-- **Befund:** brew verteilt die macOS-Installer-Form derselben Veröffentlichungen,
-  keine Linux-Archivform. Im Devcontainer-Kontext (Linux) installiert `brew` Casks nicht;
-  der Katalog-Weg (Linux-`tar.gz`-Archiv) bleibt die einzige Installationsform
-  im Devcontainer. **Der Befund begründet keine zweite Zusage** — er steht als
-  Vertriebs-Vergleich (Chronik, `CHANGELOG`-Eintrag); die Mess-Pflicht der
-  Umsetzungs-Form bleibt.
+- **Befund:** brew verteilt die macOS-Installer-Form (`pkg`) derselben
+  Veröffentlichungen, keine Linux-Archivform. Im Devcontainer-Kontext (Linux)
+  installiert `brew` Casks nicht; der Katalog-Weg (Linux-`tar.gz`-Archiv)
+  bleibt die einzige Installationsform im Devcontainer. **Der Befund begründet
+  keine zweite Zusage** — er steht als Vertriebs-Vergleich (Chronik,
+  `CHANGELOG`-Eintrag); die Mess-Pflicht der Umsetzungs-Form bleibt.
 
 ## Grenzen
 

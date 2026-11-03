@@ -507,7 +507,7 @@ func blockPinArg() map[string]string {
 }
 
 // blockChecksumSource is the official checksum source per Dockerfile-block
-// key (SPEC-054): the two pinned-toolchain keys carry theirs, the forge-CLIs
+// key (SPEC-054): the three pinned-toolchain keys carry theirs, the forge-CLIs
 // and `ollama` carry none.
 func blockChecksumSource() map[string]string {
 	return map[string]string{
