@@ -261,9 +261,11 @@ inside the devcontainer container, and `make test-docker` binds to the
 Docker daemon outside of it.
 
 ```bash
+u-boot devcontainer up          # start the repository devcontainer (the usage level)
+make dev-shell                  # open a shell in it
 make help                       # list all targets
 make build                      # build runtime image (distroless)
-make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung (inside the devcontainer container)
+make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung + tool-pruefung (run it inside the devcontainer shell, or the container form of docs/maintainer/quality.md — a bare host run is not a proof)
 make ci                         # gates + govulncheck + image-scan
 make fullbuild                  # ci + build (full closure)
 ```

@@ -253,15 +253,7 @@ verify-depguard: ## Verify all nine depguard layer rules fire (LH-FA-ARCH-003).
 # an GATE_CHECKS; hier kommen die Code-Gates dazu.
 GATE_CHECKS += lint test coverage-gate
 
-# ablage-pruefung: Positivliste der Ablage im Planning-Baum und unter docs/
-# (harness/conventions.md, Abschnitt Ablage von Messprotokollen und Skripten).
-# bash + git auf dem Host, kein Docker (Muster tools/harness/history-range-guard.sh);
-# das Skript und sein Waechter-Test liegen unter tools/harness/.
-ablage-pruefung: ## Ablage im Planning-Baum und unter docs/ gegen die Positivliste pruefen.
-	@bash tools/harness/ablage-pruefung.sh
-	@bash tools/harness/ablage-pruefung-test.sh
-
-GATE_CHECKS += ablage-pruefung
+include tools/mk/*.mk  # the repo-owned fragments (ablage-pruefung, tool-pruefung, devcontainer)
 
 ci: gates govulncheck image-scan ## Gates plus govulncheck plus image-scan (mirrors ci.yml).
 	@echo "[ci] gates + govulncheck + image-scan green"
@@ -279,5 +271,4 @@ clean: ## Remove local build artefacts and built images.
 	@echo "[clean] artefacts and images removed"
 
 # ---- Devcontainer ----------------------------------------------------------
-
-include tools/mk/devcontainer.mk
+# (das Fragment tools/mk/devcontainer.mk traegt der Glob oben ein)

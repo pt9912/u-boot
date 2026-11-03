@@ -59,7 +59,10 @@ Linter-Prüfungen und sitzt nicht in der Tabelle von §1.2. Eine
 Formatierung des Bestands läuft im Docker mit der gepinnten
 `golangci-lint`-Version, nicht auf dem Host:
 `docker run --rm -v "$PWD":/src -w /src u-boot:lint golangci-lint fmt ./...`
-(Image `u-boot:lint` aus `make lint`). Der Container läuft als `root`:
+(das Stage-Image `u-boot:lint` — es entsteht je `docker build --target lint` des
+Multi-Stage-Dockerfiles; je [`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)
+trägt der Gatter-Lauf die Rezepte im Devcontainer-Container, und die
+einzelnen Stages bleiben je `--target` baubar). Der Container läuft als `root`:
 geänderte Dateien gehören danach `root`, wo Docker Bind-Mounts nicht auf den
 Host-Nutzer abbildet (auf Colima/macOS gemessen: Eigentümer unverändert; auf
 Linux-Hosts nicht gemessen) — dort `--user "$(id -u):$(id -g)"` und
