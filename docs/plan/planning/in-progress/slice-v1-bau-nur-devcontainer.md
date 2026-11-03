@@ -20,12 +20,12 @@
 
 ## 2. Definition of Done
 
-- [ ] Entcheidungen 1 bis 3 je vom Projektinhaber bejaht (Wortlaut im CR)
-- [ ] `scripts/bau.sh`-Pfad ist der einzige Bau-Pfad: `repo.mk`-Zweige ohne `BUILD_MODE`, `modus-pruefung` je Entscheidung 3
-- [ ] Die CI-Workflows laufen die Gatter in der Devcontainer-Umgebung (je Entscheidung 1) je grünem Lauf `ci` und `integration-docker`? — Nachzug je Messbasis
-- [ ] Vertrags-Nachzug: [`SPEC-031`](../../../../spec/spezifikation.md)-Umformulierung (kein Zweimodus-Vertrag), Folge-ADR `Supersedes`-Verweis zu [`ADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md), [`AGENTS.md`](../../../../AGENTS.md) §3.1 je Entscheidung 2
-- [ ] Doku je Träger (Handbuch `BUILD_MODE`, READMEs falls betroffen), `CHANGELOG` `[Unreleased]` Eintrag
-- [ ] Gates, Reports, Closure je Muster der Umsetzungs-Slices
+- [x] Entcheidungen 1 bis 3 je vom Projektinhaber bejaht (Wortlaut im CR)
+- [x] `scripts/bau.sh`-Pfad ist der einzige Bau-Pfad: `repo.mk`-Zweige ohne `BUILD_MODE`, `modus-pruefung` je Entscheidung 3
+- [x] Die CI-Workflows laufen die Gatter in der Devcontainer-Umgebung (je Entscheidung 1) je grünem Lauf `ci` und `integration-docker`? — Nachzug je Messbasis
+- [x] Vertrags-Nachzug: [`SPEC-031`](../../../../spec/spezifikation.md)-Umformulierung (kein Zweimodus-Vertrag), Folge-ADR `Supersedes`-Verweis zu [`ADR-0037`](../../adr/0037-bauen-im-devcontainer-lokaler-modus.md), [`AGENTS.md`](../../../../AGENTS.md) §3.1 je Entscheidung 2
+- [x] Doku je Träger (Handbuch `BUILD_MODE`, READMEs falls betroffen), `CHANGELOG` `[Unreleased]` Eintrag
+- [x] Gates, Reports, Closure je Muster der Umsetzungs-Slices
 
 ## 3. Plan (vor Code)
 
@@ -56,6 +56,26 @@ DoD vollständig; `make gates` und die CI-Läufe je am neuen Weg grün; Reports;
 1. Die CI-Migration verschiebt die Last auf GitHub-Runner mit anderen Umgebungeigenschaften (Nested-Docker, Cache) — die e2e-Test-Basis (docker-getaggt) braucht im Devcontainer-Modus den verschachtelten Daemon, dessen CI-Fähigkeit ist nicht gemessen. Vorsorge: Messung vor dem Wortlaut ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)) — **Ausgang:** bei Closure.
 2. Der Host-Vertrag ist öffentlich (README/Handbuch/AGENTS) — die Umstellung ändert eine Zusage mit Nutzer-Sicht — **Ausgang:** bei Closure.
 3. Plan-Aussagen über Code (Workflows, `repo.mk`-Zweige) — §3.10-Abgleich je Runde — **Ausgang:** bei Closure.
+
+### Closure (Planner, 2026-11-03, nach Umsetzung `ff4d8dde`/`e18bb158`/`a8f578a0`/`73e0fda6`, CR-Ortsform `97bebdc1`/`bc8056d3` und Review-/Verifier-Berichtigung `7c048849`/`e5146427`)
+
+**Evidence:** Review-Report [`2026-11-03-slice-v1-bau-nur-devcontainer`](../../../reviews/2026-11-03-slice-v1-bau-nur-devcontainer.md) (1 HIGH/2 MEDIUM/3 LOW/2 INFO je berichtigt) · Verify-Report [`…-verify`](../../../reviews/2026-11-03-slice-v1-bau-nur-devcontainer-verify.md) — **DoD-Zeilen 1, 2, 4 belegt erfüllt; CI real gelaufen:** Run 41676843984 (gates 2 m 22 s inkl. Coldcache-Image-Bau, `tool-pruefung` OK in der CI) und Run 41676844151 (`integration-docker` success 18 m 12 s) — die M1-Netzbau-Grenze entlastet sich am Runner; M3 im eigenen Lauf reproduziert (33 s warm, Coverage 92,20 %); die zwei Bewejs des Laufzeit-Gates je eigener Nachfahrt (Container-Form grün: go 1.27.3/lint 2.14.0/make ≥ 4.3 samt Inventur; Host-Form rot: kein `go` am Host).
+
+**Die neue Nachweis-Form:** der Lauf-Ort ist die Werkzeugkette, nicht der Container — `tool-pruefung` (die Vollständigkeits-Form der Inventur je Projektinhaber-Auftrag) bricht jeden Lauf, dessen Werkzeugkette die Inventur nicht trägt; der Stempel-Hash ist nicht mehr umgebungsgetragen ([`BEO-WZG/tree-hash-collation`](../observations/BEO-WZG/tree-hash-collation/observation.md): `LC_ALL=C`-Pin, Host/Container je byte-gleich — Evidence-Datei ist angelegt); die DIND-Startkante (das Socket-Rennen des ersten Container-Laufs) trägt die Warteschlang-Form (60 s) und als Grenze/Empfehlung im Protokoll — Retry-Form der Läufe.
+
+**Risiken je Ausgang:** 1 CI-Migration — **belegt** (die CI-Läufe je Log oben; der Coldcache-Netzbau fiel am Runner) · 2 der Host-Vertrag — bleibt je ADR-0043 (Entscheidung 2) samt der Werkzeugketten-Formulierung · 3 Plan-Aussagen über Code — die §3-Zeilen tragen je Berichten (F-6 halb, V-3 Rest je Fix; V-4 die Fix-Runden-Träger nachgetragen) — beide berichtigt vor der Closure.
+
+**Was ging anders als geplant:** (a) der erste Container-Gates-Lauf endete am fehlenden verschachtelten Socket (Start-Rennen — der zweite Lauf trug in 35 s); (b) der Umsetzungs-Agent wurde mid-flight gestoppt (Arbeitsbaum sauber, vier Commits draußen; die Berichtigung kam vom Hauptagenten); (c) der Hash-Nachweis war umgebungsgetragen (uutils- vs. GNU-sort) — beobachtet und berichtigt je Pin.
+
+**Steering-Loop-Eintrag** (gezählt, nicht verkörpert; kein Eintrag trägt das Feld `liegt in`): *Lehre 1:* die Werkzeugkette trägt, nicht der Lauf-Ort — die künftigen Werkzeuginsel der Inventur folgen der Vollständigkeits-Zeile (je Werkzeug je Form). *Lehre 2:* die Collation-Klasse ist beobachtet und getragen (Pin); `BEO-WZG/tree-hash-collation` trägt den Vorgang (1×, unter der Schwelle). *Neuer Sensor:* keiner. *Benannte Spec-Lücke:* keine.
+
+**Beobachtungs-Register:** *Evidence neu:* [`BEO-WZG/tree-hash-collation`](../observations/BEO-WZG/tree-hash-collation/observation.md) ([`evidence/slice-v1-bau-nur-devcontainer.md`](../observations/BEO-WZG/tree-hash-collation/evidence/slice-v1-bau-nur-devcontainer.md): V-1; berichtigt im Pin). *Nicht gezählt:* [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) — die zustandsmarker-Instanz der Roadmap-Zeile (V-4/INFO) trägt die Berichtigung, keine Zählung; [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) — kein Fund.
+
+**Carveouts:** keiner — kein Gate gesenkt, keine Schwelle geändert (die `tool-pruefung`-Aufnahme ist eine Gate-ERWEITERUNG, keine Lockerung). **Folge-Slice:** der docker-cli-Weg (in `open/`) bleibt; keine Cuts versprochen. **Weiter offen:** nichts aus der DoD.
+
+**Drei Paarungen:** *Anker* — kein Steering-Loop-Eintrag trägt ein Zielort-Feld; nichts verkörpert (die ADR-/Inventur-Form tragen die Regeln). *Folge-Slice* — keiner versprochen (docker-cli-Weg ist offene Nachbarkandidatin, Verzeichnis-Lesung). *Register* — die eine neue `BEO-WZG`-Kennung löst in ein Verzeichnis mit der Evidence-Datei dieser Closure (`ls`).
+
+**Verifikation** (Container-Form-Läufe nach Closure-Inhalt, Move und Marker; Stempel je HEAD): `make gates` Exit 0 am 2026-11-03 (`record-gates`-Stempel = HEAD nach dem Nachzug). Der Lauf gilt für den Stand vor dieser Zeile; die Zeile ändert nur Prosa.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
