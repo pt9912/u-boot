@@ -34,6 +34,8 @@
 | `docs/reviews/` (Berichte) | neu | je Berichte-Runden |
 | Produktcode, Templates, Tests, Handbuch, READMEs, `CHANGELOG.md` | **kein Diff in diesem CR** | der Umsetzungs-Slice trägt sie |
 
+**Ansatz-Zeile (§3.10-Berichtigung nach dem Review, F-Findings zu den Move-Trägern):** die Lifecycle-Moves des Vorgangs zogen je Schritt die eingehenden Verweis-Träger mit `make slice-mv` nach (CR-Schnitt: ~22 Träger-Dateien über Planning-Abbage, Berichte und Roadmap — reine Moves samt Verweis-Nachzug je eigenem Commit; der §3.10-Abgleich gegen `git diff --name-status 137f2f92^..HEAD` läuft je Fix-und-Closure-Runde erneut).
+
 ## 4. Trigger
 
 **Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/`.
