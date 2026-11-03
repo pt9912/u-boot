@@ -7,7 +7,7 @@ environments — project structure, Docker Compose stack, devcontainer
 configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
-> **Status:** current version `v0.20.0` (GHCR image, six-platform binaries,
+> **Status:** current version `v0.21.0` (GHCR image, six-platform binaries,
 > `.deb`/`.rpm` packages, Homebrew tap). The tasks, options and prerequisites are in the
 > [user manual](docs/user/benutzerhandbuch.md); what each release changed is in
 > [`CHANGELOG.md`](CHANGELOG.md) and on the
@@ -95,7 +95,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` and `.rpm` from the release, amd64 and arm64):
 
 ```bash
-VERSION=0.20.0   # the release you want
+VERSION=0.21.0   # the release you want
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
