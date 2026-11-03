@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-katalog-features-quellen-und-freigabe`](../../../../in-progress/slice-v1-katalog-features-quellen-und-freigabe.md)
+**Vorgang:** [`slice-v1-katalog-features-quellen-und-freigabe`](../../../../done/slice-v1-katalog-features-quellen-und-freigabe.md)
 **Fund:** zwei Teil-Fundstellen der Klasse im Vorgang der Quellen-Reste:
 
 - **F-3 (Review, MEDIUM, zustandsmarker-Familie, dritter Kontext in Folge):** der Slice-Plan trug „CR-Schnitt liegt in `in-progress/`" (ohne Kennung und mit totem Ablauf), als der CR längst in `done/` lag — dieselbe Träger-Aussage wie die Release-Cuts-Instanzen. Berichtigt `25bc9464`.
