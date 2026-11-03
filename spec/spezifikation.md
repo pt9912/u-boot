@@ -369,11 +369,19 @@ Overrides erfolgen über `docker build --build-arg <NAME>=<value>` bzw. die korr
 
 <a id="lh-fa-build-007a--regeln-des-docker-only-workflows"></a>
 
-- Im Docker-Modus (Standard, `BUILD_MODE=docker`) müssen alle MVP- und V1-Pflicht-Targets aus [`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) ausschließlich `docker build`, `docker run` oder die Aggregation anderer solcher Targets aufrufen.
-- Voraussetzung am Host: Docker Engine und `make`. `make` ist ein bewusster Carveout zu [`LH-NFA-PORT-002`](lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) (weit verbreitet, einzige zusätzliche Host-Abhängigkeit neben Docker). Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden. Am Host und in der CI gilt der Docker-Modus.
-- **Lokaler Modus** (`BUILD_MODE=local`): Er ist für den Devcontainer des Repositories bestimmt, dessen Image die gepinnte Toolchain trägt. Dort führen alle Make-Targets mit einer Docker-Variante (`deps`, `compile`, `lint`, `test`, `coverage-gate`, `test-docker`, `govulncheck` und `build-binaries`, auch die, die [`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) nicht führt) ihre Befehle mit dieser Toolchain aus und rufen kein `docker build` der Stage. Die Befehle von `compile`, `lint`, `test` und `coverage` stehen in `scripts/bau.sh`, das auch die Stages des Dockerfiles rufen. Der Modus ist ausdrücklich gewählt (Variable `BUILD_MODE`, Standard `docker`, andere Werte sind ein Fehler); eine Erkennung von `go` im `PATH` gibt es nicht. `build`, `run`, `image-scan` und `packages` bleiben im Docker-Pfad; `packages` baut seine Binaries unabhängig von `BUILD_MODE` im Docker-Modus. Auch im lokalen Modus braucht, wer Container startet, einen Docker-Daemon (`docs-check`, die Docker-Integrationstests von `test-docker`, `build`, `run`, `image-scan`, `packages`); der Devcontainer stellt dafür einen verschachtelten Daemon bereit. Die Docker-Integrationstests (`test-docker`) sind im verschachtelten Daemon des Devcontainers nicht als Nachweis zugesagt; ihren Nachweis liefert der Docker-Modus an einem Host mit lokaler Engine und die CI.
-- Release-Artefakte (Binaries, Pakete, Images) entstehen in der Release-Pipeline im Docker-Modus.
-- Nachweis ist `make gates` im Modus der Umgebung. Ein Teillauf (`PKG` oder `RUN` bei `make test` im lokalen Modus, nur auf der Kommandozeile gültig) ist kein Nachweis; `gates`, `record-gates`, `ci` und `fullbuild` lehnen ihn ab. Im Docker-Modus sind `PKG` und `RUN` ein Fehler.
+- **Der Bau-Pfad.** Das Repo trägt einen Bau-Pfad: die Rezepte von `scripts/bau.sh` laufen in der Devcontainer-Umgebung (`BUILD_MODE=local` ist der einzige Modus-Wert, eine zweite Modus-Entscheidung entfällt). Die Gatter tragen ihre Ebenen je Messbasis: `lint`/`test`/`coverage`/`docs-check`/`baseline-verify`/`ablage-pruefung` laufen im Devcontainer-Container — dessen verschachtelter Daemon trägt die Container-Züge der Dokumentation (Messung M2/M3) — und `test-docker` läuft an dem Docker, der den Devcontainer-Container erzeugt (Sockelform; der verschachtelte Daemon trägt die docker-getaggten Tests nicht — Messung M4). `modus-pruefung` entfällt; ein Aufruf mit dem entfallenen Schalter (`BUILD_MODE=docker`) ist ein unbekanntes Verhalten und endet mit dem make-Fehler der ungeöffneten Variable.
+- **Voraussetzung am Host:** Docker Engine und `make` (Bestand). `make` ist ein bewusster Carveout zu [`LH-NFA-PORT-002`](lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) (weit verbreitet, einzige zusätzliche Host-Abhängigkeit neben Docker); der Host-Vertrag senkt sich mit dem Bau-Pfad nicht. Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden; die Bau-Nutzung läuft über den Devcontainer des Repos, dessen Image (`.devcontainer/Dockerfile`) die gepinnte Toolchain trägt, und die CI baut dieses Image je `gates`-Job-Beginn (`docker build -f .devcontainer/Dockerfile .devcontainer`) und ruft `make gates` in einem privilegierten `docker run` des Images auf (Muster je Messbasis M3/M5).
+- Die Befehle von `compile`, `lint`, `test` und `coverage` stehen in `scripts/bau.sh`, das die Targets des Makefiles (`compile`, `lint`, `test`, `coverage-gate`) und die gleichnamigen Stages des Multi-Stage-Dockerfiles rufen; die Stages bleiben je per `docker build --target <stage>` einzeln baubar ([`SPEC-029`](#spec-029--mindestumfang-des-multi-stage-dockerfiles)). Wer Container startet, braucht einen Docker-Daemon: im Devcontainer trägt ihn der verschachtelte Daemon, an Host und CI der Docker der Umgebung. Die Träger-Ebene je Gatter mit Beleg:
+
+  | Gatter | Ebene (je Messbasis) | Beleg |
+  |---|---|---|
+  | `lint`, `test`, `coverage-gate`, `docs-check`, `baseline-verify`, `ablage-pruefung` (die `make gates`-Kette) | Devcontainer-Container; der verschachtelte Daemon trägt den Container-Zug von `docs-check` | `make gates` im Container, Messung M3 ([`roh-gates.txt`](../docs/messungen/slice-v1-bau-nur-devcontainer/roh-gates.txt)); der CI-Lauf je Job (`ci.yml::gates` baut das Image und ruft `make gates` im Container), M5-Analogie der [`roh-analogie.txt`](../docs/messungen/slice-v1-bau-nur-devcontainer/roh-analogie.txt) |
+  | `test-docker` | Sockelform an dem Docker, der den Devcontainer-Container erzeugt | der CI-Lauf je Job (`integration.yml::integration-docker` am Runner-Docker, Socket-Form), M5-Analogie der [`roh-analogie.txt`](../docs/messungen/slice-v1-bau-nur-devcontainer/roh-analogie.txt); Grenze: Messung M4 ([`roh-test-docker.txt`](../docs/messungen/slice-v1-bau-nur-devcontainer/roh-test-docker.txt)) — im verschachtelten Daemon 12 Fehlschläge von 1771, die Tests dort nicht als Nachweis zugesagt |
+  | `govulncheck`, `image-scan`, `build`, `run`, `build-binaries`, `packages`, `docs-check` am Docker der Umgebung | Docker-Container am aufrufenden Docker | `docker run`- und `docker build`-Form der Targets; die CI-Jobs (`ci.yml::security-gates`/`ci.yml::image-scan`, [`publish.yml`](../.github/workflows/publish.yml)) |
+  | `modus-pruefung` | entfallen | Messung M2 ([`roh-dind.txt`](../docs/messungen/slice-v1-bau-nur-devcontainer/roh-dind.txt)): die Prüfung lief im verbleibenden Stand OK; sie entfällt, weil die Frage, die sie trug (die zwei Modi), entfällt |
+
+- Release-Artefakte (Binaries, Pakete, Images) entstehen in der Release-Pipeline am Runtime-Image-Pfad (`build`, `build-binaries`, `packages`, je Docker-Container).
+- Nachweis ist `make gates` im Devcontainer-Container. Ein Teillauf (`PKG` oder `RUN` bei `make test`, nur auf der Kommandozeile gültig) ist kein Nachweis; `gates`, `record-gates`, `ci` und `fullbuild` lehnen ihn ab.
 - Carveouts (z. B. ein Bash-Skript, das nicht containerisiert wird) sind im `Makefile`-Header explizit zu dokumentieren.
 
 ### SPEC-032 — Bootstrap-Verhalten der Coverage-Stage
@@ -1281,17 +1289,17 @@ Pflicht-Eigenschaften:
 - `help`-Target mit Übersicht über alle verfügbaren Targets
 - Variablen mit `?=`-Defaults für Overridability (`IMAGE`, `GO_VERSION`, `GOLANGCI_LINT_VERSION`, `THRESHOLD`, `BUILD_MODE`)
 
-MVP-Pflicht-Targets (die Spalte *Zweck* nennt den Docker-Modus; der lokale Modus nach [`SPEC-031`](#spec-031--regeln-des-docker-only-workflows) führt für die Targets `deps`, `compile`, `lint`, `test` und `coverage-gate` stattdessen die in der Klammer genannten Befehle aus):
+MVP-Pflicht-Targets (die Spalte *Zweck* nennt den Lauf je [`SPEC-031`](#spec-031--regeln-des-docker-only-workflows); die Targets `deps`, `compile`, `lint`, `test` und `coverage-gate` führen die in der Klammer genannten Befehle mit der Toolchain der Devcontainer-Umgebung aus):
 
 | Target          | Zweck                                                           |
 | --------------- | --------------------------------------------------------------- |
 | `help`          | Übersicht aller Targets                                         |
-| `deps`          | `docker build --target deps` (lokal: `go mod download`)         |
-| `compile`       | `docker build --target compile` (lokal: `scripts/bau.sh compile`) |
-| `lint`          | `docker build --target lint` (lokal: `scripts/bau.sh lint`)     |
-| `test`          | `docker build --target test` (lokal: `scripts/bau.sh test`)     |
+| `deps`          | `go mod download` (das Devcontainer-Umfeld; die Stage `deps` bleibt ein einzelner `docker build`-Zielort)         |
+| `compile`       | `scripts/bau.sh compile` (das Devcontainer-Umfeld; die Stage `compile` ruft dasselbe) |
+| `lint`          | `scripts/bau.sh lint` (das Devcontainer-Umfeld; die Stage `lint` ruft dasselbe)     |
+| `test`          | `scripts/bau.sh test` (das Devcontainer-Umfeld; die Stage `test` ruft dasselbe; `PKG=…`/`RUN=…` = Teillauf, kein Nachweis)     |
 | `coverage`      | Alias auf `coverage-gate`                                       |
-| `coverage-gate` | `docker build --target coverage --build-arg COVERAGE_THRESHOLD` (lokal: `scripts/bau.sh coverage`) |
+| `coverage-gate` | `scripts/bau.sh coverage` mit `COVERAGE_THRESHOLD` (das Devcontainer-Umfeld; die Stage `coverage` ruft dasselbe) |
 | `build`         | `docker build --target runtime`                                 |
 | `run`           | `docker run --rm <image> --help` (Smoketest); Dependency: `build` |
 | `clean`         | lokale Artefakte und gebaute Images entfernen                   |

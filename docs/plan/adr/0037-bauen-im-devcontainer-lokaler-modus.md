@@ -87,6 +87,7 @@ Wenn die CI auf das Toolchain-Image umgestellt wird (Option E), ersetzt diese En
 |---|---|---|
 | 2026-10-31 | Proposed | — |
 | 2026-10-31 | Accepted | Entscheidung des Projektinhabers im Gespräch am 2026-10-31 |
+| 2026-11-03 | Superseded by [ADR-0043](0043-nur-devcontainer-bau-pfad.md) — nur Devcontainer als Bau-Pfad; die Status-Zeile dieses ADRs trägt den Stand `Accepted` (die Datei ist unverändert Accepted-geparkt), die Ablösung tragen diese Zeile, die Index-Zeile und die `Supersedes`-Kante des Nachfolgers | [ADR-0043](0043-nur-devcontainer-bau-pfad.md) §Verhältnis |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**.
 Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit

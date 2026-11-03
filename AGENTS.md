@@ -74,18 +74,19 @@ In dieser Reihenfolge lesen und auflösen:
 ### 3.1 Docker-only
 
 `u-boot` hat keinen Host-Go-Toolchain-Vertrag. Build, Lint, Tests, Coverage
-und Security-Gates laufen über `make`. Am Host und in der CI nutzt `make`
-Docker (Docker-Modus, `BUILD_MODE=docker`, der Standard); der Host braucht nur
-Docker und GNU `make`. Im Devcontainer des Repos (`BUILD_MODE=local`) führen
-dieselben Targets ihre Befehle mit der dort installierten, gepinnten Toolchain
-aus; Targets, die Container starten (etwa `docs-check`), nutzen den dort
-verschachtelten Docker-Daemon ([`SPEC-031`](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows),
-[`ADR-0037`](docs/plan/adr/0037-bauen-im-devcontainer-lokaler-modus.md)). Der
-Nachweis für einen Handoff ist `make gates` im Modus der Umgebung; ein Teillauf
+und Security-Gates laufen über `make`. Der Host braucht Docker und GNU `make`
+(Bestand); die Bau-Nutzung läuft über den Devcontainer des Repos: die Rezepte
+von `scripts/bau.sh` sind der einzige Pfad; `make test-docker` bindet an den
+Docker-Daemon außerhalb des Devcontainer-Containers (Sockelform, die
+Bau-Gegenprobe der CI), die übrigen Gatter laufen im Container — der dort
+verschachtelte Docker-Daemon trägt ihre Container-Züge (etwa `docs-check`)
+([`SPEC-031`](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows),
+[`ADR-0043`](docs/plan/adr/0043-nur-devcontainer-bau-pfad.md)). Der Nachweis
+für einen Handoff ist `make gates` im Devcontainer-Container; ein Teillauf
 (`PKG`, `RUN`) zählt nicht.
 
 **Falsch:** `go test ./...` oder `golangci-lint run` direkt (am Host oder im Devcontainer) als Nachweis für einen Handoff.
-**Richtig:** `make test`, `make lint`, `make gates`.
+**Richtig:** `make test`, `make lint`, `make gates` — ausgeführt im Devcontainer-Container (`make dev-shell` oder `docker run` auf dem Devcontainer-Image).
 
 **Begründung:** Toolchain-Reproduzierbarkeit + Supply-Chain-Defense. Lokale
 Host-Toolchain-Befehle dürfen nicht als alleiniger Nachweis für einen Handoff
