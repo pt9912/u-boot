@@ -92,7 +92,7 @@ ablage-pruefung-test: 26 Faelle, 0 Fehlschlaege Exit 0 je vor- und nach-commit (
 
 **Beobachtungs-Register**: keine Beobachtung angefallen in diesem Vorgang; der Beleg der Prüflinsen ([BEO-DOK/plan-aussage-ueber-code](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) und [BEO-DOK/zusage-weiter-als-messung](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)) bleibt je „kein Fund" — die zustandsmarker-Instanz der Roadmap-Zeile (V-4 INFO, „d-check-Bump folgt je Umsetzung" abgelaufen) ist in der Berichtigung getragen und trägt keine neue Zählung (die Zeile ist je Marker-Regel der Roadmap, nicht des Plans).
 
-**Carveouts**: keiner. **Folge-Slice:** der Übergang [slice-v1-bau-nur-devcontainer](../open/slice-v1-bau-nur-devcontainer.md) liegt in open/ (drei Entscheidungen bejaht 2026-11-03, Start je WIP); der Registry-Tarball-Weg bleibt Grenze. **Weiter offen:** nichts aus der DoD.
+**Carveouts**: keiner. **Folge-Slice:** der Übergang [slice-v1-bau-nur-devcontainer](../next/slice-v1-bau-nur-devcontainer.md) liegt in open/ (drei Entscheidungen bejaht 2026-11-03, Start je WIP); der Registry-Tarball-Weg bleibt Grenze. **Weiter offen:** nichts aus der DoD.
 
 **Drei Paarungen:** Anker — kein Eintrag mit Zielort-Feld; nichts verkörpert (die Gatter-Läufe tragen die Regeln, die der Inventur-Absatz der Lastenheft nennt) · Folge-Slice — der devcontainer-Übergang ist eine Datei in open/ (Verzeichnis-Lesung) · Register — keine neue Kennung („keine Beobachtung", die Lesung oben).
 
