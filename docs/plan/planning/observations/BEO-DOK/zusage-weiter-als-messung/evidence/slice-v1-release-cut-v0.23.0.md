@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-release-cut-v0.23.0`](../../../../done/slice-v1-release-cut-v0.23.0.md)
+**Fund:** Review-Report [`2026-11-04-slice-v1-release-cut-v0.23.0`](../../../../../../reviews/2026-11-04-slice-v1-release-cut-v0.23.0.md) F-1 (LOW): Der CHANGELOG-Lead sagte „In a fresh clone the file is missing until `u-boot generate devcontainer` runs once“ ohne die Bedingung (nur wenn die Datei nicht getrackt ist, wie bei der `.gitignore` von `u-boot init`) und ohne das Messmittel des Abbruchs (`docker run`, Exit-Code `125`). Auf `main` berichtigt, der veröffentlichte Tag trägt den früheren Wortlaut.
+
+**Beleg-Qualität:** belegt durch Review- und Verification-Report. Der Plan hatte das Risiko vorab benannt (§6, erstes Risiko) und die Klasse des Cuts `v0.22.0` geprüft; ein Befund geringerer Schwere trat dennoch auf. Keine Schärfung entschieden.
