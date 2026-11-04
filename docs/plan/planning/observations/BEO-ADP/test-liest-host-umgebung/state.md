@@ -1,0 +1,1 @@
+**Stand:** offen — Trigger: ein weiterer Test, der Umgebungsvariablen oder die Git-Konfiguration des Hosts liest, ohne sie zu pinnen, oder ein Test, der einen Wert aus der Umgebung in einer Fehlermeldung ausgibt.
