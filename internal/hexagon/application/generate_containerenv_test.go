@@ -465,23 +465,25 @@ func TestGenerateDevcontainer_ContainerEnv_EscapesJSONContent(t *testing.T) {
 	}
 }
 
-// The own devcontainer of the u-boot project is converted: the three
-// values of the hand-written ENV rest behind its managed block
-// (BUILD_MODE, GOFLAGS, GOTOOLCHAIN) move into `devcontainer.containerEnv`
-// of the project config, their lines render into the `containerEnv`
-// object of the generated .devcontainer/devcontainer.json beside the two
-// cache values, and the Dockerfile rest carries none of them.
+// The own devcontainer of the u-boot project carries its two project values
+// (GOFLAGS, GOTOOLCHAIN) in `devcontainer.containerEnv` of the project
+// config, their lines render into the `containerEnv` object of the generated
+// .devcontainer/devcontainer.json beside the two cache values, and the
+// Dockerfile rest carries none of them. BUILD_MODE is not set anywhere in the
+// project config: repo.mk reads an unset value as `local`.
 func TestOwnDevcontainer_ProjectValuesUnderContainerEnv(t *testing.T) {
 	t.Parallel()
 	yaml := mustReadRepoFile(t, "u-boot.yaml")
 	for _, want := range []string{
 		"containerEnv:",
-		"BUILD_MODE: local",
 		"GOTOOLCHAIN: local",
 	} {
 		if !strings.Contains(yaml, want) {
 			t.Errorf("u-boot.yaml of the project lacks %q:\n%s", want, yaml)
 		}
+	}
+	if strings.Contains(yaml, "BUILD_MODE") {
+		t.Errorf("u-boot.yaml of the project sets BUILD_MODE, which repo.mk defaults to local:\n%s", yaml)
 	}
 	if !strings.Contains(yaml, `GOFLAGS: "-mod=readonly -buildvcs=false"`) &&
 		!strings.Contains(yaml, "GOFLAGS: -mod=readonly -buildvcs=false") {
@@ -491,7 +493,6 @@ func TestOwnDevcontainer_ProjectValuesUnderContainerEnv(t *testing.T) {
 	assertContainerEnvJSON(t, []byte(jsonBody), map[string]string{
 		"GOCACHE":     "${containerWorkspaceFolder}/.cache/go-build",
 		"GOMODCACHE":  "${containerWorkspaceFolder}/.cache/go-mod",
-		"BUILD_MODE":  "local",
 		"GOFLAGS":     "-mod=readonly -buildvcs=false",
 		"GOTOOLCHAIN": "local",
 	})
