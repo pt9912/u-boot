@@ -56,6 +56,20 @@ gemessen). Dasselbe gilt für jedes Nutzerprojekt.
   (`postStartCommand`, Startscript `u-boot-docker-init`, Policy `warn` —
   fällt der Start aus, meldet der Status `fallback` und `u-boot doctor`
   zeigt ihn).
+- Vor dem Start des Daemons baut `u-boot-docker-init` die cgroup des
+  Containers um ([`SPEC-056`](../../spec/spezifikation.md#spec-056--cgroup-umbau-im-startscript-docker-initsh-bedingung-schritte-und-fehlschlag),
+  [`ADR-0045`](../plan/adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md)):
+  nur bei cgroup v2 und nur, wenn `memory` noch nicht in
+  `cgroup.subtree_control` der Wurzel steht, entfernt es die Controller aus
+  `subtree_control`, verschiebt alle Prozesse der Wurzel nach `init` und
+  aktiviert alle Controller; ein verschachteltes `docker run --memory/--cpus`
+  kann seine Grenzen dann anwenden.
+  Ein Fehlschlag steht als Zeile `u-boot sandbox: cgroup preparation failed
+  (…)` im Protokoll des Start-Hooks, nicht in `u-boot doctor`. Ob der Zustand
+  nach einer Neuanlage (`make dev-up RECREATE=1`, nur der Projektinhaber löst
+  sie aus) hergestellt ist, `docker exec` und neue Terminals danach
+  funktionieren und die Erweiterung ihre verschobenen Prozesse verkraftet,
+  ist nicht gemessen; die Messung steht aus.
 
 ## Gatter im Container
 

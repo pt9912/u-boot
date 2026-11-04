@@ -758,7 +758,13 @@ ergeben sich aus den aktivierten Diensten.
   Zugesagt ist die Erzeugung der Optionen. Dass die Grenze im gestarteten Container
   ankommt, belegen Tests auf einem Linux-Host (`amd64`) mit lokaler, nicht
   verschachtelter Docker-Engine, im Standardprofil und im Sandbox-Profil mit
-  `nestedRuntime: docker`. Nicht zugesagt sind die Wirkung auf
+  `nestedRuntime: docker`. Bei `nestedRuntime: docker` baut das Startscript des
+  Daemons vor dem Start des Daemons die cgroup des Containers um, wenn der
+  Arbeitsspeicher dort noch nicht an Unter-Gruppen weitergegeben wird; das
+  verschachtelte Docker kann Grenzen für seine Container dann anwenden. Scheitert ein
+  Schritt, steht eine Zeile `u-boot sandbox: cgroup preparation failed (…)` im
+  Protokoll des Startscripts; der Daemon startet trotzdem, Exit-Code und Status
+  bleiben die des Daemon-Starts. Nicht zugesagt sind die Wirkung auf
   das verschachtelte Docker, das Verhalten bei einem zu kleinen Limit, andere Hosts
   und Engines (Docker Desktop, Colima, Podman) und die Summe mehrerer Instanzen.
 - Umgebungsvariablen aus einer Datei: `u-boot generate devcontainer` (und
