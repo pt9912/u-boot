@@ -1,4 +1,4 @@
-# Slice V1: `.devcontainer/devcontainer.env` als `--env-file` des Devcontainers — `generate devcontainer` legt die Datei und eine Vorlage an, `runArgs` bindet sie ein, `doctor` prüft die Ignorierung
+# Slice V1: `.devcontainer/devcontainer.env` als `--env-file` des Devcontainers — `generate devcontainer` legt die Datei und eine Vorlage an, `runArgs` bindet sie ein, `doctor` meldet, wenn die Datei fehlt
 
 **Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
@@ -57,9 +57,9 @@ in `runArgs`; Docker setzt die Variablen beim Start des Containers. Dazu:
   Platzhalter wie `CHANGEME_…`, nie reale Secrets, [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)).
 - Die `.gitignore` des Projekts ignoriert `.devcontainer/devcontainer.env`; die
   `.example`-Datei bleibt getrackt.
-- `u-boot doctor` meldet `warn`, wenn `devcontainer.env` getrackt oder nicht
-  ignoriert ist (Befund der Quelle von Zugangsdaten, wie die Prüfung in
-  [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)).
+- `u-boot doctor` meldet `warn`, wenn `devcontainer.env` fehlt, die
+  `devcontainer.json` die Zeile aber trägt (Quelle: [`SPEC-055`](../../../../spec/spezifikation.md#spec-055--umgebungsdatei-des-devcontainers-pfad-inhalt-reihenfolge-in-runargs-anlage-und-prüfung)
+  und [`ADR-0044`](../../adr/0044-devcontainer-umgebungsdatei-env-file.md)).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -67,7 +67,7 @@ in `runArgs`; Docker setzt die Variablen beim Start des Containers. Dazu:
   `${localEnv:NAME}`): Der Projektinhaber hat `--env-file` gewählt; ein
   `localEnv`-Fallback wäre ein zweiter Mechanismus mit eigener Rangfolge.
 - **Kein Auflösen von Werten in Ausgaben:** `u-boot` liest den Inhalt der Datei nicht
-  und gibt keinen Wert aus; `doctor` prüft nur Existenz, Git-Status und Ignorierung.
+  und gibt keinen Wert aus; `doctor` prüft nur die Existenz (Quelle: [`SPEC-055`](../../../../spec/spezifikation.md#spec-055--umgebungsdatei-des-devcontainers-pfad-inhalt-reihenfolge-in-runargs-anlage-und-prüfung)).
 - **Keine Änderung der bestehenden `remoteEnv`-Referenzen** (`GIT_TOKEN`, Agent-Schlüssel):
   ihr Pfad über `${localEnv:<NAME>}` bleibt; die neue Datei ist ein zusätzlicher,
   benutzergeführter Weg.

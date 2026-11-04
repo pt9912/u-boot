@@ -30,12 +30,15 @@ und stoppen“), Absatz „Mehrere Devcontainer je Projekt (Instanzen)“ —
 [Benutzerhandbuch](../user/benutzerhandbuch.md#den-devcontainer-ohne-editor-starten-und-stoppen);
 die Make-Targets reichen die Werte unverändert als Flaggen durch.
 
-**Frischer Klon dieses Repos.** `.devcontainer/devcontainer.json` verweist auf
-`.devcontainer/devcontainer.env`; die Datei ist ignoriert und liegt nicht im
-Klon. Vor dem ersten `make dev-up` oder `make dev-shell` einmal
-`u-boot generate devcontainer` ausführen: Es legt die Datei ohne Werte an,
-sonst bricht Docker den Start ab (Exit-Code 125, mit `docker run` gemessen).
-Die Vorlage `.devcontainer/devcontainer.env.example` liegt im Repo.
+**Umgebungsdatei dieses Repos.** `.devcontainer/devcontainer.json` verweist
+auf `.devcontainer/devcontainer.env`. Die Datei dieses Repos ist bewusst
+getrackt und enthält nur Kommentare; ein frischer Klon trägt sie, ein
+`u-boot generate devcontainer` ist dafür nicht nötig. Eigene Variablen gehören
+nicht hinein (lokale Änderungen nicht committen); die Vorlage
+`.devcontainer/devcontainer.env.example` liegt im Repo. Für Nutzerprojekte
+gilt: deren Datei ist ignoriert und fehlt im frischen Klon, dort einmal
+`u-boot generate devcontainer` vor dem Start, sonst bricht Docker den Start ab
+(Exit-Code 125, mit `docker run` gemessen).
 
 ## Voraussetzungen und Umgebung
 
