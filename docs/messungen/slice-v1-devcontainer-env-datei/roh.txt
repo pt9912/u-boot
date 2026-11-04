@@ -1,0 +1,20 @@
+datum: 2026-11-04T11:37Z
+engine: 29.9.3 linux/amd64
+image: busybox:1.36
+
+== E1 fehlende Datei
+docker: --env-file: open <tmp>/fehlt.env: no such file or directory
+exit=125
+== E2 Datei nur mit Kommentar
+ok
+exit=0
+== E3 Werte: Leerzeichen, Anfuehrungszeichen, leerer Wert, Name ohne Wert
+A=[eins] B=[zwei woerter] Q=["mit anfuehrung"] EMPTY=[]
+NOVAL gesetzt: 0
+== E4 Praefix export
+docker: --env-file: invalid env file (<tmp>/export.env): variable 'export DEMO_X' contains whitespaces
+exit=125
+== E5 relativer Pfad, Arbeitsverzeichnis ohne die Datei
+docker: --env-file: open rel/a.env: no such file or directory
+== E6 Vorrang von -e gegen die Datei
+A=[cli]
