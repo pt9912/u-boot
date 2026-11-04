@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-release-cut-v0.22.0 — 2026-11-04
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
-**Gegenstand:** [`slice-v1-release-cut-v0.22.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.22.0.md) — Cut-Commit `f1711f3a` (Tag `v0.22.0`, veröffentlicht), Review-Fix-Runde `353bef50`; Abgleichstand **nach der letzten Fix-Runde = `353bef50`** (= Repo-Tip, Arbeitsbaum sauber).
+**Gegenstand:** [`slice-v1-release-cut-v0.22.0`](../plan/planning/done/slice-v1-release-cut-v0.22.0.md) — Cut-Commit `f1711f3a` (Tag `v0.22.0`, veröffentlicht), Review-Fix-Runde `353bef50`; Abgleichstand **nach der letzten Fix-Runde = `353bef50`** (= Repo-Tip, Arbeitsbaum sauber).
 
 **Eingangs-Kontext:**
 
@@ -14,7 +14,7 @@
 
 ## Scope
 
-- Slice: [`slice-v1-release-cut-v0.22.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.22.0.md)
+- Slice: [`slice-v1-release-cut-v0.22.0`](../plan/planning/done/slice-v1-release-cut-v0.22.0.md)
 - IDs: [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-FA-DEV-011`](../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette), [`ADR-0043`](../plan/adr/0043-nur-devcontainer-bau-pfad.md)
 - Artefakte: `CHANGELOG.md`, `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, Roadmap
 
