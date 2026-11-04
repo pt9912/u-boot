@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-[`slice-v1-devcontainer-env-datei`](slice-v1-devcontainer-env-datei.md) liegt in `in-progress/` — `.devcontainer/devcontainer.env` als `--env-file` des Devcontainers: Messung der Docker-Fakten, Lastenheft-CR zur Bestätigung des Projektinhabers, danach Generator, `doctor` und Doku.
+[`slice-v1-devcontainer-env-datei`](../done/slice-v1-devcontainer-env-datei.md) liegt in `in-progress/` — `.devcontainer/devcontainer.env` als `--env-file` des Devcontainers: Messung der Docker-Fakten, Lastenheft-CR zur Bestätigung des Projektinhabers, danach Generator, `doctor` und Doku.
 
 ## Nächste Wellen
 

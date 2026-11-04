@@ -1,6 +1,6 @@
 # Messung: `docker run --env-file` — Eigenschaften, auf die `.devcontainer/devcontainer.env` sich stützt
 
-Vorgang: [`slice-v1-devcontainer-env-datei`](../../plan/planning/in-progress/slice-v1-devcontainer-env-datei.md). Skript: [`tools/messung/devcontainer-env-datei/messen.sh`](../../../tools/messung/devcontainer-env-datei/messen.sh); Rohdaten: [`roh.txt`](roh.txt).
+Vorgang: [`slice-v1-devcontainer-env-datei`](../../plan/planning/done/slice-v1-devcontainer-env-datei.md). Skript: [`tools/messung/devcontainer-env-datei/messen.sh`](../../../tools/messung/devcontainer-env-datei/messen.sh); Rohdaten: [`roh.txt`](roh.txt).
 Aufruf aus der Repo-Wurzel: `bash tools/messung/devcontainer-env-datei/messen.sh > <dieses Verzeichnis>/roh.txt`.
 
 ## Messstand

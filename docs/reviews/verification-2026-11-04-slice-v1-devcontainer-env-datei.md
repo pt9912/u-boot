@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD, Spec und Sensors? Form nach [`harness/verification.md`](../../harness/verification.md).
 
-**Gegenstand:** [`slice-v1-devcontainer-env-datei`](../plan/planning/in-progress/slice-v1-devcontainer-env-datei.md), Stand HEAD `615e8b3b`. Vertrag: Lastenheft 0.35.0 (`edde2281`, in place geändert mit `08d1e361`), [`ADR-0044`](../plan/adr/0044-devcontainer-umgebungsdatei-env-file.md) und [`SPEC-055`](../../spec/spezifikation.md#spec-055--umgebungsdatei-des-devcontainers-pfad-inhalt-reihenfolge-in-runargs-anlage-und-prüfung) (`ea9cd144`, ADR berichtigt `278fb1b7`), Code und Tests `af32da3b`, Doku `c7799fd7`/`734e36e3`, eigenes Projekt `f7728c34`, getrackte Datei `c7fae976`, Slice und Index `615e8b3b`. Maßstab: Slice §1, §2, §3, §6. Review-Report: [`2026-11-04-slice-v1-devcontainer-env-datei.md`](2026-11-04-slice-v1-devcontainer-env-datei.md) (2 HIGH, 2 MEDIUM, 3 LOW, 2 INFO).
+**Gegenstand:** [`slice-v1-devcontainer-env-datei`](../plan/planning/done/slice-v1-devcontainer-env-datei.md), Stand HEAD `615e8b3b`. Vertrag: Lastenheft 0.35.0 (`edde2281`, in place geändert mit `08d1e361`), [`ADR-0044`](../plan/adr/0044-devcontainer-umgebungsdatei-env-file.md) und [`SPEC-055`](../../spec/spezifikation.md#spec-055--umgebungsdatei-des-devcontainers-pfad-inhalt-reihenfolge-in-runargs-anlage-und-prüfung) (`ea9cd144`, ADR berichtigt `278fb1b7`), Code und Tests `af32da3b`, Doku `c7799fd7`/`734e36e3`, eigenes Projekt `f7728c34`, getrackte Datei `c7fae976`, Slice und Index `615e8b3b`. Maßstab: Slice §1, §2, §3, §6. Review-Report: [`2026-11-04-slice-v1-devcontainer-env-datei.md`](2026-11-04-slice-v1-devcontainer-env-datei.md) (2 HIGH, 2 MEDIUM, 3 LOW, 2 INFO).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-env-datei`](../plan/planning/in-progress/slice-v1-devcontainer-env-datei.md)
+- Slice: [`slice-v1-devcontainer-env-datei`](../plan/planning/done/slice-v1-devcontainer-env-datei.md)
 - IDs: [`LH-FA-DEV-012`](../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`LH-FA-INIT-005`](../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz), [`ADR-0044`](../plan/adr/0044-devcontainer-umgebungsdatei-env-file.md), [`SPEC-055`](../../spec/spezifikation.md#spec-055--umgebungsdatei-des-devcontainers-pfad-inhalt-reihenfolge-in-runargs-anlage-und-prüfung)
 - Artefakte: 46 Dateien in `git diff --stat ea9cd144~1..HEAD` (1240 Einfügungen, 115 Löschungen).
 
