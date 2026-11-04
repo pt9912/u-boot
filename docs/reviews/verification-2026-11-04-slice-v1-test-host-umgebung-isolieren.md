@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-test-host-umgebung-isolieren — 2026-11-04
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
-**Gegenstand:** [`slice-v1-test-host-umgebung-isolieren`](../plan/planning/in-progress/slice-v1-test-host-umgebung-isolieren.md) — Code-Commit `4995f65e`, Review-Fix-Runde `e3547e47`; Abgleichstand **nach der letzten Fix-Runde = `e3547e47`** (= Repo-Tip, Arbeitsbaum sauber). Der Backlog-Anlage-Commit `09d765f0` (Slice-Datei, Beobachtung) und die vier Move-Commits (`e9ceb890`, `60d3139e`, `1b7275ac`, `9d3f3eca`) sind Lifecycle-Bewegungen.
+**Gegenstand:** [`slice-v1-test-host-umgebung-isolieren`](../plan/planning/done/slice-v1-test-host-umgebung-isolieren.md) — Code-Commit `4995f65e`, Review-Fix-Runde `e3547e47`; Abgleichstand **nach der letzten Fix-Runde = `e3547e47`** (= Repo-Tip, Arbeitsbaum sauber). Der Backlog-Anlage-Commit `09d765f0` (Slice-Datei, Beobachtung) und die vier Move-Commits (`e9ceb890`, `60d3139e`, `1b7275ac`, `9d3f3eca`) sind Lifecycle-Bewegungen.
 
 **Eingangs-Kontext:**
 
@@ -14,7 +14,7 @@
 
 ## Scope
 
-- Slice: [`slice-v1-test-host-umgebung-isolieren`](../plan/planning/in-progress/slice-v1-test-host-umgebung-isolieren.md)
+- Slice: [`slice-v1-test-host-umgebung-isolieren`](../plan/planning/done/slice-v1-test-host-umgebung-isolieren.md)
 - IDs: [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten); keine Spec-, ADR- oder Produktcode-Änderung
 - Artefakte: `internal/adapter/driven/git/hostsource_test.go`, `internal/e2e/devcontainer_shell_docker_test.go` (Build-Tag `docker`)
 

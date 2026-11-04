@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Diff gegen Plan + Konventionen.
 
-**Gegenstand:** Commit `4995f65e` (HEAD), Slice [`slice-v1-test-host-umgebung-isolieren`](../plan/planning/in-progress/slice-v1-test-host-umgebung-isolieren.md).
+**Gegenstand:** Commit `4995f65e` (HEAD), Slice [`slice-v1-test-host-umgebung-isolieren`](../plan/planning/done/slice-v1-test-host-umgebung-isolieren.md).
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-11-04
 
 **Eingangs-Kontext:**
 
-- Slice-Plan [`slice-v1-test-host-umgebung-isolieren`](../plan/planning/in-progress/slice-v1-test-host-umgebung-isolieren.md) (§3, §6)
+- Slice-Plan [`slice-v1-test-host-umgebung-isolieren`](../plan/planning/done/slice-v1-test-host-umgebung-isolieren.md) (§3, §6)
 - [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)
 - `AGENTS.md` §3.7, §3.9, §3.10
 - `harness/review.md`, `harness/conventions.md` (Sub-Area ADP, E2E: Greenfield)
@@ -22,7 +22,7 @@
 |---|---|---|---|---|---|---|
 | F-1 | LOW | `isolateHostEnv` pinnt `GIT_TOKEN`, `GIT_CONFIG_GLOBAL` und `GIT_CONFIG_NOSYSTEM`, nicht aber die übrigen Variablen, die `git config` und `git init` lesen (`GIT_DIR`, `GIT_WORK_TREE`, `GIT_CONFIG_COUNT`/`GIT_CONFIG_KEY_<n>`/`GIT_CONFIG_VALUE_<n>`, `GIT_CONFIG_PARAMETERS`). Läuft die Suite aus einem Git-Hook (der setzt `GIT_DIR`) oder mit injizierter Konfiguration, kommt die Antwort von `ConfigValue` wieder vom Host. | Maintainability; Ziel des Slice (Antworten nie vom Host) | `internal/adapter/driven/git/hostsource_test.go` · `t.Setenv("GIT_CONFIG_NOSYSTEM", "1")` | nein — Review-only (kein Sensor stellt einen Hook-Kontext nach) | Isolations-Helfer pinnt nicht alle gelesenen Git-Variablen |
 | F-2 | LOW | Der Doc-Kommentar `// scriptBinary returns a script that prints its lines …` steht vor `TestHostSource_GitToken_HostVariableWins`. Das Symbol `scriptBinary` gibt es im Baum nicht (die Funktion heißt `writeScript`); der Kommentar liegt direkt unter dem neu eingefügten Helfer. | `AGENTS.md` §3.7, §3.9 (b)/(c) | `hostsource_test.go` · `// scriptBinary returns a script that prints its lines and` | ja — `make gates` fängt es nicht; Review-only | Kommentar verweist auf nicht vorhandenes Symbol |
-| F-3 | LOW | Plan-Tabelle §3 führt `docs/plan/planning/observations/BEO-ADP/test-liest-host-umgebung/` als „neu". `git diff --stat HEAD~1 HEAD` zeigt nur die beiden Testdateien; das Verzeichnis kam mit `09d765f0`, die Evidence-Änderung mit `HEAD~1`. Der Slice-Plan selbst (Statusänderungen) und die Evidence fehlen in der Tabelle, soweit sie der Slice berührt. | `AGENTS.md` §3.10 (Abgleich Tabelle gegen `git diff --stat`) | [`docs/plan/planning/in-progress/slice-v1-test-host-umgebung-isolieren.md`](../plan/planning/in-progress/slice-v1-test-host-umgebung-isolieren.md) · `\| docs/plan/planning/observations/BEO-ADP/test-liest-host-umgebung/ \| neu \|` | nein — Review-only | Plan-Tabelle weicht vom Diff ab |
+| F-3 | LOW | Plan-Tabelle §3 führt `docs/plan/planning/observations/BEO-ADP/test-liest-host-umgebung/` als „neu". `git diff --stat HEAD~1 HEAD` zeigt nur die beiden Testdateien; das Verzeichnis kam mit `09d765f0`, die Evidence-Änderung mit `HEAD~1`. Der Slice-Plan selbst (Statusänderungen) und die Evidence fehlen in der Tabelle, soweit sie der Slice berührt. | `AGENTS.md` §3.10 (Abgleich Tabelle gegen `git diff --stat`) | [`docs/plan/planning/done/slice-v1-test-host-umgebung-isolieren.md`](../plan/planning/done/slice-v1-test-host-umgebung-isolieren.md) · `\| docs/plan/planning/observations/BEO-ADP/test-liest-host-umgebung/ \| neu \|` | nein — Review-only | Plan-Tabelle weicht vom Diff ab |
 | F-4 | INFO | Dasselbe Muster (Meldung gibt eine Ausgabe aus, die den Wert von `GIT_TOKEN` enthalten kann) steht noch in `TestLauncher_Up_…`: `t.Errorf("the environment of the run client = %q, want %q", got, "GIT_TOKEN="+resolved)`. `got` ist die `grep`-Zeile des Prozess-Environments; der Launcher hängt Werte an `os.Environ()` an, ein Host-`GIT_TOKEN` würde im Fehlerfall ausgegeben. Placeholder-Werte der Tests sind kein Leck. Slice §6 nennt „weitere Tests" als nicht gesucht. | [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Wert nicht ausgeben) | `internal/adapter/driven/docker/devcontainer_launcher_test.go` · `the environment of the run client = %q` | Review-only | Fehlermeldung gibt Token-Wert aus |
 | F-5 | INFO | Der geänderte Docker-Test (Build-Tag `docker`) lief nicht; im Slice §6 benannt. Die Meldungsänderung ist kompilierbar gelesen (`out != ""`, `err` bleibt `%v`), aber nicht belegt. Zuständigkeit: Verifier (`make test-docker`). | Slice §6 | `internal/e2e/devcontainer_shell_docker_test.go` · `output set=%t` | `make test-docker` | — |
 
