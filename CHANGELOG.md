@@ -13,7 +13,7 @@ this file is the same format applied to u-boot itself.
 
 ## [0.22.0] - 2026-11-04
 
-Twenty-second release. **How the repository itself is built and gated, not what the product does.** Two changes to the build and gate chain: the devcontainer is the single build path, and the toolchain pins are inventoried and coupled in the gate run. The Go source of the binary is unchanged: no non-test file under `cmd/` or `internal/` differs from 0.21.0; the `go` directive of `go.mod` is raised to `1.27.0` (the toolchain pin stays `1.27.3`).
+Twenty-second release. **How the repository itself is built and gated, not what the product does.** Two changes to the build and gate chain: the devcontainer is the single build path, and the toolchain pins are inventoried and coupled in the gate run. The Go source of the binary is unchanged apart from the version string: the only non-test file under `cmd/` or `internal/` that differs from 0.21.0 is `cmd/uboot/main.go`, and only in `var version`; in `go.mod` the `go` directive is raised to `1.27.0` (the toolchain pin stays `1.27.3`), and `cobra` and `pflag` move from indirect to direct requirements at the same versions.
 
 ### Changed
 

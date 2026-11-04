@@ -14,7 +14,7 @@
 
 **Ziel:** `v0.22.0` liefert den Block `[0.22.0]` des CHANGELOG als GHCR-Image, Binaries, Pakete und Homebrew-Formel. **Push und Tag führt der Hauptagent erst nach ausdrücklicher Freigabe des Projektinhabers**; vorher steht der Stand-Bericht der Vorab-Prüfungen.
 
-**Nummer:** Minor, auf Vorschlag des Hauptagenten, vom Projektinhaber noch nicht bestätigt. Der Release enthält keine Änderung an Nicht-Test-Code in `cmd/` und `internal/` (`git diff v0.21.0..HEAD --stat -- cmd internal ':!*_test.go'` am 2026-11-04: leer); geändert sind Bau-Pfad, CI, Gate-Kette, die `go`-Direktive von `go.mod` (`1.26.0` → `1.27.0`) und Doku. Ob dafür ein Patch-Release (`v0.21.1`) genauer wäre, entscheidet der Projektinhaber.
+**Nummer:** Minor, auf Vorschlag des Hauptagenten, vom Projektinhaber noch nicht bestätigt. Der Release enthält keine Änderung an Nicht-Test-Code in `cmd/` und `internal/` (`git diff v0.21.0..HEAD --stat -- cmd internal ':!*_test.go'` am 2026-11-04 vor dem Cut-Commit: leer; der Cut-Commit ändert dort allein die Versionszeile in `cmd/uboot/main.go`); geändert sind Bau-Pfad, CI, Gate-Kette, die `go`-Direktive von `go.mod` (`1.26.0` → `1.27.0`) und Doku. Ob dafür ein Patch-Release (`v0.21.1`) genauer wäre, entscheidet der Projektinhaber.
 
 **Ausdrücklich NICHT in diesem Slice:** Produktcode · `spec/`-Änderungen (der Cut ändert Release-Dokumente und drei Versionszeilen) · `make test-docker` im Devcontainer dieser Sitzung (rot an der cgroup, [`slice-v1-sandbox-nested-docker-cgroup`](../open/slice-v1-sandbox-nested-docker-cgroup.md); der CI-Lauf `integration-docker` auf dem Push-Tip ist der Nachweis) · Hebung der Pins.
 
@@ -36,9 +36,9 @@
 | `cmd/uboot/main.go`, `repo.mk`, `Dockerfile` | update | `0.21.0-dev` → `0.22.0-dev` je Stelle samt Kommentar (Fundstellen am 2026-11-04 mit `grep` gelesen: `main.go:45`, `repo.mk:67-71`, `Dockerfile:49-53`) |
 | `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md` | update | Status-Zeile (`README.md:10`, `README.de.md:11`), `VERSION=`-Beispiel (`:99`, `:102`), Handbuch-Kopf (Zeilen 3–5), `u-boot version`, `download/v…`, `VERSION=`, Gültigkeitsbereich |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Zeile unter *Offene Wellen* bis zum Tag, danach *Abgeschlossene Wellen* mit Tag-Hash |
-| `docs/plan/planning/open/README.md` | update | Bestand-Zeile dieses Slice |
+| `docs/plan/planning/open/README.md` | kein Diff durch den Cut | die Bestand-Zeile kam mit dem Plan-Commit `slice-v1-release-cut-v0.22.0` (Plan und Bestand-Zeile), nicht mit dem Cut-Commit |
 | dieser Slice | neu / Moves | `make slice-mv` je Lifecycle-Schritt; nach dem Tag nach `done/` |
-| `spec/`, ADRs, `.github/`, `scripts/`, `packaging/`, `Makefile`, `go.mod` | kein Diff | kein Pin-Bump, keine Pipeline-Änderung ([`AGENTS.md`](../../../../AGENTS.md) §3.6) |
+| `spec/`, ADRs, `.github/`, `scripts/`, `packaging/`, `Makefile`, `go.mod` | kein Diff durch den Cut | kein Pin-Bump, keine Pipeline-Änderung ([`AGENTS.md`](../../../../AGENTS.md) §3.6); gegen `v0.21.0` tragen diese Dateien den Diff der zwei Träger-Slices, nicht des Cuts |
 
 **Reihenfolge der Maintainer-Aktionen** (aus `releasing.md` §§4 bis 6): M0 Datum-Abgleich · M-T Tap-Trockenlauf · M1 Push (Freigabe) · M2 CI-Läufe lesen · M4 `gh workflow run tap-check` · M5 Tag (nur nach Freigabe und Stand-Bericht) · M6 Kontrolle §6 · M7 Mac-Probe (Projektinhaber).
 
