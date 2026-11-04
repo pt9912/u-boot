@@ -16,7 +16,7 @@
 
 **Nummer:** Minor, auf Vorschlag des Hauptagenten, vom Projektinhaber noch nicht bestätigt. Der Release enthält keine Änderung an Nicht-Test-Code in `cmd/` und `internal/` (`git diff v0.21.0..HEAD --stat -- cmd internal ':!*_test.go'` am 2026-11-04: leer); geändert sind Bau-Pfad, CI, Gate-Kette, die `go`-Direktive von `go.mod` (`1.26.0` → `1.27.0`) und Doku. Ob dafür ein Patch-Release (`v0.21.1`) genauer wäre, entscheidet der Projektinhaber.
 
-**Ausdrücklich NICHT in diesem Slice:** Produktcode · `spec/`-Änderungen (der Cut ändert Release-Dokumente und drei Versionszeilen) · `make test-docker` im Devcontainer dieser Sitzung (rot an der cgroup, [`slice-v1-sandbox-nested-docker-cgroup`](slice-v1-sandbox-nested-docker-cgroup.md); der CI-Lauf `integration-docker` auf dem Push-Tip ist der Nachweis) · Hebung der Pins.
+**Ausdrücklich NICHT in diesem Slice:** Produktcode · `spec/`-Änderungen (der Cut ändert Release-Dokumente und drei Versionszeilen) · `make test-docker` im Devcontainer dieser Sitzung (rot an der cgroup, [`slice-v1-sandbox-nested-docker-cgroup`](../open/slice-v1-sandbox-nested-docker-cgroup.md); der CI-Lauf `integration-docker` auf dem Push-Tip ist der Nachweis) · Hebung der Pins.
 
 **Vor dem Start zu klären (M-Start):** jeder `[Unreleased]`-Eintrag trägt einen Beleg und einen Commit im Diff `v0.21.0..HEAD` (gelesen: zwei Einträge — Bau-Pfad → [`slice-v1-bau-nur-devcontainer`](../done/slice-v1-bau-nur-devcontainer.md); Pin-Inventur → [`slice-harness-dcheck-pinsync`](../done/slice-harness-dcheck-pinsync.md)).
 
