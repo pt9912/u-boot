@@ -184,6 +184,16 @@ benanntem Volume (Clone aus `origin`), kein Bind-/Socket-Mount, optional
 rootless Podman; siehe
 [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten).
 
+Umgebungsvariablen für den Devcontainer stehen in
+`.devcontainer/devcontainer.env` (`NAME=WERT` pro Zeile, Anführungszeichen
+gehören zum Wert, kein `export`): die erzeugte `devcontainer.json` reicht die
+Datei mit `--env-file` an Docker weiter. `u-boot generate devcontainer` legt
+die Datei nur mit Kommentaren an, wenn sie fehlt, und liest oder ändert eine
+vorhandene nie; `u-boot init` trägt sie in die `.gitignore` ein.
+`.devcontainer/devcontainer.env.example` ist eine versionierte Vorlage mit
+Platzhaltern. `u-boot doctor` warnt, wenn die Datei fehlt. Siehe
+[`docs/user/benutzerhandbuch.md`](docs/user/benutzerhandbuch.md#49-einen-devcontainer-einrichten).
+
 Re-Init auf einem bestehenden Projekt verlangt eine explizite
 Strategie (`--force` für Managed-Block-Edits, `--backup` für
 Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien).

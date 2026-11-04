@@ -180,6 +180,16 @@ workspace cloned from `origin`, no host bind/socket mount, optional rootless
 Podman; see
 [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten).
 
+Environment variables for the devcontainer go into
+`.devcontainer/devcontainer.env` (`NAME=VALUE` per line, quotes are part of
+the value, no `export`): the generated `devcontainer.json` hands the file to
+Docker with `--env-file`. `u-boot generate devcontainer` creates the file with
+comments only when it is missing and never reads or changes an existing one;
+`u-boot init` adds it to `.gitignore`. `.devcontainer/devcontainer.env.example`
+is a tracked template with placeholders. `u-boot doctor` warns when the file is
+missing. See
+[`docs/user/benutzerhandbuch.md`](docs/user/benutzerhandbuch.md#49-einen-devcontainer-einrichten).
+
 Re-init on an existing project requires an explicit strategy
 (`--force` for managed-block edits, `--backup` for full overwrite with
 `.bak[.N]` safety copies).

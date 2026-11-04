@@ -730,7 +730,9 @@ Docker allein mit `u-boot devcontainer up` (siehe unten in diesem Abschnitt).
 
 #### Ergebnis
 
-`.devcontainer/devcontainer.json` und `.devcontainer/Dockerfile` entstehen. Der
+`.devcontainer/devcontainer.json` und `.devcontainer/Dockerfile` entstehen, dazu
+`.devcontainer/devcontainer.env` (Ihre Datei für Umgebungsvariablen, siehe unten)
+und `.devcontainer/devcontainer.env.example` (eine Vorlage). Der
 Container läuft als Benutzer `vscode` (nicht als root). Die Weiterleitungs-Ports
 ergeben sich aus den aktivierten Diensten.
 
@@ -759,6 +761,40 @@ ergeben sich aus den aktivierten Diensten.
   `nestedRuntime: docker`. Nicht zugesagt sind die Wirkung auf
   das verschachtelte Docker, das Verhalten bei einem zu kleinen Limit, andere Hosts
   und Engines (Docker Desktop, Colima, Podman) und die Summe mehrerer Instanzen.
+- Umgebungsvariablen aus einer Datei: `u-boot generate devcontainer` (und
+  `u-boot init --devcontainer`) legt `.devcontainer/devcontainer.env` an, wenn
+  sie fehlt, und trägt als ersten Eintrag von `runArgs` der `devcontainer.json`
+  `--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env` ein, in
+  beiden Profilen. Docker setzt die Variablen der Datei beim Start des
+  Containers. Die neue Datei enthält nur Kommentare. Sie führen Ihre Variablen
+  dort, eine pro Zeile als `NAME=WERT`. Anführungszeichen gehören zum Wert
+  (`NAME="a b"` setzt den Wert samt Anführungszeichen), ein vorangestelltes
+  `export` ist nicht erlaubt und lässt den Start scheitern, `NAME=` setzt einen
+  leeren Wert. Eine mit `-e` gesetzte Variable gewinnt gegen denselben Namen in
+  der Datei. Die Datei gehört Ihnen: `u-boot` liest sie nie, ändert sie nie und
+  legt keine Sicherung von ihr an, auch nicht bei `u-boot init --force --backup`;
+  nur wenn sie fehlt (zum Beispiel nach dem Löschen), legt der nächste Lauf sie
+  wieder an. Fehlt sie, bricht Docker den Start mit Exit-Code 125 ab;
+  `u-boot doctor` warnt davor (`devcontainer.envfile`), wenn die
+  `devcontainer.json` die Zeile trägt, und der Hinweis ist `u-boot generate
+  devcontainer`. Die Prüfung fragt nur, ob die Datei existiert; sie liest den
+  Inhalt nicht und fragt Git nicht. Unter `--quiet` entfällt die Warnung.
+  Die Datei darf Zugangsdaten enthalten und gehört deshalb nicht ins
+  Repository: `u-boot init` trägt `.devcontainer/devcontainer.env` in die
+  erzeugte `.gitignore` ein. In einem Projekt mit eigener `.gitignore` tragen
+  Sie die Zeile selbst ein; `u-boot generate devcontainer` schreibt die
+  `.gitignore` nie, und ob die Datei ignoriert ist, prüft `u-boot` nicht.
+  Die Vorlage `.devcontainer/devcontainer.env.example` trägt Platzhalter
+  (`CHANGEME_…`), nie echte Werte; sie ist ein verwalteter Bereich, den
+  `u-boot generate devcontainer` aktuell hält, und gehört ins Repository.
+  Kopieren Sie die Zeilen, die Sie brauchen, in `devcontainer.env`. Zugesagt
+  sind die erzeugte Konfiguration und die Anlage der Dateien. Dass eine Variable
+  der Datei im gestarteten Container gesetzt ist, belegen Docker-Tests auf
+  einem Linux-Host mit lokaler, nicht verschachtelter Docker-Engine, mit
+  `docker run` und mit `u-boot devcontainer up`. Nicht zugesagt sind der Start
+  über einen Editor, andere Engines und Hosts, die Reihenfolge gegenüber
+  `remoteEnv` und `containerEnv`, Dateien mit Windows-Zeilenenden und
+  mehrzeilige Werte.
 - Eigene Umgebungswerte des Containers tragen Sie pro Eintrag mit
   `u-boot config set devcontainer.containerEnv.<NAME> <Wert>` in die
   Projektkonfiguration ein; `u-boot generate devcontainer` führt sie in das
@@ -1170,7 +1206,7 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `go-toolchain` | Go-Toolchain. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv von `go.dev/dl` (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Download-Listung von `go.dev/dl`). Setzt die beiden Cache-Pfade unter `containerEnv` — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
 | `golangci-lint` | golangci-lint. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv von `github.com/golangci/golangci-lint` (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Checksums-Datei des Releases). Setzt die beiden Cache-Pfade unter `containerEnv` — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
 | `java-toolchain` | JDK 21 der Eclipse-Temurin-Distribution. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv aus der Veröffentlichung der Temurin-Binaries (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Prüfsummen-Dateien desselben Releases, eines je Architektur). Keine `containerEnv`-Werte: `JAVA_HOME` und `PATH` stehen als `ENV`-Zeilen im Block — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
-| `ollama-host` | Anschluss an einen Dienst des Hosts. Kein OCI-Feature und kein Dockerfile-Block: `u-boot generate devcontainer` schreibt genau eine Zeile in `runArgs` der `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, im Standard- und im Sandbox-Profil, und weist den Anschluss beim Erzeugen aus (im Sandbox-Profil als Sicherheitslockerung, auch unter `--quiet`). `u-boot` startet keinen Relay, setzt keine Variable und trägt keinen Host in die Egress-Liste ein; keine Optionen, `version` nur zusammen mit `source` (siehe [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)) |
+| `ollama-host` | Anschluss an einen Dienst des Hosts. Kein OCI-Feature und kein Dockerfile-Block: `u-boot generate devcontainer` schreibt genau eine Zeile für den Anschluss in `runArgs` der `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, im Standard- und im Sandbox-Profil, und weist den Anschluss beim Erzeugen aus (im Sandbox-Profil als Sicherheitslockerung, auch unter `--quiet`). `u-boot` startet keinen Relay, setzt keine Variable und trägt keinen Host in die Egress-Liste ein; keine Optionen, `version` nur zusammen mit `source` (siehe [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)) |
 
 #### Externe Feature-Quellen freigeben
 
@@ -1298,7 +1334,7 @@ ein. Für die Features gilt:
   `devcontainer.json`. Ohne Sandbox-Profil weist `u-boot` sie nicht aus.
 - **`ollama-host`:** Der Anschluss an einen Dienst des Hosts ist im Sandbox-Profil eine
   Sicherheitslockerung. `u-boot generate devcontainer` weist ihn mit einer Warnung aus, auch
-  unter `--quiet`; `u-boot` schreibt dafür genau eine Zeile in `runArgs` der `devcontainer.json`
+  unter `--quiet`; `u-boot` schreibt dafür genau eine Zeile in `runArgs` der `devcontainer.json` (neben der Zeile der Umgebungsdatei)
   (siehe
   [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)).
 - **Features aus einer externen Quelle** (siehe oben, *Externe Feature-Quellen
@@ -2161,7 +2197,7 @@ erreichbar ist, hängt von seiner Bindung, von einem Relay Ihrerseits und von de
 unabhängig vom Feature `ollama`. Es ist kein OCI-Feature und kein Dockerfile-Block und erscheint nicht unter
 `features` in `devcontainer.json`.
 
-- **Was `u-boot` erzeugt:** genau eine Zeile in `runArgs` der `devcontainer.json`,
+- **Was `u-boot` erzeugt:** genau eine Zeile für den Anschluss in `runArgs` der `devcontainer.json`,
   `--add-host=host.docker.internal:host-gateway`; im Sandbox-Profil steht sie als letzter
   Eintrag, hinter den Optionen von `nestedRuntime` und der Egress-Restriktion. Sonst
   erzeugt `u-boot` nichts zu diesem Anschluss: keinen Relay, keine Umgebungsvariable
