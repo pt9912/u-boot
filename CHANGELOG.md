@@ -11,6 +11,10 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-11-04
+
+Twenty-second release. **How the repository itself is built and gated, not what the product does.** Two changes to the build and gate chain: the devcontainer is the single build path, and the toolchain pins are inventoried and coupled in the gate run. The Go source of the binary is unchanged: no non-test file under `cmd/` or `internal/` differs from 0.21.0; the `go` directive of `go.mod` is raised to `1.27.0` (the toolchain pin stays `1.27.3`).
+
 ### Changed
 
 - The repository's build path is its devcontainer: the two-mode build (the `BUILD_MODE` switch, defaulting to `docker`, guarded by the `modus-pruefung` make target) is retired — the gate chain of `make gates` runs inside the devcontainer container with the recipes of `scripts/bau.sh`, the CI `gates` job builds `.devcontainer/Dockerfile` from the `.devcontainer` context and calls `make gates` in a privileged `docker run` of that image, `make test-docker` stays in the socket form against the Docker daemon that creates the devcontainer container (the docker-tagged tests are not promised in the container's nested daemon — twelve of 1771 measured test functions failed there against none on a host engine), `modus-pruefung` is removed (`local` is the only mode value; a call with the retired switch `BUILD_MODE=docker` ends with a make error; the partial-run guards on `gates`, `record-gates`, `ci` and `fullbuild` remain), and the runtime-image, release-binary, package and `govulncheck` targets still run against a Docker daemon. The host contract stays Docker plus `make` — no Go toolchain on the host ([`LH-FA-DEV-001`](spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)). **Promised:** the single path and the load-bearing layer per gate as far as the measurement of 2026-11-03 shows — the image build from the `.devcontainer` context, the nested daemon, `make gates` inside the container cold and warm with coverage 92.20 %, and the CI topology replicated locally over the level-one Docker socket. **Not promised:** the network build of the devcontainer image on a cold cache (the measured builds were cache-warm), the CI runners themselves (the topology was replicated locally, not measured on GitHub's runners), and the equality of the docker-tagged tests in the nested daemon.
@@ -1638,7 +1642,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/pt9912/u-boot/compare/v0.21.0...v0.22.0
 [0.21.0]: https://github.com/pt9912/u-boot/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/pt9912/u-boot/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/pt9912/u-boot/compare/v0.18.0...v0.19.0

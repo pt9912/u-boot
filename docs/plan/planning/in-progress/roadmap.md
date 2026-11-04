@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-Nichts in Arbeit.
+[`slice-v1-release-cut-v0.22.0`](slice-v1-release-cut-v0.22.0.md) liegt in `in-progress/` — Minor-Release `v0.22.0` von `main` nach `v0.21.0`, trägt den einzigen Bau-Pfad im Devcontainer und die Pin-Inventur; Push und Tag stehen aus (Freigabe des Projektinhabers).
 
 ## Nächste Wellen
 
