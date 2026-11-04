@@ -549,7 +549,7 @@ func TestGenerateDevcontainer_Absent_BothFilesCreated_MinimumFields(t *testing.T
 	if resp.Action != driving.GenerateActionCreated {
 		t.Errorf("Action = %v, want Created", resp.Action)
 	}
-	wantChanged := []string{devcontainerJSONRel, dockerfileRel}
+	wantChanged := []string{devcontainerJSONRel, dockerfileRel, ".devcontainer/devcontainer.env.example", ".devcontainer/devcontainer.env"}
 	if !equalStrings(resp.Changed, wantChanged) {
 		t.Errorf("Changed = %v, want %v", resp.Changed, wantChanged)
 	}

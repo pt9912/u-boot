@@ -46,6 +46,7 @@ const containerEnvJSONGolden = "// BEGIN U-BOOT MANAGED BLOCK: init\n" +
 	"    \"dockerfile\": \"./Dockerfile\",\n" +
 	"    \"context\": \".\"\n" +
 	"  },\n" +
+	"  \"runArgs\": [\"--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env\"],\n" +
 	"  \"containerEnv\": {\n" +
 	"    \"BUILD_MODE\": \"local\",\n" +
 	"    \"GOFLAGS\": \"-mod=readonly -buildvcs=false\",\n" +
@@ -66,6 +67,7 @@ const mixedCacheJSONGolden = "// BEGIN U-BOOT MANAGED BLOCK: init\n" +
 	"    \"dockerfile\": \"./Dockerfile\",\n" +
 	"    \"context\": \".\"\n" +
 	"  },\n" +
+	"  \"runArgs\": [\"--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env\"],\n" +
 	"  \"containerEnv\": {\n" +
 	"    \"GOCACHE\": \"${containerWorkspaceFolder}/.cache/go-build\",\n" +
 	"    \"GOMODCACHE\": \"${containerWorkspaceFolder}/.cache/go-mod\",\n" +

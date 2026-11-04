@@ -126,7 +126,7 @@ func TestGenerateDevcontainer_SandboxRejectsHostSocketFeature(t *testing.T) {
 // Docker daemon of its own and does not lift the rejection of `docker-cli`:
 // with both set, the call ends with the business error. With the feature
 // switched off the same configuration generates: without an egress
-// restriction `--privileged` is the only `runArgs` entry (with one,
+// restriction `--privileged` is the only `runArgs` entry behind the environment file line (with one,
 // `--cap-add=NET_ADMIN` joins it), and there is no socket mount and no key of
 // the feature.
 func TestGenerateDevcontainer_SandboxNestedDocker_DoesNotLiftTheRejection(t *testing.T) {
@@ -155,7 +155,7 @@ func TestGenerateDevcontainer_SandboxNestedDocker_DoesNotLiftTheRejection(t *tes
 		}
 		body, _ := fs.ReadFile(devcontainerJSONPath())
 		m := devcontainerJSONMap(t, fs)
-		if args, _ := m["runArgs"].([]any); len(args) != 1 || args[0] != "--privileged" {
+		if args := runArgsAfterEnvFile(t, m); len(args) != 1 || args[0] != "--privileged" {
 			t.Errorf("runArgs = %v, want [--privileged]", m["runArgs"])
 		}
 		if bytes.Contains(body, []byte("docker.sock")) || bytes.Contains(body, []byte("docker-outside-of-docker")) {

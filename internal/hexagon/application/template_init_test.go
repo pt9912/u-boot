@@ -419,6 +419,7 @@ func TestTemplateInitService_BasicByteIdenticalToDefaultInit(t *testing.T) {
 			"# Local environment overrides; never commit.\n" +
 			".env\n" +
 			".env.local\n" +
+			".devcontainer/devcontainer.env\n" +
 			"\n" +
 			"# Editor / IDE\n" +
 			".idea/\n" +

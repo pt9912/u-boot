@@ -22,7 +22,8 @@ import (
 
 const (
 	hostLine        = "--add-host=host.docker.internal:host-gateway"
-	hostLineJSON    = `  "runArgs": ["` + hostLine + `"],` + "\n"
+	hostLineJSON    = `  "runArgs": ["` + envFileOption + `", "` + hostLine + `"],` + "\n"
+	envOnlyJSON     = `  "runArgs": ["` + envFileOption + `"],` + "\n"
 	ollamaHostOn    = "  features:\n    ollama-host:\n      enabled: true\n"
 	hostNoticeStart = "devcontainer feature ollama-host adds the container option"
 )
@@ -60,9 +61,9 @@ func withoutHostNotices(ws []driving.WarningEntry) []driving.WarningEntry {
 	return out
 }
 
-// runArgsOf returns the `runArgs` list of the generated devcontainer.json;
-// nil when the key is absent.
-func runArgsOf(t *testing.T, fs *fakeFS) []string {
+// fullRunArgsOf returns the whole `runArgs` list of the generated
+// devcontainer.json; nil when the key is absent.
+func fullRunArgsOf(t *testing.T, fs *fakeFS) []string {
 	t.Helper()
 	raw, ok := devcontainerJSONMap(t, fs)["runArgs"].([]any)
 	if !ok {
@@ -73,6 +74,17 @@ func runArgsOf(t *testing.T, fs *fakeFS) []string {
 		out[i], _ = v.(string)
 	}
 	return out
+}
+
+// runArgsOf returns the `runArgs` entries behind the environment file
+// line; it fails when that line is not the first entry.
+func runArgsOf(t *testing.T, fs *fakeFS) []string {
+	t.Helper()
+	all := fullRunArgsOf(t, fs)
+	if len(all) == 0 || all[0] != envFileOption {
+		t.Fatalf("runArgs = %v, want %s as first entry", all, envFileOption)
+	}
+	return all[1:]
 }
 
 // generatedFile returns the content of a file of the project, "" when absent.
@@ -115,9 +127,10 @@ func runHost(t *testing.T, yaml string, sandboxFlag bool) hostRun {
 	return hostRun{resp: resp, fs: fs, svc: svc}
 }
 
-// H1 (Z13, default profile): the line is the only entry of `runArgs`, between
-// `build` and the following keys, valid JSONC; the file is the run without
-// the feature plus that one line, character for character.
+// H1 (Z13, default profile): the line is the only entry of `runArgs` behind
+// the environment file line, between `build` and the following keys, valid
+// JSONC; the file is the run without the feature plus that one line,
+// character for character.
 func TestGenerateDevcontainer_OllamaHost_DefaultProfileRunArgs(t *testing.T) {
 	t.Parallel()
 	with := runHost(t, defaultProfile+ollamaHostOn, false)
@@ -129,7 +142,7 @@ func TestGenerateDevcontainer_OllamaHost_DefaultProfileRunArgs(t *testing.T) {
 	if !strings.Contains(raw, "  },\n"+hostLineJSON+"  \"remoteUser\"") {
 		t.Errorf("the line must stand between build and remoteUser:\n%s", raw)
 	}
-	if got := strings.Replace(raw, hostLineJSON, "", 1); got != generatedFile(without.fs, ".devcontainer/devcontainer.json") {
+	if got := strings.Replace(raw, hostLineJSON, envOnlyJSON, 1); got != generatedFile(without.fs, ".devcontainer/devcontainer.json") {
 		t.Errorf("devcontainer.json differs from the run without the feature by more than the line:\n%s", raw)
 	}
 	for _, rel := range []string{".devcontainer/Dockerfile"} {
@@ -166,8 +179,8 @@ func TestGenerateDevcontainer_OllamaHost_DefaultProfileKeyOrder(t *testing.T) {
 }
 
 // H2 (Z13, sandbox profile and `--sandbox`): the line stands behind the
-// options of the egress restriction and is the only entry of `runArgs`
-// without it; `mounts`, `postStartCommand` and `remoteEnv` are those of the
+// options of the egress restriction and is the only entry of `runArgs` behind
+// the environment file line without it; `mounts`, `postStartCommand` and `remoteEnv` are those of the
 // run without the feature.
 func TestGenerateDevcontainer_OllamaHost_SandboxRunArgs(t *testing.T) {
 	t.Parallel()
@@ -224,21 +237,15 @@ func podmanOptions() []string {
 // restriction.
 func TestGenerateDevcontainer_OllamaHost_InactiveIsByteIdentical(t *testing.T) {
 	t.Parallel()
-	// option marks a configuration that has a container option of its own
-	// (the egress restriction, nested Podman), so `runArgs` exists.
-	type head struct {
-		yaml   string
-		option bool
-	}
-	heads := map[string]head{
-		"default":                 {defaultProfile, false},
-		"sandbox":                 {sandboxProfile, false},
-		"sandbox with egress":     {sandboxProfile + egressOn, true},
-		"default with UID":        {defaultProfile + "  user:\n    uid: 501\n", false},
-		"sandbox, nested podman":  {sandboxProfile + "  sandbox:\n    nestedRuntime: podman\n", true},
-		"sandbox, ollama and gh":  {sandboxProfile + "  features:\n    ollama:\n      enabled: true\n    gh:\n      enabled: true\n", false},
-		"default, gh, glab":       {defaultProfile + "  features:\n    gh:\n      enabled: true\n    glab:\n      enabled: true\n", false},
-		"default, node (feature)": {defaultProfile + "  features:\n    node:\n      enabled: true\n", false},
+	heads := map[string]string{
+		"default":                 defaultProfile,
+		"sandbox":                 sandboxProfile,
+		"sandbox with egress":     sandboxProfile + egressOn,
+		"default with UID":        defaultProfile + "  user:\n    uid: 501\n",
+		"sandbox, nested podman":  sandboxProfile + "  sandbox:\n    nestedRuntime: podman\n",
+		"sandbox, ollama and gh":  sandboxProfile + "  features:\n    ollama:\n      enabled: true\n    gh:\n      enabled: true\n",
+		"default, gh, glab":       defaultProfile + "  features:\n    gh:\n      enabled: true\n    glab:\n      enabled: true\n",
+		"default, node (feature)": defaultProfile + "  features:\n    node:\n      enabled: true\n",
 	}
 	entries := map[string]string{
 		"absent":           "",
@@ -247,17 +254,17 @@ func TestGenerateDevcontainer_OllamaHost_InactiveIsByteIdentical(t *testing.T) {
 		"enabled null key": "    ollama-host: {}\n",
 	}
 	for hname, h := range heads {
-		base := runHost(t, h.yaml, false)
+		base := runHost(t, h, false)
 		want := projectTexts(base.fs)
 		for ename, entry := range entries {
 			t.Run(hname+"/"+ename, func(t *testing.T) {
 				t.Parallel()
-				yaml := h.yaml
+				yaml := h
 				if entry != "" {
-					if strings.Contains(h.yaml, "  features:\n") {
-						yaml = h.yaml + entry
+					if strings.Contains(h, "  features:\n") {
+						yaml = h + entry
 					} else {
-						yaml = h.yaml + "  features:\n" + entry
+						yaml = h + "  features:\n" + entry
 					}
 				}
 				got := runHost(t, yaml, false)
@@ -273,11 +280,9 @@ func TestGenerateDevcontainer_OllamaHost_InactiveIsByteIdentical(t *testing.T) {
 					t.Errorf("generated files differ from the run without the entry:\n%v\n---\n%v", files, wantFiles)
 				}
 				// The comparison above runs against the same build; this
-				// literal pins the shape of the existing outputs: a
-				// configuration without any container option has no `runArgs`
-				// key (not even an empty one).
-				if got := strings.Contains(files[".devcontainer/devcontainer.json"], "runArgs"); got != h.option {
-					t.Errorf("runArgs key present = %v, want %v:\n%s", got, h.option, files[".devcontainer/devcontainer.json"])
+				// pins that an inactive entry adds no line to `runArgs`.
+				if strings.Contains(files[".devcontainer/devcontainer.json"], "host.docker.internal") {
+					t.Errorf("an inactive entry adds the line:\n%s", files[".devcontainer/devcontainer.json"])
 				}
 				if n := len(hostNotices(got.resp.Warnings)); n != 0 {
 					t.Errorf("notices = %d, want 0 for an inactive entry", n)
@@ -425,8 +430,8 @@ func TestGenerateDevcontainer_OllamaHost_AddsNoCredentialVariable(t *testing.T) 
 func TestDoctor_OllamaHost_NoNewFinding(t *testing.T) {
 	t.Parallel()
 	const head = sandboxYAMLHead + "  profile: sandbox\n"
-	const jsonWith = `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}"}, "runArgs": ["` + hostLine + `"]}`
-	const jsonWithout = `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}"}}`
+	const jsonWith = `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}"}, "runArgs": ["` + envFileOption + `", "` + hostLine + `"]}`
+	const jsonWithout = `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}"}, "runArgs": ["` + envFileOption + `"]}`
 	type finding struct {
 		ID       string
 		Severity domain.Severity
@@ -435,6 +440,7 @@ func TestDoctor_OllamaHost_NoNewFinding(t *testing.T) {
 		items := runSandboxDoctor(t, func(fs *fakeFS) {
 			writeDoctorFile(t, fs, "u-boot.yaml", yaml)
 			writeDoctorFile(t, fs, ".devcontainer/devcontainer.json", json)
+			writeDoctorFile(t, fs, ".devcontainer/devcontainer.env", "")
 		})
 		var out []finding
 		msgs := map[string]string{}
@@ -849,9 +855,9 @@ func TestGenerateDevcontainer_OllamaHost_TogetherWithOtherFeaturesAndNestedRunti
 		wantRunArgs     string
 	}{
 		"podman": {"  sandbox:\n    nestedRuntime: podman\n    egress:\n      enabled: true\n",
-			`  "runArgs": ["--cap-add=SYS_ADMIN", "--security-opt=seccomp=unconfined", "--security-opt=apparmor=unconfined", "--security-opt=systempaths=unconfined", "--device=/dev/fuse", "--device=/dev/net/tun", "--cap-add=NET_ADMIN", "` + hostLine + `"],` + "\n"},
+			`  "runArgs": ["` + envFileOption + `", "--cap-add=SYS_ADMIN", "--security-opt=seccomp=unconfined", "--security-opt=apparmor=unconfined", "--security-opt=systempaths=unconfined", "--device=/dev/fuse", "--device=/dev/net/tun", "--cap-add=NET_ADMIN", "` + hostLine + `"],` + "\n"},
 		"docker": {"  sandbox:\n    nestedRuntime: docker\n    egress:\n      enabled: true\n",
-			`  "runArgs": ["--privileged", "--cap-add=NET_ADMIN", "` + hostLine + `"],` + "\n"},
+			`  "runArgs": ["` + envFileOption + `", "--privileged", "--cap-add=NET_ADMIN", "` + hostLine + `"],` + "\n"},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {

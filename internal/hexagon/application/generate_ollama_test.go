@@ -155,9 +155,8 @@ func TestGenerateDevcontainer_Ollama_Sandbox(t *testing.T) {
 					t.Errorf("devcontainer.json must not contain %q:\n%s", bad, body)
 				}
 			}
-			m := devcontainerJSONMap(t, fs)
-			if _, ok := m["runArgs"]; ok {
-				t.Errorf("ollama adds no runArgs: %v", m["runArgs"])
+			if args := runArgsOf(t, fs); len(args) != 0 {
+				t.Errorf("ollama adds no runArgs: %v", args)
 			}
 
 			notices := ollamaNotices(resp.Warnings)

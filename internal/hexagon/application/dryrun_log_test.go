@@ -139,7 +139,7 @@ func dryRunLogCases() []dryRunLogCase {
 			"[artifact env-example path .env.example project t-uboot-gen]",
 			gen(domain.ArtifactEnvExample, map[string]string{".env.example": staleEnv}, nil)},
 		{"generate devcontainer created", "generate devcontainer: created", "generate devcontainer: would create",
-			"[project t-uboot-gen forwardPorts [] features 0 changed [.devcontainer/devcontainer.json .devcontainer/Dockerfile]]",
+			"[project t-uboot-gen forwardPorts [] features 0 changed [.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcontainer/devcontainer.env.example .devcontainer/devcontainer.env]]",
 			gen(domain.ArtifactDevcontainer, nil, nil)},
 		{"generate devcontainer allowlist", "generate devcontainer: allowlist updated", "generate devcontainer: would update allowlist",
 			"[added 1 total 1]",

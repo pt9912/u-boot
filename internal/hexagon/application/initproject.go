@@ -364,6 +364,10 @@ const (
 	// (LH-FA-INIT-005/LH-FA-INIT-005 require backup before any full
 	// overwrite of an existing file).
 	actionOverwriteFull
+	// actionKeepExisting means a user-owned file (LH-FA-DEV-012)
+	// exists: nothing is read, written or backed up and the file
+	// does not appear in the created list.
+	actionKeepExisting
 )
 
 // filePlan is the planned action for a single templated file plus
@@ -823,10 +827,9 @@ func resolveProjectName(req driving.InitProjectRequest) (domain.ProjectName, err
 // file (README, CHANGELOG, compose.yaml, .env.example, .gitignore).
 // Returns the first abort-error encountered, so no side effect runs.
 //
-// When req.Devcontainer is true, the two M7-T5 devcontainer
-// templates (`.devcontainer/devcontainer.json` and
-// `.devcontainer/Dockerfile`) are appended to the plan list with
-// the same `init`-block marker style they use under
+// When req.Devcontainer is true, the devcontainer templates
+// ([devcontainerFileTemplates]) are appended to the plan list; the managed
+// ones carry the same `init`-block marker style they use under
 // `generate devcontainer` — that keeps `init --devcontainer` and
 // `generate devcontainer` interchangeable for the block-replace
 // path (slice-m7-generate.md §Block-Name).
@@ -846,8 +849,8 @@ func (s *InitProjectService) planTemplatedFiles(req driving.InitProjectRequest) 
 	return plans, nil
 }
 
-// devcontainerFileTemplates returns the two LH-FA-DEV-001 file
-// templates that `u-boot init --devcontainer` (LH-AK-005) appends
+// devcontainerFileTemplates returns the LH-FA-DEV-001 and LH-FA-DEV-012
+// file templates that `u-boot init --devcontainer` (LH-AK-005) appends
 // to the M3 fileTemplates() list. Path / Style / Managed-flag
 // match exactly what M7-T5 `generate devcontainer` writes, so the
 // same `init`-block marker survives between the two entry points.
@@ -867,6 +870,17 @@ func devcontainerFileTemplates() []fileTemplate {
 			Managed:      true,
 			Style:        managedblock.StyleHash,
 		},
+		{
+			Path:         devcontainerEnvFileExampleRel,
+			TemplateName: "devcontainer/devcontainer.env.example.tmpl",
+			Managed:      true,
+			Style:        managedblock.StyleHash,
+		},
+		{
+			Path:         devcontainerEnvFileRel,
+			TemplateName: "devcontainer/devcontainer.env.tmpl",
+			UserOwned:    true,
+		},
 	}
 }
 
@@ -882,6 +896,7 @@ func (s *InitProjectService) planUBootYAML(req driving.InitProjectRequest) (file
 // planFile applies the LH-FA-INIT-005 decision tree to a single file:
 //
 //   - file does not exist                        → actionWrite
+//   - exists + user-owned template               → actionKeepExisting (flags ignored)
 //   - is symlink                                 → ErrBackupUnsupportedKind
 //   - exists + (--force AND has managed block)   → actionReplaceBlock
 //   - exists + --backup                          → actionOverwriteFull (with backup)
@@ -918,6 +933,10 @@ func (s *InitProjectService) planFile(baseDir string, ft fileTemplate, force, ba
 			return fp, nil
 		}
 		return fp, fmt.Errorf("lstat %s: %w", ft.Path, err)
+	}
+	if ft.UserOwned {
+		fp.Action = actionKeepExisting
+		return fp, nil
 	}
 	if info.Mode()&iofs.ModeSymlink != 0 {
 		return fp, fmt.Errorf("%w: %s is a symlink", driving.ErrBackupUnsupportedKind, ft.Path)
@@ -1061,6 +1080,9 @@ func (s *InitProjectService) executeTemplatedFiles(baseDir string, plans []fileP
 	created := make([]string, 0, len(plans))
 	backups := make([]driving.BackupAction, 0)
 	for _, p := range plans {
+		if p.Action == actionKeepExisting {
+			continue
+		}
 		body, err := renderTemplate(p.Template.TemplateName, data)
 		if err != nil {
 			return nil, nil, fmt.Errorf("render %s: %w", p.Template.Path, err)

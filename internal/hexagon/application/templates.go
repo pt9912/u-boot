@@ -131,11 +131,16 @@ type templateData struct {
 // block-only re-init path; whole-file-managed templates
 // (Managed=false, e.g. .gitignore) require --backup for re-init
 // because the LH-FA-INIT-005 backup-mandatory rule kicks in unconditionally.
+//
+// UserOwned marks a file that belongs to the user once it exists
+// (LH-FA-DEV-012): it is written when absent and otherwise neither
+// read, written nor backed up; the re-init flags do not apply to it.
 type fileTemplate struct {
 	Path         string
 	TemplateName string
 	Managed      bool
 	Style        managedblock.Style
+	UserOwned    bool
 }
 
 // fileTemplates returns the project files that [InitProjectService]

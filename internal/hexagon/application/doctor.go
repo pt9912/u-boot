@@ -130,6 +130,11 @@ const (
 	// Pendant. Severity warn (repair-hint: `u-boot generate
 	// devcontainer`).
 	checkIDDevcontainerFeaturesDrift = "devcontainer.features.drift"
+
+	// checkIDDevcontainerEnvFile is the LH-FA-DEV-012 check: the
+	// environment file that `runArgs` points to exists. Existence
+	// only; the content is never read.
+	checkIDDevcontainerEnvFile = "devcontainer.envfile"
 )
 
 // DoctorCheckIDs returns every diagnostic check ID the doctor
@@ -155,6 +160,7 @@ func DoctorCheckIDs() []string {
 		checkIDForwardPortsConsistency,
 		checkIDDevcontainerFeaturesAllowlist,
 		checkIDDevcontainerFeaturesDrift,
+		checkIDDevcontainerEnvFile,
 		checkIDSandboxRuntime,
 		checkIDSandboxEgress,
 		checkIDSandboxCredentials,
@@ -205,6 +211,7 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkForwardPortsConsistency(ctx, req.BaseDir),
 		s.checkDevcontainerFeaturesAllowlist(ctx, req.BaseDir),
 		s.checkDevcontainerFeaturesDrift(ctx, req.BaseDir),
+		s.checkDevcontainerEnvFile(ctx, req.BaseDir),
 		s.checkSandboxRuntime(ctx, req.BaseDir),
 		s.checkSandboxEgress(ctx, req.BaseDir),
 		s.checkSandboxCredentials(ctx, req.BaseDir),

@@ -69,9 +69,10 @@ func TestDoctor_WritePermissions_OKOnWritableDir(t *testing.T) {
 	// from this follow-up slice (über-Spec, analog M5 service-
 	// block-drift), plus devcontainer.sandbox.runtime and
 	// devcontainer.sandbox.credentials from slice-v1-sandbox-
-	// devcontainer-umsetzung T4 (LH-FA-DEV-007 / -009) and devcontainer.sandbox.egress (LH-FA-DEV-008).
-	if got := len(resp.Report.Items); got != 16 {
-		t.Fatalf("Report.Items = %d, want 16", got)
+	// devcontainer-umsetzung T4 (LH-FA-DEV-007 / -009), devcontainer.sandbox.egress (LH-FA-DEV-008)
+	// and devcontainer.envfile (LH-FA-DEV-012).
+	if got := len(resp.Report.Items); got != 17 {
+		t.Fatalf("Report.Items = %d, want 17", got)
 	}
 	d := findDiagnostic(t, resp.Report.Items, "fs.write-permissions")
 	if d.Severity != domain.SeverityOK {

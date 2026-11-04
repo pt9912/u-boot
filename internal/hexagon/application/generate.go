@@ -1058,6 +1058,7 @@ func (s *GenerateService) planDevcontainerFiles(baseDir string, data templateDat
 	}{
 		{".devcontainer/devcontainer.json", "devcontainer/devcontainer.json.tmpl", managedblock.StyleDoubleSlash},
 		{".devcontainer/Dockerfile", "devcontainer/Dockerfile.tmpl", managedblock.StyleHash},
+		{devcontainerEnvFileExampleRel, "devcontainer/devcontainer.env.example.tmpl", managedblock.StyleHash},
 	}
 	type spec = struct {
 		relPath  string
@@ -1084,7 +1085,11 @@ func (s *GenerateService) planDevcontainerFiles(baseDir string, data templateDat
 		}
 		plans = append(plans, plan)
 	}
-	return plans, nil
+	envPlan, err := s.planDevcontainerEnvFile(baseDir, data)
+	if err != nil {
+		return nil, err
+	}
+	return append(plans, envPlan), nil
 }
 
 // planDevcontainerFile classifies a single devcontainer file.
@@ -1137,6 +1142,31 @@ func (s *GenerateService) planDevcontainerFile(
 	}
 	plan.action = devcontainerActionReplaceBlock
 	plan.existing = existing
+	return plan, nil
+}
+
+// planDevcontainerEnvFile plans the user-owned environment file
+// (LH-FA-DEV-012): written when [devcontainerEnvFileRel] is absent,
+// a no-op otherwise. An existing file is never read; it carries no
+// managed block, so the plan has no block fields and phase 2 only
+// snapshots it when the action is a write.
+func (s *GenerateService) planDevcontainerEnvFile(baseDir string, data templateData) (devcontainerFilePlan, error) {
+	targetPath := filepath.Join(baseDir, devcontainerEnvFileRel)
+	exists, err := s.fs.Exists(targetPath)
+	if err != nil {
+		return devcontainerFilePlan{}, fmt.Errorf("generate: Exists(%q): %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
+	}
+	plan := devcontainerFilePlan{relPath: devcontainerEnvFileRel, targetPath: targetPath, action: devcontainerActionNoOp}
+	if exists {
+		return plan, nil
+	}
+	rendered, err := renderTemplate("devcontainer/devcontainer.env.tmpl", data)
+	if err != nil {
+		return devcontainerFilePlan{}, err
+	}
+	plan.rendered = rendered
+	plan.action = devcontainerActionWrite
 	return plan, nil
 }
 

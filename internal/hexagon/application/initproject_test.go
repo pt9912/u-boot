@@ -383,6 +383,8 @@ func TestTemplateNames_AreSorted(t *testing.T) {
 		"changelog.md.tmpl",
 		"compose.yaml.tmpl",
 		"devcontainer/Dockerfile.tmpl",
+		"devcontainer/devcontainer.env.example.tmpl",
+		"devcontainer/devcontainer.env.tmpl",
 		"devcontainer/devcontainer.json.tmpl",
 		"devcontainer/docker-init.sh.tmpl",
 		"devcontainer/egress-init.sh.tmpl",

@@ -73,7 +73,7 @@ func TestGenerateDevcontainer_Sandbox_WithRemote(t *testing.T) {
 	if m["postCreateCommand"] != "[ -d .git ] || git clone -- git@github.com:pt9912/demo.git ." {
 		t.Errorf("postCreateCommand = %v", m["postCreateCommand"])
 	}
-	for _, forbidden := range []string{"runArgs", "privileged", "capAdd", "securityOpt"} {
+	for _, forbidden := range []string{"privileged", "capAdd", "securityOpt"} {
 		if _, ok := m[forbidden]; ok {
 			t.Errorf("sandbox devcontainer.json must not contain %q", forbidden)
 		}
@@ -311,7 +311,7 @@ func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
 	m := devcontainerJSONMap(t, fs)
 	wantArgs := []any{"--cap-add=SYS_ADMIN", "--security-opt=seccomp=unconfined",
 		"--security-opt=apparmor=unconfined", "--security-opt=systempaths=unconfined", "--device=/dev/fuse", "--device=/dev/net/tun"}
-	gotArgs, _ := m["runArgs"].([]any)
+	gotArgs := runArgsAfterEnvFile(t, m)
 	if len(gotArgs) != len(wantArgs) {
 		t.Fatalf("runArgs = %v, want %v", gotArgs, wantArgs)
 	}
@@ -477,8 +477,8 @@ func TestGenerateDevcontainer_SandboxPodman_NotGenerated(t *testing.T) {
 				t.Errorf("sandbox-init.sh must not be generated")
 			}
 			m := devcontainerJSONMap(t, fs)
-			if _, ok := m["runArgs"]; ok {
-				t.Errorf("runArgs must be absent")
+			if args := runArgsAfterEnvFile(t, m); len(args) != 0 {
+				t.Errorf("runArgs must hold only the environment file line: %v", args)
 			}
 			mnts, hasMounts := m["mounts"].([]any)
 			if wantMounts := name == "none"; hasMounts != wantMounts || (hasMounts && len(mnts) != 1) {
@@ -584,7 +584,7 @@ func TestGenerateDevcontainer_SandboxEgress(t *testing.T) {
 		t.Fatalf("generate: %v", err)
 	}
 	m := devcontainerJSONMap(t, fs)
-	args, _ := m["runArgs"].([]any)
+	args := runArgsAfterEnvFile(t, m)
 	if len(args) != 1 || args[0] != "--cap-add=NET_ADMIN" {
 		t.Errorf("runArgs = %v, want only --cap-add=NET_ADMIN", args)
 	}
@@ -773,7 +773,7 @@ func TestGenerateDevcontainer_SandboxEgressWithPodman(t *testing.T) {
 		t.Fatalf("generate: %v", err)
 	}
 	m := devcontainerJSONMap(t, fs)
-	if args, _ := m["runArgs"].([]any); len(args) != 7 || args[6] != "--cap-add=NET_ADMIN" {
+	if args := runArgsAfterEnvFile(t, m); len(args) != 7 || args[6] != "--cap-add=NET_ADMIN" {
 		t.Errorf("runArgs = %v, want 6 podman options + NET_ADMIN", m["runArgs"])
 	}
 	if m["postCreateCommand"] != "sh /usr/local/bin/u-boot-sandbox-init && { [ -d .git ] || git clone -- https://github.com/o/r.git .; }" {
@@ -822,8 +822,8 @@ func TestGenerateDevcontainer_SandboxEgress_NotGenerated(t *testing.T) {
 				t.Errorf("egress-init.sh must not be generated")
 			}
 			m := devcontainerJSONMap(t, fs)
-			if _, ok := m["runArgs"]; ok {
-				t.Errorf("runArgs must be absent: %v", m["runArgs"])
+			if args := runArgsAfterEnvFile(t, m); len(args) != 0 {
+				t.Errorf("runArgs must hold only the environment file line: %v", args)
 			}
 			if _, ok := m["postStartCommand"]; ok {
 				t.Errorf("postStartCommand must be absent")
@@ -869,7 +869,7 @@ func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
 		t.Errorf("fresh state: action = %v, want Created", resp.Action)
 	}
 	m := devcontainerJSONMap(t, fs)
-	if args, _ := m["runArgs"].([]any); len(args) != 1 || args[0] != "--privileged" {
+	if args := runArgsAfterEnvFile(t, m); len(args) != 1 || args[0] != "--privileged" {
 		t.Errorf("runArgs = %v, want [--privileged]", m["runArgs"])
 	}
 	mounts, _ := m["mounts"].([]any)
@@ -1008,7 +1008,7 @@ func TestGenerateDevcontainer_SandboxEgressWithDocker(t *testing.T) {
 		t.Fatalf("generate: %v", err)
 	}
 	m := devcontainerJSONMap(t, fs)
-	if args, _ := m["runArgs"].([]any); len(args) != 2 || args[0] != "--privileged" || args[1] != "--cap-add=NET_ADMIN" {
+	if args := runArgsAfterEnvFile(t, m); len(args) != 2 || args[0] != "--privileged" || args[1] != "--cap-add=NET_ADMIN" {
 		t.Errorf("runArgs = %v, want --privileged + NET_ADMIN", m["runArgs"])
 	}
 	if m["postStartCommand"] != "sudo sh /usr/local/bin/u-boot-egress-init && sudo sh /usr/local/bin/u-boot-docker-init" {

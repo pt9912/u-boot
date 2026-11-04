@@ -118,15 +118,28 @@ func profileIsSandbox(dc *ubootYAMLDevcontainer) bool {
 	return dc != nil && dc.Profile == string(domain.ProfileSandbox)
 }
 
+// devcontainerEnvFileRel is the user-owned environment file of the
+// devcontainer and devcontainerEnvFileExampleRel its managed template
+// (LH-FA-DEV-012); both are relative to the project root.
+const (
+	devcontainerEnvFileRel        = ".devcontainer/devcontainer.env"
+	devcontainerEnvFileExampleRel = ".devcontainer/devcontainer.env.example"
+)
+
+// envFileRunArg is the first `runArgs` entry of every generated
+// devcontainer: Docker reads the environment file from an absolute path,
+// `${localWorkspaceFolder}` stays literal in the file (LH-FA-DEV-012).
+const envFileRunArg = "--env-file=${localWorkspaceFolder}/" + devcontainerEnvFileRel
+
 // devcontainerTemplateData builds the template data for the two
 // devcontainer templates from the project name, the parsed
 // `devcontainer:` sub-tree (may be nil) and the resolved sandbox
-// state. UID stays 0 (= emit nothing) for the default 1000 so the
-// pre-0.3.0 output remains byte-identical (LH-FA-DEV-004). `RunArgs` is empty
-// in the default profile unless `devcontainer.resources.*` is set or the
-// `ollama-host` feature is active; in both profiles the resource options
-// precede the container option of that feature, and in the sandbox profile
-// they follow the options of `nestedRuntime` and of the egress restriction.
+// state. UID stays 0 (= emit nothing) for the default 1000. `RunArgs`
+// starts with [envFileRunArg] in both profiles; in the default profile the
+// resource options and then the container option of the `ollama-host`
+// feature follow it, in the sandbox profile the options of `nestedRuntime`
+// and of the egress restriction, then the resource options, then that
+// container option.
 func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bool, cloneURL string) templateData {
 	data := templateData{Name: name}
 	if dc != nil && dc.User != nil && dc.User.UID != nil && *dc.User.UID != domain.DefaultContainerUID {
@@ -137,10 +150,12 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	data.GoToolchain = dockerfileBlockFeatureActive(dc, featureGoToolchain)
 	data.GolangciLint = dockerfileBlockFeatureActive(dc, featureGolangciLint)
 	if !sandbox {
-		data.RunArgs = append(resourceRunArgs(dc), hostGatewayRunArgs(dc)...)
+		data.RunArgs = append([]string{envFileRunArg}, resourceRunArgs(dc)...)
+		data.RunArgs = append(data.RunArgs, hostGatewayRunArgs(dc)...)
 		return data
 	}
 	data.Sandbox = true
+	data.RunArgs = []string{envFileRunArg}
 	data.AgentEnv = agentCredentialEnv(dc)
 	data.WorkspaceFolder = sandboxWorkspaceRoot + "/" + name
 	data.CloneURL = cloneURL

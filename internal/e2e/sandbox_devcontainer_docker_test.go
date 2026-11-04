@@ -148,8 +148,8 @@ func TestE2E_SandboxDevcontainer_Egress(t *testing.T) {
 	warnDir := generateEgressProject(ctx, t, "warn")
 	image := build(warnDir, "uboot-e2e-egress")
 	runArgs := generatedRunArgs(t, warnDir)
-	if len(runArgs) != 1 || runArgs[0] != "--cap-add=NET_ADMIN" {
-		t.Fatalf("runArgs = %v, want only --cap-add=NET_ADMIN", runArgs)
+	if len(runArgs) != 2 || runArgs[0] != "--env-file="+warnDir+"/.devcontainer/devcontainer.env" || runArgs[1] != "--cap-add=NET_ADMIN" {
+		t.Fatalf("runArgs = %v, want the environment file line and --cap-add=NET_ADMIN", runArgs)
 	}
 
 	probe := "sudo sh /usr/local/bin/u-boot-egress-init && " +
@@ -610,6 +610,9 @@ func TestE2E_SandboxDevcontainer_TwoInstancesIsolated(t *testing.T) {
 	}
 }
 
+// generatedRunArgs returns the `runArgs` of the generated devcontainer.json
+// with `${localWorkspaceFolder}` replaced by dir, the way the Dev Containers
+// tooling resolves it.
 func generatedRunArgs(t *testing.T, dir string) []string {
 	t.Helper()
 	body, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "devcontainer.json"))
@@ -631,7 +634,11 @@ func generatedRunArgs(t *testing.T, dir string) []string {
 	if len(dc.RunArgs) == 0 {
 		t.Fatalf("generated devcontainer.json has no runArgs")
 	}
-	return dc.RunArgs
+	resolved := make([]string, len(dc.RunArgs))
+	for i, a := range dc.RunArgs {
+		resolved[i] = strings.ReplaceAll(a, "${localWorkspaceFolder}", dir)
+	}
+	return resolved
 }
 
 // skipIfNestedUsernsRestricted skips the test on hosts with

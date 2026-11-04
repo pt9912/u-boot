@@ -99,6 +99,7 @@ const toolchainJSONGolden = "// BEGIN U-BOOT MANAGED BLOCK: init\n" +
 	"    \"dockerfile\": \"./Dockerfile\",\n" +
 	"    \"context\": \".\"\n" +
 	"  },\n" +
+	"  \"runArgs\": [\"--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env\"],\n" +
 	"  \"containerEnv\": {\n" +
 	"    \"GOCACHE\": \"${containerWorkspaceFolder}/.cache/go-build\",\n" +
 	"    \"GOMODCACHE\": \"${containerWorkspaceFolder}/.cache/go-mod\"\n" +
@@ -118,6 +119,7 @@ const javaJSONGolden = "// BEGIN U-BOOT MANAGED BLOCK: init\n" +
 	"    \"dockerfile\": \"./Dockerfile\",\n" +
 	"    \"context\": \".\"\n" +
 	"  },\n" +
+	"  \"runArgs\": [\"--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env\"],\n" +
 	"  \"remoteUser\": \"vscode\"\n" +
 	"}\n" +
 	"// END U-BOOT MANAGED BLOCK: init\n"
