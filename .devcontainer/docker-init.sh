@@ -32,8 +32,9 @@ ready() { timeout 5 docker info >/dev/null 2>&1; }
 
 # Rebuilds the root cgroup so that the nested daemon can apply --memory and
 # --cpus to its containers (cgroup v2, `memory` still missing from
-# `subtree_control`); runs only in the branch that starts `dockerd`, never
-# under a running daemon. It is best effort: a failing step names itself on
+# `subtree_control`); runs only in the branch that starts `dockerd`, which is
+# entered when no running `dockerd` is recognized (readiness check and PID
+# file). It is best effort: a failing step names itself on
 # stderr and stops the rebuild; the status file and the exit code stay those
 # of the daemon start.
 cgroup_root=/sys/fs/cgroup
