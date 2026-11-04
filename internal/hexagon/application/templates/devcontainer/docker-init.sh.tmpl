@@ -30,6 +30,49 @@ unavailable() {
 
 ready() { timeout 5 docker info >/dev/null 2>&1; }
 
+# Rebuilds the root cgroup so that the nested daemon can apply --memory and
+# --cpus to its containers (cgroup v2, `memory` still missing from
+# `subtree_control`); runs only in the branch that starts `dockerd`, never
+# under a running daemon. It is best effort: a failing step names itself on
+# stderr and stops the rebuild; the status file and the exit code stay those
+# of the daemon start.
+cgroup_root=/sys/fs/cgroup
+
+cgroup_prepare_failed() {
+  echo "u-boot sandbox: cgroup preparation failed ($1); limits (--memory, --cpus) may not reach nested containers" >&2
+}
+
+cgroup_prepare() {
+  [ -r "$cgroup_root/cgroup.controllers" ] || return 0
+  cg_available=$(cat "$cgroup_root/cgroup.controllers" 2>/dev/null)
+  cg_enabled=$(cat "$cgroup_root/cgroup.subtree_control" 2>/dev/null)
+  case " $cg_available " in *" memory "*) ;; *) return 0 ;; esac
+  case " $cg_enabled " in *" memory "*) return 0 ;; esac
+  # Step 1: a root that holds threaded controllers cannot take domain ones.
+  cg_off=
+  for cg_c in $cg_enabled; do cg_off="$cg_off -$cg_c"; done
+  if [ -n "$cg_off" ] && ! { printf '%s\n' "$cg_off" > "$cgroup_root/cgroup.subtree_control"; } 2>/dev/null; then
+    cgroup_prepare_failed "disable controllers"
+    return 0
+  fi
+  # Step 2: the root keeps no processes once its controllers are enabled; a
+  # process that has exited meanwhile is not an error.
+  if ! mkdir -p "$cgroup_root/init" 2>/dev/null; then
+    cgroup_prepare_failed "create init"
+    return 0
+  fi
+  for cg_p in $(cat "$cgroup_root/cgroup.procs" 2>/dev/null); do
+    { printf '%s\n' "$cg_p" > "$cgroup_root/init/cgroup.procs"; } 2>/dev/null || true
+  done
+  # Step 3: every controller reaches the children, `memory` included.
+  cg_on=
+  for cg_c in $cg_available; do cg_on="$cg_on +$cg_c"; done
+  if ! { printf '%s\n' "$cg_on" > "$cgroup_root/cgroup.subtree_control"; } 2>/dev/null; then
+    cgroup_prepare_failed "enable controllers"
+  fi
+  return 0
+}
+
 if ready; then
   write_status ok
   exit 0
@@ -40,6 +83,7 @@ fi
 pid=$(cat "$pidfile" 2>/dev/null)
 if [ -z "$pid" ] || [ "$(cat "/proc/$pid/comm" 2>/dev/null)" != "dockerd" ]; then
   rm -f "$pidfile" /var/run/docker.sock /var/run/docker/containerd/containerd.pid
+  cgroup_prepare
   # The daemon needs the privileges of `--privileged` (iptables, cgroups, mounts).
   setsid nohup dockerd --host=unix:///var/run/docker.sock --group docker >"$log" 2>&1 &
   pid=$!

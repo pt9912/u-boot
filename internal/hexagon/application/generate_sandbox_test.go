@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -937,6 +938,175 @@ func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
 	}
 }
 
+// generatedDockerInit generates the sandbox profile with nestedRuntime docker
+// and returns the text of docker-init.sh.
+func generatedDockerInit(t *testing.T) string {
+	t.Helper()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxDockerYAML)
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	body, err := fs.ReadFile(dockerInitPath())
+	if err != nil {
+		t.Fatalf("docker-init.sh not generated: %v", err)
+	}
+	return string(body)
+}
+
+// funcBody returns the text from `name() {` to the closing brace at line start.
+func funcBody(t *testing.T, script, name string) string {
+	t.Helper()
+	start := strings.Index(script, "\n"+name+"() {\n")
+	if start < 0 {
+		t.Fatalf("function %s not in the script:\n%s", name, script)
+	}
+	end := strings.Index(script[start+1:], "\n}\n")
+	if end < 0 {
+		t.Fatalf("function %s has no closing brace:\n%s", name, script)
+	}
+	return script[start : start+1+end]
+}
+
+// SPEC-056 (ADR-0045): the cgroup rebuild stands in the branch that starts
+// `dockerd`, after the readiness check and the removal of stale PID and
+// socket files, directly before `setsid nohup dockerd`, and is called once.
+func TestGenerateDevcontainer_SandboxDocker_CgroupPrepBeforeDaemon(t *testing.T) {
+	t.Parallel()
+	script := generatedDockerInit(t)
+	const call = "\n  cgroup_prepare\n"
+	if got := strings.Count(script, call); got != 1 {
+		t.Fatalf("cgroup_prepare is called %d times at branch level, want 1:\n%s", got, script)
+	}
+	ready := strings.Index(script, "\nif ready; then\n")
+	branch := strings.Index(script, `if [ -z "$pid" ] ||`)
+	rm := strings.Index(script, `rm -f "$pidfile" /var/run/docker.sock`)
+	prep := strings.Index(script, call)
+	daemon := strings.Index(script, "  setsid nohup dockerd ")
+	if ready < 0 || branch < ready || rm < branch || prep < rm || daemon < prep {
+		t.Fatalf("order readiness (%d) < branch (%d) < rm (%d) < cgroup_prepare (%d) < dockerd (%d) violated:\n%s", ready, branch, rm, prep, daemon, script)
+	}
+	// Directly before the daemon start: only comment lines lie between.
+	for _, line := range strings.Split(script[prep+len(call):daemon], "\n") {
+		if line != "" && !strings.HasPrefix(strings.TrimSpace(line), "#") {
+			t.Errorf("code between the rebuild and dockerd: %q", line)
+		}
+	}
+	// The call sits inside the branch: no `fi` at line start between branch and call.
+	if strings.Contains(script[branch:prep], "\nfi\n") {
+		t.Errorf("cgroup_prepare is outside the dockerd branch:\n%s", script)
+	}
+}
+
+// SPEC-056: condition (cgroup v2, `memory` available and not yet in
+// subtree_control) comes first, then the three steps in their fixed order.
+func TestGenerateDevcontainer_SandboxDocker_CgroupPrepConditionsAndSteps(t *testing.T) {
+	t.Parallel()
+	script := generatedDockerInit(t)
+	if !strings.Contains(script, "\ncgroup_root=/sys/fs/cgroup\n") {
+		t.Errorf("cgroup_root is not /sys/fs/cgroup:\n%s", script)
+	}
+	body := funcBody(t, script, "cgroup_prepare")
+	ordered := []string{
+		`[ -r "$cgroup_root/cgroup.controllers" ] || return 0`,
+		`case " $cg_available " in *" memory "*) ;; *) return 0 ;; esac`,
+		`case " $cg_enabled " in *" memory "*) return 0 ;; esac`,
+		`for cg_c in $cg_enabled; do cg_off="$cg_off -$cg_c"; done`,
+		`"$cg_off" > "$cgroup_root/cgroup.subtree_control"`,
+		`mkdir -p "$cgroup_root/init"`,
+		`"$cg_p" > "$cgroup_root/init/cgroup.procs"`,
+		`for cg_c in $cg_available; do cg_on="$cg_on +$cg_c"; done`,
+		`"$cg_on" > "$cgroup_root/cgroup.subtree_control"`,
+	}
+	prev := -1
+	for _, want := range ordered {
+		at := strings.Index(body, want)
+		if at < 0 {
+			t.Fatalf("cgroup_prepare lacks %q:\n%s", want, body)
+		}
+		if at < prev {
+			t.Errorf("%q stands before its predecessor:\n%s", want, body)
+		}
+		prev = at
+	}
+	// A process that has exited meanwhile is not an error.
+	if !strings.Contains(body, `"$cg_p" > "$cgroup_root/init/cgroup.procs"; } 2>/dev/null || true`) {
+		t.Errorf("moving a process may fail silently:\n%s", body)
+	}
+	// POSIX sh: no bashisms.
+	for _, bad := range []string{"local ", "[[", "echo -e", "<(", "${!", "declare "} {
+		if strings.Contains(body, bad) {
+			t.Errorf("cgroup_prepare uses non-POSIX %q:\n%s", bad, body)
+		}
+	}
+}
+
+// SPEC-056: a failing step writes one stderr line and goes on; it writes no
+// status file, adds no exit, and does not take the `unavailable` path.
+func TestGenerateDevcontainer_SandboxDocker_CgroupPrepBestEffort(t *testing.T) {
+	t.Parallel()
+	script := generatedDockerInit(t)
+	body := funcBody(t, script, "cgroup_prepare")
+	failed := funcBody(t, script, "cgroup_prepare_failed")
+	for _, bad := range []string{`write_status`, `unavailable`, `\bexit\b`} {
+		re := regexp.MustCompile(bad)
+		if re.MatchString(body) || re.MatchString(failed) {
+			t.Errorf("the rebuild contains %q:\n%s\n%s", bad, body, failed)
+		}
+	}
+	const line = `echo "u-boot sandbox: cgroup preparation failed ($1); limits (--memory, --cpus) may not reach nested containers" >&2`
+	if got := strings.Count(script, line); got != 1 {
+		t.Errorf("stderr line appears %d times, want 1:\n%s", got, script)
+	}
+	for _, step := range []string{"disable controllers", "create init", "enable controllers"} {
+		if got := strings.Count(body, `cgroup_prepare_failed "`+step+`"`); got != 1 {
+			t.Errorf("step %q is named %d times, want 1:\n%s", step, got, body)
+		}
+	}
+	// Exit statements of the script are the four of the daemon start.
+	exits := regexp.MustCompile(`(?m)^\s+exit [0-9]+$`).FindAllString(script, -1)
+	if len(exits) != 4 {
+		t.Errorf("exit statements = %d (%q), want 4", len(exits), exits)
+	}
+}
+
+// SPEC-056: the rebuild exists only in docker-init.sh of nestedRuntime docker.
+func TestGenerateDevcontainer_CgroupPrepOnlyWithNestedDocker(t *testing.T) {
+	t.Parallel()
+	cases := map[string]struct {
+		yaml string
+		want map[string]bool
+	}{
+		"default profile": {"devcontainer:\n  enabled: true\n", map[string]bool{}},
+		"podman":          {sandboxPodmanYAML, map[string]bool{sandboxInitPath(): false}},
+		"egress only":     {"devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", map[string]bool{egressInitPath(): false}},
+		"docker, egress":  {sandboxDockerYAML + "    egress:\n      enabled: true\n", map[string]bool{egressInitPath(): false, dockerInitPath(): true}},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			if _, err := generateSandbox(svc, false); err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			for _, path := range []string{devcontainerJSONPath(), dockerfilePath(), sandboxInitPath(), egressInitPath(), dockerInitPath()} {
+				body, err := fs.ReadFile(path)
+				if err != nil {
+					if want, ok := tc.want[path]; ok && want {
+						t.Errorf("%s not generated", path)
+					}
+					continue
+				}
+				want := tc.want[path]
+				if got := strings.Contains(string(body), "cgroup_prepare"); got != want {
+					t.Errorf("%s carries the cgroup rebuild = %v, want %v", path, got, want)
+				}
+			}
+		})
+	}
+}
+
 // onUnavailable: fail is baked into the daemon start script.
 func TestGenerateDevcontainer_SandboxDocker_FailPolicy(t *testing.T) {
 	t.Parallel()
@@ -1278,7 +1448,7 @@ func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) 
 		t.Fatal(err)
 	}
 	script, _ := fs.ReadFile(dockerInitPath())
-	for _, want := range []string{"exit 11", "exit 0", "no daemon available, see $log", "echo \"u-boot sandbox: $1\" >&2"} {
+	for _, want := range []string{"exit 11", "exit 0", "no daemon available, see $log", "echo \"u-boot sandbox: $1\" >&2", "cgroup preparation failed ($1); limits (--memory, --cpus) may not reach nested containers"} {
 		if !strings.Contains(string(script), want) {
 			t.Errorf("docker-init.sh lost %q:\n%s", want, script)
 		}
