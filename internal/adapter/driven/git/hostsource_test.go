@@ -25,6 +25,21 @@ func writeScript(t *testing.T, dir, name, body string) string {
 	return path
 }
 
+// isolateHostEnv pins the process environment the adapter reads: no
+// GIT_TOKEN (an empty value counts as unset) and a git configuration with
+// neither a global nor a system file, so the answers never come from the
+// host that runs the tests.
+func isolateHostEnv(t *testing.T) {
+	t.Helper()
+	empty := filepath.Join(t.TempDir(), "gitconfig")
+	if err := os.WriteFile(empty, nil, 0o600); err != nil {
+		t.Fatalf("write %s: %v", empty, err)
+	}
+	t.Setenv("GIT_TOKEN", "")
+	t.Setenv("GIT_CONFIG_GLOBAL", empty)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+}
+
 // scriptBinary returns a script that prints its lines and exits with the
 // given status; a body `echo value` prints one line.
 func TestHostSource_GitToken_HostVariableWins(t *testing.T) {
@@ -45,6 +60,7 @@ func TestHostSource_GitToken_HostVariableWins(t *testing.T) {
 }
 
 func TestHostSource_GitToken_FallsBackToGh(t *testing.T) {
+	isolateHostEnv(t)
 	dir := t.TempDir()
 	gh := writeScript(t, dir, "gh", "echo gh-token-placeholder-0123")
 	hs := git.NewHostSource().WithHostGhBinary(gh)
@@ -61,6 +77,7 @@ func TestHostSource_GitToken_FallsBackToGh(t *testing.T) {
 }
 
 func TestHostSource_GitToken_GhMissingReadsAsNoSource(t *testing.T) {
+	isolateHostEnv(t)
 	// A missing binary: the adapter reports no source without an error.
 	dir := t.TempDir()
 	gh := filepath.Join(dir, "gh-absent")
@@ -70,11 +87,12 @@ func TestHostSource_GitToken_GhMissingReadsAsNoSource(t *testing.T) {
 		t.Fatalf("GitToken: %v (a missing gh is a skipped source, no error)", err)
 	}
 	if value != "" || source != "" {
-		t.Fatalf("value=%q source=%q, want empty both", value, source)
+		t.Fatalf("value set=%t source=%q, want empty both (the value is never printed)", value != "", source)
 	}
 }
 
 func TestHostSource_GitToken_GhFailingReadsAsNoSource(t *testing.T) {
+	isolateHostEnv(t)
 	dir := t.TempDir()
 	// exit 1 without output: the "not logged in" of gh (M3).
 	gh := writeScript(t, dir, "gh", "exit 1")
@@ -84,11 +102,12 @@ func TestHostSource_GitToken_GhFailingReadsAsNoSource(t *testing.T) {
 		t.Fatalf("GitToken: %v", err)
 	}
 	if value != "" || source != "" {
-		t.Fatalf("value=%q source=%q, want empty both", value, source)
+		t.Fatalf("value set=%t source=%q, want empty both (the value is never printed)", value != "", source)
 	}
 }
 
 func TestHostSource_GitToken_GhEmptyOutputReadsAsNoSource(t *testing.T) {
+	isolateHostEnv(t)
 	dir := t.TempDir()
 	gh := writeScript(t, dir, "gh", "")
 	hs := git.NewHostSource().WithHostGhBinary(gh)
@@ -97,11 +116,12 @@ func TestHostSource_GitToken_GhEmptyOutputReadsAsNoSource(t *testing.T) {
 		t.Fatalf("GitToken: %v", err)
 	}
 	if value != "" || source != "" {
-		t.Fatalf("value=%q source=%q, want empty both", value, source)
+		t.Fatalf("value set=%t source=%q, want empty both (the value is never printed)", value != "", source)
 	}
 }
 
 func TestHostSource_ConfigValue_ReadsTheEffectiveValue(t *testing.T) {
+	isolateHostEnv(t)
 	dir := t.TempDir()
 	if out := run(t, dir, "git", "init", "-q", "."); out != "" {
 		t.Fatalf("git init: %s", out)
@@ -122,6 +142,7 @@ func TestHostSource_ConfigValue_ReadsTheEffectiveValue(t *testing.T) {
 }
 
 func TestHostSource_ConfigValue_MissingKeyIsEmptyWithoutError(t *testing.T) {
+	isolateHostEnv(t)
 	dir := t.TempDir()
 	run(t, dir, "git", "init", "-q", ".")
 	value, err := git.NewHostSource().ConfigValue(context.Background(), dir, "user.email")

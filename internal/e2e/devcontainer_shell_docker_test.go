@@ -405,7 +405,7 @@ func TestDevcontainerShell_Docker_Session(t *testing.T) {
 		}
 		// The same exec without `-e` does not carry the token.
 		if out, err := dcDocker("exec", "-u", wantUser, "-w", wantWorkspace, id, "printenv", "GIT_TOKEN"); err == nil || out != "" {
-			t.Errorf("guard: the token is in the container without `-e`: %q (%v); the session test proves nothing", out, err)
+			t.Errorf("guard: the token is in the container without `-e` (output set=%t, err=%v); the session test proves nothing", out != "", err)
 		}
 		// The value is not in the metadata of the devcontainer.
 		doc := dcInspect(t, id)
