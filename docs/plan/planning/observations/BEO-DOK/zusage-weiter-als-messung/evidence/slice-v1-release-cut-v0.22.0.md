@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-release-cut-v0.22.0`](../../../../in-progress/slice-v1-release-cut-v0.22.0.md)
+**Fund:** Review-Report [`2026-11-04-slice-v1-release-cut-v0.22.0`](../../../../../../reviews/2026-11-04-slice-v1-release-cut-v0.22.0.md) F-1 (MEDIUM): Der CHANGELOG-Lead sagte, keine Nicht-Test-Datei unter `cmd/` oder `internal/` unterscheide sich von `0.21.0`; der Cut-Commit änderte `cmd/uboot/main.go` (Versionszeile). Die Messung „leer“ im Plan stammte von vor dem Cut-Commit. F-2 (LOW): der Lead nannte von `go.mod` nur die Anhebung der `go`-Direktive, nicht die Umstufung von `cobra` und `pflag`.
+
+**Beleg-Qualität:** belegt durch Review-Report und Verification-Report; der Tag `v0.22.0` war schon veröffentlicht, der Text ist auf `main` berichtigt, der Tag trägt den ungenauen Satz. Der Plan hatte das Risiko vorab benannt (§6, erstes Risiko); die Klasse trat trotzdem auf. Keine Schärfung entschieden.
