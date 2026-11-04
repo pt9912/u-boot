@@ -2,7 +2,7 @@
 
 **Review-Art:** Release-Cut-Review (Text und Versionsstellen) gegen Plan, Spec, Hard Rules und `releasing.md` §3/§4 (Modul 10). Keine DoD-Prüfung — das ist die Frage des Verifiers.
 
-**Gegenstand:** Cut-Commit `84a1ff3e` (8 Dateien, 23 Einfügungen, 18 Löschungen) und `git diff v0.22.0..v0.23.0 --stat` (82 Dateien; Produkt-Diff `-- cmd internal ':!*_test.go' go.mod Dockerfile repo.mk`: 15 Dateien, davon 12 unter `internal/`, `go.mod` unberührt). Slice [`slice-v1-release-cut-v0.23.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.23.0.md); der Tag `v0.23.0` steht auf `84a1ff3e` (gelesen: `git rev-parse v0.23.0^{commit}`).
+**Gegenstand:** Cut-Commit `84a1ff3e` (8 Dateien, 23 Einfügungen, 18 Löschungen) und `git diff v0.22.0..v0.23.0 --stat` (82 Dateien; Produkt-Diff `-- cmd internal ':!*_test.go' go.mod Dockerfile repo.mk`: 15 Dateien, davon 12 unter `internal/`, `go.mod` unberührt). Slice [`slice-v1-release-cut-v0.23.0`](../plan/planning/done/slice-v1-release-cut-v0.23.0.md); der Tag `v0.23.0` steht auf `84a1ff3e` (gelesen: `git rev-parse v0.23.0^{commit}`).
 
 **Skill:** `.harness/skills/reviewer.md`
 **Modell:** claude (Agentenlauf) · **Datum:** 2026-11-04

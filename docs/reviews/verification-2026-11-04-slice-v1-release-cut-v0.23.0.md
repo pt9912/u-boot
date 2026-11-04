@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-release-cut-v0.23.0 — 2026-11-04
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
-**Gegenstand:** [`slice-v1-release-cut-v0.23.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.23.0.md) — Cut-Commit `84a1ff3e` (Tag `v0.23.0`, veröffentlicht), Review-Fix-Runde `83801980` (nur Text im Block `[0.23.0]` auf `main` und Review-Report; der Tag trägt den früheren Wortlaut); Abgleichstand **nach der letzten Fix-Runde = `83801980`** (= Repo-Tip, Arbeitsbaum sauber).
+**Gegenstand:** [`slice-v1-release-cut-v0.23.0`](../plan/planning/done/slice-v1-release-cut-v0.23.0.md) — Cut-Commit `84a1ff3e` (Tag `v0.23.0`, veröffentlicht), Review-Fix-Runde `83801980` (nur Text im Block `[0.23.0]` auf `main` und Review-Report; der Tag trägt den früheren Wortlaut); Abgleichstand **nach der letzten Fix-Runde = `83801980`** (= Repo-Tip, Arbeitsbaum sauber).
 
 **Eingangs-Kontext:**
 
@@ -14,7 +14,7 @@
 
 ## Scope
 
-- Slice: [`slice-v1-release-cut-v0.23.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.23.0.md)
+- Slice: [`slice-v1-release-cut-v0.23.0`](../plan/planning/done/slice-v1-release-cut-v0.23.0.md)
 - IDs: [`LH-FA-DEV-012`](../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`ADR-0044`](../plan/adr/0044-devcontainer-umgebungsdatei-env-file.md), [`ADR-0045`](../plan/adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md)
 - Artefakte: `CHANGELOG.md`, `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, Roadmap
 
@@ -116,7 +116,7 @@ Nach dem Tag (`84a1ff3e..HEAD`): `CHANGELOG.md` (drei Textzeilen, Plan-Zeile „
 
 | ID | Beleg |
 |---|---|
-| [`LH-FA-DEV-012`](../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) | Cut-Commit `84a1ff3e` und Fix-Commit `83801980` nennen beide IDs und den Slice [`slice-v1-release-cut-v0.23.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.23.0.md) im Betreff |
+| [`LH-FA-DEV-012`](../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) | Cut-Commit `84a1ff3e` und Fix-Commit `83801980` nennen beide IDs und den Slice [`slice-v1-release-cut-v0.23.0`](../plan/planning/done/slice-v1-release-cut-v0.23.0.md) im Betreff |
 | Commits `v0.22.0..HEAD` | 53 Commits; alle nennen eine `LH-*`-, `ADR-*`-, Slice- oder Wellen-Kennung (geprüft per Muster auf den Betreff; kein Commit ohne) |
 | Slice-Moves | 18 Verschiebe-Commits des Make-Targets für Slice-Moves im Range; für diesen Slice `979417a9` (reiner Move `next/` → `in-progress/`) und `911cc938` (Verweis-Nachzug als eigener Commit, §3.3) |
 
