@@ -56,14 +56,14 @@ Fundstellen am 2026-11-04 gelesen; der Implementer ergänzt die Tabelle im erste
 
 | Datei / Komponente | Art | Begründung / Fundstelle |
 |---|---|---|
-| `internal/hexagon/application/templates/devcontainer/docker-init.sh.tmpl` | update (Ort nach ADR) | startet `dockerd` per `setsid nohup` nach der Bereitschaftsprüfung; der Umbau steht davor |
-| `internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl` | update (nur bei `ENTRYPOINT`) | Block `{{- if .NestedDocker}}` (Zeile 53) kopiert `docker-init.sh` nach `/usr/local/bin/u-boot-docker-init` (Zeile 65) |
-| `internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl` | update (nur bei `overrideCommand`) | `postStartCommand` kommt aus `data.PostStart` (`devcontainer_sandbox.go`) |
-| `internal/hexagon/application/devcontainer_sandbox.go` | update (nur bei neuem Pfad) | `devcontainerTemplateData`: Zweig `nestedDocker(dc)` setzt `PostStart`, `Mounts`, `RunArgs` |
+| `internal/hexagon/application/templates/devcontainer/docker-init.sh.tmpl` | update | startet `dockerd` per `setsid nohup` nach der Bereitschaftsprüfung; der Umbau steht davor im selben Zweig, best-effort ([`ADR-0045`](../../adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md), [`SPEC-056`](../../../../spec/spezifikation.md#spec-056--cgroup-umbau-im-startscript-docker-initsh-bedingung-schritte-und-fehlschlag)) |
+| `internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl` | unverändert (kein `ENTRYPOINT`, [`ADR-0045`](../../adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md)) | Block `{{- if .NestedDocker}}` (Zeile 53) kopiert `docker-init.sh` nach `/usr/local/bin/u-boot-docker-init` (Zeile 65) |
+| `internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl` | unverändert (kein `overrideCommand`, [`ADR-0045`](../../adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md)) | `postStartCommand` kommt aus `data.PostStart` (`devcontainer_sandbox.go`) |
+| `internal/hexagon/application/devcontainer_sandbox.go` | unverändert (kein neuer Pfad, [`ADR-0045`](../../adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md)) | `devcontainerTemplateData`: Zweig `nestedDocker(dc)` setzt `PostStart`, `Mounts`, `RunArgs` |
 | `internal/hexagon/application/generate.go` | prüfen | `planDevcontainerFiles` (Zeile 1071): `docker-init.sh` ist bereits im Plan |
-| Tests: `generate_sandbox_test.go`, Golden-Cases, `internal/e2e/sandbox_devcontainer_docker_test.go`, `internal/e2e/resources_docker_test.go` | update | Golden für beide Ausgaben; Docker-Test mit den Werten im verschachtelten Container |
+| Tests: `generate_sandbox_test.go`, `internal/e2e/sandbox_devcontainer_docker_test.go`, `internal/e2e/resources_docker_test.go` | update | Testnamen in der Beleg-Tabelle von [`SPEC-056`](../../../../spec/spezifikation.md#spec-056--cgroup-umbau-im-startscript-docker-initsh-bedingung-schritte-und-fehlschlag); bestehende Skript-Tests auf den neuen Wortlaut angepasst |
 | `.devcontainer/*` und `.gitignore` dieses Repos | update | eigenes Erzeugnis von `u-boot generate devcontainer` |
-| `spec/lastenheft.md`, `spec/spezifikation.md`, ADR samt Index | update / neu | nach Messung und Entscheidung |
+| `spec/spezifikation.md` ([`SPEC-056`](../../../../spec/spezifikation.md#spec-056--cgroup-umbau-im-startscript-docker-initsh-bedingung-schritte-und-fehlschlag) neu, [`SPEC-053`](../../../../spec/spezifikation.md#spec-053--grenzen-für-arbeitsspeicher-und-cpu-des-devcontainers-schlüssel-werte-und-runargs) Verweis, Historie), `docs/plan/adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md` samt Index | neu / update | Entscheidung des Architekten; `spec/lastenheft.md` unverändert (kein CR, [`ADR-0045`](../../adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md) Entscheidung 5) |
 | `docs/messungen/slice-v1-sandbox-nested-docker-cgroup/`, `docs/user/*`, `docs/maintainer/devcontainer-arbeiten.md`, `CHANGELOG.md` | neu / update | Protokoll und Doku |
 
 ## 4. Trigger
@@ -84,7 +84,7 @@ DoD vollständig; Neuanlage des Devcontainers belegt; `make test-docker` ohne di
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Offene Risiken werden bei Closure aufgelöst.
 
-1. **Der `ENTRYPOINT` des Images läuft nicht.** PID 1 dieses Containers ist `/bin/sh -c "echo Container started …"`; das deutet auf `--entrypoint /bin/sh` der Dev-Containers-Erweiterung (Eigenschaft `overrideCommand`). Ein `ENTRYPOINT` nach dind-Muster liefe dann nicht. Gelesen ist nur PID 1, nicht der Aufruf der Erweiterung. — **Ausgang:** offen → Messung im Slice.
+1. **Der `ENTRYPOINT` des Images läuft nicht.** PID 1 dieses Containers ist `/bin/sh -c "echo Container started …"`; das deutet auf `--entrypoint /bin/sh` der Dev-Containers-Erweiterung (Eigenschaft `overrideCommand`). Ein `ENTRYPOINT` nach dind-Muster liefe dann nicht. Gelesen ist nur PID 1, nicht der Aufruf der Erweiterung. — **Ausgang:** belegt (lesend, 2026-11-04): die Dev Container CLI 0.89.0 übergibt `--entrypoint /bin/sh` und lässt `ENTRYPOINT`/`Cmd` des Images nur bei `overrideCommand: false` stehen ([`ADR-0045`](../../adr/0045-cgroup-umbau-im-startscript-vor-dockerd.md)); Startort ist `postStartCommand`. Die Erweiterung des Editors ist nicht gelesen.
 2. **Der Zustand überlebt keinen Neustart / die Neuanlage setzt ihn nicht zurück.** Gemessen ist nur der laufende Container. — **Ausgang:** offen → Messung mit `make dev-up RECREATE=1`.
 3. **Neue Prozesse in der Wurzel nach dem Umbau** (`docker exec`, neue Terminals der Erweiterung): ein Domain-cgroup mit gesetztem `subtree_control` nimmt nach Kenntnis des Kernels keine Prozesse mehr auf; ungemessen. — **Ausgang:** offen → Messung mit Anhängen der Erweiterung und `docker exec` nach dem Umbau.
 4. **Der Umbau verschiebt Prozesse, die die Erweiterung braucht** (z. B. Server-Prozesse). — **Ausgang:** offen → Messung (Anhängen nach dem Umbau).
