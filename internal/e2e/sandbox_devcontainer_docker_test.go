@@ -1184,6 +1184,90 @@ func TestE2E_SandboxDevcontainer_NestedDocker_Restart(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-007 (SPEC-056, ADR-0045): after the generated start script, the
+// limits of a nested `docker run --memory --cpus` arrive in the nested
+// container (`memory.max`, `cpu.max`), a `docker exec` into the throwaway
+// container still works, and a second run after a stopped daemon exits 0
+// without the failure line (the condition holds the rebuild back). The image
+// reaches the nested daemon by `docker save | docker load` (no network). The
+// test shows the result, not that the container was `domain threaded` before
+// the script: that depends on the host and on what ran before it.
+func TestE2E_SandboxDevcontainer_NestedDocker_CgroupLimitsReachNestedContainer(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
+	defer cancel()
+	dir := generateSandboxProject(ctx, t, "docker", "warn")
+	image := "uboot-e2e-sandbox-docker-cgroup:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build of the generated Dockerfile failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+
+	name, volume := "uboot-e2e-dockercgroup", "uboot-e2e-dockercgroup-vol"
+	args := []string{"run", "-d", "--name", name, "--mount", "source=" + volume + ",target=/var/lib/docker,type=volume"}
+	args = append(append(args, generatedRunArgs(t, dir)...), image, "sleep", "1800")
+	if out, code := dockerOutput(ctx, t, args...); code != 0 {
+		t.Fatalf("start: %s", out)
+	}
+	t.Cleanup(func() {
+		_, _ = dockerOutput(context.Background(), t, "rm", "-f", name)
+		_, _ = dockerOutput(context.Background(), t, "volume", "rm", "-f", volume)
+	})
+	initDaemon := func(step string) string {
+		out, code := dockerOutput(ctx, t, "exec", "-u", "vscode", name, "sudo", "sh", "/usr/local/bin/u-boot-docker-init")
+		if code != 0 {
+			t.Fatalf("%s: daemon start script exit %d:\n%s", step, code, out)
+		}
+		if info, code := dockerExec(ctx, t, name, "docker info --format '{{.Driver}}'"); code != 0 || !overlayDriver(info) {
+			t.Fatalf("%s: docker info exit %d: %s", step, code, info)
+		}
+		return out
+	}
+	first := initDaemon("first run")
+	t.Logf("first run output: %q", first)
+
+	save := exec.CommandContext(ctx, "docker", "save", image)
+	load := exec.CommandContext(ctx, "docker", "exec", "-i", "-u", "vscode", name, "docker", "load")
+	pipe, err := save.StdoutPipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	load.Stdin = pipe
+	var loadOut strings.Builder
+	load.Stdout, load.Stderr = &loadOut, &loadOut
+	if err := save.Start(); err != nil {
+		t.Fatal(err)
+	}
+	if err := load.Run(); err != nil {
+		t.Fatalf("docker load into the nested daemon: %v\n%s", err, loadOut.String())
+	}
+	if err := save.Wait(); err != nil {
+		t.Fatalf("docker save: %v", err)
+	}
+
+	out, code := dockerExec(ctx, t, name, "docker run --rm --memory=64m --cpus=0.5 "+image+" cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/cpu.max")
+	if code != 0 {
+		t.Fatalf("nested docker run with limits exit %d:\n%s\nfirst run output: %q", code, out, first)
+	}
+	if got := strings.Fields(out); len(got) != 3 || got[0] != "67108864" || got[1] != "50000" || got[2] != "100000" {
+		t.Errorf("memory.max and cpu.max in the nested container = %q, want 67108864 and 50000 100000", out)
+	}
+	// Risk EBUSY: the root accepts a new process after the rebuild.
+	if out, code := dockerOutput(ctx, t, "exec", name, "sh", "-c", "echo EXEC_OK"); code != 0 || !strings.Contains(out, "EXEC_OK") {
+		t.Errorf("docker exec after the rebuild: exit %d: %s", code, out)
+	}
+
+	stop := `kill "$(cat /var/run/docker.pid)"; i=0; while kill -0 "$(cat /var/run/docker.pid 2>/dev/null)" 2>/dev/null && [ "$i" -lt 60 ]; do sleep 1; i=$((i+1)); done`
+	if out, code := dockerOutput(ctx, t, "exec", "-u", "root", name, "sh", "-c", stop); code != 0 {
+		t.Fatalf("stop the daemon: exit %d: %s", code, out)
+	}
+	if second := initDaemon("second run"); strings.Contains(second, "cgroup preparation failed") {
+		t.Errorf("second run prints the failure line:\n%s", second)
+	}
+}
+
 // LH-FA-DEV-008 with nestedRuntime docker: the Docker APT repository stays
 // configured in the image, so `apt-get update` must work behind the egress
 // restriction (download.docker.com is in the default allowlist) while an
