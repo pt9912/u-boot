@@ -83,8 +83,15 @@ exit 0
 // newFakeDocker legt ein ausführbares docker-Skript an. Die Tests dieser Datei
 // laufen nicht parallel: Ein parallel forkender Test hält die frisch
 // geschriebene Datei offen, und der exec scheitert mit "text file busy".
+// Das GIT_TOKEN des Hosts steht in keinem Test: Der Fake-Prozess erbt die
+// Umgebung des Tests, und eine Fehlermeldung, die seine Umgebung zeigt, gäbe
+// sonst den Wert des Hosts aus.
 func newFakeDocker(t *testing.T) *fakeDocker {
 	t.Helper()
+	t.Setenv("GIT_TOKEN", "")
+	if err := os.Unsetenv("GIT_TOKEN"); err != nil {
+		t.Fatal(err)
+	}
 	dir := t.TempDir()
 	f := &fakeDocker{dir: dir, bin: filepath.Join(dir, "docker")}
 	script := strings.ReplaceAll(fakeDockerScript, "%DIR%", dir)
@@ -94,6 +101,15 @@ func newFakeDocker(t *testing.T) *fakeDocker {
 	f.write(t, "context-host", "unix:///var/run/docker.sock\n")
 	f.write(t, "run-stdout", launcherSuccessOut+"\n")
 	return f
+}
+
+// Der Fake-Helfer entfernt ein gesetztes GIT_TOKEN aus der Umgebung des Tests.
+func TestNewFakeDocker_DropsTheHostToken(t *testing.T) {
+	t.Setenv("GIT_TOKEN", "host-token-placeh-0123")
+	newFakeDocker(t)
+	if v, ok := os.LookupEnv("GIT_TOKEN"); ok {
+		t.Errorf("GIT_TOKEN is still set after newFakeDocker (value set=%t)", v != "")
+	}
 }
 
 func (f *fakeDocker) write(t *testing.T, name, content string) {
