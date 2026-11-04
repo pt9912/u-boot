@@ -20,6 +20,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -1190,8 +1191,11 @@ func TestE2E_SandboxDevcontainer_NestedDocker_Restart(t *testing.T) {
 // container still works, and a second run after a stopped daemon exits 0
 // without the failure line (the condition holds the rebuild back). The image
 // reaches the nested daemon by `docker save | docker load` (no network). The
-// test shows the result, not that the container was `domain threaded` before
-// the script: that depends on the host and on what ran before it.
+// test skips when `memory` is already in `cgroup.subtree_control` of the
+// throwaway container before the script (the rebuild would not run), fails on
+// the failure line of the first run, and requires `memory` there after it.
+// Limit: it does not produce `domain threaded`; it tells the rebuild apart only
+// in the normal state "domain root with processes, `memory` not delegated".
 func TestE2E_SandboxDevcontainer_NestedDocker_CgroupLimitsReachNestedContainer(t *testing.T) {
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Fatalf("docker CLI not on PATH: %v", err)
@@ -1215,6 +1219,16 @@ func TestE2E_SandboxDevcontainer_NestedDocker_CgroupLimitsReachNestedContainer(t
 		_, _ = dockerOutput(context.Background(), t, "rm", "-f", name)
 		_, _ = dockerOutput(context.Background(), t, "volume", "rm", "-f", volume)
 	})
+	subtree := func() string {
+		out, code := dockerOutput(ctx, t, "exec", "-u", "root", name, "cat", "/sys/fs/cgroup/cgroup.subtree_control")
+		if code != 0 {
+			t.Fatalf("read cgroup.subtree_control: exit %d: %s", code, out)
+		}
+		return out
+	}
+	if before := subtree(); slices.Contains(strings.Fields(before), "memory") {
+		t.Skipf("`memory` is already in cgroup.subtree_control of the throwaway container (%q): the rebuild would not run and the test would pass without it", strings.TrimSpace(before))
+	}
 	initDaemon := func(step string) string {
 		out, code := dockerOutput(ctx, t, "exec", "-u", "vscode", name, "sudo", "sh", "/usr/local/bin/u-boot-docker-init")
 		if code != 0 {
@@ -1227,6 +1241,12 @@ func TestE2E_SandboxDevcontainer_NestedDocker_CgroupLimitsReachNestedContainer(t
 	}
 	first := initDaemon("first run")
 	t.Logf("first run output: %q", first)
+	if strings.Contains(first, "cgroup preparation failed") {
+		t.Errorf("first run prints the failure line:\n%s", first)
+	}
+	if after := subtree(); !slices.Contains(strings.Fields(after), "memory") {
+		t.Errorf("`memory` not in cgroup.subtree_control after the first run: %q", after)
+	}
 
 	save := exec.CommandContext(ctx, "docker", "save", image)
 	load := exec.CommandContext(ctx, "docker", "exec", "-i", "-u", "vscode", name, "docker", "load")
