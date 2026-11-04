@@ -1,6 +1,6 @@
 # CR-Vorschlag: Umgebungsdatei des Devcontainers — Lastenheft 0.34.0 → 0.35.0, Alt/Neu je Stelle
 
-**Status:** vorgelegt (2026-11-04); wartet auf die Freigabe des Projektinhabers.
+**Status:** freigegeben wie vorgelegt (Projektinhaber 2026-11-04, Auftrag „bitte alle … umsetzen“ nach Vorlage der fünf Punkte mit Empfehlung; die Lesart als Freigabe hat der Hauptagent im Gespräch ausgewiesen) und übernommen (Lastenheft 0.35.0).
 
 **Gegenstand:** die Lieferung zum ersten Liefer-Punkt der DoD des Slice [`slice-v1-devcontainer-env-datei`](../planning/in-progress/slice-v1-devcontainer-env-datei.md) (Vertrag). Diese Datei ist kein Slice und hat keinen eigenen Lebenszyklus; sie bleibt dauerhaft im CR-Ordner.
 
