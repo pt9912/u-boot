@@ -798,9 +798,9 @@ ergeben sich aus den aktivierten Diensten.
   `u-boot devcontainer up` ist zugesagt, soweit ein Docker-Test belegt, dass
   eine Variable der Datei im gestarteten Container gesetzt ist; diese Tests
   liefen mit `docker run` und mit `u-boot devcontainer up` auf einem Linux-Host
-  (`amd64`) in der verschachtelten Docker-Engine des Entwicklungs-Containers
-  dieses Projekts (Docker 29.9.3, ein Lauf); ein Lauf auf einer nicht
-  verschachtelten Engine steht aus. Nicht zugesagt sind der Start über einen
+  (`amd64`), in der verschachtelten Docker-Engine des Entwicklungs-Containers
+  dieses Projekts (Docker 29.9.3, ein Lauf) und auf dem GitHub-Runner der CI
+  (`ubuntu-latest`, ein Lauf, beide Tests bestanden). Nicht zugesagt sind der Start über einen
   Editor (ein Editor-Lauf ist nicht automatisierbar und hat keinen Test),
   andere Engines und Hosts, die Reihenfolge gegenüber `remoteEnv` und
   `containerEnv`, Dateien mit Windows-Zeilenenden und mehrzeilige Werte.
