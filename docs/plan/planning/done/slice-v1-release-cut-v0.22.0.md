@@ -26,7 +26,7 @@
 - [x] Vorab-Prüfungen: `make gates`, `make ci` lokal grün (`make fullbuild` einzeln nicht gefahren: es besteht aus `ci` und dem Image-Build, beide liefen grün); Gegenprobe `make build VERSION=0.22.0`; Tap-Trockenlauf nach `releasing.md` §4 mit Vorgänger-Gegenprobe; `ci` und `integration-docker` auf dem Push-Tip grün; `tap-check` grün; **danach nur nach Freigabe:** Tag `v0.22.0` gesetzt und gepusht, `publish` und Job `tap` kontrolliert.
 - [x] Doku nachgezogen: Roadmap (*Abgeschlossene Wellen* mit Tag-Hash, Zustandsmarker), Bestand-Zeilen.
 - [x] `make gates` grün nach dem letzten Commit vor dem Handoff und nach der Closure.
-- [ ] Review (kein Self-Review, [Report](../../../reviews/2026-11-04-slice-v1-release-cut-v0.22.0.md)) und Verification ([Report](../../../reviews/verification-2026-11-04-slice-v1-release-cut-v0.22.0.md)) mit Reports; Closure-Notiz mit Lerneintrag; Register oder „keine Beobachtung“; jedes Risiko mit Ausgang; drei Paarungen getragen.
+- [x] Review (kein Self-Review, [Report](../../../reviews/2026-11-04-slice-v1-release-cut-v0.22.0.md)) und Verification ([Report](../../../reviews/verification-2026-11-04-slice-v1-release-cut-v0.22.0.md)) mit Reports; Closure-Notiz mit Lerneintrag; Register oder „keine Beobachtung“; jedes Risiko mit Ausgang; drei Paarungen getragen.
 
 ## 3. Plan (vor Code)
 
