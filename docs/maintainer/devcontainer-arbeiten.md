@@ -73,11 +73,11 @@ gemessen). Dasselbe gilt für jedes Nutzerprojekt.
 
 ## Gatter im Container
 
-Die `containerEnv` setzt `BUILD_MODE=local`, `GOTOOLCHAIN=local`,
-`GOFLAGS` und die Go-Caches unter dem Workspace (je [`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)
-führen dort die Targets die Toolchain des Containers statt
-Docker-Stage-Bauten). `make gates` im Container ist damit der lokale
-Modus-Nachweis der Umgebung; eine Messung des Gesamtzugs (Image-Bau,
+Die `containerEnv` setzt `GOTOOLCHAIN=local`, `GOFLAGS` und die Go-Caches
+unter dem Workspace. `BUILD_MODE` setzt sie nicht: ein nicht gesetzter Wert gilt
+als `local` (`repo.mk`), der Bau-Pfad ist der Devcontainer
+([`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)).
+`make gates` im Container ist damit der Nachweis der Umgebung; eine Messung des Gesamtzugs (Image-Bau,
 verschachtelter Daemon, Gates im Container, `test-docker` im
 Nested-Daemon und die CI-Runner-Analogie) liegt unter
 [`docs/messungen/slice-v1-bau-nur-devcontainer/`](../messungen/slice-v1-bau-nur-devcontainer/README.md).
