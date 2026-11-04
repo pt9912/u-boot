@@ -1,2 +1,2 @@
-**Vorgang:** [`slice-v1-test-host-umgebung-isolieren`](../../../../next/slice-v1-test-host-umgebung-isolieren.md)
+**Vorgang:** [`slice-v1-test-host-umgebung-isolieren`](../../../../in-progress/slice-v1-test-host-umgebung-isolieren.md)
 **Fund:** Sechs Tests in `internal/adapter/driven/git/hostsource_test.go` (vier `GitToken_*`, zwei `ConfigValue_*`) waren im Devcontainer rot, weil `GIT_TOKEN` und die globale Git-Identität gesetzt waren; in CI (`.github/workflows/ci.yml`, frischer Container ohne Identität) grün. Drei Meldungen gaben den Token-Wert aus. Fix: `isolateHostEnv`, Meldungen ohne Wert.
