@@ -72,7 +72,6 @@ jobs:
             --volume u-boot-devcontainer-docker:/var/lib/docker \
             --volume "$PWD:/workspaces/u-boot" \
             --workdir /workspaces/u-boot \
-            --env BUILD_MODE=local \
             --env GOTOOLCHAIN=local \
             --env 'GOFLAGS=-mod=readonly -buildvcs=false' \
             --env GOCACHE=/workspaces/u-boot/.cache/go-build \
