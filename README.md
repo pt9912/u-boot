@@ -247,6 +247,8 @@ For building from source:
   [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 - **Devcontainer sandbox profile:**
   [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten)
+- **Development in the devcontainer (`make dev-up`/`dev-shell`/`dev-down`, instances, nested Docker):**
+  [`docs/maintainer/devcontainer-arbeiten.md`](docs/maintainer/devcontainer-arbeiten.md)
 - **Machine-readable CLI contract (`--json`, `--dry-run`, `--diff`):**
   [`docs/maintainer/cli-json-contract.md`](docs/maintainer/cli-json-contract.md)
   (user view: [JSON output](docs/user/benutzerhandbuch.md#json-ausgabe))
@@ -263,6 +265,7 @@ Docker daemon outside of it.
 ```bash
 u-boot devcontainer up          # start the repository devcontainer (the usage level)
 make dev-shell                  # open a shell in it
+make dev-up INSTANCE=agent-1    # start a second devcontainer of the same project (INSTANCE=<name> selects the instance; make dev-down INSTANCE=agent-1 stops it)
 make help                       # list all targets
 make build                      # build runtime image (distroless)
 make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung + tool-pruefung (run it inside the devcontainer shell, or the container form of docs/maintainer/quality.md — a bare host run is not a proof)
