@@ -30,6 +30,13 @@ und stoppen“), Absatz „Mehrere Devcontainer je Projekt (Instanzen)“ —
 [Benutzerhandbuch](../user/benutzerhandbuch.md#den-devcontainer-ohne-editor-starten-und-stoppen);
 die Make-Targets reichen die Werte unverändert als Flaggen durch.
 
+**Frischer Klon dieses Repos.** `.devcontainer/devcontainer.json` verweist auf
+`.devcontainer/devcontainer.env`; die Datei ist ignoriert und liegt nicht im
+Klon. Vor dem ersten `make dev-up` oder `make dev-shell` einmal
+`u-boot generate devcontainer` ausführen: Es legt die Datei ohne Werte an,
+sonst bricht Docker den Start ab (Exit-Code 125, mit `docker run` gemessen).
+Die Vorlage `.devcontainer/devcontainer.env.example` liegt im Repo.
+
 ## Voraussetzungen und Umgebung
 
 - Das Binary `u-boot` muss auf dem Host-Pfad liegen (die Targets brauchen es
