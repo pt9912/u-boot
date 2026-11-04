@@ -15,7 +15,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Verantwortlich:** —
 
-**Autor:** pt9912 (Rolle Implementer, Umsetzung vor dem Plan; Rollenwechsel zum Reviewer offen). **Datum:** 2026-11-04.
+**Autor:** pt9912 (Rolle Implementer, Umsetzung vor dem Plan). **Datum:** 2026-11-04.
 
 ---
 
@@ -32,8 +32,8 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 - [x] **Isolation.** `isolateHostEnv` in `internal/adapter/driven/git/hostsource_test.go` setzt `GIT_TOKEN` leer, `GIT_CONFIG_GLOBAL` auf eine leere Datei und `GIT_CONFIG_NOSYSTEM=1`; sechs Tests rufen ihn auf.
 - [x] **Kein Wert in Meldungen.** Drei Meldungen in `hostsource_test.go` und die Guard-Meldung in `internal/e2e/devcontainer_shell_docker_test.go` geben `set=<bool>` statt des Werts aus.
-- [ ] `make gates` grün im Devcontainer-Container (lief grün; Nachweis im Handoff). *(nicht gezählt — Gate-Lauf)*
-- [ ] Review, Verifikation, Closure-Notiz, Register, Risiko-Ausgänge, Drei-Paarungen. *(nicht gezählt — Closure-Pflichten)*
+- [x] `make gates` grün im Devcontainer-Container (Commit `e3547e47`, Verifier-Lauf EXIT 0). *(nicht gezählt — Gate-Lauf)*
+- [x] Review ([`2026-11-04-slice-v1-test-host-umgebung-isolieren`](../../../reviews/2026-11-04-slice-v1-test-host-umgebung-isolieren.md)), Verifikation ([`verification-2026-11-04-slice-v1-test-host-umgebung-isolieren`](../../../reviews/verification-2026-11-04-slice-v1-test-host-umgebung-isolieren.md)), Closure-Notiz, Register, Risiko-Ausgänge. *(nicht gezählt — Closure-Pflichten)*
 
 ## 3. Plan (vor Code)
 
@@ -55,13 +55,20 @@ DoD vollständig; Review und Verifikation durch andere Rollen; Closure-Notiz; `g
 
 ## 6. Risiken und offene Punkte
 
-- **Der geänderte Docker-Test lief nicht.** `make gates` enthält `test-docker` nicht. — **Ausgang:** weiter offen → Lauf von `make test-docker` vor der Closure.
+- **Der geänderte Docker-Test lief nicht.** `make gates` enthält `test-docker` nicht. — **Ausgang:** entfallen: `make test-docker` lief am 2026-11-04 auf `e3547e47`; `TestDevcontainerShell_Docker_Session` ist `--- PASS` (16,73 s, Unterfall `guards_of_the_session` 1,68 s). Der Lauf endete mit Exit `2` wegen zwei fremder Fehlschläge, siehe nächstes Risiko.
+- **`make test-docker` ist in diesem Devcontainer rot:** `TestE2E_Resources_DefaultProfileLimitsReachTheContainer` und `TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer` scheitern an `unable to apply cgroup configuration: cannot enter cgroupv2` — die verschachtelte Engine wendet keine cgroup-Grenze an (Herkunft im Plan von [`slice-v1-devcontainer-ressourcenlimits-messung`](../open/slice-v1-devcontainer-ressourcenlimits-messung.md)); die Tests berühren diesen Slice nicht. — **Ausgang:** weiter offen → [`slice-v1-devcontainer-ressourcenlimits-messung`](../open/slice-v1-devcontainer-ressourcenlimits-messung.md).
 - **Weitere Tests lesen die Umgebung.** Der Review fand in `internal/adapter/driven/**` keine weitere Lücke, aber `devcontainer_launcher_test.go` gibt bei einem Fehlschlag die `GIT_TOKEN=…`-Zeile des Prozess-Environments aus (F-4). — **Ausgang:** weiter offen → `BEO-ADP/test-liest-host-umgebung` im Register.
 - **Nicht gepinnt: `GIT_DIR`, `GIT_WORK_TREE`, `GIT_CONFIG_COUNT`/`KEY_n`/`VALUE_n`, `GIT_CONFIG_PARAMETERS`** (Review F-1); die Suite aus einem Git-Hook kann `ConfigValue` anders beantworten lassen. — **Ausgang:** weiter offen → `BEO-ADP/test-liest-host-umgebung` im Register.
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `open/`.
+- **Was hat funktioniert:** Die Isolation (`isolateHostEnv`) macht `make gates` im Devcontainer mit gesetztem `GIT_TOKEN` und globaler Git-Identität grün (vorher rot); der Review fand 0 HIGH und 0 MEDIUM, die Verifikation bestätigte beide Liefer-Punkte.
+- **Was ging anders als geplant:** Der Test-Fix entstand vor dem Slice-Plan (Rollenfolge verletzt, hier nachgeholt: Plan, `in-progress/`, Review, Verifikation). Beim Lauf des `docs-check` meldete `planning-drift` den Slice in `in-progress/` gegen den Ruhe-Marker der Roadmap; die Roadmap benennt den Slice jetzt.
+- **Steering-Loop-Eintrag:** Ein Test, der die Umgebung des Hosts liest, ist nur in CI grün (Fund 1×, noch unter der Schwelle) — gezählt, nicht verkörpert.
+- **Beobachtungs-Register (`../observations/`):** `BEO-ADP/test-liest-host-umgebung/` neu angelegt, Beleg `evidence/slice-v1-test-host-umgebung-isolieren.md` — Zähler steht bei 1×.
+- **Folge-Slices:** keine; die Rest-Risiken F-1 und F-4 führt das Register.
+- **Risiken aus §6:** je ein Ausgang, siehe §6.
+- **Drei Paarungen:** Anker — kein Herkunfts-Anker gesetzt (nichts verkörpert); Folge-Slice — [`slice-v1-devcontainer-ressourcenlimits-messung`](../open/slice-v1-devcontainer-ressourcenlimits-messung.md) ist eine Datei in `open/`; Register — `BEO-ADP/test-liest-host-umgebung` liegt vor.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
