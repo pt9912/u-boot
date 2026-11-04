@@ -4,8 +4,8 @@
 // (LH-FA-DEV-012, ADR-0044): a variable written to
 // `.devcontainer/devcontainer.env` is set in the container that the generated
 // `runArgs` start, with `docker run` and through `u-boot devcontainer up`.
-// They run on the engine of the runner (Linux host `amd64`, local engine, not
-// nested, is the measured case) and say nothing about another engine.
+// They run on the engine the suite is pointed at and say nothing about
+// another engine; only the first test skips itself off Linux `amd64`.
 
 package e2e_test
 
