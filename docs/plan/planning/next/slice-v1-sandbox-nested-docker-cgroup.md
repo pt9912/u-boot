@@ -11,7 +11,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Welle:** ohne Welle, Release-Zuordnung offen (keine Closure-Bedingung außerhalb der DoD).
 
-**Anlass.** In diesem Devcontainer scheitert jeder Start mit `--memory` oder `--cpus` (Exit `125`, `unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode`); zwei Tests von `make test-docker` (`TestE2E_Resources_DefaultProfileLimitsReachTheContainer`, `TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer`) sind deshalb rot, und die offenen Messungen von [`slice-v1-devcontainer-ressourcenlimits-messung`](slice-v1-devcontainer-ressourcenlimits-messung.md) sind hier nicht fahrbar. Entscheidung des Projektinhabers 2026-11-04: die Hürde im Devcontainer überwinden, nach dem Muster des dind-Entrypoints.
+**Anlass.** In diesem Devcontainer scheitert jeder Start mit `--memory` oder `--cpus` (Exit `125`, `unable to apply cgroup configuration: cannot enter cgroupv2 "/sys/fs/cgroup/docker" with domain controllers -- it is in threaded mode`); zwei Tests von `make test-docker` (`TestE2E_Resources_DefaultProfileLimitsReachTheContainer`, `TestE2E_Resources_SandboxNestedDockerLimitsReachTheContainer`) sind deshalb rot, und die offenen Messungen von [`slice-v1-devcontainer-ressourcenlimits-messung`](../open/slice-v1-devcontainer-ressourcenlimits-messung.md) sind hier nicht fahrbar. Entscheidung des Projektinhabers 2026-11-04: die Hürde im Devcontainer überwinden, nach dem Muster des dind-Entrypoints.
 
 **Befund der Sitzung 2026-11-04** (an diesem Container gelesen und gelaufen, nicht auf anderen Hosts):
 
@@ -37,7 +37,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 - **Keine Änderung an `nestedRuntime: podman` und am Standardprofil ohne nested Docker:** der Befund betrifft den Daemon, den `docker-init.sh` startet.
 - **Keine Host-Einstellung und kein `--cgroupns=host`:** das hebt die Isolation auf und verschiebt die Frage nur.
-- **Keine Zusage für andere Hosts oder Engines:** gemessen ist ein Container, nicht die Zusage-Menge von [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Linux `amd64`, lokale Engine). Die Messungen 1, 2, 4 und 5 bleiben bei [`slice-v1-devcontainer-ressourcenlimits-messung`](slice-v1-devcontainer-ressourcenlimits-messung.md).
+- **Keine Zusage für andere Hosts oder Engines:** gemessen ist ein Container, nicht die Zusage-Menge von [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Linux `amd64`, lokale Engine). Die Messungen 1, 2, 4 und 5 bleiben bei [`slice-v1-devcontainer-ressourcenlimits-messung`](../open/slice-v1-devcontainer-ressourcenlimits-messung.md).
 - **Kein Umbau des Werteformats** der Grenzen.
 
 ## 2. Definition of Done
@@ -72,7 +72,7 @@ Fundstellen am 2026-11-04 gelesen; der Implementer ergänzt die Tabelle im erste
 
 **Rückführungen — vorab benannt:**
 
-- `in-progress` → `open` (blockiert): Greift weder `ENTRYPOINT` noch `postStartCommand` vor `dockerd`, oder verhindert der Umbau neue Prozesse in der Wurzel (Risiko 3), gilt die Alternative: Grenzen im verschachtelten Docker bleiben nicht zugesagt, Messung auf einem Runner bei [`slice-v1-devcontainer-ressourcenlimits-messung`](slice-v1-devcontainer-ressourcenlimits-messung.md).
+- `in-progress` → `open` (blockiert): Greift weder `ENTRYPOINT` noch `postStartCommand` vor `dockerd`, oder verhindert der Umbau neue Prozesse in der Wurzel (Risiko 3), gilt die Alternative: Grenzen im verschachtelten Docker bleiben nicht zugesagt, Messung auf einem Runner bei [`slice-v1-devcontainer-ressourcenlimits-messung`](../open/slice-v1-devcontainer-ressourcenlimits-messung.md).
 - `in-progress` → `next` (zu groß): Messung und Entscheidung als eigener Slice vor dem Code.
 
 ## 5. Closure-Trigger

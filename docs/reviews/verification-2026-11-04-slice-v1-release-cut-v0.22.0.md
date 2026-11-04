@@ -71,7 +71,7 @@ Diff-Dateien ohne Plan-Zeile im Cut-Commit: keine. Plan-Zeilen ohne Diff: nur di
 | Sensor | Ergebnis | Evidence |
 |---|---|---|
 | `make gates` (Devcontainer, eigener Lauf am 2026-11-04, HEAD `353bef50`) | **pass** | EXIT=0; `baseline-verify: v6.18.1 OK — 54 Dateien`; `d-check: pinsync: 3 Pin(s) geprüft, 11 Quelle(n) gelesen`; `d-check: 1104 Datei(en) geprüft, 0 Befund(e)`; `coverage-gate: OK — coverage 92.20% meets threshold 90%`; `ablage-pruefung-test: 26 Faelle, 0 Fehlschlaege`; `tool-pruefung … OK (go 1.27.3, golangci-lint 2.14.0, make >= 4.3)`. Stempel `.harness/state/gates-passed.head` = `353bef5039433efc0f160ebd55883a9c6ee26354` = HEAD. |
-| `make test-docker` | **not run, begründet** | Lokal rot an der cgroup ([`slice-v1-sandbox-nested-docker-cgroup`](../plan/planning/open/slice-v1-sandbox-nested-docker-cgroup.md)); Ersatznachweis ist `integration-docker` Run 41816259276 auf dem Push-Tip (grün). |
+| `make test-docker` | **not run, begründet** | Lokal rot an der cgroup ([`slice-v1-sandbox-nested-docker-cgroup`](../plan/planning/next/slice-v1-sandbox-nested-docker-cgroup.md)); Ersatznachweis ist `integration-docker` Run 41816259276 auf dem Push-Tip (grün). |
 | `make verify-depguard` | **not run, begründet** | Keine Importregel berührt; der Code-Diff des Cuts ist die Versionszeile. |
 | `make ci`, `make fullbuild`, `make build VERSION=0.22.0`, Tap-Trockenlauf (M-T) | **not run** | Nicht angefordert. Ersatz teils durch CI: `ci` (govulncheck, image-scan) und `publish` (Image, Binaries, Pakete, `tap`) am selben Tip grün. Der lokale Vorab-Beleg (DoD 2) liegt dem Verifier nicht vor und ist in der Closure-Notiz zu benennen. |
 
