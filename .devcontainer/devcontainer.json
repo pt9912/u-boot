@@ -7,7 +7,7 @@
   },
   "workspaceMount": "",
   "workspaceFolder": "/workspaces/u-boot",
-  "runArgs": ["--privileged"],
+  "runArgs": ["--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env", "--privileged"],
   "mounts": [
     "source=u-boot-workspace-${devcontainerId},target=/workspaces/u-boot,type=volume",
     "source=u-boot-docker-${devcontainerId},target=/var/lib/docker,type=volume",

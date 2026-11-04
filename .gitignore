@@ -45,6 +45,7 @@ Thumbs.db
 # Local env overrides (if ever added — never commit secrets)
 .env
 .env.local
+.devcontainer/devcontainer.env
 
 # Linux-Pakete (scripts/build-packages.sh)
 /packages/
