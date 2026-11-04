@@ -41,7 +41,9 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 |---|---|---|
 | `internal/adapter/driven/git/hostsource_test.go` | update | `isolateHostEnv`; Aufruf in `GitToken_FallsBackToGh`, `…GhMissingReadsAsNoSource`, `…GhFailingReadsAsNoSource`, `…GhEmptyOutputReadsAsNoSource`, `ConfigValue_ReadsTheEffectiveValue`, `…MissingKeyIsEmptyWithoutError`; drei Meldungen ohne Wert |
 | `internal/e2e/devcontainer_shell_docker_test.go` | update | Guard-Meldung (Zeile ~408) ohne Ausgabe von `printenv GIT_TOKEN`; Docker-Test (Build-Tag `docker`), nicht ausgeführt |
-| `docs/plan/planning/observations/BEO-ADP/test-liest-host-umgebung/` | neu | Beobachtung mit Evidence dieses Slice |
+| `docs/plan/planning/observations/BEO-ADP/test-liest-host-umgebung/` | neu | Beobachtung mit Evidence dieses Slice; angelegt mit der Backlog-Anlage `09d765f0`, nicht im Code-Commit |
+| `docs/plan/planning/in-progress/roadmap.md` | update | der Ruhe-Marker „Nichts in Arbeit.“ weicht der Benennung dieses Slice (`planning-drift` des `docs-check`) |
+| `docs/reviews/2026-11-04-slice-v1-test-host-umgebung-isolieren.md` | neu | Review-Report |
 
 ## 4. Trigger
 
@@ -54,7 +56,8 @@ DoD vollständig; Review und Verifikation durch andere Rollen; Closure-Notiz; `g
 ## 6. Risiken und offene Punkte
 
 - **Der geänderte Docker-Test lief nicht.** `make gates` enthält `test-docker` nicht. — **Ausgang:** weiter offen → Lauf von `make test-docker` vor der Closure.
-- **Weitere Tests lesen die Umgebung** (nicht gesucht). — **Ausgang:** weiter offen → `BEO-ADP/test-liest-host-umgebung` im Register.
+- **Weitere Tests lesen die Umgebung.** Der Review fand in `internal/adapter/driven/**` keine weitere Lücke, aber `devcontainer_launcher_test.go` gibt bei einem Fehlschlag die `GIT_TOKEN=…`-Zeile des Prozess-Environments aus (F-4). — **Ausgang:** weiter offen → `BEO-ADP/test-liest-host-umgebung` im Register.
+- **Nicht gepinnt: `GIT_DIR`, `GIT_WORK_TREE`, `GIT_CONFIG_COUNT`/`KEY_n`/`VALUE_n`, `GIT_CONFIG_PARAMETERS`** (Review F-1); die Suite aus einem Git-Hook kann `ConfigValue` anders beantworten lassen. — **Ausgang:** weiter offen → `BEO-ADP/test-liest-host-umgebung` im Register.
 
 ## 7. Closure-Notiz
 

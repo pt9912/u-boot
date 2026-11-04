@@ -40,8 +40,6 @@ func isolateHostEnv(t *testing.T) {
 	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
 }
 
-// scriptBinary returns a script that prints its lines and exits with the
-// given status; a body `echo value` prints one line.
 func TestHostSource_GitToken_HostVariableWins(t *testing.T) {
 	dir := t.TempDir()
 	gh := writeScript(t, dir, "gh", "echo gh-token-placeholder-0123\n")

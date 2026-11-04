@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-11-03.
+**Status:** Aktiv. **Letzte Änderung:** 2026-11-04.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-Nichts in Arbeit.
+[`slice-v1-test-host-umgebung-isolieren`](slice-v1-test-host-umgebung-isolieren.md) liegt in `in-progress/` — die Adapter-Tests von `HostSource` pinnen `GIT_TOKEN` und die Git-Konfiguration, Fehlermeldungen geben keinen Token-Wert aus; Review und Verifikation stehen aus.
 
 ## Nächste Wellen
 
