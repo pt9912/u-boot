@@ -1043,8 +1043,8 @@ func TestE2E_SandboxDevcontainer_NestedDocker(t *testing.T) {
 	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
 
 	runArgs := generatedRunArgs(t, dir)
-	if len(runArgs) != 1 || runArgs[0] != "--privileged" {
-		t.Fatalf("runArgs = %v, want [--privileged]", runArgs)
+	if len(runArgs) != 2 || runArgs[0] != "--env-file="+dir+"/.devcontainer/devcontainer.env" || runArgs[1] != "--privileged" {
+		t.Fatalf("runArgs = %v, want the environment file line and --privileged", runArgs)
 	}
 	mounts := generatedMounts(t, dir)
 	if len(mounts) != 2 || !strings.Contains(mounts[1], "-docker-${devcontainerId}") {

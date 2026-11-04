@@ -31,14 +31,13 @@ und stoppen“), Absatz „Mehrere Devcontainer je Projekt (Instanzen)“ —
 die Make-Targets reichen die Werte unverändert als Flaggen durch.
 
 **Umgebungsdatei dieses Repos.** `.devcontainer/devcontainer.json` verweist
-auf `.devcontainer/devcontainer.env`. Die Datei dieses Repos ist bewusst
-getrackt und enthält nur Kommentare; ein frischer Klon trägt sie, ein
-`u-boot generate devcontainer` ist dafür nicht nötig. Eigene Variablen gehören
-nicht hinein (lokale Änderungen nicht committen); die Vorlage
-`.devcontainer/devcontainer.env.example` liegt im Repo. Für Nutzerprojekte
-gilt: deren Datei ist ignoriert und fehlt im frischen Klon, dort einmal
-`u-boot generate devcontainer` vor dem Start, sonst bricht Docker den Start ab
-(Exit-Code 125, mit `docker run` gemessen).
+auf `.devcontainer/devcontainer.env`. Die Datei ist ignoriert (`.gitignore`)
+und liegt nicht im Repo; sie gehört dem Entwickler und darf Werte tragen. Die
+Vorlage `.devcontainer/devcontainer.env.example` liegt im Repo. In einem
+frischen Klon fehlt die Datei: einmal `u-boot generate devcontainer` vor dem
+ersten `make dev-up` oder `make dev-shell` (es legt sie mit einem Kommentar-Kopf
+an), sonst bricht Docker den Start ab (Exit-Code 125, mit `docker run`
+gemessen). Dasselbe gilt für jedes Nutzerprojekt.
 
 ## Voraussetzungen und Umgebung
 

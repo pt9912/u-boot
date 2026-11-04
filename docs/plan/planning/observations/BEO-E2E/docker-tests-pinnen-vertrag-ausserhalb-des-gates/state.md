@@ -1,0 +1,1 @@
+**Stand:** offen — Trigger: ein weiterer Vertragswechsel, dessen Docker-Test-Pin erst im Volllauf von `make test-docker` auffällt, oder die Aufnahme der Docker-Tests in die Kompilierprüfung des Gates.
