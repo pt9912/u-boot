@@ -274,7 +274,7 @@ make dev-shell                  # eine Shell darin öffnen
 make dev-up INSTANCE=agent-1    # zweiten Devcontainer desselben Projekts starten (INSTANCE=<name> wählt die Instanz; make dev-down INSTANCE=agent-1 stoppt sie)
 make help                       # alle Targets auflisten
 make build                      # Runtime-Image bauen (Distroless)
-make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung (im Devcontainer-Container)
+make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung + tool-pruefung (im Devcontainer-Container)
 make ci                         # gates + govulncheck + image-scan
 make fullbuild                  # ci + build (vollständiger Closure-Lauf)
 ```
