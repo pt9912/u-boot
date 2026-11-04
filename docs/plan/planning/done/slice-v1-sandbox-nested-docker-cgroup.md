@@ -48,7 +48,7 @@ Drei Liefer-Punkte; Gate-Läufe und Closure-Pflichten zählen nicht mit.
 - [x] **Erzeugung.** Das Template startet den Umbau vor `dockerd` (Ort laut ADR); vier Unit-Tests für Ort, Bedingung und Schritte, Fehlschlag und „nur mit nested Docker“ (mit und ohne nested Docker) samt Zeile in `harness/replay.md`; ein Docker-Test (Build-Tag `docker`) belegt `memory.max` und `cpu.max` im verschachtelten Container eines Wegwerf-Containers (ein Lauf in der verschachtelten Engine dieses Entwicklungs-Devcontainers); das eigene Projekt ist regeneriert. *Geändert auf Entscheidung des Projektinhabers 2026-11-04: der Satz „die zwei roten Tests laufen in einem frisch angelegten Container grün“ entfällt hier und wandert an den Folge-Slice. Dry-Run: kein eigener Fall für `docker-init.sh`; die allgemeinen Dry-Run-Tests des Generators (`generate_rollback_test.go`, `generate_envfile_test.go`, `dryrun_log_test.go`) laufen im grünen `make test`, pinnen aber nicht diese Datei (Verification V-6, Entscheidung des Planners).*
 - [x] **Doku.** Handbuch (`docs/user/`) und `CHANGELOG.md` nennen nur das Gemessene; Nutzer-Doku ohne Kennungen ([`AGENTS.md`](../../../../AGENTS.md) §5 Regel 6); `docs/maintainer/devcontainer-arbeiten.md` nennt den Umbau.
 - [x] `make gates` grün im Devcontainer-Container (Verifier-Lauf auf `e6083d7d`, Exit 0). *(nicht gezählt — Gate-Lauf)*
-- [ ] Review, Verifikation, Closure-Notiz, Register, Risiko-Ausgänge, Drei-Paarungen. *(nicht gezählt — Closure-Pflichten)*
+- [x] Review, Verifikation, Closure-Notiz, Register, Risiko-Ausgänge, Drei-Paarungen. *(nicht gezählt — Closure-Pflichten)*
 
 ## 3. Plan (vor Code)
 

@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-[`slice-v1-sandbox-nested-docker-cgroup`](../done/slice-v1-sandbox-nested-docker-cgroup.md) liegt in `in-progress/` — cgroup-Umbau beim Start des Sandbox-Devcontainers mit nested Docker nach dem dind-Muster, damit `--memory` und `--cpus` verschachtelte Container erreichen: Entscheidung zum Startort, Umsetzung im Start-Skript, Messung nach Neuanlage des Devcontainers durch den Projektinhaber.
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
