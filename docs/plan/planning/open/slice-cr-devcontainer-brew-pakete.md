@@ -75,6 +75,11 @@ DoD vollständig, Wortlaut im Lastenheft, `make gates` grün, Reports liegen vor
 
 **Vorgelagert — Sub-Area-Wahl prüfen:** berührt sind `spec/` und `docs/plan/` (DOK); beide stehen in `harness/conventions.md` §Modus-Deklaration.
 
-**Vorgelagert — offene Beobachtungen sichten:** vor dem Übergang nach `next/` auszuführen (Register `docs/plan/planning/observations/`); der Entwurf trägt noch kein Ergebnis.
+**Vorgelagert — offene Beobachtungen sichten:** Register durchgegangen (Stichworte Zusage, Messung, Vertragsänderung, Freigabe); vier Treffer:
+
+- [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) (37 Evidence-Dateien, offen, kein Ausgang zugewiesen): der Neu-Wortlaut trägt nur Gemessenes oder ein ausgewiesenes Zielbild; der Reviewer prüft jeden Satz gegen die Grundlage (DoD 1, Risiko 1).
+- [`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md) (17 Evidence-Dateien, offen): ein Wortlaut, der nach dem Review entsteht, hat ihn nicht durchlaufen; die Übernahme ins Lastenheft ändert den freigegebenen Wortlaut nicht, und jede Abweichung steht im CR-Vorschlag (DoD 2).
+- [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) (41 Evidence-Dateien, verkörpert in `AGENTS.md` §3.10): jede Bedingung im Neu-Wortlaut („nur wenn“, „immer“) bekommt im Umsetzungs-Slice einen pinnenden Test oder entfällt.
+- [`BEO-DOK/freigabe-vorlage-verdichtet-den-entwurf`](../observations/BEO-DOK/freigabe-vorlage-verdichtet-den-entwurf/observation.md) (1 Evidence-Datei, offen): die Vorlage an den Projektinhaber zeigt den Wortlaut Satz für Satz und nicht verdichtet.
 
 **Modus-Begründungsblock:** alle berührten Sub-Areas sind Greenfield. Kein BF-/Hybrid-Block nötig.
