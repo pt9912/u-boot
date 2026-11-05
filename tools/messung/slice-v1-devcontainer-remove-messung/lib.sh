@@ -7,8 +7,8 @@
 #   WORK   Messordner AUSSERHALB des Repos (erzeugte Projekte, Logs, Register); wird vom Aufrufer gewaehlt
 #   OUT    Ausgabeverzeichnis der Rohdaten (Vorgabe: docs/messungen/slice-v1-devcontainer-remove-messung)
 #
-# Alle Docker-Objekte tragen das Praefix PFX: Projekt- und Volume-Namen beginnen mit ubmess-rm, die Container mit u-boot-ubmess-rm
-# (so benennt `u-boot devcontainer up` den Container: u-boot-<projekt>[-<instanz>]), die Images mit vsc-ubmess-rm.
+# Alle Docker-Objekte tragen das Praefix PFX, gefolgt von einem Bindestrich: Projekt- und Volume-Namen beginnen mit ubmess-rm-, die Container
+# mit u-boot-ubmess-rm- (so benennt `u-boot devcontainer up` den Container: u-boot-<projekt>[-<instanz>]), die Images mit vsc-ubmess-rm-.
 # Die Messung liest keine Zugangsdaten und setzt keine: GIT_TOKEN ist ein Platzhalter.
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -36,7 +36,7 @@ rohdaten() {
 
 now() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 mark() { echo; echo "---- $(now) $*"; }
-# Eine stabile Aussage, die ein zweiter Lauf wiederholen muss (siehe README, Lesehilfen).
+# Eine stabile Aussage, die ein zweiter Lauf wiederholen muss (siehe README, Abschnitt Aufruf).
 aussage() { echo "AUSSAGE $*"; }
 
 # befehl <argumente...>  Gibt den Befehl, seine Ausgabe (eingerueckt) und den Exit-Code aus; setzt RC.
@@ -118,11 +118,15 @@ merke_volumes() {
   mount_volumes "$1" >> "$REGISTER"
 }
 vol_alle() { docker volume ls -q | sort; }
+# hat_label <container-id> <schluessel>  "vorhanden", wenn der Schluessel in der Label-Map des Containers steht (auch mit leerem Wert), sonst "fehlt".
+hat_label() {
+  docker inspect --format '{{range $k, $v := .Config.Labels}}{{$k}}{{"\n"}}{{end}}' "$1" | grep -qxF -- "$2" && echo vorhanden || echo fehlt
+}
 
 # objekte_entfernen [mit-images]  Entfernt Container, Volumes (Register und Praefix) und, mit Argument, Images, deren Name das Praefix traegt.
 # Loescht nach dem Namen, nie nach Zeitfenstern, nie mit einem Glob ueber fremde Namen.
 objekte_entfernen() {
-  local n v pat_c="^(u-boot-)?$PFX" pat_v="^$PFX" pat_i="^vsc-$PFX"
+  local n v pat_c="^(u-boot-)?$PFX-" pat_v="^$PFX-" pat_i="^vsc-$PFX-"
   docker ps -a --format '{{.Names}}' | while read -r n; do
     [[ $n =~ $pat_c ]] && { merke_volumes "$n"; echo "entferne container $n"; docker rm -f -v "$n" > /dev/null; }
   done
@@ -139,7 +143,7 @@ objekte_entfernen() {
 
 praefix_objekte() {
   { docker ps -a --format 'container {{.Names}}'; docker volume ls -q | sed 's/^/volume /'; docker images --format 'image {{.Repository}}:{{.Tag}}'; } \
-    | grep -E "^(container (u-boot-)?$PFX|volume $PFX|image vsc-$PFX)" || true
+    | grep -E "^(container (u-boot-)?$PFX-|volume $PFX-|image vsc-$PFX-)" || true
 }
 
 # inventur <praefix-datei>  Schreibt Container, Volumes und Images der Engine sortiert in <praefix>.ps/.vol/.img.
@@ -147,6 +151,14 @@ inventur() {
   docker ps -a --format '{{.Names}}' | sort > "$1.ps"
   docker volume ls -q | sort > "$1.vol"
   docker images --format '{{.Repository}}:{{.Tag}}' | sort > "$1.img"
+}
+
+# inventur_zeigen <vorher|nachher> <praefix-datei>  Schreibt die Inventur in die Rohdaten: die Zahl und die Namen der Container und
+# Volumes der Engine. Vor dem Lauf tragen alle das Praefix nicht (Reste mit dem Praefix hat `anfang` entfernt): es sind die fremden Objekte.
+inventur_zeigen() {
+  echo "inventur $1: container=$(wc -l < "$2.ps") volumes=$(wc -l < "$2.vol") (Objekte der Engine; vor dem Lauf alle ohne das Praefix $PFX-)"
+  sed 's/^/  container /' "$2.ps"
+  sed 's/^/  volume /' "$2.vol"
 }
 
 # anfang / ende  Vorpruefung (keine Objekte mit dem Praefix), Inventur vorher; am Ende Aufraeumen der Container und Volumes und Differenz.
@@ -157,6 +169,7 @@ anfang() {
   local rest; rest=$(praefix_objekte | grep -v '^image ' || true)
   if [ -n "$rest" ]; then echo "BEFUND: Objekte mit dem Praefix $PFX sind vorhanden (Aufraeumen davor):"; echo "$rest"; objekte_entfernen; fi
   inventur "$TMP/vorher-$$"
+  inventur_zeigen "vorher" "$TMP/vorher-$$"
   trap 'ende' EXIT
 }
 ende() {
@@ -164,6 +177,7 @@ ende() {
   mark "Aufraeumen (Container und Volumes mit dem Praefix; Images bleiben bis 05-aufraeumen.sh)"
   objekte_entfernen
   inventur "$TMP/nachher-$$"
+  inventur_zeigen "nachher" "$TMP/nachher-$$"
   for k in ps vol; do
     echo "--- Differenz $k (vorher -> nachher; leer = keine)"
     diff "$TMP/vorher-$$.$k" "$TMP/nachher-$$.$k"

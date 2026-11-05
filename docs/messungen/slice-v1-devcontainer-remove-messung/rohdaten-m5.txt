@@ -1,0 +1,112 @@
+== M5 down ohne --instance, 2026-11-05T13:28:44Z
+host: x86_64 docker=29.9.3 linux/amd64 u-boot: u-boot version 0.23.0-dev
+engine: storage-driver=overlayfs cgroup=cgroupfs/v2 security=name=seccomp,profile=builtin;name=cgroupns; os=Debian GNU/Linux 13 (trixie) (containerized) kernel=6.8.0-147-generic
+hilfs-image von u-boot devcontainer up: u-boot-devcontainer-cli:0.89.0-f1a94cce795e 
+inventur vorher: container=7 volumes=2 (Objekte der Engine; vor dem Lauf alle ohne das Praefix ubmess-rm-)
+  container boring_noyce
+  container nice_fermi
+  container pedantic_spence
+  container relaxed_archimedes
+  container stoic_aryabhata
+  container stupefied_elion
+  container unruffled_perlman
+  volume dcsdmn72acy22yw-workspace-016rd3l6oepcl7l4k8jkm6jsjubsovn1p7pp77b3s0vhm8q0dt9k
+  volume dcsdmn7vfi1bhvb-workspace-0ptmh2rmt8hdne4ldc9gp094hge0tedgnm8hv52l46109svrppcp
+
+---- 2026-11-05T13:28:45Z A: Projekt sbx ohne Container
+projekt sbx: sandbox=1 
+  json: 11:  "mounts": ["source=ubmess-rm-sbx-workspace-${devcontainerId},target=/workspaces/ubmess-rm-sbx,type=volume"],
+-- Container des Projektordners (Name, Zustand, Label u-boot.instance):
+  No devcontainer container found for this project; nothing to stop
+u-boot devcontainer down (Projekt sbx): exit=0
+AUSSAGE m5-a-down-ohne-container-exit=0
+  No devcontainer container found for this project; nothing to stop
+u-boot devcontainer down --instance a (Projekt sbx): exit=0
+AUSSAGE m5-a-down-instanz-a-ohne-container-exit=0
+
+---- 2026-11-05T13:28:45Z B: Container ohne Instanz, Instanz a, Instanz b
+u-boot devcontainer up (Projekt sbx): exit=0 dauer=6s
+  Devcontainer started: container 98aa6e5564b1, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+AUSSAGE m5-b-up-ohne-instanz-exit=0
+u-boot devcontainer up --instance a (Projekt sbx): exit=0 dauer=6s
+  Devcontainer started: container 6ba3dacd52e8, name u-boot-ubmess-rm-sbx-a, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+AUSSAGE m5-b-up-a-exit=0
+u-boot devcontainer up --instance b (Projekt sbx): exit=0 dauer=5s
+  Devcontainer started: container a22f07d5c570, name u-boot-ubmess-rm-sbx-b, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+AUSSAGE m5-b-up-b-exit=0
+container: ohne=98aa6e5564b1 a=6ba3dacd52e8 b=a22f07d5c570
+-- Container des Projektordners (Name, Zustand, Label u-boot.instance):
+u-boot-ubmess-rm-sbx state=running instance=
+u-boot-ubmess-rm-sbx-a state=running instance=a
+u-boot-ubmess-rm-sbx-b state=running instance=b
+  Devcontainer stopped: container 98aa6e5564b1 (not removed)
+u-boot devcontainer down (Projekt sbx): exit=0
+AUSSAGE m5-b-down-ohne-instanz-exit=0
+AUSSAGE m5-b-nach-down-ohne-instanz: ohne-instanz-laeuft=false a-laeuft=true b-laeuft=true
+-- Container des Projektordners (Name, Zustand, Label u-boot.instance):
+u-boot-ubmess-rm-sbx state=exited instance=
+u-boot-ubmess-rm-sbx-a state=running instance=a
+u-boot-ubmess-rm-sbx-b state=running instance=b
+
+---- 2026-11-05T13:29:03Z C: nur Instanz-Container (Container ohne Instanz mit docker rm -f -v entfernt)
+$ docker rm -f -v 98aa6e5564b19776f82d2d92ad493ba6641c6b31ef21e659f6ecd9bdff3bc7af
+  98aa6e5564b19776f82d2d92ad493ba6641c6b31ef21e659f6ecd9bdff3bc7af
+  -> exit=0
+-- Container des Projektordners (Name, Zustand, Label u-boot.instance):
+u-boot-ubmess-rm-sbx-a state=running instance=a
+u-boot-ubmess-rm-sbx-b state=running instance=b
+  u-boot: devcontainer down: devcontainer: the project has only containers of instances; pass --instance <name> to act on one of them
+u-boot devcontainer down (Projekt sbx): exit=10
+AUSSAGE m5-c-down-ohne-instanz-nur-instanzen-exit=10
+AUSSAGE m5-c-nach-down: a-laeuft=true b-laeuft=true
+u-boot devcontainer up (Projekt sbx): exit=10 dauer=0s
+  log: Warning: this command mounts the host container-engine socket into a short-lived helper container (root-equivalent access to the engine for the duration of the call); the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature doc
+  log: u-boot: devcontainer up: devcontainer: the project has only containers of instances; pass --instance <name> to act on one of them
+AUSSAGE m5-c-up-ohne-instanz-nur-instanzen-exit=10
+AUSSAGE m5-c-container-ohne-instanz-angelegt=nein
+-- Container des Projektordners (Name, Zustand, Label u-boot.instance):
+u-boot-ubmess-rm-sbx-a state=running instance=a
+u-boot-ubmess-rm-sbx-b state=running instance=b
+
+---- 2026-11-05T13:29:03Z D: Instanz a gestoppt (down --instance a), b laeuft
+  Devcontainer stopped: container 6ba3dacd52e8 (not removed)
+u-boot devcontainer down --instance a (Projekt sbx): exit=0
+AUSSAGE m5-d-down-a-exit=0
+AUSSAGE m5-d-a-laeuft=false b-laeuft=true
+  u-boot: devcontainer down: devcontainer: the project has only containers of instances; pass --instance <name> to act on one of them
+u-boot devcontainer down (Projekt sbx): exit=10
+AUSSAGE m5-d-down-ohne-instanz-exit=10
+AUSSAGE m5-d-nach-down: a-laeuft=false b-laeuft=true
+
+---- 2026-11-05T13:29:04Z E: alle Instanz-Container gestoppt
+  Devcontainer stopped: container a22f07d5c570 (not removed)
+u-boot devcontainer down --instance b (Projekt sbx): exit=0
+AUSSAGE m5-e-down-b-exit=0
+AUSSAGE m5-e-a-laeuft=false b-laeuft=false
+-- Container des Projektordners (Name, Zustand, Label u-boot.instance):
+u-boot-ubmess-rm-sbx-a state=exited instance=a
+u-boot-ubmess-rm-sbx-b state=exited instance=b
+  u-boot: devcontainer down: devcontainer: the project has only containers of instances; pass --instance <name> to act on one of them
+u-boot devcontainer down (Projekt sbx): exit=10
+AUSSAGE m5-e-down-ohne-instanz-nur-gestoppte-instanzen-exit=10
+
+---- 2026-11-05T13:29:04Z Aufraeumen (Container und Volumes mit dem Praefix; Images bleiben bis 05-aufraeumen.sh)
+entferne container u-boot-ubmess-rm-sbx-b
+entferne container u-boot-ubmess-rm-sbx-a
+entferne volume ubmess-rm-sbx-workspace-0gfkm8jmddlc3od4n0trllml9k92fqar5u06cpdnk42sje7j5bkf
+entferne volume ubmess-rm-sbx-workspace-1gju3f82i5hjh0eskt8q07avs0rvr5vs9u3fu4faqj2j7bpf44ik
+entferne volume ubmess-rm-sbx-workspace-1u4nbjl5em3rddb9tusopjsgus6lpfmgkm8501nr0ifcto5qnfvb
+inventur nachher: container=7 volumes=2 (Objekte der Engine; vor dem Lauf alle ohne das Praefix ubmess-rm-)
+  container boring_noyce
+  container nice_fermi
+  container pedantic_spence
+  container relaxed_archimedes
+  container stoic_aryabhata
+  container stupefied_elion
+  container unruffled_perlman
+  volume dcsdmn72acy22yw-workspace-016rd3l6oepcl7l4k8jkm6jsjubsovn1p7pp77b3s0vhm8q0dt9k
+  volume dcsdmn7vfi1bhvb-workspace-0ptmh2rmt8hdne4ldc9gp094hge0tedgnm8hv52l46109svrppcp
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Reste mit dem Praefix (Container, Volumes): 0
+== ende 2026-11-05T13:29:05Z

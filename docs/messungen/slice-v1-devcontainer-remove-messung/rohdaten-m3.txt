@@ -1,40 +1,55 @@
-== M3 Instanzen, 2026-11-05T13:11:05Z
+== M3 Instanzen, 2026-11-05T13:27:21Z
 host: x86_64 docker=29.9.3 linux/amd64 u-boot: u-boot version 0.23.0-dev
 engine: storage-driver=overlayfs cgroup=cgroupfs/v2 security=name=seccomp,profile=builtin;name=cgroupns; os=Debian GNU/Linux 13 (trixie) (containerized) kernel=6.8.0-147-generic
 hilfs-image von u-boot devcontainer up: u-boot-devcontainer-cli:0.89.0-f1a94cce795e 
+inventur vorher: container=7 volumes=2 (Objekte der Engine; vor dem Lauf alle ohne das Praefix ubmess-rm-)
+  container boring_noyce
+  container nice_fermi
+  container pedantic_spence
+  container relaxed_archimedes
+  container stoic_aryabhata
+  container stupefied_elion
+  container unruffled_perlman
+  volume dcsdmn72acy22yw-workspace-016rd3l6oepcl7l4k8jkm6jsjubsovn1p7pp77b3s0vhm8q0dt9k
+  volume dcsdmn7vfi1bhvb-workspace-0ptmh2rmt8hdne4ldc9gp094hge0tedgnm8hv52l46109svrppcp
 
----- 2026-11-05T13:11:06Z Projekt sbx: drei Container
+---- 2026-11-05T13:27:22Z Projekt sbx: drei Container
 projekt sbx: sandbox=1 
   json: 11:  "mounts": ["source=ubmess-rm-sbx-workspace-${devcontainerId},target=/workspaces/ubmess-rm-sbx,type=volume"],
 u-boot devcontainer up (Projekt sbx): exit=0 dauer=4s
-  Devcontainer started: container 79b5541b70c8, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+  Devcontainer started: container b40e6baaadf6, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
 AUSSAGE m3-sbx-up-ohne-instanz-exit=0
 u-boot devcontainer up --instance a (Projekt sbx): exit=0 dauer=5s
-  Devcontainer started: container 828e274986e0, name u-boot-ubmess-rm-sbx-a, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+  Devcontainer started: container b4e8bfb9aaeb, name u-boot-ubmess-rm-sbx-a, remote user vscode, workspace /workspaces/ubmess-rm-sbx
 AUSSAGE m3-sbx-up-a-exit=0
 u-boot devcontainer up --instance b (Projekt sbx): exit=0 dauer=5s
-  Devcontainer started: container 0c111041f6c2, name u-boot-ubmess-rm-sbx-b, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+  Devcontainer started: container 031eeb988902, name u-boot-ubmess-rm-sbx-b, remote user vscode, workspace /workspaces/ubmess-rm-sbx
 AUSSAGE m3-sbx-up-b-exit=0
-container: ohne=79b5541b70c8 a=828e274986e0 b=0c111041f6c2
+container: ohne=b40e6baaadf6 a=b4e8bfb9aaeb b=031eeb988902
 -- Mounts (0):
-  mount type=volume name=ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk ziel=/workspaces/ubmess-rm-sbx rw=true
+  mount type=volume name=ubmess-rm-sbx-workspace-1gju3f82i5hjh0eskt8q07avs0rvr5vs9u3fu4faqj2j7bpf44ik ziel=/workspaces/ubmess-rm-sbx rw=true
 
 -- Mounts (a):
-  mount type=volume name=ubmess-rm-sbx-workspace-0ca1sr1fencagsqsi9u2i5s9p4vgq1m37r0fpl084ucr94e2r392 ziel=/workspaces/ubmess-rm-sbx rw=true
+  mount type=volume name=ubmess-rm-sbx-workspace-0gfkm8jmddlc3od4n0trllml9k92fqar5u06cpdnk42sje7j5bkf ziel=/workspaces/ubmess-rm-sbx rw=true
 
 -- Mounts (b):
-  mount type=volume name=ubmess-rm-sbx-workspace-0jl5hd8parrhlq4s08ad7ua9fqcehfhjqukn4gk8miemv4le31gj ziel=/workspaces/ubmess-rm-sbx rw=true
+  mount type=volume name=ubmess-rm-sbx-workspace-1u4nbjl5em3rddb9tusopjsgus6lpfmgkm8501nr0ifcto5qnfvb ziel=/workspaces/ubmess-rm-sbx rw=true
 
 AUSSAGE m3-sbx-workspace-volumes-verschieden=ja
 -- docker volume ls --filter name=ubmess-rm-sbx-workspace- (Namen allein; welcher Name zu welchem Container gehoert, steht nicht darin):
-  ubmess-rm-sbx-workspace-0ca1sr1fencagsqsi9u2i5s9p4vgq1m37r0fpl084ucr94e2r392
-  ubmess-rm-sbx-workspace-0jl5hd8parrhlq4s08ad7ua9fqcehfhjqukn4gk8miemv4le31gj
-  ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  ubmess-rm-sbx-workspace-0gfkm8jmddlc3od4n0trllml9k92fqar5u06cpdnk42sje7j5bkf
+  ubmess-rm-sbx-workspace-1gju3f82i5hjh0eskt8q07avs0rvr5vs9u3fu4faqj2j7bpf44ik
+  ubmess-rm-sbx-workspace-1u4nbjl5em3rddb9tusopjsgus6lpfmgkm8501nr0ifcto5qnfvb
 -- Namenslaenge: ohne=76 a=76 b=76
 -- Labels der drei Container (devcontainer.local_folder / u-boot.instance):
 u-boot-ubmess-rm-sbx-b instance=b
 u-boot-ubmess-rm-sbx-a instance=a
 u-boot-ubmess-rm-sbx instance=
+-- Schluessel u-boot.instance in Config.Labels (docker inspect; vorhanden = der Schluessel steht in der Label-Map, auch mit leerem Wert):
+  container 0: fehlt wert=''
+  container a: vorhanden wert='a'
+  container b: vorhanden wert='b'
+AUSSAGE m3-sbx-label-u-boot.instance-schluessel: ohne-instanz=fehlt a=vorhanden b=vorhanden
 -- Filter auf das Instanz-Label a: 1 Container
 -- Marker je Instanz in das Workspace-Volume schreiben und gegenpruefen (Isolation):
   container 0 liest: marker-0
@@ -42,12 +57,12 @@ u-boot-ubmess-rm-sbx instance=
   container b liest: marker-b
 AUSSAGE m3-sbx-marker-isoliert=ja
 
----- 2026-11-05T13:11:21Z Entfernen der Instanz a (Container und die Volumes AUS DEREN Mounts)
-Volumes aus Mounts von a: ubmess-rm-sbx-workspace-0ca1sr1fencagsqsi9u2i5s9p4vgq1m37r0fpl084ucr94e2r392
-$ docker rm -f 828e274986e084c372d8a498e5be74d9633c92e94a76564022da8c3c0aadc6d6
-  828e274986e084c372d8a498e5be74d9633c92e94a76564022da8c3c0aadc6d6
+---- 2026-11-05T13:27:38Z Entfernen der Instanz a (Container und die Volumes AUS DEREN Mounts)
+Volumes aus Mounts von a: ubmess-rm-sbx-workspace-0gfkm8jmddlc3od4n0trllml9k92fqar5u06cpdnk42sje7j5bkf
+$ docker rm -f b4e8bfb9aaebc4767c6ef3db3a8bafe83b84ad58d1dd72d0014d573fedfa7bd7
+  b4e8bfb9aaebc4767c6ef3db3a8bafe83b84ad58d1dd72d0014d573fedfa7bd7
   -> exit=0
-  volume rm ubmess-rm-sbx-workspace-0ca1sr1fencagsqsi9u2i5s9p4vgq1m37r0fpl084ucr94e2r392 exit=0
+  volume rm ubmess-rm-sbx-workspace-0gfkm8jmddlc3od4n0trllml9k92fqar5u06cpdnk42sje7j5bkf exit=0
 AUSSAGE m3-sbx-a-container-nach-entfernen=entfernt a-volume=entfernt
 AUSSAGE m3-sbx-ohne-instanz-unberuehrt: container-laeuft=true volume=vorhanden marker=marker-0
 AUSSAGE m3-sbx-b-unberuehrt: container-laeuft=true volume=vorhanden marker=marker-b
@@ -55,59 +70,59 @@ AUSSAGE m3-sbx-b-unberuehrt: container-laeuft=true volume=vorhanden marker=marke
   No devcontainer container found for this project; nothing to stop
 u-boot devcontainer down --instance a (Projekt sbx): exit=0
 AUSSAGE m3-sbx-down-a-nach-entfernen-exit=0
-  Devcontainer stopped: container 0c111041f6c2 (not removed)
+  Devcontainer stopped: container 031eeb988902 (not removed)
 u-boot devcontainer down --instance b (Projekt sbx): exit=0
 AUSSAGE m3-sbx-down-b-exit=0 (stoppt nur b)
 AUSSAGE m3-sbx-nach-down-b: ohne-instanz-laeuft=true b-laeuft=false
 -- Entfernen von b und des Containers ohne Instanz bleibt je einzeln: erst b
 AUSSAGE m3-sbx-nach-entfernen-von-b: ohne-instanz-laeuft=true volume-ohne-instanz=vorhanden volume-b=entfernt
 
----- 2026-11-05T13:11:23Z Projekt full (nestedRuntime docker + ollama): Instanzen a und b
+---- 2026-11-05T13:27:40Z Projekt full (nestedRuntime docker + ollama): Instanzen a und b
 projekt full: sandbox=1 devcontainer.sandbox.nestedRuntime=docker devcontainer.features.ollama.enabled=true
   json: 11:  "mounts": [
   json: 12-    "source=ubmess-rm-full-workspace-${devcontainerId},target=/workspaces/ubmess-rm-full,type=volume",
   json: 13-    "source=ubmess-rm-full-docker-${devcontainerId},target=/var/lib/docker,type=volume",
   json: 14-    "source=ubmess-rm-full-ollama-${devcontainerId},target=/home/vscode/.ollama,type=volume"
-u-boot devcontainer up --instance a (Projekt full): exit=0 dauer=7s
-  Devcontainer started: container 7a6bc236e523, name u-boot-ubmess-rm-full-a, remote user vscode, workspace /workspaces/ubmess-rm-full
+u-boot devcontainer up --instance a (Projekt full): exit=0 dauer=6s
+  Devcontainer started: container 865f9aeb01b6, name u-boot-ubmess-rm-full-a, remote user vscode, workspace /workspaces/ubmess-rm-full
 AUSSAGE m3-full-up-a-exit=0
-u-boot devcontainer up --instance b (Projekt full): exit=0 dauer=7s
-  Devcontainer started: container a8dcf99f415b, name u-boot-ubmess-rm-full-b, remote user vscode, workspace /workspaces/ubmess-rm-full
+u-boot devcontainer up --instance b (Projekt full): exit=0 dauer=6s
+  Devcontainer started: container 7129f5eee8cd, name u-boot-ubmess-rm-full-b, remote user vscode, workspace /workspaces/ubmess-rm-full
 AUSSAGE m3-full-up-b-exit=0
 -- Mounts (a):
-  mount type=volume name=ubmess-rm-full-workspace-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk ziel=/workspaces/ubmess-rm-full rw=true
-  mount type=volume name=ubmess-rm-full-ollama-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk ziel=/home/vscode/.ollama rw=true
-  mount type=volume name=ubmess-rm-full-docker-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk ziel=/var/lib/docker rw=true
+  mount type=volume name=ubmess-rm-full-workspace-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl ziel=/workspaces/ubmess-rm-full rw=true
+  mount type=volume name=ubmess-rm-full-ollama-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl ziel=/home/vscode/.ollama rw=true
+  mount type=volume name=ubmess-rm-full-docker-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl ziel=/var/lib/docker rw=true
 
 -- Mounts (b):
-  mount type=volume name=ubmess-rm-full-workspace-0vo363e3eaamj6l472jfaivcpsc2c9eog5cbnrusr73l9ivu54j0 ziel=/workspaces/ubmess-rm-full rw=true
-  mount type=volume name=ubmess-rm-full-ollama-0vo363e3eaamj6l472jfaivcpsc2c9eog5cbnrusr73l9ivu54j0 ziel=/home/vscode/.ollama rw=true
-  mount type=volume name=ubmess-rm-full-docker-0vo363e3eaamj6l472jfaivcpsc2c9eog5cbnrusr73l9ivu54j0 ziel=/var/lib/docker rw=true
+  mount type=volume name=ubmess-rm-full-workspace-080l5kgi09t68nc8no9i1khs9im2ur4qr20jtbcj96jsg3bqcf38 ziel=/workspaces/ubmess-rm-full rw=true
+  mount type=volume name=ubmess-rm-full-ollama-080l5kgi09t68nc8no9i1khs9im2ur4qr20jtbcj96jsg3bqcf38 ziel=/home/vscode/.ollama rw=true
+  mount type=volume name=ubmess-rm-full-docker-080l5kgi09t68nc8no9i1khs9im2ur4qr20jtbcj96jsg3bqcf38 ziel=/var/lib/docker rw=true
 
 AUSSAGE m3-full-volumes-a=3 b=3 gemeinsame=0
 -- Familien je Volume (Ziel im Container -> Namensinfix):
-  [a] /workspaces/ubmess-rm-full -> ubmess-rm-full-workspace-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk
-  [a] /home/vscode/.ollama -> ubmess-rm-full-ollama-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk
-  [a] /var/lib/docker -> ubmess-rm-full-docker-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk
-  [b] /workspaces/ubmess-rm-full -> ubmess-rm-full-workspace-0vo363e3eaamj6l472jfaivcpsc2c9eog5cbnrusr73l9ivu54j0
-  [b] /home/vscode/.ollama -> ubmess-rm-full-ollama-0vo363e3eaamj6l472jfaivcpsc2c9eog5cbnrusr73l9ivu54j0
-  [b] /var/lib/docker -> ubmess-rm-full-docker-0vo363e3eaamj6l472jfaivcpsc2c9eog5cbnrusr73l9ivu54j0
+  [a] /workspaces/ubmess-rm-full -> ubmess-rm-full-workspace-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl
+  [a] /home/vscode/.ollama -> ubmess-rm-full-ollama-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl
+  [a] /var/lib/docker -> ubmess-rm-full-docker-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl
+  [b] /workspaces/ubmess-rm-full -> ubmess-rm-full-workspace-080l5kgi09t68nc8no9i1khs9im2ur4qr20jtbcj96jsg3bqcf38
+  [b] /home/vscode/.ollama -> ubmess-rm-full-ollama-080l5kgi09t68nc8no9i1khs9im2ur4qr20jtbcj96jsg3bqcf38
+  [b] /var/lib/docker -> ubmess-rm-full-docker-080l5kgi09t68nc8no9i1khs9im2ur4qr20jtbcj96jsg3bqcf38
 -- Entfernen von a mit den Volumes aus Mounts von a:
   rm -f exit=0
-  volume rm ubmess-rm-full-docker-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk exit=0
-  volume rm ubmess-rm-full-ollama-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk exit=0
-  volume rm ubmess-rm-full-workspace-09aabfa3l824db6cv3mifjkf3bfhjqlb6ph0bok50q313hfd9nkk exit=0
+  volume rm ubmess-rm-full-docker-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl exit=0
+  volume rm ubmess-rm-full-ollama-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl exit=0
+  volume rm ubmess-rm-full-workspace-0h28am8s9cmvi2vtt2b5mc7fmrq4hdb48ibdji2ddpj2sag1plvl exit=0
 AUSSAGE m3-full-a-volumes-nach-entfernen=      3 entfernt 
 AUSSAGE m3-full-b-volumes-nach-entfernen-von-a=      3 vorhanden  b-laeuft=true
 
----- 2026-11-05T13:11:39Z Projekt std (Standardprofil): Container ohne Instanz und Instanz x
+---- 2026-11-05T13:27:54Z Projekt std (Standardprofil): Container ohne Instanz und Instanz x
 projekt std: sandbox=0 
   json: kein Schluessel mounts
-u-boot devcontainer up (Projekt std): exit=0 dauer=4s
-  Devcontainer started: container 17a8dec710b2, name u-boot-ubmess-rm-std, remote user vscode, workspace /workspaces/ubmess-rm-std
+u-boot devcontainer up (Projekt std): exit=0 dauer=5s
+  Devcontainer started: container 35757ed5b8de, name u-boot-ubmess-rm-std, remote user vscode, workspace /workspaces/ubmess-rm-std
 AUSSAGE m3-std-up-ohne-instanz-exit=0
 u-boot devcontainer up --instance x (Projekt std): exit=0 dauer=5s
-  Devcontainer started: container 0ec7970a2e74, name u-boot-ubmess-rm-std-x, remote user vscode, workspace /workspaces/ubmess-rm-std
+  Devcontainer started: container 06666adeaf99, name u-boot-ubmess-rm-std-x, remote user vscode, workspace /workspaces/ubmess-rm-std
 AUSSAGE m3-std-up-x-exit=0
 -- Mounts (ohne Instanz):
   mount type=bind name= ziel=/workspaces/ubmess-rm-std rw=true
@@ -119,14 +134,24 @@ AUSSAGE m3-std-volumes-ohne=0 x=0
 AUSSAGE m3-std-bind-quelle-gleich=ja
 marker im Projektordner des Hosts: std-marker
 marker im Container ohne Instanz: std-marker
-$ docker rm -f -v 0ec7970a2e7469ef61e7932faf14175fedfe9ef5fb26a04c8b89a04c6d427e50
-  0ec7970a2e7469ef61e7932faf14175fedfe9ef5fb26a04c8b89a04c6d427e50
+$ docker rm -f -v 06666adeaf9942776f1470c032379721490ff821d2032159fd4c0ba68db1c7a9
+  06666adeaf9942776f1470c032379721490ff821d2032159fd4c0ba68db1c7a9
   -> exit=0
 AUSSAGE m3-std-nach-rm-von-x: marker-im-projektordner=std-marker ohne-instanz-laeuft=true
 
----- 2026-11-05T13:11:49Z Aufraeumen (Container und Volumes mit dem Praefix; Images bleiben bis 05-aufraeumen.sh)
+---- 2026-11-05T13:28:04Z Aufraeumen (Container und Volumes mit dem Praefix; Images bleiben bis 05-aufraeumen.sh)
 entferne container u-boot-ubmess-rm-std
+inventur nachher: container=7 volumes=2 (Objekte der Engine; vor dem Lauf alle ohne das Praefix ubmess-rm-)
+  container boring_noyce
+  container nice_fermi
+  container pedantic_spence
+  container relaxed_archimedes
+  container stoic_aryabhata
+  container stupefied_elion
+  container unruffled_perlman
+  volume dcsdmn72acy22yw-workspace-016rd3l6oepcl7l4k8jkm6jsjubsovn1p7pp77b3s0vhm8q0dt9k
+  volume dcsdmn7vfi1bhvb-workspace-0ptmh2rmt8hdne4ldc9gp094hge0tedgnm8hv52l46109svrppcp
 --- Differenz ps (vorher -> nachher; leer = keine)
 --- Differenz vol (vorher -> nachher; leer = keine)
 --- Reste mit dem Praefix (Container, Volumes): 0
-== ende 2026-11-05T13:11:51Z
+== ende 2026-11-05T13:28:06Z

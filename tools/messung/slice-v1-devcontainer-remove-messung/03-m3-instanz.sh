@@ -31,6 +31,9 @@ docker volume ls -q --filter "name=$P-workspace-" | sort | sed 's/^/  /'
 echo "-- Namenslaenge: ohne=${#V0} a=${#Va} b=${#Vb}"
 echo "-- Labels der drei Container (devcontainer.local_folder / u-boot.instance):"
 docker ps -a --no-trunc --filter "label=devcontainer.local_folder=$(dir_von sbx)" --format '  {{.Names}} instance={{.Label "u-boot.instance"}}'
+echo "-- Schluessel u-boot.instance in Config.Labels (docker inspect; vorhanden = der Schluessel steht in der Label-Map, auch mit leerem Wert):"
+for x in 0 a b; do eval "c=\$c$x"; echo "  container $x: $(hat_label "$c" u-boot.instance) wert='$(docker inspect --format '{{index .Config.Labels "u-boot.instance"}}' "$c")'"; done
+aussage "m3-sbx-label-u-boot.instance-schluessel: ohne-instanz=$(hat_label "$c0" u-boot.instance) a=$(hat_label "$ca" u-boot.instance) b=$(hat_label "$cb" u-boot.instance)"
 echo "-- Filter auf das Instanz-Label a: $(docker ps -aq --filter "label=u-boot.instance=a" --filter "label=devcontainer.local_folder=$(dir_von sbx)" | wc -l) Container"
 echo "-- Marker je Instanz in das Workspace-Volume schreiben und gegenpruefen (Isolation):"
 for x in 0 a b; do eval "c=\$c$x"; docker exec "$c" sh -c "echo marker-$x > /workspaces/$P/ubmess-marker"; done

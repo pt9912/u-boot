@@ -1,72 +1,82 @@
-== M4 Volumes, die das Entfernen des Containers ueberstehen, 2026-11-05T13:11:53Z
+== M4 Volumes, die das Entfernen des Containers ueberstehen, 2026-11-05T13:28:08Z
 host: x86_64 docker=29.9.3 linux/amd64 u-boot: u-boot version 0.23.0-dev
 engine: storage-driver=overlayfs cgroup=cgroupfs/v2 security=name=seccomp,profile=builtin;name=cgroupns; os=Debian GNU/Linux 13 (trixie) (containerized) kernel=6.8.0-147-generic
 hilfs-image von u-boot devcontainer up: u-boot-devcontainer-cli:0.89.0-f1a94cce795e 
+inventur vorher: container=7 volumes=2 (Objekte der Engine; vor dem Lauf alle ohne das Praefix ubmess-rm-)
+  container boring_noyce
+  container nice_fermi
+  container pedantic_spence
+  container relaxed_archimedes
+  container stoic_aryabhata
+  container stupefied_elion
+  container unruffled_perlman
+  volume dcsdmn72acy22yw-workspace-016rd3l6oepcl7l4k8jkm6jsjubsovn1p7pp77b3s0vhm8q0dt9k
+  volume dcsdmn7vfi1bhvb-workspace-0ptmh2rmt8hdne4ldc9gp094hge0tedgnm8hv52l46109svrppcp
 
----- 2026-11-05T13:11:54Z Projekt full, up
+---- 2026-11-05T13:28:09Z Projekt full, up
 projekt full: sandbox=1 devcontainer.sandbox.nestedRuntime=docker devcontainer.features.ollama.enabled=true
   json: 11:  "mounts": [
   json: 12-    "source=ubmess-rm-full-workspace-${devcontainerId},target=/workspaces/ubmess-rm-full,type=volume",
   json: 13-    "source=ubmess-rm-full-docker-${devcontainerId},target=/var/lib/docker,type=volume",
   json: 14-    "source=ubmess-rm-full-ollama-${devcontainerId},target=/home/vscode/.ollama,type=volume"
-u-boot devcontainer up (Projekt full): exit=0 dauer=9s
-  Devcontainer started: container 55dbd8e525ad, name u-boot-ubmess-rm-full, remote user vscode, workspace /workspaces/ubmess-rm-full
+u-boot devcontainer up (Projekt full): exit=0 dauer=7s
+  Devcontainer started: container d4cd69ed0bf4, name u-boot-ubmess-rm-full, remote user vscode, workspace /workspaces/ubmess-rm-full
 AUSSAGE m4-up-exit=0
 -- Mounts vor dem Entfernen:
-  mount type=volume name=ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 ziel=/workspaces/ubmess-rm-full rw=true
-  mount type=volume name=ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 ziel=/home/vscode/.ollama rw=true
-  mount type=volume name=ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 ziel=/var/lib/docker rw=true
+  mount type=volume name=ubmess-rm-full-workspace-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn ziel=/workspaces/ubmess-rm-full rw=true
+  mount type=volume name=ubmess-rm-full-ollama-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn ziel=/home/vscode/.ollama rw=true
+  mount type=volume name=ubmess-rm-full-docker-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn ziel=/var/lib/docker rw=true
 
-workspace=ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
-docker=ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
-ollama=ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
+workspace=ubmess-rm-full-workspace-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
+docker=ubmess-rm-full-docker-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
+ollama=ubmess-rm-full-ollama-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
 
----- 2026-11-05T13:12:03Z Inhalt anlegen
+---- 2026-11-05T13:28:16Z Inhalt anlegen
 Warning: could not connect to a running Ollama instance
 Warning: client version is 0.40.6
 total 28
-drwxr-xr-x 4 vscode vscode 4096 Nov  5 13:12 .
-drwx------ 1 vscode vscode 4096 Nov  5 13:12 ..
-drwxr-xr-x 2 vscode vscode 4096 Nov  5 13:12 cache
--rw------- 1 vscode vscode  387 Nov  5 13:12 id_ed25519
--rw-r--r-- 1 vscode vscode   81 Nov  5 13:12 id_ed25519.pub
-drwxr-xr-x 3 vscode vscode 4096 Nov  5 13:12 models
--rw-rw-rw- 1 vscode vscode   10 Nov  5 13:12 ubmess-marker
-time=2026-11-05T13:12:03.607Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="31.1 GiB" a
-time=2026-11-05T13:12:03.607Z level=INFO source=routes.go:2551 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
-time=2026-11-05T13:12:03.830Z level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=4h28m16.555296356s consecutive_failures=0
+drwxr-xr-x 4 vscode vscode 4096 Nov  5 13:28 .
+drwx------ 1 vscode vscode 4096 Nov  5 13:28 ..
+drwxr-xr-x 2 vscode vscode 4096 Nov  5 13:28 cache
+-rw------- 1 vscode vscode  387 Nov  5 13:28 id_ed25519
+-rw-r--r-- 1 vscode vscode   81 Nov  5 13:28 id_ed25519.pub
+drwxr-xr-x 3 vscode vscode 4096 Nov  5 13:28 models
+-rw-rw-rw- 1 vscode vscode   10 Nov  5 13:28 ubmess-marker
+time=2026-11-05T13:28:17.051Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="31.1 GiB" a
+time=2026-11-05T13:28:17.051Z level=INFO source=routes.go:2551 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+time=2026-11-05T13:28:17.224Z level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=4h46m52.584625339s consecutive_failures=0
 AUSSAGE m4-schluesselpaar-angelegt=ja
 
----- 2026-11-05T13:12:09Z docker rm -f -v des Containers
-$ docker rm -f -v 55dbd8e525ad35fcf6059a9d7c0612fd13e293751247860781bd33999744fd3a
-  55dbd8e525ad35fcf6059a9d7c0612fd13e293751247860781bd33999744fd3a
+---- 2026-11-05T13:28:23Z docker rm -f -v des Containers
+$ docker rm -f -v d4cd69ed0bf454f0c1862dbb8ed3f522913b082836960dba6acdcfff64b12b3e
+  d4cd69ed0bf454f0c1862dbb8ed3f522913b082836960dba6acdcfff64b12b3e
   -> exit=0
 AUSSAGE m4-rm-f-v-exit=0
-  ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: vorhanden
-  ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: vorhanden
-  ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: vorhanden
+  ubmess-rm-full-workspace-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn: vorhanden
+  ubmess-rm-full-docker-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn: vorhanden
+  ubmess-rm-full-ollama-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn: vorhanden
 AUSSAGE m4-volumes-nach-rm-f-v: workspace=vorhanden docker=vorhanden ollama=vorhanden
 
----- 2026-11-05T13:12:10Z Was die Engine ueber die verwaisten Volumes sagt
-  ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 labels=null options=null created=2026-11-05T13:12:00Z
-  ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 labels=null options=null created=2026-11-05T13:12:00Z
-  ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 labels=null options=null created=2026-11-05T13:12:00Z
+---- 2026-11-05T13:28:24Z Was die Engine ueber die verwaisten Volumes sagt
+  ubmess-rm-full-workspace-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn labels=null options=null created=2026-11-05T13:28:14Z
+  ubmess-rm-full-docker-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn labels=null options=null created=2026-11-05T13:28:14Z
+  ubmess-rm-full-ollama-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn labels=null options=null created=2026-11-05T13:28:14Z
 -- docker volume ls --filter dangling=true (nur Volumes dieses Projekts):
-  ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
-  ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
-  ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
+  ubmess-rm-full-docker-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
+  ubmess-rm-full-ollama-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
+  ubmess-rm-full-workspace-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
 -- docker system df -v, Volumes dieses Projekts (Platz):
-  ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 links=0 groesse=6B
-  ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 links=0 groesse=278.6kB
-  ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 links=0 groesse=2.519kB
+  ubmess-rm-full-docker-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn links=0 groesse=278.6kB
+  ubmess-rm-full-workspace-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn links=0 groesse=6B
+  ubmess-rm-full-ollama-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn links=0 groesse=2.519kB
 -- Auswahl nach dem Namen allein:
   Infix -ollama-: 1 Volume(s)
   gemeinsames Namensende (52 Zeichen) der drei: 1 verschiedene
   docker volume ls -q --filter name=ubmess-rm-full- : 3 Volume(s)
 
----- 2026-11-05T13:12:11Z up nach dem Entfernen: neuer Container, dieselben Volumes?
+---- 2026-11-05T13:28:25Z up nach dem Entfernen: neuer Container, dieselben Volumes?
 u-boot devcontainer up (Projekt full): exit=0 dauer=7s
-  Devcontainer started: container ac123ea87bb4, name u-boot-ubmess-rm-full, remote user vscode, workspace /workspaces/ubmess-rm-full
+  Devcontainer started: container 341f2950b70e, name u-boot-ubmess-rm-full, remote user vscode, workspace /workspaces/ubmess-rm-full
 AUSSAGE m4-up-nach-rm-exit=0
 AUSSAGE m4-neuer-container=ja
 AUSSAGE m4-volume-namen-gleich=ja
@@ -75,24 +85,34 @@ AUSSAGE m4-marker-docker=m4-docker
 AUSSAGE m4-marker-ollama=m4-ollama
 AUSSAGE m4-oeffentlicher-schluessel-gleich=ja
 
----- 2026-11-05T13:12:18Z Auswahl nach dem Entfernen allein ueber den Namen: alles ausser dem Ollama-Volume entfernen
+---- 2026-11-05T13:28:32Z Auswahl nach dem Entfernen allein ueber den Namen: alles ausser dem Ollama-Volume entfernen
   volume rm ubmess-rm-full-docker exit=0
   volume rm ubmess-rm-full-workspace exit=0
 AUSSAGE m4-nach-auswahl: workspace=entfernt docker=entfernt ollama=vorhanden
 
----- 2026-11-05T13:12:19Z Neuanlage mit dem verbliebenen Ollama-Volume
-u-boot devcontainer up (Projekt full): exit=0 dauer=8s
-  Devcontainer started: container 4a3f15d69b8b, name u-boot-ubmess-rm-full, remote user vscode, workspace /workspaces/ubmess-rm-full
+---- 2026-11-05T13:28:33Z Neuanlage mit dem verbliebenen Ollama-Volume
+u-boot devcontainer up (Projekt full): exit=0 dauer=7s
+  Devcontainer started: container d3c6fa0cb730, name u-boot-ubmess-rm-full, remote user vscode, workspace /workspaces/ubmess-rm-full
 AUSSAGE m4-up-mit-nur-ollama-volume-exit=0
 AUSSAGE m4-marker-ollama-im-dritten-container=m4-ollama
 AUSSAGE m4-marker-workspace-im-dritten-container=cat: /workspaces/ubmess-rm-full/ubmess-marker: No such file or directory
 
----- 2026-11-05T13:12:27Z Aufraeumen (Container und Volumes mit dem Praefix; Images bleiben bis 05-aufraeumen.sh)
+---- 2026-11-05T13:28:40Z Aufraeumen (Container und Volumes mit dem Praefix; Images bleiben bis 05-aufraeumen.sh)
 entferne container u-boot-ubmess-rm-full
-entferne volume ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
-entferne volume ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
-entferne volume ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
+entferne volume ubmess-rm-full-docker-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
+entferne volume ubmess-rm-full-ollama-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
+entferne volume ubmess-rm-full-workspace-1a3288h2of2mbl5ciqco2gq1tffrgmn8pdmcul1abi097hslfosn
+inventur nachher: container=7 volumes=2 (Objekte der Engine; vor dem Lauf alle ohne das Praefix ubmess-rm-)
+  container boring_noyce
+  container nice_fermi
+  container pedantic_spence
+  container relaxed_archimedes
+  container stoic_aryabhata
+  container stupefied_elion
+  container unruffled_perlman
+  volume dcsdmn72acy22yw-workspace-016rd3l6oepcl7l4k8jkm6jsjubsovn1p7pp77b3s0vhm8q0dt9k
+  volume dcsdmn7vfi1bhvb-workspace-0ptmh2rmt8hdne4ldc9gp094hge0tedgnm8hv52l46109svrppcp
 --- Differenz ps (vorher -> nachher; leer = keine)
 --- Differenz vol (vorher -> nachher; leer = keine)
 --- Reste mit dem Praefix (Container, Volumes): 0
-== ende 2026-11-05T13:12:29Z
+== ende 2026-11-05T13:28:42Z

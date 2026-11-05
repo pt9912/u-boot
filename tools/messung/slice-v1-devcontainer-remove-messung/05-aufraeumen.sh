@@ -1,6 +1,7 @@
 #!/bin/bash
-# Aufraeumen: entfernt Container, Volumes und Images, deren NAME das Praefix ubmess-rm traegt (objekte_entfernen in lib.sh), und die
-# Projekte unter WORK. Nicht entfernt werden das Basis-Image, das Hilfs-Image von `u-boot devcontainer up`, der Build-Cache und fremde Objekte.
+# Aufraeumen: entfernt Container, Volumes und Images, deren NAME das Praefix ubmess-rm- traegt (objekte_entfernen in lib.sh), und die
+# Projekte unter WORK. Nicht entfernt werden das Basis-Image, das Hilfs-Image von `u-boot devcontainer up`, das Probe-Image alpine:3 (M2;
+# ob es vor der Messung in der Engine lag, ist nicht festgehalten, und ein Image dieses Namens kann fremd sein), der Build-Cache und fremde Objekte.
 # Vorher werden Groesse und Zahl der Images mit dem Praefix und der freie Platz der Docker-Wurzel gelesen (der Platzbedarf der Messung).
 # Aufruf: UBOOT=<binary> WORK=<messordner> ./05-aufraeumen.sh      -> rohdaten-aufraeumen.txt
 set -u
