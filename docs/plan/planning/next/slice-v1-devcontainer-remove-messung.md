@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle, Release-Zuordnung offen. Erster von vier Slices. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md).
+**Welle:** ohne Welle, Release-Zuordnung offen. Erster von vier Slices. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../open/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../open/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](../open/slice-v1-devcontainer-remove.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Scope: Grundlage der Änderung), [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) (Volume-Namen je Instanz).
 
@@ -37,7 +37,7 @@ Messfragen:
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Code für `remove`** — erst der Wortlaut (CR) und die Spezifikation legen den Vertrag fest; die Messung liefert nur die Grundlage.
-- **Entscheidung, welche Volumes `--volumes` löscht** — gehört dem Projektinhaber im CR (Folge-Slice [`slice-cr-devcontainer-remove`](slice-cr-devcontainer-remove.md)).
+- **Entscheidung, welche Volumes `--volumes` löscht** — gehört dem Projektinhaber im CR (Folge-Slice [`slice-cr-devcontainer-remove`](../open/slice-cr-devcontainer-remove.md)).
 - **Messung auf Hosts außer Linux-`amd64` mit lokaler Engine** — die Zusagen des Devcontainer-Bereichs gelten nur dort; weitere Hosts wären ein eigener Vorgang.
 
 ## 2. Definition of Done
