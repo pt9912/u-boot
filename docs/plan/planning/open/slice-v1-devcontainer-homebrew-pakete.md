@@ -113,6 +113,8 @@ DoD vollständig, `make gates` grün im Devcontainer, Review-Report und Messprot
 7. **Ungepinnte Pakete widersprechen dem Geist von [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)** (Pin-Politik gilt nur für die gepinnte Werkzeugkette). — **Ausgang:** offen; Abgrenzung in der Zusage festhalten (Ausweisung statt Pin).
 8. **Egress im laufenden Container** (`brew install`, `brew update`, Bottles auf `ghcr.io`) ist aus dem Paketnamen nicht vorhersagbar. — **Ausgang:** entfallen als Zusage-Risiko, sobald die Doku nur die gemessene Beispielliste nennt und keine Vollständigkeit behauptet.
 
+9. **Kombination mit den übrigen Blöcken im selben Dockerfile** (`ollama`, `gh`, `glab`, Werkzeugketten, `nestedRuntime`) wird nicht gebaut; der Golden Case pinnt nur die Reihenfolge. — **Ausgang:** eingetreten: weiterer Beleg in `BEO-E2E/kombination-ollama-nested-runtime-ohne-lauf` bei der Closure (der Trigger der Beobachtung); kein Lauf in dieser DoD.
+
 ## 7. Closure-Notiz
 
 *(Wird bei der Closure gefüllt.)*
@@ -121,6 +123,11 @@ DoD vollständig, `make gates` grün im Devcontainer, Review-Report und Messprot
 
 **Vorgelagert — Sub-Area-Wahl prüfen:** Berührt sind `internal/hexagon/application` (APP), `internal/hexagon/domain` (DOM), `spec/` und `docs/plan/` (DOK) sowie `tools/` und `docs/messungen/` (WZG); alle stehen in `harness/conventions.md` §Modus-Deklaration und sind nicht zu grob. Das Dockerfile-Template liegt unter `internal/hexagon/application/` und gehört zu APP.
 
-**Vorgelagert — offene Beobachtungen sichten:** vor dem Übergang nach `next/` auszuführen (Register `docs/plan/planning/observations/`); der Entwurf trägt noch kein Ergebnis.
+**Vorgelagert — offene Beobachtungen sichten:** Register durchgegangen (Stichworte Dockerfile-Block, Katalog, Feature, Validierung); vier Treffer, alle offen:
+
+- [`BEO-APP/block-schritt-ohne-golden-pin`](../observations/BEO-APP/block-schritt-ohne-golden-pin/observation.md) (1 Beleg): der Golden Case des neuen Blocks pinnt auch, was im Block fehlen muss (kein Installer-Skript, kein `curl | sh`, keine Anmeldung); Auswirkung auf DoD 1 und die Testzeile in §3.
+- [`BEO-APP/pruefung-nur-beim-lesen`](../observations/BEO-APP/pruefung-nur-beim-lesen/observation.md) (2 Belege): jede neue Regel für `packages` (Zeichensatz, Konflikt mit dem OCI-Feature `homebrew`, Freigabe des Taps) gilt auch in der Schreibpipeline von `config set`, nicht nur beim Lesen; Auswirkung auf DoD 1.
+- [`BEO-E2E/kombination-ollama-nested-runtime-ohne-lauf`](../observations/BEO-E2E/kombination-ollama-nested-runtime-ohne-lauf/observation.md) (5 Evidence-Dateien; der Ausgang ist laut `state.md` nicht zugewiesen und liegt beim Projektinhaber): der Trigger „weiterer Katalogeintrag mit Dockerfile-Block“ tritt mit diesem Slice ein; der Golden Case pinnt die Reihenfolge der Blöcke, ein Lauf der Kombination mit `ollama`, `gh`, `glab` und `nestedRuntime` ist nicht Teil der DoD (siehe Risiko 9).
+- [`BEO-APP/podman-static-pin-alterung`](../observations/BEO-APP/podman-static-pin-alterung/observation.md) (4 Evidence-Dateien): ein gepinnter Stand altert ohne rotes Gate; für die Homebrew-Revision gilt dasselbe (Risiko 3).
 
 **Modus-Begründungsblock:** Alle berührten Sub-Areas sind Greenfield (Spec-geführt: Zusage zuerst in Lastenheft/Spezifikation, dann Code). Kein BF-/Hybrid-Block nötig.
