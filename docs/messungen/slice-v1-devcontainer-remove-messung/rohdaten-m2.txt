@@ -1,0 +1,177 @@
+== M2 docker rm und docker volume rm, 2026-11-05T13:10:09Z
+host: x86_64 docker=29.9.3 linux/amd64 u-boot: u-boot version 0.23.0-dev
+engine: storage-driver=overlayfs cgroup=cgroupfs/v2 security=name=seccomp,profile=builtin;name=cgroupns; os=Debian GNU/Linux 13 (trixie) (containerized) kernel=6.8.0-147-generic
+hilfs-image von u-boot devcontainer up: u-boot-devcontainer-cli:0.89.0-f1a94cce795e 
+
+---- 2026-11-05T13:10:09Z Projekt sbx
+projekt sbx: sandbox=1 
+  json: 11:  "mounts": ["source=ubmess-rm-sbx-workspace-${devcontainerId},target=/workspaces/ubmess-rm-sbx,type=volume"],
+
+---- 2026-11-05T13:10:09Z M2a: laufender Container
+u-boot devcontainer up (Projekt sbx): exit=0 dauer=7s
+  Devcontainer started: container a73c47105100, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+container=a73c47105100 workspace-volume=ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+marker im Workspace des Containers geschrieben
+$ docker rm a73c47105100cb145fb5a955324f1548ce722f3383d439ce00cd663a43c23bfb
+  Error response from daemon: cannot remove container "a73c47105100cb145fb5a955324f1548ce722f3383d439ce00cd663a43c23bfb": container is running: stop the container before removing or force remove
+  -> exit=1
+AUSSAGE m2a-rm-laufend-ohne-f-exit=1
+laeuft danach: true
+AUSSAGE m2a-container-nach-rm-ohne-f=running
+$ docker rm -f a73c47105100cb145fb5a955324f1548ce722f3383d439ce00cd663a43c23bfb
+  a73c47105100cb145fb5a955324f1548ce722f3383d439ce00cd663a43c23bfb
+  -> exit=0
+AUSSAGE m2a-rm-laufend-mit-f-exit=0
+AUSSAGE m2a-container-nach-rm-f=entfernt
+AUSSAGE m2a-workspace-volume-nach-rm-f=vorhanden
+marker im Volume nach rm -f (gelesen mit alpine:3): ubmess-m2
+
+---- 2026-11-05T13:10:17Z M2d: u-boot nach docker rm -f (Volume stehen gelassen)
+  No devcontainer container found for this project; nothing to stop
+u-boot devcontainer down (Projekt sbx): exit=0
+AUSSAGE m2d-down-ohne-container-exit=0
+u-boot devcontainer up (Projekt sbx): exit=0 dauer=7s
+  Devcontainer started: container 455a8001de72, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+AUSSAGE m2d-up-exit=0
+AUSSAGE m2d-neuer-container=ja
+AUSSAGE m2d-workspace-volume-gleich=ja
+AUSSAGE m2d-marker-im-neuen-container=ubmess-m2
+
+---- 2026-11-05T13:10:24Z M2b: Volume, das ein zweiter Container haelt
+$ docker run -d --name ubmess-rm-zweiter -v ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk:/zweiter alpine:3 sleep 3600
+  e729d773526252b729fa3ae5bc99e512cf6310e52d1fba3834ac1fc57060ac2e
+  -> exit=0
+zweiter Container sieht den Marker: ubmess-m2
+-- Entfernen des Devcontainers (docker rm -f -v), das Volume haelt jetzt nur der zweite
+$ docker rm -f -v 455a8001de72ed806228b47f4cc3b113a22429d714f64ab09d25ecbe0f277c38
+  455a8001de72ed806228b47f4cc3b113a22429d714f64ab09d25ecbe0f277c38
+  -> exit=0
+$ docker volume rm ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  Error response from daemon: remove ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk: volume is in use - [e729d773526252b729fa3ae5bc99e512cf6310e52d1fba3834ac1fc57060ac2e]
+  -> exit=1
+AUSSAGE m2b-volume-rm-mit-zweitem-halter-exit=1
+AUSSAGE m2b-volume-nach-rm=vorhanden
+marker nach dem fehlgeschlagenen volume rm: ubmess-m2
+$ docker volume rm -f ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  Error response from daemon: remove ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk: volume is in use - [e729d773526252b729fa3ae5bc99e512cf6310e52d1fba3834ac1fc57060ac2e]
+  -> exit=1
+AUSSAGE m2b-volume-rm-f-mit-zweitem-halter-exit=1
+AUSSAGE m2b-volume-nach-rm-f=vorhanden
+$ docker rm -f -v ubmess-rm-zweiter
+  ubmess-rm-zweiter
+  -> exit=0
+$ docker volume rm ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  -> exit=0
+AUSSAGE m2b-volume-rm-ohne-halter-exit=0
+AUSSAGE m2b-volume-nach-letztem-rm=entfernt
+
+---- 2026-11-05T13:10:25Z M2d (Fortsetzung): Neuanlage nach docker volume rm
+u-boot devcontainer up (Projekt sbx): exit=0 dauer=5s
+  Devcontainer started: container 2cee4111956a, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+AUSSAGE m2d-up-nach-volume-rm-exit=0
+AUSSAGE m2d-workspace-volume-neu-angelegt=gleicher-name
+AUSSAGE m2d-marker-nach-volume-rm=cat: /workspaces/ubmess-rm-sbx/ubmess-marker: No such file or directory
+
+---- 2026-11-05T13:10:30Z M2c: gestoppter Container
+  Devcontainer stopped: container 2cee4111956a (not removed)
+u-boot devcontainer down (Projekt sbx): exit=0
+AUSSAGE m2c-down-exit=0
+AUSSAGE m2c-container-status-nach-down=exited
+-- Mounts des gestoppten Containers:
+  mount type=volume name=ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk ziel=/workspaces/ubmess-rm-sbx rw=true
+
+AUSSAGE m2c-mounts-des-gestoppten-containers-gleich-wie-laufend=ja
+$ docker volume rm ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  Error response from daemon: remove ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk: volume is in use - [2cee4111956abdcd63b3bc138ba56391e588ff084d024021e0ce6162a188ce01]
+  -> exit=1
+AUSSAGE m2c-volume-rm-mit-gestopptem-halter-exit=1
+$ docker volume rm -f ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  Error response from daemon: remove ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk: volume is in use - [2cee4111956abdcd63b3bc138ba56391e588ff084d024021e0ce6162a188ce01]
+  -> exit=1
+AUSSAGE m2c-volume-rm-f-mit-gestopptem-halter-exit=1
+AUSSAGE m2c-volume-nach-rm-f=vorhanden
+$ docker rm 2cee4111956abdcd63b3bc138ba56391e588ff084d024021e0ce6162a188ce01
+  2cee4111956abdcd63b3bc138ba56391e588ff084d024021e0ce6162a188ce01
+  -> exit=0
+AUSSAGE m2c-rm-gestoppt-ohne-f-exit=0
+AUSSAGE m2c-volume-nach-rm-gestoppt=vorhanden
+$ docker volume rm ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+  -> exit=0
+AUSSAGE m2c-volume-rm-nach-container-rm-exit=0
+  No devcontainer container found for this project; nothing to stop
+u-boot devcontainer down (Projekt sbx): exit=0
+AUSSAGE m2c-down-nach-rm-exit=0
+
+---- 2026-11-05T13:10:31Z M2f: u-boot devcontainer up --recreate mit benanntem Volume
+u-boot devcontainer up (Projekt sbx): exit=0 dauer=5s
+  Devcontainer started: container 2cd4458a88f5, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+u-boot devcontainer up --recreate (Projekt sbx): exit=0 dauer=5s
+  Devcontainer started: container 49df8a46a751, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+AUSSAGE m2f-recreate-exit=0
+AUSSAGE m2f-neuer-container=ja alter-container-noch-da=nein
+AUSSAGE m2f-workspace-volume-gleich=ja volume-nach-recreate=vorhanden
+AUSSAGE m2f-marker-im-neuen-container=ubmess-m2f
+
+---- 2026-11-05T13:10:41Z M2e: anonyme Volumes (Probe-Container, nur Docker)
+ohne-v: anonymes Volume d60c3c2579b2... (Namenslaenge 64), benanntes ubmess-rm-benannt-ohne-v
+AUSSAGE m2e-probe-ohne-v-anonym-danach=vorhanden benannt-danach=vorhanden
+  docker volume ls -f dangling=true (Praefix- und Register-Volumes): d60c3c2579b2d13d970cc325a698c4269ceaa132c68996440cc4fb2337da93f9
+mit-v: anonymes Volume 898a75807e00... (Namenslaenge 64), benanntes ubmess-rm-benannt-mit-v
+AUSSAGE m2e-probe-mit-v-anonym-danach=entfernt benannt-danach=vorhanden
+
+---- 2026-11-05T13:10:43Z M2e: Projekt anon (Standardprofil, VOLUME im Dockerfile), docker rm -f ohne -v, danach up --recreate
+projekt anon: sandbox=0 
+  json: kein Schluessel mounts
+u-boot devcontainer up (Projekt anon): exit=0 dauer=5s
+  Devcontainer started: container 141b8ccb108c, name u-boot-ubmess-rm-anon, remote user vscode, workspace /workspaces/ubmess-rm-anon
+  mount type=volume name=9282589dfbcfd8509a0e0e23dd9a8e037f0945ff2248aacbb661a9c2b3c1393a ziel=/ubmess-anon-daten rw=true
+  mount type=bind name= ziel=/workspaces/ubmess-rm-anon rw=true
+
+AUSSAGE m2e-anon-projekt-anonymes-volume-in-mounts=ja
+u-boot devcontainer up --recreate (Projekt anon): exit=0 dauer=6s
+  Devcontainer started: container c364f4abb85b, name u-boot-ubmess-rm-anon, remote user vscode, workspace /workspaces/ubmess-rm-anon
+AUSSAGE m2e-up-recreate-neuer-container=ja altes-anonymes-volume-danach=vorhanden neues-anonymes-volume-gleich=nein
+$ docker rm -f c364f4abb85b529faf25ee84d3ab320984776da8708f8347bf52d2c8f7426f89
+  c364f4abb85b529faf25ee84d3ab320984776da8708f8347bf52d2c8f7426f89
+  -> exit=0
+AUSSAGE m2e-anon-projekt-rm-f-ohne-v: anonymes-volume-danach=vorhanden
+u-boot devcontainer up (Projekt anon): exit=0 dauer=6s
+  Devcontainer started: container b756f7308c92, name u-boot-ubmess-rm-anon, remote user vscode, workspace /workspaces/ubmess-rm-anon
+$ docker rm -f -v b756f7308c922f5992fb5628a7ab392a9c02c2f7251fefa002615fa7a33da505
+  b756f7308c922f5992fb5628a7ab392a9c02c2f7251fefa002615fa7a33da505
+  -> exit=0
+AUSSAGE m2e-anon-projekt-rm-f-mit-v: anonymes-volume-danach=entfernt
+Volumes in der Engine, die das Register als Rest kennt (vor dem Aufraeumen):
+  7de6d97cf2980902f86d2016b8b911daf678a9b2abaaa718ff1c40cbbb44fb7f: entfernt
+  898a75807e00570f1677644daa9d781722a30f37e9dd59c6a49390639f01eb34: entfernt
+  9282589dfbcfd8509a0e0e23dd9a8e037f0945ff2248aacbb661a9c2b3c1393a: vorhanden
+  ae0edaac73d95289e429b85b9707efc708c7d84c5615a7a6d79f191a8ecfe598: vorhanden
+  bfc6d20036d83b6843821b0be9879234c16e34dfc52094b04cddc8c1fd61a481: entfernt
+  d60c3c2579b2d13d970cc325a698c4269ceaa132c68996440cc4fb2337da93f9: vorhanden
+  ubmess-rm-benannt-mit-v: vorhanden
+  ubmess-rm-benannt-ohne-v: vorhanden
+  ubmess-rm-dock-docker-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm: entfernt
+  ubmess-rm-dock-workspace-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm: entfernt
+  ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: entfernt
+  ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: entfernt
+  ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: entfernt
+  ubmess-rm-oll-ollama-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer: entfernt
+  ubmess-rm-oll-workspace-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer: entfernt
+  ubmess-rm-pod-containers-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea: entfernt
+  ubmess-rm-pod-workspace-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea: entfernt
+  ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk: vorhanden
+
+---- 2026-11-05T13:11:02Z Aufraeumen (Container und Volumes mit dem Praefix; Images bleiben bis 05-aufraeumen.sh)
+entferne container u-boot-ubmess-rm-sbx
+entferne volume 9282589dfbcfd8509a0e0e23dd9a8e037f0945ff2248aacbb661a9c2b3c1393a
+entferne volume ae0edaac73d95289e429b85b9707efc708c7d84c5615a7a6d79f191a8ecfe598
+entferne volume d60c3c2579b2d13d970cc325a698c4269ceaa132c68996440cc4fb2337da93f9
+entferne volume ubmess-rm-benannt-mit-v
+entferne volume ubmess-rm-benannt-ohne-v
+entferne volume ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Reste mit dem Praefix (Container, Volumes): 0
+== ende 2026-11-05T13:11:03Z

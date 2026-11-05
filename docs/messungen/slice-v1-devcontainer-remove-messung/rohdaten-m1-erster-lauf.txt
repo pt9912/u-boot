@@ -1,0 +1,235 @@
+== M1 Volumes eines Devcontainers, 2026-11-05T12:50:00Z
+host: x86_64 docker=29.9.3 linux/amd64 u-boot: u-boot version 0.23.0-dev
+
+---- 2026-11-05T12:50:00Z Variante std
+projekt std: sandbox=0 
+  json: kein Schluessel mounts
+u-boot devcontainer up (Projekt std): exit=0 dauer=5s
+  Devcontainer started: container a643bb240667, name u-boot-ubmess-rm-std, remote user vscode, workspace /workspaces/ubmess-rm-std
+AUSSAGE m1-std-up-exit=0
+container: a643bb240667 name=/u-boot-ubmess-rm-std image=vsc-ubmess-rm-std-e865b0bebe6732e113bef0...
+-- docker inspect, Mounts:
+  mount type=bind name= ziel=/workspaces/ubmess-rm-std rw=true
+
+-- docker inspect, Config.Volumes (Volumes, die das Image deklariert): null
+-- Volumes, die up in der Engine angelegt hat (docker volume ls vorher/nachher):
+AUSSAGE m1-std-volumes-in-mounts=0 benannt=0 anonym=0
+AUSSAGE m1-std-bind-mounts=1
+AUSSAGE m1-std-mounts-vollstaendig=ja (Mounts == Differenz der Engine, 0 Volumes)
+-- docker volume inspect (Treiber, Labels, Optionen):
+AUSSAGE m1-std-labels-an-volumes-insgesamt=0
+-- Labels des Containers (Namen): dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+-- docker rm -f -v: Volumes danach (Name: vorhanden?)
+  rm -f -v exit=0
+
+---- 2026-11-05T12:50:06Z Variante sbx
+projekt sbx: sandbox=1 
+  json: 11:  "mounts": ["source=ubmess-rm-sbx-workspace-${devcontainerId},target=/workspaces/ubmess-rm-sbx,type=volume"],
+u-boot devcontainer up (Projekt sbx): exit=0 dauer=7s
+  Devcontainer started: container 50b0768ea712, name u-boot-ubmess-rm-sbx, remote user vscode, workspace /workspaces/ubmess-rm-sbx
+AUSSAGE m1-sbx-up-exit=0
+container: 50b0768ea712 name=/u-boot-ubmess-rm-sbx image=vsc-ubmess-rm-sbx-c10814beec571bbbb12907...
+-- docker inspect, Mounts:
+  mount type=volume name=ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk ziel=/workspaces/ubmess-rm-sbx rw=true
+
+-- docker inspect, Config.Volumes (Volumes, die das Image deklariert): null
+-- Volumes, die up in der Engine angelegt hat (docker volume ls vorher/nachher):
+  ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+AUSSAGE m1-sbx-volumes-in-mounts=1 benannt=1 anonym=0
+AUSSAGE m1-sbx-bind-mounts=0
+AUSSAGE m1-sbx-mounts-vollstaendig=ja (Mounts == Differenz der Engine, 1 Volumes)
+-- docker volume inspect (Treiber, Labels, Optionen):
+  ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk driver=local labels=null options=null
+AUSSAGE m1-sbx-labels-an-volumes-insgesamt=0
+-- Namensende des ersten benannten Volumes (52 Zeichen): 15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk
+AUSSAGE m1-sbx-id-in-labels=nein id-in-umgebung=nein
+AUSSAGE m1-sbx-verschiedene-ids-ueber-alle-benannten-volumes=1
+-- Labels des Containers (Namen): dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+-- docker rm -f -v: Volumes danach (Name: vorhanden?)
+  rm -f -v exit=0
+  ubmess-rm-sbx-workspace-15kf574inkpl0cgt9vphmhbql7887hipu36ne11fa2momj8knlgk: vorhanden
+
+---- 2026-11-05T12:50:14Z Variante dock
+projekt dock: sandbox=1 devcontainer.sandbox.nestedRuntime=docker
+  json: 11:  "mounts": [
+  json: 12-    "source=ubmess-rm-dock-workspace-${devcontainerId},target=/workspaces/ubmess-rm-dock,type=volume",
+  json: 13-    "source=ubmess-rm-dock-docker-${devcontainerId},target=/var/lib/docker,type=volume"
+u-boot devcontainer up (Projekt dock): exit=0 dauer=10s
+  Devcontainer started: container 52ec09567f44, name u-boot-ubmess-rm-dock, remote user vscode, workspace /workspaces/ubmess-rm-dock
+AUSSAGE m1-dock-up-exit=0
+container: 52ec09567f44 name=/u-boot-ubmess-rm-dock image=vsc-ubmess-rm-dock-c4357a8fbe0f4a6e161ad...
+-- docker inspect, Mounts:
+  mount type=volume name=ubmess-rm-dock-workspace-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm ziel=/workspaces/ubmess-rm-dock rw=true
+  mount type=volume name=ubmess-rm-dock-docker-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm ziel=/var/lib/docker rw=true
+
+-- docker inspect, Config.Volumes (Volumes, die das Image deklariert): null
+-- Volumes, die up in der Engine angelegt hat (docker volume ls vorher/nachher):
+  ubmess-rm-dock-docker-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm
+  ubmess-rm-dock-workspace-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm
+AUSSAGE m1-dock-volumes-in-mounts=2 benannt=2 anonym=0
+AUSSAGE m1-dock-bind-mounts=0
+AUSSAGE m1-dock-mounts-vollstaendig=ja (Mounts == Differenz der Engine, 2 Volumes)
+-- docker volume inspect (Treiber, Labels, Optionen):
+  ubmess-rm-dock-docker-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm driver=local labels=null options=null
+  ubmess-rm-dock-workspace-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm driver=local labels=null options=null
+AUSSAGE m1-dock-labels-an-volumes-insgesamt=0
+-- Namensende des ersten benannten Volumes (52 Zeichen): 0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm
+AUSSAGE m1-dock-id-in-labels=nein id-in-umgebung=nein
+AUSSAGE m1-dock-verschiedene-ids-ueber-alle-benannten-volumes=1
+-- Labels des Containers (Namen): dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+-- Statusdateien der Startscripts:
+  /var/lib/u-boot/status/daemon: u-boot-status 1
+result=ok
+at=2026-11-05T12:50:24Z
+-- docker im Container: server=29.9.3 driver=overlayfs 
+-- docker rm -f -v: Volumes danach (Name: vorhanden?)
+  rm -f -v exit=0
+  ubmess-rm-dock-docker-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm: vorhanden
+  ubmess-rm-dock-workspace-0ef25loaicearhm159p6ghkm5oep0s2psfu5rfe23mkf673cbqpm: vorhanden
+
+---- 2026-11-05T12:50:26Z Variante pod
+projekt pod: sandbox=1 devcontainer.sandbox.nestedRuntime=podman
+  json: 11:  "mounts": [
+  json: 12-    "source=ubmess-rm-pod-workspace-${devcontainerId},target=/workspaces/ubmess-rm-pod,type=volume",
+  json: 13-    "source=ubmess-rm-pod-containers-${devcontainerId},target=/home/vscode/.local/share/containers,type=volume"
+u-boot devcontainer up (Projekt pod): exit=0 dauer=21s
+  Devcontainer started: container f13c1407ae83, name u-boot-ubmess-rm-pod, remote user vscode, workspace /workspaces/ubmess-rm-pod
+AUSSAGE m1-pod-up-exit=0
+container: f13c1407ae83 name=/u-boot-ubmess-rm-pod image=vsc-ubmess-rm-pod-c340fe2d3d88c06bdb1fe8...
+-- docker inspect, Mounts:
+  mount type=volume name=ubmess-rm-pod-workspace-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea ziel=/workspaces/ubmess-rm-pod rw=true
+  mount type=volume name=ubmess-rm-pod-containers-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea ziel=/home/vscode/.local/share/containers rw=true
+
+-- docker inspect, Config.Volumes (Volumes, die das Image deklariert): null
+-- Volumes, die up in der Engine angelegt hat (docker volume ls vorher/nachher):
+  ubmess-rm-pod-containers-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea
+  ubmess-rm-pod-workspace-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea
+AUSSAGE m1-pod-volumes-in-mounts=2 benannt=2 anonym=0
+AUSSAGE m1-pod-bind-mounts=0
+AUSSAGE m1-pod-mounts-vollstaendig=ja (Mounts == Differenz der Engine, 2 Volumes)
+-- docker volume inspect (Treiber, Labels, Optionen):
+  ubmess-rm-pod-containers-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea driver=local labels=null options=null
+  ubmess-rm-pod-workspace-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea driver=local labels=null options=null
+AUSSAGE m1-pod-labels-an-volumes-insgesamt=0
+-- Namensende des ersten benannten Volumes (52 Zeichen): 0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea
+AUSSAGE m1-pod-id-in-labels=nein id-in-umgebung=nein
+AUSSAGE m1-pod-verschiedene-ids-ueber-alle-benannten-volumes=1
+-- Labels des Containers (Namen): dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+-- Statusdateien der Startscripts:
+  /var/lib/u-boot/status/vfs: u-boot-status 1
+result=ok
+at=2026-11-05T12:50:46Z
+-- podman: podman version 6.1.4 podman info exit=0 
+-- docker rm -f -v: Volumes danach (Name: vorhanden?)
+  rm -f -v exit=0
+  ubmess-rm-pod-containers-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea: vorhanden
+  ubmess-rm-pod-workspace-0na2dinptdoviebs8nh7qedgr9429g0bqmmd2cmnoeqacf1p2sea: vorhanden
+
+---- 2026-11-05T12:50:48Z Variante oll
+projekt oll: sandbox=1 devcontainer.features.ollama.enabled=true
+  json: 11:  "mounts": [
+  json: 12-    "source=ubmess-rm-oll-workspace-${devcontainerId},target=/workspaces/ubmess-rm-oll,type=volume",
+  json: 13-    "source=ubmess-rm-oll-ollama-${devcontainerId},target=/home/vscode/.ollama,type=volume"
+u-boot devcontainer up (Projekt oll): exit=0 dauer=46s
+  Devcontainer started: container 0a9bf1a2a02a, name u-boot-ubmess-rm-oll, remote user vscode, workspace /workspaces/ubmess-rm-oll
+AUSSAGE m1-oll-up-exit=0
+container: 0a9bf1a2a02a name=/u-boot-ubmess-rm-oll image=vsc-ubmess-rm-oll-f1693c3877befe28880d7a...
+-- docker inspect, Mounts:
+  mount type=volume name=ubmess-rm-oll-workspace-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer ziel=/workspaces/ubmess-rm-oll rw=true
+  mount type=volume name=ubmess-rm-oll-ollama-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer ziel=/home/vscode/.ollama rw=true
+
+-- docker inspect, Config.Volumes (Volumes, die das Image deklariert): null
+-- Volumes, die up in der Engine angelegt hat (docker volume ls vorher/nachher):
+  ubmess-rm-oll-ollama-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer
+  ubmess-rm-oll-workspace-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer
+AUSSAGE m1-oll-volumes-in-mounts=2 benannt=2 anonym=0
+AUSSAGE m1-oll-bind-mounts=0
+AUSSAGE m1-oll-mounts-vollstaendig=ja (Mounts == Differenz der Engine, 2 Volumes)
+-- docker volume inspect (Treiber, Labels, Optionen):
+  ubmess-rm-oll-ollama-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer driver=local labels=null options=null
+  ubmess-rm-oll-workspace-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer driver=local labels=null options=null
+AUSSAGE m1-oll-labels-an-volumes-insgesamt=0
+-- Namensende des ersten benannten Volumes (52 Zeichen): 10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer
+AUSSAGE m1-oll-id-in-labels=nein id-in-umgebung=nein
+AUSSAGE m1-oll-verschiedene-ids-ueber-alle-benannten-volumes=1
+-- Labels des Containers (Namen): dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+-- docker rm -f -v: Volumes danach (Name: vorhanden?)
+  rm -f -v exit=0
+  ubmess-rm-oll-ollama-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer: vorhanden
+  ubmess-rm-oll-workspace-10fdh408b5jcu34eq8m8cv91r8vr8flqu7io4hocncbp51aghrer: vorhanden
+
+---- 2026-11-05T12:51:35Z Variante full
+projekt full: sandbox=1 devcontainer.sandbox.nestedRuntime=docker devcontainer.features.ollama.enabled=true
+  json: 11:  "mounts": [
+  json: 12-    "source=ubmess-rm-full-workspace-${devcontainerId},target=/workspaces/ubmess-rm-full,type=volume",
+  json: 13-    "source=ubmess-rm-full-docker-${devcontainerId},target=/var/lib/docker,type=volume",
+  json: 14-    "source=ubmess-rm-full-ollama-${devcontainerId},target=/home/vscode/.ollama,type=volume"
+u-boot devcontainer up (Projekt full): exit=0 dauer=48s
+  Devcontainer started: container a6dcf545ff1c, name u-boot-ubmess-rm-full, remote user vscode, workspace /workspaces/ubmess-rm-full
+AUSSAGE m1-full-up-exit=0
+container: a6dcf545ff1c name=/u-boot-ubmess-rm-full image=vsc-ubmess-rm-full-91969011e43ddb9d151e7...
+-- docker inspect, Mounts:
+  mount type=volume name=ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 ziel=/workspaces/ubmess-rm-full rw=true
+  mount type=volume name=ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 ziel=/home/vscode/.ollama rw=true
+  mount type=volume name=ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 ziel=/var/lib/docker rw=true
+
+-- docker inspect, Config.Volumes (Volumes, die das Image deklariert): null
+-- Volumes, die up in der Engine angelegt hat (docker volume ls vorher/nachher):
+  ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
+  ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
+  ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
+AUSSAGE m1-full-volumes-in-mounts=3 benannt=3 anonym=0
+AUSSAGE m1-full-bind-mounts=0
+AUSSAGE m1-full-mounts-vollstaendig=ja (Mounts == Differenz der Engine, 3 Volumes)
+-- docker volume inspect (Treiber, Labels, Optionen):
+  ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 driver=local labels=null options=null
+  ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 driver=local labels=null options=null
+  ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0 driver=local labels=null options=null
+AUSSAGE m1-full-labels-an-volumes-insgesamt=0
+-- Namensende des ersten benannten Volumes (52 Zeichen): 028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0
+AUSSAGE m1-full-id-in-labels=nein id-in-umgebung=nein
+AUSSAGE m1-full-verschiedene-ids-ueber-alle-benannten-volumes=1
+-- Labels des Containers (Namen): dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+-- Statusdateien der Startscripts:
+  /var/lib/u-boot/status/daemon: u-boot-status 1
+result=ok
+at=2026-11-05T12:52:22Z
+-- docker im Container: server=29.9.3 driver=overlayfs 
+-- docker rm -f -v: Volumes danach (Name: vorhanden?)
+  rm -f -v exit=0
+  ubmess-rm-full-docker-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: vorhanden
+  ubmess-rm-full-ollama-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: vorhanden
+  ubmess-rm-full-workspace-028vd5k2p9onk9g7v6cln851c3v2iq8cikaovl3b9i6oj843h5d0: vorhanden
+
+---- 2026-11-05T12:52:24Z Variante anon
+projekt anon: sandbox=0 
+  json: kein Schluessel mounts
+  Dockerfile: Zeile VOLUME /ubmess-anon-daten angehaengt
+u-boot devcontainer up (Projekt anon): exit=0 dauer=5s
+  Devcontainer started: container 5a1e96c07d2f, name u-boot-ubmess-rm-anon, remote user vscode, workspace /workspaces/ubmess-rm-anon
+AUSSAGE m1-anon-up-exit=0
+container: 5a1e96c07d2f name=/u-boot-ubmess-rm-anon image=vsc-ubmess-rm-anon-11f61152ceeb08099763c...
+-- docker inspect, Mounts:
+  mount type=volume name=19c2a0e66b582255aa1935ccc16da4e8c4a21f357d842ebf04dc646be2a955d0 ziel=/ubmess-anon-daten rw=true
+  mount type=bind name= ziel=/workspaces/ubmess-rm-anon rw=true
+
+-- docker inspect, Config.Volumes (Volumes, die das Image deklariert): {"/ubmess-anon-daten":{}}
+-- Volumes, die up in der Engine angelegt hat (docker volume ls vorher/nachher):
+  19c2a0e66b582255aa1935ccc16da4e8c4a21f357d842ebf04dc646be2a955d0
+AUSSAGE m1-anon-volumes-in-mounts=1 benannt=0 anonym=1
+AUSSAGE m1-anon-bind-mounts=1
+AUSSAGE m1-anon-mounts-vollstaendig=ja (Mounts == Differenz der Engine, 1 Volumes)
+-- docker volume inspect (Treiber, Labels, Optionen):
+  19c2a0e66b582255aa1935ccc16da4e8c4a21f357d842ebf04dc646be2a955d0 driver=local labels={"com.docker.volume.anonymous":""} options=null
+AUSSAGE m1-anon-labels-an-volumes-insgesamt=1
+-- Labels des Containers (Namen): dev.containers.id dev.containers.release dev.containers.source dev.containers.timestamp dev.containers.variant devcontainer.config_file devcontainer.local_folder devcontainer.metadata version 
+-- docker rm -f -v: Volumes danach (Name: vorhanden?)
+  rm -f -v exit=0
+  19c2a0e66b582255aa1935ccc16da4e8c4a21f357d842ebf04dc646be2a955d0: entfernt
+base-image Config.Volumes: null
+
+---- 2026-11-05T12:52:30Z Aufraeumen (Container und Volumes mit dem Praefix; Images bleiben bis 05-aufraeumen.sh)
+--- Differenz ps (vorher -> nachher; leer = keine)
+--- Differenz vol (vorher -> nachher; leer = keine)
+--- Reste mit dem Praefix (Container, Volumes): 0
+== ende 2026-11-05T12:52:31Z

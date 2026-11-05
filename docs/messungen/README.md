@@ -42,3 +42,4 @@ Die Regel steht in [`harness/conventions.md`](../../harness/conventions.md#ablag
 | [`slice-v1-katalog-feature-jdk-gepinnt`](slice-v1-katalog-feature-jdk-gepinnt/README.md) | `tools/messung/katalog-feature-jdk/` |
 | [`slice-v1-bau-nur-devcontainer`](slice-v1-bau-nur-devcontainer/README.md) | `tools/messung/devcontainer-ci/` |
 | [`slice-v1-devcontainer-homebrew-pakete`](slice-v1-devcontainer-homebrew-pakete/README.md) | `tools/messung/devcontainer-homebrew-pakete/` |
+| [`slice-v1-devcontainer-remove-messung`](slice-v1-devcontainer-remove-messung/README.md) | `tools/messung/slice-v1-devcontainer-remove-messung/` | <!-- d-check:ignore (Skriptpfad, keine Slice-Kennung) -->

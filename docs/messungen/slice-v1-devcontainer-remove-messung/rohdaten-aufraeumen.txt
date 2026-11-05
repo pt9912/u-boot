@@ -1,0 +1,50 @@
+== Aufraeumen, 2026-11-05T13:12:31Z
+vorher, Objekte mit dem Praefix:
+  image vsc-ubmess-rm-full-91969011e43ddb9d151e7b1031402c15d4334e3f0e6984311d63b85ed213d12d-uid:latest
+  image vsc-ubmess-rm-std-e865b0bebe6732e113bef0a11fa512acffad95aa42e6588cdb9f4a22e8bd3334-uid:latest
+  image vsc-ubmess-rm-sbx-c10814beec571bbbb129077ede989943a6162d36d36813e78fd63b5cd4b5dc47-uid:latest
+  image vsc-ubmess-rm-anon-11f61152ceeb08099763c681127cef9a681ba3e714879b6bc0fe73fdc9ab762b-uid:latest
+  image vsc-ubmess-rm-oll-f1693c3877befe28880d7a39626db0f3985ad7728ab5af750cc57d903f94047c-uid:latest
+  image vsc-ubmess-rm-pod-c340fe2d3d88c06bdb1fe8708b461ad0e246dddeeb0f82224829a798bad71474-uid:latest
+  image vsc-ubmess-rm-dock-c4357a8fbe0f4a6e161adfacb28af95bbf999f3e7a2fdfee55ae7f512665a7a3-uid:latest
+  image vsc-ubmess-rm-full-91969011e43ddb9d151e7b1031402c15d4334e3f0e6984311d63b85ed213d12d:latest
+  image vsc-ubmess-rm-oll-f1693c3877befe28880d7a39626db0f3985ad7728ab5af750cc57d903f94047c:latest
+  image vsc-ubmess-rm-pod-c340fe2d3d88c06bdb1fe8708b461ad0e246dddeeb0f82224829a798bad71474:latest
+  image vsc-ubmess-rm-dock-c4357a8fbe0f4a6e161adfacb28af95bbf999f3e7a2fdfee55ae7f512665a7a3:latest
+  image vsc-ubmess-rm-sbx-c10814beec571bbbb129077ede989943a6162d36d36813e78fd63b5cd4b5dc47:latest
+  image vsc-ubmess-rm-anon-11f61152ceeb08099763c681127cef9a681ba3e714879b6bc0fe73fdc9ab762b:latest
+  image vsc-ubmess-rm-std-e865b0bebe6732e113bef0a11fa512acffad95aa42e6588cdb9f4a22e8bd3334:latest
+vorher, Images mit dem Praefix (Repository Tag Groesse; die Groesse zaehlt gemeinsame Schichten je Image):
+  vsc-ubmess-rm-full-91969011e43ddb9d151e7b1031402c15d4334e3f0e6984311d63b85ed213d12d-uid latest 2GB
+  vsc-ubmess-rm-std-e865b0bebe6732e113bef0a11fa512acffad95aa42e6588cdb9f4a22e8bd3334-uid latest 1.41GB
+  vsc-ubmess-rm-sbx-c10814beec571bbbb129077ede989943a6162d36d36813e78fd63b5cd4b5dc47-uid latest 1.41GB
+  vsc-ubmess-rm-anon-11f61152ceeb08099763c681127cef9a681ba3e714879b6bc0fe73fdc9ab762b-uid latest 1.41GB
+  vsc-ubmess-rm-oll-f1693c3877befe28880d7a39626db0f3985ad7728ab5af750cc57d903f94047c-uid latest 1.5GB
+  vsc-ubmess-rm-pod-c340fe2d3d88c06bdb1fe8708b461ad0e246dddeeb0f82224829a798bad71474-uid latest 1.54GB
+  vsc-ubmess-rm-dock-c4357a8fbe0f4a6e161adfacb28af95bbf999f3e7a2fdfee55ae7f512665a7a3-uid latest 1.91GB
+  vsc-ubmess-rm-full-91969011e43ddb9d151e7b1031402c15d4334e3f0e6984311d63b85ed213d12d latest 2GB
+  vsc-ubmess-rm-oll-f1693c3877befe28880d7a39626db0f3985ad7728ab5af750cc57d903f94047c latest 1.5GB
+  vsc-ubmess-rm-pod-c340fe2d3d88c06bdb1fe8708b461ad0e246dddeeb0f82224829a798bad71474 latest 1.54GB
+  vsc-ubmess-rm-dock-c4357a8fbe0f4a6e161adfacb28af95bbf999f3e7a2fdfee55ae7f512665a7a3 latest 1.91GB
+  vsc-ubmess-rm-sbx-c10814beec571bbbb129077ede989943a6162d36d36813e78fd63b5cd4b5dc47 latest 1.41GB
+  vsc-ubmess-rm-anon-11f61152ceeb08099763c681127cef9a681ba3e714879b6bc0fe73fdc9ab762b latest 1.41GB
+  vsc-ubmess-rm-std-e865b0bebe6732e113bef0a11fa512acffad95aa42e6588cdb9f4a22e8bd3334 latest 1.41GB
+vorher, freier Platz der Docker-Wurzel: 68039655424 Byte
+entferne image vsc-ubmess-rm-full-91969011e43ddb9d151e7b1031402c15d4334e3f0e6984311d63b85ed213d12d-uid:latest
+entferne image vsc-ubmess-rm-std-e865b0bebe6732e113bef0a11fa512acffad95aa42e6588cdb9f4a22e8bd3334-uid:latest
+entferne image vsc-ubmess-rm-sbx-c10814beec571bbbb129077ede989943a6162d36d36813e78fd63b5cd4b5dc47-uid:latest
+entferne image vsc-ubmess-rm-anon-11f61152ceeb08099763c681127cef9a681ba3e714879b6bc0fe73fdc9ab762b-uid:latest
+entferne image vsc-ubmess-rm-oll-f1693c3877befe28880d7a39626db0f3985ad7728ab5af750cc57d903f94047c-uid:latest
+entferne image vsc-ubmess-rm-pod-c340fe2d3d88c06bdb1fe8708b461ad0e246dddeeb0f82224829a798bad71474-uid:latest
+entferne image vsc-ubmess-rm-dock-c4357a8fbe0f4a6e161adfacb28af95bbf999f3e7a2fdfee55ae7f512665a7a3-uid:latest
+entferne image vsc-ubmess-rm-full-91969011e43ddb9d151e7b1031402c15d4334e3f0e6984311d63b85ed213d12d:latest
+entferne image vsc-ubmess-rm-oll-f1693c3877befe28880d7a39626db0f3985ad7728ab5af750cc57d903f94047c:latest
+entferne image vsc-ubmess-rm-pod-c340fe2d3d88c06bdb1fe8708b461ad0e246dddeeb0f82224829a798bad71474:latest
+entferne image vsc-ubmess-rm-dock-c4357a8fbe0f4a6e161adfacb28af95bbf999f3e7a2fdfee55ae7f512665a7a3:latest
+entferne image vsc-ubmess-rm-sbx-c10814beec571bbbb129077ede989943a6162d36d36813e78fd63b5cd4b5dc47:latest
+entferne image vsc-ubmess-rm-anon-11f61152ceeb08099763c681127cef9a681ba3e714879b6bc0fe73fdc9ab762b:latest
+entferne image vsc-ubmess-rm-std-e865b0bebe6732e113bef0a11fa512acffad95aa42e6588cdb9f4a22e8bd3334:latest
+nachher, freier Platz der Docker-Wurzel: 68039794688 Byte (Differenz 139264 Byte; die Zahl streut mit anderer Last auf dem Host)
+nachher, Objekte mit dem Praefix: 0
+Projekte unter WORK: 0
+== ende 2026-11-05T13:12:33Z

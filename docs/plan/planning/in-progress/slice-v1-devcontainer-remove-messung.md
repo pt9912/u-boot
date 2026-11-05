@@ -42,12 +42,12 @@ Messfragen:
 
 ## 2. Definition of Done
 
-- [ ] **Messprotokoll:** `docs/messungen/slice-v1-devcontainer-remove-messung/README.md` beantwortet M1 bis M4 je mit Befehl, Ausgabe, Datum und Grenzen (kein Wert ohne Messung); das Skript liegt unter `tools/messung/slice-v1-devcontainer-remove-messung/` (Ablage-Regel in `harness/conventions.md`).
-- [ ] **Eingang für den CR:** das Protokoll nennt je Frage den Satz, den der CR-Wortlaut tragen darf, und die Sätze, die er nicht tragen darf.
+- [x] **Messprotokoll:** `docs/messungen/slice-v1-devcontainer-remove-messung/README.md` beantwortet M1 bis M4 je mit Befehl, Ausgabe, Datum und Grenzen (kein Wert ohne Messung); das Skript liegt unter `tools/messung/slice-v1-devcontainer-remove-messung/` (Ablage-Regel in `harness/conventions.md`).
+- [x] **Eingang für den CR:** das Protokoll nennt je Frage den Satz, den der CR-Wortlaut tragen darf, und die Sätze, die er nicht tragen darf.
 
 Pflichten der Closure (zählen nicht mit):
 
-- [ ] `make gates` grün (im Devcontainer-Container, `AGENTS.md` §3.1).
+- [x] `make gates` grün (im Devcontainer-Container, `AGENTS.md` §3.1).
 - [ ] Review durchgeführt, Report unter `docs/reviews/` (`.harness/skills/reviewer.md`), kein Self-Review.
 - [ ] Verification-Report unter `docs/reviews/`.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag; jedes Risiko aus §6 trägt einen Ausgang.
@@ -58,9 +58,21 @@ Pflichten der Closure (zählen nicht mit):
 |---|---|---|
 | `tools/messung/slice-v1-devcontainer-remove-messung/` | neu | Messskript und Hilfsdateien |
 | `docs/messungen/slice-v1-devcontainer-remove-messung/README.md` | neu | Protokoll M1 bis M4 |
-| `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | update | Zeilen des Slice, Zustandsmarker |
+| `docs/messungen/slice-v1-devcontainer-remove-messung/rohdaten-*.txt` | neu | Rohdaten der Läufe (archivierte Ausgabe der Skripte) |
+| `docs/messungen/README.md` | update | Zeile im Bestand (Verzeichnis und Skriptpfad; Form der Zeilen oberhalb) |
+| `docs/plan/planning/in-progress/slice-v1-devcontainer-remove-messung.md` | update | Plan-Tabelle (diese), DoD-Häkchen, Zustandsmarker in §6 |
+| `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | unverändert | Gelesen: `roadmap.md` Zeile 45 und `open/README.md` Zeile 23 nennen den Slice „in `in-progress/`“ und „in Umsetzung“; beides ist der Ist-Stand während der Messung und gilt bis zur Closure. Der Zustandsmarker wechselt mit der Closure, nicht mit der Messung. |
 
-Der Implementer ergänzt die Tabelle und gleicht sie vor dem Handoff gegen `git diff --stat` ab (`AGENTS.md` §3.10).
+**Gelesen für die Messung (Fundstellen, `AGENTS.md` §3.10):**
+
+- `internal/hexagon/application/devcontainer_start.go`, `DevcontainerStartService.Down`: sucht den Container mit `inspector.FindContainer(ctx, BaseDir, Instance)`; ohne Fund leere Antwort; bei gestopptem Container Antwort mit `ContainerID` und ohne `Stopped`; sonst `launcher.Stop`. Kein Aufruf von `docker rm` oder `docker volume rm`.
+- `internal/adapter/driven/docker/devcontainer_launcher.go`, `Launcher.Stop`: `docker stop <id>`; `runArgs`: `--remove-existing-container` bei `Recreate`, zwei `--id-label` (`devcontainer.local_folder`, `u-boot.instance`) nur mit Instanz.
+- `internal/adapter/driven/docker/inspector.go`, `Inspector.FindContainer`: `docker ps -a --no-trunc --filter label=devcontainer.local_folder=<Ordner>` und mit Instanz zusätzlich `label=u-boot.instance=<Name>`; der Doc-Kommentar der Struktur nennt als einzige Befehle `docker ps`, `docker cp` und `docker context inspect`. Kein Code des Repos liest `docker inspect` oder die `Mounts` eines Containers (Suche nach `.Mounts` und `"inspect"` in `internal/`: nur `image inspect`/`context inspect` im Launcher und Inspector).
+- `internal/hexagon/domain/containername.go`, `ComposeDevcontainerContainerName`: Name `u-boot-<projekt>` und mit Instanz `u-boot-<projekt>-<instanz>`.
+- `internal/hexagon/application/devcontainer_sandbox.go`, Zeilen 154 bis 186 und `volumeMount`: das Standardprofil kehrt vor dem Zweig des Sandbox-Profils zurück und erzeugt kein `mounts`; das Sandbox-Profil trägt `<projekt>-workspace-${devcontainerId}`, mit `nestedRuntime: podman` zusätzlich `<projekt>-containers-${devcontainerId}`, mit `nestedRuntime: docker` `<projekt>-docker-${devcontainerId}`, mit dem Feature `ollama` `<projekt>-ollama-${devcontainerId}` (jeweils `type=volume`). Die Templates `devcontainer/Dockerfile.tmpl` und `devcontainer.json.tmpl` enthalten keine `VOLUME`-Anweisung; das Basis-Image trägt keine (`docker image inspect … .Config.Volumes` ist `null`, Messung unten).
+- Nicht im Code gefunden und deshalb Messgegenstand: ob die Dev-Container-CLI selbst Volumes anlegt, ob `--remove-existing-container` anonyme Volumes mitnimmt, ob die Mounts eines Containers vollständig in `docker inspect` stehen.
+
+Der Implementer gleicht die Tabelle vor dem Handoff gegen `git diff --stat` ab (`AGENTS.md` §3.10).
 
 ## 4. Trigger
 
@@ -74,8 +86,8 @@ DoD vollständig, `make gates` grün, Reports liegen vor, Closure-Notiz geschrie
 
 ## 6. Risiken und offene Punkte
 
-- Die Messung im verschachtelten Docker des Devcontainer-Containers weicht von einer lokalen Engine ab. — **Ausgang:** offen bis Messung; das Protokoll nennt den Aufbau.
-- Der Messaufbau verbraucht Image-Bauzeit und Plattenplatz. — **Ausgang:** offen; das Protokoll nennt beides.
+- Die Messung im verschachtelten Docker des Devcontainer-Containers weicht von einer lokalen Engine ab. — **Ausgang:** offen; das Protokoll nennt den Aufbau (Docker 29.9.3, `overlayfs`, cgroup v2, verschachtelt; `u-boot` behandelte die Engine als lokal). Die Abweichung gegen eine native Engine ist nicht gemessen und steht als Grenze im Protokoll.
+- Der Messaufbau verbraucht Image-Bauzeit und Plattenplatz. — **Ausgang:** offen; das Protokoll nennt die Bauzeiten (4 bis 48 s je `up` mit Bau, je nach Zustand des Build-Caches) und die Image-Größen (1,41 bis 2 GB). Der Platzbedarf ist nicht belastbar gemessen, weil der Build-Cache der Engine die Schichten hält.
 
 ## 7. Closure-Notiz
 
