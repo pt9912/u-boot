@@ -115,6 +115,8 @@ DoD vollständig, `make gates` grün im Devcontainer, Review-Report und Messprot
 
 9. **Kombination mit den übrigen Blöcken im selben Dockerfile** (`ollama`, `gh`, `glab`, Werkzeugketten, `nestedRuntime`) wird nicht gebaut; der Golden Case pinnt nur die Reihenfolge. — **Ausgang:** eingetreten: weiterer Beleg in `BEO-E2E/kombination-ollama-nested-runtime-ohne-lauf` bei der Closure (der Trigger der Beobachtung); kein Lauf in dieser DoD.
 
+10. **Diagnose-Code der Tap-Meldung.** [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) Entscheidung 5 und 6 nennen für den Freigabe-Fehler und die Ausweisung die Kennungen [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) und [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte); das Lastenheft trägt seit `0.36.0` die Anforderung [`LH-FA-DEV-013`](../../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer). Welche Kennung die Meldung trägt, legt die Spezifikation in diesem Slice fest (Hinweis des Architects zu [`ADR-0047`](../../adr/0047-brew-formeln-lastenheft-stellen-und-verteilung-lastenheft-spezifikation.md)). — **Ausgang:** offen bis zur Spezifikation.
+
 ## 7. Closure-Notiz
 
 *(Wird bei der Closure gefüllt.)*
