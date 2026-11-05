@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-[`slice-v1-devcontainer-homebrew-pakete`](slice-v1-devcontainer-homebrew-pakete.md) liegt in `in-progress/` — Umsetzung der Anforderung [`LH-FA-DEV-013`](../../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer): ein Dockerfile-Block installiert Homebrew und eine frei wählbare Formel-Liste im Devcontainer-Image; wird ohne Welle umgesetzt.
+Nichts in Arbeit.
 
 ## Nächste Wellen
 

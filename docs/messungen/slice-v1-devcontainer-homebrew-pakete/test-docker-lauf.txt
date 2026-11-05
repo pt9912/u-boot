@@ -1,0 +1,109 @@
+Docker-Tests TestE2E_Brew_* — Auszüge aus den Läufen im verschachtelten Daemon
+================================================================================
+
+Die Auszüge sind Zeilen der Logs, unverändert, mit der Zeilennummer des Logs ("Z<n>:"). Die Logs selbst
+("go test -v", im vollen Lauf 13 241 Zeilen) liegen nicht im Repo. Nicht übernommen sind die Zeilen
+"config set: updated" und "generate devcontainer: updated-block" der Tests und der Dump der Goroutinen nach
+dem Zeitlimit. Die Auszählung unter A hat der Planner an den Logs und an den Testfunktionen unter
+internal/e2e/ gelesen.
+
+Umgebung beider Läufe: Linux-Host amd64, die verschachtelte Docker Engine 29.9.3 des Devcontainer-Containers
+(Messprotokoll README.md, Abschnitt Umgebung). Das ist nicht die Nachweis-Form von "make test-docker"
+(Sockelform am Docker außerhalb des Devcontainer-Containers, SPEC-031); die Sockelform ist nicht gelaufen.
+
+
+A. Voller Lauf: make test-docker
+--------------------------------
+
+Stand: 9a908a83 (Commit 2026-11-05 10:41:32Z; die Brew-Tests liefen ab 10:42:25Z). Das ist der Test ohne die
+Login-Shell-Prüfungen der zweiten und dritten Fix-Runde. Aufruf: "make test-docker"; das Rezept ruft im
+Test-Image "go test -v -tags docker -timeout 30m ./..." (repo.mk, Ziel test-docker).
+
+Die vier TestE2E_Brew_* (die ersten Tests des Pakets internal/e2e, Datei brew_docker_test.go):
+
+Z4604: --- PASS: TestE2E_Brew_BuildsInBothProfiles (149.93s)
+Z4605:     --- PASS: TestE2E_Brew_BuildsInBothProfiles/default_profile (61.75s)
+Z4606:     --- PASS: TestE2E_Brew_BuildsInBothProfiles/sandbox_profile (88.18s)
+Z4610: --- PASS: TestE2E_Brew_PinThatDoesNotExistBreaksTheBuild (21.50s)
+Z4614: --- PASS: TestE2E_Brew_UpdateSwitchKeepsTheRevision (52.23s)
+Z4620: --- PASS: TestE2E_Brew_EgressHostsOfHomebrew (73.41s)
+
+Paketzeilen des Pakets internal/e2e und des Pakets mit dem längsten Lauf daneben (die übrigen 23 Pakete stehen im Log
+als "ok", jedes mit einer Zeile "ok  <Paket>  <Dauer>"):
+
+Z1313: ok  	github.com/pt9912/u-boot/internal/adapter/driven/docker	197.076s
+Z5167: FAIL	github.com/pt9912/u-boot/internal/e2e	1800.055s
+
+Zeitlimit des Pakets internal/e2e (Kopfzeilen der Meldung, ohne Dump):
+
+Z5042: panic: test timed out after 30m0s
+Z5043: 	running tests:
+Z5044: 		TestE2E_Toolchain_BuildsAndReportsPins (54s)
+
+Ende des Laufs (die Zeile "exit=2" schreibt der Aufrufer, nicht make):
+
+Z13239: FAIL
+Z13240: make: *** [repo.mk:172: test-docker] Error 1
+Z13241: exit=2
+
+Auszählung (Planner, gelesen am Log und an internal/e2e/*_test.go):
+  - 25 Pakete mit Ergebnis: 24 x "ok", 1 x "FAIL" (internal/e2e, 1800,055 s). "--- FAIL": 0 Treffer im Log.
+  - internal/e2e endet am Limit -timeout 30m (panic: test timed out), nicht an einem roten Test.
+  - Von 57 Funktionen TestE2E_ (func TestE2E_... in internal/e2e/*_test.go): 46 mit "--- PASS", 4 gestartet und
+    beim Abbruch ohne Ergebnis (TestE2E_Toolchain_BuildsAndReportsPins und drei TestE2E_SandboxDevcontainer_StatusFiles_*),
+    7 nicht gestartet (TestE2E_RemovePurgeRemovesVolume, TestE2E_RemovePurgeRemovesVolume_StackDown,
+    TestE2E_Toolchain_CacheSurvivesRecreate, TestE2E_Toolchain_GolangciLintAloneBuilds,
+    TestE2E_Toolchain_OverrideBuildsAgainstReadChecksums, TestE2E_Toolchain_PinMismatchBreaksBuild,
+    TestE2E_UpDownCluster_NamesRecreateAndDown).
+  - Ein voller Lauf auf einem späteren Stand (nach der zweiten und dritten Fix-Runde) liegt nicht vor.
+
+
+B. Verengter Lauf auf dem Stand der dritten Fix-Runde
+-----------------------------------------------------
+
+Aufruf: Tests mit Build-Tag docker, verengt auf -run 'TestE2E_Brew_' im Paket internal/e2e, im Test-Image des Ziels
+test-docker (verschachtelter Daemon; der Aufruf steht nicht im Log). Beginn 2026-11-05 12:05:13Z. Der Test
+internal/e2e/brew_docker_test.go (geändert 12:04:34Z, vor dem Lauf; mit 6b17e384 committet) und
+Dockerfile.tmpl (letzte Änderung im Repo e3096006, mit 6b17e384 unverändert) sind die des Repo-Stands 6b17e384.
+Der Test prüft bash, sh und zsh mit -c und -lc, bash mit -ic und -lic, "su -l vscode" und die Kontrolle ohne die
+Datei /etc/profile.d/u-boot-brew.sh.
+
+Z13: --- PASS: TestE2E_Brew_BuildsInBothProfiles (145.11s)
+Z14:     --- PASS: TestE2E_Brew_BuildsInBothProfiles/default_profile (59.67s)
+Z15:     --- PASS: TestE2E_Brew_BuildsInBothProfiles/sandbox_profile (85.44s)
+Z19: --- PASS: TestE2E_Brew_PinThatDoesNotExistBreaksTheBuild (21.79s)
+Z23: --- PASS: TestE2E_Brew_UpdateSwitchKeepsTheRevision (54.57s)
+Z29: --- PASS: TestE2E_Brew_EgressHostsOfHomebrew (76.32s)
+Z30: PASS
+Z31: ok  	github.com/pt9912/u-boot/internal/e2e	297.802s
+Z32: EXIT=0
+
+Derselbe Aufruf auf dem Stand der zweiten Fix-Runde (Beginn 11:46Z; Test ohne zsh und ohne interaktive Shells):
+
+Z13: --- PASS: TestE2E_Brew_BuildsInBothProfiles (119.68s)
+Z14:     --- PASS: TestE2E_Brew_BuildsInBothProfiles/default_profile (48.38s)
+Z15:     --- PASS: TestE2E_Brew_BuildsInBothProfiles/sandbox_profile (71.30s)
+Z19: --- PASS: TestE2E_Brew_PinThatDoesNotExistBreaksTheBuild (20.23s)
+Z23: --- PASS: TestE2E_Brew_UpdateSwitchKeepsTheRevision (60.14s)
+Z29: --- PASS: TestE2E_Brew_EgressHostsOfHomebrew (80.21s)
+Z30: PASS
+Z31: ok  	github.com/pt9912/u-boot/internal/e2e	280.263s
+
+
+C. Mutation: die Zeile der Datei aus dem Template entfernt
+-----------------------------------------------------------
+
+Aufruf wie unter B, Beginn 12:10:39Z, mit einem Template ohne die Zeile, die /etc/profile.d/u-boot-brew.sh schreibt.
+Der Lauf ist absichtlich rot; das Template wurde danach zurückgesetzt und ist byte-gleich der gesicherten Fassung.
+Das Log nennt als Fehler genau die Prüfungen der Login-Sitzungen und die Kontrolle (Beispiel Standardprofil,
+dieselben fünf Zeilen im Sandbox-Profil):
+
+Z7:     brew_docker_test.go:162: [bash -lc]: brew on the PATH = "" (exit 1), want the prefix of Homebrew
+Z8:     brew_docker_test.go:162: [sh -lc]: brew on the PATH = "" (exit 127), want the prefix of Homebrew
+Z9:     brew_docker_test.go:162: [bash -lic]: brew on the PATH = "bash: cannot set terminal process group (-1): Inappropriate ioctl for device\nbash: no job control in this shell\n" (exit 1), want the prefix of Homebrew
+Z10:     brew_docker_test.go:167: su -l vscode: brew on the PATH = "" (exit 1), want the prefix of Homebrew
+Z11:     brew_docker_test.go:171: control: without the profile file the login session found brew ("rm: cannot remove '/etc/profile.d/u-boot-brew.sh': No such file or directory\n"); the check measures nothing
+Z23: --- FAIL: TestE2E_Brew_BuildsInBothProfiles (166.45s)
+Z24:     --- FAIL: TestE2E_Brew_BuildsInBothProfiles/default_profile (68.48s)
+Z25:     --- FAIL: TestE2E_Brew_BuildsInBothProfiles/sandbox_profile (97.97s)
+Z27: FAIL	github.com/pt9912/u-boot/internal/e2e	166.453s

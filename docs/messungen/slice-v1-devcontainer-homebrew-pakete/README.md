@@ -142,6 +142,24 @@ je Profil in den Rohdaten; die Revision des Homebrew-Verzeichnisses ist in beide
 Nicht gemessen: andere Shells als `bash`, `sh` und `zsh`; ein Login über das Feature `sshd`; ein anderes Basis-Image als
 `mcr.microsoft.com/devcontainers/base:debian`.
 
+## Docker-Tests `TestE2E_Brew_*` (`test-docker-lauf.txt`)
+
+Die vier Tests in `internal/e2e/brew_docker_test.go` (Build-Tag `docker`) bauen das Image und prüfen es: Bau in beiden Profilen mit Pin, Benutzer,
+Formeln und `brew` in den Shell-Arten aus M7, der Pin, den es nicht gibt, der Schalter gegen die Selbst-Aktualisierung und die Hosts hinter der
+Restriktion. `test-docker-lauf.txt` trägt die Zeilen der Läufe, die diese Tests bestanden haben, mit der Zeilennummer des Logs:
+
+- **Voller Lauf von `make test-docker`** auf `9a908a83` (A): alle vier Tests bestanden (zusammen rund 297 s). Das Paket `internal/e2e` endete am
+  Limit `-timeout 30m` (`panic: test timed out`, Exit-Code 2), nicht an einem roten Test: 46 von 57 Funktionen `TestE2E_` bestanden, 4 beim
+  Abbruch ohne Ergebnis, 7 nicht gestartet, `--- FAIL` kommt nicht vor; die übrigen 24 Pakete sind `ok`. Ein voller Lauf auf einem späteren Stand
+  liegt nicht vor.
+- **Verengter Lauf** (`-run 'TestE2E_Brew_'`) auf dem Stand der dritten Fix-Runde (B): vier von vier bestanden, 297,8 s; Stand der zweiten
+  Fix-Runde: 280,3 s. Die Mutation ohne die Zeile der Datei (C) färbt die Prüfungen von `bash -lc`, `sh -lc`, `bash -lic`, `su -l vscode` und die Kontrolle
+  rot.
+
+Die Umgebung ist die verschachtelte Engine des Devcontainer-Containers, nicht die Nachweis-Form von `make test-docker`
+([`SPEC-031`](../../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows): die Engine, die den Devcontainer-Container erzeugt).
+**Die Sockelform ist nicht gelaufen**; die Dauer des Pakets `internal/e2e` in der Sockelform ist nicht gemessen.
+
 ## Aufruf
 
 ```bash
