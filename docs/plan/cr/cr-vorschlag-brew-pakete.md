@@ -4,7 +4,7 @@
 
 **Gegenstand:** die Lieferung zur DoD-Zeile 1 des CR-Slices [`slice-cr-devcontainer-brew-pakete`](../planning/in-progress/slice-cr-devcontainer-brew-pakete.md) (Lastenheft-Wortlaut); Umsetzung im Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../planning/next/slice-v1-devcontainer-homebrew-pakete.md).
 
-**Grundlage:** [`ADR-0046`](../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (`Accepted`, 2026-11-05: Schlüssel `brew`, Freigabeliste `devcontainer.brewTaps.allow`, Commit-Pin ohne Übersteuerung) und die zwei Entscheidungen des Projektinhabers vom 2026-11-05 (neuer Schlüssel neben dem OCI-Feature `homebrew`; Taps nur über eine eigene Freigabeliste). **Messbasis:** keine; der Block ist noch nicht gebaut. Jede Aussage über Bau, Plattform und Netz steht deshalb als Zielbild mit ausgewiesener Grenze, nicht als gemessene Zusage (Muster der Instanz-Zusage; die Messung folgt in DoD 3 des Umsetzungs-Slices).
+**Grundlage:** [`ADR-0046`](../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (`Accepted`, 2026-11-05: Schlüssel `brew`, Freigabeliste `devcontainer.brewTaps.allow`, Commit-Pin ohne Übersteuerung) und die zwei Entscheidungen des Projektinhabers vom 2026-11-05 (neuer Schlüssel neben dem OCI-Feature `homebrew`; Taps nur über eine eigene Freigabeliste).
 
 ---
 
@@ -24,7 +24,7 @@
 
 **Neu (Vorschlag):** ein neuer Absatz zwischen beiden:
 
-> `brew` (Homebrew-Formeln im Image) ist in beiden Profilen (Standard und Sandbox) als eingebautes Feature wählbar (`u-boot config set devcontainer.features.brew.enabled true`) und nimmt die Liste `devcontainer.features.brew.packages` entgegen. Der Schlüssel installiert im erzeugten Devcontainer-Dockerfile Homebrew aus einem gepinnten Commit des Upstream-Projekts, ohne Installer-Skript, und danach die Formeln der Liste. Die Formeln selbst sind nicht gepinnt: Ihre Version bestimmt Homebrew zum Zeitpunkt des Baus, und der Pin deckt nur Homebrew. Ein Eintrag der Liste ist `<formel>` oder `<user>/<tap>/<formel>`. `u-boot` weist beim Erzeugen den Block, die Quelle von Homebrew, die ungepinnte Formelliste und jeden Tap aus. Das Community-Feature `homebrew` bleibt unverändert wählbar; beide zusammen aktiv sind ein fachlicher Validierungsfehler (Exit-Code `10`). Zugesagt ist die Erzeugung des Dockerfile-Blocks und der Konfiguration; der Bau des Images und der Betrieb sind nur auf einem Linux-Host (`amd64`) mit lokaler, nicht verschachtelter Docker-Engine und nur soweit zugesagt, wie ein Test mit Build-Tag `docker` es belegt. Nicht zugesagt: Version, Verfügbarkeit und Arbeitsverhalten einer Formel; die Hosts, die eine Formel beim Bau oder im Betrieb braucht (hinter der Egress-Restriktion trägt der Nutzer sie in `devcontainer.sandbox.egress.allow` ein, `u-boot` leitet sie aus Paketnamen nicht ab); Linux-`arm64`; das Überstehen eines Neubaus des Images, soweit kein Test es belegt.
+> `brew` (Homebrew-Formeln im Image) ist in beiden Profilen (Standard und Sandbox) als eingebautes Feature wählbar (`u-boot config set devcontainer.features.brew.enabled true`) und nimmt die Liste `devcontainer.features.brew.packages` entgegen. Der Schlüssel installiert im erzeugten Devcontainer-Dockerfile Homebrew aus einem gepinnten Commit des Upstream-Projekts, ohne Installer-Skript, und danach die Formeln der Liste. Die Formeln selbst sind nicht gepinnt: Ihre Version bestimmt Homebrew zum Zeitpunkt des Baus, und der Pin deckt nur Homebrew. Ein Eintrag der Liste ist `<formel>` oder `<user>/<tap>/<formel>`. `u-boot` weist beim Erzeugen den Block, die Quelle von Homebrew, die ungepinnte Formelliste und jeden Tap aus. Das Community-Feature `homebrew` bleibt unverändert wählbar; beide zusammen aktiv sind ein fachlicher Validierungsfehler (Exit-Code `10`).
 
 ## Stelle (c) — [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), Freigabe externer Quellen: Taps
 
@@ -51,6 +51,7 @@
 
 ## Nicht geändert
 
+- Bau, Betrieb, Plattformen und die Grenzen der Zusage („nicht zugesagt“): keine Lastenheft-Aussage. Sie gehören in die Spezifikation und in die Tests des Umsetzungs-Slices; dort stehen sie mit ihrer Messgrundlage.
 - [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte): Der Wortlaut bleibt. Die Auslegung (ein Tap ist eine vom Nutzer genannte Quelle, die Ausnahme für Paketmanager-Pakete deckt, was der Paketmanager mitbringt) steht in [`ADR-0046`](../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md).
 - `devcontainer down`, `up --recreate` und der Katalog-Eintrag `homebrew`: unverändert.
 
@@ -60,8 +61,7 @@
 
 **Offen zur Freigabe:**
 
-- **F1 — Zielbild vor Messung (Stelle (b)).** Der Satz zur Bau-Zusage (Linux-`amd64`, nur soweit ein Docker-Test es belegt) steht, bevor der Block gebaut ist. Gegenposition: den Satz streichen und mit der Messung nachziehen (eigene Lastenheft-Änderung). Empfehlung: lassen, weil er die Zusage an den Test bindet und ohne Test nichts zusagt.
-- **F2 — kein Flag für die Tap-Freigabe (Stelle (c)).** Der Weg ist `config set`; ein Flag wie bei `--allow-external-feature-sources` gibt es nicht. Gegenposition: ein Flag nur für `generate devcontainer`. Empfehlung: kein Flag, weil jedes Flag eine Prüfstrecke an drei Befehlen kostet.
-- **F3 — Versionsnummer.** `0.36.0` ist der nächste freie Minor-Schritt; die Zahl vergibt die Übernahme.
+- **F1 — kein Flag für die Tap-Freigabe (Stelle (c)).** Der Weg ist `config set`; ein Flag wie bei `--allow-external-feature-sources` gibt es nicht. Gegenposition: ein Flag nur für `generate devcontainer`. Empfehlung: kein Flag, weil jedes Flag eine Prüfstrecke an drei Befehlen kostet.
+- **F2 — Versionsnummer des Lastenhefts.** `0.36.0` ist der nächste freie Schritt der Lastenheft-Version (nicht die Release-Version); die Zahl vergibt die Übernahme.
 
-**Regeln dieser Form:** die Kennungen sind verlinkt; der Neu-Wortlaut trägt Zielbild nur mit ausgewiesener Grenze; die Historie-Zeile entsteht bei der Übernahme mit dem Datum des Commits.
+**Regeln dieser Form:** die Kennungen sind verlinkt; der Neu-Wortlaut nennt Anforderungen, keine Plattform-, Bau- oder Messgrenzen (sie stehen in der Spezifikation und in den Tests); die Historie-Zeile entsteht bei der Übernahme mit dem Datum des Commits.

@@ -20,7 +20,7 @@ Anlass: Projektinhaber, 2026-11-05 (Entscheidungen 1 und 2 im Slice [`slice-v1-d
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Das Lastenheft sagt zu, dass der Katalogschlüssel `brew` eine Liste von Homebrew-Formeln (`devcontainer.features.brew.packages`) im Devcontainer-Dockerfile installiert, dass Formeln aus einem Tap eine Eintragung in `devcontainer.brewTaps.allow` brauchen und dass die Formeln ungepinnt sind; der Wortlaut trägt nur, was die Messung in [`slice-v1-devcontainer-homebrew-pakete`](../next/slice-v1-devcontainer-homebrew-pakete.md) (DoD 3) und die ADR tragen.
+**Ziel:** Das Lastenheft sagt zu, dass der Katalogschlüssel `brew` eine Liste von Homebrew-Formeln (`devcontainer.features.brew.packages`) im Devcontainer-Dockerfile installiert, dass Formeln aus einem Tap eine Eintragung in `devcontainer.brewTaps.allow` brauchen und dass die Formeln ungepinnt sind; der Wortlaut nennt Anforderungen und keine Plattform-, Bau- oder Messgrenzen.
 
 Ausgangslage (gelesen im Bericht des Architects, Fundstellen in [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md)): Keine Zusage des Lastenhefts beschreibt einen Katalogschlüssel mit freier Paketliste oder eine Freigabeliste für Taps; [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) nimmt Paketmanager-Pakete im Image-Bau aus, nennt aber nicht freigegebene Skripte.
 
@@ -28,7 +28,7 @@ Ausgangslage (gelesen im Bericht des Architects, Fundstellen in [`ADR-0046`](../
 
 - **Spezifikation und Code** — Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../next/slice-v1-devcontainer-homebrew-pakete.md); die Spezifikation setzt den freigegebenen Vertrag voraus.
 - **Pin-Zusage für Formeln** — Homebrew pinnt Formeln nicht verlässlich; der Wortlaut sagt „ungepinnt“, nicht mehr.
-- **Plattform-Zusage über Linux-`amd64` hinaus** — sie folgt der Messung, nicht der Erwartung.
+- **Plattform-, Bau- und Messgrenzen der Zusage** — keine Lastenheft-Aussage; sie stehen in der Spezifikation und in den Tests des Umsetzungs-Slices, mit ihrer Messgrundlage.
 
 ## 2. Definition of Done
 
@@ -54,7 +54,7 @@ Der Implementer liest `lastenheft.md` an den Stellen und ergänzt die Tabelle (`
 
 ## 4. Trigger
 
-**Start** (`open` → `next` → `in-progress`): Projektinhaber priorisiert; `in-progress/` ist leer (WIP-Limit 1). Die Messung aus [`slice-v1-devcontainer-homebrew-pakete`](../next/slice-v1-devcontainer-homebrew-pakete.md) (DoD 3) ist die Grundlage für „nur Gemessenes“; ohne sie bleibt der Wortlaut ein Zielbild mit ausgewiesenen Grenzen.
+**Start** (`open` → `next` → `in-progress`): Projektinhaber priorisiert; `in-progress/` ist leer (WIP-Limit 1).
 
 **Rückführungen:** `in-progress` → `open`, solange die Freigabe des Projektinhabers aussteht.
 
@@ -64,8 +64,7 @@ DoD vollständig, Wortlaut im Lastenheft, `make gates` grün, Reports liegen vor
 
 ## 6. Risiken und offene Punkte
 
-- Der Wortlaut sagt mehr zu, als die Messung trägt (Zusage weiter als Messung). — **Ausgang:** offen; der Reviewer prüft jeden Satz gegen das Protokoll.
-- Messung und CR liegen in umgekehrter Reihenfolge der Slices (die Messung steht in DoD 3 des Folge-Slice). — **Ausgang:** offen; der CR trägt Zielbild-Sätze mit ausgewiesenen Grenzen, bis das Protokoll vorliegt.
+- Der Wortlaut enthält Details, die in die Spezifikation gehören (Plattformen, Messgrenzen). — **Ausgang:** offen; der Reviewer prüft jeden Satz auf Anforderungsebene.
 
 ## 7. Closure-Notiz
 
@@ -77,7 +76,7 @@ DoD vollständig, Wortlaut im Lastenheft, `make gates` grün, Reports liegen vor
 
 **Vorgelagert — offene Beobachtungen sichten:** Register durchgegangen (Stichworte Zusage, Messung, Vertragsänderung, Freigabe); vier Treffer:
 
-- [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) (37 Evidence-Dateien, offen, kein Ausgang zugewiesen): der Neu-Wortlaut trägt nur Gemessenes oder ein ausgewiesenes Zielbild; der Reviewer prüft jeden Satz gegen die Grundlage (DoD 1, Risiko 1).
+- [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) (37 Evidence-Dateien, offen, kein Ausgang zugewiesen): der Neu-Wortlaut nennt Anforderungen; der Reviewer prüft jeden Satz gegen die ADR und die Entscheidungen des Projektinhabers (DoD 1, Risiko 1).
 - [`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md) (17 Evidence-Dateien, offen): ein Wortlaut, der nach dem Review entsteht, hat ihn nicht durchlaufen; die Übernahme ins Lastenheft ändert den freigegebenen Wortlaut nicht, und jede Abweichung steht im CR-Vorschlag (DoD 2).
 - [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md) (41 Evidence-Dateien, verkörpert in `AGENTS.md` §3.10): jede Bedingung im Neu-Wortlaut („nur wenn“, „immer“) bekommt im Umsetzungs-Slice einen pinnenden Test oder entfällt.
 - [`BEO-DOK/freigabe-vorlage-verdichtet-den-entwurf`](../observations/BEO-DOK/freigabe-vorlage-verdichtet-den-entwurf/observation.md) (1 Evidence-Datei, offen): die Vorlage an den Projektinhaber zeigt den Wortlaut Satz für Satz und nicht verdichtet.
