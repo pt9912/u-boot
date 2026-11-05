@@ -49,7 +49,7 @@ Pflichten der Closure (zählen nicht mit):
 | `docs/plan/cr/cr-vorschlag-brew-pakete.md` | update | Vorschlags-Datei nach `cr-vorschlag.template.md`: Freigabe, Übernahme, Abweichungen (bleibt dauerhaft im CR-Ordner) |
 | `spec/lastenheft.md` | update | die neue Anforderung, Versionsfeld, §16 Historie |
 | `docs/plan/planning/next/slice-v1-devcontainer-homebrew-pakete.md` | update | Bezug, Doku-Pflicht und Test-Anker auf die neue Anforderung (Review F-3) |
-| `docs/plan/planning/in-progress/slice-cr-devcontainer-brew-pakete.md` | neu / update | dieser Plan selbst |
+| `docs/plan/planning/done/slice-cr-devcontainer-brew-pakete.md` | neu / update | dieser Plan selbst |
 | `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | update | Zeilen des Slice, Zustandsmarker |
 | `docs/reviews/2026-11-05-slice-cr-devcontainer-brew-pakete.md` | neu | Review-Report |
 | `docs/reviews/verification-2026-11-05-slice-cr-devcontainer-brew-pakete.md` | neu | Verification-Report |
