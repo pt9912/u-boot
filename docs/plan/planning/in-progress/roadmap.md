@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-[`slice-cr-devcontainer-remove`](slice-cr-devcontainer-remove.md) liegt in `in-progress/` — Lastenheft-Änderung zu [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten): ein Befehl `devcontainer remove` entfernt den Container des Projekts, mit `--volumes` auch seine Volumes; zweiter von vier Slices, wird ohne Welle umgesetzt.
+[`slice-cr-devcontainer-remove`](slice-cr-devcontainer-remove.md) liegt in `in-progress/` — Lastenheft-Änderung zu [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten): ein Befehl `devcontainer remove` entfernt den Container des Projekts, mit `--volumes` auch seine Volumes; zweiter von vier Slices, wird ohne Welle umgesetzt; der Wortlaut wird vorgelegt ([`cr-vorschlag-devcontainer-remove`](../../cr/cr-vorschlag-devcontainer-remove.md)).
 
 ## Nächste Wellen
 
