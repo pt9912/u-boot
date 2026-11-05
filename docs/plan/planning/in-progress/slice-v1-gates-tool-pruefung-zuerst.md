@@ -36,10 +36,10 @@ Ausgangslage (gelesen): `gates` hängt an `record-gates`, und `record-gates` an 
 
 Pflichten der Closure (zählen nicht mit):
 
-- [ ] `make gates` grün (im Devcontainer-Container, `AGENTS.md` §3.1).
-- [ ] Review durchgeführt, Report unter `docs/reviews/` (`.harness/skills/reviewer.md`), kein Self-Review.
-- [ ] Doku-Zeiger nachgesehen: `README.md`, `README.de.md`, `harness/README.md` nennen `tool-pruefung` als Teil der Menge der Gates; eine Reihenfolge behaupten sie nach Lesung nicht.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag; jedes Risiko aus §6 trägt einen Ausgang.
+- [x] `make gates` grün (im Devcontainer-Container, `AGENTS.md` §3.1).
+- [x] Review durchgeführt, Report unter `docs/reviews/` (`.harness/skills/reviewer.md`), kein Self-Review.
+- [x] Doku-Zeiger nachgesehen: `README.md`, `README.de.md`, `harness/README.md` nennen `tool-pruefung` als Teil der Menge der Gates; eine Reihenfolge behaupten sie nach Lesung nicht.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag; jedes Risiko aus §6 trägt einen Ausgang.
 
 ## 3. Plan (vor Code)
 
@@ -48,6 +48,9 @@ Pflichten der Closure (zählen nicht mit):
 | `tools/mk/tool-pruefung.mk` | update | `GATE_CHECKS := tool-pruefung $(GATE_CHECKS)` statt `+=` (Commit `6c4edaa9`); Kommentar nennt die Zusage (nur serieller Lauf); das Rezept von `tool-pruefung` ruft Sensor und Wächter-Test auf |
 | `tools/harness/gate-reihenfolge.sh` | neu | Sensor: liest die Prerequisite-Liste von `record-gates` aus `make -pn gates` und verlangt `tool-pruefung` an erster Stelle ([`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)) |
 | `tools/harness/gate-reihenfolge-test.sh` | neu | Wächter-Test: Grundzustand grün, Mutation (`+=`) rot; Form nach `ablage-pruefung-test.sh` |
+| `docs/reviews/2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md` | neu | Review-Report (Rolle Reviewer, 0 HIGH, 1 MEDIUM) |
+| `docs/reviews/verification-2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md` | neu | Verification-Report (Rolle Verifier) |
+| `docs/plan/planning/observations/BEO-DOK/plan-aussage-ueber-code/` | update | `state.md` und `evidence/slice-v1-gates-tool-pruefung-zuerst.md` (Closure, §7) |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Sektion „Offene Wellen“ nennt den Slice statt des Ruhe-Markers (Drift-Befund `planning-drift` von `docs-check`); bei der Closure kehrt der Ruhe-Marker zurück |
 | `README.md`, `README.de.md`, `harness/README.md` | unverändert | gelesen: Zeilen mit `make gates` führen die Gates als Menge mit `+` und nennen keine Reihenfolge (`README.md:281`, `README.de.md:287`, `harness/README.md:72`) |
 | `docs/plan/planning/open/README.md` | update | Zeile des Slice (Zustand `in-progress/`, kein Chronik-Satz) |
@@ -73,12 +76,17 @@ DoD vollständig, `make gates` grün im Devcontainer, Review-Report liegt vor, C
 
 ## 6. Risiken und offene Punkte
 
-1. **Der Sensor der Reihenfolge hängt am Text von `make -n`** und bricht, wenn sich die Rezeptzeilen ändern. — **Ausgang:** offen; der Implementer wählt die robusteste Form (Position in der Liste statt Ausgabetext).
-2. **Ein späterer `-j`-Lauf** hebt die Zusage auf, ohne dass ein Gate rot wird. — **Ausgang:** weiter offen, der Kommentar in `tools/mk/tool-pruefung.mk` benennt die Grenze.
+1. **Der Sensor der Reihenfolge hängt am Text von `make -n`** und bricht, wenn sich die Rezeptzeilen ändern. — **Ausgang:** entfallen: der Sensor liest die Position in der Prerequisite-Liste aus `make -pn gates` (`tools/harness/gate-reihenfolge.sh`), nicht den Text einer Rezeptzeile; Läufe mit `MAKEFLAGS=-j4` und `env -i` blieben grün (Review-Report).
+2. **Ein späterer `-j`-Lauf** hebt die Zusage auf, ohne dass ein Gate rot wird. — **Ausgang:** entfallen: die Rezepte von `scripts/bau.sh` und die Workflows rufen `make` ohne `-j` auf (gelesen), der Kommentar in `tools/mk/tool-pruefung.mk` benennt die Grenze, und führt ein Rezept `-j` ein, greift die Rückführung nach `open/` aus §4.
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt.)*
+- **Was hat funktioniert:** Die Reihenfolge ist eine Position in der Prerequisite-Liste von `record-gates`, und der Sensor liest genau diese Liste aus `make -pn gates`; der Wächter-Test färbt die Mutation (`+=`) rot. Beide laufen als Teil von `make tool-pruefung` im Gate.
+- **Was ging anders als geplant:** Der Wechsel nach `in-progress/` färbte `docs-check` rot, weil die Roadmap den Ruhe-Marker „Nichts in Arbeit.“ trug (`planning-drift`). Die Plan-Tabelle war zweimal unvollständig (Review F-2, Verification A-1), und die Zeile in `open/README.md` trug nach dem Wechsel noch Marker des Zustands davor (Review F-1).
+- **Steering-Loop-Eintrag:** `BEO-DOK/plan-aussage-ueber-code` ergänzt (weiterer Beleg, Rückfall nach der Verkörperung in `AGENTS.md` §3.10); keine weitere Schärfung entschieden.
+- **Beobachtungs-Register (`../observations/`):** `evidence/slice-v1-gates-tool-pruefung-zuerst.md` in `BEO-DOK/plan-aussage-ueber-code/` ergänzt.
+- **Folge-Slices:** keine. Zwei Vorbefunde außerhalb des Slice stehen im Verification-Report und sind nicht Gegenstand: `tools/harness/tool-pruefung.sh` fehlt in der Ausnahmeliste von `MR-012`, `docs/maintainer/quality.md` führt `tool-pruefung` in der Gate-Liste nicht.
+- **Risiken aus §6:** beide mit Ausgang `entfallen` (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
