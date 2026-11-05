@@ -1310,7 +1310,11 @@ devcontainer:
   Dockerfile (die Reihenfolge der Blöcke ist festgelegt, gebaut ist die
   Kombination nicht), Image-Größe und Bauzeit (mit `ripgrep` und einer
   Tap-Formel wächst das Image um rund 290 MB, Homebrew allein rund 60 MB) und
-  Abhängigkeiten einer Tap-Formel aus anderen Taps.
+  Abhängigkeiten einer Tap-Formel aus anderen Taps. Gemessen an einem
+  Formelpaar: Homebrew richtet den anderen Tap nicht selbst ein, der Bau bricht
+  ab. Tragen Sie dann die Formel der Abhängigkeit selbst in die Liste ein und
+  geben Sie deren Tap in `devcontainer.brewTaps.allow` frei (als Plan
+  gemessen, nicht gebaut).
 
 #### Externe Feature-Quellen freigeben
 

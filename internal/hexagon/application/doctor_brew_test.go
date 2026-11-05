@@ -124,5 +124,8 @@ func TestDoctor_UbootYaml_ErrorOnBadBrewEntries(t *testing.T) {
 		if d.Severity != domain.SeverityError || !strings.Contains(d.Message, "devcontainer schema invalid") {
 			t.Errorf("%s: Severity = %v, message = %q, want the schema error", name, d.Severity, d.Message)
 		}
+		if !strings.Contains(d.Hint, "Homebrew formula or tap") {
+			t.Errorf("%s: Hint = %q, want it to name the formula and the tap", name, d.Hint)
+		}
 	}
 }

@@ -625,7 +625,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 			ID:       checkIDUbootYaml,
 			Severity: domain.SeverityError,
 			Message:  fmt.Sprintf("u-boot.yaml devcontainer schema invalid: %s.", err.Error()),
-			Hint:     "Fix the offending entry (URL scheme, host, or feature name).",
+			Hint:     "Fix the offending entry (URL scheme, host, feature name, Homebrew formula or tap).",
 		}
 	}
 	return domain.Diagnostic{

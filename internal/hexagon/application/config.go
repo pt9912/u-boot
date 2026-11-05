@@ -562,11 +562,12 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 // `--allow-external-feature-sources <source>`.
 //
 // For .enabled of `brew` and `homebrew` it enforces the rules of the Homebrew
-// block through [brewViolationMessage] (LH-FA-DEV-013).
+// block through [brewEnablingViolation] (LH-FA-DEV-013); only an enabling
+// is asked, switching off is always possible.
 //
 // For .version it enforces the rule of [validateDevcontainerFeatures]
 // through [featureVersionNeedsSource]: an entry without OCI source
-// (`ollama`, `gh`, `glab`, `ollama-host`) takes a version only with a
+// (a Dockerfile block or a container option) takes a version only with a
 // source, else [driving.ErrConfigValueInvalid] (exit code 10, file untouched).
 func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 	entry, ok := lookupFeatureEntry(cfg, path.Feature)
@@ -580,14 +581,10 @@ func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 			return fmt.Errorf("%w: post-patch %s is unbound",
 				driving.ErrConfigPostPatchSanityFailed, path)
 		}
-		// LH-FA-DEV-013: enabling `brew` or `homebrew` asks the rules of the
-		// Homebrew block that the enabling can break — the conflict of the
-		// two keys and the approval of the taps of the formula list.
-		// Switching off is always possible.
-		if name := path.Feature.String(); name == featureBrew || name == featureHomebrew {
-			if msg := brewViolationMessage(cfg.Devcontainer); msg != "" {
-				return fmt.Errorf("%w: %s: %s", driving.ErrConfigValueInvalid, path, msg)
-			}
+		// LH-FA-DEV-013: the rules of the Homebrew block that the enabling
+		// of `brew` or `homebrew` can break.
+		if msg := brewEnablingViolation(cfg.Devcontainer, path.Feature.String(), *entry.Enabled); msg != "" {
+			return fmt.Errorf("%w: %s: %s", driving.ErrConfigValueInvalid, path, msg)
 		}
 		return nil
 	case domain.ConfigDevcontainerFeatureSource:

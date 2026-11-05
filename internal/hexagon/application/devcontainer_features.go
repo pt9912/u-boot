@@ -666,7 +666,7 @@ func projectFeatureEntry(name string, entry ubootYAMLDevcontainerFeature) (devco
 // Returns ("", "", false) for the orphan case (no Source override
 // and the name is not in the catalogue) — caller skips silently — and
 // for an entry without OCI source and without Source override (a
-// Dockerfile block: `ollama`, `gh`, `glab`; a container option:
+// Dockerfile block; a container option:
 // `ollama-host`): it renders no key, so the drift check stays silent for it.
 // Slice-followup-devcontainer-features-drift-doctor Review-Followup
 // S1 extracted this helper to remove the synthetic-`Enabled=&true`-
@@ -834,7 +834,7 @@ func forgeCLIWarnings(dc *ubootYAMLDevcontainer) []driving.WarningEntry {
 //   - Every non-empty `Source:` value passes [validateFeatureSource]
 //     (URL-format check only — allowlist-membership enforcement is
 //     T4's job).
-//   - An entry without OCI source (a Dockerfile block: `ollama`, `gh`, `glab`;
+//   - An entry without OCI source (a Dockerfile block;
 //     a container option: `ollama-host`) has no `Version:` override
 //     without a `Source:` override: see [featureVersionNeedsSource].
 //   - Every entry in [ubootYAMLFeatureSources.Allow] passes

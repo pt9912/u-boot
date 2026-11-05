@@ -6,7 +6,7 @@
 // installed as the container user (a formula of Homebrew itself and a formula
 // of a tap), `brew` is on the `PATH` of the sessions the product starts, a
 // pin that does not exist breaks the build, the build switch keeps the
-// revision when the automatic update would move it, and a formula of Homebrew
+// revision against the automatic update, and a formula of Homebrew
 // installs behind the egress restriction with the hosts of the generated list.
 // The measurement behind the promise: docs/messungen/slice-v1-devcontainer-
 // homebrew-pakete. The build downloads from github.com, ghcr.io and
@@ -47,8 +47,8 @@ const (
 	brewTap        = "pt9912/u-boot"
 )
 
-// kv is one `config set` of the project set-up, applied in the given order (a
-// map would shuffle the order of the tap list and the formulas).
+// kv is one `config set` of the project set-up; the settings are applied in
+// slice order, because the tap list has to stand before the formulas of the tap.
 type kv struct{ path, value string }
 
 // dcGenerateOrderedProject mirrors dcGenerateProject with the settings in

@@ -210,8 +210,10 @@ Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der M
   gleich dem Pin; der nicht vorhandene Pin bricht den Bau; der Schalter gegen die Selbst-Aktualisierung hält die Revision; `brew` im `PATH`
   von Shells ohne Login, nicht in `bash -l` und `sh -l`; die drei Hosts hinter der Restriktion für `jq`; der Host `release-assets.githubusercontent.com`
   der gemessenen Tap-Formel.
-- **Nicht gemessen und nicht zugesagt:** `arm64` (die Messumgebung konnte keinen `arm64`-Container starten), andere Formeln und Taps, Abhängigkeiten
-  einer Tap-Formel aus anderen Taps, die Kombination mit den übrigen Dockerfile-Blöcken, das Verhalten nach mehreren Tagen Betrieb.
+- **Nur an einem Formelpaar gemessen, nicht zugesagt:** Abhängigkeit einer Tap-Formel aus einem anderen Tap (M6: Homebrew richtet den anderen Tap
+  nicht selbst ein, der Bau bricht ab; die Liste mit beiden Formeln ist nur als Plan gemessen, nicht gebaut).
+- **Nicht gemessen und nicht zugesagt:** `arm64` (die Messumgebung konnte keinen `arm64`-Container starten), andere Formeln und Taps, die
+  Kombination mit den übrigen Dockerfile-Blöcken, das Verhalten nach mehreren Tagen Betrieb.
 
 ### 3.4 Verschachteltes Podman (Handbuch, Abschnitt 4.11, Podman)
 

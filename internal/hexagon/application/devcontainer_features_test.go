@@ -364,7 +364,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 //     emit `<source>:<version>` unconditionally.
 //   - The short description is non-empty so the future
 //     `feature list` UX and doctor hints have a label to surface.
-//   - A Dockerfile-block entry (`ollama`, `gh`, `glab`) carries no source, default
+//   - A Dockerfile-block entry carries no source, default
 //     version or publisher; the generated Dockerfile holds its pin
 //     (ADR-0024 decision 2).
 //   - A container-option entry (`ollama-host`) carries no source, default

@@ -221,6 +221,27 @@ func TestConfigSet_BrewEnabling_AsksTheApprovalAndTheConflict(t *testing.T) {
 			t.Fatalf("a file in a state generate rejects can still switch the key off: %v", err)
 		}
 	})
+	// A file with `brew` active, its tap not approved and `homebrew` active is
+	// a state `generate devcontainer` rejects twice over; switching off either
+	// key stays possible, because the written value decides and the sibling
+	// key's violation is not this write's.
+	t.Run("disabling at either key of a rejected file", func(t *testing.T) {
+		t.Parallel()
+		const rejected = brewConfigHead + "  features:\n    brew:\n      enabled: true\n      packages:\n        - pt9912/u-boot/u-boot\n    homebrew:\n      enabled: true\n"
+		for _, path := range []string{"devcontainer.features.homebrew.enabled", "devcontainer.features.brew.enabled"} {
+			svc, fs := newConfigService(t)
+			seedConfigUbootYAMLWithDevcontainer(t, fs, rejected)
+			if _, err := setBrew(t, svc, path, "false", driving.PreviewNone); err != nil {
+				t.Errorf("Set %s false: %v", path, err)
+			}
+			svc, fs = newConfigService(t)
+			seedConfigUbootYAMLWithDevcontainer(t, fs, rejected)
+			item := driving.ConfigSetItem{Path: mustConfigPath(t, path), Value: "false"}
+			if _, err := svc.SetMany(context.Background(), driving.ConfigSetManyRequest{BaseDir: configTestBaseDir, Items: []driving.ConfigSetItem{item}}); err != nil {
+				t.Errorf("SetMany %s false: %v", path, err)
+			}
+		}
+	})
 	t.Run("conflict with homebrew in both directions", func(t *testing.T) {
 		t.Parallel()
 		for name, tc := range map[string]struct{ yaml, path string }{

@@ -202,6 +202,19 @@ func brewViolationMessage(dc *ubootYAMLDevcontainer) string {
 	return brewTapFinding(dc)
 }
 
+// brewEnablingViolation is the rule of the write path of `config set` for the
+// `enabled` leaf of the keys `brew` and `homebrew`: the enabling asks
+// [brewViolationMessage] on the patched document (the conflict of the two keys
+// and the approval of the taps of the formula list). Switching off is always
+// possible, at either key; the written value decides, not the state of the
+// sibling key. Empty for any other key.
+func brewEnablingViolation(dc *ubootYAMLDevcontainer, feature string, enabled bool) string {
+	if !enabled || (feature != featureBrew && feature != featureHomebrew) {
+		return ""
+	}
+	return brewViolationMessage(dc)
+}
+
 // rejectBrewViolations is the brew part of the pre-write gate of
 // [GenerateService.generateDevcontainer]: the exit-10 rejection of
 // [brewViolationMessage], before any plan and write, under `--dry-run` too.

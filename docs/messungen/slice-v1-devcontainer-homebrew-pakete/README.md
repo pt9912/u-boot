@@ -4,7 +4,7 @@
 | ----------- | ------------- |
 | Auslösender Vorgang | [`slice-v1-devcontainer-homebrew-pakete`](../../plan/planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md) (Umsetzung zu Lastenheft 0.36.1, [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), [`SPEC-057`](../../../spec/spezifikation.md#spec-057--homebrew-formeln-im-devcontainer-katalog-schlüssel-brew-pfade-freigabe-der-taps-konflikt-mit-homebrew-pin-meldungen-hosts-und-grenzen)); Messpunkte aus [`ADR-0046`](../../plan/adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) |
 | Gelesen am  | 2026-11-05 |
-| Skripte     | `tools/messung/devcontainer-homebrew-pakete/` (`01-bau.sh`, `02-pfad.sh`, `03-aktualisierung.sh`, `04-egress.sh` mit `inner-04.sh`, `06-arm64.sh`, `05-aufraeumen.sh`, gemeinsam `lib.sh`; `00-alles.sh` ruft 01 bis 04 und 06) |
+| Skripte     | `tools/messung/devcontainer-homebrew-pakete/` (`01-bau.sh`, `02-pfad.sh`, `03-aktualisierung.sh`, `04-egress.sh` mit `inner-04.sh`, `06-arm64.sh`, `07-fremd-tap.sh`, `05-aufraeumen.sh`, gemeinsam `lib.sh`; `00-alles.sh` ruft 01 bis 04, 06 und 07) |
 
 ## Umgebung
 
@@ -12,7 +12,7 @@ Linux-Host `amd64` (`x86_64`), Docker Engine 29.9.3 (`linux/amd64`, die verschac
 Basis-Image `mcr.microsoft.com/devcontainers/base:debian` (Debian 13, 1.412.272.019 Byte lokal), Netz offen (kein Proxy). Das Binary `u-boot`
 (`u-boot version 0.23.0-dev`, der Stand des Slice) erzeugt die Projekte: `init --devcontainer`, die Einstellungen per `config set` in der
 Reihenfolge der Skripte, `generate devcontainer`. Ein Lauf je Messpunkt; die Rohdaten sind die archivierten Läufe
-(`rohdaten-m1.txt` bis `rohdaten-m5.txt`, M4 je Modus eine Datei). Die Messung liest keine Zugangsdaten und setzt keine; sie schreibt nichts ins
+(`rohdaten-m1.txt` bis `rohdaten-m6.txt`, M4 je Modus eine Datei). Die Messung liest keine Zugangsdaten und setzt keine; sie schreibt nichts ins
 Repo außer diesem Protokoll samt Rohdaten.
 
 ## Pin-Revision (Quelle)
@@ -89,6 +89,28 @@ item“); das Vertrauen gilt der Formel, nicht dem Tap.
 `docker run --platform linux/arm64 mcr.microsoft.com/devcontainers/base:debian uname -m` endet mit `exec format error` (Exit-Code 255): Auf diesem
 Host steht keine Emulation für `arm64` bereit. **`arm64` ist nicht gemessen.**
 
+## M6 — Abhängigkeit einer Tap-Formel aus einem anderen Tap (`rohdaten-m6.txt`)
+
+Die Formel `shivammathur/extensions/xdebug@8.2` (Tap `shivammathur/extensions`) hängt von `shivammathur/php/php@8.2` ab, einer Formel eines
+anderen Taps (`shivammathur/php`). Die Abhängigkeit ist der Meldung von Homebrew entnommen (Formel-Datei nicht gelesen). Installiert wird nichts: (a) bricht
+ab, (b) ist ein Plan.
+
+- **(a) Bau mit dem erzeugten Block**, `devcontainer.brewTaps.allow` nur `shivammathur/extensions`, Liste nur `shivammathur/extensions/xdebug@8.2`:
+  Der Bau **scheitert** im Schritt `brew install --formula 'shivammathur/extensions/xdebug@8.2'` mit Exit-Code 1, kein Image. Homebrew tappt
+  `shivammathur/extensions` und vertraut der einen Formel, richtet aber `shivammathur/php` **nicht** ein: `Warning: No available formula with the
+  name "shivammathur/php/php@8.2"`, `This command requires the tap shivammathur/php. If you trust this tap, tap it explicitly and then try again`.
+  Die Zeile `Tapping shivammathur/php` kommt im Bau nicht vor (`AUSSAGE m6-bau-tap-b-eingerichtet=0`). Dasselbe Verhalten wurde vorab in einem
+  Container des Images `alone` gesehen (Exit-Code 1, danach nur `shivammathur/extensions` getappt, keine Formel installiert).
+- **(b) `brew install --formula --dry-run` mit beiden Formeln in einem Aufruf**, in beiden Reihenfolgen, im Image `alone`: Homebrew tappt beide
+  Taps in der Reihenfolge der Argumente, vertraut beiden Formeln und plant 64 Abhängigkeiten für `php@8.2` und eine für `xdebug@8.2`; danach sind
+  genau die zwei Taps der Argumente eingerichtet. Gebaut ist diese Liste nicht (`php@8.2` ist groß, nur der Plan ist gemessen).
+
+Befund: Homebrew richtet den Tap, auf den eine Abhängigkeit zeigt, nicht selbst ein; ein Tap wird nur eingerichtet, wenn eine Formel aus ihm
+in der Liste steht. Die Formel-Dateien eines nicht genannten Taps werden im Bau nicht geladen. Ein Bau mit einer solchen Formel bricht ab, statt
+den Tap zu übernehmen; der Ausweg ist, die Formel der Abhängigkeit selbst in die Liste zu schreiben und ihren Tap in
+`devcontainer.brewTaps.allow` freizugeben. Gemessen ist ein Formelpaar bei Homebrew `7.0.12`; wie andere Formeln einen fremden Tap nennen
+(und ob Homebrew dort anders verfährt), ist nicht gemessen.
+
 ## Aufruf
 
 ```bash
@@ -106,7 +128,8 @@ Lesehilfe: Zeilen `AUSSAGE …` sind die stabilen Aussagen, die ein zweiter Lauf
 - `arm64` ist nicht gemessen (M5); die Zusage gilt nur für `amd64`.
 - Gemessen sind `ripgrep`, `jq`, `tree` (im Docker-Test) und eine Formel eines Taps; andere Formeln können andere Hosts, Build-Abhängigkeiten
   oder Bottles verlangen. Der Stand der Formeln und des Tap ist der vom 2026-11-05.
-- Abhängigkeiten einer Tap-Formel aus anderen Taps, die Kombination mit den übrigen Dockerfile-Blöcken (`ollama`, `gh`, `glab`,
-  Werkzeugketten, `nestedRuntime`) und das Verhalten nach mehreren Tagen Betrieb (Aktualisierung der Formeln im laufenden Container) sind nicht
-  gemessen.
+- Abhängigkeiten einer Tap-Formel aus anderen Taps sind an einem Formelpaar gemessen (M6, Bau scheitert, wenn der Tap der Abhängigkeit nicht
+  in der Liste steht; die Liste mit beiden Formeln ist nur als Plan gemessen). Die Kombination mit den übrigen Dockerfile-Blöcken (`ollama`, `gh`,
+  `glab`, Werkzeugketten, `nestedRuntime`) und das Verhalten nach mehreren Tagen Betrieb (Aktualisierung der Formeln im laufenden Container)
+  sind nicht gemessen.
 - Der Pin von Homebrew altert ohne rotes Gate; eine Hebung folgt einem Release von `u-boot`.

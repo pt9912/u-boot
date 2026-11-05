@@ -1,0 +1,64 @@
+== M6 Abhaengigkeit aus einem anderen Tap, 2026-11-05T10:35:27Z
+u-boot: u-boot version 0.23.0-dev
+formel=shivammathur/extensions/xdebug@8.2 haengt ab von shivammathur/php/php@8.2
+---- 2026-11-05T10:35:27Z (a) Bau: nur shivammathur/extensions freigegeben, Liste: shivammathur/extensions/xdebug@8.2
+time=2026-11-05T10:35:27.914Z level=INFO msg="config set: updated" path=devcontainer.brewTaps.allow old="" new=shivammathur/extensions
+time=2026-11-05T10:35:27.918Z level=INFO msg="config set: updated" path=devcontainer.features.brew.enabled old="" new=true
+time=2026-11-05T10:35:27.921Z level=INFO msg="config set: updated" path=devcontainer.features.brew.packages old="" new=shivammathur/extensions/xdebug@8.2
+generate: time=2026-11-05T10:35:27.926Z level=INFO msg="generate devcontainer: updated-block" project=u-boot-messung-brew-fremd forwardPorts=[] features=0 changed=[.devcontainer/Dockerfile]
+generate: Updated devcontainer managed block (.devcontainer/Dockerfile).
+generate: Warning: devcontainer feature brew installs Homebrew from github.com/Homebrew/brew (commit pinned as HOMEBREW_REVISION in .devcontainer/Dockerfile) without an installer script when the image is built; it installs the formulas shivammathur/extensions/xdebug@8.2, which are not pinned and not checked, so a later build can install other contents than an earlier one
+generate: Warning: devcontainer feature brew installs formulas from the tap shivammathur/extensions (approved in devcontainer.brewTaps.allow) when the image is built; the tap is a source of its own, its formulas are code that Homebrew loads from the repository of the tap and runs, and it is not pinned and not checked
+11:    brewTaps:
+12-        allow:
+13-            - shivammathur/extensions
+bau fremd: exit=1 dauer=15s
+  bau-log: Dockerfile:33
+  bau-log: --------------------
+  bau-log:   31 |      && mkdir ../bin \
+  bau-log:   32 |      && ln -s ../Homebrew/bin/brew ../bin/brew
+  bau-log:   33 | >>> RUN HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 brew install --formula 'shivammathur/extensions/xdebug@8.2'
+  bau-log:   34 |     USER root
+  bau-log:   35 |     USER vscode
+  bau-log: --------------------
+  bau-log: ERROR: failed to build: failed to solve: process "/bin/sh -c HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 brew install --formula 'shivammathur/extensions/xdebug@8.2'" did not complete successfully: exit code: 1
+AUSSAGE m6-bau=FEHLER
+AUSSAGE m6-bau-image-vorhanden=nein
+-- Ausgabe des Schritts brew install (Bau ohne -q), Auszug
+==> Tapping shivammathur/extensions
+==> Trusted formula shivammathur/extensions/xdebug@8.2
+Warning: No available formula with the name "shivammathur/php/php@8.2". Did you mean shivammathur/extensions/raphf@8.2?
+This command requires the tap shivammathur/php.
+  brew tap shivammathur/php
+#7 ERROR: process "/bin/sh -c HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 brew install --formula 'shivammathur/extensions/xdebug@8.2'" did not complete successfully: exit code: 1
+2.538 ==> Tapping shivammathur/extensions
+5.349 ==> Trusted formula shivammathur/extensions/xdebug@8.2
+6.432 Warning: No available formula with the name "shivammathur/php/php@8.2". Did you mean shivammathur/extensions/raphf@8.2?
+6.432 This command requires the tap shivammathur/php.
+6.432   brew tap shivammathur/php
+ERROR: failed to build: failed to solve: process "/bin/sh -c HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 brew install --formula 'shivammathur/extensions/xdebug@8.2'" did not complete successfully: exit code: 1
+AUSSAGE m6-bau-meldung-tap-noetig=2
+AUSSAGE m6-bau-tap-b-eingerichtet=0
+---- 2026-11-05T10:35:57Z (b) --dry-run in einem Aufruf, Reihenfolge: shivammathur/php/php@8.2 shivammathur/extensions/xdebug@8.2
+taps vorher: []
+==> Tapping shivammathur/php
+==> Tapping shivammathur/extensions
+==> Trusted formula shivammathur/php/php@8.2
+==> Trusted formula shivammathur/extensions/xdebug@8.2
+==> Would install 2 formulae:
+==> Would install 64 dependencies for php@8.2:
+==> Would install 1 dependency for xdebug@8.2:
+exit=0
+taps nachher: [shivammathur/extensions shivammathur/php ]
+---- 2026-11-05T10:36:07Z (b) --dry-run in einem Aufruf, Reihenfolge: shivammathur/extensions/xdebug@8.2 shivammathur/php/php@8.2
+taps vorher: []
+==> Tapping shivammathur/extensions
+==> Tapping shivammathur/php
+==> Trusted formula shivammathur/extensions/xdebug@8.2
+==> Trusted formula shivammathur/php/php@8.2
+==> Would install 2 formulae:
+==> Would install 1 dependency for xdebug@8.2:
+==> Would install 64 dependencies for php@8.2:
+exit=0
+taps nachher: [shivammathur/extensions shivammathur/php ]
+== ende 2026-11-05T10:36:17Z
