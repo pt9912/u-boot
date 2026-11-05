@@ -204,7 +204,7 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 		return driving.ConfigSetResponse{}, err
 	}
 
-	// LH-FA-DEV-003 / LH-FA-DEV-008 / lastenheft 0.32.0: the three
+	// LH-FA-DEV-003 / LH-FA-DEV-008 / lastenheft 0.32.0 / LH-FA-DEV-013: the
 	// map/list kinds route to their dedicated branches in one guard
 	// (gocyclo budget of this dispatcher); ok=false continues with
 	// the scalar route below.
@@ -561,6 +561,9 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 // `config set devcontainer.featureSources.allow <source>` or
 // `--allow-external-feature-sources <source>`.
 //
+// For .enabled of `brew` and `homebrew` it enforces the rules of the Homebrew
+// block through [brewViolationMessage] (LH-FA-DEV-013).
+//
 // For .version it enforces the rule of [validateDevcontainerFeatures]
 // through [featureVersionNeedsSource]: an entry without OCI source
 // (`ollama`, `gh`, `glab`, `ollama-host`) takes a version only with a
@@ -576,6 +579,15 @@ func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 		if entry.Enabled == nil {
 			return fmt.Errorf("%w: post-patch %s is unbound",
 				driving.ErrConfigPostPatchSanityFailed, path)
+		}
+		// LH-FA-DEV-013: enabling `brew` or `homebrew` asks the rules of the
+		// Homebrew block that the enabling can break — the conflict of the
+		// two keys and the approval of the taps of the formula list.
+		// Switching off is always possible.
+		if name := path.Feature.String(); name == featureBrew || name == featureHomebrew {
+			if msg := brewViolationMessage(cfg.Devcontainer); msg != "" {
+				return fmt.Errorf("%w: %s: %s", driving.ErrConfigValueInvalid, path, msg)
+			}
 		}
 		return nil
 	case domain.ConfigDevcontainerFeatureSource:
@@ -857,7 +869,9 @@ func extractConfigValueRaw(cfg ubootYAMLConfig, path domain.ConfigPath) (string,
 	case domain.ConfigDevcontainerFeatureSourcesAllow,
 		domain.ConfigDevcontainerFeatureEnabled,
 		domain.ConfigDevcontainerFeatureSource,
-		domain.ConfigDevcontainerFeatureVersion:
+		domain.ConfigDevcontainerFeatureVersion,
+		domain.ConfigDevcontainerBrewTapsAllow,
+		domain.ConfigDevcontainerFeaturePackages:
 		return extractDevcontainerFeatureValue(cfg, path)
 
 	case domain.ConfigDevcontainerContainerEnv:
@@ -879,9 +893,20 @@ func extractConfigValueRaw(cfg ubootYAMLConfig, path domain.ConfigPath) (string,
 }
 
 // extractDevcontainerFeatureValue handles the four LH-FA-DEV-003
-// devcontainer.* kinds. Extracted from [extractConfigValue] to keep
+// devcontainer.* kinds and the two list kinds of the Homebrew block
+// (LH-FA-DEV-013). Extracted from [extractConfigValue] to keep
 // the latter under the gocognit threshold.
 func extractDevcontainerFeatureValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, error) {
+	if path.Kind == domain.ConfigDevcontainerBrewTapsAllow || path.Kind == domain.ConfigDevcontainerFeaturePackages {
+		// The comma-joined view of a list path, like
+		// `devcontainer.featureSources.allow`; an empty list is unset.
+		value := brewListValue(cfg, path)
+		if value == "" {
+			return "", fmt.Errorf("%w: %s — populate via `u-boot config set %s <value>`",
+				driving.ErrConfigValueNotSet, path, path)
+		}
+		return value, nil
+	}
 	if path.Kind == domain.ConfigDevcontainerFeatureSourcesAllow {
 		if cfg.Devcontainer == nil || cfg.Devcontainer.FeatureSources == nil ||
 			len(cfg.Devcontainer.FeatureSources.Allow) == 0 {
@@ -1059,7 +1084,7 @@ func (s *ConfigService) setFeatureSourcesAllow(
 	return resp, nil
 }
 
-// setNonScalarKind routes the three map/list kinds of the Set
+// setNonScalarKind routes the map/list kinds of the Set
 // pipeline to their dedicated branches and keeps the dispatched
 // conditions of the scalar route out of [ConfigService.Set]'s
 // gocyclo budget. The `ok` return marks the kind handled:
@@ -1079,6 +1104,10 @@ func (s *ConfigService) setFeatureSourcesAllow(
 //     NoOp comparison needs the existence of the entry — an
 //     explicitly set empty value is a set value, which the lenient
 //     extraction cannot express.
+//   - ConfigDevcontainerBrewTapsAllow and ConfigDevcontainerFeaturePackages
+//     (LH-FA-DEV-013): the two lists of the Homebrew block take the list
+//     route of [brewListPlanFor], with the form, placement and approval
+//     rules of the read path.
 func (s *ConfigService) setNonScalarKind(
 	req driving.ConfigSetRequest, body []byte, cfg ubootYAMLConfig,
 ) (driving.ConfigSetResponse, bool, error) {
@@ -1091,6 +1120,12 @@ func (s *ConfigService) setNonScalarKind(
 		return resp, true, err
 	case domain.ConfigDevcontainerContainerEnv:
 		resp, err := s.setContainerEnvEntry(req, body, cfg)
+		return resp, true, err
+	}
+	if plan, ok := brewListPlanFor(req.Path.Kind); ok {
+		// LH-FA-DEV-013: the two lists of the Homebrew block take the
+		// list route with their own checks.
+		resp, err := s.setBrewList(req, cfg, plan)
 		return resp, true, err
 	}
 	return driving.ConfigSetResponse{}, false, nil

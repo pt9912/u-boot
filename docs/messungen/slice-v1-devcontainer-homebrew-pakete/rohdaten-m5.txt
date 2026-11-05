@@ -1,0 +1,7 @@
+== M5 Plattform, 2026-11-05T09:43:25Z
+host: x86_64 docker=29.9.3 linux/amd64
+-- arm64-Container des Basis-Images
+exec /usr/bin/uname: exec format error
+exit=255
+AUSSAGE m5-arm64=nicht-lauffaehig
+== ende 2026-11-05T09:43:25Z

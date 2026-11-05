@@ -1210,7 +1210,8 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `python` | Python (das Betriebssystem-Python; `pip install` außerhalb eines virtuellen Environments lehnt es nach PEP 668 ab: `python -m venv .venv` verwenden) |
 | `sdkman` | SDKMAN (das offizielle `java`-Feature installiert es; zusammen mit `java` erscheint es einmal) |
 | `sshd` | SSH-Server (offizielles Feature `sshd`, Login-Dienst auf Port 2222 mit Passwort- und Schlüssel-Login, Root-Login erlaubt; siehe [Login-Dienst `sshd`](#login-dienst-sshd-optional)); keine Optionen (`gatewayPorts`, `version` kennt der Katalog nicht) |
-| `homebrew` | Homebrew; **Drittanbieter-Feature** (`meaningful-ooo`, Version `2`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build |
+| `homebrew` | Homebrew; **Drittanbieter-Feature** (`meaningful-ooo`, Version `2`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build. Nicht zusammen mit `brew` |
+| `brew` | Homebrew und eine Liste von Formeln. Kein OCI-Feature: Das erzeugte Dockerfile holt Homebrew aus `github.com/Homebrew/brew` auf einen im Dockerfile gepinnten Commit (ohne Installationsskript) und installiert die Formeln der Liste als Benutzer `vscode`; die Formeln selbst sind **nicht gepinnt**, `u-boot generate devcontainer` weist das aus. Wirkt im Standard- und im Sandbox-Profil. Eine Formel aus einem Tap braucht eine Freigabe; nicht zusammen mit `homebrew`; keine Optionen, `version` nur zusammen mit `source` (siehe [Homebrew-Formeln](#homebrew-formeln-brew)) |
 | `claude-code` | Claude Code CLI; **Drittanbieter-Feature** (`anthropics`, Version `1`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build; braucht das Feature `node` (siehe [Claude Code](#claude-code-optional)); keine Optionen |
 | `ollama` | Ollama (lokale Sprachmodelle, nur CPU); wirkt nur im Sandbox-Profil. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), dazu ein benanntes Volume für die Modelle; keine Optionen, `version` nur zusammen mit `source` (siehe [Ollama](#ollama-optional)) |
 | `gh` | GitHub-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `cli/cli` (SHA-256 geprüft, nur das Programm `gh` entpackt; eine Signatur prüft `u-boot` nicht, die GitHub-Attestierung des Projekts prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` (siehe [Forge-CLIs](#forge-clis-optional)) |
@@ -1219,6 +1220,97 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `golangci-lint` | golangci-lint. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv von `github.com/golangci/golangci-lint` (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Checksums-Datei des Releases). Setzt die beiden Cache-Pfade unter `containerEnv` — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
 | `java-toolchain` | JDK 21 der Eclipse-Temurin-Distribution. Kein OCI-Feature: Das erzeugte Dockerfile installiert das Release-Archiv aus der Veröffentlichung der Temurin-Binaries (SHA-256 geprüft, eine Signatur prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus), beide Profile; die Version steht als Build-Argument im Dockerfile und ist mit `version` übersteuerbar (`u-boot` liest dafür die Prüfsummen-Dateien desselben Releases, eines je Architektur). Keine `containerEnv`-Werte: `JAVA_HOME` und `PATH` stehen als `ENV`-Zeilen im Block — siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional) |
 | `ollama-host` | Anschluss an einen Dienst des Hosts. Kein OCI-Feature und kein Dockerfile-Block: `u-boot generate devcontainer` schreibt genau eine Zeile für den Anschluss in `runArgs` der `devcontainer.json`, `--add-host=host.docker.internal:host-gateway`, im Standard- und im Sandbox-Profil, und weist den Anschluss beim Erzeugen aus (im Sandbox-Profil als Sicherheitslockerung, auch unter `--quiet`). `u-boot` startet keinen Relay, setzt keine Variable und trägt keinen Host in die Egress-Liste ein; keine Optionen, `version` nur zusammen mit `source` (siehe [Anschluss an einen Ollama-Dienst des Hosts](#anschluss-an-einen-ollama-dienst-des-hosts-optional)) |
+
+#### Homebrew-Formeln (`brew`)
+
+Das Feature `brew` installiert beim Bau des Images Homebrew und eine Liste von
+Formeln, die Sie in `u-boot.yaml` führen; `u-boot` muss die Werkzeuge nicht
+einzeln kennen. Die Pakete stecken im Image und überstehen das Neuanlegen des
+Containers.
+
+```bash
+u-boot config set devcontainer.features.brew.packages ripgrep,jq
+u-boot config set devcontainer.features.brew.enabled true
+u-boot generate devcontainer
+```
+
+Die Liste steht danach so in `u-boot.yaml`:
+
+```yaml
+devcontainer:
+  features:
+    brew:
+      enabled: true
+      packages:
+        - ripgrep
+        - jq
+```
+
+- **Einträge.** Ein Eintrag ist eine Formel (`ripgrep`, `node@22`) oder eine
+  Formel aus einem Tap (`nutzer/tap/formel`). Erlaubt sind Buchstaben, Ziffern
+  und `@ . _ + -`, der Anfang ist ein Buchstabe oder eine Ziffer; Leerzeichen,
+  Shell-Zeichen, Optionen von `brew install`, Casks und URLs sind keine Einträge
+  (Exit-Code 10). `config set` hängt an die Liste an und lässt Doppelte weg;
+  einen Eintrag entfernen Sie in `u-boot.yaml`. Ein Eintrag der Liste gilt nur
+  am Schlüssel `brew`, nicht an anderen Features. Ist `enabled: true` gesetzt
+  und die Liste leer, wird Homebrew allein installiert.
+- **Die Formeln sind nicht gepinnt.** Der Commit von Homebrew steht im
+  erzeugten Dockerfile (`HOMEBREW_REVISION`) und wird nur mit einem Release von
+  `u-boot` gehoben; Formeln, ihre Versionen und die Daten, die Homebrew beim
+  Installieren lädt, sind es nicht. Ein späterer Bau kann etwas anderes
+  installieren als ein früherer. `u-boot generate devcontainer` weist den Block
+  und die Formeln aus; mit `--quiet` entfällt die Meldung, der Block bleibt.
+  Eine `version` kennt das Feature nicht.
+- **Ein Tap braucht eine Freigabe.** Ein Tap ist eine zusätzliche Quelle: Seine
+  Formel-Dateien lädt Homebrew aus dem Repository des Tap-Betreibers und führt
+  sie beim Installieren aus. Eine Formel der Form `nutzer/tap/formel` wird nur
+  erzeugt, wenn `nutzer/tap` in `devcontainer.brewTaps.allow` steht:
+
+  ```bash
+  u-boot config set devcontainer.brewTaps.allow nutzer/tap
+  u-boot config set devcontainer.features.brew.packages nutzer/tap/formel
+  ```
+
+  Ohne Freigabe endet `u-boot generate devcontainer` mit Exit-Code 10, bevor
+  etwas geschrieben wird (auch mit `--dry-run`); `config set` der Formeln bei
+  aktivem Feature, das Aktivieren und `u-boot doctor` lehnen den Tap ebenso ab.
+  `--yes` ersetzt die Freigabe nicht, und die Freigabe von
+  `devcontainer.featureSources.allow` gilt hier nicht (die Listen sind getrennt).
+  Der Vergleich geht Zeichen für Zeichen, Groß- und Kleinschreibung zählen. Bei
+  mehreren Paaren in einem `config set`-Aufruf steht die Freigabe vor den
+  Formeln.
+  Die Freigabe ist eine Zustimmung, kein Pin: Auch ein freigegebener Tap bleibt
+  ungepinnt, und `u-boot generate devcontainer` weist jeden Tap als eigene
+  Quelle aus.
+- **Nicht zusammen mit `homebrew`.** `homebrew` ist das Feature eines
+  Drittanbieters (siehe Katalog). Beide in einem Projekt aktiv enden mit
+  Exit-Code 10, bevor etwas geschrieben wird; schalten Sie eines ab
+  (`u-boot config set devcontainer.features.homebrew.enabled false`).
+- **Im Container.** `brew` steht im `PATH` von Shells ohne Login (auch von
+  interaktiven) und von `u-boot devcontainer shell`. In einer
+  Login-Shell von `bash` oder `sh` (`bash -l`) fehlt es: Debian setzt dort den
+  `PATH` neu. Homebrew läuft als Benutzer `vscode` und liegt unter
+  `/home/linuxbrew/.linuxbrew`; es ist ein flacher Klon, `brew --version`
+  meldet deshalb `Homebrew >=4.3.0 (shallow or no git repository)`. Beim ersten
+  Aufruf, der Ruby braucht, lädt Homebrew sein eigenes Ruby nach, falls das
+  Image noch keines enthält.
+- **Egress-Restriktion.** Der Bau liegt nicht hinter der Restriktion; sie greift
+  beim Start des Containers. Dort braucht `brew install` die Hosts
+  `formulae.brew.sh`, `ghcr.io` und `pkg-containers.githubusercontent.com`, die
+  `u-boot` für das Feature in die Liste aufnimmt. Die Hosts, von denen eine
+  Formel selbst lädt, hängen von der Formel ab (die gemessene Formel eines Taps
+  lud von `github.com` und `release-assets.githubusercontent.com`); sie
+  tragen Sie bei Bedarf in `devcontainer.sandbox.egress.allow` ein.
+- **Grenzen der Messung.** Gemessen sind auf einem Linux-Host mit `amd64` und
+  lokaler Docker-Engine der Bau mit `ripgrep` und der Formel eines Taps sowie
+  die Installation von `jq` und `tree` im laufenden Container. `arm64` ist
+  nicht gemessen; ebenso nicht, ob eine bestimmte Formel
+  auf Ihrer Plattform installierbar ist, die Kombination mit `ollama`, `gh`,
+  `glab`, den Werkzeug-Features und einer Container-Laufzeit im selben
+  Dockerfile (die Reihenfolge der Blöcke ist festgelegt, gebaut ist die
+  Kombination nicht), Image-Größe und Bauzeit (mit `ripgrep` und einer
+  Tap-Formel wächst das Image um rund 290 MB, Homebrew allein rund 60 MB) und
+  Abhängigkeiten einer Tap-Formel aus anderen Taps.
 
 #### Externe Feature-Quellen freigeben
 
@@ -1763,6 +1855,7 @@ Standardmäßig erlaubt sind:
 | Feature `sdkman` | `api.sdkman.io`, `broker.sdkman.io`, `repo.maven.apache.org`, `repo1.maven.org` |
 | Feature `sshd` | keine zusätzlichen Hosts |
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
+| Feature `brew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` (ohne sie scheitert schon der erste Start von Homebrew im Container; die Hosts, von denen eine Formel lädt, kommen nicht dazu: siehe [Homebrew-Formeln](#homebrew-formeln-brew)) |
 | Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com` (Hosts der Anmeldung nicht: siehe [Claude Code](#claude-code-optional)) |
 | Feature `ollama` | `registry.ollama.ai`, `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com` (Modell-Pull; wechselt der zweite Name, bricht der Pull ab: siehe [Ollama](#ollama-optional)) |
 | Feature `gh` | `api.github.com`, `github.com` (beide stehen schon in der Zeile „immer“; Hosts nach einer Anmeldung nicht: siehe [Forge-CLIs](#forge-clis-optional)) |
@@ -1844,7 +1937,7 @@ registry.npmjs.org  feature:claude-code, feature:node
   Updates und Plugins sind **nicht aufgenommen** und werden bei Bedarf in
   `egress.allow` ergänzt (Einzelheiten im Abschnitt
   [Claude Code](#claude-code-optional)).
-- Die Features `sdkman` und `homebrew` bringen nur ihre eigenen Hosts mit. Die
+- Die Features `sdkman`, `homebrew` und `brew` bringen nur ihre eigenen Hosts mit. Die
   Download-Hosts einzelner SDKMAN-Kandidaten (zum Beispiel `services.gradle.org`
   für Gradle, `github.com` und `release-assets.githubusercontent.com` für
   GitHub-Releases) und die Hosts weiterer Quellen von Homebrew-Formeln tragen
@@ -2730,6 +2823,8 @@ mit `--json` einen strukturierten Hinweis in `data.hint` (`command`, `action`,
 | `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21`; bei `ollama`, `ollama-host`, `gh` und `glab` nur mit `source` (sonst Exit-Code `10`); für `go-toolchain` und `golangci-lint` die Versions-Übersteuerung des Katalog-Pins (siehe [Werkzeugketten](#werkzeugketten-aus-gepinntem-release-optional)) | ja |
 | `devcontainer.features.<name>.source` | externe Feature-Quelle | freigegebene Quelle in verarbeitbarer Form (`host/pfad`; die CLI verarbeitet die Registry-Referenz — Schema-Formen wie `https://…` oder `oci://…` weist u-boot ab) | ja |
 | `devcontainer.featureSources.allow` | Freigabeliste externer Quellen | Registry-Referenzen (`host/pfad`), kommagetrennt | ja |
+| `devcontainer.features.brew.packages` | Homebrew-Formeln des Features `brew` | `formel` oder `nutzer/tap/formel`, kommagetrennt; hängt an (siehe [Homebrew-Formeln](#homebrew-formeln-brew)) | ja |
+| `devcontainer.brewTaps.allow` | Freigabeliste der Homebrew-Taps | `nutzer/tap`, kommagetrennt; hängt an | ja |
 | `devcontainer.sandbox.nestedRuntime` | Container-Laufzeit im Sandbox | `none` / `podman` / `docker` | ja |
 | `devcontainer.sandbox.onUnavailable` | Verhalten ohne Fähigkeit | `warn` / `fail` | ja |
 | `devcontainer.sandbox.repository` | Clone-Quelle statt `origin` | Git-Adresse ohne Zugangsdaten | ja |
@@ -2987,6 +3082,33 @@ Fehler (Exit-Code 11).
 2. Erzeugen Sie den Devcontainer neu: `u-boot generate devcontainer`.
 3. Legen Sie einen vorhandenen Container neu an: `u-boot devcontainer up --recreate`.
 
+### Fehler: Homebrew-Formel eines Taps ohne Freigabe (Exit-Code 10)
+
+#### Ursache
+
+Das Feature `brew` ist aktiv, und die Formel-Liste enthält eine Formel der Form
+`nutzer/tap/formel`, deren Tap nicht in `devcontainer.brewTaps.allow` steht.
+`u-boot generate devcontainer` endet mit Exit-Code 10 und schreibt nichts, auch
+nicht mit `--dry-run`; `--yes` und `--no-interactive` ersetzen die Freigabe
+nicht. `u-boot doctor` meldet dasselbe als Fehler (Exit-Code 11). Dasselbe gilt
+für `u-boot config set` der Formeln bei aktivem Feature und für das Aktivieren
+des Features. Ein Konflikt mit dem Feature `homebrew` endet ebenso mit Exit-Code
+10; die Meldung nennt beide Features.
+
+#### Lösung
+
+1. Geben Sie den Tap frei, wenn Sie ihm vertrauen (die Freigabe gilt dem ganzen
+   Tap, geladen und ausgeführt werden die Formel-Dateien aus seinem Repository):
+
+   ```bash
+   u-boot config set devcontainer.brewTaps.allow nutzer/tap
+   ```
+
+   Oder entfernen Sie die Formel aus der Liste in `u-boot.yaml`, oder schalten
+   Sie das Feature ab: `u-boot config set devcontainer.features.brew.enabled false`.
+2. Bei einem Konflikt schalten Sie `brew` oder `homebrew` ab.
+3. Erzeugen Sie den Devcontainer neu: `u-boot generate devcontainer`.
+
 ### Fehler: Sandbox-Container startet nicht (Exit-Code 11 im Startscript)
 
 #### Ursache
@@ -3188,6 +3310,8 @@ Die Werte `CHANGEME_…` in `.env.example` sind Platzhalter. Ersetzen Sie sie in
 | `devcontainer.user.uid` | 1 bis 65535, Standard 1000 |
 | `devcontainer.resources.memory` | positive ganze Zahl, optional `b`, `k`, `m`, `g` (klein), nicht `0` |
 | `devcontainer.resources.cpus` | positive Dezimalzahl mit Punkt, nicht `0` |
+| `devcontainer.features.brew.packages` | je Eintrag `formel` oder `nutzer/tap/formel`; Zeichen `A–Z a–z 0–9 @ . _ + -`, Anfang Buchstabe oder Ziffer |
+| `devcontainer.brewTaps.allow` | je Eintrag `nutzer/tap`, dieselbe Zeichenmenge |
 | Sicherungsdateien (`--backup`) | `<name>.bak`, `<name>.bak.1`, `<name>.bak.2`, … |
 
 ### JSON-Ausgabe

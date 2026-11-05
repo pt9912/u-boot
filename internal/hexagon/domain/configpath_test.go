@@ -27,6 +27,9 @@ func TestNewConfigPath_KnownPaths(t *testing.T) {
 		{"devcontainer.features.node.enabled", domain.ConfigDevcontainerFeatureEnabled, true, "", "node"},
 		{"devcontainer.features.java.source", domain.ConfigDevcontainerFeatureSource, true, "", "java"},
 		{"devcontainer.features.go.version", domain.ConfigDevcontainerFeatureVersion, true, "", "go"},
+		// LH-FA-DEV-013: the package list and the tap approval list.
+		{"devcontainer.features.brew.packages", domain.ConfigDevcontainerFeaturePackages, true, "", "brew"},
+		{"devcontainer.brewTaps.allow", domain.ConfigDevcontainerBrewTapsAllow, true, "", ""},
 		{"devcontainer.user.uid", domain.ConfigDevcontainerUserUID, true, "", ""},
 		{"devcontainer.profile", domain.ConfigDevcontainerProfile, true, "", ""},
 		{"devcontainer.sandbox.nestedRuntime", domain.ConfigDevcontainerSandboxNestedRuntime, true, "", ""},
@@ -149,6 +152,8 @@ func TestNewConfigPath_ErrorMessage_NamesAllowedPaths(t *testing.T) {
 		"project.name",
 		"devcontainer.enabled",
 		"services.<svc>.enabled",
+		"devcontainer.brewTaps.allow",
+		"devcontainer.features.<feature>.{enabled,source,version,packages}",
 	} {
 		if !strings.Contains(msg, want) {
 			t.Errorf("error message %q does not mention whitelist entry %q", msg, want)
@@ -167,6 +172,8 @@ func TestConfigPath_String_RoundTrip(t *testing.T) {
 		"devcontainer.features.node.enabled",
 		"devcontainer.features.java.source",
 		"devcontainer.features.go.version",
+		"devcontainer.features.brew.packages",
+		"devcontainer.brewTaps.allow",
 	} {
 		p, err := domain.NewConfigPath(raw)
 		if err != nil {
@@ -194,6 +201,7 @@ func TestConfigPath_String_RoundTrip(t *testing.T) {
 func TestFixedConfigPaths_SetIsPinned(t *testing.T) {
 	t.Parallel()
 	want := []string{
+		"devcontainer.brewTaps.allow",
 		"devcontainer.enabled",
 		"devcontainer.featureSources.allow",
 		"devcontainer.profile",

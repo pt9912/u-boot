@@ -1,0 +1,56 @@
+== M4 Laufzeit egr, Modus discover, 2026-11-05T09:40:38Z
+runArgs laut devcontainer.json: "runArgs":["--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env","--cap-add=NET_ADMIN"],
+modus=discover user=vscode
+---- 09:40:39.846 version
+$ brew --version
+Homebrew >=4.3.0 (shallow or no git repository)
+exit=0
+AUSSAGE discover-version-exit=0
+-- DNS-Anfragen (A/AAAA, eindeutig)
+---- 09:40:40.088 core-formel
+$ brew install --formula jq
+✔︎ Bottle oniguruma (6.9.10)
+✔︎ Bottle jq (1.8.2)
+==> Installing jq dependency: oniguruma (6.9.10)
+==> Pouring oniguruma--6.9.10.x86_64_linux.bottle.tar.gz
+🍺  /home/linuxbrew/.linuxbrew/Cellar/oniguruma/6.9.10: 16 files, 1.8MB
+==> Installing jq
+==> Pouring jq--1.8.2.x86_64_linux.bottle.1.tar.gz
+🍺  /home/linuxbrew/.linuxbrew/Cellar/jq/1.8.2: 21 files, 1.5MB
+exit=0
+AUSSAGE discover-core-formel-exit=0
+-- DNS-Anfragen (A/AAAA, eindeutig)
+      2 formulae.brew.sh
+     10 ghcr.io
+      6 pkg-containers.githubusercontent.com
+---- 09:40:47.650 tap-formel
+$ brew install --formula pt9912/u-boot/u-boot
+==> Tapping pt9912/u-boot
+Cloning into '/home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/pt9912/homebrew-u-boot'...
+Tapped 1 formula (15 files, 102.6KB).
+==> Trusted formula pt9912/u-boot/u-boot
+==> Fetching downloads for: u-boot
+✔︎ Formula u-boot (0.23.0)
+==> Installing u-boot from pt9912/u-boot
+🍺  /home/linuxbrew/.linuxbrew/Cellar/u-boot/0.23.0: 4 files, 11.3MB, built in 1 second
+exit=0
+AUSSAGE discover-tap-formel-exit=0
+-- DNS-Anfragen (A/AAAA, eindeutig)
+      4 api.github.com
+      4 github.com
+      4 release-assets.githubusercontent.com
+---- 09:40:54.168 aufruf-tap-formel
+$ u-boot --version
+u-boot version 0.23.0
+exit=0
+AUSSAGE discover-aufruf-tap-formel-exit=0
+-- DNS-Anfragen (A/AAAA, eindeutig)
+
+---- 09:40:54.205 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
+      4 api.github.com
+      2 formulae.brew.sh
+     10 ghcr.io
+      4 github.com
+      6 pkg-containers.githubusercontent.com
+      4 release-assets.githubusercontent.com
+container-exit=0  gesamtdauer=16s

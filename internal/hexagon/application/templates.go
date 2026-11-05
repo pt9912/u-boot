@@ -83,6 +83,13 @@ type templateData struct {
 	Gh   bool
 	Glab bool
 
+	// Brew switches on the Homebrew installation block of the Dockerfile
+	// (LH-FA-DEV-013, both profiles); BrewPackages is the formula list of the
+	// `brew` key in the order of `u-boot.yaml`, empty for Homebrew alone. The
+	// pin of Homebrew (the commit) stands in the template.
+	Brew         bool
+	BrewPackages []string
+
 	// GoToolchain, GolangciLint and JdkToolchain switch on the installation
 	// block of the pinned toolchain (LH-FA-DEV-003, lastenheft 0.31.0,
 	// both profiles); the pin (version plus both SHA-256 values) stands in

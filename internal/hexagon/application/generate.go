@@ -808,12 +808,14 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 
 	features := collectDevcontainerFeatures(cfg)
 
-	// LH-FA-DEV-003 / LH-NFA-SEC-004: the two pre-write source checks in
+	// LH-FA-DEV-003 / LH-NFA-SEC-004: the pre-write source checks in
 	// their order — first a source form the Dev-Container-CLI does not
 	// process (the key would not resolve; lastenheft 0.33.0), then the
 	// freigabeliste rule over the effective allowlist (the list plus the
-	// flag entries of the call, R2 below). Both stand before any plan and
-	// write, so a rejected call changes nothing.
+	// flag entries of the call, R2 below), then the rules of the Homebrew
+	// block (LH-FA-DEV-013: the conflict with `homebrew`, the approval of
+	// the taps; the flag entries free no tap). All stand before any plan
+	// and write, so a rejected call changes nothing.
 	if err := rejectFeatureSourceViolations(cfg, req.AllowExternalFeatureSources); err != nil {
 		return driving.GenerateResponse{}, err
 	}
@@ -857,6 +859,7 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	warnings = append(warnings, ollamaWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, ollamaHostWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, forgeCLIWarnings(cfg.Devcontainer)...)
+	warnings = append(warnings, brewWarnings(cfg.Devcontainer)...)
 	warnings = append(warnings, toolchainWarnings(toolchain)...)
 	warnings = append(warnings, containerEnvWarnings(cfg.Devcontainer)...)
 	plans, err := s.planDevcontainerFiles(req.BaseDir, data)

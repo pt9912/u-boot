@@ -320,6 +320,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 	// removals, or renames as a visible diff and forces a deliberate
 	// update of this list when the catalogue changes.
 	want := []string{
+		"brew",
 		"claude-code",
 		"docker-cli",
 		"gh",
@@ -398,8 +399,8 @@ func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 				if !known {
 					t.Fatalf("the test has no pin ARG name for the Dockerfile-block entry %q", key)
 				}
-				if !strings.Contains(blockSandboxDockerfile(t, key), "ARG "+arg+"_VERSION=") {
-					t.Errorf("Dockerfile template lacks the pin ARG %s_VERSION for the Dockerfile-block entry %q", arg, key)
+				if !strings.Contains(blockSandboxDockerfile(t, key), "ARG "+arg+"=") {
+					t.Errorf("Dockerfile template lacks the pin ARG %s for the Dockerfile-block entry %q", arg, key)
 				}
 				return
 			}
@@ -498,17 +499,20 @@ func TestFeatureFor_LookupContract(t *testing.T) {
 	})
 }
 
-// blockPinArg is the pin ARG prefix of each Dockerfile-block key: the
+// blockPinArg is the pin ARG name of each Dockerfile-block key: the
 // generated names follow the pin names of the catalogue template, not the
-// spelling of the key (the keys with a hyphen carry no upper-case ARG name).
+// spelling of the key (the keys with a hyphen carry no upper-case ARG name), a
+// commit pin carries no `_VERSION` suffix.
 func blockPinArg() map[string]string {
 	return map[string]string{
-		"ollama":         "OLLAMA",
-		"gh":             "GH",
-		"glab":           "GLAB",
-		"go-toolchain":   "GO",
-		"golangci-lint":  "GOLANGCI_LINT",
-		"java-toolchain": "JDK",
+		"ollama":         "OLLAMA_VERSION",
+		"gh":             "GH_VERSION",
+		"glab":           "GLAB_VERSION",
+		"go-toolchain":   "GO_VERSION",
+		"golangci-lint":  "GOLANGCI_LINT_VERSION",
+		"java-toolchain": "JDK_VERSION",
+		// LH-FA-DEV-013: the pin of the Homebrew block is a commit, not a version.
+		"brew": "HOMEBREW_REVISION",
 	}
 }
 

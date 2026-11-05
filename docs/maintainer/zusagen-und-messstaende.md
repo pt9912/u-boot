@@ -42,6 +42,7 @@ Wortlaut ist aus der Handbuch-Version 2.0 (Commit `d0878f1c`) übernommen.
 | [`slice-v1-ollama-cloud-messung`](../messungen/slice-v1-ollama-cloud-messung/README.md) | Cloud-Modelle von Ollama mit Claude Code, ohne Konto |
 | [`slice-v1-ollama-cloud-messung-mit-konto`](../messungen/slice-v1-ollama-cloud-messung-mit-konto/README.md) | Cloud-Modelle von Ollama mit Claude Code, mit Konto |
 | [`slice-cr-lastenheft-messstaende`](../messungen/slice-cr-lastenheft-messstaende/README.md) | CI-Lauf der Integrationstests auf `amd64` (Ollama, verschachteltes Podman und Docker) |
+| [`slice-v1-devcontainer-homebrew-pakete`](../messungen/slice-v1-devcontainer-homebrew-pakete/README.md) | Homebrew-Formeln im Devcontainer (Schlüssel `brew`): Bau, `PATH`, Selbst-Aktualisierung, Hosts hinter der Restriktion |
 | [`slice-v1-devcontainer-bau-lokal`](../messungen/slice-v1-devcontainer-bau-lokal/README.md) | Messlauf M0 zum lokalen Bauen im Devcontainer |
 | [`slice-v1-devcontainer-ressourcenlimits`](../messungen/slice-v1-devcontainer-ressourcenlimits/README.md) | Hand-Ergänzung von `--memory` und `--cpus` und erneutes `generate devcontainer` |
 
@@ -197,6 +198,20 @@ Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der M
     GitHub-Attestierung des Projekts prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus“.
   - `glab`: „SHA-256 geprüft, nur das Programm `glab` entpackt; keine Signatur gefunden (nach Suchmuster, nicht abschließend);
     `u-boot generate devcontainer` weist das aus“.
+
+**Homebrew-Formeln, Schlüssel `brew`** (Handbuch, Abschnitt 4.10, „Homebrew-Formeln“)
+
+- **Zusage:** [`LH-FA-DEV-013`](../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer) (Formel-Liste, Tap nur nach
+  Freigabe, Formeln ungepinnt und ausgewiesen); Schlüssel, Pfade, Konflikt mit `homebrew`, Pin und Grenzen:
+  [`SPEC-057`](../../spec/spezifikation.md#spec-057--homebrew-formeln-im-devcontainer-katalog-schlüssel-brew-pfade-freigabe-der-taps-konflikt-mit-homebrew-pin-meldungen-hosts-und-grenzen).
+- **Fundstelle:** [`slice-v1-devcontainer-homebrew-pakete`](../messungen/slice-v1-devcontainer-homebrew-pakete/README.md) (Docker 29.9.3,
+  Linux `amd64`, Homebrew 7.0.12, ein Lauf je Messpunkt) und die Docker-Tests `TestE2E_Brew_*`.
+- **Gemessen:** der Bau mit `ripgrep` und der Formel eines Taps in beiden Profilen (Egress-Restriktion an); die Revision des Homebrew-Verzeichnisses
+  gleich dem Pin; der nicht vorhandene Pin bricht den Bau; der Schalter gegen die Selbst-Aktualisierung hält die Revision; `brew` im `PATH`
+  von Shells ohne Login, nicht in `bash -l` und `sh -l`; die drei Hosts hinter der Restriktion für `jq`; der Host `release-assets.githubusercontent.com`
+  der gemessenen Tap-Formel.
+- **Nicht gemessen und nicht zugesagt:** `arm64` (die Messumgebung konnte keinen `arm64`-Container starten), andere Formeln und Taps, Abhängigkeiten
+  einer Tap-Formel aus anderen Taps, die Kombination mit den übrigen Dockerfile-Blöcken, das Verhalten nach mehreren Tagen Betrieb.
 
 ### 3.4 Verschachteltes Podman (Handbuch, Abschnitt 4.11, Podman)
 

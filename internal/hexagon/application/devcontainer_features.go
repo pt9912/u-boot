@@ -164,8 +164,11 @@ func unprocessableFeatureSourceMessage(violations []featureSourceViolation) stri
 // the Dev-Container-CLI does not process (LH-FA-DEV-003, lastenheft
 // 0.33.0 — its key would not resolve, so the allowlist way out cannot
 // fix it), then the freigabeliste rule over the effective allowlist
-// (the list plus the flag entries of the call). Both are read-only
-// here: the caller runs them before any plan and write.
+// (the list plus the flag entries of the call), then the rules of the
+// Homebrew block (LH-FA-DEV-013: the conflict with `homebrew` and the
+// approval of the taps, [rejectBrewViolations]; the flag entries free
+// no tap). All are read-only here: the caller runs them before any plan
+// and write.
 func rejectFeatureSourceViolations(cfg ubootYAMLConfig, flagSources []string) error {
 	if violations := unprocessableFeatureSources(cfg); len(violations) > 0 {
 		return fmt.Errorf("generate devcontainer: %w: %s",
@@ -179,7 +182,7 @@ func rejectFeatureSourceViolations(cfg ubootYAMLConfig, flagSources []string) er
 		return fmt.Errorf("generate devcontainer: %w: %s",
 			driving.ErrConfigValueInvalid, featureSourceViolationMessage(unlisted))
 	}
-	return nil
+	return rejectBrewViolations(cfg.Devcontainer)
 }
 
 // stringSet converts a key slice into a lookup-only set. Used in
@@ -262,7 +265,7 @@ type featureCatalogueEntry struct {
 	publisher string
 	// dockerfileBlock marks an entry that is no OCI feature: the Dockerfile
 	// carries its installation (the pin stays in the template; `ollama` in
-	// the sandbox profile only, `gh` and `glab` plus the pinned-toolchain
+	// the sandbox profile only, `gh`, `glab` and `brew` plus the pinned-toolchain
 	// keys `go-toolchain` and `golangci-lint` in both profiles), so the
 	// entry has no `source`, no `defaultVersion` and renders no key under
 	// `features`. A `source:` override turns it into an external OCI
@@ -442,6 +445,10 @@ func blockAndOptionCatalogue() map[string]featureCatalogueEntry {
 		},
 		featureGlab: {
 			shortDesc:       "GitLab CLI (Dockerfile block)",
+			dockerfileBlock: true,
+		},
+		featureBrew: {
+			shortDesc:       "Homebrew from a pinned commit and a list of formulas (Dockerfile block; formulas not pinned)",
 			dockerfileBlock: true,
 		},
 		featureGoToolchain: {
@@ -833,6 +840,8 @@ func forgeCLIWarnings(dc *ubootYAMLDevcontainer) []driving.WarningEntry {
 //   - Every entry in [ubootYAMLFeatureSources.Allow] passes
 //     [validateFeatureSource] (T4 will additionally silent-dedupe at
 //     write time; here we only reject invalid entries).
+//   - The two Homebrew lists keep their form and their place: see
+//     [validateBrewEntries] (LH-FA-DEV-013).
 //
 // Returns nil when the sub-tree is empty (nil-Devcontainer is the
 // pre-LH-FA-DEV-003 default for projects that never opted in). The
@@ -878,7 +887,7 @@ func validateDevcontainerFeatures(dc *ubootYAMLDevcontainer) error {
 				ErrInvalidFeatureSource, k, featureWithoutVersionReason(k))
 		}
 	}
-	return nil
+	return validateBrewEntries(dc)
 }
 
 // featureSourceViolation names one enabled entry whose `source:` override is

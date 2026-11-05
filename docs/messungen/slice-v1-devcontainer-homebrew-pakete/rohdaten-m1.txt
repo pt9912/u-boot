@@ -1,0 +1,101 @@
+== M1 Bau, 2026-11-05T09:37:42Z
+host: x86_64 docker=29.9.3 linux/amd64
+base-image bytes: 1412272019
+u-boot: u-boot version 0.23.0-dev
+---- 2026-11-05T09:37:43Z Projekte
+time=2026-11-05T09:37:43.055Z level=INFO msg="config set: updated" path=devcontainer.brewTaps.allow old="" new=pt9912/u-boot
+time=2026-11-05T09:37:43.068Z level=INFO msg="config set: updated" path=devcontainer.features.brew.enabled old="" new=true
+time=2026-11-05T09:37:43.078Z level=INFO msg="config set: updated" path=devcontainer.features.brew.packages old="" new=ripgrep,pt9912/u-boot/u-boot
+generate: time=2026-11-05T09:37:43.086Z level=INFO msg="generate devcontainer: updated-block" project=u-boot-messung-brew-def forwardPorts=[] features=0 changed=[.devcontainer/Dockerfile]
+generate: Updated devcontainer managed block (.devcontainer/Dockerfile).
+generate: Warning: devcontainer feature brew installs Homebrew from github.com/Homebrew/brew (commit pinned as HOMEBREW_REVISION in .devcontainer/Dockerfile) without an installer script when the image is built; it installs the formulas ripgrep, pt9912/u-boot/u-boot, which are not pinned and not checked, so a later build can install other contents than an earlier one
+generate: Warning: devcontainer feature brew installs formulas from the tap pt9912/u-boot (approved in devcontainer.brewTaps.allow) when the image is built; the tap is a source of its own, its formulas are code that Homebrew loads from the repository of the tap and runs, and it is not pinned and not checked
+time=2026-11-05T09:37:43.105Z level=INFO msg="config set: updated" path=devcontainer.brewTaps.allow old="" new=pt9912/u-boot
+time=2026-11-05T09:37:43.113Z level=INFO msg="config set: updated" path=devcontainer.features.brew.enabled old="" new=true
+time=2026-11-05T09:37:43.125Z level=INFO msg="config set: updated" path=devcontainer.features.brew.packages old="" new=ripgrep,pt9912/u-boot/u-boot
+time=2026-11-05T09:37:43.134Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+generate: time=2026-11-05T09:37:43.213Z level=INFO msg="generate devcontainer: updated-block" project=u-boot-messung-brew-sbx forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcontainer/egress-init.sh]"
+generate: Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+generate: Warning: sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+generate: Warning: security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+generate: Warning: devcontainer feature brew installs Homebrew from github.com/Homebrew/brew (commit pinned as HOMEBREW_REVISION in .devcontainer/Dockerfile) without an installer script when the image is built; it installs the formulas ripgrep, pt9912/u-boot/u-boot, which are not pinned and not checked, so a later build can install other contents than an earlier one
+generate: Warning: devcontainer feature brew installs formulas from the tap pt9912/u-boot (approved in devcontainer.brewTaps.allow) when the image is built; the tap is a source of its own, its formulas are code that Homebrew loads from the repository of the tap and runs, and it is not pinned and not checked
+time=2026-11-05T09:37:43.239Z level=INFO msg="config set: updated" path=devcontainer.features.brew.enabled old="" new=true
+generate: time=2026-11-05T09:37:43.246Z level=INFO msg="generate devcontainer: updated-block" project=u-boot-messung-brew-alone forwardPorts=[] features=0 changed=[.devcontainer/Dockerfile]
+generate: Updated devcontainer managed block (.devcontainer/Dockerfile).
+generate: Warning: devcontainer feature brew installs Homebrew from github.com/Homebrew/brew (commit pinned as HOMEBREW_REVISION in .devcontainer/Dockerfile) without an installer script when the image is built; no formula is listed
+time=2026-11-05T09:37:43.279Z level=INFO msg="config set: updated" path=devcontainer.features.brew.enabled old="" new=true
+time=2026-11-05T09:37:43.287Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+generate: time=2026-11-05T09:37:43.362Z level=INFO msg="generate devcontainer: updated-block" project=u-boot-messung-brew-egr forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcontainer/egress-init.sh]"
+generate: Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+generate: Warning: sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+generate: Warning: security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+generate: Warning: devcontainer feature brew installs Homebrew from github.com/Homebrew/brew (commit pinned as HOMEBREW_REVISION in .devcontainer/Dockerfile) without an installer script when the image is built; no formula is listed
+-- Dockerfile def: Zeilen=36 HOMEBREW_REVISION=ARG HOMEBREW_REVISION=bf464f57275cae0be106b43d190c98564ac59b0e
+-- Dockerfile sbx: Zeilen=50 HOMEBREW_REVISION=ARG HOMEBREW_REVISION=bf464f57275cae0be106b43d190c98564ac59b0e
+-- Dockerfile alone: Zeilen=35 HOMEBREW_REVISION=ARG HOMEBREW_REVISION=bf464f57275cae0be106b43d190c98564ac59b0e
+-- Dockerfile egr: Zeilen=49 HOMEBREW_REVISION=ARG HOMEBREW_REVISION=bf464f57275cae0be106b43d190c98564ac59b0e
+-- brew-Zeile im Dockerfile def:
+11:# the formulas of the list, the metadata that `brew install` loads and the
+33:RUN HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 brew install --formula 'ripgrep' 'pt9912/u-boot/u-boot'
+---- 2026-11-05T09:37:43Z Bau def
+bau def: exit=0 dauer=35s
+image def: bytes=1704035546
+user=vscode uid=1000
+brew-pfad=/home/linuxbrew/.linuxbrew/bin/brew
+brew-version=Homebrew >=4.3.0 (shallow or no git repository)
+revision=bf464f57275cae0be106b43d190c98564ac59b0e
+eigentuemer=vscode:vscode
+vscode:vscode
+formeln=bzip2 pcre2 ripgrep u-boot zlib-ng-compat 
+rg=ripgrep 15.2.0
+u-boot-aus-tap=/home/linuxbrew/.linuxbrew/bin/u-boot u-boot version 0.23.0
+git-origin=https://github.com/Homebrew/brew
+shallow=true
+env-homebrew=0
+AUSSAGE m1-def-bau=ok
+---- 2026-11-05T09:38:19Z Bau sbx
+bau sbx: exit=0 dauer=41s
+image sbx: bytes=1710992029
+user=vscode uid=1000
+brew-pfad=/home/linuxbrew/.linuxbrew/bin/brew
+brew-version=Homebrew >=4.3.0 (shallow or no git repository)
+revision=bf464f57275cae0be106b43d190c98564ac59b0e
+eigentuemer=vscode:vscode
+vscode:vscode
+formeln=bzip2 pcre2 ripgrep u-boot zlib-ng-compat 
+rg=ripgrep 15.2.0
+u-boot-aus-tap=/home/linuxbrew/.linuxbrew/bin/u-boot u-boot version 0.23.0
+git-origin=https://github.com/Homebrew/brew
+shallow=true
+env-homebrew=0
+AUSSAGE m1-sbx-bau=ok
+---- 2026-11-05T09:39:00Z Homebrew allein (leere Liste)
+bau alone: exit=0 dauer=11s
+image alone: bytes=1472764145
+brew-version=Homebrew >=4.3.0 (shallow or no git repository)
+formeln=
+revision=bf464f57275cae0be106b43d190c98564ac59b0e
+AUSSAGE m1-alone-bau=ok
+---- 2026-11-05T09:39:13Z Images fuer 04-egress.sh (Sandbox-Profil, Restriktion an, Homebrew allein)
+bau egr: exit=0 dauer=20s
+image egr: bytes=1479720705
+---- 2026-11-05T09:39:33Z Negativprobe: ein Pin, den es nicht gibt, bricht den Bau ab (kein Image)
+bau def: exit=1 dauer=8s
+  bau-log: Dockerfile:24
+  bau-log: --------------------
+  bau-log:   23 |     USER vscode
+  bau-log:   24 | >>> RUN cd /home/linuxbrew/.linuxbrew \
+  bau-log:   25 | >>>  && git init -q Homebrew \
+  bau-log:   26 | >>>  && cd Homebrew \
+  bau-log:   27 | >>>  && git remote add origin https://github.com/Homebrew/brew \
+  bau-log:   28 | >>>  && git fetch -q --depth 1 origin "${HOMEBREW_REVISION}" \
+  bau-log:   29 | >>>  && git checkout -q --detach FETCH_HEAD \
+  bau-log:   30 | >>>  && test "$(git rev-parse HEAD)" = "${HOMEBREW_REVISION}" \
+  bau-log:   31 | >>>  && mkdir ../bin \
+  bau-log:   32 | >>>  && ln -s ../Homebrew/bin/brew ../bin/brew
+  bau-log:   33 |     RUN HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 brew install --formula 'ripgrep' 'pt9912/u-boot/u-boot'
+  bau-log: --------------------
+  bau-log: ERROR: failed to build: failed to solve: process "/bin/sh -c cd /home/linuxbrew/.linuxbrew  && git init -q Homebrew  && cd Homebrew  && git remote add origin https://github.com/Homebrew/brew  && git fetch -q --depth 1 origin \"${HOMEBREW_REVISION}\"  && git checkout -q --detach FETCH_HEAD  && test \"$(git rev-parse HEAD)\" = \"${HOMEBREW_REVISION}\"  && mkdir ../bin  && ln -s ../Homebrew/bin/brew ../bin/brew" did not complete successfully: exit code: 128
+AUSSAGE m1-pin-falsch=bau-abgebrochen
+== ende 2026-11-05T09:39:41Z

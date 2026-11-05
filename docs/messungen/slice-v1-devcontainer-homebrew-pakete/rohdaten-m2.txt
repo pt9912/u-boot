@@ -1,0 +1,37 @@
+== M2 PATH, 2026-11-05T09:39:43Z
+-- Umgebung des Images (PATH und HOMEBREW*)
+PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+-- Shells im Image
+bash=/usr/bin/bash
+sh=/usr/bin/sh
+zsh=/usr/bin/zsh
+bash -c    /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m2-bash_-c=/home/linuxbrew/.linuxbrew/bin/brew
+bash -lc   MISSING
+AUSSAGE m2-bash_-lc=MISSING
+bash -ic   /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m2-bash_-ic=/home/linuxbrew/.linuxbrew/bin/brew
+bash -lic  MISSING
+AUSSAGE m2-bash_-lic=MISSING
+sh -c      /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m2-sh_-c=/home/linuxbrew/.linuxbrew/bin/brew
+sh -lc     MISSING
+AUSSAGE m2-sh_-lc=MISSING
+zsh -c     /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m2-zsh_-c=/home/linuxbrew/.linuxbrew/bin/brew
+zsh -lc    /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m2-zsh_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+zsh -ic    /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m2-zsh_-ic=/home/linuxbrew/.linuxbrew/bin/brew
+zsh -lic   /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m2-zsh_-lic=/home/linuxbrew/.linuxbrew/bin/brew
+-- docker exec in einen laufenden Container (Sitzung ohne Login-Shell)
+/home/linuxbrew/.linuxbrew/bin/brew
+/home/linuxbrew/.linuxbrew/bin/brew
+-- Login-Shell: Quelle des Verlusts (Debian setzt PATH in /etc/profile neu)
+5:  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+7:  PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
+9:export PATH
+00-restore-env.sh
+bash_completion.sh
+== ende 2026-11-05T09:39:53Z

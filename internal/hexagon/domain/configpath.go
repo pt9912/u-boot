@@ -135,6 +135,20 @@ const (
 	// map write has no shape in [application.ConfigService] and
 	// falls through to the unknown-path rejection.
 	ConfigDevcontainerContainerEnv
+
+	// ConfigDevcontainerBrewTapsAllow addresses `devcontainer.brewTaps.allow`
+	// (LH-FA-DEV-013): the approval list of the Homebrew taps. A LIST: writes
+	// append `<user>/<tap>` entries (comma-separated) through the list-path
+	// route in [application.ConfigService]. It is independent of
+	// `devcontainer.featureSources.allow`.
+	ConfigDevcontainerBrewTapsAllow
+
+	// ConfigDevcontainerFeaturePackages addresses
+	// `devcontainer.features.<feature>.packages` (LH-FA-DEV-013). A LIST like
+	// the two allow paths; the path form is a placeholder path for every
+	// feature name, and the application layer accepts only the key `brew`
+	// without `source:` (the other keys end with exit code 10).
+	ConfigDevcontainerFeaturePackages
 )
 
 // ConfigPath is a typed, whitelisted reference to a leaf in
@@ -201,6 +215,8 @@ var ErrInvalidConfigPath = errors.New("invalid config path")
 //   - `devcontainer.features.<feature>.enabled`     → ConfigDevcontainerFeatureEnabled, write-OK
 //   - `devcontainer.features.<feature>.source`      → ConfigDevcontainerFeatureSource, write-OK
 //   - `devcontainer.features.<feature>.version`     → ConfigDevcontainerFeatureVersion, write-OK
+//   - `devcontainer.features.<feature>.packages`    → ConfigDevcontainerFeaturePackages, write-OK (list)
+//   - `devcontainer.brewTaps.allow`                 → ConfigDevcontainerBrewTapsAllow, write-OK (list)
 //   - `devcontainer.user.uid`                       → ConfigDevcontainerUserUID, write-OK
 //   - `devcontainer.profile`                        → ConfigDevcontainerProfile, write-OK
 //   - `devcontainer.sandbox.nestedRuntime`          → ConfigDevcontainerSandboxNestedRuntime, write-OK
@@ -245,7 +261,7 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 		}
 	}
 
-	// `devcontainer.features.<feature>.{enabled,source,version}` —
+	// `devcontainer.features.<feature>.{enabled,source,version,packages}` —
 	// 4-segment split where the third segment is a valid FeatureName.
 	if feat, ok := strings.CutPrefix(raw, "devcontainer.features."); ok {
 		for _, suffix := range []struct {
@@ -255,6 +271,7 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 			{".enabled", ConfigDevcontainerFeatureEnabled},
 			{".source", ConfigDevcontainerFeatureSource},
 			{".version", ConfigDevcontainerFeatureVersion},
+			{".packages", ConfigDevcontainerFeaturePackages},
 		} {
 			if name, ok := strings.CutSuffix(feat, suffix.leaf); ok {
 				feature, err := NewFeatureName(name)
@@ -293,7 +310,7 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 		}, nil
 	}
 
-	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.containerEnv.<name>, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository,egress.enabled,egress.allow,hostGitToken}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
+	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.containerEnv.<name>, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository,egress.enabled,egress.allow,hostGitToken}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version,packages}, devcontainer.brewTaps.allow",
 		ErrInvalidConfigPath, raw)
 }
 
@@ -316,6 +333,7 @@ func scalarConfigPaths() map[string]ConfigPathKind {
 		"project.name":                        ConfigProjectName,
 		"devcontainer.enabled":                ConfigDevcontainerEnabled,
 		"devcontainer.featureSources.allow":   ConfigDevcontainerFeatureSourcesAllow,
+		"devcontainer.brewTaps.allow":         ConfigDevcontainerBrewTapsAllow,
 		"devcontainer.user.uid":               ConfigDevcontainerUserUID,
 		"devcontainer.profile":                ConfigDevcontainerProfile,
 		"devcontainer.sandbox.nestedRuntime":  ConfigDevcontainerSandboxNestedRuntime,
@@ -348,6 +366,8 @@ func (p ConfigPath) String() string {
 		return "devcontainer.features." + p.Feature.String() + ".source"
 	case ConfigDevcontainerFeatureVersion:
 		return "devcontainer.features." + p.Feature.String() + ".version"
+	case ConfigDevcontainerFeaturePackages:
+		return "devcontainer.features." + p.Feature.String() + ".packages"
 	case ConfigDevcontainerContainerEnv:
 		return "devcontainer.containerEnv." + p.EnvName
 	default:

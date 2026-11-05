@@ -1,0 +1,72 @@
+== M4 Laufzeit egr, Modus restricted, 2026-11-05T09:40:56Z
+runArgs laut devcontainer.json: "runArgs":["--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env","--cap-add=NET_ADMIN"],
+egress-init exit=0
+-- Status-Datei des Skripts
+u-boot-status 1
+result=ok
+at=2026-11-05T09:40:57Z
+modus=restricted user=vscode
+Hosts der Allowlist im Startscript: api.github.com codeload.github.com deb.debian.org formulae.brew.sh ghcr.io github.com objects.githubusercontent.com pkg-containers.githubusercontent.com raw.githubusercontent.com security.debian.org
+---- 09:40:59.370 version
+$ brew --version
+Homebrew >=4.3.0 (shallow or no git repository)
+exit=0
+AUSSAGE restricted-version-exit=0
+-- DNS-Anfragen (A/AAAA, eindeutig)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+---- 09:40:59.620 core-formel
+$ brew install --formula jq
+✔︎ Bottle jq (1.8.2)
+✔︎ Bottle oniguruma (6.9.10)
+==> Installing jq dependency: oniguruma (6.9.10)
+==> Pouring oniguruma--6.9.10.x86_64_linux.bottle.tar.gz
+🍺  /home/linuxbrew/.linuxbrew/Cellar/oniguruma/6.9.10: 16 files, 1.8MB
+==> Installing jq
+==> Pouring jq--1.8.2.x86_64_linux.bottle.1.tar.gz
+🍺  /home/linuxbrew/.linuxbrew/Cellar/jq/1.8.2: 21 files, 1.5MB
+exit=0
+AUSSAGE restricted-core-formel-exit=0
+-- DNS-Anfragen (A/AAAA, eindeutig)
+      2 formulae.brew.sh
+     10 ghcr.io
+      6 pkg-containers.githubusercontent.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[46]: cached ghcr.io
+dnsmasq[46]: reply ghcr.io
+---- 09:41:07.124 tap-formel
+$ brew install --formula pt9912/u-boot/u-boot
+==> Fetching downloads for: u-boot
+✘ Formula u-boot (0.23.0)
+Error: Failed to download resource "u-boot (0.23.0)"
+Download failed: https://github.com/pt9912/u-boot/releases/download/v0.23.0/u-boot-linux-amd64
+curl: (6) Could not resolve host: release-assets.githubusercontent.com
+curl: (6) Could not resolve host: release-assets.githubusercontent.com
+curl: (6) Could not resolve host: release-assets.githubusercontent.com
+curl: (6) Could not resolve host: release-assets.githubusercontent.com
+exit=1
+AUSSAGE restricted-tap-formel-exit=1
+-- DNS-Anfragen (A/AAAA, eindeutig)
+      2 api.github.com
+     12 github.com
+     80 release-assets.githubusercontent.com
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[46]: cached github.com
+dnsmasq[46]: config error
+dnsmasq[46]: reply api.github.com
+dnsmasq[46]: reply github.com
+---- 09:41:49.841 aufruf-tap-formel
+$ u-boot --version
+timeout: failed to run command ‘u-boot’: No such file or directory
+exit=127
+AUSSAGE restricted-aufruf-tap-formel-exit=127
+-- DNS-Anfragen (A/AAAA, eindeutig)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+
+---- 09:41:49.857 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
+      2 api.github.com
+      2 formulae.brew.sh
+     10 ghcr.io
+     12 github.com
+      6 pkg-containers.githubusercontent.com
+     80 release-assets.githubusercontent.com
+container-exit=0  gesamtdauer=54s

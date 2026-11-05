@@ -1206,6 +1206,11 @@ func joinIntsAscending(ports []int) string {
 //     points the user at `config set devcontainer.featureSources.allow
 //     <url>` (or `--allow-external-feature-sources <url>`); `--yes`
 //     does not substitute (LH-NFA-SEC-004).
+//   - **Tap not approved (Error, LH-FA-DEV-013):** the `brew` entry is
+//     active and a formula of its list comes from a tap that is not in
+//     `cfg.Devcontainer.BrewTaps.Allow` ([brewTapFinding], the text of
+//     `generate devcontainer`). The message names `config set
+//     devcontainer.brewTaps.allow <user>/<tap>`; `--yes` does not substitute.
 //   - **Feature the sandbox profile rejects (Error, LH-FA-DEV-006):**
 //     `devcontainer.profile` of u-boot.yaml is `sandbox` and an
 //     active catalogue feature mounts the container-engine socket of
@@ -1249,16 +1254,17 @@ func (s *DoctorService) checkDevcontainerFeaturesAllowlist(_ context.Context, ba
 	}
 	allowlistViolations, orphanActivations, enabledKeyMissing := classifyFeatureEntries(cfg)
 	socketRejection := sandboxHostSocketFeatureMessage(cfg.Devcontainer, profileIsSandbox(cfg.Devcontainer))
+	brewRejection := brewTapFinding(cfg.Devcontainer)
 
 	// Worst-severity wins: allowlist violation or a feature the sandbox
 	// profile rejects (Error) > orphan / enabled-missing (Warn) > OK.
 	// Combine multiple findings into one message so the user sees the
 	// full picture at once.
-	if len(allowlistViolations) > 0 || socketRejection != "" {
+	if len(allowlistViolations) > 0 || socketRejection != "" || brewRejection != "" {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerFeaturesAllowlist,
 			Severity: domain.SeverityError,
-			Message:  featureErrorMessage(allowlistViolations, socketRejection),
+			Message:  featureErrorMessage(allowlistViolations, socketRejection, brewRejection),
 		}
 	}
 	if len(orphanActivations) > 0 || len(enabledKeyMissing) > 0 {
@@ -1289,9 +1295,10 @@ func (s *DoctorService) checkDevcontainerFeaturesAllowlist(_ context.Context, ba
 
 // featureErrorMessage joins the findings of Error severity of
 // [DoctorService.checkDevcontainerFeaturesAllowlist]: the allowlist
-// violations (empty when there are none) and the reason the sandbox profile
-// rejects a feature (empty when it does not).
-func featureErrorMessage(allowlistViolations []string, socketRejection string) string {
+// violations (empty when there are none), the reason the sandbox profile
+// rejects a feature (empty when it does not) and the taps of the formula list
+// of `brew` that are not approved (empty when there are none).
+func featureErrorMessage(allowlistViolations []string, socketRejection, brewRejection string) string {
 	var parts []string
 	if len(allowlistViolations) > 0 {
 		parts = append(parts, fmt.Sprintf(
@@ -1302,6 +1309,9 @@ func featureErrorMessage(allowlistViolations []string, socketRejection string) s
 	}
 	if socketRejection != "" {
 		parts = append(parts, socketRejection)
+	}
+	if brewRejection != "" {
+		parts = append(parts, brewRejection)
 	}
 	return strings.Join(parts, " ")
 }

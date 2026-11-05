@@ -89,6 +89,9 @@ type ubootYAMLDevcontainer struct {
 	// serialises the map keys sorted, so the file stays
 	// deterministic.
 	ContainerEnv map[string]string `yaml:"containerEnv,omitempty"`
+	// BrewTaps is the approval list of the Homebrew taps (LH-FA-DEV-013),
+	// independent of FeatureSources.
+	BrewTaps *ubootYAMLBrewTaps `yaml:"brewTaps,omitempty"`
 }
 
 // ubootYAMLDevcontainerResources is the `devcontainer.resources:` sub-tree.
@@ -138,6 +141,13 @@ type ubootYAMLFeatureSources struct {
 	Allow []string `yaml:"allow,omitempty"`
 }
 
+// ubootYAMLBrewTaps is the `devcontainer.brewTaps:` sub-tree (LH-FA-DEV-013):
+// `Allow` lists the taps (`<user>/<tap>`) whose formulas the `brew` block may
+// install.
+type ubootYAMLBrewTaps struct {
+	Allow []string `yaml:"allow,omitempty"`
+}
+
 // ubootYAMLDevcontainerFeature is one entry in the `devcontainer.features:`
 // map. The activation map is a Plan-eigene Erweiterung (slice-v1-
 // devcontainer-features T0-(b)); only the catalogue-key-as-map-key
@@ -150,10 +160,13 @@ type ubootYAMLFeatureSources struct {
 //     in T4). If empty, the catalogue lookup provides the source.
 //   - Version: optional per-feature version-pin override. If empty,
 //     the catalogue's `defaultVersion` is used.
+//   - Packages: the formula list of the `brew` key (LH-FA-DEV-013); no other
+//     key takes it.
 type ubootYAMLDevcontainerFeature struct {
-	Enabled *bool  `yaml:"enabled,omitempty"`
-	Source  string `yaml:"source,omitempty"`
-	Version string `yaml:"version,omitempty"`
+	Enabled  *bool    `yaml:"enabled,omitempty"`
+	Source   string   `yaml:"source,omitempty"`
+	Version  string   `yaml:"version,omitempty"`
+	Packages []string `yaml:"packages,omitempty"`
 }
 
 // ubootYAMLConfig is the YAML-marshalable shape of u-boot.yaml as

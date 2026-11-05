@@ -63,7 +63,7 @@ func (s *ConfigService) List(_ context.Context, req driving.ConfigListRequest) (
 
 // listCandidatePaths builds every path that could have a value in cfg:
 // the fixed scalar/list paths plus `services.<svc>.enabled` and the
-// three `devcontainer.features.<name>.*` leaves for every key present.
+// four `devcontainer.features.<name>.*` leaves for every key present.
 func listCandidatePaths(cfg ubootYAMLConfig) []domain.ConfigPath {
 	var out []domain.ConfigPath
 	add := func(raw string) {
@@ -89,7 +89,7 @@ func listCandidatePaths(cfg ubootYAMLConfig) []domain.ConfigPath {
 			add("devcontainer.containerEnv." + name)
 		}
 		for name := range cfg.Devcontainer.Features {
-			for _, leaf := range []string{"enabled", "source", "version"} {
+			for _, leaf := range []string{"enabled", "source", "version", "packages"} {
 				add("devcontainer.features." + name + "." + leaf)
 			}
 		}
@@ -179,6 +179,13 @@ func (s *ConfigService) applySetItem(
 		// lastenheft 0.32.0 (Projekt-Umgebungswerte): one map entry;
 		// the comment-preserving patch, not the marshal rewrite.
 		return s.applyContainerEnvItem(body, cfg, it)
+	}
+	if plan, ok := brewListPlanFor(it.Path.Kind); ok {
+		// LH-FA-DEV-013: the lists of the Homebrew block; the plan asks the
+		// rules on the in-memory document, so a pair that stands behind the
+		// tap list sees it.
+		next, changed, err := plan(cfg, it)
+		return s.marshalIfChanged(body, cfg, next, changed, err)
 	}
 	coerced, formatted, err := coerceConfigValue(it.Path, it.Value)
 	if err != nil {

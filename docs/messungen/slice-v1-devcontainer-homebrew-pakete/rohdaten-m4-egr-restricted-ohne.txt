@@ -1,0 +1,59 @@
+== M4 Laufzeit egr, Modus restricted-ohne, 2026-11-05T09:41:52Z
+runArgs laut devcontainer.json: "runArgs":["--env-file=${localWorkspaceFolder}/.devcontainer/devcontainer.env","--cap-add=NET_ADMIN"],
+egress-init exit=0
+-- Status-Datei des Skripts
+u-boot-status 1
+result=ok
+at=2026-11-05T09:41:52Z
+modus=restricted-ohne user=vscode
+Hosts der Allowlist im Startscript: api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org 
+---- 09:41:54.959 version
+$ brew --version
+Homebrew >=4.3.0 (shallow or no git repository)
+exit=0
+AUSSAGE restricted-ohne-version-exit=0
+-- DNS-Anfragen (A/AAAA, eindeutig)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+---- 09:41:55.244 core-formel
+$ brew install --formula jq
+Do not file an issue on GitHub about this; you will need to figure out for
+yourself what issue with your internet connection restricts your access to
+GitHub (used for Homebrew updates and binary packages).
+Error: Failed to install Homebrew Portable Ruby and cannot find another Ruby 4.0!
+If there's no Homebrew Portable Ruby available for your processor:
+- install Ruby 4.0 with your system package manager (or rbenv/ruby-build)
+- make it first in your PATH
+- try again
+exit=1
+AUSSAGE restricted-ohne-core-formel-exit=1
+-- DNS-Anfragen (A/AAAA, eindeutig)
+     16 ghcr.io
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[59]: config error
+---- 09:42:02.600 tap-formel
+$ brew install --formula pt9912/u-boot/u-boot
+Do not file an issue on GitHub about this; you will need to figure out for
+yourself what issue with your internet connection restricts your access to
+GitHub (used for Homebrew updates and binary packages).
+Error: Failed to install Homebrew Portable Ruby and cannot find another Ruby 4.0!
+If there's no Homebrew Portable Ruby available for your processor:
+- install Ruby 4.0 with your system package manager (or rbenv/ruby-build)
+- make it first in your PATH
+- try again
+exit=1
+AUSSAGE restricted-ohne-tap-formel-exit=1
+-- DNS-Anfragen (A/AAAA, eindeutig)
+     16 ghcr.io
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+dnsmasq[59]: config error
+---- 09:42:09.958 aufruf-tap-formel
+$ u-boot --version
+timeout: failed to run command ‘u-boot’: No such file or directory
+exit=127
+AUSSAGE restricted-ohne-aufruf-tap-formel-exit=127
+-- DNS-Anfragen (A/AAAA, eindeutig)
+-- Antworten ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
+
+---- 09:42:09.975 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
+     32 ghcr.io
+container-exit=0  gesamtdauer=18s

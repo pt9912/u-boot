@@ -79,7 +79,11 @@ func egressDockerAptHost() string { return "download.docker.com" }
 // (measured for two local models at one time and place; the pull of a local
 // model does not need `ollama.com`, a call of a cloud model asks it and the
 // user adds it to `egress.allow`; the install hosts are used by the image
-// build only). The `ollama-host` entry has no row: it adds no host. The `gh`
+// build only). The `ollama-host` entry has no row: it adds no host. The `brew`
+// row lists the three hosts that the first start of Homebrew (its Portable
+// Ruby) and `brew install` of a formula of Homebrew itself need in the running
+// container (measured); the hosts a formula downloads from, in particular one
+// of a tap, follow the formula and are not listed. The `gh`
 // row lists the two GitHub hosts and the `glab` row `gitlab.com`; hosts that
 // follow a sign-in, telemetry, update hosts and the hosts of `glab duo` and
 // `glab orbit` are not listed.
@@ -90,6 +94,7 @@ func egressFeatureHosts() map[string][]string {
 		"java":        {"repo.maven.apache.org", "repo1.maven.org"},
 		"python":      {"pypi.org", "files.pythonhosted.org"},
 		"homebrew":    {"formulae.brew.sh", "ghcr.io", "pkg-containers.githubusercontent.com"},
+		"brew":        {"formulae.brew.sh", "ghcr.io", "pkg-containers.githubusercontent.com"},
 		"sdkman":      {"api.sdkman.io", "broker.sdkman.io", "repo.maven.apache.org", "repo1.maven.org"},
 		"claude-code": {"registry.npmjs.org", "api.anthropic.com"},
 		"ollama":      {"registry.ollama.ai", "dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com"},

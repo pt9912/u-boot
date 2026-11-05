@@ -3,7 +3,7 @@
 FROM mcr.microsoft.com/devcontainers/base:debian
 
 # Non-root default user.
-{{- if or .UID .Sandbox .Gh .Glab .GoToolchain .GolangciLint .JdkToolchain}}
+{{- if or .UID .Sandbox .Gh .Glab .GoToolchain .GolangciLint .JdkToolchain .Brew}}
 USER root
 {{- if .UID}}
 ARG USER_UID={{.UID}}
@@ -224,6 +224,38 @@ RUN arch="$(dpkg --print-architecture)" \
  && rm -rf "$work"
 ENV JAVA_HOME="/opt/jdk-${JDK_VERSION}"
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
+{{- end}}
+{{- if .Brew}}
+# Homebrew: a checkout of Homebrew/brew at one commit, loaded by git, no
+# installer script. The revision is pinned here, in one place (the commit of the
+# release 7.0.12 of Homebrew/brew), and the build stops unless
+# `git rev-parse HEAD` returns it. The pin covers Homebrew itself:
+# the formulas of the list, the metadata that `brew install` loads and the
+# taps are not pinned and not checked, so a later build can install other
+# contents than an earlier one. Homebrew refuses to run as root, so the
+# checkout and the installation run as the container user. The installation
+# switches the automatic update off (an update moves the checkout to the newest
+# release) and the analytics off. The image sets no token and runs no sign-in.
+ARG HOMEBREW_REVISION=bf464f57275cae0be106b43d190c98564ac59b0e
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential procps curl file git ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && install -d -o vscode -g vscode /home/linuxbrew/.linuxbrew
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+USER vscode
+RUN cd /home/linuxbrew/.linuxbrew \
+ && git init -q Homebrew \
+ && cd Homebrew \
+ && git remote add origin https://github.com/Homebrew/brew \
+ && git fetch -q --depth 1 origin "${HOMEBREW_REVISION}" \
+ && git checkout -q --detach FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "${HOMEBREW_REVISION}" \
+ && mkdir ../bin \
+ && ln -s ../Homebrew/bin/brew ../bin/brew
+{{- if .BrewPackages}}
+RUN HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 brew install --formula{{range .BrewPackages}} '{{.}}'{{end}}
+{{- end}}
+USER root
 {{- end}}
 {{- if .Egress}}
 # Egress restriction.

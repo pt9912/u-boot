@@ -1,0 +1,35 @@
+== M3 Selbst-Aktualisierung, 2026-11-05T09:39:55Z
+pin-alt=8f10429b56be28a25032b87463fffc95e556b5bc pin-template=bf464f57275cae0be106b43d190c98564ac59b0e
+time=2026-11-05T09:39:55.977Z level=INFO msg="config set: updated" path=devcontainer.features.brew.enabled old="" new=true
+generate: time=2026-11-05T09:39:55.983Z level=INFO msg="generate devcontainer: updated-block" project=u-boot-messung-brew-alt forwardPorts=[] features=0 changed=[.devcontainer/Dockerfile]
+generate: Updated devcontainer managed block (.devcontainer/Dockerfile).
+generate: Warning: devcontainer feature brew installs Homebrew from github.com/Homebrew/brew (commit pinned as HOMEBREW_REVISION in .devcontainer/Dockerfile) without an installer script when the image is built; no formula is listed
+bau alt: exit=0 dauer=1s
+image alt: bytes=1471363235
+---- 2026-11-05T09:39:57Z mit-schalter (HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1)
+vorher=8f10429b56be28a25032b87463fffc95e556b5bc
+✔︎ Bottle Manifest jq (1.8.2)
+jq 1.8.2
+==> Would install 1 dependency for jq:
+==> Fetching downloads for: jq
+✔︎ Bottle jq (1.8.2)
+==> Installing jq dependency: oniguruma (6.9.10)
+==> Installing jq
+==> Pouring jq--1.8.2.x86_64_linux.bottle.1.tar.gz
+nachher=8f10429b56be28a25032b87463fffc95e556b5bc
+branch=
+AUSSAGE m3-mit-schalter=revision-unveraendert
+---- 2026-11-05T09:40:07Z ohne-schalter (HOMEBREW_NO_ANALYTICS=1)
+vorher=8f10429b56be28a25032b87463fffc95e556b5bc
+error: Not a valid ref: refs/remotes/origin/main
+==> Auto-updating Homebrew...
+✔︎ Bottle Manifest jq (1.8.2)
+==> Fetching downloads for: jq
+jq 1.8.2
+==> Would install 1 dependency for jq:
+✔︎ Bottle jq (1.8.2)
+==> Installing jq dependency: oniguruma (6.9.10)
+nachher=bf464f57275cae0be106b43d190c98564ac59b0e
+branch=stable
+AUSSAGE m3-ohne-schalter=revision-verschoben-auf-bf464f57275cae0be106b43d190c98564ac59b0e
+== ende 2026-11-05T09:40:36Z
