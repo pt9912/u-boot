@@ -55,7 +55,7 @@ devcontainer:
 ## 2. Definition of Done
 
 - [ ] **Schema und Block:** `devcontainer.features.<Schlüssel>.packages` (Liste von Strings) wird gelesen und validiert (Zeichensatz ohne Leerzeichen und Shell-Zeichen, Liste nur mit aktivem Schlüssel, sonst Exit-Code `10`); das erzeugte Dockerfile trägt einen Block, der Homebrew aus einer gepinnten Quelle ohne Installer-Skript einrichtet und die Formeln als Benutzer `vscode` installiert. `config set`/`config get` und die Drift-Prüfung kennen das Feld. Test referenziert [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features).
-- [ ] **Ausweisung und Konflikt:** Die Befehlsausgabe weist den Block als Drittanbieter-Code mit ungepinnter Formel-Liste aus; ein Eintrag der Form `<user>/<tap>/<formel>` wird als eigene Quelle ausgewiesen und folgt der Entscheidung 2 aus §6; der Schlüssel zusammen mit dem OCI-Feature `homebrew` ist ein fachlicher Validierungsfehler (Exit-Code `10`, nichts geschrieben), wie die Regel für `go` zusammen mit `go-toolchain`. Test referenziert [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte).
+- [ ] **Ausweisung und Konflikt:** Die Befehlsausgabe weist den Block als Drittanbieter-Code mit ungepinnter Formel-Liste aus; ein Eintrag der Form `<user>/<tap>/<formel>` wird als eigene Quelle ausgewiesen und wird nur ausgewiesen und installiert, wenn der Tap in der Freigabeliste steht (sonst fachlicher Validierungsfehler, Exit-Code `10`, nichts geschrieben; Entscheidung 2 aus §6); der Schlüssel zusammen mit dem OCI-Feature `homebrew` ist ein fachlicher Validierungsfehler (Exit-Code `10`, nichts geschrieben), wie die Regel für `go` zusammen mit `go-toolchain`. Test referenziert [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte).
 - [ ] **Messung im Build:** Ein Test mit Build-Tag `docker` baut das Image mit `ripgrep` und einer Tap-Formel, in beiden Profilen und, wo die Plattform es zulässt, auf `amd64` und `arm64`; das Messprotokoll unter `docs/messungen/` nennt, ob der Bau ohne Egress-Einträge gelingt, welche Hosts hinter der Egress-Restriktion im laufenden Container ein `brew install` braucht, und ob `brew` in Login- und Nicht-Login-Shells im `PATH` steht. Test referenziert [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion).
 
 Pflichten der Closure (zählen nicht mit):
@@ -86,7 +86,7 @@ Ansatz: Falls `u-boot` für die neue Zusage eine ADR braucht (Verhältnis zum OC
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): Projektinhaber hat die zwei Entscheidungen aus §6 getroffen; die Sichtung des Beobachtungs-Registers (§8) ist erfolgt.
+**Start** (`next` → `in-progress`): die zwei Entscheidungen aus §6 sind getroffen; das Ergebnis des Architects (Schlüsselname, Name der Freigabeliste) liegt vor; der Slice für die Gate-Reihenfolge ist geschlossen (WIP-Limit 1 in `in-progress/`); die Sichtung des Beobachtungs-Registers (§8) ist erfolgt.
 
 **Rückführungen:**
 
@@ -99,10 +99,10 @@ DoD vollständig, `make gates` grün im Devcontainer, Review-Report und Messprot
 
 ## 6. Risiken und offene Punkte
 
-**Entscheidungen des Projektinhabers**
+**Entscheidungen des Projektinhabers** (getroffen 2026-11-05)
 
-1. **Verhältnis zum OCI-Feature `homebrew`.** Der Block kann (a) das bestehende Feature `homebrew` ersetzen (Bestandsnutzer mit `homebrew` in `u-boot.yaml` bekämen eine andere Installation) oder (b) als neuer Schlüssel daneben stehen und mit `homebrew` zusammen ein Validierungsfehler sein. Empfehlung: (b), weil der Bestand unverändert bleibt; der Name des Schlüssels (hier `brew`) wird mit der Entscheidung festgelegt.
-2. **Tap als externe Quelle.** [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) nimmt Paketmanager-Installationen im Image-Bau aus, nennt aber Skripte „nicht ausdrücklich in `u-boot.yaml` freigegeben“. Ein Tap ist Drittanbieter-Code mit eigener Vertrauensfrage. Optionen: (a) der Eintrag in `packages` gilt als Freigabe und wird nur ausgewiesen; (b) eigene Freigabeliste analog `featureSources.allow`. Empfehlung: (b), weil das Repo bei Features dieselbe Linie fährt (`--yes` ersetzt die Freigabe nicht).
+1. **Verhältnis zum OCI-Feature `homebrew`: neuer Schlüssel daneben.** Der Block steht als eigener Katalogschlüssel neben dem bestehenden Feature `homebrew`, dessen Bestand unverändert bleibt; beide zusammen aktiv ist ein Validierungsfehler. Der Name des Schlüssels (hier `brew`) ist ein Arbeitsname, den der Architect vor dem Code festlegt.
+2. **Tap als externe Quelle.** [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) nimmt Paketmanager-Installationen im Image-Bau aus, nennt aber Skripte „nicht ausdrücklich in `u-boot.yaml` freigegeben“. Ein Tap ist Drittanbieter-Code mit eigener Vertrauensfrage. **Entscheidung: eigene Freigabeliste** analog `featureSources.allow`; `--yes` ersetzt die Freigabe nicht, wie bei externen Features. Name und Ort der Liste legt der Architect vor dem Code fest.
 
 **Risiken**
 
