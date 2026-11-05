@@ -678,14 +678,14 @@ func TestConfigSet_ForgeVersionWithoutSource_RejectsEverySet(t *testing.T) {
 }
 
 // `config set …<feature>.version <value>` follows `generate devcontainer`: a
-// Dockerfile-block feature (`ollama`, `gh`, `glab`) takes a `version` only with
+// Dockerfile-block feature (`ollama`, `gh`, `glab`, `brew`) takes a `version` only with
 // a `source`. Without it the Set ends with ErrConfigValueInvalid (exit code
 // 10, not the file-broken ErrConfigSchemaInvalid), the file stays
 // byte-identical and nothing is written, in every preview mode (`--dry-run`
 // is PreviewDryRun, `--diff` alone is PreviewAndApply).
 func TestConfigSet_DockerfileBlockVersionWithoutSource_Rejected(t *testing.T) {
 	t.Parallel()
-	for _, key := range []string{"ollama", "gh", "glab"} {
+	for _, key := range []string{"ollama", "gh", "glab", "brew"} {
 		for _, mode := range []struct {
 			name string
 			mode driving.PreviewMode

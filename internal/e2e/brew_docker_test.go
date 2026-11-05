@@ -113,7 +113,8 @@ echo "NOENV:$(env | grep -c '^HOMEBREW')"`
 // approved tap; Homebrew stands at the pinned commit, `rg` and the program of
 // the tap formula run as the container user, the image carries no `HOMEBREW`
 // variable (the build switches are no `ENV`), and `brew` is on the `PATH` of a
-// shell with and without login (`bash` and `sh`, `-c` and `-lc`) and of the
+// shell with and without login (`bash`, `sh` and `zsh` with `-c` and `-lc`;
+// `bash` interactive with `-ic` and `-lic`) and of the
 // login session `su -l` starts. The login shell sets the `PATH` anew (Debian
 // `/etc/profile`); the control removes /etc/profile.d/u-boot-brew.sh in a
 // container and expects the login session to miss `brew`, so the check
@@ -152,10 +153,12 @@ func TestE2E_Brew_BuildsInBothProfiles(t *testing.T) {
 			if f := lineValue(out, "FORMULAS:"); !strings.Contains(" "+f, " ripgrep ") || !strings.Contains(" "+f, " u-boot ") {
 				t.Errorf("formulas = %q, want ripgrep and u-boot among them", f)
 			}
-			for _, shell := range [][]string{{"bash", "-c"}, {"sh", "-c"}, {"bash", "-lc"}, {"sh", "-lc"}} {
+			// An interactive shell without a terminal writes its job-control
+			// notice to stderr ahead of the answer, so the answer is the last line.
+			for _, shell := range [][]string{{"bash", "-c"}, {"sh", "-c"}, {"zsh", "-c"}, {"bash", "-lc"}, {"sh", "-lc"}, {"zsh", "-lc"}, {"bash", "-ic"}, {"bash", "-lic"}} {
 				args := append(append([]string{"run", "--rm", image}, shell...), "command -v brew")
 				got, c := dockerOutput(ctx, t, args...)
-				if c != 0 || strings.TrimSpace(got) != "/home/linuxbrew/.linuxbrew/bin/brew" {
+				if c != 0 || lastLine(got) != "/home/linuxbrew/.linuxbrew/bin/brew" {
 					t.Errorf("%v: brew on the PATH = %q (exit %d), want the prefix of Homebrew", shell, got, c)
 				}
 			}
@@ -169,6 +172,11 @@ func TestE2E_Brew_BuildsInBothProfiles(t *testing.T) {
 			}
 		})
 	}
+}
+
+func lastLine(out string) string {
+	lines := strings.Split(strings.TrimSpace(out), "\n")
+	return strings.TrimSpace(lines[len(lines)-1])
 }
 
 func lineValue(out, prefix string) string {

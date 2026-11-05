@@ -1287,7 +1287,7 @@ devcontainer:
   Exit-Code 10, bevor etwas geschrieben wird; schalten Sie eines ab
   (`u-boot config set devcontainer.features.homebrew.enabled false`).
 - **Im Container.** `brew` steht im `PATH` von Shells mit und ohne Login
-  (`bash`, `sh`, `zsh`; auch interaktiv), von `u-boot devcontainer shell` und
+  (`bash`, `sh`, `zsh`; `bash` auch interaktiv), von `u-boot devcontainer shell` und
   von `docker exec`. Eine Login-Shell setzt den `PATH` neu (Debian,
   `/etc/profile`); das erzeugte Image legt deshalb die Datei
   `/etc/profile.d/u-boot-brew.sh` an, die die Verzeichnisse von Homebrew vorn

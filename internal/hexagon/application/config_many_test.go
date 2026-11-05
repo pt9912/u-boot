@@ -168,7 +168,7 @@ func TestConfigSetMany_OrderedDependency(t *testing.T) {
 func TestConfigSetMany_DockerfileBlockVersionNeedsSourceFirst(t *testing.T) {
 	t.Parallel()
 	const url = "example.test/features/"
-	for _, key := range []string{"ollama", "gh", "glab"} {
+	for _, key := range []string{"ollama", "gh", "glab", "brew"} {
 		t.Run(key, func(t *testing.T) {
 			t.Parallel()
 			svc, fs := newConfigService(t)

@@ -229,16 +229,23 @@ func TestConfigSet_BrewEnabling_AsksTheApprovalAndTheConflict(t *testing.T) {
 		t.Parallel()
 		const rejected = brewConfigHead + "  features:\n    brew:\n      enabled: true\n      packages:\n        - pt9912/u-boot/u-boot\n    homebrew:\n      enabled: true\n"
 		for _, path := range []string{"devcontainer.features.homebrew.enabled", "devcontainer.features.brew.enabled"} {
+			// The key's own block, with the value `false` written into it.
+			key := strings.TrimSuffix(strings.TrimPrefix(path, "devcontainer.features."), ".enabled")
+			want := "    " + key + ":\n      enabled: false\n"
 			svc, fs := newConfigService(t)
 			seedConfigUbootYAMLWithDevcontainer(t, fs, rejected)
 			if _, err := setBrew(t, svc, path, "false", driving.PreviewNone); err != nil {
 				t.Errorf("Set %s false: %v", path, err)
+			} else if y := readYAML(t, fs); !strings.Contains(y, want) {
+				t.Errorf("Set %s false: u-boot.yaml lacks %q:\n%s", path, want, y)
 			}
 			svc, fs = newConfigService(t)
 			seedConfigUbootYAMLWithDevcontainer(t, fs, rejected)
 			item := driving.ConfigSetItem{Path: mustConfigPath(t, path), Value: "false"}
 			if _, err := svc.SetMany(context.Background(), driving.ConfigSetManyRequest{BaseDir: configTestBaseDir, Items: []driving.ConfigSetItem{item}}); err != nil {
 				t.Errorf("SetMany %s false: %v", path, err)
+			} else if y := readYAML(t, fs); !strings.Contains(y, want) {
+				t.Errorf("SetMany %s false: u-boot.yaml lacks %q:\n%s", path, want, y)
 			}
 		}
 	})
