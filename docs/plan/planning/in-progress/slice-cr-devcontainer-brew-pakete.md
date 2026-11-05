@@ -69,6 +69,8 @@ DoD vollständig, Wortlaut im Lastenheft, `make gates` grün, Reports liegen vor
 
 - Der Wortlaut enthält Details, die in die Spezifikation gehören (Plattformen, Messgrenzen). — **Ausgang:** offen; der Reviewer prüft jeden Satz auf Anforderungsebene.
 
+- Der Querverweis auf [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) im Satz zum Tap ließ sich gegen die Ausnahme für Paketmanager-Pakete lesen (Review F-2). — **Ausgang:** eingetreten: der Verweis ist gestrichen (Lastenheft `0.36.1`, Entscheidung des Projektinhabers 2026-11-05); die Verifikation prüft den geänderten Satz.
+
 ## 7. Closure-Notiz
 
 *(Wird bei der Closure gefüllt.)*

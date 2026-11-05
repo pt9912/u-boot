@@ -19,7 +19,7 @@
 > *Priorität: V2.* Das Produkt soll Homebrew-Formeln, die der Benutzer in der Projektkonfiguration als Liste führt, im erzeugten Devcontainer-Image installieren, ohne dass `u-boot` die Werkzeuge einzeln kennen muss.
 >
 > - Ein Eintrag der Liste ist eine Formel oder eine Formel aus einem Tap (`<user>/<tap>/<formel>`).
-> - Ein Tap ist eine externe Quelle ([`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)): Eine Formel aus einem Tap wird nur nach ausdrücklicher Freigabe des Benutzers installiert; `--yes` ersetzt sie nicht. Ohne Freigabe endet `u-boot generate devcontainer` mit einem fachlichen Fehler (Exit-Code `10`), ehe etwas geschrieben wird.
+> - Ein Tap ist eine externe Quelle: Eine Formel aus einem Tap wird nur nach ausdrücklicher Freigabe des Benutzers installiert; `--yes` ersetzt sie nicht. Ohne Freigabe endet `u-boot generate devcontainer` mit einem fachlichen Fehler (Exit-Code `10`), ehe etwas geschrieben wird.
 > - Die Formeln sind nicht gepinnt; `u-boot` weist das beim Erzeugen aus.
 
 ## Stelle (b) — Versionsfeld und Historie (Übernahme)
@@ -36,7 +36,7 @@
 
 ---
 
-**Abweichungen der Übernahme je Stelle:** keine; der Wortlaut ist wortgleich übernommen (Kennung [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), Priorität `V2`, Version `0.36.0`), die Historie-Zeile trägt keinen Verweis auf Dateien unterhalb des Lastenhefts.
+**Abweichungen der Übernahme je Stelle:** eine, nach der Übernahme: Der Querverweis auf [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) im Satz zum Tap ist gestrichen (Review F-2: der Verweis ließ sich gegen die Ausnahme für Paketmanager-Pakete lesen), Entscheidung des Projektinhabers 2026-11-05 (Option 1), Lastenheft `0.36.1`. Sonst ist der Wortlaut wortgleich übernommen (Kennung [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), Priorität `V2`, Version `0.36.0`), die Historie-Zeile trägt keinen Verweis auf Dateien unterhalb des Lastenhefts.
 
 **Bei der Freigabe entschieden:**
 

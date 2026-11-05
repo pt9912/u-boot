@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.36.0                                                             |
+| Version          | 0.36.1                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -543,7 +543,7 @@ Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelte
 *Priorität: V2.* Das Produkt soll Homebrew-Formeln, die der Benutzer in der Projektkonfiguration als Liste führt, im erzeugten Devcontainer-Image installieren, ohne dass `u-boot` die Werkzeuge einzeln kennen muss.
 
 - Ein Eintrag der Liste ist eine Formel oder eine Formel aus einem Tap (`<user>/<tap>/<formel>`).
-- Ein Tap ist eine externe Quelle ([`LH-NFA-SEC-004`](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)): Eine Formel aus einem Tap wird nur nach ausdrücklicher Freigabe des Benutzers installiert; `--yes` ersetzt sie nicht. Ohne Freigabe endet `u-boot generate devcontainer` mit einem fachlichen Fehler (Exit-Code `10`), ehe etwas geschrieben wird.
+- Ein Tap ist eine externe Quelle: Eine Formel aus einem Tap wird nur nach ausdrücklicher Freigabe des Benutzers installiert; `--yes` ersetzt sie nicht. Ohne Freigabe endet `u-boot generate devcontainer` mit einem fachlichen Fehler (Exit-Code `10`), ehe etwas geschrieben wird.
 - Die Formeln sind nicht gepinnt; `u-boot` weist das beim Erzeugen aus.
 
 ---
@@ -1656,6 +1656,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.34.0 | 2026-11-03 | [`LH-FA-DEV-011`](#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette): Pin-Inventur — die `go`-Direktive der `go.mod` ist der fünfte Ort der Pin-Kopplung für die zwei Go-Schlüssel (Direktive auf den Pin gehoben, jede Hebung zieht sie fortan nach); Shell-Werkzeuge des Bau-Verlaufs tragen keine Einzel-Pins (Basis-Image-Gruppe), GNU make trägt eine Mindest-Version am Kopf der Makefile mit ab-brechendem Guard (Grenze zur laufenden Version); ein `pinsync`-Wächter prüft die Gleichheit je benannten Pin-Gruppe beim Gatter-Lauf (Gleichheit, keine Aktualität). | Freigabe des Projektinhabers 2026-11-03 (Wortlaut wie vorgelegt samt der GNU-make-Erweiterung, CR der Pin-Inventur) |
 | 0.35.0 | 2026-11-04 | [`LH-FA-DEV-012`](#lh-fa-dev-012--umgebungsdatei-des-devcontainers): neue Anforderung (Umgebungsdatei des Devcontainers `.devcontainer/devcontainer.env` als `--env-file`, Anlage der Datei und einer Vorlage durch `generate devcontainer`, Format nach Messung, Zusage für die erzeugte Konfiguration und, soweit ein Docker-Test es belegt, den Start über `u-boot devcontainer up`); [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) und [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten): die Zusage „Zugangsdaten stehen in keiner erzeugten Datei“ gilt für die von `u-boot` erzeugten Dateien, ausgenommen die benutzergeführte Datei. | Freigabe des Projektinhabers 2026-11-04 (Auftrag „bitte alle … umsetzen“ nach Vorlage des Vorschlags mit den fünf Empfehlungen; Wortlaut mit einer Abweichung zum Start über `u-boot devcontainer up`, Anweisung des Projektinhabers 2026-11-04: das Lastenheft ist das Zielbild) |
 | 0.36.0 | 2026-11-05 | [`LH-FA-DEV-013`](#lh-fa-dev-013--homebrew-formeln-im-devcontainer): neue Anforderung (Homebrew-Formeln im Devcontainer: Liste in der Projektkonfiguration, Installation im erzeugten Image, Formeln aus einem Tap nur nach ausdrücklicher Freigabe, Formeln ungepinnt und beim Erzeugen ausgewiesen) | Entscheidung des Projektinhabers 2026-11-05; Wortlaut freigegeben wie vorgelegt |
+| 0.36.1 | 2026-11-05 | [`LH-FA-DEV-013`](#lh-fa-dev-013--homebrew-formeln-im-devcontainer): Querverweis auf `LH-NFA-SEC-004` im Satz zum Tap gestrichen (der Satz „Ein Tap ist eine externe Quelle“ steht für sich; die Ausnahme für Paketmanager-Pakete in `LH-NFA-SEC-004` bleibt unverändert) | Entscheidung des Projektinhabers 2026-11-05 nach dem Review des CR |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
