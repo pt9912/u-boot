@@ -1,59 +1,38 @@
-# CR-Vorschlag: Homebrew-Formeln im Devcontainer — Schlüssel `brew` mit `packages` und Tap-Freigabeliste, Lastenheft `LH-FA-DEV-003` und `LH-FA-CONF-002` — Alt/Neu je Stelle
+# CR-Vorschlag: Homebrew-Formeln im Devcontainer — neue Anforderung im Lastenheft — Alt/Neu je Stelle
 
 **Status:** vorgelegt (2026-11-05); wartet auf die Freigabe des Projektinhabers.
 
 **Gegenstand:** die Lieferung zur DoD-Zeile 1 des CR-Slices [`slice-cr-devcontainer-brew-pakete`](../planning/in-progress/slice-cr-devcontainer-brew-pakete.md) (Lastenheft-Wortlaut); Umsetzung im Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../planning/next/slice-v1-devcontainer-homebrew-pakete.md).
 
-**Grundlage:** [`ADR-0046`](../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (`Accepted`, 2026-11-05: Schlüssel `brew`, Freigabeliste `devcontainer.brewTaps.allow`, Commit-Pin ohne Übersteuerung) und die zwei Entscheidungen des Projektinhabers vom 2026-11-05 (neuer Schlüssel neben dem OCI-Feature `homebrew`; Taps nur über eine eigene Freigabeliste).
+**Grundlage:** die zwei Entscheidungen des Projektinhabers vom 2026-11-05 (Homebrew-Formeln als frei wählbare Liste im Devcontainer-Image; Formeln aus einem Tap nur mit ausdrücklicher Freigabe) und [`ADR-0046`](../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (`Accepted`). Das Lastenheft nimmt nur die Anforderung auf. Schlüsselnamen, Pfade der Konfiguration, das Verfahren der Freigabe, die Pin-Stufe von Homebrew sowie Bau-, Plattform- und Messgrenzen der Zusage gehören in die Spezifikation und in die Tests des Umsetzungs-Slices.
 
 ---
 
-## Stelle (a) — [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), Beispielliste
+## Stelle (a) — neue Anforderung im Abschnitt der Devcontainer-Anforderungen
 
-**Alt:** `spec/lastenheft.md` Zeile 418, letzter Punkt der Liste:
+**Alt:** `spec/lastenheft.md` Zeile 531: [`LH-FA-DEV-012`](../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers) ist die letzte Anforderung des Abschnitts; danach folgt die Trennlinie `---`. Eine Anforderung zu Homebrew-Formeln gibt es nicht.
 
-> - Anschluss an einen Ollama-Dienst des Hosts (`ollama-host`)
+**Neu (Vorschlag):** eine neue Anforderung nach `LH-FA-DEV-012` (die Kennung vergibt die Übernahme, nächste freie: `LH-FA-DEV-013`): <!-- d-check:ignore (Kennung der neuen Anforderung, entsteht mit der Übernahme) -->
 
-**Neu (Vorschlag):** ein weiterer Punkt darunter:
+> ### LH-FA-DEV-013 – Homebrew-Formeln im Devcontainer <!-- d-check:ignore (Kennung der neuen Anforderung, entsteht mit der Übernahme) -->
+>
+> *Priorität: V2.* Das Produkt soll Homebrew-Formeln, die der Benutzer in der Projektkonfiguration als Liste führt, im erzeugten Devcontainer-Image installieren, ohne dass `u-boot` die Werkzeuge einzeln kennen muss.
+>
+> - Ein Eintrag der Liste ist eine Formel oder eine Formel aus einem Tap (`<user>/<tap>/<formel>`).
+> - Ein Tap ist eine externe Quelle ([`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)): Eine Formel aus einem Tap wird nur nach ausdrücklicher Freigabe des Benutzers installiert; `--yes` ersetzt sie nicht. Ohne Freigabe endet `u-boot generate devcontainer` mit einem fachlichen Fehler (Exit-Code `10`), ehe etwas geschrieben wird.
+> - Die Formeln sind nicht gepinnt; `u-boot` weist das beim Erzeugen aus.
 
-> - Homebrew-Formeln im Image (`brew`)
-
-## Stelle (b) — [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), neuer Absatz nach dem Absatz zu `ollama-host`
-
-**Alt:** `spec/lastenheft.md` Zeile 430 ist der Absatz „Auf Wunsch des Nutzers erzeugt `u-boot` einen Anschluss des Containers an einen Ollama-Dienst des Hosts …“; Zeile 432 beginnt mit „Für optionale externe Feature-Quellen gilt:“. Dazwischen steht nichts.
-
-**Neu (Vorschlag):** ein neuer Absatz zwischen beiden:
-
-> `brew` (Homebrew-Formeln im Image) ist in beiden Profilen (Standard und Sandbox) als eingebautes Feature wählbar (`u-boot config set devcontainer.features.brew.enabled true`) und nimmt die Liste `devcontainer.features.brew.packages` entgegen. Der Schlüssel installiert im erzeugten Devcontainer-Dockerfile Homebrew aus einem gepinnten Commit des Upstream-Projekts, ohne Installer-Skript, und danach die Formeln der Liste. Die Formeln selbst sind nicht gepinnt: Ihre Version bestimmt Homebrew zum Zeitpunkt des Baus, und der Pin deckt nur Homebrew. Ein Eintrag der Liste ist `<formel>` oder `<user>/<tap>/<formel>`. `u-boot` weist beim Erzeugen den Block, die Quelle von Homebrew, die ungepinnte Formelliste und jeden Tap aus. Das Community-Feature `homebrew` bleibt unverändert wählbar; beide zusammen aktiv sind ein fachlicher Validierungsfehler (Exit-Code `10`).
-
-## Stelle (c) — [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), Freigabe externer Quellen: Taps
-
-**Alt:** `spec/lastenheft.md` Zeilen 432 bis 440, Liste „Für optionale externe Feature-Quellen gilt:“, endet mit den Punkten „`--yes` allein gilt nicht als Zustimmung für externe Quellen.“ (Zeile 439) und der Quell-Form-Regel (Zeile 440). Ein Tap kommt nicht vor.
-
-**Neu (Vorschlag):** ein weiterer Punkt am Ende der Liste:
-
-> - Ein Tap in `devcontainer.features.brew.packages` (Eintrag der Form `<user>/<tap>/<formel>`) ist eine eigene externe Quelle: Er braucht einen Eintrag `<user>/<tap>` in `devcontainer.brewTaps.allow`. Die Freigabe erfolgt über `u-boot config set devcontainer.brewTaps.allow <user>/<tap>[,<user>/<tap>...]`; `--allow-external-feature-sources` gilt dafür nicht, und `--yes` ersetzt die Freigabe nicht. Ohne Eintrag endet `u-boot generate devcontainer` mit Exit-Code `10`, ehe etwas geschrieben wird.
-
-## Stelle (d) — [`LH-FA-CONF-002`](../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), Hinweise zur Konfiguration
-
-**Alt:** `spec/lastenheft.md` Zeilen 868 bis 870: „`devcontainer.featureSources.allow` ist optional; fehlt das Feld, ist die Liste leer …“, „Erlaubte Einträge in `devcontainer.featureSources.allow` müssen gültige, non-empty Quell-Strings … sein.“, „Beim Schreiben wird die Liste dedupliziert.“
-
-**Neu (Vorschlag):** zwei weitere Punkte nach Zeile 870:
-
-> - `devcontainer.brewTaps.allow` ist optional; fehlt das Feld, ist die Liste leer (kein Tap freigegeben). Einträge haben die Form `<user>/<tap>`; beim Schreiben wird die Liste dedupliziert. Ein ungültiger Eintrag ist ein fachlicher Validierungsfehler (Exit-Code `10`).
-> - `devcontainer.features.brew.packages` ist optional (Liste von Zeichenketten der Form `<formel>` oder `<user>/<tap>/<formel>`) und nur am Schlüssel `brew` ohne eigene `source` zulässig; ein ungültiger Eintrag oder eine Liste an einem anderen Schlüssel ist ein fachlicher Validierungsfehler (Exit-Code `10`).
-
-## Stelle (e) — Versionsfeld und Historie (Übernahme)
+## Stelle (b) — Versionsfeld und Historie (Übernahme)
 
 **Alt:** `spec/lastenheft.md` Zeile 9: Version `0.35.0`; §16 Historie endet mit der Zeile `0.35.0` (2026-11-04).
 
-**Neu (Vorschlag):** Version `0.36.0` und eine Historie-Zeile mit dem Datum der Übernahme, die die Stellen (a) bis (d) in einem Satz nennt (Schlüssel `brew` als Dockerfile-Block mit ungepinnter Formelliste, Tap-Freigabe `devcontainer.brewTaps.allow`, Konflikt mit dem Feature `homebrew`, Zusage der Erzeugung, Bau nur nach Test mit Build-Tag `docker`) und mit „Entscheidung des Projektinhabers 2026-11-05“.
+**Neu (Vorschlag):** Version `0.36.0` und eine Historie-Zeile mit dem Datum der Übernahme: neue Anforderung Homebrew-Formeln im Devcontainer (Liste in der Projektkonfiguration, Tap nur mit ausdrücklicher Freigabe, Formeln ungepinnt und ausgewiesen); Entscheidung des Projektinhabers 2026-11-05.
 
 ## Nicht geändert
 
-- Bau, Betrieb, Plattformen und die Grenzen der Zusage („nicht zugesagt“): keine Lastenheft-Aussage. Sie gehören in die Spezifikation und in die Tests des Umsetzungs-Slices; dort stehen sie mit ihrer Messgrundlage.
-- [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte): Der Wortlaut bleibt. Die Auslegung (ein Tap ist eine vom Nutzer genannte Quelle, die Ausnahme für Paketmanager-Pakete deckt, was der Paketmanager mitbringt) steht in [`ADR-0046`](../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md).
-- `devcontainer down`, `up --recreate` und der Katalog-Eintrag `homebrew`: unverändert.
+- [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CONF-002`](../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) und [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte): Die Anforderung steht für sich. Katalogschlüssel, Konfigurationsschlüssel, die Freigabeliste für Taps und die Regel zur Kombination mit dem Katalog-Feature `homebrew` (Exit-Code 10 bei gleichzeitiger Aktivierung) stehen in der Spezifikation und präzisieren die neue Anforderung, ohne sie zu erweitern.
+- Bau, Betrieb, Plattformen und die Grenzen der Zusage: keine Lastenheft-Aussage. Sie stehen in der Spezifikation und in den Tests des Umsetzungs-Slices, mit ihrer Messgrundlage.
+- `devcontainer down`, `up --recreate` und das Community-Feature `homebrew`: unverändert.
 
 ---
 
@@ -61,7 +40,7 @@
 
 **Offen zur Freigabe:**
 
-- **F1 — kein Flag für die Tap-Freigabe (Stelle (c)).** Der Weg ist `config set`; ein Flag wie bei `--allow-external-feature-sources` gibt es nicht. Gegenposition: ein Flag nur für `generate devcontainer`. Empfehlung: kein Flag, weil jedes Flag eine Prüfstrecke an drei Befehlen kostet.
-- **F2 — Versionsnummer des Lastenhefts.** `0.36.0` ist der nächste freie Schritt der Lastenheft-Version (nicht die Release-Version); die Zahl vergibt die Übernahme.
+- **F1 — Priorität.** Vorschlag `V2` (wie [`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) und [`LH-FA-DEV-012`](../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers)). Gegenposition: `V1`.
+- **F2 — Version des Lastenhefts.** `0.36.0` ist der nächste freie Schritt der Lastenheft-Version (nicht die Release-Version); die Zahl vergibt die Übernahme.
 
-**Regeln dieser Form:** die Kennungen sind verlinkt; der Neu-Wortlaut nennt Anforderungen, keine Plattform-, Bau- oder Messgrenzen (sie stehen in der Spezifikation und in den Tests); die Historie-Zeile entsteht bei der Übernahme mit dem Datum des Commits.
+**Regeln dieser Form:** die Kennungen sind verlinkt; der Neu-Wortlaut nennt Anforderungen, keine Plattform-, Bau- oder Messgrenzen und keine Konfigurationsschlüssel; die Historie-Zeile entsteht bei der Übernahme mit dem Datum des Commits.
