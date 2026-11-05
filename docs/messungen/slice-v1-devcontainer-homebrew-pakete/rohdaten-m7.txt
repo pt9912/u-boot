@@ -1,0 +1,154 @@
+== M7 Login-Shell, 2026-11-05T11:43:24Z
+host: x86_64 docker=29.9.3 linux/amd64
+u-boot: u-boot version 0.23.0-dev
+---- 2026-11-05T11:43:24Z Projekte
+time=2026-11-05T11:43:24.954Z level=INFO msg="config set: updated" path=devcontainer.brewTaps.allow old="" new=pt9912/u-boot
+time=2026-11-05T11:43:24.959Z level=INFO msg="config set: updated" path=devcontainer.features.brew.enabled old="" new=true
+time=2026-11-05T11:43:24.964Z level=INFO msg="config set: updated" path=devcontainer.features.brew.packages old="" new=ripgrep,pt9912/u-boot/u-boot
+generate: time=2026-11-05T11:43:24.968Z level=INFO msg="generate devcontainer: updated-block" project=u-boot-messung-brew-def forwardPorts=[] features=0 changed=[.devcontainer/Dockerfile]
+generate: Updated devcontainer managed block (.devcontainer/Dockerfile).
+generate: Warning: devcontainer feature brew installs Homebrew from github.com/Homebrew/brew (commit pinned as HOMEBREW_REVISION in .devcontainer/Dockerfile) without an installer script when the image is built; it installs the formulas ripgrep, pt9912/u-boot/u-boot, which are not pinned and not checked, so a later build can install other contents than an earlier one
+generate: Warning: devcontainer feature brew installs formulas from the tap pt9912/u-boot (approved in devcontainer.brewTaps.allow) when the image is built; the tap is a source of its own, its formulas are code that Homebrew loads from the repository of the tap and runs, and it is not pinned and not checked
+time=2026-11-05T11:43:24.983Z level=INFO msg="config set: updated" path=devcontainer.brewTaps.allow old="" new=pt9912/u-boot
+time=2026-11-05T11:43:24.987Z level=INFO msg="config set: updated" path=devcontainer.features.brew.enabled old="" new=true
+time=2026-11-05T11:43:24.991Z level=INFO msg="config set: updated" path=devcontainer.features.brew.packages old="" new=ripgrep,pt9912/u-boot/u-boot
+time=2026-11-05T11:43:24.995Z level=INFO msg="config set: updated" path=devcontainer.sandbox.egress.enabled old="" new=true
+generate: time=2026-11-05T11:43:25.041Z level=INFO msg="generate devcontainer: updated-block" project=u-boot-messung-brew-sbx forwardPorts=[] features=0 changed="[.devcontainer/devcontainer.json .devcontainer/Dockerfile .devcontainer/egress-init.sh]"
+generate: Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+generate: Warning: sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+generate: Warning: security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+generate: Warning: devcontainer feature brew installs Homebrew from github.com/Homebrew/brew (commit pinned as HOMEBREW_REVISION in .devcontainer/Dockerfile) without an installer script when the image is built; it installs the formulas ripgrep, pt9912/u-boot/u-boot, which are not pinned and not checked, so a later build can install other contents than an earlier one
+generate: Warning: devcontainer feature brew installs formulas from the tap pt9912/u-boot (approved in devcontainer.brewTaps.allow) when the image is built; the tap is a source of its own, its formulas are code that Homebrew loads from the repository of the tap and runs, and it is not pinned and not checked
+-- Dockerfile def: 2 Zeile(n) mit u-boot-brew.sh
+19:# /etc/profile.d/u-boot-brew.sh puts the same directories in front of it again.
+25: && printf '%s\n' 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"' > /etc/profile.d/u-boot-brew.sh
+-- Dockerfile sbx: 2 Zeile(n) mit u-boot-brew.sh
+19:# /etc/profile.d/u-boot-brew.sh puts the same directories in front of it again.
+25: && printf '%s\n' 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"' > /etc/profile.d/u-boot-brew.sh
+---- 2026-11-05T11:43:25Z Bau def
+bau def: exit=0 dauer=30s
+image def: bytes=1704048115
+AUSSAGE m7-def-bau=ok
+AUSSAGE m7-def-revision=bf464f57275cae0be106b43d190c98564ac59b0e
+---- 2026-11-05T11:43:56Z Messung def
+-- Datei im Image def
+root:root 644 /etc/profile.d/u-boot-brew.sh
+export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+00-restore-env.sh
+bash_completion.sh
+u-boot-brew.sh
+AUSSAGE m7-def-datei=root:root 644
+-- Shell-Arten (nicht interaktiv ohne TTY; -i erzwingt eine interaktive Shell)
+bash -c    /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-bash_-c=/home/linuxbrew/.linuxbrew/bin/brew
+sh -c      /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-sh_-c=/home/linuxbrew/.linuxbrew/bin/brew
+zsh -c     /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-zsh_-c=/home/linuxbrew/.linuxbrew/bin/brew
+bash -lc   /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-bash_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+sh -lc     /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-sh_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+zsh -lc    /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-zsh_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+bash -ic   /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-bash_-ic=/home/linuxbrew/.linuxbrew/bin/brew
+bash -lic  /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-bash_-lic=/home/linuxbrew/.linuxbrew/bin/brew
+-- PATH der Login-Shell: bash -lc und sh -lc, Zahl der Eintraege von Homebrew, erster Eintrag, git und Formeln der Liste
+PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+AUSSAGE m7-def-bash_-lc-eintraege-bin=1
+AUSSAGE m7-def-bash_-lc-erster=/home/linuxbrew/.linuxbrew/bin
+AUSSAGE m7-def-bash_-lc-git=/usr/local/bin/git
+AUSSAGE m7-def-bash_-lc-rg=ripgrep 15.2.0
+AUSSAGE m7-def-bash_-lc-formeln=bzip2 pcre2 ripgrep u-boot zlib-ng-compat 
+PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+AUSSAGE m7-def-sh_-lc-eintraege-bin=1
+AUSSAGE m7-def-sh_-lc-erster=/home/linuxbrew/.linuxbrew/bin
+AUSSAGE m7-def-sh_-lc-git=/usr/local/bin/git
+AUSSAGE m7-def-sh_-lc-rg=ripgrep 15.2.0
+AUSSAGE m7-def-sh_-lc-formeln=bzip2 pcre2 ripgrep u-boot zlib-ng-compat 
+-- Sitzungen in einem laufenden Container
+docker exec bash -c: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-exec-bash_-c=/home/linuxbrew/.linuxbrew/bin/brew
+docker exec sh -c: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-exec-sh_-c=/home/linuxbrew/.linuxbrew/bin/brew
+docker exec bash -lc: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-exec-bash_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+docker exec sh -lc: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-exec-sh_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+su -l vscode -c: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-su-l=/home/linuxbrew/.linuxbrew/bin/brew
+su -l vscode -s /bin/sh -c: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-su-l-sh=/home/linuxbrew/.linuxbrew/bin/brew
+-- Kontrolle: ohne die Datei (im Container als root entfernt) findet die Login-Sitzung das Kommando nicht
+docker exec bash -lc ohne Datei: MISSING
+AUSSAGE m7-def-kontrolle-bash_-lc=MISSING
+su -l vscode -c ohne Datei: MISSING
+AUSSAGE m7-def-kontrolle-su-l=MISSING
+docker exec bash -c ohne Datei (ENV PATH): /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-def-kontrolle-bash_-c=/home/linuxbrew/.linuxbrew/bin/brew
+---- 2026-11-05T11:44:10Z Bau sbx
+bau sbx: exit=0 dauer=36s
+image sbx: bytes=1711003747
+AUSSAGE m7-sbx-bau=ok
+AUSSAGE m7-sbx-revision=bf464f57275cae0be106b43d190c98564ac59b0e
+---- 2026-11-05T11:44:46Z Messung sbx
+-- Datei im Image sbx
+root:root 644 /etc/profile.d/u-boot-brew.sh
+export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+00-restore-env.sh
+bash_completion.sh
+u-boot-brew.sh
+AUSSAGE m7-sbx-datei=root:root 644
+-- Shell-Arten (nicht interaktiv ohne TTY; -i erzwingt eine interaktive Shell)
+bash -c    /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-bash_-c=/home/linuxbrew/.linuxbrew/bin/brew
+sh -c      /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-sh_-c=/home/linuxbrew/.linuxbrew/bin/brew
+zsh -c     /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-zsh_-c=/home/linuxbrew/.linuxbrew/bin/brew
+bash -lc   /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-bash_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+sh -lc     /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-sh_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+zsh -lc    /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-zsh_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+bash -ic   /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-bash_-ic=/home/linuxbrew/.linuxbrew/bin/brew
+bash -lic  /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-bash_-lic=/home/linuxbrew/.linuxbrew/bin/brew
+-- PATH der Login-Shell: bash -lc und sh -lc, Zahl der Eintraege von Homebrew, erster Eintrag, git und Formeln der Liste
+PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+AUSSAGE m7-sbx-bash_-lc-eintraege-bin=1
+AUSSAGE m7-sbx-bash_-lc-erster=/home/linuxbrew/.linuxbrew/bin
+AUSSAGE m7-sbx-bash_-lc-git=/usr/local/bin/git
+AUSSAGE m7-sbx-bash_-lc-rg=ripgrep 15.2.0
+AUSSAGE m7-sbx-bash_-lc-formeln=bzip2 pcre2 ripgrep u-boot zlib-ng-compat 
+PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+AUSSAGE m7-sbx-sh_-lc-eintraege-bin=1
+AUSSAGE m7-sbx-sh_-lc-erster=/home/linuxbrew/.linuxbrew/bin
+AUSSAGE m7-sbx-sh_-lc-git=/usr/local/bin/git
+AUSSAGE m7-sbx-sh_-lc-rg=ripgrep 15.2.0
+AUSSAGE m7-sbx-sh_-lc-formeln=bzip2 pcre2 ripgrep u-boot zlib-ng-compat 
+-- Sitzungen in einem laufenden Container
+docker exec bash -c: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-exec-bash_-c=/home/linuxbrew/.linuxbrew/bin/brew
+docker exec sh -c: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-exec-sh_-c=/home/linuxbrew/.linuxbrew/bin/brew
+docker exec bash -lc: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-exec-bash_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+docker exec sh -lc: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-exec-sh_-lc=/home/linuxbrew/.linuxbrew/bin/brew
+su -l vscode -c: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-su-l=/home/linuxbrew/.linuxbrew/bin/brew
+su -l vscode -s /bin/sh -c: /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-su-l-sh=/home/linuxbrew/.linuxbrew/bin/brew
+-- Kontrolle: ohne die Datei (im Container als root entfernt) findet die Login-Sitzung das Kommando nicht
+docker exec bash -lc ohne Datei: MISSING
+AUSSAGE m7-sbx-kontrolle-bash_-lc=MISSING
+su -l vscode -c ohne Datei: MISSING
+AUSSAGE m7-sbx-kontrolle-su-l=MISSING
+docker exec bash -c ohne Datei (ENV PATH): /home/linuxbrew/.linuxbrew/bin/brew
+AUSSAGE m7-sbx-kontrolle-bash_-c=/home/linuxbrew/.linuxbrew/bin/brew
+== ende 2026-11-05T11:45:01Z

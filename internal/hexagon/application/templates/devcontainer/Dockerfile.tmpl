@@ -236,11 +236,15 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 # checkout and the installation run as the container user. The installation
 # switches the automatic update off (an update moves the checkout to the newest
 # release) and the analytics off. The image sets no token and runs no sign-in.
+# The `PATH` of the image carries the directories of Homebrew; a login shell
+# sets the `PATH` anew (Debian /etc/profile), so the file
+# /etc/profile.d/u-boot-brew.sh puts the same directories in front of it again.
 ARG HOMEBREW_REVISION=bf464f57275cae0be106b43d190c98564ac59b0e
 RUN apt-get update \
  && apt-get install -y --no-install-recommends build-essential procps curl file git ca-certificates \
  && rm -rf /var/lib/apt/lists/* \
- && install -d -o vscode -g vscode /home/linuxbrew/.linuxbrew
+ && install -d -o vscode -g vscode /home/linuxbrew/.linuxbrew \
+ && printf '%s\n' 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"' > /etc/profile.d/u-boot-brew.sh
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
 USER vscode
 RUN cd /home/linuxbrew/.linuxbrew \

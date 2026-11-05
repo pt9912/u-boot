@@ -4,8 +4,8 @@
 // the generated Dockerfile builds against the real engine in both profiles,
 // Homebrew stands at the pinned commit and the formulas of the list are
 // installed as the container user (a formula of Homebrew itself and a formula
-// of a tap), `brew` is on the `PATH` of the sessions the product starts, a
-// pin that does not exist breaks the build, the build switch keeps the
+// of a tap), `brew` is on the `PATH` of the sessions the product starts and of
+// login shells, a pin that does not exist breaks the build, the build switch keeps the
 // revision against the automatic update, and a formula of Homebrew
 // installs behind the egress restriction with the hosts of the generated list.
 // The measurement behind the promise: docs/messungen/slice-v1-devcontainer-
@@ -113,9 +113,11 @@ echo "NOENV:$(env | grep -c '^HOMEBREW')"`
 // approved tap; Homebrew stands at the pinned commit, `rg` and the program of
 // the tap formula run as the container user, the image carries no `HOMEBREW`
 // variable (the build switches are no `ENV`), and `brew` is on the `PATH` of a
-// non-login shell and of the session `docker exec` starts. Measured and
-// reported, not promised: the login shell of `bash` and `sh` resets the `PATH`
-// (Debian `/etc/profile`).
+// shell with and without login (`bash` and `sh`, `-c` and `-lc`) and of the
+// login session `su -l` starts. The login shell sets the `PATH` anew (Debian
+// `/etc/profile`); the control removes /etc/profile.d/u-boot-brew.sh in a
+// container and expects the login session to miss `brew`, so the check
+// measures the file and not the `ENV` line.
 func TestE2E_Brew_BuildsInBothProfiles(t *testing.T) {
 	requireDocker(t)
 	for name, tc := range map[string]struct {
@@ -150,12 +152,20 @@ func TestE2E_Brew_BuildsInBothProfiles(t *testing.T) {
 			if f := lineValue(out, "FORMULAS:"); !strings.Contains(" "+f, " ripgrep ") || !strings.Contains(" "+f, " u-boot ") {
 				t.Errorf("formulas = %q, want ripgrep and u-boot among them", f)
 			}
-			for _, shell := range [][]string{{"bash", "-c"}, {"sh", "-c"}} {
+			for _, shell := range [][]string{{"bash", "-c"}, {"sh", "-c"}, {"bash", "-lc"}, {"sh", "-lc"}} {
 				args := append(append([]string{"run", "--rm", image}, shell...), "command -v brew")
 				got, c := dockerOutput(ctx, t, args...)
 				if c != 0 || strings.TrimSpace(got) != "/home/linuxbrew/.linuxbrew/bin/brew" {
 					t.Errorf("%v: brew on the PATH = %q (exit %d), want the prefix of Homebrew", shell, got, c)
 				}
+			}
+			got, c := dockerOutput(ctx, t, "run", "--rm", "-u", "root", image, "su", "-l", "vscode", "-c", "command -v brew")
+			if c != 0 || strings.TrimSpace(got) != "/home/linuxbrew/.linuxbrew/bin/brew" {
+				t.Errorf("su -l vscode: brew on the PATH = %q (exit %d), want the prefix of Homebrew", got, c)
+			}
+			control := "rm /etc/profile.d/u-boot-brew.sh && su -l vscode -c 'command -v brew || echo MISSING'"
+			if got, _ := dockerOutput(ctx, t, "run", "--rm", "-u", "root", image, "sh", "-c", control); strings.TrimSpace(got) != "MISSING" {
+				t.Errorf("control: without the profile file the login session found brew (%q); the check measures nothing", got)
 			}
 		})
 	}

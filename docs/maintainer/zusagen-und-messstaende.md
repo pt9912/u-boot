@@ -42,7 +42,7 @@ Wortlaut ist aus der Handbuch-Version 2.0 (Commit `d0878f1c`) übernommen.
 | [`slice-v1-ollama-cloud-messung`](../messungen/slice-v1-ollama-cloud-messung/README.md) | Cloud-Modelle von Ollama mit Claude Code, ohne Konto |
 | [`slice-v1-ollama-cloud-messung-mit-konto`](../messungen/slice-v1-ollama-cloud-messung-mit-konto/README.md) | Cloud-Modelle von Ollama mit Claude Code, mit Konto |
 | [`slice-cr-lastenheft-messstaende`](../messungen/slice-cr-lastenheft-messstaende/README.md) | CI-Lauf der Integrationstests auf `amd64` (Ollama, verschachteltes Podman und Docker) |
-| [`slice-v1-devcontainer-homebrew-pakete`](../messungen/slice-v1-devcontainer-homebrew-pakete/README.md) | Homebrew-Formeln im Devcontainer (Schlüssel `brew`): Bau, `PATH`, Selbst-Aktualisierung, Hosts hinter der Restriktion |
+| [`slice-v1-devcontainer-homebrew-pakete`](../messungen/slice-v1-devcontainer-homebrew-pakete/README.md) | Homebrew-Formeln im Devcontainer (Schlüssel `brew`): Bau, `PATH`, Selbst-Aktualisierung, Hosts hinter der Restriktion, Fremd-Tap, Login-Shell |
 | [`slice-v1-devcontainer-bau-lokal`](../messungen/slice-v1-devcontainer-bau-lokal/README.md) | Messlauf M0 zum lokalen Bauen im Devcontainer |
 | [`slice-v1-devcontainer-ressourcenlimits`](../messungen/slice-v1-devcontainer-ressourcenlimits/README.md) | Hand-Ergänzung von `--memory` und `--cpus` und erneutes `generate devcontainer` |
 
@@ -208,11 +208,13 @@ Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der M
   Linux `amd64`, Homebrew 7.0.12, ein Lauf je Messpunkt) und die Docker-Tests `TestE2E_Brew_*`.
 - **Gemessen:** der Bau mit `ripgrep` und der Formel eines Taps in beiden Profilen (Egress-Restriktion an); die Revision des Homebrew-Verzeichnisses
   gleich dem Pin; der nicht vorhandene Pin bricht den Bau; der Schalter gegen die Selbst-Aktualisierung hält die Revision; `brew` im `PATH`
-  von Shells ohne Login, nicht in `bash -l` und `sh -l`; die drei Hosts hinter der Restriktion für `jq`; der Host `release-assets.githubusercontent.com`
-  der gemessenen Tap-Formel.
+  von `bash`, `sh` und `zsh` mit und ohne Login in beiden Profilen (Datei `/etc/profile.d/u-boot-brew.sh` im Block, Kontrolle ohne die Datei: in
+  der Login-Sitzung fehlt `brew`; M7); die drei Hosts hinter der Restriktion für `jq`, in einem Image mit leerer Formel-Liste; der Host
+  `release-assets.githubusercontent.com` der gemessenen Tap-Formel.
 - **Nur an einem Formelpaar gemessen, nicht zugesagt:** Abhängigkeit einer Tap-Formel aus einem anderen Tap (M6: Homebrew richtet den anderen Tap
   nicht selbst ein, der Bau bricht ab; die Liste mit beiden Formeln ist nur als Plan gemessen, nicht gebaut).
-- **Nicht gemessen und nicht zugesagt:** `arm64` (die Messumgebung konnte keinen `arm64`-Container starten), andere Formeln und Taps, die
+- **Nicht gemessen und nicht zugesagt:** `arm64` (die Messumgebung konnte keinen `arm64`-Container starten), andere Shells als `bash`, `sh` und
+  `zsh`, ein Login über das Feature `sshd`, die drei Hosts in einem Image mit Formel-Liste, andere Formeln und Taps, die
   Kombination mit den übrigen Dockerfile-Blöcken, das Verhalten nach mehreren Tagen Betrieb.
 
 ### 3.4 Verschachteltes Podman (Handbuch, Abschnitt 4.11, Podman)

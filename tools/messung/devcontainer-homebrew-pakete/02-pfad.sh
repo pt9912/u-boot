@@ -25,7 +25,7 @@ docker rm -f "$c" > /dev/null 2>&1
 docker run -d --name "$c" "$img" sleep 600 > /dev/null
 docker exec "$c" bash -c 'command -v brew || echo MISSING'
 docker exec -u vscode "$c" sh -c 'command -v brew || echo MISSING'
-echo "-- Login-Shell: Quelle des Verlusts (Debian setzt PATH in /etc/profile neu)"
+echo "-- Login-Shell: Debian setzt PATH in /etc/profile neu; die Dateien unter /etc/profile.d/ laufen danach"
 docker exec "$c" bash -c 'grep -n "PATH" /etc/profile; ls /etc/profile.d/'
 docker rm -f "$c" > /dev/null
 echo "== ende $(now)"

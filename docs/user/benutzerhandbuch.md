@@ -1286,10 +1286,14 @@ devcontainer:
   Drittanbieters (siehe Katalog). Beide in einem Projekt aktiv enden mit
   Exit-Code 10, bevor etwas geschrieben wird; schalten Sie eines ab
   (`u-boot config set devcontainer.features.homebrew.enabled false`).
-- **Im Container.** `brew` steht im `PATH` von Shells ohne Login (auch von
-  interaktiven) und von `u-boot devcontainer shell`. In einer
-  Login-Shell von `bash` oder `sh` (`bash -l`) fehlt es: Debian setzt dort den
-  `PATH` neu. Homebrew läuft als Benutzer `vscode` und liegt unter
+- **Im Container.** `brew` steht im `PATH` von Shells mit und ohne Login
+  (`bash`, `sh`, `zsh`; auch interaktiv), von `u-boot devcontainer shell` und
+  von `docker exec`. Eine Login-Shell setzt den `PATH` neu (Debian,
+  `/etc/profile`); das erzeugte Image legt deshalb die Datei
+  `/etc/profile.d/u-boot-brew.sh` an, die die Verzeichnisse von Homebrew vorn
+  einträgt. Gemessen ist das mit `bash -l`, `sh -l`, `zsh -l` und mit der
+  Login-Sitzung von `su -l`; ein Login über das Feature `sshd` ist nicht
+  gemessen. Homebrew läuft als Benutzer `vscode` und liegt unter
   `/home/linuxbrew/.linuxbrew`; es ist ein flacher Klon, `brew --version`
   meldet deshalb `Homebrew >=4.3.0 (shallow or no git repository)`. Beim ersten
   Aufruf, der Ruby braucht, lädt Homebrew sein eigenes Ruby nach, falls das
@@ -1303,7 +1307,7 @@ devcontainer:
   tragen Sie bei Bedarf in `devcontainer.sandbox.egress.allow` ein.
 - **Grenzen der Messung.** Gemessen sind auf einem Linux-Host mit `amd64` und
   lokaler Docker-Engine der Bau mit `ripgrep` und der Formel eines Taps sowie
-  die Installation von `jq` und `tree` im laufenden Container. `arm64` ist
+  die Installation von `jq` im laufenden Container. `arm64` ist
   nicht gemessen; ebenso nicht, ob eine bestimmte Formel
   auf Ihrer Plattform installierbar ist, die Kombination mit `ollama`, `gh`,
   `glab`, den Werkzeug-Features und einer Container-Laufzeit im selben
@@ -1859,7 +1863,7 @@ Standardmäßig erlaubt sind:
 | Feature `sdkman` | `api.sdkman.io`, `broker.sdkman.io`, `repo.maven.apache.org`, `repo1.maven.org` |
 | Feature `sshd` | keine zusätzlichen Hosts |
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
-| Feature `brew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` (ohne sie scheitert schon der erste Start von Homebrew im Container; die Hosts, von denen eine Formel lädt, kommen nicht dazu: siehe [Homebrew-Formeln](#homebrew-formeln-brew)) |
+| Feature `brew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` (gemessen in einem Image ohne Formeln: ohne sie scheitert schon der erste Start von Homebrew im Container; die Hosts, von denen eine Formel lädt, kommen nicht dazu: siehe [Homebrew-Formeln](#homebrew-formeln-brew)) |
 | Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com` (Hosts der Anmeldung nicht: siehe [Claude Code](#claude-code-optional)) |
 | Feature `ollama` | `registry.ollama.ai`, `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com` (Modell-Pull; wechselt der zweite Name, bricht der Pull ab: siehe [Ollama](#ollama-optional)) |
 | Feature `gh` | `api.github.com`, `github.com` (beide stehen schon in der Zeile „immer“; Hosts nach einer Anmeldung nicht: siehe [Forge-CLIs](#forge-clis-optional)) |

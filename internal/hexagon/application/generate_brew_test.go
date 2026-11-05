@@ -30,7 +30,8 @@ const (
 )
 
 // brewBlockLines are the instruction lines of the block for the formulas
-// ripgrep and pt9912/u-boot/u-boot: the pin, the build dependencies, the
+// ripgrep and pt9912/u-boot/u-boot: the pin, the build dependencies with the
+// profile file that puts Homebrew on the `PATH` of login shells, the
 // checkout at the pin with the abort on another commit, the installation as
 // the container user with the update and the analytics switched off, and the
 // return to root. Comment lines are not part of it.
@@ -40,7 +41,8 @@ func brewBlockLines(formulas string) []string {
 		"RUN apt-get update \\",
 		" && apt-get install -y --no-install-recommends build-essential procps curl file git ca-certificates \\",
 		" && rm -rf /var/lib/apt/lists/* \\",
-		" && install -d -o vscode -g vscode /home/linuxbrew/.linuxbrew",
+		" && install -d -o vscode -g vscode /home/linuxbrew/.linuxbrew \\",
+		` && printf '%s\n' 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"' > /etc/profile.d/u-boot-brew.sh`,
 		`ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"`,
 		"USER vscode",
 		"RUN cd /home/linuxbrew/.linuxbrew \\",
