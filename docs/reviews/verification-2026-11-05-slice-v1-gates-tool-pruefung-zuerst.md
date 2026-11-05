@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-gates-tool-pruefung-zuerst — 2026-11-05
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
-**Gegenstand:** [`slice-v1-gates-tool-pruefung-zuerst`](../plan/planning/in-progress/slice-v1-gates-tool-pruefung-zuerst.md) — Commit-Range `d28b3548..4a4cbd2a`. Code-Commits `6c4edaa9` (Reihenfolge), `36138efc` (Sensor, Wächter-Test), Review-Fix-Runde `3ef9d47b`; Abgleichstand **nach der letzten Fix-Runde = `4a4cbd2a`** (= Repo-Tip, Arbeitsbaum sauber). Die Move-Commits `7fc612f9`, `7f7b9ba9` sind Lifecycle-Bewegungen. Der Anlege-Commit `9182d4bd` und `4a4cbd2a` tragen zusätzlich den anderen Slice [`slice-v1-devcontainer-homebrew-pakete`](../plan/planning/open/slice-v1-devcontainer-homebrew-pakete.md); er ist nicht Gegenstand.
+**Gegenstand:** [`slice-v1-gates-tool-pruefung-zuerst`](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md) — Commit-Range `d28b3548..4a4cbd2a`. Code-Commits `6c4edaa9` (Reihenfolge), `36138efc` (Sensor, Wächter-Test), Review-Fix-Runde `3ef9d47b`; Abgleichstand **nach der letzten Fix-Runde = `4a4cbd2a`** (= Repo-Tip, Arbeitsbaum sauber). Die Move-Commits `7fc612f9`, `7f7b9ba9` sind Lifecycle-Bewegungen. Der Anlege-Commit `9182d4bd` und `4a4cbd2a` tragen zusätzlich den anderen Slice [`slice-v1-devcontainer-homebrew-pakete`](../plan/planning/open/slice-v1-devcontainer-homebrew-pakete.md); er ist nicht Gegenstand.
 
 **Eingangs-Kontext:**
 
@@ -15,7 +15,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-gates-tool-pruefung-zuerst`](../plan/planning/in-progress/slice-v1-gates-tool-pruefung-zuerst.md)
+- Slice: [`slice-v1-gates-tool-pruefung-zuerst`](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md)
 - IDs: [`LH-FA-DEV-011`](../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette), [`ADR-0043`](../plan/adr/0043-nur-devcontainer-bau-pfad.md)
 - Artefakte: `tools/mk/tool-pruefung.mk`, `tools/harness/gate-reihenfolge.sh`, `tools/harness/gate-reihenfolge-test.sh`; Doku `harness/README.md`, `harness/conventions.md`, [`MR-012`](../../harness/conventions/MR-012-ai-harness-init-werkzeug-des-repos.md); Planung `roadmap.md`, `open/README.md`
 
@@ -51,7 +51,7 @@ Plan-vs-Code (§3 gegen `git diff --stat d28b3548..4a4cbd2a`, Stand nach der let
 | `docs/plan/planning/in-progress/roadmap.md` (±4) | Z. 51 | deckt |
 | `docs/plan/planning/open/README.md` (+2) | Z. 53 | deckt |
 | [`open/slice-v1-devcontainer-homebrew-pakete.md`](../plan/planning/open/slice-v1-devcontainer-homebrew-pakete.md) (neu) | Z. 54 | deckt (anderer Slice) |
-| [`in-progress/slice-v1-gates-tool-pruefung-zuerst.md`](../plan/planning/in-progress/slice-v1-gates-tool-pruefung-zuerst.md) (neu) | Z. 55 | deckt |
+| [`done/slice-v1-gates-tool-pruefung-zuerst.md`](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md) (neu) | Z. 55 | deckt |
 | `harness/README.md`, `harness/conventions.md`, `MR-012` (je ±1) | Z. 56 | deckt |
 | [`docs/reviews/2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md`](2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md) (neu, 67) | **keine Zeile** | **Abweichung A-1** |
 | `repo.mk`, `Makefile`, `README.md`, `README.de.md` | Z. 52, 57 „unverändert“ | `git diff --stat` ohne Eintrag: deckt |
@@ -104,10 +104,10 @@ Commit / Artefakt:
 
 | ID | Gewicht | Befund | Fundstelle |
 |---|---|---|---|
-| A-1 | LOW | Die Plan-Tabelle führt den Review-Report [`docs/reviews/2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md`](2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md) nicht, der im Diff steht (`AGENTS.md` §3.10: jede berührte Datei, Abgleich nach der letzten Fix-Runde). Mit diesem Verification-Report kommt eine zweite Datei hinzu. Zeile nachziehen und den Abgleich bei der Closure wiederholen. | [`slice-v1-gates-tool-pruefung-zuerst.md`](../plan/planning/in-progress/slice-v1-gates-tool-pruefung-zuerst.md) Z. 46-57` |
-| A-2 | LOW | Risiko 1 trägt einen überholten Ausgang („offen; der Implementer wählt …“), obwohl die Wahl getroffen ist (Zustandsmarker mit Ablaufpunkt, §3.10). Bei der Closure schließen (siehe Tabelle oben). | [Slice-Plan Z. 76](../plan/planning/in-progress/slice-v1-gates-tool-pruefung-zuerst.md) |
+| A-1 | LOW | Die Plan-Tabelle führt den Review-Report [`docs/reviews/2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md`](2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md) nicht, der im Diff steht (`AGENTS.md` §3.10: jede berührte Datei, Abgleich nach der letzten Fix-Runde). Mit diesem Verification-Report kommt eine zweite Datei hinzu. Zeile nachziehen und den Abgleich bei der Closure wiederholen. | [`slice-v1-gates-tool-pruefung-zuerst.md`](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md) Z. 46-57` |
+| A-2 | LOW | Risiko 1 trägt einen überholten Ausgang („offen; der Implementer wählt …“), obwohl die Wahl getroffen ist (Zustandsmarker mit Ablaufpunkt, §3.10). Bei der Closure schließen (siehe Tabelle oben). | [Slice-Plan Z. 76](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md) |
 | A-3 | INFO | Der Marker „wartet auf Verifikation“ in `open/README.md` läuft mit diesem Report ab; bei der Closure auf den Ist-Stand setzen oder die Zeile gemäß Lifecycle behandeln. | `docs/plan/planning/open/README.md:23` |
-| H-1 | INFO | DoD-Wortlaut „`make -n gates` zeigt `tool-pruefung` als ersten Check“ ist per Hand bestätigt; der Sensor liest bewusst die Datenbank (`make -pn`), nicht die `-n`-Ausgabe. Kein Mangel, die Wahl ist durch Risiko 1 gedeckt. | [Slice-Plan Z. 35](../plan/planning/in-progress/slice-v1-gates-tool-pruefung-zuerst.md) |
+| H-1 | INFO | DoD-Wortlaut „`make -n gates` zeigt `tool-pruefung` als ersten Check“ ist per Hand bestätigt; der Sensor liest bewusst die Datenbank (`make -pn`), nicht die `-n`-Ausgabe. Kein Mangel, die Wahl ist durch Risiko 1 gedeckt. | [Slice-Plan Z. 35](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md) |
 | H-2 | INFO (Vorbefund) | `tools/harness/tool-pruefung.sh` ist `100644` und fehlt in der Ausnahmeliste von [`MR-012`](../../harness/conventions/MR-012-ai-harness-init-werkzeug-des-repos.md); `docs/maintainer/quality.md:83` listet `tool-pruefung` nicht. Nicht Gegenstand dieses Slice; als Beobachtung zu führen, falls die Closure sie aufnimmt. | `tools/harness/tool-pruefung.sh`, `docs/maintainer/quality.md:83` |
 
 ## Urteil
