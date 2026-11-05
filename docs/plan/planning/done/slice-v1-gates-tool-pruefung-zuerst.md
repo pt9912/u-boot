@@ -54,7 +54,7 @@ Pflichten der Closure (zählen nicht mit):
 | `docs/plan/planning/in-progress/roadmap.md` | update | Sektion „Offene Wellen“ nennt den Slice statt des Ruhe-Markers (Drift-Befund `planning-drift` von `docs-check`); bei der Closure kehrt der Ruhe-Marker zurück |
 | `README.md`, `README.de.md`, `harness/README.md` | unverändert | gelesen: Zeilen mit `make gates` führen die Gates als Menge mit `+` und nennen keine Reihenfolge (`README.md:281`, `README.de.md:287`, `harness/README.md:72`) |
 | `docs/plan/planning/open/README.md` | update | Zeile des Slice (Zustand `in-progress/`, kein Chronik-Satz) |
-| `docs/plan/planning/next/slice-v1-devcontainer-homebrew-pakete.md` | neu | anderer Slice, im selben Anlege-Commit `9182d4bd`; nicht Gegenstand dieses Slice |
+| `docs/plan/planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md` | neu | anderer Slice, im selben Anlege-Commit `9182d4bd`; nicht Gegenstand dieses Slice |
 | `docs/plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md` | neu / update | dieser Plan selbst (angelegt in `open/`, per `make slice-mv` hierher) |
 | `harness/README.md`, `harness/conventions.md`, `harness/conventions/MR-012-ai-harness-init-werkzeug-des-repos.md` | update | Review F-5: Zeile `make tool-pruefung` nennt den Sensor; die zwei neuen Skripte stehen als repo-geführte Ausnahme in `tools/harness/` |
 | `repo.mk`, `Makefile` | unverändert | gelesen: `repo.mk:254` hängt `lint test coverage-gate` an, `repo.mk:256` bindet `tools/mk/*.mk` ein; die Reihenfolge ergibt sich allein aus der Position der Anhängestelle |

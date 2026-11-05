@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-gates-tool-pruefung-zuerst — 2026-11-05
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
-**Gegenstand:** [`slice-v1-gates-tool-pruefung-zuerst`](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md) — Commit-Range `d28b3548..4a4cbd2a`. Code-Commits `6c4edaa9` (Reihenfolge), `36138efc` (Sensor, Wächter-Test), Review-Fix-Runde `3ef9d47b`; Abgleichstand **nach der letzten Fix-Runde = `4a4cbd2a`** (= Repo-Tip, Arbeitsbaum sauber). Die Move-Commits `7fc612f9`, `7f7b9ba9` sind Lifecycle-Bewegungen. Der Anlege-Commit `9182d4bd` und `4a4cbd2a` tragen zusätzlich den anderen Slice [`slice-v1-devcontainer-homebrew-pakete`](../plan/planning/next/slice-v1-devcontainer-homebrew-pakete.md); er ist nicht Gegenstand.
+**Gegenstand:** [`slice-v1-gates-tool-pruefung-zuerst`](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md) — Commit-Range `d28b3548..4a4cbd2a`. Code-Commits `6c4edaa9` (Reihenfolge), `36138efc` (Sensor, Wächter-Test), Review-Fix-Runde `3ef9d47b`; Abgleichstand **nach der letzten Fix-Runde = `4a4cbd2a`** (= Repo-Tip, Arbeitsbaum sauber). Die Move-Commits `7fc612f9`, `7f7b9ba9` sind Lifecycle-Bewegungen. Der Anlege-Commit `9182d4bd` und `4a4cbd2a` tragen zusätzlich den anderen Slice [`slice-v1-devcontainer-homebrew-pakete`](../plan/planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md); er ist nicht Gegenstand.
 
 **Eingangs-Kontext:**
 
@@ -50,7 +50,7 @@ Plan-vs-Code (§3 gegen `git diff --stat d28b3548..4a4cbd2a`, Stand nach der let
 | `tools/harness/gate-reihenfolge-test.sh` (neu, 48) | Z. 50 | deckt |
 | `docs/plan/planning/in-progress/roadmap.md` (±4) | Z. 51 | deckt |
 | `docs/plan/planning/open/README.md` (+2) | Z. 53 | deckt |
-| [`next/slice-v1-devcontainer-homebrew-pakete.md`](../plan/planning/next/slice-v1-devcontainer-homebrew-pakete.md) (neu) | Z. 54 | deckt (anderer Slice) |
+| [`in-progress/slice-v1-devcontainer-homebrew-pakete.md`](../plan/planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md) (neu) | Z. 54 | deckt (anderer Slice) |
 | [`done/slice-v1-gates-tool-pruefung-zuerst.md`](../plan/planning/done/slice-v1-gates-tool-pruefung-zuerst.md) (neu) | Z. 55 | deckt |
 | `harness/README.md`, `harness/conventions.md`, `MR-012` (je ±1) | Z. 56 | deckt |
 | [`docs/reviews/2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md`](2026-11-05-slice-v1-gates-tool-pruefung-zuerst.md) (neu, 67) | **keine Zeile** | **Abweichung A-1** |
