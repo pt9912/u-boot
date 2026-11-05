@@ -2,8 +2,8 @@
 # gate-reihenfolge-test — Waechter-Test fuer gate-reihenfolge.sh.
 #
 # Der Grundzustand (Kopie der Make-Dateien dieses Repos) muss gruen sein; die
-# Mutation (tool-pruefung per += ans Ende der Liste gehaengt, wie vor der Zusage
-# in tools/mk/tool-pruefung.mk) muss das Skript rot faerben und tool-pruefung
+# Mutation (tool-pruefung per += ans Ende der Liste gehaengt, die Form, die die Zusage
+# in tools/mk/tool-pruefung.mk ausschliesst) muss das Skript rot faerben und tool-pruefung
 # nennen. Ein Fall, der nicht greift, bricht den Test.
 #
 # Kein Docker, kein Netz: bash + make.

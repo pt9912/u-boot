@@ -3,7 +3,7 @@
 - **Datum:** 2026-10-16
 - **Geltungsbereich:** [`Makefile`](../../Makefile), [`repo.mk`](../../repo.mk),
   [`d-check.mk`](../../d-check.mk), `harness/mk/`, `tools/harness/` (außer
-  `fetch-baseline-cache.sh`, `ablage-pruefung.sh` und `ablage-pruefung-test.sh`), `.claude/settings.json`, `.claude/hooks/`,
+  `fetch-baseline-cache.sh`, `ablage-pruefung.sh`, `ablage-pruefung-test.sh`, `gate-reihenfolge.sh` und `gate-reihenfolge-test.sh`), `.claude/settings.json`, `.claude/hooks/`,
   [`harness/mk/ai-harness-init.md`](../mk/ai-harness-init.md),
   [`.d-check.yml`](../../.d-check.yml) (`targets`), [`harness/README.md`](../README.md) §Sensors.
 - **Ersetzt-Baseline-Regel:** [`grundlagen-harness-dateien.md` §harness/README.md als Einstiegspunkt](../../.harness/baseline/v6.18.1/regelwerk/grundlagen-harness-dateien.md#harnessreadmemd-als-einstiegspunkt)

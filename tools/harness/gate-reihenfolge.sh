@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # gate-reihenfolge — pinnt die Zusage aus tools/mk/tool-pruefung.mk: in der
-# Prerequisite-Liste von record-gates steht tool-pruefung an erster Stelle, der
-# Nachweis record-gates selbst haengt an allen Checks. Gelesen wird die Liste aus
+# Prerequisite-Liste von record-gates steht tool-pruefung an erster Stelle; nur
+# diese Stelle wird geprueft. Gelesen wird die Liste aus
 # der Regel-Datenbank von make (make -pn), nicht der Text einer Rezeptzeile.
 #
 # Aufruf: tools/harness/gate-reihenfolge.sh   (Exit 0 gruen, 1 bei Abweichung)
