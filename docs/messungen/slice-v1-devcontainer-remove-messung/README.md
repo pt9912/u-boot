@@ -2,7 +2,7 @@
 
 | Dokument    | Messprotokoll |
 | ----------- | ------------- |
-| Auslösender Vorgang | [`slice-v1-devcontainer-remove-messung`](../../plan/planning/in-progress/slice-v1-devcontainer-remove-messung.md) (erster von vier Slices zu `devcontainer remove`; Grundlage: [`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Volume-Namen je Instanz: [`ADR-0015`](../../plan/adr/0015-sandbox-volumes-pro-instanz.md)) |
+| Auslösender Vorgang | [`slice-v1-devcontainer-remove-messung`](../../plan/planning/done/slice-v1-devcontainer-remove-messung.md) (erster von vier Slices zu `devcontainer remove`; Grundlage: [`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Volume-Namen je Instanz: [`ADR-0015`](../../plan/adr/0015-sandbox-volumes-pro-instanz.md)) |
 | Gelesen am  | 2026-11-05 |
 | Skripte     | `tools/messung/slice-v1-devcontainer-remove-messung/` (`01-m1-volumes.sh`, `02-m2-entfernen.sh`, `03-m3-instanz.sh`, `04-m4-ueberleben.sh`, `04b-m5-down-ohne-instanz.sh`, `05-aufraeumen.sh`, gemeinsam `lib.sh`; `00-alles.sh` ruft 01 bis 04b) | <!-- d-check:ignore (Skriptpfad, keine Slice-Kennung) -->
 

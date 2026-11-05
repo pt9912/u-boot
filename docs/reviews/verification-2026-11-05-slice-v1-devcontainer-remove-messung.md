@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-devcontainer-remove-messung — 2026-11-05
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
-**Gegenstand:** [`slice-v1-devcontainer-remove-messung`](../plan/planning/in-progress/slice-v1-devcontainer-remove-messung.md) — Commit-Range `642aefe7..94f65083` (2 Commits: Messung `8861376d`, Fix-Runde nach dem Review `94f65083`; 19 Dateien, 2225 Einfügungen / 10 Löschungen). Abgleichstand **nach der letzten Fix-Runde = `94f65083`** (= Repo-Tip, Arbeitsbaum vor diesem Report sauber; `main` ist 7 Commits vor `origin/main`, nichts davon gepusht).
+**Gegenstand:** [`slice-v1-devcontainer-remove-messung`](../plan/planning/done/slice-v1-devcontainer-remove-messung.md) — Commit-Range `642aefe7..94f65083` (2 Commits: Messung `8861376d`, Fix-Runde nach dem Review `94f65083`; 19 Dateien, 2225 Einfügungen / 10 Löschungen). Abgleichstand **nach der letzten Fix-Runde = `94f65083`** (= Repo-Tip, Arbeitsbaum vor diesem Report sauber; `main` ist 7 Commits vor `origin/main`, nichts davon gepusht).
 
 **Eingangs-Kontext:**
 
@@ -16,7 +16,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-remove-messung`](../plan/planning/in-progress/slice-v1-devcontainer-remove-messung.md) (Messslice, kein Go-Code)
+- Slice: [`slice-v1-devcontainer-remove-messung`](../plan/planning/done/slice-v1-devcontainer-remove-messung.md) (Messslice, kein Go-Code)
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`ADR-0015`](../plan/adr/0015-sandbox-volumes-pro-instanz.md)
 - Artefakte: Messskripte, Messprotokoll mit Rohdaten (M1 bis M4 laut DoD, M5 als Zusatz der Fix-Runde), Zeile im Bestand [`docs/messungen/README.md`](../messungen/README.md)
 
