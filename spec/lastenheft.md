@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.35.0                                                             |
+| Version          | 0.36.0                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -537,6 +537,14 @@ Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelte
 - Die Datei gehört in die `.gitignore` des Projekts; `u-boot init` trägt sie dort ein, die Beispieldatei bleibt getrackt. Für ein bestehendes Projekt schreibt `generate devcontainer` die `.gitignore` nicht. `u-boot doctor` weist mit `warn` darauf hin, wenn die Datei fehlt.
 - Format, gemessen am 2026-11-04 mit Docker Engine 29.9.3 (`linux/amd64`, verschachtelt, ein Lauf je Fall): Zeilen `NAME=WERT` und Kommentarzeilen mit `#`; Anführungszeichen sind Teil des Werts; ein Präfix `export` und eine fehlende Datei lassen den Start der Engine mit Exit-Code `125` scheitern; ein mit `-e` gesetzter Wert gewinnt gegen die Datei; ein relativer Pfad wird gegen das Arbeitsverzeichnis des Clients aufgelöst, deshalb steht der absolute Pfad über `${localWorkspaceFolder}` in der Konfiguration.
 - **Zugesagt** ist die erzeugte Konfiguration und die Anlage der Dateien, soweit Tests es belegen. Der Start über `u-boot devcontainer up` gehört zur Zusage-Menge von [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Linux-Host `amd64`, lokale Engine) und gilt nur, soweit ein Test mit Build-Tag `docker` belegt, dass eine Variable der Datei im gestarteten Container gesetzt ist. **Nicht zugesagt:** andere Engines und Hosts als die Zusage-Menge, die Reihenfolge gegen `remoteEnv` und `containerEnv`, Dateien mit `CRLF` und mehrzeilige Werte sowie der Start über den Editor (ein Editor-Lauf ist nicht automatisierbar, also ohne Test).
+
+### LH-FA-DEV-013 – Homebrew-Formeln im Devcontainer
+
+*Priorität: V2.* Das Produkt soll Homebrew-Formeln, die der Benutzer in der Projektkonfiguration als Liste führt, im erzeugten Devcontainer-Image installieren, ohne dass `u-boot` die Werkzeuge einzeln kennen muss.
+
+- Ein Eintrag der Liste ist eine Formel oder eine Formel aus einem Tap (`<user>/<tap>/<formel>`).
+- Ein Tap ist eine externe Quelle ([`LH-NFA-SEC-004`](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)): Eine Formel aus einem Tap wird nur nach ausdrücklicher Freigabe des Benutzers installiert; `--yes` ersetzt sie nicht. Ohne Freigabe endet `u-boot generate devcontainer` mit einem fachlichen Fehler (Exit-Code `10`), ehe etwas geschrieben wird.
+- Die Formeln sind nicht gepinnt; `u-boot` weist das beim Erzeugen aus.
 
 ---
 
@@ -1647,6 +1655,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.33.0 | 2026-11-03 | [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features): die Katalog-Einträge `cpp` und `postgres-client` entfallen (ihre Katalogquellen existieren nicht — Messung der Registry- und Upstream-Lesung im Messprotokoll des Repos, gelesen 2026-11-03), die Beispiele-Zeile nennt „PostgreSQL Client“ nicht mehr; eine externe Quell-Angabe, deren Form die Dev-Container-CLI nicht verarbeitet (gemessen: `oci://…:<tag>` und `https://…:<tag>` unverarbeitbar, Registry-Tarball-Form offen), weist die Erzeugung je Exit-Code `10` ab samt Abhilfe in der Meldung, `config set …source` wendet dieselbe Prüfung an ([`LH-FA-CLI-006`](#lh-fa-cli-006--exit-codes)). | Freigabe des Projektinhabers 2026-11-03 (Wortlaut wie vorgelegt, CR der Katalogquellen) |
 | 0.34.0 | 2026-11-03 | [`LH-FA-DEV-011`](#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette): Pin-Inventur — die `go`-Direktive der `go.mod` ist der fünfte Ort der Pin-Kopplung für die zwei Go-Schlüssel (Direktive auf den Pin gehoben, jede Hebung zieht sie fortan nach); Shell-Werkzeuge des Bau-Verlaufs tragen keine Einzel-Pins (Basis-Image-Gruppe), GNU make trägt eine Mindest-Version am Kopf der Makefile mit ab-brechendem Guard (Grenze zur laufenden Version); ein `pinsync`-Wächter prüft die Gleichheit je benannten Pin-Gruppe beim Gatter-Lauf (Gleichheit, keine Aktualität). | Freigabe des Projektinhabers 2026-11-03 (Wortlaut wie vorgelegt samt der GNU-make-Erweiterung, CR der Pin-Inventur) |
 | 0.35.0 | 2026-11-04 | [`LH-FA-DEV-012`](#lh-fa-dev-012--umgebungsdatei-des-devcontainers): neue Anforderung (Umgebungsdatei des Devcontainers `.devcontainer/devcontainer.env` als `--env-file`, Anlage der Datei und einer Vorlage durch `generate devcontainer`, Format nach Messung, Zusage für die erzeugte Konfiguration und, soweit ein Docker-Test es belegt, den Start über `u-boot devcontainer up`); [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) und [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten): die Zusage „Zugangsdaten stehen in keiner erzeugten Datei“ gilt für die von `u-boot` erzeugten Dateien, ausgenommen die benutzergeführte Datei. | Freigabe des Projektinhabers 2026-11-04 (Auftrag „bitte alle … umsetzen“ nach Vorlage des Vorschlags mit den fünf Empfehlungen; Wortlaut mit einer Abweichung zum Start über `u-boot devcontainer up`, Anweisung des Projektinhabers 2026-11-04: das Lastenheft ist das Zielbild) |
+| 0.36.0 | 2026-11-05 | [`LH-FA-DEV-013`](#lh-fa-dev-013--homebrew-formeln-im-devcontainer): neue Anforderung (Homebrew-Formeln im Devcontainer: Liste in der Projektkonfiguration, Installation im erzeugten Image, Formeln aus einem Tap nur nach ausdrücklicher Freigabe, Formeln ungepinnt und beim Erzeugen ausgewiesen) | Entscheidung des Projektinhabers 2026-11-05; Wortlaut freigegeben wie vorgelegt |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
