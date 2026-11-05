@@ -1,10 +1,10 @@
 # ADR 0046: Homebrew-Formeln im Devcontainer — Katalogschlüssel `brew` als Dockerfile-Block aus gepinntem Commit, ungepinnte Formeln, Tap-Freigabeliste `devcontainer.brewTaps.allow`, Pin-Politik ohne Vier-Stellen-Kopplung
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-11-05
 
-**Autor:** pt9912 (Rolle Architect; Entscheidungen 1 und 2 des Projektinhabers 2026-11-05, Namen, Form und Pin-Stelle als Vorschlag des Architects zur Bestätigung)
+**Autor:** pt9912 (Rolle Architect; Entscheidungen 1 und 2 des Projektinhabers 2026-11-05, Namen, Form und Pin-Stelle vorgeschlagen vom Architect und vom Projektinhaber am 2026-11-05 bestätigt)
 
 **Bezug:** [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-011`](../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette), [`LH-FA-CONF-002`](../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`ADR-0020`](0020-drittanbieter-features-im-katalog.md), [`ADR-0024`](0024-ollama-im-sandbox-devcontainer.md), [`ADR-0035`](0035-forge-clis-gh-und-glab-im-devcontainer.md), [`ADR-0041`](0041-gepinnte-werkzeugkette-hybrid-versionierung.md), [`ADR-0016`](0016-homebrew-distribution-per-tap.md) (nur die Namensform eines Taps)
 
@@ -97,5 +97,6 @@ Ein Nutzer verlangt die Freigabe eines Taps in einem Aufruf (Flag, dann Folge-AD
 |---|---|---|
 | 2026-11-05 | Entscheidungen des Projektinhabers: neuer Schlüssel neben dem OCI-Feature `homebrew` mit Validierungsfehler bei gleichzeitiger Aktivierung; eigene Freigabeliste für Taps analog `featureSources.allow`, `--yes` ersetzt sie nicht | Vereinbarung mit dem Projektinhaber |
 | 2026-11-05 | Proposed (Schlüsselname `brew`, Liste `devcontainer.brewTaps.allow`, Commit-Pin im Template, Abgrenzung zur Pin-Politik der gepinnten Werkzeugkette: Vorschlag des Architects zur Bestätigung) | Rolle Architect |
+| 2026-11-05 | Accepted (Bestätigung von Schlüsselname, Freigabeliste und Commit-Pin durch den Projektinhaber, ohne Änderung) | Projektinhaber |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit `Supersedes ADR-0046`.
