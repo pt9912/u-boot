@@ -1,7 +1,7 @@
 # Verification-Report: slice-v1-devcontainer-homebrew-pakete — 2026-11-05
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
-**Gegenstand:** [`slice-v1-devcontainer-homebrew-pakete`](../plan/planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md) — Commit-Range `8b3a9644..9a908a83` (2 Commits: Umsetzung `de8f8c61`, Fix-Runde nach dem Review `9a908a83`; 52 Dateien, 4016 Einfügungen / 67 Löschungen). Abgleichstand **nach der letzten Fix-Runde = `9a908a83`** (= Repo-Tip, Arbeitsbaum vor diesem Report sauber).
+**Gegenstand:** [`slice-v1-devcontainer-homebrew-pakete`](../plan/planning/done/slice-v1-devcontainer-homebrew-pakete.md) — Commit-Range `8b3a9644..9a908a83` (2 Commits: Umsetzung `de8f8c61`, Fix-Runde nach dem Review `9a908a83`; 52 Dateien, 4016 Einfügungen / 67 Löschungen). Abgleichstand **nach der letzten Fix-Runde = `9a908a83`** (= Repo-Tip, Arbeitsbaum vor diesem Report sauber).
 
 **Eingangs-Kontext:**
 
@@ -17,7 +17,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-homebrew-pakete`](../plan/planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md)
+- Slice: [`slice-v1-devcontainer-homebrew-pakete`](../plan/planning/done/slice-v1-devcontainer-homebrew-pakete.md)
 - IDs: [`LH-FA-DEV-013`](../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`ADR-0046`](../plan/adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md), [`ADR-0047`](../plan/adr/0047-brew-formeln-lastenheft-stellen-und-verteilung-lastenheft-spezifikation.md)
 - Artefakte: Katalog-Schlüssel `brew` (Dockerfile-Block im Template, Domäne `brewpackage.go`, Anwendung `devcontainer_brew.go`, `config_brew.go`), Spezifikation [`SPEC-057`](../../spec/spezifikation.md#spec-057--homebrew-formeln-im-devcontainer-katalog-schlüssel-brew-pfade-freigabe-der-taps-konflikt-mit-homebrew-pin-meldungen-hosts-und-grenzen) und Zeigerzeilen, Benutzerhandbuch, CHANGELOG, Messprotokoll mit Skripten
 

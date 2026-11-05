@@ -2,7 +2,7 @@
 
 | Dokument    | Messprotokoll |
 | ----------- | ------------- |
-| Auslösender Vorgang | [`slice-v1-devcontainer-homebrew-pakete`](../../plan/planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md) (Umsetzung zu Lastenheft 0.36.1, [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), [`SPEC-057`](../../../spec/spezifikation.md#spec-057--homebrew-formeln-im-devcontainer-katalog-schlüssel-brew-pfade-freigabe-der-taps-konflikt-mit-homebrew-pin-meldungen-hosts-und-grenzen)); Messpunkte aus [`ADR-0046`](../../plan/adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) |
+| Auslösender Vorgang | [`slice-v1-devcontainer-homebrew-pakete`](../../plan/planning/done/slice-v1-devcontainer-homebrew-pakete.md) (Umsetzung zu Lastenheft 0.36.1, [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), [`SPEC-057`](../../../spec/spezifikation.md#spec-057--homebrew-formeln-im-devcontainer-katalog-schlüssel-brew-pfade-freigabe-der-taps-konflikt-mit-homebrew-pin-meldungen-hosts-und-grenzen)); Messpunkte aus [`ADR-0046`](../../plan/adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) |
 | Gelesen am  | 2026-11-05 |
 | Skripte     | `tools/messung/devcontainer-homebrew-pakete/` (`01-bau.sh`, `02-pfad.sh`, `03-aktualisierung.sh`, `04-egress.sh` mit `inner-04.sh`, `06-arm64.sh`, `07-fremd-tap.sh`, `08-login-shell.sh`, `05-aufraeumen.sh`, gemeinsam `lib.sh`; `00-alles.sh` ruft 01 bis 04 und 06 bis 08) |
 

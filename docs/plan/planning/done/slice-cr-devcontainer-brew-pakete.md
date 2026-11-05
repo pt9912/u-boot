@@ -5,10 +5,10 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle, Release-Zuordnung offen. Erster von zwei Slices: ihm folgt [`slice-v1-devcontainer-homebrew-pakete`](../in-progress/slice-v1-devcontainer-homebrew-pakete.md).
+**Welle:** ohne Welle, Release-Zuordnung offen. Erster von zwei Slices: ihm folgt [`slice-v1-devcontainer-homebrew-pakete`](../done/slice-v1-devcontainer-homebrew-pakete.md).
 
 **Bezug:** [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Anwendung: ein Tap ist eine externe Quelle; der Wortlaut dieser Anforderung ändert sie nicht), [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) und [`ADR-0047`](../../adr/0047-brew-formeln-lastenheft-stellen-und-verteilung-lastenheft-spezifikation.md) (Entscheidungsgrundlage, beide `Accepted`; die zweite hält fest, welche Lastenheft-Stellen tragen). Eine neue Anforderung im Abschnitt der Devcontainer-Anforderungen, nach [`LH-FA-DEV-012`](../../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers).
-Anlass: Projektinhaber, 2026-11-05 (Entscheidungen 1 und 2 im Slice [`slice-v1-devcontainer-homebrew-pakete`](../in-progress/slice-v1-devcontainer-homebrew-pakete.md), §6).
+Anlass: Projektinhaber, 2026-11-05 (Entscheidungen 1 und 2 im Slice [`slice-v1-devcontainer-homebrew-pakete`](../done/slice-v1-devcontainer-homebrew-pakete.md), §6).
 
 **Berührte Spec-Stellen:** `lastenheft.md`: eine neue Anforderung nach [`LH-FA-DEV-012`](../../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers) (Kennung [`LH-FA-DEV-013`](../../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), vergeben bei der Übernahme), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt dieser Slice nicht; Schlüsselnamen, Konfigurationspfade, das Verfahren der Tap-Freigabe, die Konflikt-Regel mit dem Katalog-Feature `homebrew` sowie Bau-, Plattform- und Messgrenzen werden im Umsetzungs-Slice in der Spezifikation festgelegt.
 
@@ -26,7 +26,7 @@ Ausgangslage (gelesen im Bericht des Architects, Fundstellen in [`ADR-0046`](../
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Spezifikation und Code** — Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../in-progress/slice-v1-devcontainer-homebrew-pakete.md); die Spezifikation setzt den freigegebenen Vertrag voraus.
+- **Spezifikation und Code** — Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../done/slice-v1-devcontainer-homebrew-pakete.md); die Spezifikation setzt den freigegebenen Vertrag voraus.
 - **Pin-Zusage für Formeln** — Homebrew pinnt Formeln nicht verlässlich; der Wortlaut sagt „ungepinnt“, nicht mehr.
 - **Plattform-, Bau- und Messgrenzen der Zusage** — keine Lastenheft-Aussage; sie werden im Umsetzungs-Slice in der Spezifikation und in den Tests festgelegt, mit ihrer Messgrundlage.
 
@@ -48,7 +48,7 @@ Pflichten der Closure (zählen nicht mit):
 |---|---|---|
 | `docs/plan/cr/cr-vorschlag-brew-pakete.md` | update | Vorschlags-Datei nach `cr-vorschlag.template.md`: Freigabe, Übernahme, Abweichungen (bleibt dauerhaft im CR-Ordner) |
 | `spec/lastenheft.md` | update | die neue Anforderung, Versionsfeld, §16 Historie |
-| `docs/plan/planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md` | update | Bezug, Doku-Pflicht und Test-Anker auf die neue Anforderung (Review F-3) |
+| `docs/plan/planning/done/slice-v1-devcontainer-homebrew-pakete.md` | update | Bezug, Doku-Pflicht und Test-Anker auf die neue Anforderung (Review F-3) |
 | `docs/plan/planning/done/slice-cr-devcontainer-brew-pakete.md` | neu / update | dieser Plan selbst |
 | `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | update | Zeilen des Slice, Zustandsmarker |
 | `docs/reviews/2026-11-05-slice-cr-devcontainer-brew-pakete.md` | neu | Review-Report |
@@ -82,7 +82,7 @@ DoD vollständig, Wortlaut im Lastenheft, `make gates` grün, Reports liegen vor
 - **Was ging anders als geplant:** Der erste Vorschlag trug fünf Stellen mit Schlüsselnamen, Verfahren und einer Bau-Zusage; der Projektinhaber nahm sie zurück (nicht Anforderungsebene). Der Satz zum Tap trug einen Querverweis auf die Ausnahme für Paketmanager-Pakete, der sich gegen sie lesen ließ (Review F-2); er ist gestrichen (Lastenheft `0.36.1`), die Auslegung bleibt in [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) und [`ADR-0047`](../../adr/0047-brew-formeln-lastenheft-stellen-und-verteilung-lastenheft-spezifikation.md). Die Plan-Tabelle und die Zustandsmarker waren mehrfach unvollständig oder veraltet (Review F-1, F-4, F-5; Verification V-1, V-2, V-5, V-6).
 - **Steering-Loop-Eintrag:** `BEO-DOK/plan-aussage-ueber-code` (Rückfall nach der Verkörperung in `AGENTS.md` §3.10), `BEO-DOK/vertragsaenderung-nach-review` (Wortlaut nach dem Review geändert, ohne Nachlauf-Review) und `BEO-DOK/spec-bedingung-ohne-code-entsprechung` (Bedingungen ohne Testzuordnung) ergänzt; keine weitere Schärfung entschieden.
 - **Beobachtungs-Register (`../observations/`):** je `evidence/slice-cr-devcontainer-brew-pakete.md` in den drei genannten Verzeichnissen ergänzt.
-- **Folge-Slices:** [`slice-v1-devcontainer-homebrew-pakete`](../in-progress/slice-v1-devcontainer-homebrew-pakete.md) (liegt in `next/`, Start nach dieser Closure).
+- **Folge-Slices:** [`slice-v1-devcontainer-homebrew-pakete`](../done/slice-v1-devcontainer-homebrew-pakete.md) (liegt in `next/`, Start nach dieser Closure).
 - **Risiken aus §6:** alle mit Ausgang (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung

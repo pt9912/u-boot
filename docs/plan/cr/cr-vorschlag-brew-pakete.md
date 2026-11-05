@@ -2,7 +2,7 @@
 
 **Status:** freigegeben wie vorgelegt (Projektinhaber, 2026-11-05); F1 Priorität `V2` und F2 Lastenheft-Version `0.36.0` wie vorgeschlagen. Übernommen ins Lastenheft `0.36.0` (Commit acbd0cf4).
 
-**Gegenstand:** die Lieferung zur DoD-Zeile 1 des CR-Slices [`slice-cr-devcontainer-brew-pakete`](../planning/done/slice-cr-devcontainer-brew-pakete.md) (Lastenheft-Wortlaut); Umsetzung im Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../planning/in-progress/slice-v1-devcontainer-homebrew-pakete.md).
+**Gegenstand:** die Lieferung zur DoD-Zeile 1 des CR-Slices [`slice-cr-devcontainer-brew-pakete`](../planning/done/slice-cr-devcontainer-brew-pakete.md) (Lastenheft-Wortlaut); Umsetzung im Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../planning/done/slice-v1-devcontainer-homebrew-pakete.md).
 
 **Grundlage:** die zwei Entscheidungen des Projektinhabers vom 2026-11-05 (Homebrew-Formeln als frei wählbare Liste im Devcontainer-Image; Formeln aus einem Tap nur mit ausdrücklicher Freigabe) und [`ADR-0046`](../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (`Accepted`). Das Lastenheft nimmt nur die Anforderung auf. Schlüsselnamen, Pfade der Konfiguration, das Verfahren der Freigabe, die Pin-Stufe von Homebrew sowie Bau-, Plattform- und Messgrenzen der Zusage gehören in die Spezifikation und in die Tests des Umsetzungs-Slices.
 
