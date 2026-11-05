@@ -30,10 +30,10 @@ liefert `rohdaten-aufraeumen.txt` (Reste mit dem Präfix: 0). Nicht entfernt wer
 weil ein Image dieses Namens fremd sein kann.
 
 **Läufe und ihre Herkunft.** Die Rohdaten `rohdaten-m1.txt` bis `rohdaten-m5.txt` und `rohdaten-aufraeumen.txt` stammen aus **einem** Lauf der archivierten Fassung der Skripte
-(`00-alles.sh`, danach `05-aufraeumen.sh`; Stempel in den Dateien, 2026-11-05 13:25 bis 13:29 UTC, Build-Cache warm). Gegen die im Commit `8861376d` archivierten Rohdaten von M1 bis M4
+(`00-alles.sh`, danach `05-aufraeumen.sh`; Stempel in den Dateien, 2026-11-05 13:25 bis 13:29 UTC; der Zustand des Build-Caches ist nicht festgehalten). Gegen die im Commit `8861376d` archivierten Rohdaten von M1 bis M4
 (Lauf der in `8861376d` archivierten Skripte, die weder Inventurzeilen noch den Label-Schlüssel in M3 schrieben) sind die Zeilen `AUSSAGE` verglichen (52-stellige Namensenden gleichgesetzt, `diff`):
 gleich, bis auf die Zeile zum Label-Schlüssel in M3, die es vorher nicht gab. Ältere Läufe (die Vorfassungen von M2 bis M4 vor dem ersten Commit) sind nicht archiviert; ein Vergleich mit ihnen
-ist nicht prüfbar, und das Protokoll stützt sich auf keine ihrer Zeilen. `rohdaten-m1-erster-lauf.txt` ist die Ausgabe des ersten Laufs von M1 (2026-11-05 12:50 UTC, Dauern mit neu gebauten Images)
+ist nicht prüfbar, und das Protokoll stützt sich auf keine ihrer Zeilen. `rohdaten-m1-erster-lauf.txt` ist die Ausgabe des ersten Laufs von M1 (2026-11-05 12:50 UTC)
 und stammt aus einer Skriptfassung, die **nicht** archiviert ist (sie schrieb die Kopfzeilen `engine:` und `hilfs-image von …` noch nicht); ihre Zeilen `AUSSAGE` sind mit denen von `rohdaten-m1.txt`
 verglichen und gleich (`diff` leer, gleiche Gleichsetzung der Namensenden). Diese Datei trägt die Dauern des ersten Laufs (siehe M1) und sonst nichts, was das Protokoll zählt.
 
@@ -57,10 +57,10 @@ verglichen und gleich (`diff` leer, gleiche Gleichsetzung der Namensenden). Dies
 
 | Frage | Befund (Messung) | Rohdaten |
 |---|---|---|
-| M1 | Alle Volumes eines Containers von `devcontainer up` stehen vollständig in `Mounts` von `docker inspect` (sieben Varianten, Menge gleich der Menge, die `up` in der Engine neu angelegt hat). Das Standardprofil hält keins. Die Volumes tragen keine Labels außer dem Marker anonymer Volumes; weder Labels noch Umgebung des Containers nennen die `devcontainerId`. | `rohdaten-m1*.txt` |
+| M1 | Alle Volumes eines Containers von `devcontainer up` stehen vollständig in `Mounts` von `docker inspect` (sieben Varianten, Menge gleich der Menge, die `up` in der Engine neu angelegt hat). Das Standardprofil ohne Katalog-Feature hält keins. Die Volumes tragen keine Labels außer dem Marker anonymer Volumes; das aufgelöste Namensende der `devcontainerId` steht weder in `Config.Labels` noch in der Umgebung des Containers (Suche). | `rohdaten-m1*.txt` |
 | M2 | `docker rm` eines laufenden Containers scheitert (Exit-Code 1), mit `-f` gelingt es; ein benanntes Volume bleibt stehen. `docker volume rm` eines Volumes, das ein weiterer Container hält (laufend oder gestoppt), scheitert (Exit-Code 1, auch mit `-f`); das Volume und sein Inhalt bleiben. Anonyme Volumes entfernt nur `docker rm -v`. | `rohdaten-m2.txt` |
-| M3 | Jeder Container (mit und ohne Instanz) hat im Sandbox-Profil eigene Volumes; das Entfernen von Container und Volumes einer Instanz, bestimmt aus deren `Mounts`, lässt die anderen unberührt. Im Standardprofil teilen sich die Container den Bind-Mount des Projektordners. | `rohdaten-m3.txt` |
-| M4 | `docker rm -f -v` entfernt **kein** benanntes Volume: Workspace-, Docker-Speicher- und Ollama-Volume bleiben, ein neuer Container hängt sie unter denselben Namen ein, der Inhalt ist da. Nach dem Entfernen des Containers unterscheidet nur noch der Name die Volumes. | `rohdaten-m4.txt` |
+| M3 | Jeder Container (mit und ohne Instanz) hat im Sandbox-Profil eigene Volumes; das Entfernen von Container und Volumes einer Instanz, bestimmt aus deren `Mounts`, lässt die anderen unberührt. Im Standardprofil ohne Katalog-Feature teilen sich der Container ohne Instanz und eine Instanz den Bind-Mount des Projektordners. | `rohdaten-m3.txt` |
+| M4 | `docker rm -f -v` entfernt **kein** benanntes Volume: Workspace-, Docker-Speicher- und Ollama-Volume bleiben, ein neuer Container hängt sie unter denselben Namen ein, die Markerdateien sind da. Nach dem Entfernen des Containers unterscheidet nur noch der Name die Volumes. | `rohdaten-m4.txt` |
 | M5 | `down` ohne `--instance` stoppt nur den Container ohne Instanz; gibt es im Projekt nur Container von Instanzen (laufend oder gestoppt), endet es mit Exit-Code `10` und stoppt nichts; ohne jeden Container endet es mit Exit-Code `0`. `up` ohne `--instance` endet bei nur Instanz-Containern ebenfalls mit Exit-Code `10`. | `rohdaten-m5.txt` |
 
 ## M1 — Volumes des Containers und ihre Erkennung (`rohdaten-m1.txt`, `rohdaten-m1-erster-lauf.txt`)
@@ -85,18 +85,17 @@ Menge, die `up` in der Engine neu angelegt hat (`mounts-vollstaendig`).
   Lauf liefert derselbe Projektordner dieselben Namen (`…-sbx-workspace-1gju3f8…` in M1, M2 und M3, dort der Container ohne Instanz); `rohdaten-m1-erster-lauf.txt` trägt für `sbx` andere Namen
   (`…-sbx-workspace-15kf574…`), der Messordner dieses Laufs ist nicht festgehalten.
 - **Labels:** `docker volume inspect` zeigt für die benannten Volumes `labels=null options=null`; das anonyme Volume trägt das Label
-  `com.docker.volume.anonymous`. Die Labels des Containers (`dev.containers.*`, `devcontainer.*`, `version`) enthalten das Namensende nicht, die Umgebung
-  des Containers auch nicht (`id-in-labels=nein id-in-umgebung=nein` in allen Varianten mit benannten Volumes). `Config.Volumes` des Containers
+  `com.docker.volume.anonymous`. Das Namensende kommt in der JSON-Darstellung von `Config.Labels` des Containers nicht vor und in seiner Umgebung auch nicht
+  (`id-in-labels=nein id-in-umgebung=nein` in allen Varianten mit benannten Volumes; die Rohdaten tragen das Ergebnis der Suche und die Namen der Labels
+  `dev.containers.*`, `devcontainer.*`, `version`, nicht ihre Werte). `Config.Volumes` des Containers
   nennt nur das `VOLUME` des Images (`anon`); das Basis-Image deklariert keins.
 - **Das Hilfsverfahren legt nichts nebenbei an:** In keiner Variante entstand ein Volume, das nicht in `Mounts` des Containers steht.
 - **Runtimes im verschachtelten Daemon:** `dock` und `full`: Statusdatei `daemon` `result=ok`, `docker info` im Container antwortet
   (Server 29.9.3). `pod`: Statusdatei `vfs` `result=ok`, `podman version 6.1.4`, `podman info` Exit-Code 0; ein Container im Podman wurde nicht gestartet.
-- **Dauer und Platz (Risiko des Slice):** `up` mit Bau des Images: im ersten Lauf (`rohdaten-m1-erster-lauf.txt`; Images dieser Projekte neu, Basis-Image lokal, Schichten teils im
-  Build-Cache) `std` 5 s, `sbx` 7 s, `dock` 10 s, `pod` 21 s, `oll` 46 s, `full` 48 s, `anon` 5 s; im Lauf der archivierten Fassung (Build-Cache warm) 4 bis 8 s je
+- **Dauer und Platz (Risiko des Slice):** Dauer von `up` (das Image wird bei Bedarf gebaut): im ersten Lauf (`rohdaten-m1-erster-lauf.txt`; ob die Images dieser Projekte und die Schichten im Build-Cache vorher in der Engine lagen, ist nicht festgehalten) `std` 5 s, `sbx` 7 s, `dock` 10 s, `pod` 21 s, `oll` 46 s, `full` 48 s, `anon` 5 s; im Lauf der archivierten Fassung (Cache-Zustand nicht festgehalten) 4 bis 8 s je
   Variante (`rohdaten-m1.txt`). Die Images (`docker images`, Größe wie angezeigt, je Projekt zwei Images, `vsc-…` und `vsc-…-uid`): 1,41 GB (`std`, `sbx`, `anon`),
   1,5 GB (`oll`), 1,54 GB (`pod`), 1,91 GB (`dock`), 2 GB (`full`); die Anzeige zählt gemeinsame Schichten je Image. Der Platzbedarf der Messung ist **nicht
-  belastbar gemessen**: Das Entfernen aller 14 Images änderte den freien Platz der Docker-Wurzel um −1.937.408 Byte (er sank; andere Last auf dem Host), weil der Build-Cache der Engine die Schichten hält
-  (`rohdaten-aufraeumen.txt`). Die Volumes sind klein (Workspace 6 B, Docker-Speicher 278,6 kB, Ollama 2,5 kB mit Schlüsselpaar, ohne Modell; `docker system df -v` in M4).
+  belastbar gemessen**: Das Entfernen aller 14 Images änderte den freien Platz der Docker-Wurzel um −1.937.408 Byte (er sank, `rohdaten-aufraeumen.txt`); die Ursache ist nicht gemessen. Vermutung, ungeprüft: andere Last auf dem Host oder Schichten, die der Build-Cache der Engine hält. Die Volumes sind klein (Workspace 6 B, Docker-Speicher 278,6 kB, Ollama 2,5 kB mit Schlüsselpaar, ohne Modell; `docker system df -v` in M4).
 
 ### Eingang für den CR (M1)
 
@@ -109,7 +108,7 @@ Menge, die `up` in der Engine neu angelegt hat (`mounts-vollstaendig`).
 - Im Sandbox-Profil hält er das Workspace-Volume, mit `nestedRuntime: docker` das Volume des Docker-Speichers, mit `nestedRuntime: podman` das
   Volume der Container, mit dem Feature `ollama` das Volume der Modelle (Namen wie im Code).
 - Ein Volume, das das Image mit `VOLUME` deklariert, ist anonym und steht ebenfalls in `Mounts`.
-- Weder die Labels des Containers noch die der benannten Volumes tragen die `devcontainerId` oder einen Verweis zwischen Container und Volume.
+- Das aufgelöste Namensende (die `devcontainerId`) steht in keiner Variante in `Config.Labels` oder in der Umgebung des Containers (Suche, `id-in-labels=nein`, `id-in-umgebung=nein`), und die benannten Volumes tragen keine Labels (`labels=null`).
 
 **Darf nicht tragen:**
 
@@ -117,6 +116,7 @@ Menge, die `up` in der Engine neu angelegt hat (`mounts-vollstaendig`).
 - Dass sich die Volume-Namen aus `${devcontainerId}` berechnen lassen: Das Verfahren der CLI ist weder gelesen noch gemessen.
 - Dass u-boot-Container keine anonymen Volumes haben: Gemessen sind die erzeugten Konfigurationen (keines); ein von Hand ergänztes `VOLUME` erzeugt eins
   (`anon`). Weitere Features des Katalogs außer `ollama`, Features aus externen Quellen, von Hand geschriebene `mounts` und `docker-cli` sind nicht gemessen.
+- Dass kein Label des Containers einen Verweis auf ein Volume trägt: Von den Labels des Containers sind die Namen archiviert, nicht die Werte (darunter `devcontainer.metadata`); gemessen ist nur, dass das aufgelöste Namensende fehlt.
 - Dass die Runtime im Container „funktioniert“: Gemessen sind die Statusdateien und `docker info`/`podman info`, kein Lauf von Containern darin.
 - Jede Aussage für andere Hosts und Engines (Docker Desktop, Colima, rootless, Podman als Host-Engine, entfernt, `arm64`, Windows).
 
@@ -195,7 +195,7 @@ nur `b`.
 gemeinsamen (`gemeinsame=0`). Das Entfernen von a und der drei Volumes aus deren `Mounts` lässt die drei Volumes von b stehen und b laufen. Der Inhalt
 der Volumes des Docker-Speichers und der Modelle ist hier nicht gegengeprüft (nur die Namen und das Entfernen).
 
-**Projekt `std` (Standardprofil):** der Container ohne Instanz und `--instance x` haben 0 Volumes und denselben Bind-Mount (`bind-quelle-gleich=ja`);
+**Projekt `std` (Standardprofil, ohne Katalog-Feature):** der Container ohne Instanz und `--instance x` haben 0 Volumes und denselben Bind-Mount (`bind-quelle-gleich=ja`);
 eine Datei, die `x` in den Workspace schreibt, steht im Projektordner des Hosts und im Container ohne Instanz; nach `docker rm -f -v` von `x` bleibt
 sie im Projektordner, der Container ohne Instanz läuft weiter.
 
@@ -209,7 +209,7 @@ sie im Projektordner, der Container ohne Instanz läuft weiter.
   Containers ohne Instanz nicht (gemessen: zwei Instanzen mit Docker-Speicher und Modellen, drei Container ohne diese).
 - Eine Instanz erkennt `u-boot` am Label `u-boot.instance` des Containers; der Container ohne Instanz trägt den Schlüssel in `Config.Labels` nicht (gemessen mit `docker inspect`;
   `docker ps` zeigt für ihn die leere Zeichenkette).
-- Im Standardprofil hat auch eine Instanz keine Volumes; das Entfernen ihres Containers lässt den Projektordner und seinen Inhalt unberührt.
+- Im Standardprofil ohne Katalog-Feature hat auch eine Instanz keine Volumes; das Entfernen ihres Containers lässt den Projektordner und seinen Inhalt unberührt (gemessen: der Container ohne Instanz und eine Instanz `x`).
 
 **Darf nicht tragen:**
 
@@ -218,34 +218,35 @@ sie im Projektordner, der Container ohne Instanz läuft weiter.
 - Isolation des Docker-Speichers oder der Modelle zwischen Instanzen (Namen verschieden, Inhalt nicht geprüft; [`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) sagt sie auch nicht zu).
 - Drei oder mehr gleichzeitige Instanzen im selben Projekt (gemessen: höchstens drei Container, davon zwei Instanzen).
 - Instanzen mit `nestedRuntime: podman` (nicht gemessen, nur ohne Instanz in M1).
+- Das Standardprofil mit Katalog-Features (nicht gemessen); die Einhängungen, die ein solches Feature mitbringt, sind unbekannt.
 
 ## M4 — Was das Entfernen des Containers übersteht (`rohdaten-m4.txt`)
 
 Projekt `full` (Sandbox, `nestedRuntime: docker`, `ollama`), ein Container ohne Instanz. In jedes der drei Volumes steht eine Markerdatei; im Ollama-Volume
-legt `ollama serve` beim Start das Schlüsselpaar `id_ed25519` und `id_ed25519.pub` sowie die Verzeichnisse `models` und `cache` an. Ein Modell
+listet `ls -la` nach `ollama --version` und `ollama serve` das Schlüsselpaar `id_ed25519` (387 B) und `id_ed25519.pub` (81 B), die Markerdatei und die Verzeichnisse `cache` (zwei Links) und `models` (drei Links); der Inhalt der beiden Verzeichnisse ist nicht gelistet, und welcher der beiden Befehle das Schlüsselpaar anlegt, ist nicht getrennt gemessen (Vermutung: `ollama serve`). Ein Modell
 wurde **nicht** geladen; die Markerdatei steht stellvertretend. Die Version `0.40.6` stammt aus `ollama --version`, einer Warnung des Clients (`Warning: client version is 0.40.6`; der Server war zu dem Zeitpunkt nicht gestartet); die Version des Servers steht in den Rohdaten nicht.
 
 - `docker rm -f -v <id>`: Exit-Code 0. Workspace-, Docker-Speicher- und Ollama-Volume sind alle **vorhanden** (`docker volume ls` zeigt sie als
-  `dangling=true`). Die Engine kennt zu den verwaisten Volumes nur Name, Treiber `local` und Anlagezeit (`labels=null options=null`); `docker system df -v`
+  `dangling=true`). Abgefragt wurden zu den verwaisten Volumes Labels, Optionen und Anlagezeit (`labels=null options=null created=…`); weitere Felder von `docker volume inspect` sind nicht archiviert. `docker system df -v`
   zeigt `links=0`.
 - `u-boot devcontainer up`: neuer Container (andere ID), dieselben drei Volume-Namen; die drei Markerdateien sind lesbar, und der öffentliche Schlüssel
   des Ollama-Volumes hat dieselbe Prüfsumme wie vorher.
 - **Unterscheidung nach dem Entfernen:** Allein über den Namen. Der Infix `-ollama-` trifft genau ein Volume; die drei Volumes tragen dasselbe
   52-stellige Ende (ein Container). Vor dem Entfernen unterscheidet das Ziel in `Mounts` (`/home/vscode/.ollama`).
 - **Auswahl über den Namen:** Wurden alle Volumes des Projekts außer dem mit dem Infix `-ollama-` entfernt (`docker volume rm`, Exit-Code 0), blieb das
-  Ollama-Volume stehen; ein neuer Container hängte es ein und las die Markerdatei, das Workspace-Volume war neu und leer.
+  Ollama-Volume stehen; ein neuer Container hängte es ein und las die Markerdatei, die Markerdatei des Workspace-Volumes fehlte (das Volume war zuvor entfernt worden und von `up` neu angelegt; geprüft ist nur diese Datei).
 
 ### Eingang für den CR (M4)
 
 **Darf tragen:**
 
 - Das Entfernen des Containers (auch `docker rm -f -v`) lässt **alle** benannten Volumes stehen, nicht nur das der Ollama-Modelle; ein folgendes `u-boot devcontainer up`
-  hängt sie unter denselben Namen wieder ein, der Inhalt ist da. `up --recreate` ist für das Workspace-Volume in M2 gemessen, nicht für die Volumes des Docker-Speichers
+  hängt sie unter denselben Namen wieder ein, die Markerdateien sind da. `up --recreate` ist für das Workspace-Volume in M2 gemessen, nicht für die Volumes des Docker-Speichers
   und der Modelle.
 - Das Volume des Ollama-Verzeichnisses (`-ollama-`, Ziel `/home/vscode/.ollama`) überlebt das Entfernen des Containers (auch `docker rm -f -v`); ein neuer Container
-  hängt es unter demselben Namen ein, und der öffentliche Schlüssel hat dieselbe Prüfsumme wie vorher. Gemessen ist der Inhalt: Markerdatei, Schlüsselpaar
-  `id_ed25519`/`id_ed25519.pub` und die leeren Verzeichnisse `models` und `cache`.
-- Nach dem Entfernen des Containers hat ein Volume weder Label noch Verweis auf seine Herkunft; die Unterscheidung (Workspace, Docker-Speicher, Modelle) trägt der
+  hängt es unter demselben Namen ein, und der öffentliche Schlüssel hat dieselbe Prüfsumme wie vorher. Gemessen sind Markerdatei und Schlüsselpaar
+  `id_ed25519`/`id_ed25519.pub`; die Verzeichnisse `models` (drei Links) und `cache` (zwei Links) stehen im Listing, ihr Inhalt wurde nicht gelistet.
+- Nach dem Entfernen des Containers trägt ein Volume in den abgefragten Feldern (Labels, Optionen) nichts, das auf seine Herkunft zeigt; die Unterscheidung (Workspace, Docker-Speicher, Modelle) trägt der
   Name (`-workspace-`, `-docker-`, `-ollama-`), die Zuordnung zu einem Container das gemeinsame 52-stellige Ende.
 - Verwaiste Volumes erscheinen in `docker volume ls --filter dangling=true`.
 
@@ -306,7 +307,7 @@ UBOOT=<pfad>/u-boot WORK=<messordner> tools/messung/slice-v1-devcontainer-remove
 
 Je Messung einzeln: `01-m1-volumes.sh`, `02-m2-entfernen.sh`, `03-m3-instanz.sh`, `04-m4-ueberleben.sh`, `04b-m5-down-ohne-instanz.sh` (je eine Rohdatei `rohdaten-m1.txt` bis
 `rohdaten-m5.txt`). Lesehilfe: Zeilen `AUSSAGE …` sind die stabilen Aussagen, die ein zweiter Lauf wiederholen muss; Dauern, Container-IDs und
-Zeitstempel streuen. Die Datei `rohdaten-m1-erster-lauf.txt` ist die Ausgabe des ersten Laufs von M1 (Dauern mit neu gebauten Images).
+Zeitstempel streuen. Die Datei `rohdaten-m1-erster-lauf.txt` ist die Ausgabe des ersten Laufs von M1.
 
 ## Grenzen
 
@@ -315,6 +316,6 @@ Zeitstempel streuen. Die Datei `rohdaten-m1-erster-lauf.txt` ist die Ausgabe des
 - Gemessen sind die von `u-boot` erzeugten Konfigurationen (Standard- und Sandbox-Profil) mit den Optionen `nestedRuntime` und dem Feature `ollama`; die übrigen
   Features des Katalogs, Features aus externen Quellen und von Hand geschriebene Konfigurationen sind nicht gemessen (Ausnahme: ein von Hand angehängtes
   `VOLUME` im Dockerfile).
-- Der Platzbedarf der Images ist nicht belastbar gemessen (Build-Cache); die Bauzeiten stehen mit der Einschränkung ihres Cache-Zustands in M1.
+- Der Platzbedarf der Images ist nicht belastbar gemessen (die Ursache der Platzdifferenz ist nicht gemessen); der Cache-Zustand der Bauzeiten ist nicht festgehalten (M1).
 - Ein Modell von Ollama wurde nicht geladen; das Netz diente dem Bau der Images.
 - Ob `docker volume prune`, `docker system prune` oder `docker compose down -v` anders wirken, ist nicht gemessen.

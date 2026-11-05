@@ -36,6 +36,8 @@ Ausgangslage (gelesen):
 4. **Volume der Ollama-Modelle:** Vorschlag: `--volumes` entfernt es mit, weil es zu diesem Container gehört; die Abfrage nennt es; Gegenposition: eigenes Flag (Messfrage M4).
 5. **`--instance <name>`:** wie bei `down`: ohne Flag wirkt der Befehl nur auf den Container ohne Instanz; gibt es nur Container von Instanzen, endet er mit Exit-Code `10` und dem Hinweis auf `--instance`.
 
+**Frage aus der Messung (keine Entscheidung; vor dem Wortlaut zu beantworten):** Welcher Container ist bei `remove` ohne `--instance` gemeint? Entscheidung 5 schlägt die Antwort von `down` vor. Die Messung [`slice-v1-devcontainer-remove-messung`](../in-progress/slice-v1-devcontainer-remove-messung.md) (M5) belegt für `down` und `up`: ohne `--instance` gilt nur der Container ohne Instanz; gibt es im Projekt nur Container von Instanzen (laufend, gestoppt oder gemischt), endet der Befehl mit Exit-Code `10` und dem Hinweis auf `--instance`. Sie belegt nichts für `remove`: Für eine zerstörerische Aktion kann der Wortlaut dieselbe Antwort wählen oder eine ausdrückliche Wahl vorschreiben.
+
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Spezifikation und Code** — Folge-Slices [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) und [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md); die Spezifikation setzt den freigegebenen Vertrag voraus.
