@@ -12,9 +12,9 @@
 
 **Alt:** `spec/lastenheft.md` Zeile 531: [`LH-FA-DEV-012`](../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers) ist die letzte Anforderung des Abschnitts; danach folgt die Trennlinie `---`. Eine Anforderung zu Homebrew-Formeln gibt es nicht.
 
-**Neu (Vorschlag):** eine neue Anforderung nach `LH-FA-DEV-012` (die Kennung vergibt die Übernahme, nächste freie: `LH-FA-DEV-013`): <!-- d-check:ignore (Kennung der neuen Anforderung, entsteht mit der Übernahme) -->
+**Neu (Vorschlag):** eine neue Anforderung nach [`LH-FA-DEV-012`](../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers) (Kennung [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), vergeben bei der Übernahme):
 
-> ### LH-FA-DEV-013 – Homebrew-Formeln im Devcontainer <!-- d-check:ignore (Kennung der neuen Anforderung, entsteht mit der Übernahme) -->
+> ### LH-FA-DEV-013 – Homebrew-Formeln im Devcontainer <!-- d-check:ignore (Zitat der Überschrift; die Definition steht im Lastenheft) -->
 >
 > *Priorität: V2.* Das Produkt soll Homebrew-Formeln, die der Benutzer in der Projektkonfiguration als Liste führt, im erzeugten Devcontainer-Image installieren, ohne dass `u-boot` die Werkzeuge einzeln kennen muss.
 >
@@ -30,15 +30,15 @@
 
 ## Nicht geändert
 
-- [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CONF-002`](../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) und [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte): Die Anforderung steht für sich. Katalogschlüssel, Konfigurationsschlüssel, die Freigabeliste für Taps und die Regel zur Kombination mit dem Katalog-Feature `homebrew` (Exit-Code 10 bei gleichzeitiger Aktivierung) stehen in der Spezifikation und präzisieren die neue Anforderung, ohne sie zu erweitern.
-- Bau, Betrieb, Plattformen und die Grenzen der Zusage: keine Lastenheft-Aussage. Sie stehen in der Spezifikation und in den Tests des Umsetzungs-Slices, mit ihrer Messgrundlage.
+- [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CONF-002`](../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) und [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte): Die Anforderung steht für sich. Katalogschlüssel, Konfigurationsschlüssel, die Freigabeliste für Taps und die Regel zur Kombination mit dem Katalog-Feature `homebrew` (Exit-Code 10 bei gleichzeitiger Aktivierung) werden im Umsetzungs-Slice in der Spezifikation festgelegt und präzisieren die neue Anforderung, ohne sie zu erweitern.
+- Bau, Betrieb, Plattformen und die Grenzen der Zusage: keine Lastenheft-Aussage. Sie werden im Umsetzungs-Slice in der Spezifikation und in den Tests festgelegt, mit ihrer Messgrundlage.
 - `devcontainer down`, `up --recreate` und das Community-Feature `homebrew`: unverändert.
 
 ---
 
 **Abweichungen der Übernahme je Stelle:** keine; der Wortlaut ist wortgleich übernommen (Kennung [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), Priorität `V2`, Version `0.36.0`), die Historie-Zeile trägt keinen Verweis auf Dateien unterhalb des Lastenhefts.
 
-**Offen zur Freigabe:**
+**Bei der Freigabe entschieden:**
 
 - **F1 — Priorität.** Vorschlag `V2` (wie [`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) und [`LH-FA-DEV-012`](../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers)). Gegenposition: `V1`.
 - **F2 — Version des Lastenhefts.** `0.36.0` ist der nächste freie Schritt der Lastenheft-Version (nicht die Release-Version); die Zahl vergibt die Übernahme.

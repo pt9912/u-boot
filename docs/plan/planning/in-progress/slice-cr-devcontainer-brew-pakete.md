@@ -32,8 +32,8 @@ Ausgangslage (gelesen im Bericht des Architects, Fundstellen in [`ADR-0046`](../
 
 ## 2. Definition of Done
 
-- [ ] **CR-Vorschlag und Freigabe:** `docs/plan/cr/cr-vorschlag-brew-pakete.md` (Form `cr-vorschlag.template.md`) trägt je Stelle Alt/Neu; der Projektinhaber gibt den Wortlaut frei und bestätigt [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (Schlüsselname, Listenpfad, Pin-Stufe).
-- [ ] **Übernahme:** `spec/lastenheft.md` trägt die neue Anforderung (Lastenheft-Version `0.36.0` oder die nächste freie, Historie-Zeile mit Datum); Abweichungen der Übernahme sind im CR-Vorschlag ausgewiesen.
+- [x] **CR-Vorschlag und Freigabe:** `docs/plan/cr/cr-vorschlag-brew-pakete.md` (Form `cr-vorschlag.template.md`) trägt je Stelle Alt/Neu; der Projektinhaber gibt den Wortlaut frei und bestätigt [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (Schlüsselname, Listenpfad, Pin-Stufe).
+- [x] **Übernahme:** `spec/lastenheft.md` trägt die neue Anforderung (Lastenheft-Version `0.36.0` oder die nächste freie, Historie-Zeile mit Datum); Abweichungen der Übernahme sind im CR-Vorschlag ausgewiesen.
 
 Pflichten der Closure (zählen nicht mit):
 
@@ -46,17 +46,20 @@ Pflichten der Closure (zählen nicht mit):
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `docs/plan/cr/cr-vorschlag-brew-pakete.md` | neu | Vorschlags-Datei nach `cr-vorschlag.template.md` (bleibt dauerhaft im CR-Ordner) |
+| `docs/plan/cr/cr-vorschlag-brew-pakete.md` | update | Vorschlags-Datei nach `cr-vorschlag.template.md`: Freigabe, Übernahme, Abweichungen (bleibt dauerhaft im CR-Ordner) |
 | `spec/lastenheft.md` | update | die neue Anforderung, Versionsfeld, §16 Historie |
+| `docs/plan/planning/next/slice-v1-devcontainer-homebrew-pakete.md` | update | Bezug, Doku-Pflicht und Test-Anker auf die neue Anforderung (Review F-3) |
+| `docs/plan/planning/in-progress/slice-cr-devcontainer-brew-pakete.md` | neu / update | dieser Plan selbst |
 | `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | update | Zeilen des Slice, Zustandsmarker |
+| `docs/reviews/2026-11-05-slice-cr-devcontainer-brew-pakete.md` | neu | Review-Report |
 
-Der Implementer liest `lastenheft.md` an den Stellen und ergänzt die Tabelle (`AGENTS.md` §3.10).
+Die Tabelle wird nach der letzten Fix-Runde gegen `git diff --stat` abgeglichen (`AGENTS.md` §3.10).
 
 ## 4. Trigger
 
 **Start** (`open` → `next` → `in-progress`): Projektinhaber priorisiert; `in-progress/` ist leer (WIP-Limit 1).
 
-**Rückführungen:** `in-progress` → `open`, solange die Freigabe des Projektinhabers aussteht.
+**Rückführungen:** `in-progress` → `open`, wenn Review oder Verifikation eine Änderung am Wortlaut verlangen, die der Projektinhaber erneut freigeben muss.
 
 ## 5. Closure-Trigger
 
