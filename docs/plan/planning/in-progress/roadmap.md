@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-11-04.
+**Status:** Aktiv. **Letzte Änderung:** 2026-11-05.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-Nichts in Arbeit.
+[`slice-v1-gates-tool-pruefung-zuerst`](slice-v1-gates-tool-pruefung-zuerst.md) liegt in `in-progress/` — `tool-pruefung` steht in `make gates` als erster Check ([`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)); wird ohne Welle umgesetzt.
 
 ## Nächste Wellen
 

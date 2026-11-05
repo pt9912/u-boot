@@ -14,8 +14,11 @@
 # tool-pruefung steht VOR allen anderen Checks der Liste: ein serieller Lauf
 # (ohne -j) prueft zuerst die Werkzeugkette, bevor lint, test und die uebrigen
 # Gates auf ihr laufen. Unter make -j ist die Reihenfolge der Checks nicht zugesagt.
+# gate-reihenfolge.sh pinnt die Zusage, gate-reihenfolge-test.sh ihre rote Probe.
 GATE_CHECKS := tool-pruefung $(GATE_CHECKS)
 
 .PHONY: tool-pruefung
 tool-pruefung: ## Installed tools of the running context match the pins of the inventory (LH-FA-DEV-011, ADR-0043).
 	bash tools/harness/tool-pruefung.sh
+	@bash tools/harness/gate-reihenfolge.sh
+	@bash tools/harness/gate-reihenfolge-test.sh

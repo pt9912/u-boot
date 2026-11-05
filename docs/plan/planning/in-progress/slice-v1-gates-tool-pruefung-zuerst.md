@@ -32,7 +32,7 @@ Ausgangslage (gelesen): `gates` hängt an `record-gates`, und `record-gates` an 
 
 ## 2. Definition of Done
 
-- [ ] **Reihenfolge:** `make -n gates` zeigt `tool-pruefung` als ersten Check, `record-gates` als letzten; ein Test oder Sensor pinnt das, damit die Zusage aus dem Kommentar in `tools/mk/tool-pruefung.mk` nicht still bricht (Form wählt der Implementer, Kandidat: ein Shell-Test unter `tools/harness/` neben `ablage-pruefung-test.sh`).
+- [x] **Reihenfolge:** `make -n gates` zeigt `tool-pruefung` als ersten Check, `record-gates` als letzten; ein Test oder Sensor pinnt das, damit die Zusage aus dem Kommentar in `tools/mk/tool-pruefung.mk` nicht still bricht (Form wählt der Implementer, Kandidat: ein Shell-Test unter `tools/harness/` neben `ablage-pruefung-test.sh`).
 
 Pflichten der Closure (zählen nicht mit):
 
@@ -45,8 +45,10 @@ Pflichten der Closure (zählen nicht mit):
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `tools/mk/tool-pruefung.mk` | update | `GATE_CHECKS := tool-pruefung $(GATE_CHECKS)` statt `+=`; Kommentar nennt die Zusage (nur serieller Lauf) — bereits im Arbeitsbaum, noch nicht committet |
-| Test/Sensor der Reihenfolge (Ort offen, Kandidat `tools/harness/`) | neu | pinnt `tool-pruefung` vor den übrigen Checks nach [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) |
+| `tools/mk/tool-pruefung.mk` | update | `GATE_CHECKS := tool-pruefung $(GATE_CHECKS)` statt `+=` (Commit `6c4edaa9`); Kommentar nennt die Zusage (nur serieller Lauf); das Rezept von `tool-pruefung` ruft Sensor und Wächter-Test auf |
+| `tools/harness/gate-reihenfolge.sh` | neu | Sensor: liest die Prerequisite-Liste von `record-gates` aus `make -pn gates` und verlangt `tool-pruefung` an erster Stelle ([`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette)) |
+| `tools/harness/gate-reihenfolge-test.sh` | neu | Wächter-Test: Grundzustand grün, Mutation (`+=`) rot; Form nach `ablage-pruefung-test.sh` |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Sektion „Offene Wellen“ nennt den Slice statt des Ruhe-Markers (Drift-Befund `planning-drift` von `docs-check`); bei der Closure kehrt der Ruhe-Marker zurück |
 | `README.md`, `README.de.md`, `harness/README.md` | unverändert | gelesen: Zeilen mit `make gates` führen die Gates als Menge mit `+` und nennen keine Reihenfolge (`README.md:281`, `README.de.md:287`, `harness/README.md:72`) |
 | `repo.mk`, `Makefile` | unverändert | gelesen: `repo.mk:254` hängt `lint test coverage-gate` an, `repo.mk:256` bindet `tools/mk/*.mk` ein; die Reihenfolge ergibt sich allein aus der Position der Anhängestelle |
 
