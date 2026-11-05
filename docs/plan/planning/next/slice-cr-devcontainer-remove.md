@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle, Release-Zuordnung offen. Zweiter von vier Slices; ihm geht [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md) voraus. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md).
+**Welle:** ohne Welle, Release-Zuordnung offen. Zweiter von vier Slices; ihm geht [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md) voraus. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../open/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](../open/slice-v1-devcontainer-remove.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Änderung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes: nur Anwendung, keine Änderung), [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) (Volumes je Instanz).
 Anlass: Projektinhaber, 2026-11-05 (`devcontainer down` entfernt den Container nicht und seine Volumes nicht; Weg „eigener Befehl `devcontainer remove`“ gewählt).
@@ -40,7 +40,7 @@ Ausgangslage (gelesen):
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Spezifikation und Code** — Folge-Slices [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) und [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md); die Spezifikation setzt den freigegebenen Vertrag voraus.
+- **Spezifikation und Code** — Folge-Slices [`slice-v2-spec-devcontainer-remove`](../open/slice-v2-spec-devcontainer-remove.md) und [`slice-v1-devcontainer-remove`](../open/slice-v1-devcontainer-remove.md); die Spezifikation setzt den freigegebenen Vertrag voraus.
 - **Änderung von `devcontainer down` und `up --recreate`** — beide behalten ihre Zusage; eine Änderung wäre eine Zusage-Verschärfung ohne Anlass.
 - **`remove` für Compose-Dienste** — `u-boot down --volumes` deckt sie ab.
 
