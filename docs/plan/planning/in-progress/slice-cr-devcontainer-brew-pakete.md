@@ -7,10 +7,10 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** ohne Welle, Release-Zuordnung offen. Erster von zwei Slices: ihm folgt [`slice-v1-devcontainer-homebrew-pakete`](../next/slice-v1-devcontainer-homebrew-pakete.md).
 
-**Bezug:** [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Anwendung: ein Tap ist eine externe Quelle; der Wortlaut dieser Anforderung ändert sie nicht), [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (Entscheidungsgrundlage, `Accepted`). Eine neue Anforderung im Abschnitt der Devcontainer-Anforderungen, nach [`LH-FA-DEV-012`](../../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers).
+**Bezug:** [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Anwendung: ein Tap ist eine externe Quelle; der Wortlaut dieser Anforderung ändert sie nicht), [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) und [`ADR-0047`](../../adr/0047-brew-formeln-lastenheft-stellen-und-verteilung-lastenheft-spezifikation.md) (Entscheidungsgrundlage, beide `Accepted`; die zweite hält fest, welche Lastenheft-Stellen tragen). Eine neue Anforderung im Abschnitt der Devcontainer-Anforderungen, nach [`LH-FA-DEV-012`](../../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers).
 Anlass: Projektinhaber, 2026-11-05 (Entscheidungen 1 und 2 im Slice [`slice-v1-devcontainer-homebrew-pakete`](../next/slice-v1-devcontainer-homebrew-pakete.md), §6).
 
-**Berührte Spec-Stellen:** `lastenheft.md`: eine neue Anforderung nach [`LH-FA-DEV-012`](../../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers) (Kennung vergibt die Übernahme), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt dieser Slice nicht; Schlüsselnamen, Konfigurationspfade, das Verfahren der Tap-Freigabe, die Konflikt-Regel mit dem Katalog-Feature `homebrew` sowie Bau-, Plattform- und Messgrenzen stehen im Umsetzungs-Slice in der Spezifikation.
+**Berührte Spec-Stellen:** `lastenheft.md`: eine neue Anforderung nach [`LH-FA-DEV-012`](../../../../spec/lastenheft.md#lh-fa-dev-012--umgebungsdatei-des-devcontainers) (Kennung [`LH-FA-DEV-013`](../../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), vergeben bei der Übernahme), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt dieser Slice nicht; Schlüsselnamen, Konfigurationspfade, das Verfahren der Tap-Freigabe, die Konflikt-Regel mit dem Katalog-Feature `homebrew` sowie Bau-, Plattform- und Messgrenzen werden im Umsetzungs-Slice in der Spezifikation festgelegt.
 
 **Verantwortlich:** —
 
@@ -28,7 +28,7 @@ Ausgangslage (gelesen im Bericht des Architects, Fundstellen in [`ADR-0046`](../
 
 - **Spezifikation und Code** — Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../next/slice-v1-devcontainer-homebrew-pakete.md); die Spezifikation setzt den freigegebenen Vertrag voraus.
 - **Pin-Zusage für Formeln** — Homebrew pinnt Formeln nicht verlässlich; der Wortlaut sagt „ungepinnt“, nicht mehr.
-- **Plattform-, Bau- und Messgrenzen der Zusage** — keine Lastenheft-Aussage; sie stehen in der Spezifikation und in den Tests des Umsetzungs-Slices, mit ihrer Messgrundlage.
+- **Plattform-, Bau- und Messgrenzen der Zusage** — keine Lastenheft-Aussage; sie werden im Umsetzungs-Slice in der Spezifikation und in den Tests festgelegt, mit ihrer Messgrundlage.
 
 ## 2. Definition of Done
 
@@ -37,10 +37,10 @@ Ausgangslage (gelesen im Bericht des Architects, Fundstellen in [`ADR-0046`](../
 
 Pflichten der Closure (zählen nicht mit):
 
-- [ ] `make gates` grün (im Devcontainer-Container, `AGENTS.md` §3.1).
-- [ ] Review durchgeführt, Report unter `docs/reviews/` (`.harness/skills/reviewer.md`), kein Self-Review.
-- [ ] Verification-Report unter `docs/reviews/`.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag; jedes Risiko aus §6 trägt einen Ausgang.
+- [x] `make gates` grün (im Devcontainer-Container, `AGENTS.md` §3.1).
+- [x] Review durchgeführt, Report unter `docs/reviews/` (`.harness/skills/reviewer.md`), kein Self-Review.
+- [x] Verification-Report unter `docs/reviews/`.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag; jedes Risiko aus §6 trägt einen Ausgang.
 
 ## 3. Plan (vor Code)
 
@@ -52,8 +52,11 @@ Pflichten der Closure (zählen nicht mit):
 | `docs/plan/planning/in-progress/slice-cr-devcontainer-brew-pakete.md` | neu / update | dieser Plan selbst |
 | `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | update | Zeilen des Slice, Zustandsmarker |
 | `docs/reviews/2026-11-05-slice-cr-devcontainer-brew-pakete.md` | neu | Review-Report |
+| `docs/reviews/verification-2026-11-05-slice-cr-devcontainer-brew-pakete.md` | neu | Verification-Report |
+| `docs/plan/adr/0047-brew-formeln-lastenheft-stellen-und-verteilung-lastenheft-spezifikation.md`, `docs/plan/adr/README.md` | neu / update | Folge-ADR zu Review F-8, Index-Zeile; angenommen am 2026-11-05 |
+| `docs/plan/planning/observations/BEO-DOK/plan-aussage-ueber-code/`, `.../vertragsaenderung-nach-review/`, `.../spec-bedingung-ohne-code-entsprechung/` | update | `state.md` und je eine Evidence-Datei (Closure, §7) |
 
-Die Tabelle wird nach der letzten Fix-Runde gegen `git diff --stat` abgeglichen (`AGENTS.md` §3.10).
+Abgeglichen nach der letzten Fix-Runde gegen `git diff --stat 7552b978..HEAD` (`AGENTS.md` §3.10); `spec/lastenheft.md` trägt Version `0.36.1` und zwei Historie-Zeilen.
 
 ## 4. Trigger
 
@@ -67,13 +70,20 @@ DoD vollständig, Wortlaut im Lastenheft, `make gates` grün, Reports liegen vor
 
 ## 6. Risiken und offene Punkte
 
-- Der Wortlaut enthält Details, die in die Spezifikation gehören (Plattformen, Messgrenzen). — **Ausgang:** offen; der Reviewer prüft jeden Satz auf Anforderungsebene.
+- Der Wortlaut enthält Details, die in die Spezifikation gehören (Plattformen, Messgrenzen). — **Ausgang:** entfallen: Review und Verifikation haben den Wortlaut Satz für Satz auf Anforderungsebene gelesen und keine Nicht-Anforderung gefunden (Reports).
 
 - Der Querverweis auf [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) im Satz zum Tap ließ sich gegen die Ausnahme für Paketmanager-Pakete lesen (Review F-2). — **Ausgang:** eingetreten: der Verweis ist gestrichen (Lastenheft `0.36.1`, Entscheidung des Projektinhabers 2026-11-05); die Verifikation prüft den geänderten Satz.
 
+- Bedingungen im Wortlaut („nur nach ausdrücklicher Freigabe“, „`--yes` ersetzt sie nicht“, „ehe etwas geschrieben wird“) haben noch keinen pinnenden Test (Verification V-4). — **Ausgang:** weiter offen: → `BEO-DOK/spec-bedingung-ohne-code-entsprechung` im Register; die Tests liefert die DoD 2 des Umsetzungs-Slice.
+
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt.)*
+- **Was hat funktioniert:** Der Schnitt „Lastenheft nur Anforderungen“ trug: Aus fünf Stellen wurden eine neue Anforderung und das Versionsfeld; Schlüssel, Pfade, Konflikt-Regel und Grenzen gehen in die Spezifikation des Umsetzungs-Slice. Review und Verifikation lasen den Wortlaut gegen den freigegebenen Vorschlag.
+- **Was ging anders als geplant:** Der erste Vorschlag trug fünf Stellen mit Schlüsselnamen, Verfahren und einer Bau-Zusage; der Projektinhaber nahm sie zurück (nicht Anforderungsebene). Der Satz zum Tap trug einen Querverweis auf die Ausnahme für Paketmanager-Pakete, der sich gegen sie lesen ließ (Review F-2); er ist gestrichen (Lastenheft `0.36.1`), die Auslegung bleibt in [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) und [`ADR-0047`](../../adr/0047-brew-formeln-lastenheft-stellen-und-verteilung-lastenheft-spezifikation.md). Die Plan-Tabelle und die Zustandsmarker waren mehrfach unvollständig oder veraltet (Review F-1, F-4, F-5; Verification V-1, V-2, V-5, V-6).
+- **Steering-Loop-Eintrag:** `BEO-DOK/plan-aussage-ueber-code` (Rückfall nach der Verkörperung in `AGENTS.md` §3.10), `BEO-DOK/vertragsaenderung-nach-review` (Wortlaut nach dem Review geändert, ohne Nachlauf-Review) und `BEO-DOK/spec-bedingung-ohne-code-entsprechung` (Bedingungen ohne Testzuordnung) ergänzt; keine weitere Schärfung entschieden.
+- **Beobachtungs-Register (`../observations/`):** je `evidence/slice-cr-devcontainer-brew-pakete.md` in den drei genannten Verzeichnissen ergänzt.
+- **Folge-Slices:** [`slice-v1-devcontainer-homebrew-pakete`](../next/slice-v1-devcontainer-homebrew-pakete.md) (liegt in `next/`, Start nach dieser Closure).
+- **Risiken aus §6:** alle mit Ausgang (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

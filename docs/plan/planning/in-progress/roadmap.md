@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-[`slice-cr-devcontainer-brew-pakete`](slice-cr-devcontainer-brew-pakete.md) liegt in `in-progress/` — neue Anforderung [`LH-FA-DEV-013`](../../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer) im Lastenheft `0.36.0` (Homebrew-Formeln im Devcontainer); wartet auf Verifikation.
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
