@@ -9,7 +9,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Scope), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes), [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md).
 
-**Berührte Spec-Stellen:** [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Aufruf, Suche, Ausgabe und Exit-Codes von `up` und `down`; `remove` erweitert sie) und der Abschnitt zur `--json`-Ausgabe, in dem `devcontainer` als Wert von `command` steht; ob eine neue `SPEC-<NNN>` entsteht oder [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) wächst, entscheidet der Architect.
+**Berührte Spec-Stellen:** [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (Aufruf, Suche, Ausgabe und Exit-Codes von `up` und `down`; `remove` erweitert sie) und der Abschnitt zur `--json`-Ausgabe, in dem `devcontainer` als Wert von `command` steht; ob eine neue `SPEC-<NNN>` entsteht oder [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) wächst, entscheidet der Architect. Außerdem die Kopien der Befehlsliste in `spec/spezifikation.md` (`--quiet`-Liste, Aussage zu Instanzen, Wert `devcontainer` des Feldes `command`, Verweisliste zu [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)), in `spec/architecture.md` (Abschnitt zum CLI-Adapter und die Tabelle der Fehlerklassen) und in `docs/maintainer/cli-json-contract.md` (Abschnitt 6.11, Matrix der Dateisystem-Mutationen); Träger je Stelle in §3.
 
 **Verantwortlich:** —
 
@@ -19,7 +19,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Die Spezifikation legt fest, wie `u-boot devcontainer remove` den Container sucht (wie `down`: Label `devcontainer.local_folder`, Instanz-Label), welche Volumes `--volumes` erfasst, wie die Abfrage und `--yes` wirken, was die Ausgabe und die `--json`-Ausgabe tragen und welche Exit-Codes gelten.
+**Ziel:** Die Spezifikation legt fest, wie `u-boot devcontainer remove` den Container sucht (wie `down`: Label `devcontainer.local_folder`, Instanz-Label), welche Volumes `--volumes` erfasst, wie die Abfrage und `--yes` wirken, was die Ausgabe und die `--json`-Ausgabe tragen und welche Exit-Codes gelten. Sie legt dazu die Grenzen fest, die der Lastenheft-Wortlaut bewusst nicht trägt (Review des CR F-8, Entscheidung F5 des CR): was `remove --volumes` mit einem Volume tut, das ein anderer Container hält (die Messung belegt nur, dass das Entfernen scheitert, solange ein Container es hält); wie anonyme Volumes behandelt werden (die Messung: `docker rm` lässt sie stehen, `docker rm -v` entfernt sie; der Lastenheft-Satz „Die Volumes des Containers bleiben dabei erhalten“ trägt eine der beiden Wahlen); die Reihenfolge Abfrage, Stoppen, Entfernen (das Lastenheft verlangt die Abfrage vor jedem Eingriff); die Zuordnung der Exit-Codes `10` (Freigabe fehlt oder abgelehnt, nur Instanzen), `11` (Engine nicht erreichbar oder nicht lokal) und `12` (Stoppen oder Entfernen scheitert, die Engine verweigert); Plattform- und Messgrenzen (die Messung lief auf der verschachtelten Engine).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -28,7 +28,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 ## 2. Definition of Done
 
-- [ ] **Spezifikation:** Aufruf, Suche, Volume-Auswahl, Abfrage, Ausgabe (Text und `--json`), Exit-Codes und Grenzen stehen in `spec/spezifikation.md`; jede Bedingung, die den Code beschreibt („nur wenn“, „immer“), bekommt im Code-Slice einen pinnenden Test oder entfällt (`AGENTS.md` §3.10).
+- [ ] **Spezifikation:** Aufruf, Suche, Volume-Auswahl, Abfrage, Ausgabe (Text und `--json`), Exit-Codes und Grenzen stehen in `spec/spezifikation.md`; jede Bedingung, die den Code beschreibt („nur wenn“, „immer“), bekommt im Code-Slice einen pinnenden Test oder entfällt (`AGENTS.md` §3.10). Die Kopien der Befehlsliste (Plan-Tabelle §3) nennen `remove`, und keine Aussage der Spezifikation widerspricht dem Lastenheft (insbesondere „räumt keine auf“ in `spec/spezifikation.md`; das Lastenheft sagt „räumt keine von sich aus auf“).
 
 Pflichten der Closure (zählen nicht mit):
 
@@ -41,7 +41,10 @@ Pflichten der Closure (zählen nicht mit):
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/spezifikation.md` | update | [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) und die `--json`-Stelle bzw. eine neue `SPEC-<NNN>` |
+| `spec/spezifikation.md` | update | [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) bzw. eine neue `SPEC-<NNN>` (gelesen am Stand `7f5110cc`): Zeile 866 (*Aufruf*: nennt `up`, `down`, `shell`), Zeile 870 („`u-boot` führt keine Liste der Instanzen und räumt keine auf“ — widerspricht dem Lastenheft „räumt keine von sich aus auf“), Absatz *Ohne `--instance`, nur Instanzen* und *Mit `--instance`* (Zeilen 875 und 876: nennen `up`, `down`, `shell`), die Tabelle der Exit-Codes ab Zeile 938 (Spalten `up`, `down`, `shell`; eine Spalte oder Zeile für `remove`); die Verweisliste Zeile 1602 (Eintrag zu [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten): `u-boot devcontainer up`, `up --recreate`, `down`, `shell`) |
+| `spec/spezifikation.md` (`--quiet` und `--json`) | update | Zeile 619 (Liste der ändernden Subkommandos unter `--quiet`: endet auf `devcontainer shell`), Zeile 631 (`devcontainer down --quiet` gibt nichts aus; `remove --quiet` fehlt), Zeile 1354 (Wert `devcontainer` im Feld `command`: „`up` beziehungsweise `down`“; ob `remove` eine `--json`-Ausgabe hat, legt dieser Slice fest) |
+| `spec/architecture.md` | update | Zeilen 299 bis 314 (Abschnitt zum CLI-Adapter: „`devcontainer` (mit `up`/`down`/`shell`)“, „jeder der drei Unterbefehle trägt eine eigene Diagnostic-Abbildung“, Abweisung von `--dry-run` und `--diff`); Zeile 381 (`ARC-008`: Lifecycle-Operationen, Sitzung von `devcontainer shell`); Zeile 656 (Fehlerklasse „Laufzeitfehler der Runtime“, Exit-Code `12`: Stoppen und Entfernen von `remove`); Zeile 651 (Bestätigungs-Gate, Exit-Code `10`) trägt keinen Befehlsnamen und bleibt unverändert (gelesen). Die Architektur bleibt meilenstein- und ADR-frei (`AGENTS.md` §3.4) |
+| `docs/maintainer/cli-json-contract.md` | update | Abschnitt 6.11 (Überschrift Zeile 1244: `devcontainer up --json` / `devcontainer down --json`, `devcontainer shell`; ein Umschlag oder die Abweisung für `remove`) und die Matrix der Dateisystem-Mutationen (Zeilen 1356 bis 1358: `devcontainer up`, `down`, `shell`; eine Zeile `remove`, dessen Wirkung die Container-Engine, nicht eine Projektdatei ist) |
 | `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | update | Zeilen des Slice, Zustandsmarker |
 
 ## 4. Trigger
@@ -49,6 +52,8 @@ Pflichten der Closure (zählen nicht mit):
 **Start** (`next` → `in-progress`): [`slice-cr-devcontainer-remove`](../in-progress/slice-cr-devcontainer-remove.md) liegt in `done/`; `in-progress/` ist leer.
 
 **Rückführungen:** `in-progress` → `next`, wenn der CR-Wortlaut eine Spec-Stelle nicht trägt.
+
+**Bezug zum CR:** Der Start verlangt das Lastenheft `0.37.1` (Folgeänderung nach dem Review des CR: Exit-Codes `10`, `0` und `12`, abgelehnte Abfrage, Zusage-Menge) freigegeben und in `done/` geschlossen; die Spezifikation präzisiert diesen Wortlaut.
 
 ## 5. Closure-Trigger
 
