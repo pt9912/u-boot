@@ -1,6 +1,6 @@
 # ADR 0047: Homebrew-Formeln im Devcontainer — Lastenheft-Stellen der Folgepflicht von ADR 0046 (neue Anforderung [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer) statt Änderung von [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CONF-002`](../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)), Auslegung von [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) bleibt in ADR 0046, Verteilung Lastenheft/Spezifikation
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-11-05
 
@@ -86,6 +86,7 @@ Das Lastenheft ändert den Wortlaut von [`LH-NFA-SEC-004`](../../../spec/lastenh
 
 | Datum | Ereignis | Verweis |
 |---|---|---|
-| 2026-11-05 | Proposed (Folge zu Finding F-8 des Review-Reports; Auftrag Rolle Architect; Annahme durch den Projektinhaber steht aus) | [Review-Report](../../reviews/2026-11-05-slice-cr-devcontainer-brew-pakete.md), [CR-Vorschlag](../cr/cr-vorschlag-brew-pakete.md) |
+| 2026-11-05 | Proposed (Folge zu Finding F-8 des Review-Reports; Auftrag Rolle Architect) | [Review-Report](../../reviews/2026-11-05-slice-cr-devcontainer-brew-pakete.md), [CR-Vorschlag](../cr/cr-vorschlag-brew-pakete.md) |
+| 2026-11-05 | Accepted (Annahme durch den Projektinhaber, ohne Änderung) | Projektinhaber |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit `Supersedes ADR-0047`.
