@@ -1,6 +1,6 @@
 # CR-Vorschlag: Homebrew-Formeln im Devcontainer — neue Anforderung im Lastenheft — Alt/Neu je Stelle
 
-**Status:** freigegeben wie vorgelegt (Projektinhaber, 2026-11-05); F1 Priorität `V2` und F2 Lastenheft-Version `0.36.0` wie vorgeschlagen.
+**Status:** freigegeben wie vorgelegt (Projektinhaber, 2026-11-05); F1 Priorität `V2` und F2 Lastenheft-Version `0.36.0` wie vorgeschlagen. Übernommen ins Lastenheft `0.36.0` (Commit acbd0cf4).
 
 **Gegenstand:** die Lieferung zur DoD-Zeile 1 des CR-Slices [`slice-cr-devcontainer-brew-pakete`](../planning/in-progress/slice-cr-devcontainer-brew-pakete.md) (Lastenheft-Wortlaut); Umsetzung im Folge-Slice [`slice-v1-devcontainer-homebrew-pakete`](../planning/next/slice-v1-devcontainer-homebrew-pakete.md).
 
@@ -36,7 +36,7 @@
 
 ---
 
-**Abweichungen der Übernahme je Stelle:** *(bei der Übernahme zu tragen.)*
+**Abweichungen der Übernahme je Stelle:** keine; der Wortlaut ist wortgleich übernommen (Kennung [`LH-FA-DEV-013`](../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), Priorität `V2`, Version `0.36.0`), die Historie-Zeile trägt keinen Verweis auf Dateien unterhalb des Lastenhefts.
 
 **Offen zur Freigabe:**
 
