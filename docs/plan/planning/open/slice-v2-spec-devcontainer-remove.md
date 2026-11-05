@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle, Release-Zuordnung offen. Dritter von vier Slices; ihm geht [`slice-cr-devcontainer-remove`](../next/slice-cr-devcontainer-remove.md) voraus. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../next/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md).
+**Welle:** ohne Welle, Release-Zuordnung offen. Dritter von vier Slices; ihm geht [`slice-cr-devcontainer-remove`](../in-progress/slice-cr-devcontainer-remove.md) voraus. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../in-progress/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Scope), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes), [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md).
 
@@ -23,7 +23,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Lastenheft** — liegt in [`slice-cr-devcontainer-remove`](../next/slice-cr-devcontainer-remove.md); die Spezifikation präzisiert es, erweitert es nie.
+- **Lastenheft** — liegt in [`slice-cr-devcontainer-remove`](../in-progress/slice-cr-devcontainer-remove.md); die Spezifikation präzisiert es, erweitert es nie.
 - **Code** — Folge-Slice [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md).
 
 ## 2. Definition of Done
@@ -46,7 +46,7 @@ Pflichten der Closure (zählen nicht mit):
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): [`slice-cr-devcontainer-remove`](../next/slice-cr-devcontainer-remove.md) liegt in `done/`; `in-progress/` ist leer.
+**Start** (`next` → `in-progress`): [`slice-cr-devcontainer-remove`](../in-progress/slice-cr-devcontainer-remove.md) liegt in `done/`; `in-progress/` ist leer.
 
 **Rückführungen:** `in-progress` → `next`, wenn der CR-Wortlaut eine Spec-Stelle nicht trägt.
 
