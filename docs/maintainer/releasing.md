@@ -282,12 +282,11 @@ P=.github/workflows/smoke.yml      # oder README.md
    `sha`.
 
 **Gelaufen und nicht gelaufen.** Die lesenden Befehle der Schritte 1, 4 und 5 sind gegen den Tap ausgeführt, ebenso die
-Befehle vor Schritt 3. Der Aufruf von Schritt 3 lief am 2026-11-06 durch den Hauptagenten (ohne `branch`, `B64` und `SHA`
-vorab gesetzt) und erzeugte im Tap den Commit `662c5fb5` auf `main`, der nur `.github/workflows/smoke.yml` änderte (+4,
-−1; Reviewer und Verifier haben ihn gelesen). Der Wortlaut stammt aus dem Sitzungsprotokoll des Hauptagenten; die Zeile
-für `B64` stand dort vorab, ihre Form im Block oben ist nicht gelaufen. Für `README.md` und für den Rückweg (Schritt 6)
-ist der Aufruf nicht gelaufen. Eine Probe, die nichts schreibt, gibt es für den Schreibschritt nicht; der Dispatch aus
-Schritt 5 ist ebenfalls nur berichtet.
+Befehle vor Schritt 3. Der Aufruf von Schritt 3 ist durch den Hauptagenten in der Sitzung vom 2026-11-06 für
+`.github/workflows/smoke.yml` gelaufen (ohne `branch`, `B64` und `SHA` vorab gesetzt); sein Wortlaut stammt aus dem
+Sitzungsprotokoll. Die Zeile für `B64` im Block oben ist nicht als gelaufen ausgewiesen. Für `README.md` und für den
+Rückweg (Schritt 6) ist der Aufruf nicht gelaufen. Eine Probe, die nichts schreibt, gibt es für den Schreibschritt nicht;
+der Dispatch aus Schritt 5 ist ebenfalls nur berichtet.
 
 **Grenze.** Kein Skript, kein Gate und kein Test hält Quelle und Tap gleich oder schreibt diese zwei Dateien in den Tap:
 `scripts/tap-nachzug.sh` klont den Tap, kopiert die Formel nach `Formula/u-boot.rb` und fügt diese Datei hinzu (Zeilen
