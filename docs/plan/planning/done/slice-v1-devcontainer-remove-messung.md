@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** [`welle-devcontainer-remove`](../welle-devcontainer-remove.md), Release-Zuordnung offen. Erster von vier Slices. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../done/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](../done/slice-v1-devcontainer-remove.md).
+**Welle:** [`welle-devcontainer-remove`](welle-devcontainer-remove.md), Release-Zuordnung offen. Erster von vier Slices. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../done/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](../done/slice-v1-devcontainer-remove.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Scope: Grundlage der Änderung), [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) (Volume-Namen je Instanz).
 

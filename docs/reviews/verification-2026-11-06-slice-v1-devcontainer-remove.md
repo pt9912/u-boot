@@ -19,7 +19,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md) (Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md))
+- Slice: [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md) (Welle [`welle-devcontainer-remove`](../plan/planning/done/welle-devcontainer-remove.md))
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-005A`](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-NFA-PORT-004`](../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image), [`SPEC-058`](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes), [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), [`ADR-0015`](../plan/adr/0015-sandbox-volumes-pro-instanz.md), [`ADR-0043`](../plan/adr/0043-nur-devcontainer-bau-pfad.md)
 - Artefakte: `u-boot devcontainer remove` (`internal/adapter/driving/cli/devcontainer.go`, `internal/hexagon/application/devcontainer_remove.go`, die vier Port-Dateien, `internal/adapter/driven/docker/`, `internal/adapter/driven/confirm/`, `cmd/uboot/main.go`), `internal/e2e/devcontainer_remove_docker_test.go`, Handbuch, README, CHANGELOG, `spec/spezifikation.md`, `spec/architecture.md`, `docs/maintainer/`
 
