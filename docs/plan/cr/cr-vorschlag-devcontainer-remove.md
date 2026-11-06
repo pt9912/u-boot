@@ -1,8 +1,10 @@
-# CR-Vorschlag: `u-boot devcontainer remove` — Lastenheft 0.36.1 → 0.37.0 und Folgeänderung 0.37.1, Alt/Neu je Stelle
+# CR-Vorschlag: `u-boot devcontainer remove` — Lastenheft 0.36.1 → 0.37.0 und Folgeänderungen 0.37.1 und 0.37.2, Alt/Neu je Stelle
 
 **Status:** freigegeben wie vorgelegt (Antwort des Projektinhabers im Sitzungsdialog, 2026-11-05: „freigegeben wie vorgelegt“); Wortlaut, Lastenheft-Version `0.37.0`, Priorität `V2` und F1 bis F7 wie vorgeschlagen. Übernommen ins Lastenheft `0.37.0`.
 
-**Folgeänderung `0.37.1`** (Review [`2026-11-05-slice-cr-devcontainer-remove`](../../reviews/2026-11-05-slice-cr-devcontainer-remove.md) F-1, F-3, F-4, F-5; Entscheidungen des Projektinhabers vom 2026-11-05, Sitzungsdialog nach dem Review): der Wortlaut steht im Arbeitsbaum von `spec/lastenheft.md` und im Abschnitt „Folgeänderung 0.37.1“ unten (Stellen (h) bis (k)); er ist dem Projektinhaber noch nicht vorgelegt und nicht freigegeben, und er ist nicht committet.
+**Folgeänderung `0.37.1`** (Review [`2026-11-05-slice-cr-devcontainer-remove`](../../reviews/2026-11-05-slice-cr-devcontainer-remove.md) F-1, F-3, F-4, F-5; Entscheidungen des Projektinhabers vom 2026-11-05, Sitzungsdialog nach dem Review): der Wortlaut steht im Abschnitt „Folgeänderung 0.37.1“ unten (Stellen (h) bis (k)). Der Projektinhaber hat ihn im Sitzungsdialog am 2026-11-05 freigegeben wie vorgelegt; übernommen ist er im Lastenheft `0.37.1` (Commit `a7914c99`), der Nachlauf-Review liegt vor ([`2026-11-05-slice-cr-devcontainer-remove-nachlauf`](../../reviews/2026-11-05-slice-cr-devcontainer-remove-nachlauf.md)).
+
+**Folgeänderung `0.37.2`** (Nachlauf-Review, MEDIUM „Freigabe und Containersuche“ und LOW „Image-Satz“; Entscheidungen des Projektinhabers im Sitzungsdialog nach dem Nachlauf-Review): der Wortlaut steht im Abschnitt „Folgeänderung 0.37.2“ unten (Stellen (l) bis (o)) und in `spec/lastenheft.md` Version `0.37.2`. Der Projektinhaber hat ihn im Sitzungsdialog am 2026-11-06 freigegeben wie vorgelegt, einschließlich der Auslegung von `--instance` ohne Container der Instanz (Exit-Code `0`, keine Abfrage); der Nachlauf-Review über den Diff von `0.37.1` zu `0.37.2` steht aus (DoD-Zeile 5 des CR-Slice).
 
 **Gegenstand:** die Lieferung zur DoD-Zeile 1 des CR-Slices [`slice-cr-devcontainer-remove`](../planning/in-progress/slice-cr-devcontainer-remove.md) (Lastenheft-Wortlaut); Folge-Slices: Spezifikation [`slice-v2-spec-devcontainer-remove`](../planning/open/slice-v2-spec-devcontainer-remove.md), Umsetzung [`slice-v1-devcontainer-remove`](../planning/open/slice-v1-devcontainer-remove.md). Diese Datei ist kein Slice und trägt keinen Lebenszyklus; sie ändert nichts an den Verträgen. Ihr **Ablage-Ort** ist dieser Ordner (`docs/plan/cr/`) je [`harness/conventions.md`](../../../harness/conventions.md#ablage-von-messprotokollen-und-skripten) (Ablage-Tabelle).
 
@@ -132,9 +134,9 @@ Die Bedingungen im Wortlaut („nur auf den Container ohne Instanz“, „im nic
 
 ## Folgeänderung 0.37.1 (nach dem Review): Stellen (h) bis (k), Alt/Neu je Stelle
 
-Anlass: [`2026-11-05-slice-cr-devcontainer-remove`](../../reviews/2026-11-05-slice-cr-devcontainer-remove.md) F-1, F-3, F-4 und F-5 (merge-blockierend: F-1 und F-3). Der Wortlaut ändert sich nach dem Review des CR; er geht an den Projektinhaber (Freigabe) und an einen Nachlauf-Review ([`BEO-DOK/vertragsaenderung-nach-review`](../planning/observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)). Alt ist der Wortlaut von `0.37.0` (`git show HEAD:spec/lastenheft.md`), Neu der Arbeitsbaum.
+Anlass: [`2026-11-05-slice-cr-devcontainer-remove`](../../reviews/2026-11-05-slice-cr-devcontainer-remove.md) F-1, F-3, F-4 und F-5 (merge-blockierend: F-1 und F-3). Der Wortlaut ändert sich nach dem Review des CR; er geht an den Projektinhaber (Freigabe) und an einen Nachlauf-Review ([`BEO-DOK/vertragsaenderung-nach-review`](../planning/observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)). Alt ist der Wortlaut von `0.37.0` (`git show 602d8fa4:spec/lastenheft.md`), Neu der Wortlaut von `0.37.1` (`git show a7914c99:spec/lastenheft.md`).
 
-**Entscheidungen des Projektinhabers, auf die die Folgeänderung zurückgeht (2026-11-05, Sitzungsdialog nach dem Review; der konkrete Wortlaut ist noch vorzulegen):**
+**Entscheidungen des Projektinhabers, auf die die Folgeänderung zurückgeht (2026-11-05, Sitzungsdialog nach dem Review; der Wortlaut ist am 2026-11-05 im Sitzungsdialog freigegeben wie vorgelegt):**
 
 | | Entscheidung | Stelle |
 |---|---|---|
@@ -195,11 +197,70 @@ Die Historie-Zeile verweist auf nichts unterhalb des Lastenhefts (Decken-Regel).
 
 Die Bedingungen „gibt es keinen Container dieser Instanz … Exit-Code `0`“, „abgelehnte Abfrage … läuft weiter“ und „`12`, wenn das Stoppen oder das Entfernen scheitert“ bekommen im Umsetzungs-Slice je einen pinnenden Test oder entfallen ([`AGENTS.md`](../../../AGENTS.md) §3.10).
 
+## Folgeänderung 0.37.2 (nach dem Nachlauf-Review): Stellen (l) bis (o), Alt/Neu je Stelle
+
+Anlass: [`2026-11-05-slice-cr-devcontainer-remove-nachlauf`](../../reviews/2026-11-05-slice-cr-devcontainer-remove-nachlauf.md), MEDIUM „Reihenfolge von Freigabe und Containersuche“ und LOW „Reichweite des Image-Satzes“. Alt ist der Wortlaut von `0.37.1` (`git show a7914c99:spec/lastenheft.md`), Neu der Wortlaut von `0.37.2` in `spec/lastenheft.md`. Er ist vom Projektinhaber freigegeben (Sitzungsdialog, 2026-11-06, wie vorgelegt) und geht an einen Nachlauf-Review über den Diff ([`BEO-DOK/vertragsaenderung-nach-review`](../planning/observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)). Der Review-Befund zum MEDIUM 1 (Zustandsmarker) ist keine Wortlaut-Änderung und steht hier nicht.
+
+**Entscheidungen des Projektinhabers, auf die die Folgeänderung zurückgeht (Sitzungsdialog nach dem Nachlauf-Review; der Wortlaut ist am 2026-11-06 freigegeben wie vorgelegt):**
+
+| | Entscheidung | Stelle |
+|---|---|---|
+| G-1 | `remove --volumes` ohne `--yes` im nicht-interaktiven Modus, ohne vorhandenen Container: Exit-Code `0` (nichts zu entfernen). Die Abfrage und der Exit-Code `10` gelten nur, wenn es etwas zu entfernen gäbe. | (l), (m) |
+| G-2 | Der Satz zum ausgelieferten Container-Image gilt ausdrücklich auch für `remove`. | (n) |
+
+### Stelle (l) — Spiegelstrich zu `remove` (Zeile 517): Abfrage und Exit-Code `10` nur bei einem Container zu entfernen
+
+**Alt (`0.37.1`):**
+> - `u-boot devcontainer remove` entfernt den Container; ein laufender Container wird dafür zuerst gestoppt. Die Volumes des Containers bleiben dabei erhalten. Mit `--volumes` entfernt der Befehl zusätzlich die Volumes dieses Containers, auch das Volume für die Modelle des Features `ollama` ([`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)). `--volumes` ist eine destruktive Operation nach [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung): Der Befehl nennt vor der Abfrage die Volumes, die er entfernen würde, und fragt nach, bevor er etwas stoppt oder entfernt; `--yes` ersetzt die Abfrage; im nicht-interaktiven Modus ohne `--yes` endet der Befehl mit Exit-Code `10`. Ohne Freigabe (nicht-interaktiver Modus ohne `--yes` oder abgelehnte Abfrage) endet der Befehl mit Exit-Code `10` und es geschieht nichts: Ein laufender Container läuft weiter, und kein Container und kein Volume wird gestoppt oder entfernt. Nach dem Entfernen nennt der Befehl die entfernten Volumes. Mit `--instance <name>` wirkt er nur auf den Container dieser Instanz und lässt die übrigen Container des Projekts und ihre Volumes unberührt; gibt es keinen Container dieser Instanz, entfernt er nichts und endet mit Exit-Code `0`, auch wenn es andere Container des Projekts gibt. Ohne `--instance` wirkt er nur auf den Container ohne Instanz; gibt es im Projekt nur Container von Instanzen und keinen Container ohne Instanz, endet `remove` ohne `--instance` mit Exit-Code `10` und einem Hinweis auf `--instance`, ohne einen Container zu entfernen. Gibt es im Projekt keinen Container, entfernt der Befehl nichts und endet mit Exit-Code `0`. `u-boot devcontainer remove` ist nicht `u-boot remove <service>`: Dieser nimmt einen Dienst des Compose-Stacks aus der Konfiguration, jener entfernt den Container des Devcontainers; beide löschen Volumes nur auf ausdrückliche Anforderung (`--purge` bei `u-boot remove`, `--volumes` bei `u-boot devcontainer remove`).
+
+**Neu (Vorschlag):**
+> - `u-boot devcontainer remove` entfernt den Container; ein laufender Container wird dafür zuerst gestoppt. Die Volumes des Containers bleiben dabei erhalten. Mit `--volumes` entfernt der Befehl zusätzlich die Volumes dieses Containers, auch das Volume für die Modelle des Features `ollama` ([`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)). `--volumes` ist eine destruktive Operation nach [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung): Der Befehl nennt vor der Abfrage die Volumes, die er entfernen würde, und fragt nach, bevor er etwas stoppt oder entfernt; `--yes` ersetzt die Abfrage; im nicht-interaktiven Modus ohne `--yes` endet der Befehl mit Exit-Code `10`. Ohne Freigabe (nicht-interaktiver Modus ohne `--yes` oder abgelehnte Abfrage) endet der Befehl mit Exit-Code `10` und es geschieht nichts: Ein laufender Container läuft weiter, und kein Container und kein Volume wird gestoppt oder entfernt. Nach dem Entfernen nennt der Befehl die entfernten Volumes. Mit `--instance <name>` wirkt er nur auf den Container dieser Instanz und lässt die übrigen Container des Projekts und ihre Volumes unberührt; gibt es keinen Container dieser Instanz, entfernt er nichts und endet mit Exit-Code `0`, auch wenn es andere Container des Projekts gibt. Ohne `--instance` wirkt er nur auf den Container ohne Instanz; gibt es im Projekt nur Container von Instanzen und keinen Container ohne Instanz, endet `remove` ohne `--instance` mit Exit-Code `10` und einem Hinweis auf `--instance`, ohne einen Container zu entfernen. Gibt es im Projekt keinen Container, entfernt der Befehl nichts und endet mit Exit-Code `0`. **Die Abfrage und der Exit-Code `10` ohne Freigabe gelten nur, wenn der Befehl einen Container entfernen würde; gibt es keinen Container zu entfernen (im Projekt oder, mit `--instance`, in der Instanz), fragt der Befehl nicht nach und endet auch mit `--volumes` im nicht-interaktiven Modus ohne `--yes` mit Exit-Code `0`.** `u-boot devcontainer remove` ist nicht `u-boot remove <service>`: Dieser nimmt einen Dienst des Compose-Stacks aus der Konfiguration, jener entfernt den Container des Devcontainers; beide löschen Volumes nur auf ausdrückliche Anforderung (`--purge` bei `u-boot remove`, `--volumes` bei `u-boot devcontainer remove`).
+
+(Der fett gesetzte Satz ist die einzige Änderung der Stelle; im Lastenheft steht er ohne Fettdruck.) Lesart: Der Satz ist ein neuer Satz 10 hinter Satz 9; die Abgrenzung wird Satz 11. Er schränkt Satz 4 („im nicht-interaktiven Modus ohne `--yes` endet der Befehl mit Exit-Code `10`“) und Satz 5 („Ohne Freigabe … `10`“) ausdrücklich auf den Fall ein, dass es etwas zu entfernen gibt, und macht Satz 7 (Instanz ohne Container: `0`) und Satz 9 (kein Container im Projekt: `0`) auch für `--volumes` ohne Freigabe maßgeblich. Der Fall „nur Container von Instanzen, ohne `--instance`“ (Satz 8, Exit-Code `10` mit Hinweis auf `--instance`) bleibt: Der Exit-Code `10` kommt dort aus der fehlenden Auswahl, nicht aus der fehlenden Freigabe, und der Satz sagt „ohne Freigabe“. Der Befehl muss dafür den Container suchen, bevor er die Freigabe prüft; wie, legt die Spezifikation fest.
+
+### Stelle (m) — Fehlerklassen (Zeile 522): `10` bei fehlender Freigabe nur mit einem Container zu entfernen
+
+**Alt (`0.37.1`, Auszug):** „… und wenn `remove --volumes` die Freigabe nicht erhält (nicht-interaktiver Modus ohne `--yes` oder abgelehnte Abfrage); `11`, …“
+
+**Neu (Vorschlag, Auszug):**
+> … und wenn `remove --volumes` bei einem Container, den der Befehl entfernen würde, die Freigabe nicht erhält (nicht-interaktiver Modus ohne `--yes` oder abgelehnte Abfrage); `11`, …
+
+Der Rest des Spiegelstrichs ist wörtlich. Die Klausel folgt Stelle (l): ohne Container zu entfernen gibt es kein `10` aus fehlender Freigabe.
+
+### Stelle (n) — Zusage-Menge (Zeile 523): der Image-Satz gilt auch für `remove`
+
+**Alt (`0.37.1`, letzter Satz):** „Im ausgelieferten Container-Image ([`LH-NFA-PORT-004`](../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image)) läuft er nicht.“
+
+**Neu (Vorschlag):**
+> Im ausgelieferten Container-Image ([`LH-NFA-PORT-004`](../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image)) läuft er nicht, und `u-boot devcontainer remove` läuft dort ebenfalls nicht.
+
+Der Rest des Spiegelstrichs ist wörtlich. „er“ bleibt der Befehl, der startet (Satz 1 des Spiegelstrichs); der Halbsatz nennt `remove` ausdrücklich, damit die Zusage-Menge für beide Befehle dieselbe Grenze trägt.
+
+### Stelle (o) — Versionsfeld (Zeile 9) und §16 Historie (Zeile 1664)
+
+**Alt:** Version `0.37.1`; §16 Historie endet mit der Zeile `0.37.1`.
+
+**Neu (Vorschlag):** Version `0.37.2` und eine Historie-Zeile:
+> | 0.37.2 | 2026-11-06 | [`LH-FA-DEV-010`](../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten): Folgeänderung zu `u-boot devcontainer remove` nach dem Nachlauf-Review: die Abfrage von `remove --volumes` und der Exit-Code `10` ohne Freigabe gelten nur, wenn es einen Container zu entfernen gibt; ohne Container (im Projekt oder in der angegebenen Instanz) fragt der Befehl nicht nach und endet auch ohne `--yes` im nicht-interaktiven Modus mit Exit-Code `0`; der Satz zum ausgelieferten Container-Image gilt ausdrücklich auch für `remove`. | Entscheidung des Projektinhabers nach dem Nachlauf-Review des CR |
+
+Die Historie-Zeile verweist auf nichts unterhalb des Lastenhefts (Decken-Regel). Das Datum ist das der Änderung im Lastenheft; die Entscheidungen des Projektinhabers stammen aus dem Sitzungsdialog nach dem Nachlauf-Review.
+
+### Prüfung der Folgeänderung 0.37.2 gegen die Messgrenzen
+
+| Satz | Deckung |
+|---|---|
+| (l), (m) ohne Container zu entfernen: keine Abfrage, Exit-Code `0` auch mit `--volumes` ohne `--yes` | Anforderung (G-1); für `remove` keine Messaussage. Für `down` gemessen ist nur der Exit-Code `0` ohne Container ([`slice-v1-devcontainer-remove-messung`](../../messungen/slice-v1-devcontainer-remove-messung/README.md) M3); die Reihenfolge von Freigabe und Containersuche ist Code des Umsetzungs-Slice. Gelesen: `u-boot down --volumes` (`internal/hexagon/application/downservice.go`, `DownService.Down`) prüft die Freigabe über `runConfirmationGate` vor dem ersten Engine-Zugriff (`ComposeDown`); `remove` übernimmt diese Reihenfolge nicht, weil der Wortlaut die Suche des Containers vor der Freigabe verlangt |
+| (n) Image-Satz auch für `remove` | Anforderung (G-2); keine Messaussage; ob `remove` im ausgelieferten Image tatsächlich nicht läuft, ist nicht gelesen und nicht gemessen |
+
+Die Bedingungen „ohne Container zu entfernen … keine Abfrage, Exit-Code `0`“ und „Im ausgelieferten Container-Image … läuft `remove` nicht“ bekommen im Umsetzungs-Slice ([`slice-v1-devcontainer-remove`](../planning/open/slice-v1-devcontainer-remove.md) §2) je einen pinnenden Test oder entfallen bzw. stehen in der Spezifikation als Nicht-Zusage ([`AGENTS.md`](../../../AGENTS.md) §3.10). Für den Image-Satz zu `up` ist kein pinnender Test gefunden (Suche nach `PORT-004` in `*.go`, `Makefile`, `*.mk`, `*.sh` ohne Treffer; Suche nach `Runtime-Image` in `internal/e2e/*.go` ohne Treffer); die Entscheidung dazu trifft der Spezifikations-Slice.
+
 ---
 
 **Abweichungen der Übernahme je Stelle:** keine. Der Wortlaut der Stellen (a) bis (f) ist wortgleich übernommen; die Kennungen der Anforderungen sind in der Form des Lastenhefts verlinkt (Anker ohne Dateipfad, `#lh-…`, statt `../../../spec/lastenheft.md#lh-…`). In Stelle (g) sind die Platzhalter des Vorschlags aufgelöst (Datum der Übernahme `2026-11-05`, Quelle-Zelle „Entscheidung des Projektinhabers 2026-11-05; Wortlaut freigegeben wie vorgelegt“), der Vorschlags-Text dort trägt die aufgelösten Werte; die Historie-Zeile trägt keinen Verweis auf Dateien unterhalb des Lastenhefts.
 
-**Abweichung der Folgeänderung `0.37.1` von der Übernahme `0.37.0`:** nach dem Review ändern die Stellen (h) bis (k) den übernommenen Wortlaut (Version `0.37.1`, Vorbild: `0.36.1` im CR [`cr-vorschlag-brew-pakete`](cr-vorschlag-brew-pakete.md)): abgelehnte Abfrage mit Exit-Code `10` und ohne Eingriff, Instanz ohne Container mit Exit-Code `0`, Exit-Code `12` für das Entfernen, Befehls-Subjekte in der Fehlerklassen-Liste, `remove` in der Zusage-Menge, Abgrenzung zu `u-boot remove <service>`. Der Wortlaut der Stellen (a) bis (g) bleibt, soweit die Stellen (h) bis (k) ihn nicht ändern, wie übernommen. Der Wortlaut ist noch nicht freigegeben (Vorlage an den Projektinhaber); die Folgeänderung bekommt einen Nachlauf-Review.
+**Abweichung der Folgeänderung `0.37.1` von der Übernahme `0.37.0`:** nach dem Review ändern die Stellen (h) bis (k) den übernommenen Wortlaut (Version `0.37.1`, Vorbild: `0.36.1` im CR [`cr-vorschlag-brew-pakete`](cr-vorschlag-brew-pakete.md)): abgelehnte Abfrage mit Exit-Code `10` und ohne Eingriff, Instanz ohne Container mit Exit-Code `0`, Exit-Code `12` für das Entfernen, Befehls-Subjekte in der Fehlerklassen-Liste, `remove` in der Zusage-Menge, Abgrenzung zu `u-boot remove <service>`. Der Wortlaut der Stellen (a) bis (g) bleibt, soweit die Stellen (h) bis (k) ihn nicht ändern, wie übernommen. Der Wortlaut ist freigegeben wie vorgelegt (Sitzungsdialog, 2026-11-05); die Folgeänderung hat einen Nachlauf-Review (siehe oben), dessen Befunde die Folgeänderung `0.37.2` behandelt.
+
+**Abweichung der Folgeänderung `0.37.2` von `0.37.1`:** nach dem Nachlauf-Review ändern die Stellen (l) bis (o) den Wortlaut von `0.37.1` (Version `0.37.2`): ein Satz im Spiegelstrich zu `remove` und eine Klausel in den Fehlerklassen nehmen den Fall ohne Container zu entfernen von der Abfrage und vom Exit-Code `10` aus (Exit-Code `0`), und der Image-Satz der Zusage-Menge nennt `remove`. Der Wortlaut der Stellen (a) bis (k) bleibt, soweit die Stellen (l) bis (o) ihn nicht ändern, wie in `0.37.1`. Der Wortlaut ist freigegeben wie vorgelegt (Sitzungsdialog, 2026-11-06); die Folgeänderung bekommt einen Nachlauf-Review, der aussteht.
 
 **Bei der Freigabe entschieden** (je Frage der Vorschlag und die verworfene Gegenposition; F1 bis F5 sind Auslegungen, die E1 bis E5 offen ließen, F6 und F7 Form):
 
