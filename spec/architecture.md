@@ -129,7 +129,8 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
   - `DevcontainerStartService` — den Devcontainer des Projekts ohne Editor
     starten, stoppen, entfernen und betreten
     ([`LH-FA-DEV-010`](lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
-    Einzelheiten [`SPEC-049`](spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)).
+    Einzelheiten [`SPEC-049`](spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes),
+    zum Entfernen [`SPEC-058`](spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes)).
     `Up` und `Shell` teilen eine Startphase: Sie prüft, was der Hilfs-Container
     tragen muss (Konfigurationsdatei vorhanden, Projektpfad und Variablennamen
     zulässig), liest die Variablennamen aus dem Text der Konfiguration über

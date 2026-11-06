@@ -1278,6 +1278,8 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   "data": { "containerId": "0123…cdef", "stopped": true } }
 ```
 
+Zielbild, der Befehl ist noch nicht ausgeliefert (`devcontainer remove`):
+
 ```json
 { "status": "ok", "command": "devcontainer", "subcommand": "remove",
   "diagnostics": [], "exitCode": 0,
@@ -1285,7 +1287,7 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
             "removedVolumeNames": ["demo-workspace-…"] } }
 ```
 
-- **`devcontainer remove --json`** ([SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes)) liefert den Minimalkontrakt mit `subcommand: "remove"`; die Felder
+- **`devcontainer remove --json`** (Zielbild nach [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes); der Befehl hat im Code noch keine Entsprechung) liefert den Minimalkontrakt mit `subcommand: "remove"`; die Felder
   von `data` tragen kein `omitempty`: `containerId` (die volle Kennung, der leere String ohne Container),
   `stopped` (`true`, wenn der Befehl den Container gestoppt hat), `removed` (`true`, wenn er ihn entfernt hat) und
   `removedVolumeNames` (immer ein Array, `[]` ohne `--volumes`, ohne Container und bei einem Container ohne Volume).
@@ -1374,7 +1376,7 @@ in derselben PR ergänzen.
 | `egress list` ([slice-v1-cli-egress-anzeige](../plan/planning/done/slice-v1-cli-egress-anzeige.md); read-only, nur `Exists`/`ReadFile` auf `u-boot.yaml` und `.git/config`) | — | — | — | — | — | — | — | — |
 | `devcontainer up` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml`, schreibt keine Projektdatei) | — | — | — | — | — | — | — | — |
 | `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — | — |
-| `devcontainer remove` ([SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes); liest nichts, schreibt keine Projektdatei; die Wirkung ist die der Container-Engine: stoppt und entfernt den Container, mit `--volumes` seine Volumes; `--dry-run` und `--diff` werden abgewiesen) | — | — | — | — | — | — | — | — |
+| `devcontainer remove` (Zielbild nach [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes); noch nicht ausgeliefert; liest nichts, schreibt keine Projektdatei; die Wirkung ist die der Container-Engine: stoppt und entfernt den Container, mit `--volumes` seine Volumes; `--dry-run` und `--diff` werden abgewiesen) | — | — | — | — | — | — | — | — |
 | `devcontainer shell` ([slice-v1-cli-devcontainer-shell](../plan/planning/done/slice-v1-cli-devcontainer-shell.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml` wie `up`, schreibt keine Projektdatei, keine Mutation; kein `--json`, `--dry-run`, `--diff`) | — | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
