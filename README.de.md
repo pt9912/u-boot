@@ -8,7 +8,7 @@ Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
 OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
-> **Stand:** aktuelle Version `v0.23.0` (GHCR-Image, sechs Plattform-Binaries,
+> **Stand:** aktuelle Version `v0.24.0` (GHCR-Image, sechs Plattform-Binaries,
 > `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Aufgaben, Optionen und Voraussetzungen stehen im
 > [Benutzerhandbuch](docs/user/benutzerhandbuch.md); was jedes Release geändert hat,
 > steht in [`CHANGELOG.md`](CHANGELOG.md) und auf der
@@ -99,7 +99,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` und `.rpm` aus dem Release, amd64 und arm64):
 
 ```bash
-VERSION=0.23.0   # gewünschtes Release
+VERSION=0.24.0   # gewünschtes Release
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"

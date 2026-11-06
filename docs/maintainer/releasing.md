@@ -82,7 +82,7 @@ der **Ablauf** steht vollständig in diesem Dokument:
 ## 4. Vorab-Prüfung
 
 ```bash
-make gates            # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung
+make gates            # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung + tool-pruefung
 make ci               # gates + govulncheck + image-scan (Trivy HIGH/CRITICAL)
 make test-docker      # Integrationstests gegen die echte Docker Engine
 make fullbuild        # ci + Runtime-Image-Build
