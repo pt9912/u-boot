@@ -53,7 +53,7 @@ Pflichten der Closure (zählen nicht mit):
 
 **Rückführungen:** `in-progress` → `next`, wenn der CR-Wortlaut eine Spec-Stelle nicht trägt.
 
-**Bezug zum CR:** Der Start verlangt das Lastenheft `0.37.2` (Folgeänderungen nach dem Review und dem Nachlauf-Review des CR: Exit-Codes `10`, `0` und `12`, abgelehnte Abfrage, Abfrage nur bei einem Container zu entfernen, Zusage-Menge samt Image-Satz) freigegeben und in `done/` geschlossen; die Spezifikation präzisiert diesen Wortlaut.
+**Bezug zum CR:** Der Start verlangt das Lastenheft `0.37.3` (Folgeänderungen nach dem Review und den Nachlauf-Reviews des CR: Exit-Codes `10`, `0` und `12`, abgelehnte Abfrage, Abfrage nur bei einem Container zu entfernen, auch in der Regel zu destruktiven Operationen ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)), Zusage-Menge samt Image-Satz) freigegeben und in `done/` geschlossen; die Spezifikation präzisiert diesen Wortlaut.
 
 ## 5. Closure-Trigger
 
