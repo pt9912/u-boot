@@ -1,7 +1,7 @@
 # Review-Report (Nachlauf 3): slice-cr-devcontainer-remove, Folgeänderung Lastenheft 0.37.3 — 2026-11-06
 
 **Review-Art:** Nachlauf-Review zu einer Änderung des Wortlauts nach dem zweiten Nachlauf-Review (Beobachtung `BEO-DOK/vertragsaenderung-nach-review`, DoD-Zeile 7 des Slice). Vorlauf: [`2026-11-06-slice-cr-devcontainer-remove-nachlauf-2`](2026-11-06-slice-cr-devcontainer-remove-nachlauf-2.md).
-**Gegenstand:** `git diff 7f568768..18f07fcc` (HEAD), 8 Dateien, 213 Einfügungen, 32 Löschungen. Betroffen sind `spec/lastenheft.md` (drei Zeilen), der CR-Vorschlag [`cr-vorschlag-devcontainer-remove.md`](../plan/cr/cr-vorschlag-devcontainer-remove.md), der Slice [`slice-cr-devcontainer-remove`](../plan/planning/done/slice-cr-devcontainer-remove.md), [`open/README.md`](../plan/planning/open/README.md), die zwei Folge-Slices [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md) und [`slice-v2-spec-devcontainer-remove`](../plan/planning/done/slice-v2-spec-devcontainer-remove.md), die Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md) und der Report des Vorlaufs.
+**Gegenstand:** `git diff 7f568768..18f07fcc` (HEAD), 8 Dateien, 213 Einfügungen, 32 Löschungen. Betroffen sind `spec/lastenheft.md` (drei Zeilen), der CR-Vorschlag [`cr-vorschlag-devcontainer-remove.md`](../plan/cr/cr-vorschlag-devcontainer-remove.md), der Slice [`slice-cr-devcontainer-remove`](../plan/planning/done/slice-cr-devcontainer-remove.md), [`open/README.md`](../plan/planning/open/README.md), die zwei Folge-Slices [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md) und [`slice-v2-spec-devcontainer-remove`](../plan/planning/done/slice-v2-spec-devcontainer-remove.md), die Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md) und der Report des Vorlaufs.
 **Skill:** `.harness/skills/reviewer.md`. **Modell:** claude-sonnet-5-5.
 
 ## Eingangs-Kontext und Sensors
@@ -33,11 +33,11 @@
 **Risiko:** Der nächste Änderer wiederholt den Abgleich nach `AGENTS.md` §3.10 gegen `git diff --stat`, findet acht Dateien gegen sieben im Text und kann den Plan nicht auf einen Blick gegen den Diff halten; die Aussage „nicht versioniert“ hält niemand fest, weil kein Gate sie widerlegt.
 **Verifizierbar:** Review-only (`git ls-files`, `git diff --stat`)
 
-### LOW `docs/plan/planning/in-progress/slice-v1-devcontainer-remove.md` · „**Bedingungen des Lastenhefts `0.37.2` (Nachlauf-Review des CR):**“ — Überschrift der DoD-Zeile trägt die Version der Bedingungen 1 und 2, Bedingung 3 gehört zu `0.37.3`
+### LOW `docs/plan/planning/done/slice-v1-devcontainer-remove.md` · „**Bedingungen des Lastenhefts `0.37.2` (Nachlauf-Review des CR):**“ — Überschrift der DoD-Zeile trägt die Version der Bedingungen 1 und 2, Bedingung 3 gehört zu `0.37.3`
 
 **Klasse:** Zustandsmarker mit Ablaufpunkt nicht entfernt (Versionsangabe nicht mit dem Inhalt der Zeile fortgeschrieben)
 **Quelle:** `AGENTS.md` §3.10 (Aussagen im Plan nennen nur, was gelesen ist; Marker auf den Ist-Stand setzen); Skill LOW mit Konventions-Anker
-**Befund:** Die DoD-Zeile führt unter der Überschrift „`0.37.2`“ jetzt drei Punkte; der neue Punkt (3) nennt selbst „Lastenheft `0.37.3`, Zeile 214“. Die Plan-Tabelle des CR-Slice (Zeile zu [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md)) nennt „Punkt 3 der Bedingungen des Lastenhefts“ ohne Version und trägt die Zeile damit korrekt; nur die Überschrift der Zeile ist nicht fortgeschrieben.
+**Befund:** Die DoD-Zeile führt unter der Überschrift „`0.37.2`“ jetzt drei Punkte; der neue Punkt (3) nennt selbst „Lastenheft `0.37.3`, Zeile 214“. Die Plan-Tabelle des CR-Slice (Zeile zu [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md)) nennt „Punkt 3 der Bedingungen des Lastenhefts“ ohne Version und trägt die Zeile damit korrekt; nur die Überschrift der Zeile ist nicht fortgeschrieben.
 **Risiko:** Der Verifier des Umsetzungs-Slice sucht die Bedingungen der Version `0.37.3` und liest „`0.37.2`“; er kann Punkt 3 als überholt oder zu `0.37.2` gehörig lesen und den pinnenden Test des Falls (d) gegen Zeile 214 auslassen. Kein Gate prüft die Überschrift.
 **Verifizierbar:** Review-only
 
@@ -53,7 +53,7 @@
 
 **Klasse:** Bedingung in der Spec ohne pinnenden Test (offen im Umsetzungs-Slice)
 **Quelle:** `AGENTS.md` §3.10 (Bedingung in Spec oder Handbuch bekommt einen Test oder wird gestrichen)
-**Befund:** Die Bedingung ist neu in Zeile 214 und dieselbe wie in Satz 10 des Spiegelstrichs in [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten). Ein Test existiert nicht (Code des Befehls fehlt noch). Den Auftrag tragen der CR-Vorschlag (Abschnitt „Prüfung der Folgeänderung 0.37.3 gegen die Messgrenzen“, letzter Absatz) und Punkt (3) der DoD von [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md); er nennt beide Seiten (ohne Container `0`, mit Container `10`) und die zwei unveränderten Befehle (`down --volumes`, `remove --purge`: `10`).
+**Befund:** Die Bedingung ist neu in Zeile 214 und dieselbe wie in Satz 10 des Spiegelstrichs in [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten). Ein Test existiert nicht (Code des Befehls fehlt noch). Den Auftrag tragen der CR-Vorschlag (Abschnitt „Prüfung der Folgeänderung 0.37.3 gegen die Messgrenzen“, letzter Absatz) und Punkt (3) der DoD von [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md); er nennt beide Seiten (ohne Container `0`, mit Container `10`) und die zwei unveränderten Befehle (`down --volumes`, `remove --purge`: `10`).
 **Risiko:** keines im Diff; die Pflicht liegt beim Verifier des Umsetzungs-Slice.
 **Verifizierbar:** Review-only (Test im Umsetzungs-Slice)
 
@@ -63,7 +63,7 @@
 |---|---|
 | MEDIUM (Ausnahme der Version `0.37.2` widerspricht Zeile 214 von [`LH-FA-CLI-005A`](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)) | Aufgelöst. Zeile 214 trägt jetzt die Ausnahme am Satz, der den Befehl namentlich nennt, und verweist auf [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten). Die Zeilen 214 und 517 (Satz 10) und 522 (Fehlerklasse) sagen denselben Fall gleich: ohne Container zu entfernen kein Exit-Code `10`, Exit-Code `0`. Der Rang-1-interne Widerspruch ist damit nicht mehr im Wortlaut. |
 | LOW (Zustandsfeld `open/README.md` trägt die Versionskette) | Aufgelöst. Die Zeile nennt den Zustand (Lastenheft `0.37.3`, Wortlaut freigegeben, Nachlauf-Review offen, Closure offen) und verweist für die Fassungen auf den CR-Vorschlag; die Chronik steht dort einmal. Gleiche Form in der Welle (§1, §3, §5) und im Kopf des Slice. |
-| INFO (Image-Satz ohne pinnenden Test) | offen, unverändert; Auftrag in der DoD von [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md) Punkt (1) und in der Plan-Tabelle von [`slice-v2-spec-devcontainer-remove`](../plan/planning/done/slice-v2-spec-devcontainer-remove.md) |
+| INFO (Image-Satz ohne pinnenden Test) | offen, unverändert; Auftrag in der DoD von [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md) Punkt (1) und in der Plan-Tabelle von [`slice-v2-spec-devcontainer-remove`](../plan/planning/done/slice-v2-spec-devcontainer-remove.md) |
 | INFO (Spannung Exit-Code `2` und `10`) | offen, unverändert (INFO oben) |
 
 ## Geprüft ohne Befund
@@ -87,7 +87,7 @@
 
 ## Nicht geprüft
 
-- **Code, Tests, Docker-Pfad:** im Diff nicht berührt. Die Sentinel- und Diagnostic-Abdeckung von `remove` ist Aufgabe des Review von [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md).
+- **Code, Tests, Docker-Pfad:** im Diff nicht berührt. Die Sentinel- und Diagnostic-Abdeckung von `remove` ist Aufgabe des Review von [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md).
 - **Ob der Projektinhaber den Wortlaut `0.37.3` im Sitzungsdialog gesehen und freigegeben hat:** liegt im Sitzungsdialog und ist nicht belegbar; die Planungsstellen führen es als erfolgt.
 - **`--json` ohne `--yes` bei `remove --volumes` ohne Container:** der Lastenheft-Wortlaut sagt „nicht-interaktiver Modus“ und nennt `--json` nicht; [`SPEC-038`](../../spec/spezifikation.md#spec-038--bestätigungspfad-von-u-boot-down---volumes) behandelt `--json` für `down`. Für `remove` legt es die Spezifikation fest (Aufgabe von [`slice-v2-spec-devcontainer-remove`](../plan/planning/done/slice-v2-spec-devcontainer-remove.md)); nicht Gegenstand des Diffs, daher kein Finding.
 - **`make gates`:** nicht gefahren (Review-Rolle, Doku-Diff).

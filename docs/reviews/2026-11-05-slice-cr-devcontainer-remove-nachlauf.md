@@ -85,7 +85,7 @@ Beide Lesarten sind mit dem Wortlaut vereinbar. Das Skript bricht oder läuft du
 **Risiko:** Keines aus dem Diff; die Frage betrifft ebenso `down --volumes` und `remove --purge`.
 **Verifizierbar:** Review-only
 
-### INFO `docs/plan/planning/in-progress/slice-v1-devcontainer-remove.md` · „(e) abgelehnte Abfrage von `remove --volumes`“ — Machbarkeit des Falls (e) auf Ebene des gebauten Binary nicht belegt
+### INFO `docs/plan/planning/done/slice-v1-devcontainer-remove.md` · „(e) abgelehnte Abfrage von `remove --volumes`“ — Machbarkeit des Falls (e) auf Ebene des gebauten Binary nicht belegt
 
 **Klasse:** Plan-Aussage über ein Testmittel ohne gelesene Stelle
 **Quelle:** `AGENTS.md` §3.10; Zuständigkeit Implementer und Verifier des Umsetzungs-Slice
@@ -104,7 +104,7 @@ Beide Lesarten sind mit dem Wortlaut vereinbar. Das Skript bricht oder läuft du
 | F-5 (Abgrenzung) | Aufgelöst. Der Satz stimmt mit [`LH-FA-ADD-007`](../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) überein (Compose-Eintrag, `--purge`) und trägt die Gemeinsamkeit. |
 | F-6 (Zustandsmarker) | Der alte Marker ist entfernt. Mit 0.37.1 sind neue Marker entstanden, die der Commit überholt (erstes MEDIUM). |
 | F-7 (Spannung Exit-Code 2 und 10) | offen, im Slice §6 an den Architect adressiert |
-| F-8, F-9 | Testauftrag steht in [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md) §2. F-9 ist dieser Report. |
+| F-8, F-9 | Testauftrag steht in [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md) §2. F-9 ist dieser Report. |
 
 ## Geprüft ohne Befund
 
@@ -121,7 +121,7 @@ Beide Lesarten sind mit dem Wortlaut vereinbar. Das Skript bricht oder läuft du
 
 ## Nicht geprüft
 
-- **Code, Tests, Dual-Classifier, Docker-Pfad, Importregeln:** im Diff nicht berührt. Die Sentinel- und Diagnostic-Abdeckung von `remove` ist Aufgabe des Review von [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md).
+- **Code, Tests, Dual-Classifier, Docker-Pfad, Importregeln:** im Diff nicht berührt. Die Sentinel- und Diagnostic-Abdeckung von `remove` ist Aufgabe des Review von [`slice-v1-devcontainer-remove`](../plan/planning/done/slice-v1-devcontainer-remove.md).
 - **Ob der Projektinhaber den Wortlaut 0.37.1 gesehen hat:** liegt im Sitzungsdialog und ist nicht belegbar. Sicher ist nur, dass die Planungsstellen die Freigabe als ausstehend führen (siehe erstes MEDIUM).
 - **`make gates`:** nicht gefahren (Review-Rolle, Doku-Diff).
 

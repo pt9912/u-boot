@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** [`welle-devcontainer-remove`](../welle-devcontainer-remove.md), Release-Zuordnung offen. Erster von vier Slices. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../done/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](../in-progress/slice-v1-devcontainer-remove.md).
+**Welle:** [`welle-devcontainer-remove`](../welle-devcontainer-remove.md), Release-Zuordnung offen. Erster von vier Slices. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../done/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](../done/slice-v1-devcontainer-remove.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Scope: Grundlage der Änderung), [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) (Volume-Namen je Instanz).
 
@@ -129,7 +129,7 @@ Reports: Review [`2026-11-05-slice-v1-devcontainer-remove-messung`](../../../rev
   11. Die Rohdaten `rohdaten-aufraeumen.txt` stammen von einer früheren Fassung von `05-aufraeumen.sh`, deren spätere Änderung nur Kommentarzeilen betrifft; die Register-Datei der Volumes überdauert die Läufe von M1 bis M5 (Verification V-9, ohne Folge für die Aussagen).
   12. Release-Zuordnung offen (der Slice liefert kein Release-Artefakt).
 - **Abgleich der Plan-Tabelle** (`AGENTS.md` §3.10, Stand nach der letzten Fix-Runde und der Closure-Berichtigung): gegen `git diff --stat 642aefe7` (27 Dateien) und `git status` (vier ungetrackte Dateien: drei Evidence-Dateien des Registers, der Verification-Report) nach der letzten Änderung dieser Closure gelesen: jede Datei hat eine Zeile der Plan-Tabelle, jede Zeile eine Datei im Diff; die Zeile der Slice-Datei deckt auch §6 bis §8. Nach dem Move nach `done/` gilt der Abgleich erneut für die Verweis-Nachzüge von `make slice-mv`.
-- **Folge-Slices:** keine neue Datei. Die Reihe läuft weiter mit [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../done/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](../in-progress/slice-v1-devcontainer-remove.md).
+- **Folge-Slices:** keine neue Datei. Die Reihe läuft weiter mit [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../done/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](../done/slice-v1-devcontainer-remove.md).
 - **Risiken aus §6:** alle mit Ausgang (siehe §6): 1 offen mit Grenze, weitergereicht an den CR; 2 gemessen, mit Grenze; 3 und 4 angenommen (Planner-Entscheidungen oben).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
