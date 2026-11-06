@@ -224,8 +224,17 @@ P=.github/workflows/smoke.yml      # oder README.md
 
 2. **Quelle ändern.** `make gates` im Devcontainer-Container, auf `main` committen, Review und Verification der Quelle
    abwarten. Erst danach folgt der Push in den Tap.
-3. **Push in den Tap** per `gh api` mit `PUT` auf `contents/<Pfad>`. `sha` ist der Blob-sha der Datei, die ersetzt wird
-   (Schritt 1):
+3. **Push in den Tap** per `gh api` mit `PUT` auf `contents/<Pfad>`. Die Befehle lesen die Quelle aus dem Arbeitsbaum;
+   vorher muss dieser dem geprüften Commit auf `main` entsprechen: Arbeitsbaum sauber und die Quelle gleich `origin/main`
+   (beide Ausgaben leer):
+
+   ```bash
+   git fetch origin
+   git status --short
+   git diff origin/main -- packaging/homebrew-tap/
+   ```
+
+   `sha` ist der Blob-sha der Datei, die ersetzt wird (Schritt 1):
 
    ```bash
    B64=$(base64 -w0 < packaging/homebrew-tap/$P)   # Base64 der Quelle ohne Zeilenumbruch
@@ -272,14 +281,18 @@ P=.github/workflows/smoke.yml      # oder README.md
    früheren Revision der Quelle (`git show <Revision>:packaging/homebrew-tap/$P | base64 -w0`) und dem dann aktuellen
    `sha`.
 
-**Gelaufen und nicht gelaufen.** Die lesenden Befehle der Schritte 1, 4 und 5 sind gegen den Tap ausgeführt. Der Aufruf
-von Schritt 3 ist in dieser Form (mit vorher gesetzten Variablen, ohne `branch`) gelaufen und erzeugte einen Commit auf
-`main` des Tap für `.github/workflows/smoke.yml`; für `README.md` und für den Rückweg (Schritt 6) ist er nicht gelaufen.
-Die Zeile für `B64` ist nicht Teil dieses Laufs. Eine Probe, die nichts schreibt, gibt es für den Schreibschritt nicht;
-der Dispatch aus Schritt 5 ist ebenfalls nur berichtet, nicht von dieser Doku aus gelaufen.
+**Gelaufen und nicht gelaufen.** Die lesenden Befehle der Schritte 1, 4 und 5 sind gegen den Tap ausgeführt, ebenso die
+Befehle vor Schritt 3. Der Aufruf von Schritt 3 lief am 2026-11-06 durch den Hauptagenten (ohne `branch`, `B64` und `SHA`
+vorab gesetzt) und erzeugte im Tap den Commit `662c5fb5` auf `main`, der nur `.github/workflows/smoke.yml` änderte (+4,
+−1; Reviewer und Verifier haben ihn gelesen). Der Wortlaut stammt aus dem Sitzungsprotokoll des Hauptagenten; die Zeile
+für `B64` stand dort vorab, ihre Form im Block oben ist nicht gelaufen. Für `README.md` und für den Rückweg (Schritt 6)
+ist der Aufruf nicht gelaufen. Eine Probe, die nichts schreibt, gibt es für den Schreibschritt nicht; der Dispatch aus
+Schritt 5 ist ebenfalls nur berichtet.
 
 **Grenze.** Kein Skript, kein Gate und kein Test hält Quelle und Tap gleich oder schreibt diese zwei Dateien in den Tap:
 `scripts/tap-nachzug.sh` klont den Tap, kopiert die Formel nach `Formula/u-boot.rb` und fügt diese Datei hinzu (Zeilen
 25 bis 27 und 34); `scripts/tap-check.sh` führt `git push --dry-run` auf den geklonten Stand aus (Zeile 34) und belegt
 kein Recht für `.github/workflows/`. Der Vergleich der Schritte 1 und 4 ist die einzige Prüfung; dazwischen kann jede
 Seite allein geändert werden, und ein stabiler Tag startet den Smoke mit der Datei, die im Tap liegt.
+`base64 -w0` (Schritt 3 und 6) ist eine GNU-Option; ausgeführt wurde sie unter Linux, über andere Plattformen sagt der
+Abschnitt nichts.
