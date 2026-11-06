@@ -141,7 +141,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
       er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7
       notiert.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — hier geprüft, weil das Repo ohne
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — hier geprüft, weil das Repo ohne
       Wellen-Betrieb für diesen Slice arbeitet.
 
 ## 3. Plan (vor Code)
