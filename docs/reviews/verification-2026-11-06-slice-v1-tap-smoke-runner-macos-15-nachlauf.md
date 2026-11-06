@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`), nur lesend
 
-**Gegenstand:** [`slice-v1-tap-smoke-runner-macos-15`](../plan/planning/in-progress/slice-v1-tap-smoke-runner-macos-15.md), die Liefer-Punkte **Tap** und **Smoke** (Plan §2). Der erste Teil ([`verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15`](verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15.md)) hat Quelle, Gates und Plan-Tabelle bis `3e1d81a9` geprüft; sein Abschnitt *Übergabe → An den zweiten, lesenden Teil* ist der Prüfauftrag dieses Berichts. Lokaler Tip beim Nachlauf: `d665e62b` (Report des ersten Teils); der Arbeitsbaum war vor und nach allen Lesungen sauber, `git diff d665e62b HEAD` leer.
+**Gegenstand:** [`slice-v1-tap-smoke-runner-macos-15`](../plan/planning/done/slice-v1-tap-smoke-runner-macos-15.md), die Liefer-Punkte **Tap** und **Smoke** (Plan §2). Der erste Teil ([`verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15`](verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15.md)) hat Quelle, Gates und Plan-Tabelle bis `3e1d81a9` geprüft; sein Abschnitt *Übergabe → An den zweiten, lesenden Teil* ist der Prüfauftrag dieses Berichts. Lokaler Tip beim Nachlauf: `d665e62b` (Report des ersten Teils); der Arbeitsbaum war vor und nach allen Lesungen sauber, `git diff d665e62b HEAD` leer.
 
 **Umfang.** Gelesen wurde ausschließlich per `gh api` (GET) gegen `pt9912/homebrew-u-boot` und per lokalem `git`/`cmp`. Geschrieben habe ich in den Tap und auf GitHub nichts: kein Push, kein Dispatch, kein Cancel, kein Rerun. Plan und Quelle sind unverändert. Die Zeitangaben in den Metadaten sind UTC.
 
@@ -21,7 +21,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-tap-smoke-runner-macos-15`](../plan/planning/in-progress/slice-v1-tap-smoke-runner-macos-15.md)
+- Slice: [`slice-v1-tap-smoke-runner-macos-15`](../plan/planning/done/slice-v1-tap-smoke-runner-macos-15.md)
 - IDs: [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md)
 - Artefakte: `.github/workflows/smoke.yml` im Tap-Repo `pt9912/homebrew-u-boot` (Commit `662c5fb5`), Quelle `packaging/homebrew-tap/.github/workflows/smoke.yml`, Lauf `smoke` Run `42212837961`
 

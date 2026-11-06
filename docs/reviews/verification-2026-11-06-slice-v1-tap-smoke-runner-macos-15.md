@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
 
-**Gegenstand:** [`slice-v1-tap-smoke-runner-macos-15`](../plan/planning/in-progress/slice-v1-tap-smoke-runner-macos-15.md), Commit-Spanne `34de6de2^..3e1d81a9` (Plananlage bis lokaler Tip). Die Quelländerung ist `737dae18` (eine Datei, 4 Einfügungen, 1 Löschung); `3e1d81a9` legt den Review-Report ab und berichtigt den Plan (F-1 bis F-3). **Abgleichstand nach der letzten Fix-Runde = `3e1d81a9`**; der Arbeitsbaum war vor und nach allen Läufen sauber (`git status --short` leer).
+**Gegenstand:** [`slice-v1-tap-smoke-runner-macos-15`](../plan/planning/done/slice-v1-tap-smoke-runner-macos-15.md), Commit-Spanne `34de6de2^..3e1d81a9` (Plananlage bis lokaler Tip). Die Quelländerung ist `737dae18` (eine Datei, 4 Einfügungen, 1 Löschung); `3e1d81a9` legt den Review-Report ab und berichtigt den Plan (F-1 bis F-3). **Abgleichstand nach der letzten Fix-Runde = `3e1d81a9`**; der Arbeitsbaum war vor und nach allen Läufen sauber (`git status --short` leer).
 
 **Umfang dieses Teils.** Nach Plan §2 (Zeile „Verification-Report“) prüft dieser Teil vor dem Push in den Tap: die Quelle, die Gates und die Plan-Tabelle. Die Liefer-Punkte **Tap** und **Smoke** stehen aus; der Hauptagent führt sie nach diesem Bericht aus, ein zweiter, nur lesender Teil prüft sie nach. Dieser Bericht behauptet für beide Punkte nichts.
 
@@ -19,7 +19,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-tap-smoke-runner-macos-15`](../plan/planning/in-progress/slice-v1-tap-smoke-runner-macos-15.md)
+- Slice: [`slice-v1-tap-smoke-runner-macos-15`](../plan/planning/done/slice-v1-tap-smoke-runner-macos-15.md)
 - IDs: [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md)
 - Artefakte: `packaging/homebrew-tap/.github/workflows/smoke.yml` (Quelle); Tap-Repo `pt9912/homebrew-u-boot`, `.github/workflows/smoke.yml` (extern, noch unverändert)
 
@@ -100,7 +100,7 @@ Diff: 5 Dateien, 385 Einfügungen, 2 Löschungen.
 | Diff-Datei | Plan-Zeile (§3) | Abgleich |
 |---|---|---|
 | `packaging/homebrew-tap/.github/workflows/smoke.yml` (+4/−1) | update (Matrix-Zeile 27, Kommentar 24 bis 26) | deckt; Zeilennummern des Endstands gelesen |
-| [Slice-Plan](../plan/planning/in-progress/slice-v1-tap-smoke-runner-macos-15.md) (+300) | neu | deckt |
+| [Slice-Plan](../plan/planning/done/slice-v1-tap-smoke-runner-macos-15.md) (+300) | neu | deckt |
 | `docs/plan/planning/open/README.md` (+1) | update (Bestandszeile) | deckt; Zeile 14 gelesen: verweist auf `../in-progress/`, Text „liegt in `in-progress/`, in Umsetzung“ |
 | `docs/plan/planning/in-progress/roadmap.md` (−1) | update (Ruhe-Marker entfällt) | deckt; `git show 026fefb5`: gelöscht ist die Zeile „Nichts in Arbeit.“; sie steht nicht mehr in `roadmap.md` (Suche) |
 | [Review-Report](2026-11-06-slice-v1-tap-smoke-runner-macos-15.md) (+80) | neu (Review-Report) | deckt |
