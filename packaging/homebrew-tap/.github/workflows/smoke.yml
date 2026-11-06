@@ -21,7 +21,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [macos-14, macos-15-intel]
+        # Beide Labels nennen die macOS-Version ausdruecklich (arm64 macos-15,
+        # amd64 macos-15-intel); ein Versionswechsel ist eine Aenderung dieser
+        # Zeile in Vorlage und Tap, kein wanderndes macos-latest.
+        runner: [macos-15, macos-15-intel]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Tap und Install aus dem Tap
