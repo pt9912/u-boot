@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
 
-**Gegenstand:** [`slice-v1-tap-nachzug-verfahren-doku`](../plan/planning/in-progress/slice-v1-tap-nachzug-verfahren-doku.md), Commit-Spanne `8074e4cf^..8cc97257` (Plananlage bis Tip). Die Umsetzung ist `11fc3b01` (zwei Dateien), der Review-Report liegt in `8558da8b`, der Review-Fix in `8cc97257` (eine Datei, `releasing.md`). **Abgleichstand nach der letzten Fix-Runde = `8cc97257`**; der Arbeitsbaum war vor und nach allen Läufen sauber (`git status --short` leer).
+**Gegenstand:** [`slice-v1-tap-nachzug-verfahren-doku`](../plan/planning/done/slice-v1-tap-nachzug-verfahren-doku.md), Commit-Spanne `8074e4cf^..8cc97257` (Plananlage bis Tip). Die Umsetzung ist `11fc3b01` (zwei Dateien), der Review-Report liegt in `8558da8b`, der Review-Fix in `8cc97257` (eine Datei, `releasing.md`). **Abgleichstand nach der letzten Fix-Runde = `8cc97257`**; der Arbeitsbaum war vor und nach allen Läufen sauber (`git status --short` leer).
 
 **Umfang.** Der Slice schreibt nichts in den Tap; es gibt keinen Nachlauf-Teil. Dieser Bericht prüft die Dokumentation, die Gates, die Plan-Tabelle, den Tap-Zustand (nur `gh api` GET) und führt die lesenden Befehle von `releasing.md` §9 selbst aus. Der Schreibschritt (Schritt 3), der Dispatch (Schritt 5, erste Zeile) und der Rückweg (Schritt 6) sind von mir nicht ausgeführt; das ist Auftragsgrenze, kein Befund.
 
@@ -19,7 +19,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-tap-nachzug-verfahren-doku`](../plan/planning/in-progress/slice-v1-tap-nachzug-verfahren-doku.md)
+- Slice: [`slice-v1-tap-nachzug-verfahren-doku`](../plan/planning/done/slice-v1-tap-nachzug-verfahren-doku.md)
 - IDs: [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md)
 - Artefakte: `docs/maintainer/releasing.md` (§2, §4, §8, neuer §9), `docs/maintainer/README.md` (Zeile 10); Tap-Repo `pt9912/homebrew-u-boot` (nur gelesen)
 
@@ -87,7 +87,7 @@ Die Seite „Create or update file contents“ der GitHub-REST-Dokumentation (`d
 |---|---|
 | `docs/maintainer/releasing.md` (+108 −…) | ja, „update“ (§9 und drei Verweise) |
 | `docs/maintainer/README.md` (1 Zeile) | ja, „update“ |
-| [Plan-Datei des Slice](../plan/planning/in-progress/slice-v1-tap-nachzug-verfahren-doku.md) in `in-progress/` (neu) | ja, „neu“ |
+| [Plan-Datei des Slice](../plan/planning/done/slice-v1-tap-nachzug-verfahren-doku.md) in `in-progress/` (neu) | ja, „neu“ |
 | `docs/plan/planning/open/README.md` | ja, „update“ (Bestandszeile folgt dem Slice) |
 | `docs/plan/planning/in-progress/roadmap.md` (−2: Ruhe-Marker) | ja, „unverändert bis zum Start; dann update, Nettodiff der Spanne leer“ — der Zustand ist für `in-progress` richtig; die Closure stellt den Marker wieder her, danach fehlt die Datei im `--stat` |
 | [Review-Report](2026-11-06-slice-v1-tap-nachzug-verfahren-doku.md) (neu) | ja |

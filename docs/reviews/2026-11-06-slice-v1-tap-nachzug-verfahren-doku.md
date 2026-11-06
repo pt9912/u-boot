@@ -2,7 +2,7 @@
 
 **Review-Art:** Code (Dokumentations-Diff) — geprüft gegen Plan, Entscheidungen und Hard Rules.
 
-**Gegenstand:** [`slice-v1-tap-nachzug-verfahren-doku`](../plan/planning/in-progress/slice-v1-tap-nachzug-verfahren-doku.md), Commit `11fc3b01` gegen `0afd3272` (zwei Dateien:
+**Gegenstand:** [`slice-v1-tap-nachzug-verfahren-doku`](../plan/planning/done/slice-v1-tap-nachzug-verfahren-doku.md), Commit `11fc3b01` gegen `0afd3272` (zwei Dateien:
 `docs/maintainer/releasing.md`, `docs/maintainer/README.md`).
 
 **Skill:** `.harness/skills/reviewer.md` @ `11fc3b01`
@@ -10,7 +10,7 @@
 
 **Eingangs-Kontext:**
 
-- Slice-Plan [`slice-v1-tap-nachzug-verfahren-doku`](../plan/planning/in-progress/slice-v1-tap-nachzug-verfahren-doku.md) (DoD, §3 Plan-Tabelle, §4 Entscheidungen, §6 Risiken)
+- Slice-Plan [`slice-v1-tap-nachzug-verfahren-doku`](../plan/planning/done/slice-v1-tap-nachzug-verfahren-doku.md) (DoD, §3 Plan-Tabelle, §4 Entscheidungen, §6 Risiken)
 - [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md) (Entscheidung 5, Smoke im Tap); [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung)
 - `AGENTS.md` (Hard Rules, besonders §3.1, §3.7, §3.10), `harness/conventions.md`
 - gelesene Fundstellen im Code: `packaging/homebrew-tap/.github/workflows/smoke.yml`, `scripts/tap-nachzug.sh`,
