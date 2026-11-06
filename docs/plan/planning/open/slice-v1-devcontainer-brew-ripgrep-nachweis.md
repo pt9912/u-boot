@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Folge-Slice von [`slice-v1-devcontainer-brew-ripgrep-im-repo`](../done/slice-v1-devcontainer-brew-ripgrep-im-repo.md), das mit „`rg` nicht gemessen“ geschlossen wurde; er übernimmt dessen Rest- und Folgepunkte 1 (`rg`-Nachweis) und 2 (Lock-Schritt), §7 dort. Entscheidung des Projektinhabers 2026-11-06 (Sitzungsdialog): Der Nachweis ist ein eigener Slice; er kommt **vom Projektinhaber nach dem Release `v0.24.0`**, auf einem Docker-Host außerhalb des Agenten-Containers. Der Cut [`slice-v1-release-cut-v0.24.0`](../next/slice-v1-release-cut-v0.24.0.md) behauptet nichts über `rg` im Container und führt den Nachweis nur als Rest-Punkt. Eine Closure-Bedingung, die von der DoD dieses Slice verschieden ist, gibt es nicht.
+**Welle:** ohne Welle. Folge-Slice von [`slice-v1-devcontainer-brew-ripgrep-im-repo`](../done/slice-v1-devcontainer-brew-ripgrep-im-repo.md), das mit „`rg` nicht gemessen“ geschlossen wurde; er übernimmt dessen Rest- und Folgepunkte 1 (`rg`-Nachweis) und 2 (Lock-Schritt), §7 dort. Entscheidung des Projektinhabers 2026-11-06 (Sitzungsdialog): Der Nachweis ist ein eigener Slice; er kommt **vom Projektinhaber nach dem Release `v0.24.0`**, auf einem Docker-Host außerhalb des Agenten-Containers. Der Cut [`slice-v1-release-cut-v0.24.0`](../in-progress/slice-v1-release-cut-v0.24.0.md) behauptet nichts über `rg` im Container und führt den Nachweis nur als Rest-Punkt. Eine Closure-Bedingung, die von der DoD dieses Slice verschieden ist, gibt es nicht.
 
 **Bezug:** [`LH-FA-DEV-013`](../../../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer) (Formel-Liste im Devcontainer), [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) (der eigene Devcontainer ist das erzeugte Projekt), [`LH-FA-DEV-011`](../../../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette) (die acht Werkzeuge der Prüfung, die Homebrew nicht überdecken darf); [`ADR-0046`](../../adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md) (Re-Evaluierungs-Trigger bei einem Befund am Block).
 
@@ -76,7 +76,7 @@ Kein Test: Der Slice ändert keinen Code. Die Befehle sind ein Handlauf des Proj
 
 ## 4. Trigger
 
-**Start** (`open` → `next` → `in-progress`): Der Release `v0.24.0` ist geschnitten (Tag gesetzt, `publish` kontrolliert; [`slice-v1-release-cut-v0.24.0`](../next/slice-v1-release-cut-v0.24.0.md) liegt in `done/`), **und** der Projektinhaber erbringt den Nachweis (Image- und/oder Container-Ebene) und legt die Ausgaben vor; kein anderer Slice in `in-progress/` (WIP-Limit 1). Ohne beides bleibt der Slice in `open/`.
+**Start** (`open` → `next` → `in-progress`): Der Release `v0.24.0` ist geschnitten (Tag gesetzt, `publish` kontrolliert; [`slice-v1-release-cut-v0.24.0`](../in-progress/slice-v1-release-cut-v0.24.0.md) liegt in `done/`), **und** der Projektinhaber erbringt den Nachweis (Image- und/oder Container-Ebene) und legt die Ausgaben vor; kein anderer Slice in `in-progress/` (WIP-Limit 1). Ohne beides bleibt der Slice in `open/`.
 
 **Rückführungen — vorab benannt:**
 
