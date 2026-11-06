@@ -1,6 +1,6 @@
 # Architektur — u-boot
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-21.
+**Status:** Aktiv. **Letzte Änderung:** 2026-11-06.
 
 **Bezug:** [`SPEC-012`](spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal), [`SPEC-013`](spezifikation.md#spec-013--import-regel-tabelle-der-schichten) und [`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln)
 
@@ -127,7 +127,7 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
     (`GenerateService`), sodass Anzeige und erzeugtes Startscript dieselbe Liste
     tragen.
   - `DevcontainerStartService` — den Devcontainer des Projekts ohne Editor
-    starten, stoppen und betreten
+    starten, stoppen, entfernen und betreten
     ([`LH-FA-DEV-010`](lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
     Einzelheiten [`SPEC-049`](spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)).
     `Up` und `Shell` teilen eine Startphase: Sie prüft, was der Hilfs-Container
@@ -295,15 +295,18 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
 Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
 - **Inhalt:** `cli/` mit Cobra. Pro Subkommando ein eigenes Cobra-Command in einer eigenen Datei.
-  - Implementiert sind `init`, `add`, `remove`, `up`, `down`, `logs`, `doctor`,
+  - Subkommandos sind `init`, `add`, `remove`, `up`, `down`, `logs`, `doctor`,
     `generate`, `config` (mit `get`/`set`), `egress` (mit `list`), `devcontainer`
-    (mit `up`/`down`/`shell`) und `template` (mit `list`). `egress list` ist ein reiner
+    (mit `up`/`down`/`remove`/`shell`) und `template` (mit `list`). `egress list` ist ein reiner
     Abfragebefehl: Er weist `--dry-run` und `--diff` mit Exit-Code 2 ab, behält
     seine Ausgabe unter `--quiet` und trägt eine eigene Diagnostic-Abbildung
-    (§7.2). `devcontainer up`, `devcontainer down` und `devcontainer shell`
-    weisen `--dry-run` und `--diff` ebenfalls mit Exit-Code 2 ab (sie schreiben
-    keine Projektdatei), der Aufruf ohne Unterbefehl endet mit Exit-Code 2, und
-    jeder der drei Unterbefehle trägt eine eigene Diagnostic-Abbildung (§7.2).
+    (§7.2). `devcontainer up`, `devcontainer down`, `devcontainer remove` und
+    `devcontainer shell` weisen `--dry-run` und `--diff` ebenfalls mit Exit-Code 2
+    ab (sie schreiben keine Projektdatei), der Aufruf ohne Unterbefehl endet mit
+    Exit-Code 2, und jeder der vier Unterbefehle trägt eine eigene
+    Diagnostic-Abbildung (§7.2). `devcontainer remove` entfernt mit `--volumes`
+    Daten und geht deshalb über das Bestätigungs-Gate (§7.1); es liest keine
+    Projektdatei und braucht keinen Hilfs-Container.
     `devcontainer shell` weist außerdem `--json` mit Exit-Code 2 ab (der
     Befehl ist interaktiv, die Standardausgabe gehört der Sitzung), schreibt selbst
     nur auf die Standardfehlerausgabe und reicht Standardeingabe,
@@ -378,7 +381,7 @@ deklariert.
 
 | ID | System | Rolle | Sichtbar in Schicht | Substituierbarkeit |
 | --- | --- | --- | --- | --- |
-| `ARC-008` | Container-Runtime mit Compose-Schnittstelle (Docker-API-kompatibles Binary auf `$PATH`) | Diagnose (read-only Probes, Statusdateien des Devcontainer-Containers), Lifecycle-Operationen der erzeugten Umgebung, der kurzlebige Hilfs-Container, der mit dem Engine-Socket die gepinnte Dev-Container-CLI aus dem lokal gebauten Hilfs-Image ausführt, und die Sitzung von `devcontainer shell` (`docker exec` des Host-Clients) | `adapter/driven` (hinter `DockerProbe`/`DockerEngine`/`DevcontainerInspector`/`DevcontainerLauncher`) | hoch — die Application kennt nur die Ports; ein Podman-Setup funktioniert als Drop-in (für den Hilfs-Container des `DevcontainerLauncher` ist Podman als Host-Engine nicht zugesagt), ein SDK-basierter Adapter wäre ein Paket-Austausch ohne Änderung an `application` |
+| `ARC-008` | Container-Runtime mit Compose-Schnittstelle (Docker-API-kompatibles Binary auf `$PATH`) | Diagnose (read-only Probes, Statusdateien des Devcontainer-Containers), Lifecycle-Operationen der erzeugten Umgebung, das Entfernen des Containers eines Devcontainers und seiner Volumes (`devcontainer remove`), der kurzlebige Hilfs-Container, der mit dem Engine-Socket die gepinnte Dev-Container-CLI aus dem lokal gebauten Hilfs-Image ausführt, und die Sitzung von `devcontainer shell` (`docker exec` des Host-Clients) | `adapter/driven` (hinter `DockerProbe`/`DockerEngine`/`DevcontainerInspector`/`DevcontainerLauncher`) | hoch — die Application kennt nur die Ports; ein Podman-Setup funktioniert als Drop-in (für den Hilfs-Container des `DevcontainerLauncher` ist Podman als Host-Engine nicht zugesagt), ein SDK-basierter Adapter wäre ein Paket-Austausch ohne Änderung an `application` |
 | `ARC-009` | CLI-Framework (Kommando-/Flag-Parsing) | Aufbau des Kommando-Baums, Flag-Bindung, Hilfe-Ausgabe | ausschließlich `adapter/driving/cli` | hoch — kein Port, kein Use-Case und kein Domänentyp kennt das Framework; der Austausch bleibt im Driving-Adapter |
 | `ARC-010` | YAML-Serialisierung | Lesen/Schreiben der Projektkonfiguration und der Compose-Datei | `adapter/driven` (hinter `YAMLCodec`) | hoch — ein Adapter-Paket |
 | `ARC-011` | `git`-Binary | optionale Repository-Initialisierung beim Anlegen eines Projekts | `adapter/driven` (hinter `Git`) | hoch — fehlt es, degradiert der Pfad kontrolliert; die Application sieht nur den Port |
@@ -653,7 +656,7 @@ keine Exit-Codes; der Adapter kennt keine Use-Case-Interna.
 | Diagnose-Befund im strikten Modus | `hexagon/application` (Report), Schwelle im Adapter | `adapter/driving` | 11 | Report-Ausgabe, Severity je Befund |
 | Container-Runtime nicht erreichbar (auch: entfernte Engine beim Devcontainer-Start) | `port/driven`-Sentinel aus dem Adapter | `adapter/driving` | 11 | Fehlertext mit Reparaturhinweis |
 | Abbruch eines Startscripts im gestarteten Devcontainer (Statusdatei `failed`) nach dem Lauf der Dev-Container-CLI, gelungen oder fehlgeschlagen | `hexagon/application` als `port/driving`-Sentinel, anhand der Statusdateien | `adapter/driving` | 11 | nach einem Fehler der CLI der Fehlertext mit dem Ende ihrer Ausgabe, nach einem gelungenen Lauf der Satz der Fähigkeit mit dem Hinweis, dass der Aufruf das Startscript nicht ausführte |
-| Laufzeitfehler der Runtime (Compose-Start, Stabilisierungs-Timeout; Bau des Hilfs-Images, Start des Hilfs-Containers und Fehler der Dev-Container-CLI beim Devcontainer-Start; Probe der Sitzung von `devcontainer shell` und Fehler des Clients vor dem Beginn der Sitzung) | `port/driven`- bzw. `port/driving`-Sentinel | `adapter/driving` | 12 | Fehlertext, ggf. Teil-Status |
+| Laufzeitfehler der Runtime (Compose-Start, Stabilisierungs-Timeout; Bau des Hilfs-Images, Start des Hilfs-Containers und Fehler der Dev-Container-CLI beim Devcontainer-Start; Stoppen und Entfernen von Container und Volumes bei `devcontainer remove`; Probe der Sitzung von `devcontainer shell` und Fehler des Clients vor dem Beginn der Sitzung) | `port/driven`- bzw. `port/driving`-Sentinel | `adapter/driving` | 12 | Fehlertext, ggf. Teil-Status |
 | Technischer Dateisystem-/Persistenzfehler (unerwartete IO-, Permission-, Backup-Slot-Fehler) | `hexagon/application` als `port/driving`-Sentinel | `adapter/driving` | 14 | Fehlertext; Plan-Phase verhindert Teil-Schreibzustände |
 | Alles übrige | — | `adapter/driving` | 1 | generischer Fehlertext |
 

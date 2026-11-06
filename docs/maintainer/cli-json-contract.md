@@ -1241,7 +1241,7 @@ Datum, keine Diagnose:
   `command: "egress"` verpflichtend; `checkSubcommand` in `jsontestutil` prüft es, das Enum prüft
   `jsontestutil` nicht.
 
-### 6.11 `u-boot devcontainer up --json` / `devcontainer down --json` (slice-v1-cli-devcontainer-up-down); `devcontainer shell` (slice-v1-cli-devcontainer-shell)
+### 6.11 `u-boot devcontainer up --json` / `devcontainer down --json` (slice-v1-cli-devcontainer-up-down); `devcontainer remove --json`; `devcontainer shell` (slice-v1-cli-devcontainer-shell)
 
 `u-boot devcontainer shell` hat keine `--json`-Ausgabe: Der Befehl öffnet eine
 interaktive Sitzung, und die Standardausgabe gehört ihr. `--json` endet mit
@@ -1277,6 +1277,25 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   "diagnostics": [], "exitCode": 0,
   "data": { "containerId": "0123…cdef", "stopped": true } }
 ```
+
+```json
+{ "status": "ok", "command": "devcontainer", "subcommand": "remove",
+  "diagnostics": [], "exitCode": 0,
+  "data": { "containerId": "0123…cdef", "stopped": true, "removed": true,
+            "removedVolumeNames": ["demo-workspace-…"] } }
+```
+
+- **`devcontainer remove --json`** ([SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes)) liefert den Minimalkontrakt mit `subcommand: "remove"`; die Felder
+  von `data` tragen kein `omitempty`: `containerId` (die volle Kennung, der leere String ohne Container),
+  `stopped` (`true`, wenn der Befehl den Container gestoppt hat), `removed` (`true`, wenn er ihn entfernt hat) und
+  `removedVolumeNames` (immer ein Array, `[]` ohne `--volumes`, ohne Container und bei einem Container ohne Volume).
+  `status` ist `ok` und `diagnostics` leer, denn der Befehl trägt keine Ausweisung (kein Hilfs-Container, kein Socket).
+  Es gibt keine Abfrage: `--volumes` ohne `--yes` bei einem Container zu entfernen endet mit Exit 10 und einem
+  Fehler-Umschlag, `--volumes` ohne Container mit Exit 0 und `removed: false`. Ein Fehler-Umschlag trägt keine `data`;
+  der Code der Diagnose ist [LH-FA-DEV-010](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) für
+  die Klassen 10, 11 und 12, [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) für 2 und 1,
+  [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) für `--yes` zusammen mit
+  `--no-interactive`. Die Tabelle der Sentinels unten führt `up` und `down`; die Exit-Codes von `remove` stehen in [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes).
 
 - **`status` von `up` ist `warn`, auch im Erfolgsfall.** Die Ausweisung der
   Socket-Lockerung ist eine Warnung ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
@@ -1355,6 +1374,7 @@ in derselben PR ergänzen.
 | `egress list` ([slice-v1-cli-egress-anzeige](../plan/planning/done/slice-v1-cli-egress-anzeige.md); read-only, nur `Exists`/`ReadFile` auf `u-boot.yaml` und `.git/config`) | — | — | — | — | — | — | — | — |
 | `devcontainer up` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml`, schreibt keine Projektdatei) | — | — | — | — | — | — | — | — |
 | `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — | — |
+| `devcontainer remove` ([SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes); liest nichts, schreibt keine Projektdatei; die Wirkung ist die der Container-Engine: stoppt und entfernt den Container, mit `--volumes` seine Volumes; `--dry-run` und `--diff` werden abgewiesen) | — | — | — | — | — | — | — | — |
 | `devcontainer shell` ([slice-v1-cli-devcontainer-shell](../plan/planning/done/slice-v1-cli-devcontainer-shell.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml` wie `up`, schreibt keine Projektdatei, keine Mutation; kein `--json`, `--dry-run`, `--diff`) | — | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
