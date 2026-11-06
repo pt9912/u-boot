@@ -440,7 +440,7 @@ wiederholte, was nur der Hauptagent berichtet, und was niemand las.
   `BEO-DOK/zusage-weiter-als-messung`, `BEO-DOK/unumkehrbarer-schritt-vor-der-kontrolle` und
   `BEO-WZG/kopplung-nicht-nachgezogen` existieren als Verzeichnis, jedes mit nicht leerem `evidence/` (geprüft nach dem Move).
 - **Plan-Tabelle gegen `git diff --stat cf4c3cb8..HEAD`** (`AGENTS.md` §3.10; Stand nach der letzten Fix-Runde `f902d127`,
-  Spitze nach dem Ruhe-Marker-Commit): 9 Dateien — `docs/maintainer/releasing.md`, `docs/maintainer/README.md`, diese Datei
+  Spitze nach dem Ruhe-Marker-Commit `932626f3`): 8 Dateien — `docs/maintainer/releasing.md`, `docs/maintainer/README.md`, diese Datei
   (neu, am Ruheort `done/`), `open/README.md`, der Review-Report, der Verification-Report (mit Nachtrag und Nachtrag 2),
   die neue Evidence-Datei und `state.md` von `BEO-DOK/plan-aussage-ueber-code/`. Die Plan-Tabelle führt jede davon; die
   Roadmap steht nicht in der Stat, weil der Start-Commit `0afd3272` den Ruhe-Marker entfernt und die Closure ihn an derselben
