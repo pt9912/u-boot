@@ -30,8 +30,9 @@ const (
 	// inspectorTimeout bounds every engine call of the inspector: the
 	// callers (doctor, generate, init) must not hang on a stale socket.
 	inspectorTimeout = 10 * time.Second
-	// inspectorOutputLimit bounds the text read from `docker ps` and
-	// `docker context inspect`.
+	// inspectorOutputLimit bounds the text read from `docker ps`,
+	// `docker context inspect`, `docker inspect` and `docker volume ls`;
+	// ExistingVolumes treats a full read as an incomplete list.
 	inspectorOutputLimit = 1 << 20
 	// inspectorStderrLimit bounds the stderr text kept for classifying a
 	// failed command.

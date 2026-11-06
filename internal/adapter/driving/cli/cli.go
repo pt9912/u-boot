@@ -79,7 +79,7 @@ type App struct {
 	// the command fail with a wiring error.
 	egressListUseCase driving.EgressListUseCase
 
-	// devcontainerUseCase implements `u-boot devcontainer up|down|shell`
+	// devcontainerUseCase implements `u-boot devcontainer up|down|shell|remove`
 	// (LH-FA-DEV-010). Set through [WithDevcontainerUseCase]; nil makes
 	// the commands fail with a wiring error.
 	devcontainerUseCase driving.DevcontainerUseCase

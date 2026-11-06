@@ -162,8 +162,8 @@ Zwei Einschränkungen im Container:
   mit `?` markiert. Auch die Prüfung des Geräts `/dev/fuse` entfällt (Eintrag
   `devcontainer.sandbox.runtime`, Info): das Gerät im Image gehört dem
   u-boot-Container, nicht dem Container-Host. Auch `up`, `down`, `logs`,
-  `devcontainer up`, `devcontainer down`, `devcontainer shell` und `devcontainer remove` laufen im Image nicht, weil dort kein Docker
-  vorhanden ist (Exit-Code 11).
+  `devcontainer up`, `devcontainer down`, `devcontainer shell` und `devcontainer remove` sind im Image nicht
+  zugesagt; ohne `docker` im `PATH` enden sie mit Exit-Code 11.
 
 Für den Alltag ist ein installiertes Programm bequemer als das Image.
 
@@ -1116,7 +1116,7 @@ u-boot devcontainer remove --instance agent-1 --volumes --yes   # ohne Rückfrag
 **Exit-Codes von `devcontainer remove`:** `0` Erfolg (auch ohne Container zu entfernen); `2` falsche Benutzung
 (`--dry-run`, `--diff`, Argumente, `--yes` zusammen mit `--no-interactive`); `10` ein ungültiger Instanzname, ohne
 `--instance` nur Container von Instanzen, oder `--volumes` ohne Zustimmung (abgelehnt, Antwort nicht lesbar,
-`--no-interactive` oder `--json` ohne `--yes`); `11` kein `docker` im `PATH` (so auch im Container-Image von `u-boot`), der Daemon antwortet
+`--no-interactive` oder `--json` ohne `--yes`); `11` kein `docker` im `PATH` (im Container-Image von `u-boot` ist der Befehl nicht zugesagt), der Daemon antwortet
 nicht, die Engine ist nicht lokal oder die Engine lässt sich nicht befragen; `12` `docker stop`, `docker rm` oder `docker volume rm` scheitert,
 oder ein Volume besteht danach noch (die Meldung nennt den Schritt, die Meldung der Engine und die entfernten und die
 bestehenden Volumes). Der Exit-Code `14` kommt nicht vor, weil der Befehl keine Projektdatei liest.
