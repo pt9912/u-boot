@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
 
-**Gegenstand:** [`slice-v1-devcontainer-brew-ripgrep-im-repo`](../plan/planning/in-progress/slice-v1-devcontainer-brew-ripgrep-im-repo.md), Commit-Spanne `7fbad506..ee2db629` (Start-Commit bis lokaler Tip). Der Umsetzungs-Commit ist `9d255cbb` (4 Dateien, 39 Einfügungen, 5 Löschungen); `ee2db629` ändert nur den Review-Report und eine Zeile der Plan-Tabelle (`git diff --stat 9d255cbb ee2db629`: 2 Dateien, 80 Einfügungen). **Abgleichstand nach der letzten Fix-Runde = `ee2db629`** (Arbeitsbaum vor diesem Report sauber).
+**Gegenstand:** [`slice-v1-devcontainer-brew-ripgrep-im-repo`](../plan/planning/done/slice-v1-devcontainer-brew-ripgrep-im-repo.md), Commit-Spanne `7fbad506..ee2db629` (Start-Commit bis lokaler Tip). Der Umsetzungs-Commit ist `9d255cbb` (4 Dateien, 39 Einfügungen, 5 Löschungen); `ee2db629` ändert nur den Review-Report und eine Zeile der Plan-Tabelle (`git diff --stat 9d255cbb ee2db629`: 2 Dateien, 80 Einfügungen). **Abgleichstand nach der letzten Fix-Runde = `ee2db629`** (Arbeitsbaum vor diesem Report sauber).
 
 **Push-Stand (gelesen am 2026-11-06, 07:42 UTC):** `origin/main` steht auf `9d255cbb`; `ee2db629` ist **nicht gepusht**. Der CI-Beleg dieses Reports gilt dem **Push-Tip `9d255cbb`**, nicht dem lokalen HEAD (siehe V-1).
 
@@ -19,7 +19,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-devcontainer-brew-ripgrep-im-repo`](../plan/planning/in-progress/slice-v1-devcontainer-brew-ripgrep-im-repo.md)
+- Slice: [`slice-v1-devcontainer-brew-ripgrep-im-repo`](../plan/planning/done/slice-v1-devcontainer-brew-ripgrep-im-repo.md)
 - IDs: [`LH-FA-DEV-013`](../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), [`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen), [`ADR-0046`](../plan/adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md), [`ADR-0043`](../plan/adr/0043-nur-devcontainer-bau-pfad.md)
 - Artefakte: `u-boot.yaml`, `.devcontainer/Dockerfile`, `.devcontainer/devcontainer.json`, `docs/maintainer/devcontainer-arbeiten.md`, `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md`
 
