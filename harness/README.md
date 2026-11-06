@@ -86,6 +86,7 @@ Diese Datei dupliziert sie nicht.
 | `make dev-up` | startet den Devcontainer mit `u-boot devcontainer up` (`RECREATE=1` legt ihn neu an, `INSTANCE=<name>` wählt eine Instanz und reicht sie als `--instance <name>` weiter); setzt `GIT_TOKEN` und `GH_TOKEN` aus `gh auth token`, wenn sie auf dem Host fehlen; braucht das Binary `u-boot` auf dem Host | kein Gate |
 | `make dev-down` | stoppt den Devcontainer mit `u-boot devcontainer down` (`INSTANCE=<name>` wählt eine Instanz) | kein Gate |
 | `make dev-shell` | startet den Devcontainer und öffnet eine Shell darin (`INSTANCE=<name>` wählt eine Instanz); setzt `GIT_TOKEN` und `GH_TOKEN` wie `make dev-up` | kein Gate |
+| `make dev-remove` | entfernt den Devcontainer samt Volumes mit `u-boot devcontainer remove --volumes --yes` (`INSTANCE=<name>` wählt eine Instanz) | kein Gate |
 
 **Targets der Werkzeug-Fragmente:** [`mk/ai-harness-init.md`](mk/ai-harness-init.md) — der Teil dieses Index, den `ai-harness-init` bei jedem Lauf neu schreibt; was das Repo über eines dieser Targets entscheidet, steht in dieser Zeile ([`MR-012`](conventions.md#mr-012)).
 
