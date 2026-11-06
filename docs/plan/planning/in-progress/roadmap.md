@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-11-05.
+**Status:** Aktiv. **Letzte Änderung:** 2026-11-06.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -43,8 +43,6 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
 Nichts in Arbeit.
-
-- [welle-devcontainer-remove](../welle-devcontainer-remove.md)
 
 ## Nächste Wellen
 
@@ -141,6 +139,7 @@ flowchart LR
 | v0.18.0 (Minor-Release ohne Welle-Datei: der Containername `u-boot-<project>[-<instance>]`, die Auflösung von Git-Zugangsdaten und Identität des Hosts (opt-in), die Schlüssel `devcontainer.resources.memory`/`.cpus` und die Hilfetexte ohne Kennungen; Lastenheft 0.27.0, 0.28.0 und 0.29.0) | 2026-11-02 | [`slice-v1-release-cut-v0.18.0`](../done/slice-v1-release-cut-v0.18.0.md) — Tag `v0.18.0` auf `e6c87379` |
 | v0.19.0 (Minor-Release: der Katalog-Eintragstyp „gepinnte Werkzeugkette“ mit den zwei Schlüssel `go-toolchain`/`golangci-lint`, Übersteuerung per `version:` mit Prüfsummen-Verifikation, die Exit-10-Abweisungen, `containerEnv`-Cache-Pfade und die Pin-Politik der vier Stellen; Lastenheft 0.30.0) | 2026-11-02 | [`slice-v1-release-cut-v0.19.0`](../done/slice-v1-release-cut-v0.19.0.md) — Tag `v0.19.0` auf `3564ac31` |
 | v0.20.0 (Minor-Release: der dritte Schlüssel des Eintragstyp „gepinnte Werkzeugkette“, `java-toolchain` — JDK der Eclipse-Temurin-Distribution LTS 21 aus Prüfsummen-verifiziertem Release-Archiv, Übersteuerung per `version:`, Konflikt-Abweisung externes `java` + `java-toolchain` je Exit-Code `10`; Lastenheft 0.31.0) | 2026-11-03 | [`slice-v1-release-cut-v0.20.0`](../done/slice-v1-release-cut-v0.20.0.md) — Tag `v0.20.0` auf `90f2a1d2` |
+| welle-devcontainer-remove (`u-boot devcontainer remove [--instance <name>] [--volumes]` entfernt den Container des Projekts, ein laufender wird zuvor gestoppt, mit `--volumes` auch seine Volumes nach Nennung und Abfrage (`--yes` ersetzt sie; ohne Freigabe Exit-Code `10`, nichts geschieht); Lastenheft 0.37.0 bis 0.37.3, [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`SPEC-058`](../../../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes), [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md) als Bezug; Zusage Linux-Host `amd64` mit lokaler Engine, im ausgelieferten Container-Image nicht zugesagt; kein Release-Cut-Slice, die Release-Zuordnung bestimmt der Projektinhaber; offener Bedarfspunkt V-1 des Validators und die Entscheidungen in der Welle-Datei §7) | 2026-11-06 | [`slice-v1-devcontainer-remove`](../done/slice-v1-devcontainer-remove.md) (Detailquelle); [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md); [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md); [`slice-v2-spec-devcontainer-remove`](../done/slice-v2-spec-devcontainer-remove.md); Validator-Bericht [`validation-2026-11-06-welle-devcontainer-remove`](../../../reviews/validation-2026-11-06-welle-devcontainer-remove.md); Welle-Datei [`welle-devcontainer-remove`](../done/welle-devcontainer-remove.md) §7 |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen
