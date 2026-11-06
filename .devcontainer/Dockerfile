@@ -103,6 +103,38 @@ RUN arch="$(dpkg --print-architecture)" \
  && tar -xzf "golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}.tar.gz" --strip-components=1 -C /usr/local/bin "golangci-lint-${GOLANGCI_LINT_VERSION#v}-linux-${arch}/golangci-lint" \
  && cd / \
  && rm -rf "$work"
+# Homebrew: a checkout of Homebrew/brew at one commit, loaded by git, no
+# installer script. The revision is pinned here, in one place (the commit of the
+# release 7.0.12 of Homebrew/brew), and the build stops unless
+# `git rev-parse HEAD` returns it. The pin covers Homebrew itself:
+# the formulas of the list, the metadata that `brew install` loads and the
+# taps are not pinned and not checked, so a later build can install other
+# contents than an earlier one. Homebrew refuses to run as root, so the
+# checkout and the installation run as the container user. The installation
+# switches the automatic update off (an update moves the checkout to the newest
+# release) and the analytics off. The image sets no token and runs no sign-in.
+# The `PATH` of the image carries the directories of Homebrew; a login shell
+# sets the `PATH` anew (Debian /etc/profile), so the file
+# /etc/profile.d/u-boot-brew.sh puts the same directories in front of it again.
+ARG HOMEBREW_REVISION=bf464f57275cae0be106b43d190c98564ac59b0e
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends build-essential procps curl file git ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && install -d -o vscode -g vscode /home/linuxbrew/.linuxbrew \
+ && printf '%s\n' 'export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"' > /etc/profile.d/u-boot-brew.sh
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+USER vscode
+RUN cd /home/linuxbrew/.linuxbrew \
+ && git init -q Homebrew \
+ && cd Homebrew \
+ && git remote add origin https://github.com/Homebrew/brew \
+ && git fetch -q --depth 1 origin "${HOMEBREW_REVISION}" \
+ && git checkout -q --detach FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "${HOMEBREW_REVISION}" \
+ && mkdir ../bin \
+ && ln -s ../Homebrew/bin/brew ../bin/brew
+RUN HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1 brew install --formula 'ripgrep'
+USER root
 # Status files of the container start scripts; `u-boot doctor`
 # reads them from the host. The directory belongs to the container user so the
 # `postCreateCommand` and the `sudo` scripts can write there.

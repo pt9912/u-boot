@@ -3,7 +3,9 @@
 Das Repo entwickelt sich selbst im Devcontainer: das erzeugte
 `.devcontainer/` ([`LH-FA-DEV-001`](../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen))
 trägt das Sandbox-Profil mit verschachteltem Docker und den gepinnten
-Werkzeugen (Go, golangci-lint, make, Ollama, GitHub CLI). Die drei
+Werkzeugen (Go, golangci-lint, make, Ollama, GitHub CLI). Dazu installiert
+das Dockerfile beim Bau des Images `ripgrep` als Homebrew-Formel
+(Schlüssel `brew` in `u-boot.yaml`); die Formel ist nicht gepinnt. Die drei
 Bedien-Targets sind in [`tools/mk/devcontainer.mk`](../../tools/mk/devcontainer.mk)
 definiert; sie prüfen nichts und hängen nicht an der Gate-Kette.
 

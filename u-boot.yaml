@@ -17,9 +17,10 @@ devcontainer:
       version: 1.0.5
     ollama:
       enabled: true
-    homebrew:
+    brew:
       enabled: true
-      version: 2.0.5
+      packages:
+        - ripgrep
     go-toolchain:
       enabled: true
     golangci-lint:

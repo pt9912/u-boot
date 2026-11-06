@@ -29,8 +29,7 @@
   },
   "features": {
     "ghcr.io/anthropics/devcontainer-features/claude-code:1.0.5": {},
-    "ghcr.io/devcontainers/features/node:2.1.1": {},
-    "ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2.0.5": {}
+    "ghcr.io/devcontainers/features/node:2.1.1": {}
   },
   "remoteUser": "vscode"
 }
