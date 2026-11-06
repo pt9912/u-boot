@@ -1,7 +1,7 @@
 # Review-Report (Nachlauf): slice-cr-devcontainer-remove, Folgeänderung Lastenheft 0.37.1 — 2026-11-05
 
 **Review-Art:** Nachlauf-Review zu einer Änderung des Wortlauts nach dem Review (Beobachtung `BEO-DOK/vertragsaenderung-nach-review`, Risiko 6 des Slice, F-9 des Vorlauf-Reports [`2026-11-05-slice-cr-devcontainer-remove`](2026-11-05-slice-cr-devcontainer-remove.md)).
-**Gegenstand:** `git diff 7f5110cc..a7914c99`, 7 Dateien, 146 Einfügungen, 50 Löschungen. Betroffen sind `spec/lastenheft.md`, der CR-Vorschlag [`cr-vorschlag-devcontainer-remove.md`](../plan/cr/cr-vorschlag-devcontainer-remove.md), der Slice [`slice-cr-devcontainer-remove`](../plan/planning/in-progress/slice-cr-devcontainer-remove.md), `open/README.md`, die zwei Folge-Slices und die Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md).
+**Gegenstand:** `git diff 7f5110cc..a7914c99`, 7 Dateien, 146 Einfügungen, 50 Löschungen. Betroffen sind `spec/lastenheft.md`, der CR-Vorschlag [`cr-vorschlag-devcontainer-remove.md`](../plan/cr/cr-vorschlag-devcontainer-remove.md), der Slice [`slice-cr-devcontainer-remove`](../plan/planning/done/slice-cr-devcontainer-remove.md), `open/README.md`, die zwei Folge-Slices und die Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md).
 **Skill:** `.harness/skills/reviewer.md`. **Modell:** claude-sonnet-5-5. Der Report ist vom Aufrufer unverändert aus der Ausgabe des Reviewers übernommen, weil die Rolle keine Report-Dateien schreibt.
 
 ## Eingangs-Kontext und Sensors
@@ -43,7 +43,7 @@
 Weitere Fundstellen mit demselben Muster:
 
 - CR-Vorschlag: „Neu der Arbeitsbaum“ (Stellen (h) bis (k)).
-- Slice [`docs/plan/planning/in-progress/slice-cr-devcontainer-remove.md`](../plan/planning/in-progress/slice-cr-devcontainer-remove.md): „Folgeänderung `0.37.1` im Arbeitsbaum, nicht committet“ (§3), „ist dem Projektinhaber noch vorzulegen und nicht committet“ (Kopf).
+- Slice [`docs/plan/planning/done/slice-cr-devcontainer-remove.md`](../plan/planning/done/slice-cr-devcontainer-remove.md): „Folgeänderung `0.37.1` im Arbeitsbaum, nicht committet“ (§3), „ist dem Projektinhaber noch vorzulegen und nicht committet“ (Kopf).
 - `docs/plan/planning/open/README.md`: „Folgeänderung `0.37.1` nach dem Review im Arbeitsbaum“.
 - `docs/plan/planning/welle-devcontainer-remove.md`: „(Lastenheft `0.37.0`, CR-Vorschlag“ (Tabelle) und „im Lastenheft `0.37.0` übernommen, die Closure steht aus“ (Reihenfolge). Beide nennen die Version `0.37.0`, das Lastenheft trägt `0.37.1`.
 

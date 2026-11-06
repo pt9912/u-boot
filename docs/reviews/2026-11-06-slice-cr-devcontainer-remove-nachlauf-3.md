@@ -1,7 +1,7 @@
 # Review-Report (Nachlauf 3): slice-cr-devcontainer-remove, Folgeänderung Lastenheft 0.37.3 — 2026-11-06
 
 **Review-Art:** Nachlauf-Review zu einer Änderung des Wortlauts nach dem zweiten Nachlauf-Review (Beobachtung `BEO-DOK/vertragsaenderung-nach-review`, DoD-Zeile 7 des Slice). Vorlauf: [`2026-11-06-slice-cr-devcontainer-remove-nachlauf-2`](2026-11-06-slice-cr-devcontainer-remove-nachlauf-2.md).
-**Gegenstand:** `git diff 7f568768..18f07fcc` (HEAD), 8 Dateien, 213 Einfügungen, 32 Löschungen. Betroffen sind `spec/lastenheft.md` (drei Zeilen), der CR-Vorschlag [`cr-vorschlag-devcontainer-remove.md`](../plan/cr/cr-vorschlag-devcontainer-remove.md), der Slice [`slice-cr-devcontainer-remove`](../plan/planning/in-progress/slice-cr-devcontainer-remove.md), [`open/README.md`](../plan/planning/open/README.md), die zwei Folge-Slices [`slice-v1-devcontainer-remove`](../plan/planning/open/slice-v1-devcontainer-remove.md) und [`slice-v2-spec-devcontainer-remove`](../plan/planning/open/slice-v2-spec-devcontainer-remove.md), die Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md) und der Report des Vorlaufs.
+**Gegenstand:** `git diff 7f568768..18f07fcc` (HEAD), 8 Dateien, 213 Einfügungen, 32 Löschungen. Betroffen sind `spec/lastenheft.md` (drei Zeilen), der CR-Vorschlag [`cr-vorschlag-devcontainer-remove.md`](../plan/cr/cr-vorschlag-devcontainer-remove.md), der Slice [`slice-cr-devcontainer-remove`](../plan/planning/done/slice-cr-devcontainer-remove.md), [`open/README.md`](../plan/planning/open/README.md), die zwei Folge-Slices [`slice-v1-devcontainer-remove`](../plan/planning/open/slice-v1-devcontainer-remove.md) und [`slice-v2-spec-devcontainer-remove`](../plan/planning/open/slice-v2-spec-devcontainer-remove.md), die Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md) und der Report des Vorlaufs.
 **Skill:** `.harness/skills/reviewer.md`. **Modell:** claude-sonnet-5-5.
 
 ## Eingangs-Kontext und Sensors
@@ -25,7 +25,7 @@
 
 ## Findings
 
-### LOW `docs/plan/planning/in-progress/slice-cr-devcontainer-remove.md` · „ist ein neuer, nicht versionierter Bestandteil des Review-Laufs“ — Zustandsmarker mit Ablaufpunkt, im Commit abgelaufen
+### LOW `docs/plan/planning/done/slice-cr-devcontainer-remove.md` · „ist ein neuer, nicht versionierter Bestandteil des Review-Laufs“ — Zustandsmarker mit Ablaufpunkt, im Commit abgelaufen
 
 **Klasse:** Zustandsmarker mit Ablaufpunkt nicht entfernt (Plan-Aussage ohne Entsprechung im Stand)
 **Quelle:** `AGENTS.md` §3.10 (Zustandsmarker mit Ablaufpunkt wird beim Ablauf auf den Ist-Stand gesetzt; Abgleich der Tabelle gegen `git diff --stat` für den Stand nach der letzten Fix-Runde); Skill LOW mit Konventions-Anker
