@@ -27,8 +27,10 @@ Label `macos-14` und hat keinen Runner bekommen (`runner_name` leer). Die Annota
 Annotation, dem fehlenden Runner und der Ankündigung; bewiesen ist es erst, wenn der Lauf mit dem
 neuen Label grün ist. Das Label `macos-14` bekam bis zum 2026-11-04 noch Runner: die Läufe
 `41636802191` (2026-11-03) und `41844822254` (2026-11-04) waren dort `success`. Die Matrix steht in
-`packaging/homebrew-tap/.github/workflows/smoke.yml` Zeile 24 (`runner: [macos-14, macos-15-intel]`);
-die Datei im Tap ist heute byte-gleich mit ihr (`cmp` gegen den Inhalt von
+`packaging/homebrew-tap/.github/workflows/smoke.yml` im Stand vor der Änderung in Zeile 24
+(`runner: [macos-14, macos-15-intel]`); im Endstand steht sie in Zeile 27
+(`runner: [macos-15, macos-15-intel]`, gelesen). Die Datei im Tap war vor der Änderung byte-gleich mit
+dem Stand vor der Änderung (`cmp` gegen den Inhalt von
 `gh api repos/pt9912/homebrew-u-boot/contents/.github/workflows/smoke.yml`, 2026-11-06). Der
 Projektinhaber hat am 2026-11-06 entschieden, den Runner zu wechseln.
 
@@ -85,7 +87,7 @@ ein Vorschlag des Planners; die Freigabe zum Umsetzen gab der Projektinhaber am 
   von `actions/runner-images` führt das Label ohne Hinweis auf eine Außerbetriebnahme (der gelesene
   Hinweis dort gilt macOS 14). Ob und wann `macos-15-intel` endet, ist nicht gelesen (Risiko in §6).
 - **Keine Änderung an Schritten, Audit-Gate oder Formel.** `brew audit --strict --online` gatet den
-  Lauf (`smoke.yml` Zeilen 58 bis 66) und wird nicht gelockert (`AGENTS.md` §3.6); ein neuer Befund
+  Lauf (`smoke.yml` Zeilen 61 bis 69, Schritt „Formel pruefen (gatend)“, Endstand) und wird nicht gelockert (`AGENTS.md` §3.6); ein neuer Befund
   unter `macos-15` wäre ein eigener Vorgang, kein Teil dieses Slice.
 - **Kein Test und kein Gate, das die Labels pinnt.** Ob GitHub ein Label bedient, ist Fremdzustand und
   offline nicht lesbar; ein Test, der das Label aus der Datei liest, prüft die Datei gegen sich selbst.
@@ -150,11 +152,12 @@ liefert die Pfad-Kandidaten für §8. Jede Zeile „unverändert“ trägt die S
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `packaging/homebrew-tap/.github/workflows/smoke.yml` | update | Zeile 24: `macos-14` wird `macos-15`; davor ein Kommentar (Abgrenzung, Indikativ, ohne Chronik): beide Labels nennen die macOS-Version ausdrücklich (arm64 `macos-15`, amd64 `macos-15-intel`), ein Versionswechsel ist eine Änderung dieser Zeile in Vorlage und Tap, kein wanderndes `-latest`. Wortlaut ASCII wie die übrigen Kommentare der Datei (Zeilen 3 bis 8). |
+| `packaging/homebrew-tap/.github/workflows/smoke.yml` | update | Matrix-Zeile `runner:` (Endstand Zeile 27): `macos-14` wird `macos-15`; davor ein Kommentar (Endstand Zeilen 24 bis 26; Abgrenzung, Indikativ, ohne Chronik): beide Labels nennen die macOS-Version ausdrücklich (arm64 `macos-15`, amd64 `macos-15-intel`), ein Versionswechsel ist eine Änderung dieser Zeile in Vorlage und Tap, kein wanderndes `-latest`. Wortlaut ASCII; die Datei enthält genau ein Nicht-ASCII-Zeichen, den Gedankenstrich in Zeile 6 (bestehender Kommentar, nicht berührt), alle übrigen Kommentare (Zeilen 3 bis 8 außer dem Gedankenstrich, 33 bis 38, 63) sind ASCII (Suche nach Nicht-ASCII-Zeichen, gelesen). |
 | Tap-Repo `pt9912/homebrew-u-boot`, `.github/workflows/smoke.yml` | update (extern, nicht in `git diff --stat`) | Kopie der Quelle nach dem Commit der Quelle; Push durch den Hauptagent nach Review und Verification (DoD „Tap“). Der Tap-Branch `main` ist nicht geschützt (`gh api repos/pt9912/homebrew-u-boot/branches/main`, `protected` ist `false`, 2026-11-06). |
 | `docs/plan/planning/in-progress/slice-v1-tap-smoke-runner-macos-15.md` | neu | dieser Plan; die Zustandswechsel sind reine `git mv` (open → next → in-progress → done) |
 | `docs/plan/planning/open/README.md` | update | Bestandszeile des Plans (Tabelle „Bestand“); die Zeile folgt dem Slice bei jedem `git mv` |
-| `docs/reviews/<Datum>-slice-v1-tap-smoke-runner-macos-15.md` | neu | Review-Report (`.harness/skills/reviewer.md`) |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Die Zeile „Nichts in Arbeit.“ (Ruhe-Marker) entfällt, weil der Slice in `in-progress/` liegt (Commit `026fefb5`, Abschnitt vor „Nächste Wellen“) |
+| `docs/reviews/2026-11-06-slice-v1-tap-smoke-runner-macos-15.md` | neu | Review-Report (`.harness/skills/reviewer.md`), liegt vor |
 | `docs/reviews/<Datum>-verification-slice-v1-tap-smoke-runner-macos-15.md` | neu | Verification-Report; Namensform wie die Berichte zu `slice-v2-homebrew-smoke-haertung` |
 | `docs/plan/planning/observations/BEO-<KUERZEL>/<slug>/…` | neu oder update, bei der Closure | Beobachtung „Runner-Label stillgelegt“ mit den Vorgängen `slice-v2-homebrew-formula` (`macos-13`) und diesem Slice (`macos-14`), falls die Closure sie anlegt; das Kürzel ist nachzuschlagen (§8) |
 | Tests | keine Änderung | Kein Test liest `smoke.yml`: `cmd/uboot/homebrew_scripts_test.go` liest `scripts/homebrew-formula.rb.tmpl` (Zeile 73) und ruft `scripts/homebrew-formula-fill.sh` und `scripts/tap-formula-check.sh` (Funktionen `runFill`, Zeilen 21 bis 35, und `runTapCheck`, Zeilen 120 bis 129); Zeile 70 nennt `slice-v2-homebrew-smoke-haertung` nur im Kommentar. Eine Suche nach `smoke.yml`, `macos-1` und `runner:` über `*.go`, `*.sh`, `*.mk`, `*.py`, `*.yml`, `*.yaml`, `*.rb` und `*.tmpl` fand außer der Datei selbst nur den Fehlertext `fake runner: …` in `internal/adapter/driven/docker/inspector_test.go` Zeile 47. |
@@ -233,7 +236,7 @@ sich entscheidet.
   [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md)) liefen, mit welchem
   Token, ist nicht gelesen. Die Messstelle ist der Push selbst. — **Ausgang:** bei Closure (entfallen oder
   eingetreten → Rückführung nach `open/`, §4).
-- **Datei-Drift zwischen Quelle und Tap.** Heute byte-gleich (§Anlass); danach kann jede Seite allein
+- **Datei-Drift zwischen Quelle und Tap.** Vor der Änderung byte-gleich (§Anlass); danach kann jede Seite allein
   geändert werden, und kein Skript schreibt `smoke.yml` in den Tap. Der Vergleich in der DoD belegt den
   Stand zur Closure, nicht danach. — **Ausgang:** bei Closure (der Vergleich nach der letzten Fix-Runde);
   das Verfahren für künftige Änderungen bleibt weiter offen → Frage an den Projektinhaber (Bericht).
@@ -250,7 +253,9 @@ sich entscheidet.
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `open/` (Entwurf). Die Closure trennt bei den Belegen, was der
+Noch nicht geschlossen; der Slice liegt in `in-progress/`. Die Quelle `smoke.yml` ist im Commit `737dae18`
+geändert, der Review-Report liegt vor (`docs/reviews/2026-11-06-slice-v1-tap-smoke-runner-macos-15.md`);
+Verification, Tap-Push und Smoke-Lauf stehen aus. Die Closure trennt bei den Belegen, was der
 Planner selbst gelesen hat (Quelle, Vergleich, Tap-Lauf per `gh api`) und was nur der Hauptagent berichtet.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
