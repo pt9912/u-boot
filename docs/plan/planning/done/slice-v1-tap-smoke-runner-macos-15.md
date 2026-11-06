@@ -396,7 +396,7 @@ was nur der Hauptagent berichtet, und was niemand las.
   Zahlen und Marker im Plan sind, die der Verifier gegen die Datei gelesen und ohne Abweichung gefunden hat. *Grenze:* zu
   `3e1d81a9` liegt kein eigener Review-Report vor. Nicht ausgeführt: `make test-docker`, `make verify-depguard`,
   `make ci`, `make fullbuild` (kein Go-Code, keine Docker-, Importregel- oder Image-Änderung im Diff; Begründung im
-  ersten Teil). `make gates` im Devcontainer-Container: GATES_PLATZHALTER
+  ersten Teil). `make gates` im Devcontainer-Container (`/.dockerenv` vorhanden), Tip `90583b57`, Exit `0`: `tool-pruefung` OK (Go 1.27.3, golangci-lint 2.14.0), `gate-reihenfolge-test` 2 Fälle 0 Fehlschläge, `baseline-verify` v6.18.1 OK (54 Dateien), `d-check` 1209 Dateien 0 Befunde (`pinsync` 3 Pins), lint `0 issues.`, `coverage-gate` 92,40 % gegen 90 %, `ablage-pruefung` OK (26 Fälle 0 Fehlschläge). Der Lauf liegt nach den Closure-Commits `11ae65db`, `d9b7bfbe`, `c370def1` und `90583b57`; diese Zeile ist danach ergänzt und ändert nur Markdown.
 
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
