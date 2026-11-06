@@ -152,7 +152,7 @@ liefert die Pfad-Kandidaten für §8. Jede Zeile „unverändert“ trägt die S
 |---|---|---|
 | `packaging/homebrew-tap/.github/workflows/smoke.yml` | update | Zeile 24: `macos-14` wird `macos-15`; davor ein Kommentar (Abgrenzung, Indikativ, ohne Chronik): beide Labels nennen die macOS-Version ausdrücklich (arm64 `macos-15`, amd64 `macos-15-intel`), ein Versionswechsel ist eine Änderung dieser Zeile in Vorlage und Tap, kein wanderndes `-latest`. Wortlaut ASCII wie die übrigen Kommentare der Datei (Zeilen 3 bis 8). |
 | Tap-Repo `pt9912/homebrew-u-boot`, `.github/workflows/smoke.yml` | update (extern, nicht in `git diff --stat`) | Kopie der Quelle nach dem Commit der Quelle; Push durch den Hauptagent nach Review und Verification (DoD „Tap“). Der Tap-Branch `main` ist nicht geschützt (`gh api repos/pt9912/homebrew-u-boot/branches/main`, `protected` ist `false`, 2026-11-06). |
-| `docs/plan/planning/next/slice-v1-tap-smoke-runner-macos-15.md` | neu | dieser Plan; die Zustandswechsel sind reine `git mv` (open → next → in-progress → done) |
+| `docs/plan/planning/in-progress/slice-v1-tap-smoke-runner-macos-15.md` | neu | dieser Plan; die Zustandswechsel sind reine `git mv` (open → next → in-progress → done) |
 | `docs/plan/planning/open/README.md` | update | Bestandszeile des Plans (Tabelle „Bestand“); die Zeile folgt dem Slice bei jedem `git mv` |
 | `docs/reviews/<Datum>-slice-v1-tap-smoke-runner-macos-15.md` | neu | Review-Report (`.harness/skills/reviewer.md`) |
 | `docs/reviews/<Datum>-verification-slice-v1-tap-smoke-runner-macos-15.md` | neu | Verification-Report; Namensform wie die Berichte zu `slice-v2-homebrew-smoke-haertung` |
