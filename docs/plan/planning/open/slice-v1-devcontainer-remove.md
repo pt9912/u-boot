@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** [`welle-devcontainer-remove`](../welle-devcontainer-remove.md), Release-Zuordnung offen. Letzter von vier Slices; ihm gehen [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) und davor der CR voraus. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md).
+**Welle:** [`welle-devcontainer-remove`](../welle-devcontainer-remove.md), Release-Zuordnung offen. Letzter von vier Slices; ihm gehen [`slice-v2-spec-devcontainer-remove`](../next/slice-v2-spec-devcontainer-remove.md) und davor der CR voraus. Reihe (vier Slices, je einzeln lieferbar): [`slice-v1-devcontainer-remove-messung`](../done/slice-v1-devcontainer-remove-messung.md) → [`slice-cr-devcontainer-remove`](../done/slice-cr-devcontainer-remove.md) → [`slice-v2-spec-devcontainer-remove`](../next/slice-v2-spec-devcontainer-remove.md) → [`slice-v1-devcontainer-remove`](slice-v1-devcontainer-remove.md).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Scope), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes), [`ADR-0015`](../../adr/0015-sandbox-volumes-pro-instanz.md).
 
@@ -65,7 +65,7 @@ Der Implementer liest die Dateien, ergänzt die Tabelle und gleicht sie vor dem 
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): [`slice-v2-spec-devcontainer-remove`](slice-v2-spec-devcontainer-remove.md) liegt in `done/`; `in-progress/` ist leer.
+**Start** (`next` → `in-progress`): [`slice-v2-spec-devcontainer-remove`](../next/slice-v2-spec-devcontainer-remove.md) liegt in `done/`; `in-progress/` ist leer.
 
 **Rückführungen:** `in-progress` → `next`, wenn die Port-Änderung mehr als einen Slice trägt; → `open`, wenn die Messung eine Operation nicht trägt, die der Vertrag verlangt.
 
