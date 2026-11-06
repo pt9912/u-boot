@@ -48,7 +48,7 @@ führt die Dateinamen mit `~`. Stabile Tags haben nur eine Schreibweise.
   bei klassischen PATs zeigt `permissions.push` die Rechte des Benutzers, nicht die Scopes des
   Tokens). Ein Rerun des Jobs `tap` zeigt das nicht, wenn die Formel schon im Tap liegt.
 - **Tap-Repo** `pt9912/homebrew-u-boot` (README und Smoke-Workflow aus
-  [`packaging/homebrew-tap/`](../../packaging/homebrew-tap/)).
+  [`packaging/homebrew-tap/`](../../packaging/homebrew-tap/); eine Änderung dieser zwei Dateien kommt nach §9 in den Tap).
 - Schreibrecht auf Tags und auf `ghcr.io/pt9912/u-boot` (über `GITHUB_TOKEN` des Workflows).
 
 ## 3. Vorbereitung (ein Commit auf `main`)
@@ -120,6 +120,9 @@ grün** (`gh run list --limit 3`). Ein roter `image-scan` blockiert den Release 
 Anlass ist ein neuer Go-stdlib-Advisory; dann den Go-Pin heben (`Dockerfile` `ARG
 GO_VERSION`, `repo.mk` `GO_VERSION`), siehe CHANGELOG-Einträge zu Toolchain-Bumps.
 
+Sichtschritt vor einem stabilen Tag, kein Gate: Quelle und Tap von `README.md` und `.github/workflows/smoke.yml`
+vergleichen (Schritt 1 aus §9); der Smoke läuft mit der Datei, die im Tap liegt.
+
 ## 5. Tag setzen (Maintainer-Aktion)
 
 Vor jedem Tag (auch dem Vorab-Tag) `date +%F` prüfen und das Datum in CHANGELOG und im
@@ -185,8 +188,98 @@ auf „kein Absturz" geprüft). `brew audit --strict --online` gatet den Lauf; e
 | Job `tap` schlägt fehl (z. B. `403 Permission denied`) | `gh workflow run tap-check` ausführen; PAT-Rechte/Ablauf prüfen (fine-grained: Repo ergänzen, Contents = Read and write); manuell nachziehen: `TAP_TOKEN=… TAG=vX.Y.Z scripts/tap-nachzug.sh` |
 | Job `tap` meldet „the u-boot.rb asset of vX.Y.Z does not carry four download URLs“ | Die Formel trägt keine `version`-Zeile; `scripts/tap-formula-check.sh` liest die vier `url`-Zeilen und weist einen falschen Tag oder eine fehlende URL ab. Das Asset ist dann tatsächlich falsch befüllt (`scripts/homebrew-formula-fill.sh`, `SHA256SUMS` prüfen); Tap nach der Behebung manuell nachziehen (`TAP_TOKEN=… TAG=vX.Y.Z scripts/tap-nachzug.sh`) |
 | Formel fehlt im Tap | Asset `u-boot.rb` des Releases fehlt (Prerelease?) oder Tap-Job nicht gelaufen |
+| Smoke im Tap rot, ein Job ohne Runner, Annotation „The configuration '…' is not supported“ | Das Runner-Label der Matrix in `smoke.yml` wird nicht unterstützt → Label in der Vorlage ändern und die Datei nach §9 in den Tap bringen |
 | Paket-Smoke endet mit `curl: (22) 404` | Asset-Name falsch gewählt (Vorab-Tag: `~` im Dateinamen, `.` im Asset); `gh release view vX.Y.Z-rc.N --json assets` zeigt die Namen, `scripts/package-asset-name.sh` wählt sie; Workflow-Fix auf `main`, neuer Vorab-Tag (der alte Tag wird nicht verschoben) |
 | Trivy-`image-scan` rot | Go-Pin heben (siehe §4), erst dann taggen |
 
 Ein bereits veröffentlichter Tag wird **nicht verschoben**; ein Fehler wird mit dem nächsten
 Patch-Release behoben.
+
+## 9. Dateien des Tap-Repos nachziehen (`packaging/homebrew-tap/`)
+
+Der Abschnitt gilt für `README.md` und `.github/workflows/smoke.yml` aus
+[`packaging/homebrew-tap/`](../../packaging/homebrew-tap/). Die Formel `Formula/u-boot.rb` zieht der Job `tap` nach
+(§1, §6) und gehört nicht hierher. Die Quelle in `packaging/homebrew-tap/` führt, der Tap folgt: Der Smoke läuft
+mit der Datei, die im Tap-Repo `pt9912/homebrew-u-boot` liegt, nicht mit der Vorlage (`smoke.yml` Zeilen 10 bis 14:
+Trigger `push` auf `Formula/u-boot.rb` und `workflow_dispatch`).
+
+**Rechte, als Hinweis.** Die Seite „Create or update file contents“ der GitHub-REST-Dokumentation nennt für klassische
+PATs den Scope `repo` und zusätzlich `workflow`, um Dateien unter `.github/workflows` zu ändern, und für fine-grained
+PATs Contents (write) sowie Contents (write) mit Workflows (write). Welche Rechte das Token trägt, mit dem der Maintainer
+pusht, zeigt nur der Push; über `HOMEBREW_TAP_GITHUB_TOKEN` (§2) sagt dieser Abschnitt nichts.
+
+Die Befehle setzen `P` (der Pfad der Datei) und lesen die Quelle aus dem Arbeitsbaum:
+
+```bash
+P=.github/workflows/smoke.yml      # oder README.md
+```
+
+1. **Ausgangslage vergleichen.** Beide Ausgaben sind gleich, wenn Quelle und Tap übereinstimmen. Weichen sie ab, ist
+   zuerst zu klären, was nur im Tap steht, bevor die Quelle geändert wird:
+
+   ```bash
+   git hash-object packaging/homebrew-tap/$P
+   gh api repos/pt9912/homebrew-u-boot/contents/$P --jq .sha
+   ```
+
+2. **Quelle ändern.** `make gates` im Devcontainer-Container, auf `main` committen, Review und Verification der Quelle
+   abwarten. Erst danach folgt der Push in den Tap.
+3. **Push in den Tap** per `gh api` mit `PUT` auf `contents/<Pfad>`. `sha` ist der Blob-sha der Datei, die ersetzt wird
+   (Schritt 1):
+
+   ```bash
+   B64=$(base64 -w0 < packaging/homebrew-tap/$P)   # Base64 der Quelle ohne Zeilenumbruch
+   SHA=$(gh api repos/pt9912/homebrew-u-boot/contents/$P --jq .sha)
+   gh api -X PUT repos/pt9912/homebrew-u-boot/contents/$P \
+     -f message='<Commit-Text>' -f content="$B64" -f sha="$SHA" -q '.commit.sha'
+   ```
+
+   Der Push startet keinen Lauf: Der Trigger nennt nur `Formula/u-boot.rb` und `workflow_dispatch`.
+4. **Nachvergleich.** Der Inhalt im Tap ist byte-gleich mit der Quelle (`cmp` endet mit Exit `0`), und der sha stimmt
+   mit dem aus Schritt 1 für die Quelle überein:
+
+   ```bash
+   gh api repos/pt9912/homebrew-u-boot/contents/$P --jq .content | base64 -d | cmp - packaging/homebrew-tap/$P
+   gh api repos/pt9912/homebrew-u-boot/contents/$P --jq .sha
+   ```
+
+5. **Lauf starten und lesen.** Der Dispatch ist ein Schreibzugriff auf den Tap; die Lesebefehle danach ändern nichts:
+
+   ```bash
+   gh workflow run smoke --repo pt9912/homebrew-u-boot
+   gh api 'repos/pt9912/homebrew-u-boot/actions/workflows/smoke.yml/runs?per_page=5' \
+     --jq '.workflow_runs[] | [.id,.created_at,.head_sha,.event,.status,.conclusion] | @tsv'
+   ```
+
+   Den neuen Lauf erkennt `created_at` (der jüngste `workflow_dispatch`-Lauf); `head_sha` ist der Commit aus Schritt 3.
+   Zwei Dispatch-Läufe auf demselben Commit tragen denselben `head_sha`, und ein älterer Dispatch-Lauf ohne Job kann
+   daneben in der Liste stehen. Dann Jobs, Annotationen und Log des neuen Laufs lesen (`<id>` und `<job-id>` aus den
+   vorigen Ausgaben):
+
+   ```bash
+   gh api repos/pt9912/homebrew-u-boot/actions/runs/<id>/jobs \
+     --jq '.jobs[] | [.id,.name,(.labels|join(",")),.runner_name,.conclusion] | @tsv'
+   gh api repos/pt9912/homebrew-u-boot/check-runs/<job-id>/annotations --jq '.[] | [.annotation_level,.message] | @tsv'
+   gh api --allow-escape-sequences repos/pt9912/homebrew-u-boot/actions/jobs/<job-id>/logs \
+     | grep -E 'Image:|Cellar/u-boot/[0-9.]+:|u-boot version'
+   ```
+
+   Pro Matrix-Eintrag (`labels`) trägt ein Job `runner_name` und `conclusion`. Das Log (nicht allein `gh run view
+   --log`) zeigt die Image-Zeile (`Image: …`) und die installierte Formel-Version (`Cellar/u-boot/<Version>`, `u-boot
+   version <Version>`); „grün“ heißt diese Version und diese Image-Zeile, nicht „macOS grün“. Ein Job ohne Runner trägt
+   die Annotation „The configuration '…' is not supported“ (§8).
+6. **Rückweg.** Ein weiterer Commit mit dem vorigen Inhalt: derselbe Aufruf wie in Schritt 3, mit `B64` aus der
+   früheren Revision der Quelle (`git show <Revision>:packaging/homebrew-tap/$P | base64 -w0`) und dem dann aktuellen
+   `sha`.
+
+**Gelaufen und nicht gelaufen.** Die lesenden Befehle der Schritte 1, 4 und 5 sind gegen den Tap ausgeführt. Der Aufruf
+von Schritt 3 ist in dieser Form (mit vorher gesetzten Variablen, ohne `branch`) gelaufen und erzeugte einen Commit auf
+`main` des Tap für `.github/workflows/smoke.yml`; für `README.md` und für den Rückweg (Schritt 6) ist er nicht gelaufen.
+Die Zeile für `B64` ist nicht Teil dieses Laufs. Eine Probe, die nichts schreibt, gibt es für den Schreibschritt nicht;
+der Dispatch aus Schritt 5 ist ebenfalls nur berichtet, nicht von dieser Doku aus gelaufen.
+
+**Grenze.** Kein Skript, kein Gate und kein Test hält Quelle und Tap gleich oder schreibt diese zwei Dateien in den Tap:
+`scripts/tap-nachzug.sh` klont den Tap, kopiert die Formel nach `Formula/u-boot.rb` und fügt diese Datei hinzu (Zeilen
+25 bis 27 und 34); `scripts/tap-check.sh` führt `git push --dry-run` auf den geklonten Stand aus (Zeile 34) und belegt
+kein Recht für `.github/workflows/`. Der Vergleich der Schritte 1 und 4 ist die einzige Prüfung; dazwischen kann jede
+Seite allein geändert werden, und ein stabiler Tag startet den Smoke mit der Datei, die im Tap liegt.
