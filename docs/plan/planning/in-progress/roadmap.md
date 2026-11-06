@@ -42,7 +42,7 @@ Der CR-Schnitt [`slice-cr-devcontainer-katalog-quellen`](../done/slice-cr-devcon
 
 [](../done/slice-v1-bau-nur-devcontainer.md) liegt in `in-progress/` — der Übergang auf den einzigen Bau-Pfad (`scripts/bau.sh`, CI im Devcontainer-Container, `modus-pruefung`/`BUILD_MODE` entfallen; die drei Entscheidungen bejaht 2026-11-03); die CI-Messung ist der erste Vorgang (beobachtbar: das Protokoll unter `docs/messungen/`).
 
-[`slice-v1-release-cut-v0.24.0`](slice-v1-release-cut-v0.24.0.md) liegt in `in-progress/` — Release-Cut `v0.24.0` von `main` nach `v0.23.0` (Minor-Release): `u-boot devcontainer remove` und der Katalog-Schlüssel `brew`; Push und Tag erst nach Freigabe des Projektinhabers.
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
@@ -83,6 +83,7 @@ flowchart LR
 
 ## Abgeschlossene Wellen
 
+| v0.24.0 (Minor-Release: der Befehl `u-boot devcontainer remove` und die Homebrew-Formeln im Devcontainer (Katalog-Schlüssel `brew`); die Werkzeugprüfung steht im Gate-Lauf des Repos vor allen anderen Checks; Lastenheft 0.36.0 bis 0.37.3) | 2026-11-06 | [`slice-v1-release-cut-v0.24.0`](../done/slice-v1-release-cut-v0.24.0.md) — Tag `v0.24.0` auf `3c98ce87` |
 | v0.23.0 (Minor-Release: die Umgebungsdatei des Devcontainers `.devcontainer/devcontainer.env` als `--env-file` und der cgroup-Umbau im Start-Skript des Sandbox-Devcontainers mit nested Docker; Lastenheft 0.35.0) | 2026-11-04 | [`slice-v1-release-cut-v0.23.0`](../done/slice-v1-release-cut-v0.23.0.md) — Tag `v0.23.0` auf `84a1ff3e` |
 | v0.22.0 (Minor-Release: der Bau-Pfad des Repos ist allein der Devcontainer, die Werkzeug-Pins sind inventarisiert und im Gate-Lauf gekoppelt (`pinsync`); am Quelltext des Binary ändert sich nur die Versionszeile) | 2026-11-04 | [`slice-v1-release-cut-v0.22.0`](../done/slice-v1-release-cut-v0.22.0.md) — Tag `v0.22.0` auf `f1711f3a` |
 | v0.21.0 (Minor-Release: der Konfig-Schluessel `devcontainer.containerEnv` — Projekt-Umgebungswerte in der erzeugten Dev-Container-Konfiguration; Katalog-Eintraege `cpp`/`postgres-client` entfernt, Abweisung unverarbeitbarer externer Formen je Exit-Code `10`; Lastenheft 0.32.0 und 0.33.0) | 2026-11-03 | [`slice-v1-release-cut-v0.21.0`](../done/slice-v1-release-cut-v0.21.0.md) — Tag `v0.21.0` auf `f0026b4d` |
