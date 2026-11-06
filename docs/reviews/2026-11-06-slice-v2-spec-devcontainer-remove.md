@@ -10,7 +10,7 @@
 
 **Gelesen:**
 
-- Slice [`slice-v2-spec-devcontainer-remove`](../plan/planning/done/slice-v2-spec-devcontainer-remove.md) (Kopf, §1 bis §6, §8) und der Folge-Slice [`slice-v1-devcontainer-remove`](../plan/planning/next/slice-v1-devcontainer-remove.md) (DoD, Plan-Tabelle, Nicht-Ziele), Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md) nur über die Verweise.
+- Slice [`slice-v2-spec-devcontainer-remove`](../plan/planning/done/slice-v2-spec-devcontainer-remove.md) (Kopf, §1 bis §6, §8) und der Folge-Slice [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md) (DoD, Plan-Tabelle, Nicht-Ziele), Welle [`welle-devcontainer-remove`](../plan/planning/welle-devcontainer-remove.md) nur über die Verweise.
 - Lastenheft: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (alle Spiegelstriche), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-005A`](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes).
 - Spezifikation: [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (ganz), [`SPEC-038`](../../spec/spezifikation.md#spec-038--bestätigungspfad-von-u-boot-down---volumes), `--quiet`-Abschnitt, Kopf und Historie.
 - Messprotokoll [`slice-v1-devcontainer-remove-messung`](../messungen/slice-v1-devcontainer-remove-messung/README.md) (Kurzfassung, M1 bis M5, Grenzen), gegen jede `Messung M…`-Fundstelle von [`SPEC-058`](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes) gelesen.
@@ -41,7 +41,7 @@
 **Risiko:** Nach der eigenen Regel der Stelle entfallen diese Aussagen, oder der Code-Slice pinnt sie nicht, weil seine Arbeitsliste die Tabelle ist: Ein späterer Änderer lässt `remove` `u-boot.yaml` lesen oder den Socket einbinden, die Spec bleibt wahr im Text und falsch im Verhalten, und kein Test oder Gate schlägt an.
 **Verifizierbar:** Review-only (Tabelle *Belege* gegen die Absätze *Aufruf*, *Pfade und Exit-Codes*, *Nach dem Entfernen*, *Fehler beim Entfernen*)
 
-### MEDIUM `docs/plan/planning/next/slice-v1-devcontainer-remove.md` · „dieser Slice setzt sie um und ändert sie nicht“ — Übergabe Spec-Slice → Code-Slice hat keinen Träger für die Zielbild-Pflichten
+### MEDIUM `docs/plan/planning/in-progress/slice-v1-devcontainer-remove.md` · „dieser Slice setzt sie um und ändert sie nicht“ — Übergabe Spec-Slice → Code-Slice hat keinen Träger für die Zielbild-Pflichten
 
 **Klasse:** Übergabe ohne benennbares Artefakt beim Empfänger (Pflicht im Absender-Slice, nicht im Empfänger-Slice)
 **Quelle:** `AGENTS.md` §3.10 (Zustandsmarker mit Ablaufpunkt wird beim Ablauf entfernt oder auf den Ist-Stand gesetzt); `harness/roles.md` (Übergabe-Artefakte); Slice [`slice-v2-spec-devcontainer-remove`](../plan/planning/done/slice-v2-spec-devcontainer-remove.md) §6
@@ -120,7 +120,7 @@
 
 **Nicht geprüft:**
 
-- Code, Tests und Docker-Pfade — nicht im Diff; die Umsetzung ist Gegenstand von [`slice-v1-devcontainer-remove`](../plan/planning/next/slice-v1-devcontainer-remove.md).
+- Code, Tests und Docker-Pfade — nicht im Diff; die Umsetzung ist Gegenstand von [`slice-v1-devcontainer-remove`](../plan/planning/in-progress/slice-v1-devcontainer-remove.md).
 - Nutzerdokumentation (`README.md`, `README.de.md`, `docs/user/`, `CHANGELOG.md`) — vom Folge-Slice getragen; im Diff nicht berührt (§5 Regel 5 betrifft dort den Zeitpunkt der Lieferung des Befehls).
 - `make gates`, `make test-docker`, `make verify-depguard` — Begründung oben (nur Doku; DoD-Nachweis ist Sache des Verifiers).
 - DoD-Abgleich der Closure-Pflichten (grüne Gates, Verification-Report, Closure-Notiz) — Verifier-Aufgabe, kein Gegenstand des Reviews.
