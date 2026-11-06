@@ -24,7 +24,7 @@ define dev_require
 @command -v $(U_BOOT) >/dev/null 2>&1 || { echo "$(1): '$(U_BOOT)' not found on PATH" >&2; exit 2; }
 endef
 
-.PHONY: dev-up dev-down dev-shell
+.PHONY: dev-up dev-down dev-shell dev-remove
 
 dev-up: ## Devcontainer starten (RECREATE=1 legt ihn neu an, INSTANCE=<name> waehlt eine Instanz, GIT_TOKEN und GH_TOKEN aus gh auth token)
 	$(call dev_require,dev-up)
@@ -37,3 +37,7 @@ dev-down: ## Devcontainer stoppen (er bleibt bestehen; INSTANCE=<name> waehlt ei
 dev-shell: ## Devcontainer starten und eine Shell darin oeffnen (INSTANCE=<name> waehlt eine Instanz, GIT_TOKEN und GH_TOKEN aus gh auth token)
 	$(call dev_require,dev-shell)
 	$(U_BOOT) devcontainer shell $(if $(INSTANCE),--instance $(INSTANCE))
+
+dev-remove: ## Devcontainer entfernen (INSTANCE=<name> waehlt eine Instanz)
+	$(call dev_require,dev-remove)
+	$(U_BOOT) devcontainer remove --volumes --yes $(if $(INSTANCE),--instance $(INSTANCE))
