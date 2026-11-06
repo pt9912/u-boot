@@ -1,0 +1,1 @@
+**Stand:** offen — zwei Belege ([`slice-v2-homebrew-formula`](../../../done/slice-v2-homebrew-formula.md), [`slice-v1-tap-smoke-runner-macos-15`](../../../done/slice-v1-tap-smoke-runner-macos-15.md)); unter der Schwelle von drei, keine Verkörperung entschieden. Gezählt, nicht verkörpert.

@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-v1-tap-smoke-runner-macos-15`](../../../../done/slice-v1-tap-smoke-runner-macos-15.md)
+**Fund:** Der Job `install (macos-14)` (arm64) im Lauf `smoke` 42191356009 zu `u-boot 0.24.0` hatte keinen Runner (`runner_name` leer, `cancelled`, Annotation „The configuration 'macos-14-arm64-us-default' is not supported“); die Läufe 41636802191 (2026-11-03) und 41844822254 (2026-11-04) mit demselben Label waren `success`. Behoben mit `macos-15` (Tap-Commit `662c5fb5`); der Lauf 42212837961 ist grün, `labels` `["macos-15"]`, `runner_name` nicht leer.

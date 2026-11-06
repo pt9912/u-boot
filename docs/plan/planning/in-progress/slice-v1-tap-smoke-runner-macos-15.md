@@ -106,15 +106,15 @@ ein Vorschlag des Planners; die Freigabe zum Umsetzen gab der Projektinhaber am 
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Ziel-Form: Slice — drei Liefer-Punkte; die Gate-Läufe und die Closure-Pflichten zählen nicht mit.
 
-- [ ] **Quelle:** `packaging/homebrew-tap/.github/workflows/smoke.yml` nennt in der Matrix
+- [x] **Quelle:** `packaging/homebrew-tap/.github/workflows/smoke.yml` nennt in der Matrix
       `runner: [macos-15, macos-15-intel]`; der Diff der Datei besteht aus dieser Zeile und einem
       Kommentar zur Label-Wahl (§3), sonst nichts.
-- [ ] **Tap:** `.github/workflows/smoke.yml` in `pt9912/homebrew-u-boot` ist byte-gleich mit der Quelle:
+- [x] **Tap:** `.github/workflows/smoke.yml` in `pt9912/homebrew-u-boot` ist byte-gleich mit der Quelle:
       `gh api repos/pt9912/homebrew-u-boot/contents/.github/workflows/smoke.yml --jq .content | base64 -d | cmp - packaging/homebrew-tap/.github/workflows/smoke.yml`
       endet mit Exit 0; der Tap-Commit steht in §7. Den Push in den Tap macht der Hauptagent nach Review
       und Verification, nicht der Implementer; die Freigabe des Projektinhabers liegt für diesen Schritt vor
       (Auftrag vom 2026-11-06).
-- [ ] **Smoke:** Ein Lauf `smoke` im Tap, gestartet mit `gh workflow run smoke --repo pt9912/homebrew-u-boot`
+- [x] **Smoke:** Ein Lauf `smoke` im Tap, gestartet mit `gh workflow run smoke --repo pt9912/homebrew-u-boot`
       (der Push-Trigger beobachtet nur `Formula/u-boot.rb`, `smoke.yml` Zeilen 10 bis 13; der Lauf
       `39008767100` in [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md) lief
       ebenso über `workflow_dispatch`), endet mit `success`, und die Jobs `install (macos-15)` und
@@ -126,21 +126,21 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
       das Log nicht lesbar, steht das in §7, und die Aussage „arm64“ steht dort nicht. Die Aussage „grün“
       nennt die Formel-Version, die im Lauf installiert wurde (`0.24.0`, solange kein neuer Tag im Tap liegt),
       und kein „macOS grün“ darüber hinaus.
-- [ ] `make gates` grün (im Devcontainer-Container, `AGENTS.md` §3.1).
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] `make gates` grün (im Devcontainer-Container, `AGENTS.md` §3.1).
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
-- [ ] Verification-Report ([`harness/verification.md`](../../../../harness/verification.md)) liegt vor: vor dem
+- [x] Verification-Report ([`harness/verification.md`](../../../../harness/verification.md)) liegt vor: vor dem
       Push in den Tap für die Quelle, die Gates und die Plan-Tabelle; die Punkte „Tap“ und „Smoke“ prüft der
       Verifier nach dem Push nach, nur lesend.
-- [ ] Doku-Update: keine Datei berührt, weil kein öffentlicher Vertrag berührt ist; die Zeilen „unverändert“
+- [x] Doku-Update: keine Datei berührt, weil kein öffentlicher Vertrag berührt ist; die Zeilen „unverändert“
       in §3 sind mit gelesenen Stellen belegt, bei der Closure gegen `git diff --stat` abgeglichen.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis
       `BEO-<KUERZEL>/<slug>/` oder eine weitere Datei in dessen `evidence/`; **kein Zaehler wird gesetzt**,
       er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7
       notiert.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — hier geprüft, weil das Repo ohne
       Wellen-Betrieb für diesen Slice arbeitet.
 
@@ -154,12 +154,13 @@ liefert die Pfad-Kandidaten für §8. Jede Zeile „unverändert“ trägt die S
 |---|---|---|
 | `packaging/homebrew-tap/.github/workflows/smoke.yml` | update | Matrix-Zeile `runner:` (Endstand Zeile 27): `macos-14` wird `macos-15`; davor ein Kommentar (Endstand Zeilen 24 bis 26; Abgrenzung, Indikativ, ohne Chronik): beide Labels nennen die macOS-Version ausdrücklich (arm64 `macos-15`, amd64 `macos-15-intel`), ein Versionswechsel ist eine Änderung dieser Zeile in Vorlage und Tap, kein wanderndes `-latest`. Wortlaut ASCII; die Datei enthält genau ein Nicht-ASCII-Zeichen, den Gedankenstrich in Zeile 6 (bestehender Kommentar, nicht berührt), alle übrigen Kommentare (Zeilen 3 bis 8 außer dem Gedankenstrich, 33 bis 38, 63) sind ASCII (Suche nach Nicht-ASCII-Zeichen, gelesen). |
 | Tap-Repo `pt9912/homebrew-u-boot`, `.github/workflows/smoke.yml` | update (extern, nicht in `git diff --stat`) | Kopie der Quelle nach dem Commit der Quelle; Push durch den Hauptagent nach Review und Verification (DoD „Tap“). Der Tap-Branch `main` ist nicht geschützt (`gh api repos/pt9912/homebrew-u-boot/branches/main`, `protected` ist `false`, 2026-11-06). |
-| `docs/plan/planning/in-progress/slice-v1-tap-smoke-runner-macos-15.md` | neu | dieser Plan; die Zustandswechsel sind reine `git mv` (open → next → in-progress → done) |
+| `docs/plan/planning/done/slice-v1-tap-smoke-runner-macos-15.md` | neu | dieser Plan, im Endstand am Ruheort `done/`; die Zustandswechsel sind reine `git mv` (open → next → in-progress → done) |
 | `docs/plan/planning/open/README.md` | update | Bestandszeile des Plans (Tabelle „Bestand“); die Zeile folgt dem Slice bei jedem `git mv` |
-| `docs/plan/planning/in-progress/roadmap.md` | update | Die Zeile „Nichts in Arbeit.“ (Ruhe-Marker) entfällt, weil der Slice in `in-progress/` liegt (Commit `026fefb5`, Abschnitt vor „Nächste Wellen“) |
+| `docs/plan/planning/in-progress/roadmap.md` | update, Nettodiff der Spanne leer | Die Zeile „Nichts in Arbeit.“ (Ruhe-Marker) entfällt mit dem Start-Commit `026fefb5`, weil der Slice in `in-progress/` liegt (Abschnitt vor „Nächste Wellen“), und steht nach dem Move nach `done/` wieder an derselben Stelle (eigener Closure-Commit); `.d-check.yml` (`planning`) verlangt sie genau dann, wenn `in-progress/` keinen Slice trägt. Die Datei fehlt deshalb in `git diff --stat 34de6de2^..HEAD`. |
 | `docs/reviews/2026-11-06-slice-v1-tap-smoke-runner-macos-15.md` | neu | Review-Report (`.harness/skills/reviewer.md`), liegt vor |
-| `docs/reviews/<Datum>-verification-slice-v1-tap-smoke-runner-macos-15.md` | neu | Verification-Report; Namensform wie die Berichte zu `slice-v2-homebrew-smoke-haertung` |
-| `docs/plan/planning/observations/BEO-<KUERZEL>/<slug>/…` | neu oder update, bei der Closure | Beobachtung „Runner-Label stillgelegt“ mit den Vorgängen `slice-v2-homebrew-formula` (`macos-13`) und diesem Slice (`macos-14`), falls die Closure sie anlegt; das Kürzel ist nachzuschlagen (§8) |
+| `docs/reviews/verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15.md` und `docs/reviews/verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15-nachlauf.md` | neu | Verification-Report in zwei Teilen: erster Teil vor dem Push (Quelle, Gates, Plan-Tabelle), Nachlauf nach dem Push (Tap und Smoke, nur lesend); Namensform `verification-<Datum>-<Kennung>.md` wie die neueren Berichte in `docs/reviews/` |
+| `docs/plan/planning/observations/BEO-WZG/runner-label-stillgelegt/` (`observation.md`, `state.md`, `evidence/slice-v2-homebrew-formula.md`, `evidence/slice-v1-tap-smoke-runner-macos-15.md`) | neu, bei der Closure | Beobachtung „Runner-Label stillgelegt“ mit den Vorgängen `slice-v2-homebrew-formula` (`macos-13`) und diesem Slice (`macos-14`); Kürzel WZG, nächste Zeile der Modus-Deklaration (§8), Sub-Area der Datei selbst ist Aspirantin |
+| `docs/plan/planning/observations/BEO-DOK/plan-aussage-ueber-code/` (`state.md`, `evidence/slice-v1-tap-smoke-runner-macos-15.md`) und `BEO-DOK/plan-annahme-ueber-fremdzustand-ohne-messstelle/state.md` | update, bei der Closure | weiterer Beleg zu den Plan-Aussagen (Review F-1 bis F-3, Verification V-1 und V-4); „Anwendung ohne Beleg“ zur Annahme über den Fremdzustand (§8, zweiter Punkt); jeweils Zeile in `state.md`, kein Zähler |
 | Tests | keine Änderung | Kein Test liest `smoke.yml`: `cmd/uboot/homebrew_scripts_test.go` liest `scripts/homebrew-formula.rb.tmpl` (Zeile 73) und ruft `scripts/homebrew-formula-fill.sh` und `scripts/tap-formula-check.sh` (Funktionen `runFill`, Zeilen 21 bis 35, und `runTapCheck`, Zeilen 120 bis 129); Zeile 70 nennt `slice-v2-homebrew-smoke-haertung` nur im Kommentar. Eine Suche nach `smoke.yml`, `macos-1` und `runner:` über `*.go`, `*.sh`, `*.mk`, `*.py`, `*.yml`, `*.yaml`, `*.rb` und `*.tmpl` fand außer der Datei selbst nur den Fehlertext `fake runner: …` in `internal/adapter/driven/docker/inspector_test.go` Zeile 47. |
 | `.github/workflows/*.yml` (`ci`, `integration`, `publish`, `tap-check`) | unverändert | Keine Datei nennt ein `macos`-Label (Suche über `.github/workflows/`); der Smoke läuft im Tap-Repo, nicht im Hauptrepo. |
 | `scripts/tap-nachzug.sh`, `scripts/tap-check.sh` | unverändert | `tap-nachzug.sh` klont den Tap und kopiert nur das Release-Asset nach `Formula/u-boot.rb` (Schritte `mkdir -p "$work/tap/Formula"` und `cp "$work/u-boot.rb" "$work/tap/Formula/u-boot.rb"`); `smoke.yml` kommt nie per Nachzug in den Tap. `tap-check.sh` probt den Push des Nachzug-Tokens per Klon und `git push --dry-run`; mit dem Token des Hauptagenten hat es nichts zu tun. |
@@ -215,18 +216,23 @@ sich entscheidet.
 
 - **Die Ursache ist nicht bewiesen.** Annotation, fehlender Runner und Ankündigung passen zusammen
   (§Anlass), aber der Lauf mit dem neuen Label ist der Beweis. Bleibt auch `macos-15` rot mit einer
-  Runner-Meldung, ist die Ursache eine andere. — **Ausgang:** bei Closure (entfallen, wenn der Lauf grün
-  ist; sonst eingetreten und zurück nach `open/`).
+  Runner-Meldung, ist die Ursache eine andere. — **Ausgang:** entfallen: der Lauf `smoke` 42212837961 mit
+  `macos-15` ist `success`, `install (macos-15)` hat einen Runner (`labels` `["macos-15"]`, `runner_name` nicht
+  leer), und keine Annotation meldet eine nicht unterstützte Konfiguration (vom Planner gelesen, §7). Die Aussage
+  bleibt auf das Gelesene beschränkt: `macos-14` bekam im Lauf `42191356009` keinen Runner, `macos-15` bekommt
+  einen. Die Ankündigung von GitHub (Stilllegung zum 2026-11-02) hat in der Verification und in dieser Closure
+  niemand erneut gelesen; sie bleibt die Aussage des Anlass-Abschnitts.
 - **Weiterer Runner-Wandel.** Die Matrix steht nach dem Wechsel auf `macos-15` und `macos-15-intel`; beide
   Versionen werden einmal stillgelegt, und die README von `actions/runner-images` nennt für
   `macos-15-intel` keinen Termin (gelesen, 2026-11-06; ein Termin außerhalb dieser Datei ist nicht
-  gelesen). — **Ausgang:** weiter offen → Beobachtung im Register (§5, §7 der Closure); der
-  Neubewertungs-Trigger der Label-Wahl steht in §1.
+  gelesen). — **Ausgang:** weiter offen → Beobachtung
+  [`BEO-WZG/runner-label-stillgelegt`](../observations/BEO-WZG/runner-label-stillgelegt/observation.md) (zwei
+  Belege, §7); der Neubewertungs-Trigger der Label-Wahl steht in §1.
 - **Die Stilllegung fällt erst beim nächsten Formel-Push auf.** `smoke.yml` läuft nur bei einem Push auf
   `Formula/u-boot.rb` und per `workflow_dispatch` (Zeilen 10 bis 14, kein `schedule`); der rote Lauf zu
   `0.24.0` kam vier Tage nach dem Stilllegungsdatum und nur, weil ein Release ihn auslöste. Ein
   regelmäßiger Lauf wäre eine Zusage über Runner-Minuten und eine Änderung am Verfahren, nicht an diesem
-  Slice. — **Ausgang:** weiter offen → Frage an den Projektinhaber (Bericht), bei Bedarf eigener Slice.
+  Slice. — **Ausgang:** weiter offen → Frage an den Projektinhaber (§7, Rest- und Folgepunkt 2); kein Slice angelegt.
 - **Schreibzugriff auf den Tap.** Der Push einer Datei unter `.github/workflows/` braucht bei GitHub ein
   eigenes Recht neben dem Schreibrecht auf den Inhalt (aus dem Verhalten von GitHub bekannt, in diesem Repo
   nicht gemessen). Gelesen: das Token des Hauptagenten ist ein fine-grained PAT (`gh auth status`), das
@@ -234,29 +240,164 @@ sich entscheidet.
   in den Tap (Commits `a8498fd`, `76a7faa`, genannt in
   [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md) und
   [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md)) liefen, mit welchem
-  Token, ist nicht gelesen. Die Messstelle ist der Push selbst. — **Ausgang:** bei Closure (entfallen oder
-  eingetreten → Rückführung nach `open/`, §4).
+  Token, ist nicht gelesen. Die Messstelle ist der Push selbst. — **Ausgang:** entfallen: GitHub hat den Push angenommen; der Tap-Commit
+  `662c5fb5` liegt auf `main` und ändert genau die eine Datei (+4 −1, vom Planner gelesen, §7). Mit welchem Token
+  der Push lief, ist nicht gelesen.
 - **Datei-Drift zwischen Quelle und Tap.** Vor der Änderung byte-gleich (§Anlass); danach kann jede Seite allein
   geändert werden, und kein Skript schreibt `smoke.yml` in den Tap. Der Vergleich in der DoD belegt den
-  Stand zur Closure, nicht danach. — **Ausgang:** bei Closure (der Vergleich nach der letzten Fix-Runde);
-  das Verfahren für künftige Änderungen bleibt weiter offen → Frage an den Projektinhaber (Bericht).
+  Stand zur Closure, nicht danach. — **Ausgang:** weiter offen → Frage an den Projektinhaber (§7, Rest- und Folgepunkt 1) für das Verfahren künftiger
+  Änderungen. Der Stand zur Closure ist belegt: `cmp` Quelle gegen Tap-Datei Exit 0, gleicher Blob `db62a07f…`, Tap-Kopf
+  weiter `662c5fb5`, `packaging/` seit `737dae18` unverändert (§7); der Vergleich gilt für diesen Zeitpunkt, nicht danach.
 - **Ein neuer Befund unter `macos-15`.** Ein anderes Image bringt eine andere Homebrew-Version und andere
   vorinstallierte Taps mit; `brew audit --strict --online` kann etwas melden, das unter `macos-14` nicht
   auftrat, und der Hinweis „Failed to import … vagrant.rb“ des Intel-Laufs (Angabe des Projektinhabers im
   Cut-Slice [`slice-v1-release-cut-v0.24.0`](../done/slice-v1-release-cut-v0.24.0.md) §7, nicht von mir
   gelesen) kann auf dem neuen Image andere Gestalt haben. Das Audit-Gate bleibt (`AGENTS.md` §3.6). —
-  **Ausgang:** bei Closure (eingetreten → eigener Slice für die Formel oder den Schritt; dieser Slice
-  schließt erst mit grünem Lauf).
+  **Ausgang:** entfallen: unter `macos-15` (arm64) kein Befund; alle 9 Schritte sind `success`, auch das gatende Audit,
+  die einzige Annotation ist ein `notice` zur Queue-Zeit. Der Hinweis „Failed to import … vagrant.rb“ steht am
+  Intel-Job (Label unverändert) als Annotation der Stufe `failure` bei Job-Konklusion `success`; jetzt vom Planner
+  gelesen: er nennt einen anderen Tap im Homebrew-Verzeichnis des Runners (`hashicorp/homebrew-tap`), nicht die
+  Formel, und gatet nicht.
 - **Knappe macOS-Runner.** Ein Job kann lange `queued` stehen (Lauf `36894925908` in
   [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md)). Ein Hänger ist kein Rot der Datei. —
-  **Ausgang:** bei Closure (Rerun des Jobs, die Lauf-ID bleibt in §7).
+  **Ausgang:** entfallen für den Beleg-Lauf: `42212837961` lief ohne Rerun (`run_attempt` 1) in 2 min 12 s
+  (`created_at` 11:47:29Z, `updated_at` 11:49:41Z). Der frühere Dispatch-Lauf `42196563230` (09:39:00Z) steht bei der
+  Lesung ohne Job auf `queued` (`total_count` 0): das ist kein knapper Runner, es gibt keinen wartenden Job; warum er
+  so steht, ist nicht gelesen. Er ist kein Beleg und steht als Frage in §7 (Rest- und Folgepunkt 3).
 
 ## 7. Closure-Notiz
 
-Noch nicht geschlossen; der Slice liegt in `in-progress/`. Die Quelle `smoke.yml` ist im Commit `737dae18`
-geändert, der Review-Report liegt vor (`docs/reviews/2026-11-06-slice-v1-tap-smoke-runner-macos-15.md`);
-Verification, Tap-Push und Smoke-Lauf stehen aus. Die Closure trennt bei den Belegen, was der
-Planner selbst gelesen hat (Quelle, Vergleich, Tap-Lauf per `gh api`) und was nur der Hauptagent berichtet.
+**Abschluss:** 2026-11-06. **Verantwortlich:** —. Die Pfade dieses Abschnitts lösen vom Ruheort `done/` auf
+(Ruheort-Regel, Baseline-Regelwerk `grundlagen-traceability.md` §Herkunfts-Anker für Steering-Loop-Regeln). Die
+Belege sind nach Herkunft getrennt: was der Planner selbst las, was der Verifier las und der Planner nicht wiederholte,
+was nur der Hauptagent berichtet, und was niemand las.
+
+- **Geliefert (Fundstellen):** Quelle: Commit `737dae18` (`737dae18fbb8e52ae7512e86184353c773d7d750`),
+  `packaging/homebrew-tap/.github/workflows/smoke.yml`, +4 −1: Matrix `runner: [macos-15, macos-15-intel]` in Zeile 27,
+  Kommentar in den Zeilen 24 bis 26, Blob `db62a07fb710fb2752857b76bcb09422806a2800`. Tap: Commit
+  `662c5fb5c57fc61751f5cff127f213be57573211` in `pt9912/homebrew-u-boot` (Eltern `b9f23331a5…`). Smoke: Lauf `smoke`
+  [42212837961](https://github.com/pt9912/homebrew-u-boot/actions/runs/42212837961) (Event `workflow_dispatch`, Kopf
+  `662c5fb5`, `success`), Jobs `127875452461` `install (macos-15)` und `127875452090` `install (macos-15-intel)`, beide
+  `success`. Installiert wurde die Formel `u-boot 0.24.0`.
+- **Vom Planner gelesen** (`gh api`, nur GET, und lokales `git`/`cmp`, 2026-11-06 kurz vor 11:57Z; nach der letzten
+  Fix-Runde, `git diff 737dae18 HEAD -- packaging` ist leer):
+  `cmp` der Datei im Tap (`contents`-API, base64 dekodiert) gegen `packaging/homebrew-tap/.github/workflows/smoke.yml`
+  Exit `0`, `.sha` im Tap gleich `git hash-object` der Quelle; `commits/main` im Tap `662c5fb5…`; `commits/662c5fb5`
+  genau eine Datei (`.github/workflows/smoke.yml`, `modified`, +4 −1), Eltern `b9f23331a5…`, Nachricht nennt
+  `macos-15` und die Stilllegung; Lauf 42212837961: `completed`/`success`, `run_attempt` 1, 11:47:29Z bis 11:49:41Z;
+  beide Jobs `success`, `head_sha` `662c5fb5…`, `labels` `["macos-15"]` und `["macos-15-intel"]`, `runner_name`
+  `GitHub Actions 1000036052` und `GitHub Actions 1000036051`, je 9 Schritte `success`; Log beider Jobs per
+  `gh api --allow-escape-sequences …/actions/jobs/<id>/logs` (nicht `gh run view --log`): `Image: macos-15-arm64`
+  (Image-Version `20261028.0489.1`) und `Image: macos-15` (`20260824.0482.1`), `Formula u-boot (0.24.0)`,
+  `/opt/homebrew/Cellar/u-boot/0.24.0` und `/usr/local/Cellar/u-boot/0.24.0`, `u-boot version 0.24.0` in beiden;
+  Annotationen: `install (macos-15)` genau ein `notice` zur Queue-Zeit, `install (macos-15-intel)` zwei `warning` (AWS
+  SAM CLI) und ein `failure` („Failed to import … vagrant.rb“) bei Job-Konklusion `success`; Lauf 42196563230:
+  `workflow_dispatch`, Kopf `662c5fb5…`, `queued`, `…/jobs` `total_count` 0; `smoke.yml` Zeilen 1 bis 40
+  (Trigger `push` auf `Formula/u-boot.rb` und `workflow_dispatch`, kein `schedule`). „arm64“ für den ersten Job
+  trägt das Feld `Image:` `macos-15-arm64` zusammen mit dem Homebrew-Präfix `/opt/homebrew`; der Workflow gibt keine
+  Architektur aus, gemessen auf dem Runner ist sie nicht.
+- **Vom Verifier gelesen** ([Nachlauf](../../../reviews/verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15-nachlauf.md),
+  vom Planner nicht wiederholt): Hunk des Tap-Commits zeilengleich mit dem Hunk von `737dae18`; macOS 15.8.2 und 15.7.9
+  im Log; Gems `arm64-darwin` und `x86_64-darwin`; der Schritt `doctor` im Intel-Log (drei Docker-Befunde, Exit-Code im
+  erlaubten Bereich); der Wortlaut der übrigen Annotationen. Erster Teil
+  ([Verification](../../../reviews/verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15.md)): Quelle, `make gates`
+  am Tip `3e1d81a9`, Plan-Tabelle.
+- **Nur berichtet (Hauptagent und Projektinhaber), nicht gelesen:** der Weg und das Token des Push in den Tap, die
+  Auslösung des Dispatch-Laufs 42212837961 und was dabei geschah; die Entscheidungen des Projektinhabers vom
+  2026-11-06 (Runner-Wechsel, Freigabe zu Closure und Push) stehen als Angabe im Auftrag, nicht als Artefakt im Repo.
+- **Von niemandem gelesen:** die Ankündigung von GitHub zur Außerbetriebnahme von `macos-14`; der Grund, warum der Lauf
+  42196563230 ohne Job auf `queued` steht; die Architektur auf dem Runner per Kommando; jede andere macOS-Version, jede
+  andere Formel-Version und ein Lauf mit Docker auf dem Runner. Die Aussage „grün“ gilt für die Formel `u-boot 0.24.0`,
+  den Tap-Kopf `662c5fb5`, die zwei Images oben und die neun Schritte der Datei.
+- **Was hat funktioniert:** Die Messstelle stand vorab im Plan (DoD „Smoke“: Job-Metadaten und Log per `gh api`) und
+  hat die Annahme über den Fremdzustand am Lauf bestätigt, statt sie zu übernehmen. Die Reihenfolge hielt: Review
+  und Verification vor dem Push in das fremde Repo, danach Lauf und lesender Nachlauf; eine Rückführung nach §4 trat
+  nicht ein. Der Review fand drei Plan-Fehler (LOW) vor dem Push; sie sind in `3e1d81a9` berichtigt.
+- **Was ging anders als geplant:** (1) Der Plan nannte Zeilenverweise im Stand vor dem Diff (Review F-1), eine
+  ungenaue ASCII-Aussage (F-2), einen abgelaufenen Zustandsmarker in §7 (F-3), den Verification-Report in einer
+  Namensform, die nicht der Datei entspricht, und einen Report statt zwei (Verification V-1, Nachlauf N-5), und §7
+  trug den Marker „Verification … stehen aus“ über den Ablauf hinaus (V-4). Berichtigt in `3e1d81a9` und in dieser
+  Closure. (2) Es gibt zwei Dispatch-Läufe auf demselben Kopf: 42196563230 (09:39:00Z) bekam nie einen Job, der
+  Beleg-Lauf ist der zweite Dispatch 42212837961 (11:47:29Z); der Plan sah einen Lauf vor. (3) Der Verifier berichtet,
+  dass `gh api …/logs` ohne `--allow-escape-sequences` abgelehnt wurde; der Planner rief die Logs mit dem Flag ab und
+  entfernte die Escape-Folgen vor dem Lesen.
+- **Steering-Loop-Eintrag und Lerneintrag:** Ein Label der Smoke-Matrix wird von GitHub stillgelegt, **weil** die Datei
+  ein ausdrückliches Label nennt und sich der Fremdzustand ohne Commit ändert; das Rot fällt erst beim nächsten
+  Formel-Push auf, **weil** `smoke.yml` nur bei einem Push auf `Formula/u-boot.rb` und per `workflow_dispatch` läuft
+  (kein `schedule`, gelesen); der rote Lauf 42191356009 kam laut Anlass-Abschnitt vier Tage nach dem genannten
+  Stilllegungsdatum und nur, weil der Release `v0.24.0` ihn auslöste. Zweites Vorkommen nach `macos-13`
+  ([`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md)): [`BEO-WZG/runner-label-stillgelegt`](../observations/BEO-WZG/runner-label-stillgelegt/observation.md)
+  steht bei 2× und ist **gezählt, nicht verkörpert**; es entsteht kein neuer Sensor, weil ein Test, der das Label aus
+  der Datei liest, die Datei gegen sich selbst prüft (§1) und ein Lauf nach Zeitplan eine Zusage über Runner-Minuten
+  wäre (Rest- und Folgepunkt 2). Zweite Beobachtung dieser Closure: die Klasse der Plan-Aussagen über Code trat
+  zum 90. Mal auf (Evidence-Datei ergänzt); der noch nicht entschiedene Schärfungs-Vorschlag „Reports nur mit festem
+  Bezug in der Plan-Tabelle“ trifft V-1 (der Platzhalter `<Datum>-verification-slice-…` war kein fester Bezug).
+  Es wurde nichts verkörpert, daher kein `liegt in`.
+- **Beobachtungs-Register (`../observations/`; Zähler = Dateien in `evidence/`, gelesen am 2026-11-06):** neu
+  [`BEO-WZG/runner-label-stillgelegt/`](../observations/BEO-WZG/runner-label-stillgelegt/observation.md) mit
+  `evidence/slice-v2-homebrew-formula.md` und `evidence/slice-v1-tap-smoke-runner-macos-15.md` — Zähler 2×. Evidence-Datei
+  `evidence/slice-v1-tap-smoke-runner-macos-15.md` in
+  [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) ergänzt (jetzt 90
+  Dateien; verkörpert in `AGENTS.md` §3.10, Rückfall, keine weitere Schärfung entschieden). Zeile ohne neue
+  Evidence-Datei in `state.md` von
+  [`BEO-DOK/plan-annahme-ueber-fremdzustand-ohne-messstelle`](../observations/BEO-DOK/plan-annahme-ueber-fremdzustand-ohne-messstelle/observation.md)
+  (Anwendung ohne Beleg; 3 Dateien, Ausgang beim Projektinhaber). Kein Eintrag erreichte mit diesem Slice neu die
+  Schwelle von drei (Lese-Schritt: keiner neu über der Schwelle). Kein neues Auftreten:
+  [`BEO-DOK/ci-log-falsch-gelesen`](../observations/BEO-DOK/ci-log-falsch-gelesen/observation.md) (Logs per `gh api`
+  gelesen), [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)
+  (die Aussage „grün“ ist auf Formel, Kopf, Images und Schritte begrenzt),
+  [`BEO-DOK/unumkehrbarer-schritt-vor-der-kontrolle`](../observations/BEO-DOK/unumkehrbarer-schritt-vor-der-kontrolle/observation.md)
+  (Push in den Tap nach Verification), [`BEO-WZG/kopplung-nicht-nachgezogen`](../observations/BEO-WZG/kopplung-nicht-nachgezogen/observation.md)
+  (verwandt, nicht gezählt, siehe Punkt 1).
+- **Rest- und Folgepunkte** — Fragen an den Projektinhaber; keine Slice-Datei angelegt, ob einer als Slice entsteht,
+  entscheidet er:
+  1. **Verfahren Quelle → Tap für `smoke.yml`.** Kein Skript schreibt die Datei in den Tap (`scripts/tap-nachzug.sh`
+     kopiert nur `Formula/u-boot.rb`, Plan §3), `packaging/homebrew-tap/README.md` nennt nur das Anlegen des Tap-Repos,
+     und kein Sensor hält beide Seiten gleich; heute sind sie gleich (`cmp` Exit 0), morgen kann jede Seite allein
+     driften. Ob es ein Verfahren gibt (Vergleich in `tap-check`, Erweiterung des Nachzugs oder ein Satz in
+     `docs/maintainer/releasing.md`) und wer die Datei mit welchem Token-Recht für `.github/workflows/` pusht, ist
+     offen. **Ziel: Projektinhaber** (Architect, falls ein Verfahren entsteht).
+  2. **Regelmäßiger Lauf (`schedule`).** Ohne ihn fällt die nächste Stilllegung wieder erst beim nächsten
+     Formel-Push auf; ein Zeitplan ist eine Zusage über Runner-Minuten. **Ziel: Projektinhaber.**
+  3. **Der hängende Lauf `42196563230`.** Er steht seit 09:39Z ohne Job auf `queued`, ist kein Beleg und wurde von
+     niemandem angefasst (ein Abbruch ist ein Schreibzugriff). Startet er später, entsteht ein zweiter Lauf auf
+     demselben Kopf. **Ziel: Projektinhaber** — stehen lassen oder abbrechen.
+  4. **Grenzen, benannt:** die Entscheidungen des Projektinhabers stehen im Auftrag, nicht im Repo; die Ankündigung
+     von GitHub und die Architektur per Kommando sind nicht gelesen (siehe oben); die Label-Wahl wird neu bewertet,
+     wenn ein Label der Matrix ein drittes Mal stillgelegt wird oder GitHub `macos-15` ankündigt (§1). **Ziel: keiner;
+     benannt.**
+- **Folge-Slices:** keine angelegt. Die Punkte 1 bis 3 haben keine Slice-Datei, bis der Projektinhaber entscheidet.
+- **Risiken aus §6:** je ein Ausgang, siehe §6 (eingetreten: keines; entfallen: 1, 4, 6, 7; weiter offen: 2, 3, 5).
+- **Drei Paarungen:** (a) *Anker* — kein Herkunfts-Anker gesetzt, der Steering-Loop-Eintrag trägt kein Feld
+  `liegt in …`, die Paarung hat keinen Gegenstand; (b) *Folge-Slice* — keiner genannt, die Paarung hat keinen
+  Gegenstand; (c) *Register* — die genannten Kennungen `BEO-WZG/runner-label-stillgelegt`,
+  `BEO-DOK/plan-aussage-ueber-code`, `BEO-DOK/plan-annahme-ueber-fremdzustand-ohne-messstelle`,
+  `BEO-DOK/ci-log-falsch-gelesen`, `BEO-DOK/zusage-weiter-als-messung`,
+  `BEO-DOK/unumkehrbarer-schritt-vor-der-kontrolle` und `BEO-WZG/kopplung-nicht-nachgezogen` existieren als
+  Verzeichnis, jedes mit nicht leerem `evidence/` (geprüft nach dem Move).
+- **Plan-Tabelle gegen `git diff --stat 34de6de2^..HEAD`** (`AGENTS.md` §3.10; Stand nach der letzten Fix-Runde, Spitze
+  nach dem Ruhe-Marker-Commit): 13 Dateien — `smoke.yml` (+4 −1), diese Datei (neu, am Ruheort `done/`),
+  `open/README.md`, der Review-Report, die zwei Verification-Reports (V-1 und N-5 berichtigt), vier Dateien von
+  `BEO-WZG/runner-label-stillgelegt/`, `state.md` und die neue Evidence-Datei von `BEO-DOK/plan-aussage-ueber-code/`,
+  `state.md` von `BEO-DOK/plan-annahme-ueber-fremdzustand-ohne-messstelle/`. Die Plan-Tabelle führt jede davon; die
+  Roadmap steht nicht in der Stat, weil der Start-Commit den Ruhe-Marker entfernt und die Closure ihn
+  wiederherstellt (Nettodiff leer, in der Tabelle so geführt). Die Zeilen „unverändert“ (Tests, `.github/workflows/`,
+  `scripts/tap-nachzug.sh`, `scripts/tap-check.sh`, `packaging/homebrew-tap/README.md`, `docs/maintainer/releasing.md`,
+  `CHANGELOG.md`, [ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md)) stehen nicht im Diff; ihre gelesenen
+  Stellen hat der Verifier im ersten Teil nachgeprüft.
+- **Carveouts:** keine neu, keine gelöst, keiner berührt (kein Eintrag unter `docs/plan/carveouts/` im Diff).
+- **Verification und Gates:** [Verification, erster Teil](../../../reviews/verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15.md)
+  (Verdikt: Quelle bereit; Findings V-1 bis V-5) und
+  [Nachlauf](../../../reviews/verification-2026-11-06-slice-v1-tap-smoke-runner-macos-15-nachlauf.md) (Verdikt:
+  bestanden; Findings N-1 bis N-5, alle INFO bis auf N-5 LOW); Review-Report
+  [2026-11-06-slice-v1-tap-smoke-runner-macos-15](../../../reviews/2026-11-06-slice-v1-tap-smoke-runner-macos-15.md)
+  (0 HIGH, 0 MEDIUM, 3 LOW, 2 INFO). V-2, V-3 und N-1 bis N-4 sind in §6 und oben aufgelöst; V-5 (kein Nachlauf-Review
+  der Plan-Berichtigungen aus `3e1d81a9`): Entscheidung des Planners — kein weiteres Review, weil die Berichtigungen
+  Zahlen und Marker im Plan sind, die der Verifier gegen die Datei gelesen und ohne Abweichung gefunden hat. *Grenze:* zu
+  `3e1d81a9` liegt kein eigener Review-Report vor. Nicht ausgeführt: `make test-docker`, `make verify-depguard`,
+  `make ci`, `make fullbuild` (kein Go-Code, keine Docker-, Importregel- oder Image-Änderung im Diff; Begründung im
+  ersten Teil). `make gates` im Devcontainer-Container: GATES_PLATZHALTER
+
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
