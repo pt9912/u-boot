@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext; Baseline-Regelwerk `modul-11`)
 
-**Gegenstand:** [`slice-v1-release-cut-v0.24.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.24.0.md), Commit-Spanne `e38d6461..8aca6bef` (Slice in Umsetzung bis lokaler Tip). Der Cut-Commit ist `58411aaf` (8 Dateien, 28 Einfügungen, 19 Löschungen); `8aca6bef` ändert nur die Lead-Zeile des CHANGELOG-Blocks (1 Zeile) und legt den Review-Report ab (`git diff --stat 58411aaf..HEAD`: 2 Dateien). **Abgleichstand nach der letzten Fix-Runde = `8aca6bef`**; der Arbeitsbaum war vor und nach allen Läufen sauber (`git status --short` leer).
+**Gegenstand:** [`slice-v1-release-cut-v0.24.0`](../plan/planning/done/slice-v1-release-cut-v0.24.0.md), Commit-Spanne `e38d6461..8aca6bef` (Slice in Umsetzung bis lokaler Tip). Der Cut-Commit ist `58411aaf` (8 Dateien, 28 Einfügungen, 19 Löschungen); `8aca6bef` ändert nur die Lead-Zeile des CHANGELOG-Blocks (1 Zeile) und legt den Review-Report ab (`git diff --stat 58411aaf..HEAD`: 2 Dateien). **Abgleichstand nach der letzten Fix-Runde = `8aca6bef`**; der Arbeitsbaum war vor und nach allen Läufen sauber (`git status --short` leer).
 
 **Push-Stand (gelesen am 2026-11-06):** `origin/main` steht auf `68321ff6`; `main` liegt sieben Commits davor (`git log origin/main..HEAD`: `6d68a2a3` bis `8aca6bef`). Es gibt keinen Lauf von `ci`, `integration-docker` oder `tap-check` auf `8aca6bef` (`gh run list --commit 8aca6bef…` liefert `[]`); der Tag `v0.24.0` existiert weder lokal (`git tag -l 'v0.24*'` leer) noch ist er gepusht. Der Push und der Tag stehen nach Plan §1 aus und gehören dem Projektinhaber.
 
@@ -19,7 +19,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-release-cut-v0.24.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.24.0.md)
+- Slice: [`slice-v1-release-cut-v0.24.0`](../plan/planning/done/slice-v1-release-cut-v0.24.0.md)
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-DEV-013`](../../spec/lastenheft.md#lh-fa-dev-013--homebrew-formeln-im-devcontainer), [`LH-FA-DEV-011`](../../spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette), [`ADR-0043`](../plan/adr/0043-nur-devcontainer-bau-pfad.md), [`ADR-0046`](../plan/adr/0046-homebrew-formeln-im-devcontainer-schluessel-brew-und-tap-freigabe.md)
 - Artefakte: `CHANGELOG.md`, `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, `docs/maintainer/releasing.md`
 

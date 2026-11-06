@@ -2,7 +2,7 @@
 
 **Review-Art:** Release-Cut-Review (Text und Versionsstellen) gegen Plan, Spec, Hard Rules und `releasing.md` §3/§4 (Modul 10). Keine DoD-Prüfung — das ist die Frage des Verifiers.
 
-**Gegenstand:** Cut-Commit `58411aaf` (Basis `e38d6461`; 8 Dateien, 28 Einfügungen, 19 Löschungen) und, soweit der Lead Aussagen über den Release trägt, der Stand von `main` gegen den Tag `v0.23.0` (`git diff v0.23.0..HEAD --stat -- cmd internal ':!*_test.go'`: 27 Dateien, wie im Plan gelesen). Slice [`slice-v1-release-cut-v0.24.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.24.0.md); der Slice ist bewusst nicht geschlossen (§7 leer, DoD-Haken offen, kein Tag) — kein Finding.
+**Gegenstand:** Cut-Commit `58411aaf` (Basis `e38d6461`; 8 Dateien, 28 Einfügungen, 19 Löschungen) und, soweit der Lead Aussagen über den Release trägt, der Stand von `main` gegen den Tag `v0.23.0` (`git diff v0.23.0..HEAD --stat -- cmd internal ':!*_test.go'`: 27 Dateien, wie im Plan gelesen). Slice [`slice-v1-release-cut-v0.24.0`](../plan/planning/done/slice-v1-release-cut-v0.24.0.md); der Slice ist bewusst nicht geschlossen (§7 leer, DoD-Haken offen, kein Tag) — kein Finding.
 
 **Skill:** `.harness/skills/reviewer.md`
 **Modell:** claude (Agentenlauf) · **Datum:** 2026-11-06
