@@ -460,6 +460,11 @@ wiederholte, was nur der Hauptagent berichtet, und was niemand las.
   Devcontainer-Container durch den Verifier am Stand `f902d127`, Exit `0`: `d-check` 1212 Dateien 0 Befunde, `lint`
   0 issues, `coverage-gate` 92,40 % gegen 90 %, `baseline-verify` OK, Stempel `f902d127`. Nicht ausgeführt: `make test-docker`,
   `make verify-depguard`, `make ci`, `make fullbuild` (nur Markdown im Diff, kein Docker-, Importregel- oder Image-Pfad).
+  Eigener Lauf der Closure: `make gates` im Devcontainer-Container (`/.dockerenv` vorhanden), Tip `e49b6d24`, Exit `0`:
+  `tool-pruefung` OK (Go 1.27.3, golangci-lint 2.14.0), `gate-reihenfolge-test` 2 Fälle 0 Fehlschläge, `baseline-verify` v6.18.1
+  OK (54 Dateien), `d-check` 1213 Dateien 0 Befunde (`pinsync` 3 Pins), `lint` 0 issues, `coverage-gate` 92,40 % gegen 90 %,
+  `ablage-pruefung-test` 26 Fälle 0 Fehlschläge, Stempel `.harness/state/gates-passed.head` = `e49b6d24`. Der Lauf liegt nach den
+  Closure-Commits `4c6657e0`, `a1a2063c`, `ff064e04`, `932626f3` und `e49b6d24`; diese Zeile ist danach ergänzt und ändert nur Markdown.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
