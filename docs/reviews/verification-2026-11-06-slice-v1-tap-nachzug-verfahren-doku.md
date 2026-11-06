@@ -155,3 +155,30 @@ Plan-Einträge ohne Diff: `docs/plan/planning/observations/…` (bedingt, Closur
 ## Nachtrag
 
 `make docs-check` für diesen Bericht: grün, 1212 Dateien, 0 Befunde (Stand nach dem Schreiben).
+
+## Nachtrag 2: Nachprüfung von V-1 an `f902d127`
+
+**Gelesen:** nur der Diff `8cc97257..f902d127` (eine Datei, `docs/maintainer/releasing.md`, 5 Einfügungen, 6 Löschungen, alle im Absatz „Gelaufen und nicht gelaufen“), gegen die DoD „Verfahren“ (letzter Absatz) und gegen V-1.
+
+| Prüfpunkt | Ergebnis |
+|---|---|
+| Commit-Kennung im Abschnitt | **entfernt**; Suche über §9 nach 8-stelligen Hex-Folgen und Zahlen ab 10 Stellen ohne Treffer |
+| Run- und Job-IDs im Abschnitt | keine (gleiche Suche) |
+| Prozessaussage „Reviewer und Verifier haben ihn gelesen“ | **entfernt**; die Wörter Reviewer und Verifier kommen in §9 nicht mehr vor |
+| Beschreibung des Tap-Commits (Zeilenzahlen, „nur `smoke.yml`“) | entfernt; der Absatz sagt noch: Aufruf durch den Hauptagenten in der Sitzung vom 2026-11-06 für `.github/workflows/smoke.yml`, ohne `branch`, `B64` und `SHA` vorab gesetzt, Wortlaut aus dem Sitzungsprotokoll |
+| Bezugspunkt aus F-1 des Reviews (Herkunft, Datum) | bleibt: Hauptagent, Sitzung, Datum, Sitzungsprotokoll. Das Datum ist ein berichtetes Ereignis, kein Zustandsmarker mit Ablaufpunkt |
+| Umfang der Aussage | unverändert ehrlich: `B64`-Zeile des Blocks „nicht als gelaufen ausgewiesen“, `README.md`, Rückweg und Dispatch als nicht gelaufen; die Aussage über den gelaufenen Aufruf bleibt ein Bericht, den ich nicht belegen kann (V-2) |
+| Diff außerhalb des Absatzes | keiner (`--stat` der Spanne `8cc97257..HEAD` nennt außer diesem Report nur `releasing.md`) |
+
+**V-1: behoben.** Die DoD-Zusage „keine Run-, Commit- oder Job-IDs als Beleg“ ist im Stand `f902d127` für den Abschnitt erfüllt. Die Belege (Tap-Commit, Lesebefunde) gehören in Plan §7; die Closure trägt sie.
+
+**Offen wie zuvor, vom Fix nicht berührt:** V-2 (Herkunft des Push-Aufrufs; Risiko 2 „weiter offen → Grenze (d)“), V-3 (Entscheidungen nur als Angabe des Hauptagenten), V-4 bis V-6 (INFO). Anmerkung zur Wortwahl: „nicht als gelaufen ausgewiesen“ sagt weniger als der vorige Satz „nicht gelaufen“; gemeint ist dasselbe, V-2 deckt es.
+
+**Sensors an `f902d127`:**
+
+| Sensor | Ergebnis | Evidence |
+|---|---|---|
+| `make gates` (Devcontainer-Container, ganzer Lauf) | **pass** (Exit 0) | `d-check`: 1212 Dateien, 0 Befunde; `lint`: 0 issues; `coverage-gate`: 92,40 % ≥ 90 %; `baseline-verify` OK; Stempel `.harness/state/gates-passed.head` = `f902d127` |
+| `make docs-check` mit diesem Nachtrag | **pass** | `d-check: 1212 Datei(en) geprüft, 0 Befund(e)` |
+
+**Verdikt nach dem Fix:** DoD „Verfahren“ erfüllt; kein Befund mit Änderungspflicht für den Slice-Inhalt mehr offen. Die Closure trägt V-2 und V-3 in §7, stellt den Ruhe-Marker der Roadmap wieder her und wiederholt den Abgleich der Plan-Tabelle gegen `git diff --stat` nach dieser Fix-Runde (Stand `f902d127`).
