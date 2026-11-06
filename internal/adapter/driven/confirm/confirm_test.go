@@ -244,3 +244,61 @@ func TestConfirmer_AddDependency_ReadErrorPropagates(t *testing.T) {
 		t.Fatal("expected error, got nil")
 	}
 }
+
+const confirmRemoveID = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+// SPEC-058, answers: y and yes in any case agree; n, a longer word, the empty
+// line and the end of the input decline.
+func TestConfirmer_RemoveDevcontainer_Answers(t *testing.T) {
+	t.Parallel()
+	cases := map[string]bool{
+		"y\n": true, "Y\n": true, "yes\n": true, "YES\n": true, " yes \n": true,
+		"n\n": false, "no\n": false, "yep\n": false, "\n": false, "": false, "ja\n": false,
+	}
+	for answer, want := range cases {
+		t.Run(strings.TrimSpace(answer), func(t *testing.T) {
+			t.Parallel()
+			c := confirm.New(strings.NewReader(answer), &bytes.Buffer{})
+			got, err := c.ConfirmRemoveDevcontainer(context.Background(), confirmRemoveID, []string{"v1"})
+			if err != nil || got != want {
+				t.Errorf("answer %q: got %t, err %v, want %t", answer, got, err, want)
+			}
+		})
+	}
+}
+
+// SPEC-058, prompt: the first twelve characters of the container ID, every
+// volume on a line of its own, the warning and `[y/N]` with the default N; the
+// container without a volume says so and has no warning about volumes.
+func TestConfirmer_RemoveDevcontainer_Prompt(t *testing.T) {
+	t.Parallel()
+	out := &bytes.Buffer{}
+	c := confirm.New(strings.NewReader("n\n"), out)
+	if _, err := c.ConfirmRemoveDevcontainer(context.Background(), confirmRemoveID, []string{"demo-docker-x", "demo-workspace-x"}); err != nil {
+		t.Fatal(err)
+	}
+	want := "About to remove the devcontainer container 0123456789ab of this project and its volumes:\n" +
+		"  - demo-docker-x\n  - demo-workspace-x\n" +
+		"Data in these volumes will be PERMANENTLY DELETED. Proceed? [y/N] "
+	if out.String() != want {
+		t.Errorf("prompt:\n%q\nwant\n%q", out.String(), want)
+	}
+	out.Reset()
+	c = confirm.New(strings.NewReader("n\n"), out)
+	if _, err := c.ConfirmRemoveDevcontainer(context.Background(), confirmRemoveID, nil); err != nil {
+		t.Fatal(err)
+	}
+	want = "About to remove the devcontainer container 0123456789ab of this project; it holds no volume.\nProceed? [y/N] "
+	if out.String() != want {
+		t.Errorf("prompt without volumes:\n%q\nwant\n%q", out.String(), want)
+	}
+}
+
+// SPEC-058: an answer that cannot be read is an error, not a "no".
+func TestConfirmer_RemoveDevcontainer_ReadErrorPropagates(t *testing.T) {
+	t.Parallel()
+	c := confirm.New(&erroringReader{err: errSimulated}, &bytes.Buffer{})
+	if _, err := c.ConfirmRemoveDevcontainer(context.Background(), confirmRemoveID, nil); err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}

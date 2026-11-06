@@ -40,8 +40,10 @@ type DevcontainerContainer struct {
 // DevcontainerInspector is the read-only view of the devcontainer
 // container of a project (LH-FA-DEV-007: the host determines the
 // fallbacks of the container start scripts from the status files they
-// write). The two methods are the only engine access it needs; it never
-// runs a program in the container and never follows a symlink in it.
+// write; LH-FA-DEV-010: `devcontainer remove` reads the volumes of the
+// container). The four methods are the only engine access it needs; it never
+// changes the engine, never runs a program in the container and never follows
+// a symlink in it.
 //
 // Layer rules (LH-FA-ARCH-002, LH-FA-ARCH-003): driven port; the
 // production implementation lives in `internal/adapter/driven/docker`
@@ -66,4 +68,17 @@ type DevcontainerInspector interface {
 	// [ErrContainerFileInvalid] for any other entry type (symlink, FIFO,
 	// directory, device) or a file larger than maxBytes.
 	ReadFile(ctx context.Context, containerID, path string, maxBytes int) ([]byte, error)
+
+	// ContainerVolumes returns the names of the volumes the container with the
+	// given ID mounts: its mounts of the type `volume`, named and anonymous, in
+	// the order the engine lists them. Bind mounts and `tmpfs` mounts are not
+	// in the list; a container without a volume returns an empty list. The
+	// volumes are those of the container itself, never found by a name
+	// pattern. A non-nil error means the engine could not be asked.
+	ContainerVolumes(ctx context.Context, containerID string) ([]string, error)
+
+	// ExistingVolumes returns those of the given volume names that exist in the
+	// engine, in the order of names. A non-nil error means the engine could
+	// not be asked.
+	ExistingVolumes(ctx context.Context, names []string) ([]string, error)
 }

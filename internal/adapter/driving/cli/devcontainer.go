@@ -17,13 +17,13 @@ import (
 // devcontainer`, with and without `--json`: the group has no data of its own.
 // Like bare `egress --json` it ends with exit 2 (usage class via
 // [isUsageError]) and without an envelope.
-var ErrDevcontainerSubcommandRequired = errors.New("u-boot devcontainer requires a subcommand (try `u-boot devcontainer up`, `u-boot devcontainer down` or `u-boot devcontainer shell`)")
+var ErrDevcontainerSubcommandRequired = errors.New("u-boot devcontainer requires a subcommand (try `u-boot devcontainer up`, `u-boot devcontainer down`, `u-boot devcontainer shell` or `u-boot devcontainer remove`)")
 
 // ErrDevcontainerPreviewNotApplicable is returned when `--dry-run` or
-// `--diff` is given to `devcontainer up`, `devcontainer down` or
-// `devcontainer shell`: none of the commands writes a project file, so there
-// is nothing to preview. Maps to exit 2.
-var ErrDevcontainerPreviewNotApplicable = errors.New("--dry-run/--diff is not applicable to `devcontainer up`, `devcontainer down` and `devcontainer shell` (they write no project file)")
+// `--diff` is given to `devcontainer up`, `devcontainer down`,
+// `devcontainer shell` or `devcontainer remove`: none of the commands writes a
+// project file, so there is nothing to preview. Maps to exit 2.
+var ErrDevcontainerPreviewNotApplicable = errors.New("--dry-run/--diff is not applicable to `devcontainer up`, `devcontainer down`, `devcontainer shell` and `devcontainer remove` (they write no project file)")
 
 // ErrDevcontainerShellJSONNotApplicable is returned when `--json` is given to
 // `devcontainer shell`: the command opens an interactive session, and the
@@ -41,10 +41,15 @@ func isDevcontainerUsageError(err error) bool {
 }
 
 // devcontainerFlags bundles the flag state of `devcontainer up`,
-// `devcontainer down` and `devcontainer shell`. DryRun and Diff are registered
-// only so Cobra parses them and the RunE can reject them with an envelope.
+// `devcontainer down`, `devcontainer shell` and `devcontainer remove`. DryRun
+// and Diff are registered only so Cobra parses them and the RunE can reject
+// them with an envelope. Volumes is the local flag of `remove`; Yes and
+// NoInteractive are read from the persistent root flags by `remove` alone.
 type devcontainerFlags struct {
-	Recreate bool
+	Recreate      bool
+	Volumes       bool
+	Yes           bool
+	NoInteractive bool
 	// Instance is the value of `--instance`; InstanceGiven is true when the
 	// flag was on the command line, so an empty value is told from no flag.
 	Instance      string
@@ -96,13 +101,24 @@ type devcontainerDownData struct {
 	Stopped     bool   `json:"stopped"`
 }
 
+// devcontainerRemoveData is the typed `data` carrier of `devcontainer remove
+// --json`; no field is omitempty. `containerId` is the empty string when there
+// is no container for the project, and `removedVolumeNames` is an array, empty
+// when no volume was removed.
+type devcontainerRemoveData struct {
+	ContainerID        string   `json:"containerId"`
+	Stopped            bool     `json:"stopped"`
+	Removed            bool     `json:"removed"`
+	RemovedVolumeNames []string `json:"removedVolumeNames"`
+}
+
 // newDevcontainerCommand builds the `u-boot devcontainer` group
-// (LH-FA-DEV-010). Children: `up`, `down`, `shell`.
+// (LH-FA-DEV-010). Children: `up`, `down`, `shell`, `remove`.
 func newDevcontainerCommand(a *App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "devcontainer",
-		Short: "Start, stop and enter the devcontainer of the project without an editor",
-		Long: `Start, stop and enter the devcontainer of the project without a
+		Short: "Start, stop, enter and remove the devcontainer of the project without an editor",
+		Long: `Start, stop, enter and remove the devcontainer of the project without a
 devcontainer-capable editor, without Node.js and without the Dev Container CLI
 on the host; Docker (client and local engine) is enough.
 
@@ -111,6 +127,7 @@ Subcommands:
   u-boot devcontainer up [--recreate]   start the devcontainer
   u-boot devcontainer down              stop the devcontainer
   u-boot devcontainer shell             start the devcontainer and open a shell in it
+  u-boot devcontainer remove [--volumes]  remove the container, with --volumes its volumes
 
 Each subcommand takes --instance NAME to act on one of several devcontainers of
 the same project folder; see the help of the subcommands.`,
@@ -119,7 +136,7 @@ the same project folder; see the help of the subcommands.`,
 			return ErrDevcontainerSubcommandRequired
 		},
 	}
-	cmd.AddCommand(newDevcontainerUpCommand(a), newDevcontainerDownCommand(a), newDevcontainerShellCommand(a))
+	cmd.AddCommand(newDevcontainerUpCommand(a), newDevcontainerDownCommand(a), newDevcontainerShellCommand(a), newDevcontainerRemoveCommand(a))
 	return cmd
 }
 
@@ -230,7 +247,8 @@ func newDevcontainerDownCommand(a *App) *cobra.Command {
 Unlike "u-boot down", which tears the Compose environment down, this command
 only stops the container: it removes neither the container nor a volume, and it
 needs no helper container and no socket mount. A later "u-boot devcontainer
-up" starts the same container again.
+up" starts the same container again. "u-boot devcontainer remove" removes the
+container.
 
 With no container for the project, or with one that is already stopped, the
 command ends with exit 0.
@@ -349,6 +367,86 @@ Examples:
 	return cmd
 }
 
+func newDevcontainerRemoveCommand(a *App) *cobra.Command {
+	flags := &devcontainerFlags{}
+	cmd := &cobra.Command{
+		Use:   "remove",
+		Short: "Remove the container of the devcontainer of the project; with --volumes its volumes (data loss)",
+		Long: `Remove the container that belongs to the project in the current directory. A
+running container is stopped first. The command needs no helper container, no
+socket mount and no project file; the host needs Docker (client and local
+engine), nothing else. It is not "u-boot remove", which disables an add-on
+service of the Compose environment, and not "u-boot devcontainer down", which
+stops the container and removes nothing.
+
+Without --volumes the command removes the container only and asks nothing. The
+volumes of the container stay, and a later "u-boot devcontainer up" mounts the
+named ones again with their content; an anonymous volume (a VOLUME of the
+Dockerfile of the project) stays behind unused.
+
+--volumes also removes the volumes that the container mounts, named and
+anonymous (in the sandbox profile the workspace volume, with the nested runtime
+the volume of its storage, with the feature ollama the volume of the models).
+THE DATA IN THESE VOLUMES IS PERMANENTLY DELETED. The command reads the volumes
+from the mounts of the container, never from a name pattern, and names them
+before it asks. It asks for confirmation on the standard error stream
+("[y/N]"; only y and yes agree, an empty line or the end of the input declines):
+  - --yes                     confirm without asking
+  - --no-interactive          exit 10, nothing is stopped or removed
+  - --json                    never asks, exit 10 unless --yes is given
+The question comes only when the project has a container to remove; with no
+container the command ends with exit 0 and asks nothing. A volume that another
+container holds cannot be removed: the command removes the others, names the
+one that remains, and ends with exit 12. A volume of a container that no longer
+exists is not found by the command; remove such a volume with "docker volume
+rm".
+
+--instance NAME removes the container of that instance (1 to 32 characters of
+a-z, 0-9 and '-', beginning and ending with a letter or digit) and leaves the
+other containers of the project and their volumes alone; with no container of
+that instance the command ends with exit 0. Without --instance the command acts
+on the container without an instance only; if the project has only containers
+of instances, it ends with exit 10 and removes nothing, also with --volumes
+--yes.
+
+--quiet holds back the result lines; the question and every error stay.
+--dry-run, --diff and arguments are rejected with exit 2, as is --yes together
+with --no-interactive.
+
+Exit codes:
+  0   success, also when there is nothing to remove
+  2   CLI validation (unknown flag, arguments, --dry-run/--diff, --yes together
+      with --no-interactive)
+  10  an instance name that is not admissible; no --instance although the
+      project has only containers of instances; --volumes was not confirmed
+      (declined, answer not readable, --no-interactive or --json without --yes)
+  11  no docker binary on the PATH (for example in the released container
+      image), the daemon does not answer, the engine is not local, or the
+      engine could not be queried
+  12  docker stop, docker rm or docker volume rm failed, or a volume remains
+
+Examples:
+  u-boot devcontainer remove
+  u-boot devcontainer remove --volumes
+  u-boot devcontainer remove --instance agent-1 --volumes --yes
+  u-boot devcontainer remove --json`,
+		Args: jsonArgsValidator(a, "devcontainer", "remove", cobra.NoArgs, mapDevcontainerRemoveErrorToDiagnostic, false),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			flags.Quiet = a.quiet()
+			flags.JSON = a.json
+			flags.Yes = a.yes
+			flags.NoInteractive = a.noInteractive
+			flags.InstanceGiven = cmd.Flags().Changed("instance")
+			return runDevcontainerRemove(cmd.Context(), cmd.OutOrStdout(), *flags, a.devcontainerUseCase, a.getwd)
+		},
+	}
+	cmd.Flags().BoolVar(&flags.Volumes, "volumes", false,
+		"also remove the volumes that the container mounts (named and anonymous; the data is permanently deleted)")
+	registerDevcontainerInstanceFlag(cmd, flags)
+	registerDevcontainerPreviewFlags(cmd, flags)
+	return cmd
+}
+
 func registerDevcontainerPreviewFlags(cmd *cobra.Command, flags *devcontainerFlags) {
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
 		"not applicable (the command writes no project file); rejected with exit 2")
@@ -356,7 +454,7 @@ func registerDevcontainerPreviewFlags(cmd *cobra.Command, flags *devcontainerFla
 		"not applicable (the command writes no project file); rejected with exit 2")
 }
 
-// reportDevcontainerError is the error gate of both subcommands. In JSON mode
+// reportDevcontainerError is the error gate of the subcommands. In JSON mode
 // it writes one envelope whose `diagnostics[]` holds the warnings already
 // raised (the socket disclosure) followed by the error, and returns err for
 // [ExitCode]; in human mode it returns err.
@@ -494,6 +592,88 @@ func runDevcontainerDown(
 	return nil
 }
 
+// runDevcontainerRemove delegates to the use case and renders the result. The
+// result lines are the result of the command and disappear under `--quiet`
+// like the success line of every modifying command; the question of
+// `--volumes` is the confirmer's and stays. `--dry-run`, `--diff` and `--yes`
+// together with `--no-interactive` end with exit 2 before anything else, an
+// instance flag given empty with exit 10.
+func runDevcontainerRemove(
+	ctx context.Context, stdout io.Writer, flags devcontainerFlags,
+	uc driving.DevcontainerUseCase, getwd func() (string, error),
+) error {
+	fail := func(err error) error {
+		return reportDevcontainerError(stdout, err, flags, "remove", mapDevcontainerRemoveErrorToDiagnostic, nil)
+	}
+	switch {
+	case flags.DryRun || flags.Diff:
+		return fail(ErrDevcontainerPreviewNotApplicable)
+	case flags.Yes && flags.NoInteractive:
+		return fail(ErrConflictingModeFlags)
+	case uc == nil:
+		return fail(errors.New("devcontainer remove: use case not wired"))
+	}
+	if err := emptyInstanceError(flags, "remove"); err != nil {
+		return fail(err)
+	}
+	cwd, err := getwd()
+	if err != nil {
+		return fail(fmt.Errorf("determine working directory: %w", err))
+	}
+	resp, err := uc.Remove(ctx, driving.DevcontainerRemoveRequest{
+		BaseDir:          cwd,
+		Instance:         flags.Instance,
+		Volumes:          flags.Volumes,
+		AssumeYes:        flags.Yes,
+		NonInteractive:   flags.NoInteractive,
+		SilenceConfirmer: flags.JSON,
+	})
+	if err != nil {
+		return fail(sanitizeBaseDir(err, cwd))
+	}
+	if flags.JSON {
+		names := resp.RemovedVolumeNames
+		if names == nil {
+			names = []string{}
+		}
+		data := devcontainerRemoveData{ContainerID: resp.ContainerID, Stopped: resp.Stopped, Removed: resp.Removed, RemovedVolumeNames: names}
+		return writeEnvelope(stdout, newDataEnvelope("devcontainer", "remove", data, nil, 0))
+	}
+	if !flags.Quiet {
+		writeDevcontainerRemoveResult(stdout, resp, flags.Volumes)
+	}
+	return nil
+}
+
+// writeDevcontainerRemoveResult renders the result lines of `remove`: the
+// container, with `--volumes` the volumes removed, and the hint of a call with
+// no container to remove.
+func writeDevcontainerRemoveResult(out io.Writer, resp driving.DevcontainerRemoveResponse, volumes bool) {
+	if !resp.Removed {
+		fmt.Fprintln(out, "No devcontainer container found for this project; nothing to remove")
+		if volumes {
+			fmt.Fprintln(out, "Volumes of a container that no longer exists are not removed by u-boot.")
+		}
+		return
+	}
+	line := "Devcontainer removed: container " + shortContainerID(resp.ContainerID)
+	if resp.Stopped {
+		line += " (stopped first)"
+	}
+	fmt.Fprintln(out, line)
+	if !volumes {
+		return
+	}
+	if len(resp.RemovedVolumeNames) == 0 {
+		fmt.Fprintln(out, "No volume removed (the container held no volume)")
+		return
+	}
+	fmt.Fprintf(out, "Volumes removed: %d\n", len(resp.RemovedVolumeNames))
+	for _, name := range resp.RemovedVolumeNames {
+		fmt.Fprintf(out, "  - %s\n", name)
+	}
+}
+
 // devcontainerStreams are the streams of `devcontainer shell`: the standard
 // input of the session and the two output streams of the command.
 type devcontainerStreams struct {
@@ -612,7 +792,7 @@ func shortContainerID(id string) string {
 	return id
 }
 
-// mapDevcontainerEngineSentinel classifies the engine-side sentinels both
+// mapDevcontainerEngineSentinel classifies the engine-side sentinels the
 // subcommands can return: the environment class (exit 11), the runtime class
 // (exit 12) and the start script abort (exit 11). The code is the
 // requirement that defines the classes.
@@ -657,6 +837,27 @@ func mapDevcontainerDownErrorToDiagnostic(err error) diagnosticItem {
 	return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 }
 
+// mapDevcontainerRemoveErrorToDiagnostic maps a `devcontainer remove` error to
+// its diagnostic: the engine sentinels (exit 11 and 12), then the instance
+// sentinels and the two sentinels of the missing confirmation (exit 10, all
+// with the code of LH-FA-DEV-010), the exclusion of `--yes` and
+// `--no-interactive` (exit 2, LH-FA-CLI-005A), then the rest. `remove` reads
+// no project file, so neither the filesystem class (exit 14) nor the sentinels
+// about the configuration, the folder and the variable names occur.
+func mapDevcontainerRemoveErrorToDiagnostic(err error) diagnosticItem {
+	if code, matched := mapDevcontainerEngineSentinel(err); matched {
+		return diagnosticItem{Level: "error", Code: code, Message: err.Error()}
+	}
+	if isDevcontainerInstanceError(err) ||
+		errors.Is(err, driving.ErrConfirmationRequired) || errors.Is(err, driving.ErrConfirmerUnavailable) {
+		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-010", Message: err.Error()}
+	}
+	if errors.Is(err, ErrConflictingModeFlags) {
+		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-005A", Message: err.Error()}
+	}
+	return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+}
+
 // mapDevcontainerShellErrorToDiagnostic maps a `devcontainer shell` error to
 // its diagnostic. `--json` is rejected before the use case runs, so the only
 // errors that reach an envelope are the usage errors of the command (exit 2,
@@ -667,7 +868,7 @@ func mapDevcontainerShellErrorToDiagnostic(err error) diagnosticItem {
 }
 
 // isDevcontainerValidationError reports the exit-10 sentinels of `devcontainer
-// up`, `down` and `shell`; [isValidationError] takes them as one condition.
+// up`, `down`, `shell` and `remove`; [isValidationError] takes them as one condition.
 func isDevcontainerValidationError(err error) bool {
 	return errors.Is(err, driving.ErrDevcontainerConfigMissing) ||
 		errors.Is(err, driving.ErrDevcontainerProjectFolderInvalid) ||
@@ -678,7 +879,7 @@ func isDevcontainerValidationError(err error) bool {
 }
 
 // isDevcontainerInstanceError reports the two exit-10 sentinels about the
-// instance, which `up`, `down` and `shell` share.
+// instance, which `up`, `down`, `shell` and `remove` share.
 func isDevcontainerInstanceError(err error) bool {
 	return errors.Is(err, driving.ErrDevcontainerInstanceInvalid) ||
 		errors.Is(err, driving.ErrDevcontainerOnlyInstances)

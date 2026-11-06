@@ -43,6 +43,14 @@ func (f *instanceInspector) FindContainer(_ context.Context, _, instance string)
 	return driven.DevcontainerContainer{}, false, nil
 }
 
+func (f *instanceInspector) ContainerVolumes(context.Context, string) ([]string, error) {
+	return nil, errors.New("instanceInspector: ContainerVolumes is not expected")
+}
+
+func (f *instanceInspector) ExistingVolumes(context.Context, []string) ([]string, error) {
+	return nil, errors.New("instanceInspector: ExistingVolumes is not expected")
+}
+
 func (f *instanceInspector) ReadFile(context.Context, string, string, int) ([]byte, error) {
 	return nil, driven.ErrContainerFileNotFound
 }

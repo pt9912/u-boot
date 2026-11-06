@@ -1278,7 +1278,7 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   "data": { "containerId": "0123…cdef", "stopped": true } }
 ```
 
-Zielbild, der Befehl ist noch nicht ausgeliefert (`devcontainer remove`):
+Beispiel für `devcontainer remove`:
 
 ```json
 { "status": "ok", "command": "devcontainer", "subcommand": "remove",
@@ -1287,7 +1287,7 @@ Zielbild, der Befehl ist noch nicht ausgeliefert (`devcontainer remove`):
             "removedVolumeNames": ["demo-workspace-…"] } }
 ```
 
-- **`devcontainer remove --json`** (Zielbild nach [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes); der Befehl hat im Code noch keine Entsprechung) liefert den Minimalkontrakt mit `subcommand: "remove"`; die Felder
+- **`devcontainer remove --json`** (Datentyp `devcontainerRemoveData`, Ablauf `runDevcontainerRemove` in `cli/devcontainer.go`; Verhalten nach [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes)) liefert den Minimalkontrakt mit `subcommand: "remove"`; die Felder
   von `data` tragen kein `omitempty`: `containerId` (die volle Kennung, der leere String ohne Container),
   `stopped` (`true`, wenn der Befehl den Container gestoppt hat), `removed` (`true`, wenn er ihn entfernt hat) und
   `removedVolumeNames` (immer ein Array, `[]` ohne `--volumes`, ohne Container und bei einem Container ohne Volume).
@@ -1297,7 +1297,7 @@ Zielbild, der Befehl ist noch nicht ausgeliefert (`devcontainer remove`):
   der Code der Diagnose ist [LH-FA-DEV-010](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) für
   die Klassen 10, 11 und 12, [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) für 2 und 1,
   [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) für `--yes` zusammen mit
-  `--no-interactive`. Die Tabelle der Sentinels unten führt `up` und `down`; die Exit-Codes von `remove` stehen in [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes).
+  `--no-interactive`. Die Tabelle der Sentinels unten führt `up`, `down` und `remove`; die Exit-Codes jeder Zeile von `remove` stehen in [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes).
 
 - **`status` von `up` ist `warn`, auch im Erfolgsfall.** Die Ausweisung der
   Socket-Lockerung ist eine Warnung ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
@@ -1326,19 +1326,22 @@ Zielbild, der Befehl ist noch nicht ausgeliefert (`devcontainer remove`):
   keinen Container gibt; `stopped` ist `false`, wenn nichts zu stoppen war (Exit 0).
 - **Codes:** die Klassen 10, 11 und 12 von `devcontainer` tragen [LH-FA-DEV-010](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
   ein Lesefehler [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (Exit 14),
-  Aufrufformfehler [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes). Die Abbildung steht je Unterbefehl in `mapDevcontainerUpErrorToDiagnostic` und
-  `mapDevcontainerDownErrorToDiagnostic`, die Exit-Codes in `ExitCode` (zwei Klassifikatoren, je Sentinel ein Pin-Test):
+  Aufrufformfehler [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes). Die Abbildung steht je Unterbefehl in `mapDevcontainerUpErrorToDiagnostic`,
+  `mapDevcontainerDownErrorToDiagnostic` und `mapDevcontainerRemoveErrorToDiagnostic`, die Exit-Codes in `ExitCode` (zwei Klassifikatoren, je Sentinel ein Pin-Test):
 
-  | Sentinel | Exit | `up` | `down` |
-  |---|---|---|---|
-  | `driven.ErrDockerUnavailable`, `driven.ErrContainerEngineNotLocal` | 11 | ✓ | ✓ |
-  | `driving.ErrDevcontainerStartScriptFailed` (Statusdatei `result=failed`, auch nach einem gelungenen Lauf der Dev-Container-CLI) | 11 | ✓ | — |
-  | `driven.ErrDevcontainerRuntime` | 12 | ✓ | ✓ (`docker stop`) |
-  | `driving.ErrDevcontainerConfigMissing`, `…ProjectFolderInvalid`, `…EnvNameInvalid` | 10 | ✓ | — |
-  | `driving.ErrDevcontainerInstanceInvalid` (Name der Instanz ungültig, auch `--instance` leer), `…OnlyInstances` (ohne `--instance` nur Container von Instanzen) | 10 | ✓ | ✓ (`isDevcontainerInstanceError`) |
-  | `driving.ErrDevcontainerFileSystem` | 14 | ✓ | — |
-  | `ErrDevcontainerSubcommandRequired`, `ErrDevcontainerPreviewNotApplicable` | 2 | ✓ | ✓ |
-  | `ErrDevcontainerShellJSONNotApplicable` | 2 | — | — (nur `shell`) |
+  | Sentinel | Exit | `up` | `down` | `remove` |
+  |---|---|---|---|---|
+  | `driven.ErrDockerUnavailable`, `driven.ErrContainerEngineNotLocal` | 11 | ✓ | ✓ | ✓ |
+  | `driving.ErrDevcontainerStartScriptFailed` (Statusdatei `result=failed`, auch nach einem gelungenen Lauf der Dev-Container-CLI) | 11 | ✓ | — | — |
+  | `driven.ErrDevcontainerRuntime` | 12 | ✓ | ✓ (`docker stop`) | ✓ (`docker stop`, `docker rm`, `docker volume rm`, ein Volume besteht danach) |
+  | `driving.ErrDevcontainerConfigMissing`, `…ProjectFolderInvalid`, `…EnvNameInvalid` | 10 | ✓ | — | — |
+  | `driving.ErrDevcontainerInstanceInvalid` (Name der Instanz ungültig, auch `--instance` leer), `…OnlyInstances` (ohne `--instance` nur Container von Instanzen) | 10 | ✓ | ✓ (`isDevcontainerInstanceError`) | ✓ (`isDevcontainerInstanceError`) |
+  | `driving.ErrConfirmationRequired` (`--volumes` nicht freigegeben: abgelehnt, `--no-interactive`, `--json` ohne `--yes`), `driving.ErrConfirmerUnavailable` (Antwort nicht lesbar) | 10 | — | — | ✓ |
+  | `driving.ErrDevcontainerFileSystem` | 14 | ✓ | — | — (`remove` liest keine Projektdatei) |
+  | `ErrDevcontainerSubcommandRequired` | 2 | ✓ | ✓ | ✓ |
+  | `ErrDevcontainerPreviewNotApplicable` | 2 | ✓ | ✓ | ✓ |
+  | `ErrConflictingModeFlags` (`--yes` zusammen mit `--no-interactive`, Code [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)) | 2 | — | — | ✓ |
+  | `ErrDevcontainerShellJSONNotApplicable` | 2 | — | — | — (nur `shell`) |
 
   Die Spalte `shell` entspricht der Spalte `up` ohne Umschlag (die Fehler erscheinen als Text auf der Fehlerausgabe,
   Exit-Code wie `up`); die Probe vor der Sitzung scheitert als `driven.ErrDevcontainerRuntime` (Exit 12).
@@ -1376,7 +1379,7 @@ in derselben PR ergänzen.
 | `egress list` ([slice-v1-cli-egress-anzeige](../plan/planning/done/slice-v1-cli-egress-anzeige.md); read-only, nur `Exists`/`ReadFile` auf `u-boot.yaml` und `.git/config`) | — | — | — | — | — | — | — | — |
 | `devcontainer up` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml`, schreibt keine Projektdatei) | — | — | — | — | — | — | — | — |
 | `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — | — |
-| `devcontainer remove` (Zielbild nach [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes); noch nicht ausgeliefert; liest nichts, schreibt keine Projektdatei; die Wirkung ist die der Container-Engine: stoppt und entfernt den Container, mit `--volumes` seine Volumes; `--dry-run` und `--diff` werden abgewiesen) | — | — | — | — | — | — | — | — |
+| `devcontainer remove` ([SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes); liest nichts, schreibt keine Projektdatei; die Wirkung ist die der Container-Engine: stoppt und entfernt den Container, mit `--volumes` seine Volumes; `--dry-run` und `--diff` werden abgewiesen) | — | — | — | — | — | — | — | — |
 | `devcontainer shell` ([slice-v1-cli-devcontainer-shell](../plan/planning/done/slice-v1-cli-devcontainer-shell.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml` wie `up`, schreibt keine Projektdatei, keine Mutation; kein `--json`, `--dry-run`, `--diff`) | — | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,

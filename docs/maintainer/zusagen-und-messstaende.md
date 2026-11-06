@@ -55,9 +55,10 @@ Wortlaut ist aus der Handbuch-Version 2.0 (Commit `d0878f1c`) übernommen.
   [`slice-v1-cli-devcontainer-up-down`](../messungen/slice-v1-cli-devcontainer-up-down/README.md) (Docker 29.9.1).
 - **Wortlaut:**
   - Zeile der Voraussetzungs-Tabelle: „Docker (Client und lokale Engine; gemessen mit 29.9.1)“.
-  - „Für `devcontainer up`, `devcontainer down` und `devcontainer shell` ist Podman als Host-Engine nicht zugesagt.“
-  - README.md: „Docker Engine ≥ 24.0.0 or Podman ≥ 4.0 (drop-in supported; not promised for `devcontainer up`/`down`/`shell`)“;
-    README.de.md: „Docker Engine ≥ 24.0.0 oder Podman ≥ 4.0 (Drop-in unterstützt; für `devcontainer up`/`down`/`shell` nicht zugesagt)“.
+  - „Für `devcontainer up`, `devcontainer down`, `devcontainer shell` und `devcontainer remove` ist Podman als Host-Engine nicht zugesagt.“
+    (Handbuch, Abschnitt 1, Absatz zu Podman.)
+  - README.md: „Docker Engine ≥ 24.0.0 or Podman ≥ 4.0 (drop-in supported)“; README.de.md: „Docker Engine ≥ 24.0.0 oder Podman ≥ 4.0
+    (Drop-in unterstützt)“. Die zwei Sätze der READMEs tragen keinen Vorbehalt für die Befehle `devcontainer …`; der Vorbehalt steht im Handbuch.
 
 ### 3.2 Den Devcontainer ohne Editor starten und stoppen (Handbuch, Abschnitt 4.9)
 
@@ -66,7 +67,9 @@ Wortlaut ist aus der Handbuch-Version 2.0 (Commit `d0878f1c`) übernommen.
   (Docker 29.9.1, 2026-10-20). Erneutes `up`, Statusdatei, Instanzen: [`slice-v1-devcontainer-instanz-messung`](../messungen/slice-v1-devcontainer-instanz-messung/README.md)
   (Docker 29.9.2, Dev-Container-CLI 0.89.0); die Zuordnung der einzelnen Aussage ist nicht geprüft. Keine Fundstelle gefunden
   (Suche nach den Zahlen und Stichwörtern): die Zeiten von Strg-C (10,1 und 10,5 Sekunden), `u-boot` 0.13.0, die Benutzer-ID 4321,
-  `Devcontainer already running`.
+  `Devcontainer already running`. `devcontainer remove`: Die Messung [`slice-v1-devcontainer-remove-messung`](../messungen/slice-v1-devcontainer-remove-messung/README.md)
+  fährt `remove` nicht (sie belegt `docker rm`, `docker volume rm` und die Volumes eines Containers); den Messstand zu `remove` tragen die Docker-Tests
+  `TestDevcontainerRemove_Docker_*` (`internal/e2e/devcontainer_remove_docker_test.go`).
 - **Wortlaut:**
 
 **Erster Aufruf**

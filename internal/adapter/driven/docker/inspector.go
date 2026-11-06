@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -39,10 +40,15 @@ const (
 
 var containerIDPattern = regexp.MustCompile(`^[0-9a-f]{12,64}$`)
 
+// volumeNamePattern is the set of names the engine gives a volume: a letter or
+// digit, then letters, digits, `_`, `.` and `-`. The adapters hand a name to
+// `docker volume rm` as one argument only when it matches.
+var volumeNamePattern = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_.-]*$`)
+
 // Inspector is the production [driven.DevcontainerInspector] adapter. It
-// runs only `docker ps`, `docker cp <id>:<path> -` and, to tell a local
-// from a remote engine, `docker context inspect`; never `docker exec`
-// and never `docker cp -L`. Construct with [NewInspector] or
+// runs only `docker ps`, `docker cp <id>:<path> -`, `docker inspect`,
+// `docker volume ls` and, to tell a local from a remote engine, `docker
+// context inspect`; never `docker exec` and never `docker cp -L`. Construct with [NewInspector] or
 // [WithInspectorBinary].
 type Inspector struct {
 	binary string
@@ -182,6 +188,72 @@ func (i *Inspector) ReadFile(ctx context.Context, containerID, path string, maxB
 		return nil, fmt.Errorf("docker cp: archive ended after %d of %d bytes", len(body), hdr.Size)
 	}
 	return body, nil
+}
+
+// mount is the part of a mount the adapter reads from the output of `docker
+// inspect --format '{{json .Mounts}}'`.
+type mount struct {
+	Type string `json:"Type"`
+	Name string `json:"Name"`
+}
+
+// ContainerVolumes implements [driven.DevcontainerInspector.ContainerVolumes]:
+// `docker inspect --format '{{json .Mounts}}' <id>`, the names of the mounts of
+// the type `volume`.
+func (i *Inspector) ContainerVolumes(ctx context.Context, containerID string) ([]string, error) {
+	if !containerIDPattern.MatchString(containerID) {
+		return nil, fmt.Errorf("docker inspect: %q is not a container ID", containerID)
+	}
+	ctx, cancel := context.WithTimeout(ctx, inspectorTimeout)
+	defer cancel()
+	out, err := i.output(ctx, "inspect", "--format", "{{json .Mounts}}", containerID)
+	if err != nil {
+		return nil, fmt.Errorf("docker inspect: %w", err)
+	}
+	var mounts []mount
+	if err := json.Unmarshal([]byte(strings.TrimSpace(out)), &mounts); err != nil {
+		return nil, fmt.Errorf("docker inspect: unexpected output: %w", err)
+	}
+	names := []string{}
+	for _, m := range mounts {
+		if m.Type != "volume" {
+			continue
+		}
+		if !volumeNamePattern.MatchString(m.Name) {
+			return nil, fmt.Errorf("docker inspect: unexpected volume name %q", m.Name)
+		}
+		names = append(names, m.Name)
+	}
+	return names, nil
+}
+
+// ExistingVolumes implements [driven.DevcontainerInspector.ExistingVolumes]:
+// `docker volume ls --format '{{.Name}}'` lists every volume, and the names
+// asked for are picked from the list (the filter of `docker volume ls` matches
+// substrings and is not used).
+func (i *Inspector) ExistingVolumes(ctx context.Context, names []string) ([]string, error) {
+	ctx, cancel := context.WithTimeout(ctx, inspectorTimeout)
+	defer cancel()
+	out, err := i.output(ctx, "volume", "ls", "--format", "{{.Name}}")
+	if err != nil {
+		return nil, fmt.Errorf("docker volume ls: %w", err)
+	}
+	if len(out) >= inspectorOutputLimit {
+		return nil, errors.New("docker volume ls: the list exceeds the limit that is read")
+	}
+	listed := map[string]bool{}
+	for _, line := range strings.Split(out, "\n") {
+		if line = strings.TrimRight(line, "\r"); line != "" {
+			listed[line] = true
+		}
+	}
+	existing := []string{}
+	for _, n := range names {
+		if listed[n] {
+			existing = append(existing, n)
+		}
+	}
+	return existing, nil
 }
 
 // requireLocalEngine fails with [driven.ErrContainerEngineNotLocal] when

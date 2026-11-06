@@ -32,6 +32,10 @@ func (noopConfirmer) ConfirmAddDependency(_ context.Context, _ string, _ []strin
 	return false, nil
 }
 
+func (noopConfirmer) ConfirmRemoveDevcontainer(_ context.Context, _ string, _ []string) (bool, error) {
+	return false, nil
+}
+
 // noopLogger is the nil-tolerant default for the [driven.Logger]
 // dependency — every level discards. Keeps the application services'
 // debug/info call sites free of nil checks.
@@ -54,4 +58,12 @@ func (noopDevcontainerInspector) FindContainer(_ context.Context, _, _ string) (
 
 func (noopDevcontainerInspector) ReadFile(_ context.Context, _, _ string, _ int) ([]byte, error) {
 	return nil, driven.ErrContainerFileNotFound
+}
+
+func (noopDevcontainerInspector) ContainerVolumes(_ context.Context, _ string) ([]string, error) {
+	return nil, nil
+}
+
+func (noopDevcontainerInspector) ExistingVolumes(_ context.Context, _ []string) ([]string, error) {
+	return nil, nil
 }

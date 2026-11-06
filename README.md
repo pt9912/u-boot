@@ -211,8 +211,9 @@ Re-init on an existing project requires an explicit strategy
 | `config [get\|set\|list] [<path>…]` | Whitelist-scoped reads/writes with two-stage schema validation; multi-path `get`, atomic multi-pair `set`, `list`. |
 | `egress list [--json]` | Show the egress allowlist of the sandbox devcontainer with the origin of each host; reads `u-boot.yaml` and `.git/config` only. |
 | `devcontainer up [--recreate] [--instance <name>]` | Start the devcontainer of the project without an editor, Node.js or the Dev Container CLI on the host (Docker only): the CLI runs in a short-lived helper container that holds the engine socket, which the command says before it starts (also under `--quiet`). `--instance` starts a further devcontainer of the same project. |
-| `devcontainer down [--instance <name>]` | Stop that container (with `--instance`, the container of that instance); it removes neither the container nor a volume. |
+| `devcontainer down [--instance <name>]` | Stop that container (with `--instance`, the container of that instance); it removes neither the container nor a volume (`devcontainer remove` does). |
 | `devcontainer shell [--instance <name>]` | Start the devcontainer like `devcontainer up` and open an interactive shell in it, as the user and in the workspace the start reports and with the credentials the generated configuration passes on; the shell itself runs without a helper container and without a socket that the command mounts. |
+| `devcontainer remove [--instance <name>] [--volumes]` | Remove the container of the project (with `--instance`, of that instance), stopping it first if it runs; the volumes stay. `--volumes` also removes the volumes the container mounts, and the data in them is permanently deleted: the command names the container and each volume and asks `[y/N]` (`--yes` agrees; `--no-interactive` and `--json` without `--yes` end with exit 10). With no container to remove it asks nothing and ends with exit 0. Not `u-boot remove <service>`. |
 | `template list [--json]` | Browse the built-in template catalogue. |
 
 ## Prerequisites

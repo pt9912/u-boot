@@ -56,19 +56,20 @@ grobes Verständnis von Docker Compose genügen.
 |---|---|
 | `u-boot` (Binary, Paket, Homebrew oder Container-Image) | alle Befehle |
 | Docker Engine ab 24.0 | `up`, `down`, `logs` und die Docker-Prüfungen von `doctor` |
-| Docker-Compose-Plugin ab 2.20 | dieselben Befehle (nicht `devcontainer up`, `devcontainer down` und `devcontainer shell`) |
-| Docker (Client und lokale Engine) | `devcontainer up`, `devcontainer down` und `devcontainer shell` (Abschnitt 4.9) |
+| Docker-Compose-Plugin ab 2.20 | dieselben Befehle (nicht `devcontainer up`, `devcontainer down`, `devcontainer shell` und `devcontainer remove`) |
+| Docker (Client und lokale Engine) | `devcontainer up`, `devcontainer down`, `devcontainer shell` und `devcontainer remove` (Abschnitt 4.9) |
 | `git` | `init` (außer mit `--no-git`) |
 
 **Ohne Docker** funktionieren `init`, `add`, `remove`, `generate`, `config`,
 `egress list` und `template list`. Nur `up`, `down`, `logs`, `devcontainer up`,
-`devcontainer down` und `devcontainer shell` brauchen einen erreichbaren Docker-Daemon. `u-boot doctor` meldet
+`devcontainer down`, `devcontainer shell` und `devcontainer remove` brauchen einen erreichbaren Docker-Daemon. `u-boot doctor` meldet
 fehlende Werkzeuge als Befund.
 
 Podman ab 4.0 funktioniert als Ersatz für Docker, wenn `docker` auf `podman`
 zeigt und `DOCKER_HOST` auf den Podman-Socket gesetzt ist. `u-boot doctor`
 meldet Podman-Versionen als Warnung („unrecognized version"), bricht aber nicht
-ab.
+ab. Für `devcontainer up`, `devcontainer down`, `devcontainer shell` und
+`devcontainer remove` ist Podman als Host-Engine nicht zugesagt.
 
 ---
 
@@ -161,7 +162,7 @@ Zwei Einschränkungen im Container:
   mit `?` markiert. Auch die Prüfung des Geräts `/dev/fuse` entfällt (Eintrag
   `devcontainer.sandbox.runtime`, Info): das Gerät im Image gehört dem
   u-boot-Container, nicht dem Container-Host. Auch `up`, `down`, `logs`,
-  `devcontainer up`, `devcontainer down` und `devcontainer shell` laufen im Image nicht, weil dort kein Docker
+  `devcontainer up`, `devcontainer down`, `devcontainer shell` und `devcontainer remove` laufen im Image nicht, weil dort kein Docker
   vorhanden ist (Exit-Code 11).
 
 Für den Alltag ist ein installiertes Programm bequemer als das Image.
@@ -321,7 +322,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up`, `devcontainer down` und `devcontainer shell` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt; bei `devcontainer up` und `devcontainer shell` hält es den Fortschritt zurück und gibt ihn nur bei einem Fehler aus; die Ausgabe der Shell von `devcontainer shell` ändert es nicht), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils, ein im Container aktivierter Login-Dienst (Feature `sshd`), die Lockerungen des Features `go`, der Netzanschluss an den Host durch `ollama-host` im Sandbox-Profil und die Warnung je Feature aus einer externen Quelle; in der Befehlsausgabe erzeugen `generate devcontainer`, `devcontainer up` und `devcontainer shell` (die Einbindung des Docker-Sockets in den Hilfs-Container) diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer`, `init`, `devcontainer up` und `devcontainer shell`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up`, `devcontainer down`, `devcontainer shell` und `devcontainer remove` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt; bei `devcontainer up` und `devcontainer shell` hält es den Fortschritt zurück und gibt ihn nur bei einem Fehler aus; die Ausgabe der Shell von `devcontainer shell` ändert es nicht; bei `devcontainer remove` bleibt die Rückfrage zu `--volumes` bestehen), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils, ein im Container aktivierter Login-Dienst (Feature `sshd`), die Lockerungen des Features `go`, der Netzanschluss an den Host durch `ollama-host` im Sandbox-Profil und die Warnung je Feature aus einer externen Quelle; in der Befehlsausgabe erzeugen `generate devcontainer`, `devcontainer up` und `devcontainer shell` (die Einbindung des Docker-Sockets in den Hilfs-Container) diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer`, `init`, `devcontainer up` und `devcontainer shell`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -846,6 +847,7 @@ u-boot devcontainer up              # startet den Devcontainer des Projekts
 u-boot devcontainer up --recreate   # entfernt den Container und legt ihn neu an
 u-boot devcontainer down            # stoppt den Container
 u-boot devcontainer shell           # startet den Container wie `up` und öffnet eine Shell darin
+u-boot devcontainer remove          # stoppt und entfernt den Container (seine Volumes bleiben)
 u-boot devcontainer up --instance agent-1   # startet einen weiteren Container desselben Projekts
 ```
 
@@ -1010,13 +1012,14 @@ docker exec -it -e GIT_TOKEN -u <Benutzer> -w <Workspace> <Container> bash
 
 **Mehrere Devcontainer je Projekt (Instanzen).** Mit `--instance <Name>` starten Sie neben dem
 Container des Projekts weitere Devcontainer desselben Projektordners, zum Beispiel einen je Agent.
-Die Befehle `up`, `down` und `shell` nehmen das Flag:
+Die Befehle `up`, `down`, `shell` und `remove` nehmen das Flag:
 
 ```bash
 u-boot devcontainer up --instance agent-1              # startet die Instanz agent-1
 u-boot devcontainer shell --instance agent-1           # öffnet eine Shell in agent-1
 u-boot devcontainer down --instance agent-1            # stoppt nur agent-1
 u-boot devcontainer up --instance agent-1 --recreate   # ersetzt nur den Container von agent-1
+u-boot devcontainer remove --instance agent-1          # entfernt nur den Container von agent-1
 ```
 
 - **Name.** Der Name besteht aus Kleinbuchstaben, Ziffern und Bindestrichen, beginnt und endet
@@ -1029,18 +1032,19 @@ u-boot devcontainer up --instance agent-1 --recreate   # ersetzt nur den Contain
   Features `ollama` liegen, wenn aktiviert, ebenfalls in Volumes, deren Name von der Kennung des
   Devcontainers abhängt. Im Standardprofil teilen alle Instanzen den
   Projektordner, denn er ist in jeden Container eingehängt.
-- **Ohne `--instance`.** Ohne das Flag wirken `up`, `down` und `shell` nur auf den Container ohne
+- **Ohne `--instance`.** Ohne das Flag wirken `up`, `down`, `shell` und `remove` nur auf den Container ohne
   Instanz, den `up` ohne Flag anlegt, auch wenn eine Instanz jünger ist. Gibt es im Projekt nur
-  Container von Instanzen und keinen ohne Instanz, enden die drei Befehle ohne `--instance` mit
-  Exit-Code 10 und einem Hinweis auf `--instance`; sie starten und stoppen dann nichts. Gibt es gar
-  keinen Container, legen `up` und `shell` den Container ohne Instanz an, und `down` endet mit
+  Container von Instanzen und keinen ohne Instanz, enden die vier Befehle ohne `--instance` mit
+  Exit-Code 10 und einem Hinweis auf `--instance`; sie starten, stoppen und entfernen dann nichts. Gibt es gar
+  keinen Container, legen `up` und `shell` den Container ohne Instanz an, und `down` und `remove` enden mit
   Exit-Code 0.
 - **Wiederholen, ersetzen, stoppen.** Ein zweites `up --instance agent-1` ohne `--recreate` trifft
   denselben Container (`Devcontainer already running`). `up --instance agent-1 --recreate` ersetzt nur
   diesen Container; seine Volumes bleiben. `down --instance agent-1` stoppt nur diese Instanz; gibt es
   keine Instanz dieses Namens, endet es mit Exit-Code 0.
-- **Was `u-boot` nicht tut.** Es führt keine Liste der Instanzen und räumt keine auf; entfernen Sie
-  nicht mehr benötigte Container und Volumes mit `docker rm` und `docker volume rm`. Es wählt keinen
+- **Was `u-boot` nicht tut.** Es führt keine Liste der Instanzen und räumt keine von sich aus auf;
+  nicht mehr benötigte Container entfernen Sie mit `u-boot devcontainer remove --instance <Name>`, mit
+  `--volumes` samt ihren Volumes (siehe „Den Container entfernen“). Es wählt keinen
   Zweig je Instanz und startet keinen Agenten.
 - **Andere Befehle.** `doctor`, `generate devcontainer` und `init` betrachten nur den Container ohne
   Instanz. Hat ein Projekt nur Container von Instanzen, ist der Zustand der Fallbacks für sie nicht
@@ -1063,6 +1067,59 @@ Container wieder. `up --recreate` entfernt den Container und legt ihn neu an; be
 Volumes (zum Beispiel der Workspace des Sandbox-Profils) bleiben erhalten. Die Hinweise von
 `u-boot` zu einer geänderten Egress-Liste nennen `devcontainer up --remove-existing-container`;
 `u-boot devcontainer up --recreate` bewirkt dasselbe.
+
+**Den Container entfernen.** `u-boot devcontainer remove` stoppt den Container, wenn er läuft, und
+entfernt ihn. Es braucht keinen Hilfs-Container, bindet kein Socket ein und liest keine Projektdatei.
+Es ist nicht `u-boot remove <dienst>` (das schaltet einen Dienst der Compose-Umgebung ab) und nicht
+`devcontainer down` (das nur stoppt):
+
+```bash
+u-boot devcontainer remove                  # entfernt den Container; seine Volumes bleiben
+u-boot devcontainer remove --volumes        # entfernt auch seine Volumes, nach einer Rückfrage
+u-boot devcontainer remove --instance agent-1 --volumes --yes   # ohne Rückfrage, nur agent-1
+```
+
+- **Warnung: `--volumes` löscht Daten.** Der Inhalt der Volumes, die der Container einhängt, geht
+  unwiderruflich verloren: im Sandbox-Profil der Workspace, mit `nestedRuntime: docker` der
+  Docker-Speicher, mit dem Feature `ollama` die geladenen Modelle. Der Befehl bestimmt die Volumes aus
+  den Einhängungen des Containers, nicht aus einem Namensmuster; benannte und anonyme Volumes (ein
+  `VOLUME` im Dockerfile Ihres Projekts) sind dabei. Der Projektordner, auch als Bind-Mount im
+  Standardprofil, und die Images bleiben unberührt.
+- **Ohne `--volumes`** bleiben alle Volumes, und der Befehl fragt nicht. Ein folgendes `u-boot devcontainer up`
+  hängt die benannten Volumes unter demselben Namen mit demselben Inhalt wieder ein; ein anonymes
+  Volume bleibt unbenutzt zurück. Nach `remove --volumes` legt `up` die Volumes gleichen Namens neu
+  und leer an.
+- **Rückfrage.** Mit `--volumes` nennt der Befehl vor dem Entfernen den Container und jedes Volume und
+  fragt auf der Standardfehlerausgabe (auch mit `--quiet`) `[y/N]`; nur `y` und `yes` stimmen zu, jede
+  andere Eingabe, die leere Zeile und das Ende der Eingabe lehnen ab (Exit-Code 10, nichts wird gestoppt
+  oder entfernt, ein laufender Container läuft weiter). `--yes` stimmt ohne Frage zu. `--no-interactive`
+  und `--json` fragen nie und enden ohne `--yes` mit Exit-Code 10; die Meldung nennt `--yes`. Der Befehl prüft nicht,
+  ob Sie ein Terminal haben, er liest die Antwort von der Standardeingabe. `--yes` zusammen mit
+  `--no-interactive` endet mit Exit-Code 2, auch ohne `--volumes`.
+- **Kein Container.** Gibt es keinen Container zu entfernen (im Projekt keinen, oder mit
+  `--instance` keinen dieser Instanz), fragt der Befehl nicht und endet mit Exit-Code 0, auch
+  `--volumes` ohne `--yes` im nicht-interaktiven Modus; die anderen Container des Projekts und ihre
+  Volumes bleiben unberührt.
+- **Grenzen.** Ein Volume, das ein anderer Container hält, lässt sich nicht entfernen: Der Befehl entfernt den
+  Container und die übrigen Volumes, nennt das gehaltene Volume und endet mit Exit-Code 12;
+  entfernen Sie es mit `docker volume rm <Name>`, sobald kein Container es hält. Die Volumes
+  eines Containers, den es nicht mehr gibt, findet der Befehl nicht (auch nicht nach einem `remove`
+  ohne `--volumes`): Ein folgendes `remove --volumes` ohne Container entfernt kein Volume; entfernen Sie sie mit
+  `docker volume rm`. Geprüft sind das Standardprofil ohne Feature, das Sandbox-Profil mit seinen
+  Standardeinstellungen, das Feature `ollama` und ein `VOLUME` im Dockerfile des Projekts. Für andere Features des Katalogs, Features aus
+  externen Quellen und von Hand geschriebene Einhängungen gilt dieselbe Regel (alle Volumes, die der Container einhängt), ihr Ergebnis ist dort
+  nicht zugesagt; ebenso nicht das Verhalten bei einem Container, der weder läuft noch gestoppt ist (etwa pausiert), bei zwei gleichzeitigen
+  Aufrufen und bei einem Abbruch durch ein Signal mitten im Ablauf. Gibt es mehrere Container mit denselben Labels
+  (zum Beispiel einen, den `u-boot` nicht angelegt hat), wirkt der Befehl nur auf den jüngsten.
+  Zugesagt ist er unter Docker auf einem Linux-Host (`amd64`) mit lokaler Engine; Podman als Host-Engine ist nicht zugesagt.
+
+**Exit-Codes von `devcontainer remove`:** `0` Erfolg (auch ohne Container zu entfernen); `2` falsche Benutzung
+(`--dry-run`, `--diff`, Argumente, `--yes` zusammen mit `--no-interactive`); `10` ein ungültiger Instanzname, ohne
+`--instance` nur Container von Instanzen, oder `--volumes` ohne Zustimmung (abgelehnt, Antwort nicht lesbar,
+`--no-interactive` oder `--json` ohne `--yes`); `11` kein `docker` im `PATH` (so auch im Container-Image von `u-boot`), der Daemon antwortet
+nicht, die Engine ist nicht lokal oder die Engine lässt sich nicht befragen; `12` `docker stop`, `docker rm` oder `docker volume rm` scheitert,
+oder ein Volume besteht danach noch (die Meldung nennt den Schritt, die Meldung der Engine und die entfernten und die
+bestehenden Volumes). Der Exit-Code `14` kommt nicht vor, weil der Befehl keine Projektdatei liest.
 
 **Exit-Codes von `devcontainer up` und `devcontainer shell`** (bei `shell` zusätzlich `0`, sobald
 die Shell begonnen hat):
@@ -2255,8 +2312,9 @@ ollama run smollm2:135m "Reply with the single word OK."
     **Rückbau:** Auf der Seite Ihres Kontos bei Ollama, die Ihre Schlüssel führt, entfernen Sie den
     Eintrag selbst; der öffentliche Teil liegt als `id_ed25519.pub` im Volume. Lokal entfernen
     Sie den Schlüssel mit dem Volume:
-    `u-boot devcontainer down` entfernt weder den Container noch das Volume, und
-    `docker volume rm` lehnt ein Volume ab, das ein Container noch benutzt, auch ein gestoppter
+    `u-boot devcontainer remove --volumes` entfernt den Container und seine Volumes, auch dieses
+    (nach einer Rückfrage; mit `--yes` ohne), `u-boot devcontainer down` entfernt weder den Container
+    noch das Volume. Von Hand lehnt `docker volume rm` ein Volume ab, das ein Container noch benutzt, auch ein gestoppter
     (Meldung `volume is in use`, sie nennt den Container). Entfernen Sie den Container mit `docker rm`, dann das Volume
     mit `docker volume rm <projekt>-ollama-<Kennung>`; `docker volume ls` zeigt den vollständigen
     Namen. Mit dem Volume gehen die geladenen Modelle verloren.
@@ -2878,7 +2936,7 @@ Handarbeit bräuchte:
 | Aufgabe | Benötigtes Recht |
 |---|---|
 | Dateien anlegen und ändern (`init`, `add`, `remove`, `generate`, `config set`) | Schreibrecht im Projektverzeichnis (`doctor` prüft das: `fs.write-permissions`) |
-| `up`, `down`, `logs`, `devcontainer up`, `devcontainer down`, `devcontainer shell` | Zugriff auf den Docker-Daemon; unter Linux meist Mitgliedschaft in der Gruppe `docker` |
+| `up`, `down`, `logs`, `devcontainer up`, `devcontainer down`, `devcontainer shell`, `devcontainer remove` | Zugriff auf den Docker-Daemon; unter Linux meist Mitgliedschaft in der Gruppe `docker` |
 | Installation in `/usr/local/bin` oder per Paket | Administratorrechte (`sudo`) |
 | `git`-Funktionen von `init` | `git` installiert und konfiguriert |
 
@@ -2887,7 +2945,7 @@ root. Ihre Geheimnis-Verzeichnisse bindet weder das Standard- noch das
 Sandbox-Profil ein. Das Docker-Socket des Hosts bindet das Standardprofil ein, wenn ein
 Feature es tut, zum Beispiel `docker-cli`; das Sandbox-Profil weist dieses Feature ab
 (siehe 4.9 und 4.10). Das gilt für den erzeugten Devcontainer;
-der Hilfs-Container von `u-boot devcontainer up` und `u-boot devcontainer shell` ist davon ausgenommen (siehe 4.9).
+der Hilfs-Container von `u-boot devcontainer up` und `u-boot devcontainer shell` ist davon ausgenommen (siehe 4.9); `u-boot devcontainer remove` startet keinen Hilfs-Container und bindet kein Socket ein.
 
 ---
 
@@ -2903,8 +2961,8 @@ Werten Sie in Skripten diese Codes aus:
 | `1` | allgemeiner Fehler |
 | `2` | falsche Benutzung (unbekanntes Flag, fehlendes Argument, widersprüchliche Modus-Flags, ungültiger `--timeout`, `--tail`, `--since`) |
 | `10` | fachlicher Fehler (ungültiger Name oder Wert, fehlendes Projekt, nicht unterstützter Dienst, verweigerte Bestätigung, vorhandene Datei) |
-| `11` | Umgebungsproblem (Docker nicht erreichbar, Compose-Plugin fehlt; auch `doctor` mit Fehlern; bei `devcontainer up` und `devcontainer shell` auch ein abgebrochenes Startscript des Containers, auch aus einem früheren Start desselben Containers) |
-| `12` | Laufzeitfehler von Compose (auch Zeitüberschreitung bei `up`); bei `devcontainer up`, `devcontainer down` und `devcontainer shell` ein Fehler beim Bau oder Start, bei `shell` auch eine gescheiterte Prüfung vor der Shell (Abschnitt 4.9) |
+| `11` | Umgebungsproblem (Docker nicht erreichbar, Compose-Plugin fehlt; auch `doctor` mit Fehlern; bei `devcontainer up` und `devcontainer shell` auch ein abgebrochenes Startscript des Containers, auch aus einem früheren Start desselben Containers; bei `devcontainer remove` auch eine Engine, die sich nicht befragen lässt) |
+| `12` | Laufzeitfehler von Compose (auch Zeitüberschreitung bei `up`); bei `devcontainer up`, `devcontainer down` und `devcontainer shell` ein Fehler beim Bau oder Start, bei `shell` auch eine gescheiterte Prüfung vor der Shell, bei `devcontainer remove` ein Fehler beim Stoppen oder Entfernen (Abschnitt 4.9) |
 | `14` | Dateisystem- oder Persistenzfehler |
 
 ### Fehler: „project not initialized: u-boot.yaml missing"
@@ -3163,7 +3221,7 @@ lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; die Mel
 ## 8. FAQ
 
 **Brauche ich Docker, um `u-boot` zu benutzen?**
-Nur für `up`, `down`, `logs`, `devcontainer up`, `devcontainer down`, `devcontainer shell` und die
+Nur für `up`, `down`, `logs`, `devcontainer up`, `devcontainer down`, `devcontainer shell`, `devcontainer remove` und die
 Docker-Prüfungen von `doctor`. `init`, `add`, `remove`, `generate`, `config`,
 `egress list` und `template list` laufen ohne.
 
@@ -3260,6 +3318,7 @@ neuen Stand.
 | `u-boot devcontainer up` | Devcontainer ohne Editor starten | 4.9 |
 | `u-boot devcontainer down` | Devcontainer stoppen (entfernt nichts) | 4.9 |
 | `u-boot devcontainer shell` | Devcontainer starten und eine Shell darin öffnen | 4.9 |
+| `u-boot devcontainer remove` | Container des Devcontainers entfernen; mit `--volumes` auch seine Volumes (löscht Daten) | 4.9 |
 | `u-boot template list` | Vorlagenkatalog anzeigen | 4.12 |
 | `u-boot completion <shell>` | Shell-Vervollständigung erzeugen | 2 |
 
@@ -3281,6 +3340,7 @@ neuen Stand.
 | `devcontainer up` | `--recreate`; `--dry-run` und `--diff` werden mit Exit-Code 2 abgewiesen |
 | `devcontainer down` | keine eigenen; `--dry-run` und `--diff` werden mit Exit-Code 2 abgewiesen |
 | `devcontainer shell` | keine eigenen; `--json`, `--dry-run`, `--diff` und Argumente werden mit Exit-Code 2 abgewiesen, `--yes` und `--no-interactive` haben keine Wirkung |
+| `devcontainer remove` | `--volumes`, `--instance <name>`; `--dry-run`, `--diff` und Argumente werden mit Exit-Code 2 abgewiesen; `--yes` und `--no-interactive` gelten für die Rückfrage von `--volumes` |
 
 ### Dienstekatalog
 
@@ -3333,7 +3393,7 @@ aus. Bei Fehlern erscheint der Fehlertext zusätzlich auf der Fehlerausgabe.
 |---|---|
 | `status` | `ok`, `warn` oder `error`; folgt dem schwersten Eintrag in `diagnostics` |
 | `command` | Befehl: `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress`, `devcontainer`, `template` |
-| `subcommand` | nur bei `config` (`show` für `u-boot config` ohne Unterbefehl, `get`, `set`, `list`), `egress` (`list`), `devcontainer` (`up`, `down`; `shell` nur im Umschlag der Abweisung) und `template` (`list`) |
+| `subcommand` | nur bei `config` (`show` für `u-boot config` ohne Unterbefehl, `get`, `set`, `list`), `egress` (`list`), `devcontainer` (`up`, `down`, `remove`; `shell` nur im Umschlag der Abweisung) und `template` (`list`) |
 | `diagnostics` | Liste der Befunde, leer (`[]`), wenn alles in Ordnung ist |
 | `exitCode` | derselbe Wert wie der Exit-Code des Prozesses |
 | `data` | Ergebnisdaten des Befehls (siehe Tabelle unten), nicht bei jedem Befehl |
@@ -3377,6 +3437,7 @@ im JSON nicht; `--quiet` ändert die JSON-Ausgabe nicht.
 | `egress list` | `active`, `sandboxProfile`, `egressEnabled`, `cloneSource` (Wahrheitswerte) und `hosts`: Liste mit `host` und `sources` (Herkunft) |
 | `devcontainer up` | `containerId` (volle ID), `remoteUser`, `remoteWorkspaceFolder`, `alreadyRunning` (Wahrheitswert; `true`, wenn der Container vor dem Aufruf lief und die Dev-Container-CLI dieselbe Kennung meldet); nicht bei einem Fehler |
 | `devcontainer down` | `containerId` (leer, wenn es keinen Container gibt) und `stopped` (Wahrheitswert; `false`, wenn nichts zu stoppen war) |
+| `devcontainer remove` | `containerId` (leer, wenn es keinen Container gibt), `stopped` und `removed` (Wahrheitswerte) und `removedVolumeNames` (Liste, leer ohne `--volumes`, ohne Container und für einen Container ohne Volume); nicht bei einem Fehler |
 | `devcontainer shell` | keine; der Befehl gibt kein `data` aus |
 | `template list` | Liste der Vorlagen mit `name`, `description`, `version`, `supportedAddOns`, `generatedFiles`, `requiredTools`, `variables` |
 
@@ -3387,7 +3448,7 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 
 - Ein Aufruf von `u-boot template --json` oder `u-boot egress --json` ohne `list`
   endet mit Exit-Code 2 und gibt kein JSON aus; `u-boot devcontainer` ohne `up`,
-  `down` oder `shell` ebenso, auch ohne `--json`. `u-boot devcontainer shell --json` endet mit
+  `down`, `shell` oder `remove` ebenso, auch ohne `--json`. `u-boot devcontainer shell --json` endet mit
   Exit-Code 2 und gibt den Umschlag der Abweisung aus (`subcommand` ist `shell`). `u-boot logs --follow --json` ist ebenfalls ein
   Nutzungsfehler (Exit-Code 2).
 - Der Umschlag von `devcontainer up` trägt auch im Erfolgsfall `status: warn`, weil die
@@ -3396,8 +3457,8 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
   steht diese Warnung vor dem Fehler-Eintrag.
 - `doctor` endet mit `warn` und Exit-Code 0, solange nur Warnungen vorliegen;
   mit `--strict` oder bei einem Fehler lautet der Exit-Code 11.
-- Bei `down --volumes` ohne `--yes` wird im JSON-Modus nicht gefragt, sondern
-  abgelehnt (Exit-Code 10).
+- Bei `down --volumes` und `devcontainer remove --volumes` ohne `--yes` wird im JSON-Modus nicht gefragt, sondern
+  abgelehnt (Exit-Code 10); `devcontainer remove` ohne Container zu entfernen endet auch dann mit Exit-Code 0.
 
 **Kennungen in `diagnostics[].code`:**
 

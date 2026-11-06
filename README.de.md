@@ -215,8 +215,9 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien).
 | `config [get\|set\|list] [<pfad>…]` | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
 | `egress list [--json]` | Egress-Allowlist des Sandbox-Devcontainers mit der Herkunft je Host anzeigen; liest nur `u-boot.yaml` und `.git/config`. |
 | `devcontainer up [--recreate] [--instance <name>]` | Devcontainer des Projekts ohne Editor, Node.js und Dev-Container-CLI auf dem Host starten (nur Docker): die CLI läuft in einem kurzlebigen Hilfs-Container, der das Engine-Socket hält; der Befehl sagt das vor dem Start, auch unter `--quiet`. `--instance` startet einen weiteren Devcontainer desselben Projekts. |
-| `devcontainer down [--instance <name>]` | Diesen Container stoppen (mit `--instance` den Container dieser Instanz); er entfernt weder den Container noch ein Volume. |
+| `devcontainer down [--instance <name>]` | Diesen Container stoppen (mit `--instance` den Container dieser Instanz); er entfernt weder den Container noch ein Volume (das tut `devcontainer remove`). |
 | `devcontainer shell [--instance <name>]` | Den Devcontainer wie `devcontainer up` starten und eine interaktive Shell darin öffnen, als der Benutzer und im Workspace, die der Start meldet, und mit den Zugangsdaten, die die erzeugte Konfiguration weitergibt; die Shell selbst läuft ohne Hilfs-Container und ohne ein Socket, das der Befehl einbindet. |
+| `devcontainer remove [--instance <name>] [--volumes]` | Den Container des Projekts (mit `--instance` den dieser Instanz) entfernen, ein laufender wird zuvor gestoppt; die Volumes bleiben. `--volumes` entfernt auch die Volumes, die der Container einhängt, und der Inhalt geht unwiderruflich verloren: Der Befehl nennt den Container und jedes Volume und fragt `[y/N]` (`--yes` stimmt zu; `--no-interactive` und `--json` ohne `--yes` enden mit Exit 10). Gibt es keinen Container, fragt er nicht und endet mit Exit 0. Nicht `u-boot remove <service>`. |
 | `template list [--json]` | Eingebauten Template-Katalog browsen. |
 
 ## Voraussetzungen

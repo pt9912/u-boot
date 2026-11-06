@@ -73,7 +73,9 @@ func helperContextNames() []string {
 }
 
 // Launcher is the production [driven.DevcontainerLauncher] adapter. It runs
-// `docker build -`, `docker run`, `docker stop`, `docker rm -f`,
+// `docker build -`, `docker run`, `docker stop`, `docker rm -f` (the helper
+// container), `docker rm [-v]` and `docker volume rm` (the removal of
+// [Launcher.RemoveContainer] and [Launcher.RemoveVolume]),
 // `docker exec` (the session of [Launcher.Shell] and its probe) and the
 // environment checks; it never uses Compose. Construct with [NewLauncher]
 // or [WithLauncherBinary].
@@ -293,6 +295,48 @@ func (l *Launcher) Stop(ctx context.Context, containerID string) error {
 			return ctxErr
 		}
 		return fmt.Errorf("docker stop failed (%s: %s): %w", err.Error(), tailOf(out), driven.ErrDevcontainerRuntime)
+	}
+	return nil
+}
+
+// RemoveContainer implements [driven.DevcontainerLauncher.RemoveContainer]:
+// `docker rm [-v] <id>`, never with `-f`.
+func (l *Launcher) RemoveContainer(ctx context.Context, containerID string, withVolumes bool) error {
+	if !containerIDPattern.MatchString(containerID) {
+		return fmt.Errorf("docker rm: %q is not a container ID: %w", containerID, driven.ErrDevcontainerRuntime)
+	}
+	if err := l.preflight(ctx); err != nil {
+		return err
+	}
+	args := []string{"rm"}
+	if withVolumes {
+		args = append(args, "-v")
+	}
+	out, err := exec.CommandContext(ctx, l.binary, append(args, containerID)...).CombinedOutput()
+	if err != nil {
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return ctxErr
+		}
+		return fmt.Errorf("docker rm failed (%s: %s): %w", err.Error(), tailOf(out), driven.ErrDevcontainerRuntime)
+	}
+	return nil
+}
+
+// RemoveVolume implements [driven.DevcontainerLauncher.RemoveVolume]: `docker
+// volume rm <name>`, never with `-f`.
+func (l *Launcher) RemoveVolume(ctx context.Context, name string) error {
+	if !volumeNamePattern.MatchString(name) {
+		return fmt.Errorf("docker volume rm: %q is not a volume name: %w", name, driven.ErrDevcontainerRuntime)
+	}
+	if err := l.preflight(ctx); err != nil {
+		return err
+	}
+	out, err := exec.CommandContext(ctx, l.binary, "volume", "rm", name).CombinedOutput()
+	if err != nil {
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return ctxErr
+		}
+		return fmt.Errorf("docker volume rm failed (%s: %s): %w", err.Error(), tailOf(out), driven.ErrDevcontainerRuntime)
 	}
 	return nil
 }

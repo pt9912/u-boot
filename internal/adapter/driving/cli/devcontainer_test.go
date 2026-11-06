@@ -42,6 +42,12 @@ type fakeDevcontainerUseCase struct {
 	// test can see that the context of the command reached the use case.
 	ctxKey   any
 	ctxValue any
+
+	// remove* record and answer Remove.
+	removeCalls int
+	removeReq   driving.DevcontainerRemoveRequest
+	removeResp  driving.DevcontainerRemoveResponse
+	removeErr   error
 }
 
 func (f *fakeDevcontainerUseCase) Up(_ context.Context, req driving.DevcontainerUpRequest) (driving.DevcontainerUpResponse, error) {
@@ -62,6 +68,12 @@ func (f *fakeDevcontainerUseCase) Down(_ context.Context, req driving.Devcontain
 	f.downCalls++
 	f.downReq = req
 	return f.downResp, f.downErr
+}
+
+func (f *fakeDevcontainerUseCase) Remove(_ context.Context, req driving.DevcontainerRemoveRequest) (driving.DevcontainerRemoveResponse, error) {
+	f.removeCalls++
+	f.removeReq = req
+	return f.removeResp, f.removeErr
 }
 
 func (f *fakeDevcontainerUseCase) Shell(ctx context.Context, req driving.DevcontainerShellRequest) error {

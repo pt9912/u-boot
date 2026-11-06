@@ -777,6 +777,18 @@ type fakeConfirmer struct {
 	addDepCalls         []fakeConfirmerAddDepCall
 	addDepAnswer        bool
 	addDepErr           error
+	// removeDevcontainer* record and answer ConfirmRemoveDevcontainer;
+	// onRemoveDevcontainer runs at the call, so a test can log its place in
+	// a sequence.
+	removeDevcontainerCalls  []fakeConfirmerRemoveDevcontainerCall
+	removeDevcontainerAnswer bool
+	removeDevcontainerErr    error
+	onRemoveDevcontainer     func()
+}
+
+type fakeConfirmerRemoveDevcontainerCall struct {
+	ContainerID string
+	Volumes     []string
 }
 
 type fakeConfirmerCall struct {
@@ -801,6 +813,14 @@ func (c *fakeConfirmer) ConfirmTreatAsExisting(_ context.Context, baseDir string
 func (c *fakeConfirmer) ConfirmRemoveVolumes(_ context.Context, baseDir string) (bool, error) {
 	c.removeVolumesCalls = append(c.removeVolumesCalls, fakeConfirmerRemoveVolumesCall{BaseDir: baseDir})
 	return c.removeVolumesAnswer, c.removeVolumesErr
+}
+
+func (c *fakeConfirmer) ConfirmRemoveDevcontainer(_ context.Context, containerID string, volumes []string) (bool, error) {
+	c.removeDevcontainerCalls = append(c.removeDevcontainerCalls, fakeConfirmerRemoveDevcontainerCall{ContainerID: containerID, Volumes: append([]string{}, volumes...)})
+	if c.onRemoveDevcontainer != nil {
+		c.onRemoveDevcontainer()
+	}
+	return c.removeDevcontainerAnswer, c.removeDevcontainerErr
 }
 
 func (c *fakeConfirmer) ConfirmAddDependency(_ context.Context, svc string, missing []string) (bool, error) {

@@ -95,9 +95,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	inspectorAdapter := docker.NewInspector()
 	// The devcontainer launcher (LH-FA-DEV-010) builds the helper image and
 	// runs the Dev Container CLI in a helper container that holds the engine
-	// socket; `devcontainer down` stops the container through it and
-	// `devcontainer shell` opens its session through it. Used only by the
-	// devcontainer start service.
+	// socket; `devcontainer down` stops the container through it,
+	// `devcontainer shell` opens its session through it and `devcontainer
+	// remove` removes the container and its volumes through it. Used only by
+	// the devcontainer start service.
 	launcherAdapter := docker.NewLauncher()
 	// The netprobe adapter (M6-T3) provides TCP-reachability checks
 	// for the UpService polling loop. Stateless; depguard rule
@@ -175,15 +176,18 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// the filesystem port only: no Docker, no network, no write.
 	egressListSvc := application.NewEgressListService(fsAdapter, yamlAdapter, logAdapter)
 
-	// `devcontainer up|down|shell` (LH-FA-DEV-010) reads the devcontainer
-	// configuration and u-boot.yaml through the filesystem port and starts,
-	// stops and enters through the launcher; the inspector finds the container
-	// and its status files.
+	// `devcontainer up|down|shell|remove` (LH-FA-DEV-010) reads the devcontainer
+	// configuration and u-boot.yaml through the filesystem port (`remove` reads
+	// no project file) and starts, stops, enters and removes through the
+	// launcher; the inspector finds the container, its status files and its
+	// volumes, and the confirmer asks the question of `remove --volumes`.
 	// The host git source (LH-FA-DEV-009, LH-FA-DEV-010): `git` and `gh` of
 	// the host, read only by `devcontainer up` and `shell` — token sources
 	// and the two identity keys, no other host state.
 	gitHostSource := git.NewHostSource()
-	devcontainerSvc := application.NewDevcontainerStartService(fsAdapter, yamlAdapter, launcherAdapter, inspectorAdapter, logAdapter).WithHostGitSource(gitHostSource)
+	devcontainerSvc := application.NewDevcontainerStartService(fsAdapter, yamlAdapter, launcherAdapter, inspectorAdapter, logAdapter).
+		WithHostGitSource(gitHostSource).
+		WithConfirmer(confirmAdapter)
 
 	// Driving adapter (CLI).
 	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, removeSvc, logsSvc, cli.WithEgressListUseCase(egressListSvc), cli.WithDevcontainerUseCase(devcontainerSvc), cli.WithLogLevel(logLevel))

@@ -146,18 +146,21 @@ func stringEnd(text string, start int) int {
 }
 
 // DevcontainerStartService implements [driving.DevcontainerUseCase]
-// (`u-boot devcontainer up`, `down` and `shell`, LH-FA-DEV-010). It reads the
-// project files through the [driven.FileSystem] port, starts, stops and enters
-// through the [driven.DevcontainerLauncher], finds the container and its
-// status files through the [driven.DevcontainerInspector] and, when wired,
-// resolves the git token and the git identity of the host through the
-// [driven.HostGitSource] port (LH-FA-DEV-009, LH-FA-DEV-010).
+// (`u-boot devcontainer up`, `down`, `shell` and `remove`, LH-FA-DEV-010). It
+// reads the project files through the [driven.FileSystem] port, starts, stops,
+// enters and removes through the [driven.DevcontainerLauncher], finds the
+// container, its status files and its volumes through the
+// [driven.DevcontainerInspector], asks the confirmation of `remove --volumes`
+// through the [driven.Confirmer] and, when wired, resolves the git token and
+// the git identity of the host through the [driven.HostGitSource] port
+// (LH-FA-DEV-009, LH-FA-DEV-010).
 type DevcontainerStartService struct {
 	fs         driven.FileSystem
 	yaml       driven.YAMLCodec
 	launcher   driven.DevcontainerLauncher
 	inspector  driven.DevcontainerInspector
 	hostSource driven.HostGitSource
+	confirmer  driven.Confirmer
 	logger     driven.Logger
 }
 
@@ -166,7 +169,7 @@ var _ driving.DevcontainerUseCase = (*DevcontainerStartService)(nil)
 
 // NewDevcontainerStartService constructs the service. Launcher and inspector
 // are mandatory ports without a nil-tolerant default: a missing one makes
-// `Up`, `Down` and `Shell` fail instead of reporting "nothing to do". A nil logger
+// `Up`, `Down`, `Shell` and `Remove` fail instead of reporting "nothing to do". A nil logger
 // is routed to [noopLogger]. A nil host source switches the host git
 // resolution off: the caller of the construction decides; the production
 // wiring sets it.
@@ -180,7 +183,16 @@ func NewDevcontainerStartService(
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	return &DevcontainerStartService{fs: fs, yaml: yaml, launcher: launcher, inspector: inspector, logger: logger}
+	return &DevcontainerStartService{fs: fs, yaml: yaml, launcher: launcher, inspector: inspector, confirmer: noopConfirmer{}, logger: logger}
+}
+
+// WithConfirmer wires the confirmation of `remove --volumes`
+// ([driven.Confirmer]); a nil value leaves the default, which declines.
+func (s *DevcontainerStartService) WithConfirmer(confirmer driven.Confirmer) *DevcontainerStartService {
+	if confirmer != nil {
+		s.confirmer = confirmer
+	}
+	return s
 }
 
 // WithHostGitSource wires the host git resolution
@@ -785,19 +797,9 @@ func (s *DevcontainerStartService) Down(ctx context.Context, req driving.Devcont
 	if err := validInstance("down", req.Instance); err != nil {
 		return driving.DevcontainerDownResponse{}, err
 	}
-	container, found, err := s.inspector.FindContainer(ctx, req.BaseDir, req.Instance)
+	container, found, err := s.findContainer(ctx, "down", req.BaseDir, req.Instance)
 	if err != nil {
-		if ctxErr := ctx.Err(); ctxErr != nil {
-			return driving.DevcontainerDownResponse{}, ctxErr
-		}
-		if errors.Is(err, driven.ErrOnlyInstanceContainers) {
-			return driving.DevcontainerDownResponse{}, onlyInstancesError("down")
-		}
-		if errors.Is(err, driven.ErrContainerEngineNotLocal) {
-			return driving.DevcontainerDownResponse{}, fmt.Errorf("devcontainer down: %w", err)
-		}
-		return driving.DevcontainerDownResponse{}, fmt.Errorf("devcontainer down: the container engine could not be queried: %w (%s)",
-			driven.ErrDockerUnavailable, err)
+		return driving.DevcontainerDownResponse{}, err
 	}
 	if !found {
 		return driving.DevcontainerDownResponse{}, nil
@@ -809,4 +811,27 @@ func (s *DevcontainerStartService) Down(ctx context.Context, req driving.Devcont
 		return driving.DevcontainerDownResponse{}, err
 	}
 	return driving.DevcontainerDownResponse{ContainerID: container.ID, Stopped: true}, nil
+}
+
+// findContainer asks the inspector for the container of the project folder and
+// the instance and gives the failures of the search the identity that `down`
+// and `remove` share: the context error, the project that has only containers
+// of instances, the remote engine, and any other failure of the engine as
+// [driven.ErrDockerUnavailable]. command names the command in the error text.
+func (s *DevcontainerStartService) findContainer(ctx context.Context, command, baseDir, instance string) (driven.DevcontainerContainer, bool, error) {
+	container, found, err := s.inspector.FindContainer(ctx, baseDir, instance)
+	if err == nil {
+		return container, found, nil
+	}
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		return driven.DevcontainerContainer{}, false, ctxErr
+	}
+	if errors.Is(err, driven.ErrOnlyInstanceContainers) {
+		return driven.DevcontainerContainer{}, false, onlyInstancesError(command)
+	}
+	if errors.Is(err, driven.ErrContainerEngineNotLocal) {
+		return driven.DevcontainerContainer{}, false, fmt.Errorf("devcontainer %s: %w", command, err)
+	}
+	return driven.DevcontainerContainer{}, false, fmt.Errorf("devcontainer %s: the container engine could not be queried: %w (%s)",
+		command, driven.ErrDockerUnavailable, err)
 }

@@ -89,4 +89,20 @@ type Confirmer interface {
 	// `--with-deps` skips the call entirely and returns
 	// [driving.ErrDependenciesRequired] directly.
 	ConfirmAddDependency(ctx context.Context, svc string, missing []string) (bool, error)
+
+	// ConfirmRemoveDevcontainer asks the user whether `u-boot devcontainer
+	// remove --volumes` should proceed and remove the container with the
+	// given ID and the listed volumes (LH-FA-DEV-010, LH-FA-CLI-005A). The
+	// prompt names the container and every volume, one per line; volumes is
+	// empty when the container mounts none, and the prompt then says so. The
+	// adapter MUST default-show `N` capitalized.
+	//
+	// Returns (true, nil) when the user confirms; (false, nil) when the user
+	// declines or sends EOF without input. A non-nil error is an I/O failure
+	// on the input channel; the application treats the missing answer as no
+	// confirmation.
+	//
+	// Caller responsibility: the application service decides *whether* to call;
+	// `--yes`, `--no-interactive` and `--json` never reach the adapter.
+	ConfirmRemoveDevcontainer(ctx context.Context, containerID string, volumes []string) (bool, error)
 }

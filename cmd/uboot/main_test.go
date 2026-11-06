@@ -713,6 +713,172 @@ func TestRun_DevcontainerDown_NoDockerBinaryExits11(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-010, LH-FA-CLI-006: without a docker binary `devcontainer remove`
+// cannot ask the engine; that is an environment failure (exit 11), also with
+// `--volumes --yes`, not "nothing to remove". The command reads no project
+// file: a folder with an invalid `u-boot.yaml` and an invalid
+// `.devcontainer/devcontainer.json` still ends with exit 11, not 14, and the
+// project stays as it was. A call without a docker client is the situation of
+// the released container image, which holds none.
+func TestRun_DevcontainerRemove_NoDockerBinaryExits11(t *testing.T) {
+	projectWithDevcontainer(t)
+	for rel, body := range map[string]string{"u-boot.yaml": "{ invalid: [", filepath.Join(".devcontainer", "devcontainer.json"): "{ not json"} {
+		if err := os.WriteFile(rel, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	before := snapshotTree(t, ".")
+
+	for _, args := range [][]string{
+		{"devcontainer", "remove", "--json"},
+		{"devcontainer", "remove", "--volumes", "--yes", "--json"},
+		{"devcontainer", "remove", "--instance", "agent-1", "--volumes", "--yes", "--json"},
+	} {
+		var out, errOut bytes.Buffer
+		code := run(context.Background(), args, &out, &errOut)
+		if code != 11 {
+			t.Fatalf("%v: exit %d, want 11; stdout=%q stderr=%q", args, code, out.String(), errOut.String())
+		}
+		var env devcontainerRunEnvelope
+		if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+			t.Fatalf("%v: invalid JSON: %v\n%s", args, err, out.String())
+		}
+		if env.Status != "error" || env.Command != "devcontainer" || env.Subcommand != "remove" || env.ExitCode != 11 ||
+			len(env.Diagnostics) != 1 || env.Diagnostics[0].Code != "LH-FA-DEV-010" ||
+			!strings.Contains(env.Diagnostics[0].Message, "could not be queried") {
+			t.Errorf("%v: envelope = %+v", args, env)
+		}
+	}
+	if after := snapshotTree(t, "."); !reflect.DeepEqual(before, after) {
+		t.Errorf("the failed call changed the project:\n before %v\n after  %v", before, after)
+	}
+}
+
+// fakeDockerForRemove is a shell script that stands in for the docker binary
+// of `devcontainer remove`: one running container of the project with one
+// volume, the volume exists until `docker volume rm` ran. Every call is
+// appended to calls.log in its directory, one call per line.
+const fakeDockerForRemove = `#!/bin/sh
+D='%DIR%'
+echo "$*" >> "$D/calls.log"
+case "$1" in
+version) echo 29.0.0 ;;
+context) echo unix:///var/run/docker.sock ;;
+ps) echo "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef running " ;;
+inspect) echo '[{"Type":"bind","Source":"/p","Destination":"/w"},{"Type":"volume","Name":"demo-workspace-1"}]' ;;
+volume)
+  case "$2" in
+  ls) [ -e "$D/volume-removed" ] || echo demo-workspace-1 ;;
+  rm) : > "$D/volume-removed" ;;
+  esac ;;
+esac
+exit 0
+`
+
+// withFakeDocker puts the script on the PATH and returns its directory.
+func withFakeDocker(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	script := strings.ReplaceAll(fakeDockerForRemove, "%DIR%", dir)
+	if err := os.WriteFile(filepath.Join(dir, "docker"), []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir)
+	t.Setenv("DOCKER_HOST", "")
+	return dir
+}
+
+// withStdin makes the text the standard input of the process for the test.
+func withStdin(t *testing.T, text string) {
+	t.Helper()
+	f, err := os.CreateTemp(t.TempDir(), "stdin")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.WriteString(text); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.Seek(0, 0); err != nil {
+		t.Fatal(err)
+	}
+	saved := os.Stdin
+	os.Stdin = f
+	t.Cleanup(func() { os.Stdin = saved; _ = f.Close() })
+}
+
+func dockerCalls(t *testing.T, dir string) []string {
+	t.Helper()
+	raw, err := os.ReadFile(filepath.Join(dir, "calls.log"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.Split(strings.TrimSpace(string(raw)), "\n")
+}
+
+// LH-FA-DEV-010 at the wiring: the production adapters put the question of
+// `remove --volumes` on stderr with the container and its volume, read the
+// answer from the standard input, and act on it. Declined (`n`, and the end of
+// the input) the engine is asked and nothing is stopped or removed (exit 10);
+// confirmed (`y`) the calls are `docker stop`, `docker rm -v` and `docker
+// volume rm`, in this order, and the volume is reported as removed.
+func TestRun_DevcontainerRemove_QuestionAndAnswerAtTheWiring(t *testing.T) {
+	changing := func(calls []string) []string {
+		var out []string
+		for _, c := range calls {
+			for _, prefix := range []string{"stop ", "rm ", "volume rm "} {
+				if strings.HasPrefix(c, prefix) {
+					out = append(out, c)
+				}
+			}
+		}
+		return out
+	}
+	const id = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+	for _, answer := range []string{"n\n", ""} {
+		dir := withFakeDocker(t)
+		projectDir := t.TempDir()
+		t.Chdir(projectDir)
+		withStdin(t, answer)
+		var out, errOut bytes.Buffer
+		code := run(context.Background(), []string{"devcontainer", "remove", "--volumes"}, &out, &errOut)
+		if code != 10 || out.Len() != 0 || !strings.Contains(errOut.String(), "About to remove the devcontainer container 0123456789ab of this project and its volumes:\n  - demo-workspace-1\n") ||
+			!strings.Contains(errOut.String(), "Proceed? [y/N] ") {
+			t.Errorf("answer %q: exit %d, stdout %q, stderr %q, want 10, the question and no stdout", answer, code, out.String(), errOut.String())
+		}
+		if got := changing(dockerCalls(t, dir)); len(got) != 0 {
+			t.Errorf("answer %q: the engine was changed: %v", answer, got)
+		}
+	}
+
+	dir := withFakeDocker(t)
+	t.Chdir(t.TempDir())
+	withStdin(t, "yes\n")
+	var out, errOut bytes.Buffer
+	code := run(context.Background(), []string{"devcontainer", "remove", "--volumes"}, &out, &errOut)
+	want := "Devcontainer removed: container 0123456789ab (stopped first)\nVolumes removed: 1\n  - demo-workspace-1\n"
+	if code != 0 || out.String() != want {
+		t.Errorf("confirmed: exit %d, stdout %q, stderr %q, want 0 and %q", code, out.String(), errOut.String(), want)
+	}
+	wantCalls := []string{"stop " + id, "rm -v " + id, "volume rm demo-workspace-1"}
+	if got := changing(dockerCalls(t, dir)); !reflect.DeepEqual(got, wantCalls) {
+		t.Errorf("confirmed: changing calls = %v, want %v", got, wantCalls)
+	}
+
+	// --quiet drops the result lines and keeps the question.
+	dir = withFakeDocker(t)
+	t.Chdir(t.TempDir())
+	withStdin(t, "y\n")
+	out.Reset()
+	errOut.Reset()
+	code = run(context.Background(), []string{"--quiet", "devcontainer", "remove", "--volumes"}, &out, &errOut)
+	if code != 0 || out.Len() != 0 || !strings.Contains(errOut.String(), "Proceed? [y/N] ") {
+		t.Errorf("--quiet: exit %d, stdout %q, stderr %q, want 0, no stdout and the question", code, out.String(), errOut.String())
+	}
+	if got := changing(dockerCalls(t, dir)); !reflect.DeepEqual(got, wantCalls) {
+		t.Errorf("--quiet: changing calls = %v, want %v", got, wantCalls)
+	}
+}
+
 // LH-FA-DEV-010, LH-FA-CLI-006, ADR-0031 decision 2 at the user path: without a
 // docker binary `devcontainer shell` ends with exit 11 before a session can
 // begin, writes the socket disclosure and the error to stderr and nothing to
@@ -773,7 +939,8 @@ func TestRun_Devcontainer_WiredAndBareExits2(t *testing.T) {
 	}
 	out.Reset()
 	if code := run(context.Background(), []string{"devcontainer", "--help"}, &out, &errOut); code != 0 ||
-		!strings.Contains(out.String(), "up [--recreate]") || !strings.Contains(out.String(), "down ") || !strings.Contains(out.String(), "shell ") {
+		!strings.Contains(out.String(), "up [--recreate]") || !strings.Contains(out.String(), "down ") || !strings.Contains(out.String(), "shell ") ||
+		!strings.Contains(out.String(), "remove [--volumes]") {
 		t.Errorf("devcontainer --help: exit %d, stdout=%q", code, out.String())
 	}
 	out.Reset()

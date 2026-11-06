@@ -8,10 +8,11 @@ import (
 	"strings"
 )
 
-// ErrDevcontainerRuntime signals that starting, stopping or entering a
-// devcontainer failed: the build of the helper image, the start of the helper
-// container, a CLI outcome other than `success`, `docker stop`, or the probe
-// or the start of a session ([DevcontainerLauncher]); also a request the
+// ErrDevcontainerRuntime signals that starting, stopping, entering or removing
+// a devcontainer failed: the build of the helper image, the start of the helper
+// container, a CLI outcome other than `success`, `docker stop`, `docker rm`,
+// `docker volume rm`, or the probe or the start of a session
+// ([DevcontainerLauncher]); also a request the
 // launcher rejects before any docker call: the launcher applies
 // [ValidateDevcontainerProjectFolder], [ValidateDevcontainerEnvName],
 // [ValidateDevcontainerShellUser], [ValidateDevcontainerWorkspace] and, for a
@@ -292,17 +293,19 @@ type DevcontainerUpResult struct {
 	GitIdentityApplied bool
 }
 
-// DevcontainerLauncher starts, stops and enters the devcontainer of a
+// DevcontainerLauncher starts, stops, enters and removes the devcontainer of a
 // project without an editor and without Node on the host: `Up` runs the Dev
 // Container CLI in a short-lived helper container that holds the engine
 // socket; `Stop` stops the container with `docker stop`; `Shell` opens a
-// session in the running container with `docker exec` of the host.
+// session in the running container with `docker exec` of the host;
+// `RemoveContainer` and `RemoveVolume` remove with `docker rm` and `docker
+// volume rm`.
 //
 // Each method first rejects an invalid argument as [ErrDevcontainerRuntime]
 // without a docker call (`Up`: project folder, then variable names and
-// resolved values; `Stop`:
-// container ID; `Shell`: container ID, user, workspace, then variable
-// names and resolved values), then checks the environment (Docker binary on the `PATH`,
+// resolved values; `Stop` and `RemoveContainer`:
+// container ID; `RemoveVolume`: volume name; `Shell`: container ID, user,
+// workspace, then variable names and resolved values), then checks the environment (Docker binary on the `PATH`,
 // daemon answers, engine is local) and fails with [ErrDockerUnavailable] or
 // [ErrContainerEngineNotLocal]; every later failure is
 // [ErrDevcontainerRuntime]. A cancelled context ends `Up` with the context
@@ -319,6 +322,19 @@ type DevcontainerLauncher interface {
 	// least 12 hex characters). It neither removes the container nor
 	// starts a helper container.
 	Stop(ctx context.Context, containerID string) error
+
+	// RemoveContainer removes the stopped container with the given ID (full ID
+	// or prefix of at least 12 hex characters) with `docker rm`, and with
+	// withVolumes with `docker rm -v`, which also removes the anonymous
+	// volumes of the container. It never passes `-f`: a running container is
+	// the caller's to stop, and the call fails for one. It removes no named
+	// volume and starts no helper container.
+	RemoveContainer(ctx context.Context, containerID string, withVolumes bool) error
+
+	// RemoveVolume removes the volume with the given name with `docker volume
+	// rm` and without `-f`. It fails as [ErrDevcontainerRuntime] while a
+	// container, running or stopped, holds the volume.
+	RemoveVolume(ctx context.Context, name string) error
 
 	// Shell opens a session in the running container and returns when the
 	// session ends. It starts no helper container and binds no engine

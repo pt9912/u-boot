@@ -141,6 +141,48 @@ type DevcontainerDownResponse struct {
 	Stopped bool
 }
 
+// DevcontainerRemoveRequest is the input for [DevcontainerUseCase.Remove]
+// (`u-boot devcontainer remove`).
+type DevcontainerRemoveRequest struct {
+	// BaseDir is the absolute project folder. Mandatory.
+	BaseDir string
+
+	// Instance mirrors `--instance`, see [DevcontainerUpRequest.Instance].
+	Instance string
+
+	// Volumes mirrors `--volumes`: the volumes the container mounts are removed
+	// together with it. It is the only destructive part of the command, so
+	// the confirmation gate below applies to it alone.
+	Volumes bool
+
+	// AssumeYes mirrors `--yes`: with Volumes the confirmation is given.
+	AssumeYes bool
+
+	// NonInteractive mirrors `--no-interactive`: with Volumes and without
+	// AssumeYes the call ends with [ErrConfirmationRequired] and asks nothing.
+	NonInteractive bool
+
+	// SilenceConfirmer is set for `--json`: with Volumes and without AssumeYes
+	// the question is not asked and the answer counts as declined.
+	SilenceConfirmer bool
+}
+
+// DevcontainerRemoveResponse is the output of [DevcontainerUseCase.Remove] on
+// success.
+type DevcontainerRemoveResponse struct {
+	// ContainerID is the full ID of the container found for the project; empty
+	// when there is none.
+	ContainerID string
+	// Stopped is true when this call stopped the container before it removed it.
+	Stopped bool
+	// Removed is true when this call removed the container.
+	Removed bool
+	// RemovedVolumeNames lists the removed volumes of the container, sorted. It
+	// is never nil and empty without Volumes, without a container and for a
+	// container that mounts no volume.
+	RemovedVolumeNames []string
+}
+
 // ErrDevcontainerConfigMissing signals that the project folder has no
 // `.devcontainer/devcontainer.json`. Maps to exit code 10 (LH-FA-DEV-010,
 // LH-FA-CLI-006).
@@ -194,7 +236,8 @@ var ErrDevcontainerFileSystem = errors.New("devcontainer: filesystem read failed
 var ErrDevcontainerStartScriptFailed = errors.New("devcontainer: a container start script reported a failure")
 
 // DevcontainerUseCase is the driving port of `u-boot devcontainer up`,
-// `u-boot devcontainer down` and `u-boot devcontainer shell` (LH-FA-DEV-010).
+// `u-boot devcontainer down`, `u-boot devcontainer shell` and
+// `u-boot devcontainer remove` (LH-FA-DEV-010).
 //
 // Contract:
 //
@@ -223,6 +266,16 @@ var ErrDevcontainerStartScriptFailed = errors.New("devcontainer: a container sta
 //     container ran before the call; a failed query is no failure of Up.
 //   - Down stops a running container and succeeds when there is none or it
 //     is stopped. It never removes a container or a volume.
+//   - Remove acts on the container of the instance the request names, like
+//     Down, and succeeds without asking when there is none. It reads no
+//     project file and starts no helper container. With Volumes it reads the
+//     volumes the container mounts, then asks for the confirmation
+//     ([ErrConfirmationRequired] or [ErrConfirmerUnavailable] without it,
+//     before anything is stopped or removed), then stops the container if it
+//     runs, removes it and removes each of its volumes. A step that fails ends
+//     the call with the sentinel identity of the engine
+//     (`driven.ErrDevcontainerRuntime`), and the error names what was removed
+//     and what remains.
 //   - Shell runs the start of Up without Recreate: the same validation errors,
 //     the same sentinel identities, and the same judgement by the state of the
 //     container, so a status file with `result=failed` ends the call with
@@ -238,4 +291,5 @@ type DevcontainerUseCase interface {
 	Up(ctx context.Context, req DevcontainerUpRequest) (DevcontainerUpResponse, error)
 	Down(ctx context.Context, req DevcontainerDownRequest) (DevcontainerDownResponse, error)
 	Shell(ctx context.Context, req DevcontainerShellRequest) error
+	Remove(ctx context.Context, req DevcontainerRemoveRequest) (DevcontainerRemoveResponse, error)
 }

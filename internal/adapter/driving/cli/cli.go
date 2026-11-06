@@ -146,8 +146,8 @@ func WithEgressListUseCase(uc driving.EgressListUseCase) Option {
 }
 
 // WithDevcontainerUseCase wires the use case behind `u-boot devcontainer up`,
-// `u-boot devcontainer down` and `u-boot devcontainer shell` (LH-FA-DEV-010).
-// Without it the three commands end with a "not wired" error.
+// `u-boot devcontainer down`, `u-boot devcontainer shell` and `u-boot
+// devcontainer remove` (LH-FA-DEV-010). Without it the four commands end with a "not wired" error.
 func WithDevcontainerUseCase(uc driving.DevcontainerUseCase) Option {
 	return func(a *App) { a.devcontainerUseCase = uc }
 }
@@ -300,8 +300,10 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //   - 12 — fachlicher Ausführungsfehler (M6): Compose-runtime error
 //     after passing preflight (driven.ErrComposeRuntime) or
 //     stabilization timeout (driving.ErrStabilizationTimeout);
-//     `u-boot devcontainer` build or start failure, or the failure of
-//     the check that precedes the session of `devcontainer shell`
+//     `u-boot devcontainer` build or start failure, the failure of
+//     the check that precedes the session of `devcontainer shell`, or
+//     the failure to stop or remove a container or a volume in
+//     `devcontainer remove`
 //     (driven.ErrDevcontainerRuntime)
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-NFA-REL-003
 //     backup-suffix exhausted (ErrBackupSuffixExhausted),

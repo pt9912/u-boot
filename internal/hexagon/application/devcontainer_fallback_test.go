@@ -82,6 +82,14 @@ func (f *fakeInspector) FindContainer(_ context.Context, localFolder, instance s
 	return f.container, f.found && f.findErr == nil, f.findErr
 }
 
+func (f *fakeInspector) ContainerVolumes(context.Context, string) ([]string, error) {
+	return nil, errors.New("fakeInspector: ContainerVolumes is not expected")
+}
+
+func (f *fakeInspector) ExistingVolumes(context.Context, []string) ([]string, error) {
+	return nil, errors.New("fakeInspector: ExistingVolumes is not expected")
+}
+
 func (f *fakeInspector) ReadFile(_ context.Context, id, path string, maxBytes int) ([]byte, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()

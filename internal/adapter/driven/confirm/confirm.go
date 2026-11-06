@@ -111,3 +111,38 @@ func (c *Confirmer) ConfirmAddDependency(_ context.Context, svc string, missing 
 	answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
 	return answer == "y" || answer == "yes", nil
 }
+
+// ConfirmRemoveDevcontainer renders the LH-FA-CLI-005A destructive-
+// confirmation prompt for `u-boot devcontainer remove --volumes`: the
+// container (the first twelve characters of its ID) and each volume, one per
+// line, or the statement that the container holds none. Defaults to `N`.
+//
+// Mirrors [ConfirmTreatAsExisting]'s parsing rules: accepts `y` / `yes`
+// (case-insensitive) as confirmation; anything else (including EOF, empty
+// line, "no") is "no". A read error other than EOF surfaces to the caller.
+func (c *Confirmer) ConfirmRemoveDevcontainer(_ context.Context, containerID string, volumes []string) (bool, error) {
+	short := containerID
+	if len(short) > 12 {
+		short = short[:12]
+	}
+	if len(volumes) == 0 {
+		fmt.Fprintf(c.out, "About to remove the devcontainer container %s of this project; it holds no volume.\n", short)
+		fmt.Fprint(c.out, "Proceed? [y/N] ")
+	} else {
+		fmt.Fprintf(c.out, "About to remove the devcontainer container %s of this project and its volumes:\n", short)
+		for _, v := range volumes {
+			fmt.Fprintf(c.out, "  - %s\n", v)
+		}
+		fmt.Fprint(c.out, "Data in these volumes will be PERMANENTLY DELETED. Proceed? [y/N] ")
+	}
+
+	scanner := bufio.NewScanner(c.in)
+	if !scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return false, fmt.Errorf("read confirmation: %w", err)
+		}
+		return false, nil
+	}
+	answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
+	return answer == "y" || answer == "yes", nil
+}

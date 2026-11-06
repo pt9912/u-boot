@@ -52,6 +52,16 @@ func (f *fakeLauncher) Stop(_ context.Context, containerID string) error {
 	return f.stopErr
 }
 
+// RemoveContainer and RemoveVolume are not reached by the tests that use this
+// double: the removal is tested against [removeEngine].
+func (f *fakeLauncher) RemoveContainer(context.Context, string, bool) error {
+	return errors.New("fakeLauncher: RemoveContainer is not expected")
+}
+
+func (f *fakeLauncher) RemoveVolume(context.Context, string) error {
+	return errors.New("fakeLauncher: RemoveVolume is not expected")
+}
+
 func (f *fakeLauncher) Shell(_ context.Context, opts driven.DevcontainerShellOptions) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()

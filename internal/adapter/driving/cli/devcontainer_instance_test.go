@@ -18,16 +18,18 @@ func instanceOf(uc *fakeDevcontainerUseCase, sub string) (instance string, calls
 		return uc.upReq.Instance, uc.upCalls
 	case "down":
 		return uc.downReq.Instance, uc.downCalls
+	case "remove":
+		return uc.removeReq.Instance, uc.removeCalls
 	}
 	return uc.shellReq.Instance, uc.shellCalls
 }
 
-// LH-FA-DEV-010 (ADR-0038 decision 1): `--instance <name>` of `up`, `down` and
-// `shell` reaches the request of the use case; without the flag the request
+// LH-FA-DEV-010 (ADR-0038 decision 1): `--instance <name>` of `up`, `down`,
+// `shell` and `remove` reaches the request of the use case; without the flag the request
 // carries no instance.
 func TestExecute_Devcontainer_InstanceFlagReachesTheRequest(t *testing.T) {
 	t.Parallel()
-	for _, sub := range []string{"up", "down", "shell"} {
+	for _, sub := range []string{"up", "down", "shell", "remove"} {
 		for _, args := range [][]string{{"--instance", "agent-1"}, {"--instance=agent-1"}} {
 			t.Run(sub+" "+strings.Join(args, " "), func(t *testing.T) {
 				t.Parallel()
@@ -59,7 +61,7 @@ func TestExecute_Devcontainer_InstanceFlagReachesTheRequest(t *testing.T) {
 // the requirement (`shell` rejects `--json` with exit 2 before).
 func TestExecute_Devcontainer_EmptyInstanceIsInvalid(t *testing.T) {
 	t.Parallel()
-	for _, sub := range []string{"up", "down", "shell"} {
+	for _, sub := range []string{"up", "down", "shell", "remove"} {
 		for _, args := range [][]string{{"--instance", ""}, {"--instance="}} {
 			t.Run(sub+" "+strings.Join(args, "|"), func(t *testing.T) {
 				t.Parallel()
@@ -119,6 +121,12 @@ func TestExecute_Devcontainer_HelpNamesInstance(t *testing.T) {
 			"Without --instance the command acts on the container without an instance only; " + only + "stops nothing.",
 			"10 an instance name that is not admissible; no --instance although the project has only containers of instances",
 			"u-boot devcontainer down --instance agent-1",
+		}},
+		{[]string{"devcontainer", "remove", "--help"}, []string{
+			"--instance NAME removes the container of that instance", rule, "with no container of that instance the command ends with exit 0.",
+			"Without --instance the command acts on the container without an instance only; if the project has only containers of instances, it ends with exit 10 and removes nothing, also with --volumes --yes.",
+			"10 an instance name that is not admissible; no --instance although the project has only containers of instances;",
+			"u-boot devcontainer remove --instance agent-1 --volumes --yes",
 		}},
 		{[]string{"devcontainer", "shell", "--help"}, []string{
 			"--instance NAME opens the shell in the container of that instance", rule,

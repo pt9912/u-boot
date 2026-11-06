@@ -56,6 +56,13 @@ rm)
   [ -e "$D/rm-nosuch" ] && { echo 'Error response from daemon: No such container: x' >&2; exit 1; }
   exit 0 ;;
 stop) [ -e "$D/stop-fail" ] && { echo 'stop-boom' >&2; exit 1; }; exit 0 ;;
+volume)
+  case "$2" in
+  rm) [ -e "$D/volume-rm-fail" ] && { echo 'volume-boom: volume is in use' >&2; exit 1; }; exit 0 ;;
+  ls) [ -e "$D/volume-ls-fail" ] && exit 1; [ -f "$D/volume-ls-output" ] && cat "$D/volume-ls-output"; exit 0 ;;
+  esac
+  exit 0 ;;
+inspect) [ -e "$D/inspect-fail" ] && { echo 'inspect-boom' >&2; exit 1; }; [ -f "$D/inspect-output" ] && cat "$D/inspect-output"; exit 0 ;;
 exec)
   case " $* " in
   *" -i "*)
@@ -366,7 +373,9 @@ func TestLauncher_Preflight(t *testing.T) {
 			_, upErr := l.Up(context.Background(), upOptions())
 			stopErr := l.Stop(context.Background(), strings.Repeat("a", 12))
 			shellErr := l.Shell(context.Background(), shellOptions(nil))
-			for name, err := range map[string]error{"Up": upErr, "Stop": stopErr, "Shell": shellErr} {
+			rmErr := l.RemoveContainer(context.Background(), strings.Repeat("a", 12), true)
+			volumeErr := l.RemoveVolume(context.Background(), "demo-volume")
+			for name, err := range map[string]error{"Up": upErr, "Stop": stopErr, "Shell": shellErr, "RemoveContainer": rmErr, "RemoveVolume": volumeErr} {
 				if !errors.Is(err, tc.want) {
 					t.Errorf("%s error = %v, want %v", name, err, tc.want)
 				}
@@ -374,7 +383,7 @@ func TestLauncher_Preflight(t *testing.T) {
 					t.Errorf("%s error %v is classified as runtime failure", name, err)
 				}
 			}
-			for _, verb := range []string{"build", "run", "stop", "exec"} {
+			for _, verb := range []string{"build", "run", "stop", "exec", "rm", "volume"} {
 				if f.call(t, verb) != nil {
 					t.Errorf("docker %s ran although the environment check failed", verb)
 				}
@@ -393,6 +402,12 @@ func TestLauncher_Preflight_MissingBinary(t *testing.T) {
 	}
 	if err := l.Shell(context.Background(), shellOptions(nil)); !errors.Is(err, driven.ErrDockerUnavailable) {
 		t.Errorf("Shell error = %v, want ErrDockerUnavailable", err)
+	}
+	if err := l.RemoveContainer(context.Background(), strings.Repeat("a", 12), false); !errors.Is(err, driven.ErrDockerUnavailable) {
+		t.Errorf("RemoveContainer error = %v, want ErrDockerUnavailable", err)
+	}
+	if err := l.RemoveVolume(context.Background(), "demo-volume"); !errors.Is(err, driven.ErrDockerUnavailable) {
+		t.Errorf("RemoveVolume error = %v, want ErrDockerUnavailable", err)
 	}
 }
 
