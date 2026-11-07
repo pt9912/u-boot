@@ -258,7 +258,7 @@ For building from source:
   [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 - **Devcontainer sandbox profile:**
   [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten)
-- **Development in the devcontainer (`make dev-up`/`dev-shell`/`dev-down`, instances, nested Docker):**
+- **Development in the devcontainer (`make dev-up`/`dev-shell`/`dev-down`/`dev-remove`, instances, nested Docker):**
   [`docs/maintainer/devcontainer-arbeiten.md`](docs/maintainer/devcontainer-arbeiten.md)
 - **Machine-readable CLI contract (`--json`, `--dry-run`, `--diff`):**
   [`docs/maintainer/cli-json-contract.md`](docs/maintainer/cli-json-contract.md)

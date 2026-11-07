@@ -5,7 +5,7 @@ Das Repo entwickelt sich selbst im Devcontainer: das erzeugte
 trägt das Sandbox-Profil mit verschachteltem Docker und den gepinnten
 Werkzeugen (Go, golangci-lint, make, Ollama, GitHub CLI). Dazu installiert
 das Dockerfile beim Bau des Images `ripgrep` als Homebrew-Formel
-(Schlüssel `brew` in `u-boot.yaml`); die Formel ist nicht gepinnt. Die drei
+(Schlüssel `brew` in `u-boot.yaml`); die Formel ist nicht gepinnt. Die vier
 Bedien-Targets sind in [`tools/mk/devcontainer.mk`](../../tools/mk/devcontainer.mk)
 definiert; sie prüfen nichts und hängen nicht an der Gate-Kette.
 
@@ -16,12 +16,14 @@ definiert; sie prüfen nichts und hängen nicht an der Gate-Kette.
 | `make dev-up` | `u-boot devcontainer up` | `RECREATE=1` legt den Container neu an (`--recreate`), `INSTANCE=<name>` wählt eine Instanz (`--instance <name>`) |
 | `make dev-shell` | `u-boot devcontainer shell` | startet den Container wie `up` und öffnet eine Shell darin; `INSTANCE=<name>` |
 | `make dev-down` | `u-boot devcontainer down` | stoppt den Container; `INSTANCE=<name>` stoppt nur diese Instanz |
+| `make dev-remove` | `u-boot devcontainer remove --volumes --yes` | entfernt den Container samt Volumes ohne Rückfrage; `INSTANCE=<name>` entfernt nur diese Instanz |
 
 ```bash
 make dev-up                     # Devcontainer ohne Instanz starten
 make dev-up INSTANCE=agent-1    # zweiter Container desselben Projekts
 make dev-shell INSTANCE=agent-1 # Shell in die Instanz agent-1
 make dev-down INSTANCE=agent-1  # nur agent-1 stoppen
+make dev-remove INSTANCE=agent-1 # agent-1 samt Volumes entfernen
 make dev-up RECREATE=1          # Container ohne Instanz neu anlegen
 ```
 

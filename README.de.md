@@ -264,7 +264,7 @@ Für den Bau aus den Quellen:
   [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 - **Sandbox-Profil des Devcontainers:**
   [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten)
-- **Arbeit im Devcontainer (`make dev-up`/`dev-shell`/`dev-down`, Instanzen, verschachtelter Docker):**
+- **Arbeit im Devcontainer (`make dev-up`/`dev-shell`/`dev-down`/`dev-remove`, Instanzen, verschachtelter Docker):**
   [`docs/maintainer/devcontainer-arbeiten.md`](docs/maintainer/devcontainer-arbeiten.md)
 - **Maschinen-lesbarer CLI-Vertrag (`--json`, `--dry-run`, `--diff`):**
   [`docs/maintainer/cli-json-contract.md`](docs/maintainer/cli-json-contract.md)
