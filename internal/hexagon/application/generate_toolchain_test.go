@@ -25,16 +25,16 @@ import (
 
 // The checksum values of the tests are the recorded values of the two
 // sources (go.dev/dl listing for 1.27.3 and 1.26.10, the checksums file of
-// the golangci-lint releases v2.14.0 and v2.13.2); the Docker tests of the
+// the golangci-lint releases v2.15.0 and v2.13.2); the Docker tests of the
 // package (`internal/e2e`) read the live sources, these fixtures pin the
 // parsing offline.
 const (
 	goDefaultVersion   = "1.27.3"
 	goSHAAMD64Default  = "65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40"
 	goSHAARM64Default  = "a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49"
-	golangciDefaultVer = "v2.14.0"
-	golangciSHAAMD64   = "ab90aeb7b066f92a33415b638a50fe5344bbb75a0d32ad30cc248d88f81032ab"
-	golangciSHAARM64   = "ee7ec5f3453d15ddf106fae5a4d6c71737712348a979d1fe9cd52ec7ea299bae"
+	golangciDefaultVer = "v2.15.0"
+	golangciSHAAMD64   = "9b7fe6a6bf6334b98decf8d86b11415ea7889afdabdd1959fdce23af2a9ebcea"
+	golangciSHAARM64   = "b4d8f17068b35ee6060cc2f69a16fb48740d706fbba81661c318649c114a6998"
 
 	goOverrideVersion = "1.26.10"
 	goOverrideAMD64   = "ccfe7ae822d2c2f41f4fe7c956199967a4dac22d0ee0d2b2bfdb440aab3b20c5"

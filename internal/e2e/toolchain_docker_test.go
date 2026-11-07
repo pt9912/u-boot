@@ -42,7 +42,7 @@ const (
 	e2eGoOverrideVersion    = "1.26.10"
 	e2eLintOverrideVersion  = "v2.13.2"
 	e2eGoDefaultVersion     = "1.27.3"
-	e2eGolangciDefaultVer   = "v2.14.0"
+	e2eGolangciDefaultVer   = "v2.15.0"
 	e2eJdkDefaultVer        = "21.0.13+9"
 	e2eJdkOverrideVersion   = "21.0.9+10"
 	goCanaryMarker          = "go-build-marker-toolchain"
@@ -79,7 +79,7 @@ func TestE2E_Toolchain_BuildsAndReportsPins(t *testing.T) {
 	for _, want := range []string{
 		"GO:go version go" + e2eGoDefaultVersion + " linux/",
 		// The version output of golangci-lint carries the release number
-		// without the tag's `v` prefix ("has version 2.14.0 built with ...").
+		// without the tag's `v` prefix ("has version 2.15.0 built with ...").
 		"LINT:golangci-lint has version " + strings.TrimPrefix(e2eGolangciDefaultVer, "v"),
 		// The JDK block: java reports the pinned Temurin release and
 		// JAVA_HOME points at the extracted distribution (the ARG form of

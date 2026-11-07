@@ -36,7 +36,7 @@ LINT_PIN=$(sed -n 's/^GOLANGCI_LINT_VERSION[[:space:]]*?=[[:space:]]*//p' "$root
 # go: die Ausgabe heisst "go version go1.27.3 linux/amd64"; der Pin heisst
 # "1.27.3" (repo.mk) — der Versionsteil der Ausgabe trägt ihn.
 tool go "$GO_PIN" "go"
-# golangci-lint: "golangci-lint has version 2.14.0 ..."; der Pin heisst "v2.14.0"
+# golangci-lint: "golangci-lint has version 2.15.0 ..."; der Pin heisst "v2.15.0"
 # (repo.mk) — verglichen wird der Versionsteil.
 tool golangci-lint "${LINT_PIN#v}" "golangci-lint"
 

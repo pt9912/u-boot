@@ -11,6 +11,10 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Changed
+
+- The default pin of the catalogue key `golangci-lint` is `v2.15.0` (was `v2.14.0`), with the SHA-256 values of the `linux-amd64` and `linux-arm64` archives from the checksums file of that release ([`LH-FA-DEV-011`](spec/lastenheft.md#lh-fa-dev-011--pin-politik-der-gepinnten-werkzeugkette), [`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`ADR-0041`](docs/plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md)). A generated `.devcontainer/Dockerfile` of a project that enables the key carries the new version after `u-boot generate devcontainer`; a `version:` override of the project is unchanged.
+
 ## [0.24.0] - 2026-11-06
 
 Twenty-fourth release. **A command that removes the container of the devcontainer, Homebrew formulas in the devcontainer, and a fixed first check in the gate run of the repository.** `u-boot devcontainer remove` removes the container of the project (or of the instance with `--instance`), stopping it first, and keeps the volumes; `--volumes` also removes them, permanently, after a `[y/N]` question on standard error (exit code `10` without `--yes` in non-interactive mode and under `--json`, when there is a container to remove; with no container the command asks nothing and ends with exit code `0`); the command is not promised inside the released container image. The catalogue key `brew` installs Homebrew, checked out at a pinned commit without an installer script, and the formulas of `devcontainer.features.brew.packages` when the image is built; the formulas, their metadata and the taps are not pinned and not checked, `u-boot generate devcontainer` says so, and a formula of a tap needs the approval in `devcontainer.brewTaps.allow` (otherwise exit code `10` before anything is written). The third change concerns how the repository itself is built, not what the product does: `tool-pruefung` stands before all other checks of the serial `make gates`, not promised under `make -j`. `arm64` is not measured for `brew`. Lastenheft 0.36.0 to 0.37.3.

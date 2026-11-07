@@ -2546,7 +2546,7 @@ Version und Prüfsummen stehen an einer Stelle im Dockerfile; im Standardprofil 
 
 - **Version:** Die Version steht als Build-Argument im erzeugten Dockerfile und stammt aus
   dem Katalog von `u-boot`; sie ändert sich nur mit einem `u-boot`-Release. Zum Stand dieses
-  Handbuchs: Go `1.27.3` und `golangci-lint` `v2.14.0`; maßgeblich sind die Zahlen im
+  Handbuchs: Go `1.27.3` und `golangci-lint` `v2.15.0`; maßgeblich sind die Zahlen im
   erzeugten Dockerfile.
 - **Eigene Version:** Sie übersteuern sie je Schlüssel:
 

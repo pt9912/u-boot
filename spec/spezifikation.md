@@ -1768,9 +1768,9 @@ Beleg-Tabelle (Muster [`SPEC-054`](#spec-054--katalog-eintragstyp-gepinnte-werkz
 
 | Bedingung | Pinnender Test beziehungsweise Gate-Beleg |
 |---|---|
-| Die Pin-Werte der vier Kopplungsstellen der zwei Go-Schlüssel sind gleich (`1.27.3`, `v2.14.0`) und folgen den Template-Args | `TestToolchainPinPlacesEqual` (`internal/hexagon/application/generate_toolchain_test.go`; liest die vier Stellen gegen die Code-Konstanten) |
+| Die Pin-Werte der vier Kopplungsstellen der zwei Go-Schlüssel sind gleich (`1.27.3`, `v2.15.0`) und folgen den Template-Args | `TestToolchainPinPlacesEqual` (`internal/hexagon/application/generate_toolchain_test.go`; liest die vier Stellen gegen die Code-Konstanten) |
 | Die `go`-Direktive der `go.mod` trägt den Pin-Minor (`1.27.0` neben `1.27.3`) und zieht je Pin-Hebung nach | Pin-Gruppe `go` im `docs-check`-Gatter (`pinsync`, Fanggruppe Major.Minor); Negativprobe mit `pinsync-mismatch` in der Mismatch-Gegenprobe des Laufes (Messprotokoll [`slice-harness-dcheck-pinsync`](../docs/messungen/slice-harness-dcheck-pinsync/README.md)) |
-| Die vier `GOLANGCI_LINT_VERSION`-Stellen tragen denselben Wert (`v2.14.0`) | Pin-Gruppe `golangci-lint` im `docs-check`-Gatter (derselbe Lauf), neben `TestToolchainPinPlacesEqual` für die Vier-Stellen-Kopplung |
+| Die vier `GOLANGCI_LINT_VERSION`-Stellen tragen denselben Wert (`v2.15.0`) | Pin-Gruppe `golangci-lint` im `docs-check`-Gatter (derselbe Lauf), neben `TestToolchainPinPlacesEqual` für die Vier-Stellen-Kopplung |
 | Die zwei `devcontainer-cli`-Stellen tragen dieselbe Version (`0.89.0`) | Pin-Gruppe `devcontainer-cli` im `docs-check`-Gatter (derselbe Lauf; Mismatch-Gegenprobe im Messprotokoll) |
 | Ein Lauf unter GNU make unterhalb der Mindest-Version bricht vor jeder Logik ab | make-eigener Guard im `Makefile`: `$(error)` in der `ifeq`-Klammer zum `$(shell if …)`, Negativprobe mit `make MAKE_VERSION=4.2` (Messprotokoll) |
 

@@ -57,7 +57,7 @@ IMAGE                   ?= u-boot
 # der Hebung ohne eigenen ADR traegt ADR-0041, Abschnitt Konsequenzen
 # (docs/plan/adr/0041-gepinnte-werkzeugkette-hybrid-versionierung.md).
 GO_VERSION              ?= 1.27.3
-GOLANGCI_LINT_VERSION   ?= v2.14.0
+GOLANGCI_LINT_VERSION   ?= v2.15.0
 GOVULNCHECK_VERSION     ?= v1.8.0
 PYTHON_VERSION          ?= 3.13-slim
 
