@@ -401,7 +401,9 @@ Dieser Reject ist **RunE-getragen**, nicht mehr gate-getragen — siehe §6.2.
 [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) macht `subcommand` auch für `command="egress"` und
 `command="devcontainer"` verpflichtend, und beide weisen `--json` gleichartig ab.
 
-### 6.2 `u-boot template list --json` (slice-v1-cli-json-dry-run-template, done)
+### 6.2 `u-boot template list --json`
+
+Herkunft: [slice-v1-cli-json-dry-run-template](../plan/planning/done/slice-v1-cli-json-dry-run-template.md).
 
 `template list --json` liefert den [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-Minimalkontrakt-
 Envelope mit `command: "template"`, `subcommand: "list"` ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)
@@ -421,7 +423,9 @@ Fehler (`ErrTemplateCatalog`, in einem grünen CI-Build via `embed.FS`
 load-time-Validierung nie erreicht) mappt auf [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) /
 Exit 14 (`mapTemplateErrorToDiagnostic`).
 
-**Breaking-Change** ([slice-v1-cli-json-dry-run-template](../plan/planning/done/slice-v1-cli-json-dry-run-template.md) T2): vor der
+#### Breaking-Change ([slice-v1-cli-json-dry-run-template](../plan/planning/done/slice-v1-cli-json-dry-run-template.md) T2)
+
+vor der
 Migration war der Output ein roher, pretty-indented `[]templateJSON`-
 Array; jetzt ein single-line Envelope-Objekt mit der Liste in `data`.
 Konsumenten, die das Top-Level-Array lasen, müssen auf `.data`
@@ -436,29 +440,24 @@ bare-`template`-RunE, damit `--json template` nach dem Gate-Abbau
 keinen Hilfetext leakt. Im Human-Modus (ohne `--json`) druckt bare
 `template` weiterhin den Hilfetext.
 
-### 6.3 `u-boot add --json` (slice-v1-cli-json-dry-run-add, done)
+### 6.3 `u-boot add --json`
+
+Herkunft: [slice-v1-cli-json-dry-run-add](../plan/planning/done/slice-v1-cli-json-dry-run-add.md).
 
 `u-boot add` ist der erste modifying-Subcommand mit JSON-
-Envelope-Migration. Drei Flag-Kombinationen, drei Output-Formen
+Envelope-Migration. Vier Flag-Kombinationen, drei Output-Formen
 ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)/[LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)):
 
-- **`--json` ohne `--dry-run`/`--diff`** → Minimalkontrakt
-  ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)). Die Operation schreibt das FS um, das JSON-Output
-  trägt aber **keine** Plan- oder Change-Information. Für die
-  Liste der veränderten Files den Preview-Pfad nutzen:
-  `--dry-run --json` (Vorschau ohne Schreiben) oder
-  `--diff --json` (Vorschau plus Schreiben, mit Hunks).
-- **`--dry-run --json`** → Voll-Schema mit
-  `plannedFiles[]`/`changes[]`, `dryRun: true`, `diff: false`. Es
-  wird **nichts** auf die Disk geschrieben — der
-  `RecordingFileSystem` capturet alle geplanten Mutations.
-- **`--diff --json`** → Voll-Schema mit
-  `plannedFiles[].hunks[]`, `dryRun: false`, `diff: true`. Es wird
-  geschrieben **und** capturet (Preview-and-Apply, [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)).
-- **`--dry-run --diff --json`** → wie `--dry-run --json`, aber mit
-  Hunks und `diff: true`. Kein Write.
+| Aufruf | Schema | Schreibt auf die Platte | Inhalt |
+|---|---|---|---|
+| `--json` | Minimalkontrakt ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) | ja | keine Plan- oder Change-Information; die Liste der veränderten Dateien liefert der Preview-Pfad |
+| `--dry-run --json` | Voll-Schema | nein (der `RecordingFileSystem` capturet alle geplanten Mutationen) | `plannedFiles[]`, `changes[]`, `dryRun: true`, `diff: false` |
+| `--diff --json` | Voll-Schema | ja (Preview-and-Apply, [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)) | `plannedFiles[].hunks[]`, `dryRun: false`, `diff: true` |
+| `--dry-run --diff --json` | Voll-Schema | nein | wie `--dry-run --json`, mit Hunks und `diff: true` |
 
-**Mid-Write-Failure-UX** ([LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)): wenn im
+#### Mid-Write-Failure-UX ([LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern))
+
+wenn im
 `--diff --json`-Preview-and-Apply-Pfad ein Write mid-stream failt,
 trägt `plannedFiles[]` nur die Aufrufe bis zur Failure-Stelle. Der
 Diagnostic-Eintrag (`diagnostics[].code: "[LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)"`) trägt
@@ -467,7 +466,9 @@ mehr geschriebenen Files erscheinen **nicht** in `plannedFiles[]`
 — ein Roll-back-aware Capture ist V1-Out-of-Scope (Cluster-T0-(b)
 Variante 3 ChangeSet-Pattern explizit verworfen).
 
-**Sub-Decisions**: der Slice etabliert `RecordingFileSystem` als
+#### Sub-Decisions
+
+der Slice etabliert `RecordingFileSystem` als
 driven-Adapter (`internal/adapter/driven/recordingfs/`), `Hunks`-
 Schema (`plannedFiles[].hunks: [{oldStart, oldLines, newStart,
 newLines, content}]`, T0-(l)), Pure-Go LCS-Diff-Renderer
@@ -479,33 +480,24 @@ Diagnostic-Codes sind LH-Kennungen
 (`LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/
 [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)); keine erfundenen `add.*`-Codes (T0-(j)).
 
-### 6.4 `u-boot init --json` (slice-v1-cli-json-dry-run-init, done)
+### 6.4 `u-boot init --json`
+
+Herkunft: [slice-v1-cli-json-dry-run-init](../plan/planning/done/slice-v1-cli-json-dry-run-init.md).
 
 `u-boot init <name>` ist der zweite modifying-Subcommand und der
 wichtigste Onboarding-Use-Case. Vier Flag-Kombinationen mit
 exakter Symmetrie zu `add` (T0-(a) Pattern-Erbe-Disziplin):
 
-- **`--json` ohne `--dry-run`/`--diff`** → Minimalkontrakt-
-  Envelope. Operation schreibt das FS um (Skeleton-Dirs +
-  Skeleton-Files + `u-boot.yaml`), das JSON-Output trägt aber
-  **keine** Plan- oder Change-Information. Preview-Information
-  liefert der Preview-Pfad: `--dry-run --json` oder
-  `--diff --json`.
-- **`--dry-run --json`** → Voll-Schema mit `plannedFiles[]`/
-  `changes[]`, `dryRun: true`, `diff: false`. Es wird **nichts**
-  auf die Disk geschrieben — der `RecordingFileSystem` capturet
-  alle geplanten Mutations. Auch der separate
-  `driven.GitClient`-Port wird in diesem Modus **geskippt**
-  (`PreviewMode == PreviewDryRun` umgeht `s.initGit`, weil git am
-  Recorder vorbei auf die echte Disk schreiben würde — T0-(n)).
-- **`--diff --json`** → Voll-Schema mit
-  `plannedFiles[].hunks[]`, `dryRun: false`, `diff: true`. Es
-  wird geschrieben **und** capturet (Preview-and-Apply); `git
-  init` läuft regulär.
-- **`--dry-run --diff --json`** → wie `--dry-run --json`, aber
-  mit Hunks und `diff: true`. Kein Write.
+| Aufruf | Schema | Schreibt auf die Platte | Inhalt |
+|---|---|---|---|
+| `--json` | Minimalkontrakt | ja (Skeleton-Verzeichnisse, Skeleton-Dateien, `u-boot.yaml`) | keine Plan- oder Change-Information; die Vorschau liefert der Preview-Pfad |
+| `--dry-run --json` | Voll-Schema | nein (der `RecordingFileSystem` capturet alle geplanten Mutationen); der `driven.GitClient`-Port wird übersprungen (`PreviewMode == PreviewDryRun` umgeht `s.initGit`, weil git am Recorder vorbei auf die echte Platte schriebe, T0-(n)) | `plannedFiles[]`, `changes[]`, `dryRun: true`, `diff: false` |
+| `--diff --json` | Voll-Schema | ja (Preview-and-Apply); `git init` läuft regulär | `plannedFiles[].hunks[]`, `dryRun: false`, `diff: true` |
+| `--dry-run --diff --json` | Voll-Schema | nein | wie `--dry-run --json`, mit Hunks und `diff: true` |
 
-**Mid-Write-Failure-UX** ([LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)): identisch zu `add`
+#### Mid-Write-Failure-UX ([LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern))
+
+identisch zu `add`
 — Voll-Schema-Envelope trägt `plannedFiles[]` bis zur Failure-
 Stelle, `diagnostics[].file` markiert die Position,
 `exitCode: 14`. Backup-Sentinels
@@ -516,7 +508,9 @@ init-CLI prüft `ErrInitFileSystem` als ersten `errors.Is`-Case,
 weil Multi-`%w`-Wraps (Go 1.20+) einen FS-Fehler sonst auf einen
 Exit-10-Fachfehler downgraden könnten.
 
-**Planning-Phase-Failures** (T0-(q)): Fehler vor dem
+#### Planning-Phase-Failures (T0-(q))
+
+Fehler vor dem
 Recorder-Capture (Force-without-Backup, ungültige Service-Namen,
 Template-Read-Failures) produzieren `plannedFiles: []` mit
 fachlichem Diagnostic-Code (z. B. [LH-FA-INIT-005](../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) / Exit 10) —
@@ -524,7 +518,9 @@ fachlichem Diagnostic-Code (z. B. [LH-FA-INIT-005](../../spec/lastenheft.md#lh-f
 load-bearing: Planning-Errors sind User-Action-Klasse,
 Write-Errors sind FS-Klasse.
 
-**Template-Modus-Mutex** (T0-(i)): `init --template <name>`
+#### Template-Modus-Mutex (T0-(i))
+
+`init --template <name>`
 kombiniert mit `--dry-run` oder `--diff` wird mit
 `ErrTemplateConflictsWithFlag` (Exit-Code 2, [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes))
 rejected. V1 liefert keine Template-Preview; die Migration läuft
@@ -550,7 +546,9 @@ Substitution, kein Prompt. Variable-Auflösung (`--var key=value`)
 ist out-of-scope und kommt in einem eigenen Folge-Slice; bis dahin
 rendern lokale Templates nur `{{ .Name }}`.
 
-**ProgressPort-Silencing-Hint** (T0-(o)): Modifying-Subcommands
+#### ProgressPort-Silencing-Hint (T0-(o))
+
+Modifying-Subcommands
 mit stdout-bound ProgressPorts MÜSSEN den Port im JSON-Mode
 silencen — der Recorder schützt nur die FS-Layer, nicht stdout.
 `init` setzt `req.SilenceProgress = flags.JSON` und swappt im
@@ -560,51 +558,56 @@ JSON-Parser-Konsumenten. Add hat diesen Port nicht; bei künftigen
 modifying-Subcommands mit Progress-Events ist das Silencing
 verbindlich.
 
-**Context-Cancellation-Carveout** (T0-(p)): Ctrl-C oder
+#### Context-Cancellation-Carveout (T0-(p))
+
+Ctrl-C oder
 `context.Canceled` während eines modifying-Subcommands fällt
 heute auf die [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Default-Klausel und Exit 2. Eine
 Interrupt-aware Exit-130-Convention bleibt eigener
 Cross-Cutting-Folge-Slice für **alle** modifying-Subcommands —
 init ändert den Status-quo nicht.
 
-**Path-Anchor-Vertrag** (T0-(k)): `plannedFiles[].path` ist
+#### Path-Anchor-Vertrag (T0-(k))
+
+`plannedFiles[].path` ist
 **project-relativ** (anchor = `<name>`/), unabhängig davon, wie
 der positional `<name>` geschrieben wurde (trailing-slash,
 dot-slash, absoluter Pfad). Acceptance-Pins decken alle vier
 Varianten.
 
-**Concurrency**: `InitProjectService` trägt einen eigenen
+#### Concurrency
+
+`InitProjectService` trägt einen eigenen
 `initMu sync.Mutex` — der `s.fs`-Swap pro Request ist nicht
 race-frei ohne Lock. Zwei Goroutinen, die parallel `init` auf
 denselben Service mit unterschiedlichen TempDirs aufrufen, werden
 serialisiert (Acceptance-Pin).
 
-### 6.5 `u-boot generate --json` (slice-v1-cli-json-dry-run-generate, done)
+### 6.5 `u-boot generate --json`
+
+Herkunft: [slice-v1-cli-json-dry-run-generate](../plan/planning/done/slice-v1-cli-json-dry-run-generate.md).
 
 `u-boot generate <artifact>` ist der **erste** Subcommand, der
 mehrere Artefakte (`changelog` / `readme` / `env-example` /
 `devcontainer`) über einen einzigen Subcommand bedient. Vier
 Flag-Kombinationen mit derselben Symmetrie wie `add`/`init`:
 
-- **`--json` ohne `--dry-run`/`--diff`** → Minimal+Data-Envelope
-  via `newDataEnvelope`. Operation schreibt das FS um; das
-  JSON-Output trägt **keinen** Plan-Inhalt, aber `data.artifact`
-  und `data.action` für Konsumenten-Klassifikation.
-- **`--dry-run --json`** → Voll-Schema mit `plannedFiles[]`/
-  `changes[]` plus `data.action`, `dryRun: true`, `diff: false`.
-  Es wird **nichts** auf die Disk geschrieben.
-- **`--diff --json`** → Voll-Schema mit `plannedFiles[].hunks[]`,
-  `dryRun: false`, `diff: true`, plus `data.action`. Es wird
-  geschrieben **und** capturet.
-- **`--dry-run --diff --json`** → wie `--dry-run --json`, aber
-  mit Hunks. Kein Write.
+| Aufruf | Schema | Schreibt auf die Platte | Inhalt |
+|---|---|---|---|
+| `--json` | Minimal+Data-Envelope (`newDataEnvelope`) | ja | kein Plan-Inhalt; `data.artifact` und `data.action` für die Klassifikation durch Konsumenten |
+| `--dry-run --json` | Voll-Schema | nein | `plannedFiles[]`, `changes[]`, `data.action`, `dryRun: true`, `diff: false` |
+| `--diff --json` | Voll-Schema | ja (geschrieben und gecapturet) | `plannedFiles[].hunks[]`, `data.action`, `dryRun: false`, `diff: true` |
+| `--dry-run --diff --json` | Voll-Schema | nein | wie `--dry-run --json`, mit Hunks |
 
-**Envelope-Shape** (T0-(m)): `command="generate"`, **kein
+#### Envelope-Shape (T0-(m))
+
+`command="generate"`, **kein
 `subcommand`-Feld** (Cobra-`<artifact>` ist Positional-Arg, kein
 Subcommand). Artefakt wird in `data.artifact:
 "<changelog|readme|env-example|devcontainer>"` getragen.
 
-**Action-Klassifikation via `data.action`** (T0-(f)):
+#### Action-Klassifikation via `data.action` (T0-(f))
+
 `<created|updated-block|no-op|repaired-manual>`. **NoOp**
 produziert zusätzlich `plannedFiles: []` UND `changes: []`
 (beide leer). **UpdatedBlock** und **RepairedManual** sind
@@ -619,8 +622,9 @@ Artefakt (`ErrArtifactUnknown` aus
 `domain.NewArtifact`-Validation) entfällt `data` komplett —
 das Artefakt ist nicht klassifizierbar.
 
-**Per-Artefakt LH-Code-Tabelle** (T0-(e)) für
-`ErrGenerateManualConflict`:
+#### Per-Artefakt LH-Code-Tabelle (T0-(e))
+
+Code und Exit für `ErrGenerateManualConflict`:
 
 | Artefakt | LH-Code | Exit-Code |
 | --- | --- | --- |
@@ -637,12 +641,16 @@ Exit 10 ([LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-fe
 Exit 2 (CLI-Validation, [LH-FA-GEN-001](../../spec/lastenheft.md#lh-fa-gen-001--generate-befehl)); `ErrProjectNotInitialized`
 → [LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren) / Exit 10.
 
-**`--allow-external-feature-sources`-Mutex-Check**: der Flag ist
+#### `--allow-external-feature-sources`-Mutex-Check
+
+der Flag ist
 NUR für `generate devcontainer` gültig. Auf anderen Artefakten
 rejected die CLI mit `ErrArtifactUnknown` / Exit 2 **vor** dem
 Use-Case-Call (Acceptance-Pin).
 
-**Devcontainer-Atomicity-Asymmetrie** (T0-(i)): Phase 1
+#### Devcontainer-Atomicity-Asymmetrie (T0-(i))
+
+Phase 1
 (`planDevcontainerFiles`) ist Pre-Write-Validation-atomar (kein
 WriteFile bei `ErrGenerateManualConflict`); Phase 2
 (`executeDevcontainerPlans`) ist seit
@@ -657,11 +665,15 @@ Aufruf. Scheitert die Wiederherstellung selbst, nennt die Fehlermeldung
 `rollback incomplete` (Exit 14, Kette `ErrGenerateFileSystem` bleibt). Im
 `--dry-run` wird nichts geschrieben, also auch nichts zurückgerollt.
 
-**Concurrency**: `GenerateService.generateMu sync.Mutex`
+#### Concurrency
+
+`GenerateService.generateMu sync.Mutex`
 serialisiert konkurrierende `Generate()`-Calls auf demselben
 Service (analog `InitProjectService.initMu`).
 
-### 6.6 `u-boot remove --json` (slice-v1-cli-json-dry-run-remove, done)
+### 6.6 `u-boot remove --json`
+
+Herkunft: [slice-v1-cli-json-dry-run-remove](../plan/planning/done/slice-v1-cli-json-dry-run-remove.md).
 
 `u-boot remove <service>` ist der fünfte modifying-Subcommand und
 die **inverse Operation zu `add`**: strip managed-block aus
@@ -670,24 +682,16 @@ auf `false` in `u-boot.yaml`, optional Volume-Purge via
 `--purge`-Gate ([LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)). Acht Flag-Kombinationen
 plus die orthogonale `--purge`-Dimension (T0-(h)):
 
-- **`--json` ohne `--dry-run`/`--diff`** → Minimal+Data-Envelope
-  via `newDataEnvelope`. Operation schreibt das FS um; das
-  JSON-Output trägt **keinen** Plan-Inhalt, aber das Success-
-  Quartet `data: {service, priorState, state, volumesPurged}`
-  für Konsumenten-Klassifikation.
-- **`--dry-run --json`** → Voll-Schema mit `plannedFiles[]`/
-  `changes[]` plus dem `data`-Quartet, `dryRun: true`,
-  `diff: false`. Es wird **nichts** auf die Disk geschrieben —
-  `RecordingFileSystem` capturet alle geplanten Mutations,
-  inklusive der `RemoveAll`-Captures als
-  `plannedFiles[].action: "delete"`.
-- **`--diff --json`** → Voll-Schema mit `plannedFiles[].hunks[]`,
-  `dryRun: false`, `diff: true`, plus `data`-Quartet. Es wird
-  geschrieben **und** capturet (Preview-and-Apply).
-- **`--dry-run --diff --json`** → wie `--dry-run --json`, aber
-  mit Hunks. Kein Write.
+| Aufruf | Schema | Schreibt auf die Platte | Inhalt |
+|---|---|---|---|
+| `--json` | Minimal+Data-Envelope (`newDataEnvelope`) | ja | kein Plan-Inhalt; das Success-Quartett `data: {service, priorState, state, volumesPurged}` |
+| `--dry-run --json` | Voll-Schema | nein (der `RecordingFileSystem` capturet alle geplanten Mutationen, auch `RemoveAll` als `plannedFiles[].action: "delete"`) | `plannedFiles[]`, `changes[]`, das `data`-Quartett, `dryRun: true`, `diff: false` |
+| `--diff --json` | Voll-Schema | ja (Preview-and-Apply) | `plannedFiles[].hunks[]`, das `data`-Quartett, `dryRun: false`, `diff: true` |
+| `--dry-run --diff --json` | Voll-Schema | nein | wie `--dry-run --json`, mit Hunks |
 
-**Envelope-Shape** (T0-(f)): `command="remove"`, **kein
+#### Envelope-Shape (T0-(f))
+
+`command="remove"`, **kein
 `subcommand`-Feld** (Cobra-`<service>` ist Positional-Arg).
 Success-`data` ist typed `removeEnvelopeData` mit
 **Pointer-Wrapping**:
@@ -712,7 +716,9 @@ Validation-Pfade (NoPositionalArg, ConflictingModeFlags,
 InvalidServiceName) übergeben `data: null` — kein Service-
 Kontext existiert.
 
-**Idempotenz-NoOp-Semantik**: nur `PriorState=Deactivated`
+#### Idempotenz-NoOp-Semantik
+
+nur `PriorState=Deactivated`
 qualifiziert als NoOp. Single+Repeat-Call gegen bereits
 disabled Service liefern `plannedFiles: []` UND `changes: []`,
 `data.priorState=data.state="deactivated"`, `status: ok`,
@@ -722,7 +728,8 @@ state-transitioning (`Changed!=nil`, voll-`plannedFiles[]`)
 `data.priorState: "enabled-unset"` und
 `data.state: "deactivated"`.
 
-**`--purge`-Gate-Verhalten im JSON-Mode** (T0-(j)):
+#### `--purge`-Gate-Verhalten im JSON-Mode (T0-(j))
+
 Confirmer-Prompt-Silencing via Service-Field-Mutation —
 `req.SilenceConfirmer = flags.JSON` swappt `s.confirmer` auf
 `noopConfirmer` (M4 Confirmer-Slice) innerhalb der
@@ -734,7 +741,9 @@ ein remove-spezifisches Neu-Pattern. Bei
 `ErrConfirmationRequired` → [LH-FA-INIT-005](../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)-Envelope mit
 Exit 10.
 
-**WARN-Migration in `diagnostics[]`** (T0-(g)): heutige
+#### WARN-Migration in `diagnostics[]` (T0-(g))
+
+heutige
 `printRemoveSummary`-stderr-WARNING bei
 `--purge && !VolumesPurged` (Volume-Removal ist in v0.3.0
 deferred) wandert im JSON-Mode in `diagnostics[]`-Eintrag mit
@@ -753,7 +762,8 @@ keine Mutation aus — die WARN-Prosa wäre semantisch falsch
 `printRemoveSummary` unterdrückt entsprechend den WARN-Block.
 `PreviewAndApply` behält die WARN.
 
-**Custom-`Args`-Validator** (R11/R12/R13-Pins):
+#### Custom-`Args`-Validator (R11/R12/R13-Pins)
+
 `validateRemoveArgs(a *App)` ist eine Cobra-PositionalArgs-
 Closure mit `*App`-Capture, die `cobra.ExactArgs(1)` ersetzt.
 Drei Cases:
@@ -772,7 +782,9 @@ In allen drei Fällen liest der Validator
 bereits geparst) — Voll-Schema-Envelope bei `--dry-run` ODER
 `--diff` ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)), sonst Minimal-Schema.
 
-**`baseDirSanitizedError`-Wrapper**: FS-Wraps in der Use-Case
+#### `baseDirSanitizedError`-Wrapper
+
+FS-Wraps in der Use-Case
 der Form `fmt.Errorf("remove write %s: %w: %w", absPath,
 ErrRemoveFileSystem, raw)` tunneln den absoluten Filesystem-
 Pfad in `diagnostic.message`. `runRemove` wrappt den UC-Error
@@ -789,8 +801,9 @@ cwd)`. Regeln:
 intakt via Unwrap-Chain. Mapper-Switch-Order, Sentinel-
 Identity, Exit-Code-Mapping — alles unverändert.
 
-**Remove-LH-Code-Mapper-Tabelle** (FS-first Switch-Order,
-Multi-`%w`-Defense):
+#### Remove-LH-Code-Mapper-Tabelle
+
+FS-first Switch-Order, Multi-`%w`-Defense:
 
 | Sentinel | LH-Code | Exit |
 | --- | --- | --- |
@@ -810,21 +823,27 @@ Plus die WARN-Multi-Use von [LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-0
 Code identifiziert die Spec-Anforderung, nicht die Sub-Semantik;
 Disambiguation via `(code, level)`-Tupel.
 
-**`delete`-Action im Recorder** (T0-(p)): `RemoveAll`-Captures
+#### `delete`-Action im Recorder (T0-(p))
+
+`RemoveAll`-Captures
 für `extraFiles` aus dem Catalog werden im Recorder als
 `plannedFiles[].action: "delete"` gewired. `--diff` rendert
 für `delete`-Aktionen Old-Content (der heute existierende
 Datei-Inhalt) plus leeren New-Content; die Unified-Diff zeigt
 nur `-`-Lines.
 
-**Concurrency**: `RemoveServiceService.removeMu sync.Mutex`
+#### Concurrency
+
+`RemoveServiceService.removeMu sync.Mutex`
 serialisiert konkurrierende `Remove()`-Calls auf demselben
 Service (analog `InitProjectService.initMu` /
 `GenerateService.generateMu`). Confirmer-Swap UND fs-Swap
 laufen **innerhalb** der Lock-Region — sonst könnten parallel
 laufende Goroutinen ihre Swaps gegenseitig korrumpieren.
 
-### 6.7 `u-boot up --json` / `u-boot down --json` (slice-v1-cli-json-dry-run-up-down, done)
+### 6.7 `u-boot up --json` / `u-boot down --json`
+
+Herkunft: [slice-v1-cli-json-dry-run-up-down](../plan/planning/done/slice-v1-cli-json-dry-run-up-down.md).
 
 `u-boot up` und `u-boot down` sind im sechsten Folge-Slice
 gebündelt weil beide Subcommands den Compose-Status lesen und
@@ -860,18 +879,23 @@ fähige Surface.
   `false` ist der legitime Success-Wert "kein `--volumes`
   gesetzt".
 
-**Envelope-Shape**: `command="up"` bzw. `command="down"`, KEIN
+#### Envelope-Shape
+
+`command="up"` bzw. `command="down"`, KEIN
 `subcommand`-Feld (beide sind Top-Level-Subcommands ohne Sub-
 Form). KEIN `dryRun`/`diff`/`plannedFiles`/`changes`/`hunks`-
 Feld (read-only-Klasse).
 
-**`--quiet --json` semantisch identisch zu `--json`**:
+#### `--quiet --json` semantisch identisch zu `--json`
+
 Cluster-T0-(a) doctor-Pattern. `--quiet` darf den JSON-Output
 NICHT unterdrücken — JSON ist die Maschinen-Schnittstelle.
 Beide Flag-Reihenfolgen `--quiet --json` und `--json --quiet`
 produzieren denselben Envelope.
 
-**`--timeout=0` Fire-and-Forget im JSON-Mode**: Marker
+#### `--timeout=0` Fire-and-Forget im JSON-Mode
+
+Marker
 `data.timeoutFireAndForget: true` erscheint ausschließlich im
 `--timeout=0`-Pfad (`*bool`-Pointer mit `omitempty` —
 Key-Absence-Disambiguation analog remove's `volumesPurged`).
@@ -879,8 +903,9 @@ Key-Absence-Disambiguation analog remove's `volumesPurged`).
 nil-Slice wird im CLI-Layer mit `[]serviceStatus{}`
 initialisiert.
 
-**`down --volumes` Confirmer-Branch im JSON-Mode** (T0-(d)
-Option (b)): Request-time Gate-Branch in `runConfirmationGate`
+#### `down --volumes` Confirmer-Branch im JSON-Mode (T0-(d) Option (b))
+
+Request-time Gate-Branch in `runConfirmationGate`
 Row 4 swappt den wired Confirmer auf einen lokalen
 `noopConfirmer{}` (`(false, nil)`-Returns) wenn
 `req.SilenceConfirmer == true`. **Refuse-by-Default-Semantik**:
@@ -895,8 +920,9 @@ Branch — explicit Flags > impliziter Mode-Default. Kein
 State-Mutiert, kein neuer `downMu`-Mutex nötig, race-frei by
 construction.
 
-**Mapper-Tabelle mit verbindlicher Switch-Order** (T0-(e)
-R3-HIGH-1) — Reihenfolge ist Switch-Sequenz im Mapper-Code:
+#### Mapper-Tabelle mit verbindlicher Switch-Order (T0-(e) R3-HIGH-1)
+
+Die Reihenfolge ist Switch-Sequenz im Mapper-Code:
 
 | # | Sentinel | LH-Code | Exit | Mapper-Heim | Begründung |
 | - | -------- | ------- | ---- | ----------- | ---------- |
@@ -912,7 +938,8 @@ R3-HIGH-1) — Reihenfolge ist Switch-Sequenz im Mapper-Code:
 | 9 | `cli.ErrConflictingModeFlags` | [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) | 2 | `mapDown` | Mode-Mutex-Verträge |
 | 10 | Default (unknown) | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) | 1 | `beide` | Fallback |
 
-**Cross-Slice-Klassen-Pin für `ErrProjectNotInitialized`**:
+#### Cross-Slice-Klassen-Pin für `ErrProjectNotInitialized`
+
 derselbe Sentinel mappt auf **[LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)** bei
 Environment-Subcommands (up/down/generate) UND auf
 **[LH-FA-ADD-001](../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl)** bei Service-Subcommands (add/remove) —
@@ -948,14 +975,18 @@ Exit 11, FS+StabilizationTimeout für Exit 12); FS+ConfirmRequired
 / FS+ComposeRuntime / FS+ProjectNotInitialized sind als
 by-design-Carveouts dokumentiert.
 
-**Path-Leak-Defense**: `runUp`/`runDown` wrappen UC-Errors mit
+#### Path-Leak-Defense
+
+`runUp`/`runDown` wrappen UC-Errors mit
 `sanitizeBaseDir(err, cwd)` vor `reportError` — der Sanitizer
 extrahiert aus `cli/remove.go` (T7) in `cli/sanitize.go` (T5)
 lebt jetzt package-intern. 11 FS-Read- und Compose-Runtime-
 Wraps in upservice/downservice tunneln nach T3 keinen
 absoluten Filesystem-Pfad mehr in `diagnostic.message`.
 
-**Concurrency**: kein `upMu` / `downMu` — Pattern-Erbe init
+#### Concurrency
+
+kein `upMu` / `downMu` — Pattern-Erbe init
 T0-(d) (Service-Field-Swap mit Mutex) ist HIER explizit
 **verworfen**. `SilenceProgress` und `SilenceConfirmer` sind
 Bool-Felder im Request, die Branches sind lokale Variablen im
@@ -964,7 +995,9 @@ by construction.
 
 ---
 
-### 6.8 `u-boot logs --json` (slice-v1-cli-json-dry-run-logs, done)
+### 6.8 `u-boot logs --json`
+
+Herkunft: [slice-v1-cli-json-dry-run-logs](../plan/planning/done/slice-v1-cli-json-dry-run-logs.md).
 
 `u-boot logs` ist der siebte Folge-Slice. **Read-only-Klasse** auf
 lokalem FS (analog up-down): weder `--dry-run` noch `--diff` — nur
@@ -977,7 +1010,9 @@ lokalem FS (analog up-down): weder `--dry-run` noch `--diff` — nur
   emittiert, NICHT `"lines":null` — Pattern-Erbe up-down's
   `services []serviceStatus`).
 
-**Erweiterungen** ([slice-v1-logs-multi-service-filter](../plan/planning/done/slice-v1-logs-multi-service-filter.md),
+#### Erweiterungen
+
+Erweiterungen ([slice-v1-logs-multi-service-filter](../plan/planning/done/slice-v1-logs-multi-service-filter.md),
 [slice-v1-logs-format-flags](../plan/planning/done/slice-v1-logs-format-flags.md),
 [slice-v1-logs-time-range-filter](../plan/planning/done/slice-v1-logs-time-range-filter.md)):
 `u-boot logs [service…]` nimmt mehrere Services (je Name Regex-geprüft, Exit 10;
@@ -988,7 +1023,8 @@ eine positive Dauer (`90s`, `30m`, `1h`) oder einen Zeitstempel (RFC 3339,
 (`ErrInvalidLogsTime`). Die `--json`-Form bleibt `data.lines[]`
 (die Zeilen tragen dann Präfix bzw. Zeitstempel je nach Flags).
 
-**T0-(a) Single-Envelope + `--follow --json` Reject** (Option (A)):
+#### T0-(a) Single-Envelope + `--follow --json` Reject (Option (A))
+
 Der Konsens aus [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Single-Envelope pro CLI-Call) wird honoriert.
 `--follow` produziert konzeptionell einen Tail-Stream, nicht eine
 beschränkte Antwort — und die NDJSON-Stream-Form ist Cluster-weit
@@ -998,7 +1034,9 @@ nicht vorgesehen. Daher wird `--follow --json` in `runLogs` Stage-1
 rejected. **Bounded `--tail=N`** ist die
 einzige `--json`-akquisitionsform.
 
-**T0-(i) Validation-Reihenfolge**: bei `--follow --json --tail=-1`
+#### T0-(i) Validation-Reihenfolge
+
+bei `--follow --json --tail=-1`
 ist `--follow --json` der dominante Reject-Pfad — die CLI-Stage-1-
 Reihenfolge pinnt Reject-Sentinel VOR Tail-Validation (siehe
 `TestLogsJSON_ValidationOrder_FollowJSONBeatsInvalidTail`). Konsumenten
@@ -1006,14 +1044,19 @@ können sich darauf verlassen, dass die kombinierte Fehler-Klasse
 immer [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)/Exit 2 ist, ohne die Reject-Reihenfolge raten zu
 müssen.
 
-**Envelope-Shape**: `command="logs"`, KEIN `subcommand`-Feld. KEIN
+#### Envelope-Shape
+
+`command="logs"`, KEIN `subcommand`-Feld. KEIN
 `dryRun`/`diff`/`plannedFiles`/`changes`/`hunks`-Feld (read-only-Klasse).
 
-**`--quiet --json` semantisch identisch zu `--json`**: Cluster-T0-(a)
+#### `--quiet --json` semantisch identisch zu `--json`
+
+Cluster-T0-(a)
 doctor-Pattern. `--quiet` darf den JSON-Output NICHT unterdrücken.
 
-**Mapper-Tabelle mit verbindlicher Switch-Order** (T0-(f)) —
-Reihenfolge ist Switch-Sequenz im Mapper-Code (`mapLogsErrorToDiagnostic`):
+#### Mapper-Tabelle mit verbindlicher Switch-Order (T0-(f))
+
+Die Reihenfolge ist Switch-Sequenz im Mapper-Code (`mapLogsErrorToDiagnostic`):
 
 | # | Sentinel | LH-Code | Exit | Begründung |
 | - | -------- | ------- | ---- | ---------- |
@@ -1027,12 +1070,15 @@ Reihenfolge ist Switch-Sequenz im Mapper-Code (`mapLogsErrorToDiagnostic`):
 | 8 | `cli.ErrInvalidLogsTail` | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) | 2 | CLI-Form-Validierung |
 | 9 | Default (unknown) | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) | 1 | Fallback |
 
-**Cross-Slice-Klassen-Pin für `ErrProjectNotInitialized`**: derselbe
+#### Cross-Slice-Klassen-Pin für `ErrProjectNotInitialized`
+
+derselbe
 Sentinel mappt auf **[LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)** bei Environment-Subcommands
 (up/down/generate/logs) UND auf **[LH-FA-ADD-001](../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl)** bei Service-
 Subcommands (add/remove) — bewusste Cluster-Konvention.
 
-**`(code, exitCode)`-Tupel-Disambiguation für Multi-`%w`-Wraps**
+#### `(code, exitCode)`-Tupel-Disambiguation für Multi-`%w`-Wraps
+
 (Pattern-Erbe up-down §6.7): Mapper ist FS-first (Row 1), aber der
 ExitCode-Helper (`cli/cli.go`) checkt Driven-Sentinels ZUERST.
 Beispiel-Tabelle:
@@ -1048,10 +1094,12 @@ failed VOR `ComposeLogs`) — Defense-only-Pin
 (`TestLogsJSON_MultiWrap_FSAndDocker_SwitchOrderFSFirst_ByDesign`)
 gegen künftige Multi-Wrap-Konstruktionen.
 
-**Path-Leak-Defense**: `runLogs` wrappt UC-Errors mit
+#### Path-Leak-Defense
+
+`runLogs` wrappt UC-Errors mit
 `sanitizeBaseDir(err, cwd)` vor `reportError` (Pattern-Erbe up-down).
 
-**Bekannte Limitationen**:
+#### Bekannte Limitationen
 
 - **`--follow --json` Reject**: konsequent inkompatibel, kein
   künftiger Streaming-Pfad geplant. Konsumenten die einen Tail-Stream
@@ -1069,13 +1117,17 @@ gegen künftige Multi-Wrap-Konstruktionen.
   emittiert auf allen Plattformen `\n`. Falls je relevant: Folge-Slice
   ergänzt explizites `\r\n`-Handling.
 
-**Concurrency**: kein `logsMu`. `JSON` und `Quiet` sind Bool-Felder im
+#### Concurrency
+
+kein `logsMu`. `JSON` und `Quiet` sind Bool-Felder im
 `logsFlags`; der Reject-Pfad und der Acquisition-Pfad sind reine
 Funktionsaufrufe ohne State-Mutation. Race-frei by construction.
 
 ---
 
-### 6.9 `u-boot config` / `config get` / `config set --json` (slice-v1-cli-json-dry-run-config, done)
+### 6.9 `u-boot config` / `config get` / `config set --json`
+
+Herkunft: [slice-v1-cli-json-dry-run-config](../plan/planning/done/slice-v1-cli-json-dry-run-config.md).
 
 `config` ist der **erste Read-only+Modifying-Hybrid** des Clusters:
 drei Sub-Formen teilen `command: "config"` und tragen je ein
@@ -1092,11 +1144,13 @@ Modifying-Form `config set` trägt zusätzlich `--dry-run`/`--diff`.
 | `u-boot config set <path> <value>` | `"set"` | modifying | Minimal+Data `{path, oldValue, newValue, noOp[, appendedSources]}` |
 | `u-boot config set <p1> <v1> <p2> <v2>…` | `"set"` | modifying | Minimal+Data `{entries: [{path, oldValue, newValue, noOp}…], noOp}`; **atomar** (ein Schreibvorgang nach Validierung aller Paare, sonst bleibt `u-boot.yaml` unverändert) |
 
-**`subcommand`-Wert für bare** (T0-(b)): `"show"` — Code-Heim ist
+#### `subcommand`-Wert für bare (T0-(b))
+
+`"show"` — Code-Heim ist
 `runConfigShow`, der Wert bleibt 1:1 mit der Code-Realität
 abgleichbar (Cluster-Plan-Vorschläge `"list"`/`""` verworfen).
 
-**Data-Carrier** (T0-(c)):
+#### Data-Carrier (T0-(c))
 
 ```jsonc
 // u-boot config --json                          → subcommand "show"
@@ -1124,7 +1178,9 @@ abgleichbar (Cluster-Plan-Vorschläge `"list"`/`""` verworfen).
   den rohen `--allow-external-feature-sources`-Input, damit der
   Konsument sieht, was der Flag anhängen wollte (vor Dedupe).
 
-**`config set` Voll-Schema** (`--dry-run`/`--diff`): wie die übrigen
+#### `config set` Voll-Schema (`--dry-run`/`--diff`)
+
+wie die übrigen
 Modifying-Subcommands `newFullEnvelope` mit `dryRun`/`diff`/
 `plannedFiles[]`/`changes[]`. `config set` schreibt **genau eine**
 Datei (`u-boot.yaml`), also trägt `plannedFiles[]` höchstens eine
@@ -1134,17 +1190,20 @@ WriteFile → `plannedFiles: []` + `data.noOp: true` + leeres
 `diagnostics: []` (T0-(d); **kein** `level: "info"`-Diagnostic —
 Spec §2.1).
 
-**`--quiet --json`** ist auf allen drei Formen ein No-op (≡ `--json`,
+#### `--quiet --json`
+
+`--quiet --json` ist auf allen drei Formen ein No-op (≡ `--json`,
 doctor-Pattern §2.2).
 
-**`--dry-run`/`--diff`-Reject auf den Read-only-Formen** (T0-(g)):
+#### `--dry-run`/`--diff`-Reject auf den Read-only-Formen (T0-(g))
+
 `config`/`config get` registrieren `--dry-run`/`--diff` synthetisch
 (damit Cobra sie sauber parst) und rejecten sie im RunE Envelope-
 konform mit `cli.ErrDryRunNotApplicable` → **Exit 2** ([LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)).
 Der Reject-Envelope bleibt Minimal (Read-only-Form-Invariante — auch
 im Args-Validator-Pfad, R-CLI-1).
 
-**Mapper-Tabelle** `mapConfigErrorToDiagnostic` (T0-(f), FS-first):
+#### Mapper-Tabelle `mapConfigErrorToDiagnostic` (T0-(f), FS-first)
 
 | # | Sentinel | `code` | Exit |
 | - | -------- | ------ | ---- |
@@ -1167,7 +1226,9 @@ Chain Exit 10 — das ist die `(code, exitCode)`-Disambiguation
 Klasse, der Exit die Sub-Sentinel-Quelle. Ein reiner FS-Fehler
 (FS-Sentinel + roher OS-Error) trägt Exit 14.
 
-**[LH-FA-CONF-005](../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)-Multi-Use-Disambiguation** (T0-(m)/R3-MED-2): drei
+#### [LH-FA-CONF-005](../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)-Multi-Use-Disambiguation (T0-(m)/R3-MED-2)
+
+drei
 Sentinels teilen den Diagnostic-Code
 [LH-FA-CONF-005](../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)
 (Rows 4/5/7), und alle drei
@@ -1180,7 +1241,9 @@ die Disambiguation läuft über den Message-Prefix:
 | `ErrConfigWriteRejected` | `config: write rejected for non-writable path: …` (Hint `u-boot add <svc>`) |
 | `ErrConfigValueNotSet` | `config: value not set: …` |
 
-**Strukturierter Hint** ([slice-v1-config-structured-hint](../plan/planning/done/slice-v1-config-structured-hint.md)): Die Fehler-
+#### Strukturierter Hint ([slice-v1-config-structured-hint](../plan/planning/done/slice-v1-config-structured-hint.md))
+
+Die Fehler-
 Envelopes von `config get` (`ErrConfigValueNotSet`) und `config set`
 (`ErrConfigWriteRejected` für `services.<svc>.enabled`) tragen
 `data.hint {command, action, argument[, flag]}`; `command` ist die
@@ -1192,18 +1255,23 @@ Analog zum `(code, exitCode)`-Tupel der Read-only-Slices, hier aber
 `(code, message-prefix)` weil alle drei Exit 10 sind und der Exit
 nicht differenziert.
 
-**Bekannte Limitation — YAML-Kommentare** (config Out-of-Scope):
+#### Bekannte Limitation — YAML-Kommentare (config Out-of-Scope)
+
 `config set devcontainer.featureSources.allow <url>` läuft über einen
 Marshal-Rewrite (Listen-Pfad) und **verliert Kommentare** in
 `u-boot.yaml`. [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) fordert keine Comment-Preservation für
 diesen Listen-Pfad. Scalar-Pfade (`project.name`, `*.enabled`, …)
 behalten Kommentare via `yaml.v3.PatchScalar`.
 
-**Path-Leak-Defense**: alle Use-Case-Errors laufen vor der
+#### Path-Leak-Defense
+
+alle Use-Case-Errors laufen vor der
 `diagnostic.message`-Emission durch `sanitizeBaseDir` (`cli/sanitize.go`,
 Pattern-Erbe up-down/remove) — absolute Pfade werden project-relativ.
 
-### 6.10 `u-boot egress list --json` (slice-v1-cli-egress-anzeige)
+### 6.10 `u-boot egress list --json`
+
+Herkunft: [slice-v1-cli-egress-anzeige](../plan/planning/done/slice-v1-cli-egress-anzeige.md).
 
 `egress list --json` liefert den Minimalkontrakt mit `command: "egress"`,
 `subcommand: "list"`, `diagnostics: []`, `exitCode: 0` und dem `data`-Objekt
@@ -1241,7 +1309,18 @@ Datum, keine Diagnose:
   `command: "egress"` verpflichtend; `checkSubcommand` in `jsontestutil` prüft es, das Enum prüft
   `jsontestutil` nicht.
 
-### 6.11 `u-boot devcontainer up --json` / `devcontainer down --json` (slice-v1-cli-devcontainer-up-down); `devcontainer remove --json`; `devcontainer shell` (slice-v1-cli-devcontainer-shell)
+### 6.11 `u-boot devcontainer` (`up`, `down`, `remove`, `shell`)
+
+Herkunft: [slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md) (`up`, `down`), [slice-v1-cli-devcontainer-shell](../plan/planning/done/slice-v1-cli-devcontainer-shell.md) (`shell`).
+
+| Unterbefehl | `--json` | `status` im Erfolgsfall | `data` |
+|---|---|---|---|
+| `up` | Minimalkontrakt | `warn` (Ausweisung der Socket-Lockerung als `diagnostics[0]`) | `devcontainerUpData`: `containerId`, `remoteUser`, `remoteWorkspaceFolder`, `alreadyRunning`, `gitTokenSource` |
+| `down` | Minimalkontrakt | `ok` | `devcontainerDownData`: `containerId`, `stopped` |
+| `remove` | Minimalkontrakt | `ok` | `devcontainerRemoveData`: `containerId`, `stopped`, `removed`, `removedVolumeNames` |
+| `shell` | abgewiesen (Exit 2) | — | — |
+
+#### `devcontainer shell`
 
 `u-boot devcontainer shell` hat keine `--json`-Ausgabe: Der Befehl öffnet eine
 interaktive Sitzung, und die Standardausgabe gehört ihr. `--json` endet mit
@@ -1253,6 +1332,8 @@ Umschlag des Befehls: Minimalkontrakt mit `command: "devcontainer"`,
 `mapDevcontainerShellErrorToDiagnostic` (nur Klasse 2); Fehler des Use-Case erreichen keinen Umschlag, weil `--json`
 vor dem Aufruf abgewiesen wird. Die Exit-Codes der Fehler des Befehls ohne `--json` laufen über `ExitCode`
 (10, 11, 12, 14 wie bei `up`; `TestExecute_DevcontainerShell_SentinelsAndExitCodes`).
+
+#### `devcontainer up` und `devcontainer down`
 
 Beide Unterbefehle liefern den Minimalkontrakt mit `command: "devcontainer"`,
 `subcommand: "up"` beziehungsweise `"down"` und dem `data`-Objekt
@@ -1277,27 +1358,6 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   "diagnostics": [], "exitCode": 0,
   "data": { "containerId": "0123…cdef", "stopped": true } }
 ```
-
-Beispiel für `devcontainer remove`:
-
-```json
-{ "status": "ok", "command": "devcontainer", "subcommand": "remove",
-  "diagnostics": [], "exitCode": 0,
-  "data": { "containerId": "0123…cdef", "stopped": true, "removed": true,
-            "removedVolumeNames": ["demo-workspace-…"] } }
-```
-
-- **`devcontainer remove --json`** (Datentyp `devcontainerRemoveData`, Ablauf `runDevcontainerRemove` in `cli/devcontainer.go`; Verhalten nach [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes)) liefert den Minimalkontrakt mit `subcommand: "remove"`; die Felder
-  von `data` tragen kein `omitempty`: `containerId` (die volle Kennung, der leere String ohne Container),
-  `stopped` (`true`, wenn der Befehl den Container gestoppt hat), `removed` (`true`, wenn er ihn entfernt hat) und
-  `removedVolumeNames` (immer ein Array, `[]` ohne `--volumes`, ohne Container und bei einem Container ohne Volume).
-  `status` ist `ok` und `diagnostics` leer, denn der Befehl trägt keine Ausweisung (kein Hilfs-Container, kein Socket).
-  Es gibt keine Abfrage: `--volumes` ohne `--yes` bei einem Container zu entfernen endet mit Exit 10 und einem
-  Fehler-Umschlag, `--volumes` ohne Container mit Exit 0 und `removed: false`. Ein Fehler-Umschlag trägt keine `data`;
-  der Code der Diagnose ist [LH-FA-DEV-010](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) für
-  die Klassen 10, 11 und 12, [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) für 2 und 1,
-  [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) für `--yes` zusammen mit
-  `--no-interactive`. Die Tabelle der Sentinels unten führt `up`, `down` und `remove`; die Exit-Codes jeder Zeile von `remove` stehen in [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes).
 
 - **`status` von `up` ist `warn`, auch im Erfolgsfall.** Die Ausweisung der
   Socket-Lockerung ist eine Warnung ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
@@ -1324,6 +1384,39 @@ Beispiel für `devcontainer remove`:
   `data` fehlt im Fehlerfall.
 - **`data.containerId` von `down`** ist der leere String, wenn es für das Projekt (mit `--instance`: für die Instanz)
   keinen Container gibt; `stopped` ist `false`, wenn nichts zu stoppen war (Exit 0).
+#### `devcontainer remove`
+
+Datentyp `devcontainerRemoveData`, Ablauf `runDevcontainerRemove` in `cli/devcontainer.go`; Verhalten nach [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes).
+
+Beispiel für `devcontainer remove`:
+
+```json
+{ "status": "ok", "command": "devcontainer", "subcommand": "remove",
+  "diagnostics": [], "exitCode": 0,
+  "data": { "containerId": "0123…cdef", "stopped": true, "removed": true,
+            "removedVolumeNames": ["demo-workspace-…"] } }
+```
+
+- **Umschlag:** Minimalkontrakt mit `subcommand: "remove"`; `status` ist `ok` und `diagnostics` leer, denn der Befehl trägt keine
+  Ausweisung (kein Hilfs-Container, kein Socket).
+- **Felder von `data`** (ohne `omitempty`):
+
+  | Feld | Typ | Wert |
+  |---|---|---|
+  | `containerId` | String | die volle Kennung, der leere String ohne Container |
+  | `stopped` | Bool | `true`, wenn der Befehl den Container gestoppt hat |
+  | `removed` | Bool | `true`, wenn er ihn entfernt hat |
+  | `removedVolumeNames` | Array | immer ein Array, `[]` ohne `--volumes`, ohne Container und bei einem Container ohne Volume |
+
+- **Keine Abfrage:** `--volumes` ohne `--yes` bei einem Container zu entfernen endet mit Exit 10 und einem Fehler-Umschlag;
+  `--volumes` ohne Container endet mit Exit 0 und `removed: false`.
+- **Fehler-Umschlag:** ohne `data`. Der Code der Diagnose ist
+  [LH-FA-DEV-010](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) für die Klassen 10, 11 und 12, [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) für 2 und 1,
+  [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) für `--yes` zusammen mit `--no-interactive`.
+- **Exit-Codes:** die Tabelle der Sentinels unten führt `up`, `down` und `remove`; die Exit-Codes jeder Zeile von `remove` stehen in [SPEC-058](../../spec/spezifikation.md#spec-058--container-des-devcontainers-entfernen-u-boot-devcontainer-remove-aufruf-suche-volumes-abfrage-ausgabe-und-exit-codes).
+
+#### Exit-Codes und Codes der Diagnose
+
 - **Codes:** die Klassen 10, 11 und 12 von `devcontainer` tragen [LH-FA-DEV-010](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
   ein Lesefehler [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (Exit 14),
   Aufrufformfehler [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes). Die Abbildung steht je Unterbefehl in `mapDevcontainerUpErrorToDiagnostic`,
@@ -1345,6 +1438,8 @@ Beispiel für `devcontainer remove`:
 
   Die Spalte `shell` entspricht der Spalte `up` ohne Umschlag (die Fehler erscheinen als Text auf der Fehlerausgabe,
   Exit-Code wie `up`); die Probe vor der Sitzung scheitert als `driven.ErrDevcontainerRuntime` (Exit 12).
+
+#### Gemeinsam für alle Unterbefehle
 
 - **`--quiet`** ist im JSON-Modus ein No-op; der Fortschritt (Bau des Hilfs-Images, Ausgabe der CLI) wird unter `--json`
   nicht geschrieben, bei einem Fehler enthält die Meldung des Fehler-Eintrags das gekürzte Ende der CLI-Ausgabe.
